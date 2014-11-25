@@ -1,4 +1,4 @@
-package org.tms.tds;
+package org.tms.api;
 
 public enum TableElementType
 {

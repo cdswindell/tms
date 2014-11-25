@@ -1,5 +1,7 @@
 package org.tms.tds;
 
+import org.tms.api.TableElementType;
+
 public class Table extends TableElement
 {
     public Table()
