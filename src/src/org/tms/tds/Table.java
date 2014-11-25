@@ -11,8 +11,7 @@ public class Table extends TableElement
 
     public Table(String name)
     {
-        this();
-        
+        this();       
         this.setLabel(name);
     }
 

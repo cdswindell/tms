@@ -5,7 +5,10 @@ import static org.hamcrest.core.Is.is;
 
 import org.junit.Test;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.exceptions.TableException;
+import org.tms.api.exceptions.UnimplementedException;
 import org.tms.tds.Table;
 
 public class TableElementPropertyTest
@@ -43,6 +46,34 @@ public class TableElementPropertyTest
         catch (TableException te)
         {
             // noop
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
+        
+        // expect failure
+        try {
+            t.setProperty(TableProperty.Row, "abc");
+            fail("set unimplemented property");
+        }
+        catch (UnimplementedException te)
+        {
+            assertThat(te.getTableErrorClass(), is(TableErrorClass.Unimplemented));
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
+        
+        // expect failure
+        try {
+            t.setProperty(TableProperty.Rows, "abc");
+            fail("set read only property");
+        }
+        catch (ReadOnlyException te)
+        {
+            assertThat(te.getTableErrorClass(), is(TableErrorClass.ReadOnly));
         }
         catch (Exception e)
         {

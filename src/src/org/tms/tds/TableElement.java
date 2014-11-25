@@ -136,6 +136,9 @@ public class TableElement
     
     public Object getProperty(TableProperty key)
     {
+        if (!key.isImplementedBy(this))
+            throw new UnimplementedException(this, key);
+        
         return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
     }
     
