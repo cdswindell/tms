@@ -8,5 +8,5 @@ public enum TableElementType
     Column,
     Cell,
     Range,
-    Derivation
+    Derivation;
 }

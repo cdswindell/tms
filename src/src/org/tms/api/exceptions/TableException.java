@@ -1,33 +1,41 @@
 package org.tms.api.exceptions;
 
+import org.tms.api.TableElementType;
+import org.tms.api.TableProperty;
+
 public class TableException extends RuntimeException
 {
-    private static final long serialVersionUID = 2907947831287999680L;
-
-    public TableException()
+    private static final long serialVersionUID = -4100871283289669659L;
+    
+    private TableErrorClass m_errorClass;
+    private TableElementType m_elementType;
+    private TableProperty m_property;
+    
+    protected TableException(TableElementType tet, TableProperty tp, TableErrorClass ec)
     {
-        // TODO Auto-generated constructor stub
+        this(String.format("%s: %s->%s", ec, tet, tp));
+        m_elementType = tet;
+        m_errorClass = ec;
+        m_property = tp;       
     }
 
-    public TableException(String message)
+    protected TableException(TableElementType tet, String msg, TableErrorClass ec)
+    {
+        this(String.format("%s: %s (%s)", ec, msg, tet));
+        m_elementType = tet;
+        m_errorClass = ec;
+        m_property = null;       
+    }
+
+    protected TableException(String message)
     {
         super(message);
     }
 
-    public TableException(Throwable cause)
-    {
-        super(cause);
-    }
-
-    public TableException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
-
-    public TableException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace)
-    {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
-
+    public TableElementType getTableElementType() { return m_elementType; }
+    public TableProperty    getTableProperty()    { return m_property; }
+    public TableErrorClass  getTableErrorClass()  { return m_errorClass; }
+    
+    @Override
+    public String toString() { return this.getMessage(); }
 }

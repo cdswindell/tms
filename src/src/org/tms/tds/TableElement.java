@@ -4,7 +4,9 @@ import java.util.HashMap;
 
 import org.tms.api.TableElementType;
 import org.tms.api.TableProperty;
-import org.tms.api.exceptions.TableException;
+import org.tms.api.exceptions.InvalidPropertyException;
+import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.exceptions.UnimplementedException;
 
 public class TableElement 
 {
@@ -41,8 +43,21 @@ public class TableElement
         return m_elemProperties;
     }
 
+    public boolean isImplements(TableProperty tp)
+    {
+        if (tp == null)
+            return false;
+        else
+            return tp.isImplementedBy(this);
+    }
+    
     public void setProperty(TableProperty key, Object value)
     {
+        if (!key.isImplementedBy(this))
+            throw new UnimplementedException(this, key);
+        else if (key.isReadOnly())
+            throw new ReadOnlyException(this, key);
+        
         setProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), value, false);
     }
     
@@ -66,6 +81,11 @@ public class TableElement
     
     public boolean clearProperty(TableProperty key)
     {
+        if (!key.isImplementedBy(this))
+            throw new UnimplementedException(this, key);
+        else if (key.isReadOnly())
+            throw new ReadOnlyException(this, key);
+        
         return clearProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
     }
     
@@ -89,8 +109,15 @@ public class TableElement
     }
     
     public boolean hasProperty(TableProperty key)
-    {
-        return hasProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+    { 
+        if (key.isImplementedBy(this)) {
+            if (key.isReadOnly())
+                return true;
+        
+            return hasProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+        }
+        
+        return false;
     }
     
     private boolean hasProperty(String key, boolean vetKey) 
@@ -152,9 +179,9 @@ public class TableElement
     private String vetKey(String key)
     {
         if (key == null || (key = key.trim()).length() == 0)
-            throw new TableException();
+            throw new InvalidPropertyException(this);
         else if (key.startsWith(sf_RESERVED_PROPERTY_PREFIX))
-            throw new TableException();
+            throw new InvalidPropertyException(this, key);
         
         return key;
     }

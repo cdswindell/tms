@@ -1,0 +1,14 @@
+package org.tms.api.exceptions;
+
+import org.tms.api.TableProperty;
+import org.tms.tds.TableElement;
+
+public final class UnimplementedException extends TableException
+{
+    private static final long serialVersionUID = 4174806292387968676L;
+
+    public UnimplementedException(TableElement te, TableProperty tp)
+    {
+        super(te.getTableElementType(), tp, TableErrorClass.Unimplemented);
+    }
+}
