@@ -8,7 +8,7 @@ import org.tms.api.exceptions.TableException;
 
 public class TableElement 
 {
-    private static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
+    protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
     private TableElementType m_tableElementType;
     private HashMap<String, Object> m_elemProperties;

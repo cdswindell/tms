@@ -5,6 +5,7 @@ import static org.hamcrest.core.Is.is;
 
 import org.junit.Test;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.TableException;
 import org.tms.tds.Table;
 
 public class TableElementPropertyTest
@@ -34,7 +35,19 @@ public class TableElementPropertyTest
         t.clearProperty("abc");
         assertThat(t.hasProperty("abc"), is(false));
         
-        
+        // expect failure
+        try {
+            t.setProperty(TableElement.sf_RESERVED_PROPERTY_PREFIX + "Label", "abc");
+            fail("set invalid property");
+        }
+        catch (TableException te)
+        {
+            // noop
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
     }
 
 }
