@@ -1,4 +1,4 @@
-package test.tms.tds;
+package org.tms.tds;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.core.Is.is;
