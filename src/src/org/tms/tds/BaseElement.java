@@ -14,8 +14,7 @@ public class BaseElement
     
     private ElementType m_tableElementType;
     private HashMap<String, Object> m_elemProperties;
-    private int m_index = -1;
-    
+
     protected BaseElement(ElementType eType)
     {
         setTableElementType(eType);
@@ -140,15 +139,6 @@ public class BaseElement
         if (!key.isImplementedBy(this))
             throw new UnimplementedException(this, key);
         
-        // Some properties are built into the base object
-        switch (key)
-        {
-            case Index:
-                return m_index;
-            default:
-                break;
-        }
-        
         return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
     }
     
@@ -187,16 +177,6 @@ public class BaseElement
     public void setDescription(String description)
     {
         setProperty(TableProperty.Description, (description != null ? description.trim() : null));
-    }
-    
-    public int getIndex()
-    {
-        return m_index;
-    }
-    
-    protected void setIndex(int idx)
-    {
-        m_index = idx;
     }
     
     private String vetKey(String key)

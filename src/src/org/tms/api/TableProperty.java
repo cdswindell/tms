@@ -20,6 +20,9 @@ public enum TableProperty
     private boolean m_readOnly;
     private Set<ElementType> m_implementedBy = new HashSet<ElementType>();
     
+    /**
+     * Constructor for properties that apply to objects that extend BaseElement
+     */
     private TableProperty()
     {
         this(false /* isReadOnly */,
@@ -31,6 +34,10 @@ public enum TableProperty
              ElementType.Context);
     }
     
+    /**
+     * Constructor for properties that apply to objects that extend TableElement
+     * @param readOnly
+     */
     private TableProperty(boolean readOnly)
     {
         this(readOnly,
@@ -38,8 +45,7 @@ public enum TableProperty
              ElementType.Row,
              ElementType.Column,
              ElementType.Cell,
-             ElementType.Range,
-             ElementType.Context);
+             ElementType.Range);
     }
     
     private TableProperty(boolean isReadOnly,

@@ -2,7 +2,7 @@ package org.tms.tds;
 
 import org.tms.api.ElementType;
 
-public class Table extends BaseElement
+public class Table extends TableElement
 {
     public Table()
     {

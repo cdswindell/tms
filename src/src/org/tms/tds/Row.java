@@ -2,17 +2,10 @@ package org.tms.tds;
 
 import org.tms.api.ElementType;
 
-public class Row extends BaseElement
+public class Row extends TableElement
 {
-    public Row()
+    public Row(Table parentTable)
     {
-        super(ElementType.Table);
+        super(ElementType.Table, parentTable);
     }
-
-    public Row(String name)
-    {
-        this();       
-        this.setLabel(name);
-    }
-
 }
