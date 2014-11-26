@@ -8,7 +8,7 @@ import org.tms.api.exceptions.InvalidPropertyException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnimplementedException;
 
-public class BaseElement 
+abstract public class BaseElement 
 {
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     

@@ -8,4 +8,9 @@ public class Column extends TableElement
     {
         super(ElementType.Column, parentTable);
     }
+
+    @Override
+    protected void reset()
+    {
+    }
 }

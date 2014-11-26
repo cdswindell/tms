@@ -3,7 +3,7 @@ package org.tms.tds;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
-public class TableElement extends BaseElement
+abstract public class TableElement extends BaseElement
 {
     private int m_index = -1;
     private Table m_parentTable;
@@ -11,6 +11,7 @@ public class TableElement extends BaseElement
     public TableElement(ElementType eType)
     {
         super(eType);
+        reset();
     }
     
     public TableElement(ElementType eType, Table parentTable)
@@ -46,4 +47,5 @@ public class TableElement extends BaseElement
         m_index = idx;
     }
     
+    abstract protected void reset();
 }

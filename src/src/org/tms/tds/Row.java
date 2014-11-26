@@ -8,4 +8,9 @@ public class Row extends TableElement
     {
         super(ElementType.Table, parentTable);
     }
+
+    @Override
+    protected void reset()
+    {
+    }
 }
