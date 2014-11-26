@@ -1,18 +1,11 @@
 package org.tms.tds;
 
-import org.tms.api.TableElementType;
+import org.tms.api.ElementType;
 
-public class Table extends TableElement
+public class Table extends BaseElement
 {
     public Table()
     {
-        super(TableElementType.Table);
+        super(ElementType.Table);
     }
-
-    public Table(String name)
-    {
-        this();       
-        this.setLabel(name);
-    }
-
 }

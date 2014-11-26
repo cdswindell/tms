@@ -1,6 +1,6 @@
 package org.tms.api.exceptions;
 
-import org.tms.api.TableElementType;
+import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
 public class TableException extends RuntimeException
@@ -8,10 +8,10 @@ public class TableException extends RuntimeException
     private static final long serialVersionUID = -4100871283289669659L;
     
     private TableErrorClass m_errorClass;
-    private TableElementType m_elementType;
+    private ElementType m_elementType;
     private TableProperty m_property;
     
-    protected TableException(TableElementType tet, TableProperty tp, TableErrorClass ec)
+    protected TableException(ElementType tet, TableProperty tp, TableErrorClass ec)
     {
         this(String.format("%s: %s->%s", ec, tet, tp));
         m_elementType = tet;
@@ -19,7 +19,7 @@ public class TableException extends RuntimeException
         m_property = tp;       
     }
 
-    protected TableException(TableElementType tet, String msg, TableErrorClass ec)
+    protected TableException(ElementType tet, String msg, TableErrorClass ec)
     {
         this(String.format("%s: %s (%s)", ec, msg, tet));
         m_elementType = tet;
@@ -32,7 +32,7 @@ public class TableException extends RuntimeException
         super(message);
     }
 
-    public TableElementType getTableElementType() { return m_elementType; }
+    public ElementType getTableElementType() { return m_elementType; }
     public TableProperty    getTableProperty()    { return m_property; }
     public TableErrorClass  getTableErrorClass()  { return m_errorClass; }
     

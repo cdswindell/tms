@@ -2,30 +2,31 @@ package org.tms.tds;
 
 import java.util.HashMap;
 
-import org.tms.api.TableElementType;
+import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidPropertyException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnimplementedException;
 
-public class TableElement 
+public class BaseElement 
 {
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
-    private TableElementType m_tableElementType;
+    private ElementType m_tableElementType;
     private HashMap<String, Object> m_elemProperties;
+    private int m_index = -1;
     
-    protected TableElement(TableElementType eType)
+    protected BaseElement(ElementType eType)
     {
         setTableElementType(eType);
     }
     
-    public TableElementType getTableElementType()
+    public ElementType getTableElementType()
     {
         return m_tableElementType;
     }
 
-    protected void setTableElementType(TableElementType tableElementType)
+    protected void setTableElementType(ElementType tableElementType)
     {
         m_tableElementType = tableElementType;
     }
@@ -139,6 +140,15 @@ public class TableElement
         if (!key.isImplementedBy(this))
             throw new UnimplementedException(this, key);
         
+        // Some properties are built into the base object
+        switch (key)
+        {
+            case Index:
+                return m_index;
+            default:
+                break;
+        }
+        
         return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
     }
     
@@ -179,6 +189,16 @@ public class TableElement
         setProperty(TableProperty.Description, (description != null ? description.trim() : null));
     }
     
+    public int getIndex()
+    {
+        return m_index;
+    }
+    
+    protected void setIndex(int idx)
+    {
+        m_index = idx;
+    }
+    
     private String vetKey(String key)
     {
         if (key == null || (key = key.trim()).length() == 0)
@@ -187,6 +207,5 @@ public class TableElement
             throw new InvalidPropertyException(this, key);
         
         return key;
-    }
-    
+    } 
 }

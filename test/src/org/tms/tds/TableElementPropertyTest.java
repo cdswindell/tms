@@ -40,7 +40,7 @@ public class TableElementPropertyTest
         
         // expect failure
         try {
-            t.setProperty(TableElement.sf_RESERVED_PROPERTY_PREFIX + "Label", "abc");
+            t.setProperty(BaseElement.sf_RESERVED_PROPERTY_PREFIX + "Label", "abc");
             fail("set invalid property");
         }
         catch (TableException te)
@@ -80,5 +80,4 @@ public class TableElementPropertyTest
             fail(e.getMessage());
         }
     }
-
 }

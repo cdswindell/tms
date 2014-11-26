@@ -1,6 +1,6 @@
 package org.tms.api;
 
-public enum TableElementType
+public enum ElementType
 {
     Context,
     Table,

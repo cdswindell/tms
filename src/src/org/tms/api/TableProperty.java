@@ -3,41 +3,53 @@ package org.tms.api;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.tms.tds.TableElement;
+import org.tms.tds.BaseElement;
 
 public enum TableProperty
 {
     Label,
     Description,
-    Context(true, TableElementType.Table, TableElementType.Row, TableElementType.Column, TableElementType.Cell, TableElementType.Range),
-    Table(true, TableElementType.Row, TableElementType.Column, TableElementType.Cell, TableElementType.Range),
-    Rows(true, TableElementType.Table, TableElementType.Range),
-    Columns(true, TableElementType.Table, TableElementType.Range),
-    Row(true, TableElementType.Cell),
-    Column(true, TableElementType.Cell);
+    Index(true),
+    Context(true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    Table(true, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    Rows(true, ElementType.Table, ElementType.Range),
+    Columns(true, ElementType.Table, ElementType.Range),
+    Row(true, ElementType.Cell),
+    Column(true, ElementType.Cell);
     
     private boolean m_readOnly;
-    private Set<TableElementType> m_implementedBy = new HashSet<TableElementType>();
+    private Set<ElementType> m_implementedBy = new HashSet<ElementType>();
     
     private TableProperty()
     {
         this(false /* isReadOnly */,
-             TableElementType.Table,
-             TableElementType.Row,
-             TableElementType.Column,
-             TableElementType.Cell,
-             TableElementType.Range,
-             TableElementType.Context);
+             ElementType.Table,
+             ElementType.Row,
+             ElementType.Column,
+             ElementType.Cell,
+             ElementType.Range,
+             ElementType.Context);
+    }
+    
+    private TableProperty(boolean readOnly)
+    {
+        this(readOnly,
+             ElementType.Table,
+             ElementType.Row,
+             ElementType.Column,
+             ElementType.Cell,
+             ElementType.Range,
+             ElementType.Context);
     }
     
     private TableProperty(boolean isReadOnly,
-                          TableElementType... implementedBy)
+                          ElementType... implementedBy)
     {
         m_readOnly = isReadOnly;
         
         if (implementedBy != null)
         {
-            for (TableElementType t : implementedBy)
+            for (ElementType t : implementedBy)
                 m_implementedBy.add(t);
         }
     }
@@ -47,7 +59,7 @@ public enum TableProperty
         return m_readOnly;
     }
     
-    public boolean isImplementedBy(TableElement te)
+    public boolean isImplementedBy(BaseElement te)
     {
         if (te == null)
             return false;
