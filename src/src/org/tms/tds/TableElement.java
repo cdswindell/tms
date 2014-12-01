@@ -1,5 +1,8 @@
 package org.tms.tds;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
@@ -21,7 +24,7 @@ abstract public class TableElement extends BaseElement
         switch (key)
         {
             case Index:
-                return m_index;
+                return getIndex();
             case Table:
                 return getTable();
             case Context:
@@ -64,6 +67,18 @@ abstract public class TableElement extends BaseElement
     void setTable(Table t)
     {
         m_table = t;
+    }
+    
+    public Set<TableProperty> getInitializableProperties()
+    {
+        Set<TableProperty> initializableProperties = new HashSet<TableProperty>();
+        
+        for (TableProperty tp : TableProperty.values()) {
+            if (tp.isImplementedBy(this) && tp.isInitializable())
+                initializableProperties.add(tp);
+        }
+        
+        return initializableProperties;
     }
     
     abstract protected void reset();

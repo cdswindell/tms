@@ -7,17 +7,22 @@ import org.tms.tds.BaseElement;
 
 public enum TableProperty
 {
+    Index(true, false),
+    Context(true, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    Table(true, true, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    Rows(true, false, ElementType.Table, ElementType.Range),
+    Columns(true, false, ElementType.Table, ElementType.Range),
+    Row(true, false, ElementType.Cell),
+    Column(true, false, ElementType.Cell),
+    NumAllocRows(true, false, ElementType.Table),
+    NumAllocColumns(true, false, ElementType.Table),
+    RowAllocIncr(false, true, ElementType.Context, ElementType.Table),
+    ColumnAllocIncr(false, true, ElementType.Context, ElementType.Table),
     Label,
-    Description,
-    Index(true),
-    Context(true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
-    Table(true, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
-    Rows(true, ElementType.Table, ElementType.Range),
-    Columns(true, ElementType.Table, ElementType.Range),
-    Row(true, ElementType.Cell),
-    Column(true, ElementType.Cell);
+    Description;
     
     private boolean m_readOnly;
+    private boolean m_initializable;
     private Set<ElementType> m_implementedBy = new HashSet<ElementType>();
     
     /**
@@ -26,6 +31,7 @@ public enum TableProperty
     private TableProperty()
     {
         this(false /* isReadOnly */,
+             false /* Initializable */,
              ElementType.Table,
              ElementType.Row,
              ElementType.Column,
@@ -38,9 +44,10 @@ public enum TableProperty
      * Constructor for properties that apply to objects that extend TableElement
      * @param readOnly
      */
-    private TableProperty(boolean readOnly)
+    private TableProperty(boolean readOnly, boolean initializable)
     {
         this(readOnly,
+             initializable,
              ElementType.Table,
              ElementType.Row,
              ElementType.Column,
@@ -49,9 +56,11 @@ public enum TableProperty
     }
     
     private TableProperty(boolean isReadOnly,
+                          boolean isInitializable,
                           ElementType... implementedBy)
     {
         m_readOnly = isReadOnly;
+        m_initializable = isInitializable;
         
         if (implementedBy != null)
         {
@@ -65,11 +74,24 @@ public enum TableProperty
         return m_readOnly;
     }
     
+    public boolean isInitializable()
+    {
+        return m_initializable;
+    }
+    
     public boolean isImplementedBy(BaseElement te)
     {
         if (te == null)
             return false;
         else
-            return m_implementedBy.contains(te.getTableElementType());
+            return isImplementedBy(te.getElementType());
+    }
+    
+    public boolean isImplementedBy(ElementType et)
+    {
+        if (et == null)
+            return false;
+        else
+            return m_implementedBy.contains(et);
     }
 }

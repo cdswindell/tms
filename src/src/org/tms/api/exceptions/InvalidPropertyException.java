@@ -8,14 +8,14 @@ public final class InvalidPropertyException extends TableException
 
     public InvalidPropertyException(BaseElement te, String key)
     {
-        super(te.getTableElementType(), 
+        super(te.getElementType(), 
               String.format("Invalid property: %s", key != null && key.trim().length() > 0 ? key.trim() : "<not specified>"), 
               TableErrorClass.Invalid);
     }
     
     public InvalidPropertyException(BaseElement te)
     {
-        super(te.getTableElementType(), 
+        super(te.getElementType(), 
               "Property not specified", 
               TableErrorClass.Invalid);
     }

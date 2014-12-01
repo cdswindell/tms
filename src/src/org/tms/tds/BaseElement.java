@@ -1,6 +1,8 @@
 package org.tms.tds;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
@@ -17,15 +19,15 @@ abstract public class BaseElement
 
     protected BaseElement(ElementType eType)
     {
-        setTableElementType(eType);
+        setElementType(eType);
     }
     
-    public ElementType getTableElementType()
+    public ElementType getElementType()
     {
         return m_tableElementType;
     }
 
-    protected void setTableElementType(ElementType tableElementType)
+    protected void setElementType(ElementType tableElementType)
     {
         m_tableElementType = tableElementType;
     }
@@ -177,6 +179,18 @@ abstract public class BaseElement
     public void setDescription(String description)
     {
         setProperty(TableProperty.Description, (description != null ? description.trim() : null));
+    }
+    
+    public Set<TableProperty> getInitializableProperties()
+    {
+        Set<TableProperty> initializableProperties = new HashSet<TableProperty>();
+        
+        for (TableProperty tp : TableProperty.values()) {
+            if (tp.isImplementedBy(this) && tp.isInitializable())
+                initializableProperties.add(tp);
+        }
+        
+        return initializableProperties;
     }
     
     private String vetKey(String key)

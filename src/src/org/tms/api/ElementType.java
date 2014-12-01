@@ -1,5 +1,8 @@
 package org.tms.api;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public enum ElementType
 {
     Context,
@@ -9,4 +12,5 @@ public enum ElementType
     Cell,
     Range,
     Derivation;
+    
 }

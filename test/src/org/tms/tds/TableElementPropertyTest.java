@@ -17,11 +17,13 @@ public class TableElementPropertyTest
     @Test
     public void testTableElementPropertyGetSetHasClear()
     {
-        Table t = new Table(10, 10, null);
+        Table t = new Table(7, 10, null);
         
         assert (t != null);
-        assertThat(t.hasProperty(TableProperty.Label), is(false));
         
+        assertThat(t.getNumAllocRows(), is(10));
+        
+        assertThat(t.hasProperty(TableProperty.Label), is(false));
         t.setLabel("abcdef");
         assertThat(t.hasProperty(TableProperty.Label), is(true));
         

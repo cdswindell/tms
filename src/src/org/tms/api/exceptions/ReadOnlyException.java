@@ -9,6 +9,6 @@ public final class ReadOnlyException extends TableException
 
     public ReadOnlyException(BaseElement te, TableProperty tp)
     {
-        super(te.getTableElementType(), tp, TableErrorClass.ReadOnly);
+        super(te.getElementType(), tp, TableErrorClass.ReadOnly);
     }
 }
