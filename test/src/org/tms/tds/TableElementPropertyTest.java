@@ -17,7 +17,7 @@ public class TableElementPropertyTest
     @Test
     public void testTableElementPropertyGetSetHasClear()
     {
-        Table t = new Table();
+        Table t = new Table(10, 10, null);
         
         assert (t != null);
         assertThat(t.hasProperty(TableProperty.Label), is(false));

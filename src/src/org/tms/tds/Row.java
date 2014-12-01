@@ -13,4 +13,11 @@ public class Row extends TableElement
     protected void reset()
     {
     }
+
+    @Override
+    protected Table getTable()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

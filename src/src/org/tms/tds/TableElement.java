@@ -6,18 +6,12 @@ import org.tms.api.TableProperty;
 abstract public class TableElement extends BaseElement
 {
     private int m_index = -1;
-    private Table m_parentTable;
+    private Table m_table;
 
-    public TableElement(ElementType eType)
-    {
-        super(eType);
-        reset();
-    }
-    
     public TableElement(ElementType eType, Table parentTable)
     {
-        this(eType);
-        m_parentTable = parentTable;
+        super(eType);
+        setTable(parentTable);
     }
 
     @Override
@@ -29,7 +23,9 @@ abstract public class TableElement extends BaseElement
             case Index:
                 return m_index;
             case Table:
-                return m_parentTable;
+                return getTable();
+            case Context:
+                return getContext();
             default:
                 break;
         }
@@ -42,9 +38,32 @@ abstract public class TableElement extends BaseElement
         return m_index ;
     }
     
-    protected void setIndex(int idx)
+    void setIndex(int idx)
     {
         m_index = idx;
+    }
+    
+    /**
+     * Retrieve the Context associated with this table element; the context is associated with the parent table
+     * @return
+     */
+    protected Context getContext()
+    {
+        return getTable() != null ? getTable().getContext() : null;
+    }
+    
+    protected Table getTable()
+    {
+        return m_table;
+    }
+    
+    /**
+     * Package-protected method only accessible from other TDS methods
+     * @param t
+     */
+    void setTable(Table t)
+    {
+        m_table = t;
     }
     
     abstract protected void reset();

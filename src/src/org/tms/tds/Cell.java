@@ -6,10 +6,10 @@ public class Cell extends TableElement
 {
     private boolean m_null;
     
-    public Cell()
+    public Cell(Table t)
     {
-        super(ElementType.Cell);
-        
+        super(ElementType.Cell, t);
+      
     }
 
     public boolean isNull()
