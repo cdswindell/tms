@@ -181,7 +181,7 @@ abstract public class BaseElement
         setProperty(TableProperty.Description, (description != null ? description.trim() : null));
     }
     
-    public Set<TableProperty> getInitializableProperties()
+    Set<TableProperty> getInitializableProperties()
     {
         Set<TableProperty> initializableProperties = new HashSet<TableProperty>();
         
@@ -191,6 +191,16 @@ abstract public class BaseElement
         }
         
         return initializableProperties;
+    }
+    
+    protected boolean isValidPropertyValueInt(Object value)
+    {
+        return value != null && value instanceof Integer && ((int)value) > 0;    
+    }
+    
+    protected boolean isValidPropertyValueBoolean(Object value)
+    {
+        return value != null && value instanceof Boolean;    
     }
     
     private String vetKey(String key)

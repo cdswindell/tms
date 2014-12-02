@@ -1,14 +1,12 @@
 package org.tms.tds;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
 abstract public class TableElement extends BaseElement
 {
     private int m_index = -1;
+    private boolean m_readOnly;
     private Table m_table;
 
     public TableElement(ElementType eType, Table parentTable)
@@ -25,15 +23,19 @@ abstract public class TableElement extends BaseElement
         {
             case Index:
                 return getIndex();
+                
             case Table:
                 return getTable();
+                
             case Context:
                 return getContext();
+                
+            case ReadOnly:
+                return isReadOnly();
+                
             default:
-                break;
+                return super.getProperty(key);
         }
-        
-        return super.getProperty(key);
     }
     
     public int getIndex()
@@ -69,17 +71,15 @@ abstract public class TableElement extends BaseElement
         m_table = t;
     }
     
-    public Set<TableProperty> getInitializableProperties()
+    protected boolean isReadOnly()
     {
-        Set<TableProperty> initializableProperties = new HashSet<TableProperty>();
-        
-        for (TableProperty tp : TableProperty.values()) {
-            if (tp.isImplementedBy(this) && tp.isInitializable())
-                initializableProperties.add(tp);
-        }
-        
-        return initializableProperties;
+        return m_readOnly;
     }
-    
+
+    protected void setReadOnly(boolean readOnly)
+    {
+        m_readOnly = readOnly;
+    }
+
     abstract protected void reset();
 }

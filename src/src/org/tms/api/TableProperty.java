@@ -8,16 +8,21 @@ import org.tms.tds.BaseElement;
 public enum TableProperty
 {
     Index(true, false),
+    ReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    SupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    
     Context(true, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Table(true, true, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Rows(true, false, ElementType.Table, ElementType.Range),
     Columns(true, false, ElementType.Table, ElementType.Range),
     Row(true, false, ElementType.Cell),
     Column(true, false, ElementType.Cell),
+    
     NumAllocRows(true, false, ElementType.Table),
     NumAllocColumns(true, false, ElementType.Table),
     RowAllocIncr(false, true, ElementType.Context, ElementType.Table),
     ColumnAllocIncr(false, true, ElementType.Context, ElementType.Table),
+    
     Label,
     Description;
     

@@ -13,14 +13,18 @@ public class Table extends TableElement
     
     private Context m_context;
     
-    private int m_rowAllocIncr;
-    private int m_columnAllocIncr;
-    
     private int m_numAllocRows;
     private int m_numAllocCols;
     
     private int m_nextRowIdx;
     private int m_nextColIdx;
+    
+    //Initialized from context or source table
+    private int m_rowAllocIncr;
+    private int m_columnAllocIncr;
+    
+    private boolean m_readOnly;
+    private boolean m_supportsNull;
     
     public Table(int nRows, int nCols, Context c)
     {
@@ -64,6 +68,7 @@ public class Table extends TableElement
         m_cells = new Cell[m_numAllocRows * m_numAllocCols];
         m_rows = new Row[m_numAllocRows];
         m_cols = new Column[m_numAllocCols];
+        
     }
     
     @Override
@@ -88,7 +93,10 @@ public class Table extends TableElement
     
     private void setContext(Context c)
     {
-        m_context = c;
+        if (c == null)
+            c = Context.getDefaultContext();
+        
+        m_context = c.register(this);
     }
     
     @Override
