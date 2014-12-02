@@ -8,7 +8,7 @@ import org.tms.tds.BaseElement;
 public enum TableProperty
 {
     Index(true, false),
-    ReadOnly(false, true, ElementType.Context, ElementType.Table),
+    ReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column),
     SupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
@@ -99,6 +99,35 @@ public enum TableProperty
         }
     }
     
+    public boolean isBooleanValue()
+    {
+        switch(this)
+        {
+            case ReadOnly:
+            case SupportsNull:
+                return true;
+                
+            default:
+                return false;
+        }
+    }
+    
+    public boolean isIntValue()
+    {
+        switch(this)
+        {
+            case Index:
+            case NumAllocRows:
+            case NumAllocColumns:
+            case RowAllocIncr:
+            case ColumnAllocIncr:
+                return true;
+                
+            default:
+                return false;
+        }
+    }
+    
     public boolean isReadOnly()
     {
         return m_readOnly;
@@ -107,6 +136,11 @@ public enum TableProperty
     public boolean isOptional()
     {
         return m_optional;
+    }
+    
+    public boolean isNonOptional()
+    {
+        return !isOptional();
     }
     
     public boolean isInitializable()

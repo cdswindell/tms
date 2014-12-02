@@ -26,4 +26,39 @@ public class RowTest
                 fail("Parameter not retrieved: " + p);
         }
     }
+    
+    @Test
+    public void getBooleanPropertiesTest()
+    {
+        Table t = new Table(12, 10);        
+        assert (t != null);
+        
+        Row r = new Row(t);
+
+        Set<TableProperty> props = r.getProperties();
+        for (TableProperty p : props) { 
+            if (!p.isBooleanValue()) continue;
+            
+            // will fail if property getter not implemented
+            r.getPropertyBoolean(p);
+        }
+    }
+
+    @Test
+    public void getIntPropertiesTest()
+    {
+        Table t = new Table(12, 10);        
+        assert (t != null);
+        
+        Row r = new Row(t);
+
+        Set<TableProperty> props = r.getProperties();
+        for (TableProperty p : props) { 
+            if (!p.isIntValue()) continue;
+            
+            // will fail if property getter not implemented
+            r.getPropertyInt(p);
+        }
+    }
+
 }

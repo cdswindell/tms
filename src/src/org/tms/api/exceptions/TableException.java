@@ -11,6 +11,14 @@ public class TableException extends RuntimeException
     private ElementType m_elementType;
     private TableProperty m_property;
     
+    protected TableException(ElementType tet, TableProperty tp, TableErrorClass ec, String msg)
+    {
+        this(String.format("%s: %s->%s (%s)", ec, tet, tp, msg));
+        m_elementType = tet;
+        m_errorClass = ec;
+        m_property = tp;       
+    }
+
     protected TableException(ElementType tet, TableProperty tp, TableErrorClass ec)
     {
         this(String.format("%s: %s->%s", ec, tet, tp));

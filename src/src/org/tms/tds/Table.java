@@ -23,9 +23,12 @@ public class Table extends TableElement
     private int m_rowAllocIncr;
     private int m_columnAllocIncr;
     
-    private boolean m_readOnly;
-    
-    public Table(int nRows, int nCols, Context c)
+    public Table(int nRows, int nCols)
+    {
+        this(nRows, nCols, Context.getDefaultContext());
+    }
+
+    protected Table(int nRows, int nCols, Context c)
     {
         super(ElementType.Table, null);
         setTable(this);
@@ -34,7 +37,7 @@ public class Table extends TableElement
         initialize(nRows, nCols);
     }
 
-    public Table(int nRows, int nCols, Table t)
+    protected Table(int nRows, int nCols, Table t)
     {
         super(ElementType.Table, null);
         setTable(this);
@@ -42,12 +45,7 @@ public class Table extends TableElement
         
         initialize(nRows, nCols, t);
     }
-
-    public Table(int nRows, int nCols)
-    {
-        this(nRows, nCols, Context.getDefaultContext());
-    }
-
+    
     @Override
     protected void reset()
     {
@@ -65,7 +63,7 @@ public class Table extends TableElement
         setDirty(false);
         
         clearProperty(TableProperty.Label);
-        clearProperty(TableProperty.Description);
+        clearProperty(TableProperty.Description);        
     }
     
     private void initialize(int nRows, int nCols)
@@ -86,35 +84,21 @@ public class Table extends TableElement
         for (TableProperty tp : this.getInitializableProperties()) {
             Object value = source.getProperty(tp);
             
+            if (super.initializeProperty(tp, value)) continue;
+            
             switch (tp) {
                 case RowAllocIncr:
-                    if (isValidPropertyValueInt(value))
-                        setRowAllocIncr((int)value);
-                    else 
-                        setRowAllocIncr(Context.sf_ROW_ALLOC_INCR_DEFAULT);
+                    if (!isValidPropertyValueInt(value))
+                        value = Context.sf_ROW_ALLOC_INCR_DEFAULT;
+                    setRowAllocIncr((int)value);
                     break;
                     
                 case ColumnAllocIncr:
-                    if (isValidPropertyValueInt(value))
-                        setColumnAllocIncr((int)value);
-                    else 
-                        setColumnAllocIncr(Context.sf_COLUMN_ALLOC_INCR_DEFAULT);
+                    if (!isValidPropertyValueInt(value))
+                        value = Context.sf_COLUMN_ALLOC_INCR_DEFAULT;
+                    setColumnAllocIncr((int)value);
                     break;
-                    
-                case ReadOnly:
-                    if (isValidPropertyValueBoolean(value))
-                        setReadOnly((boolean)value);
-                    else 
-                        setReadOnly(Context.sf_READ_ONLY_DEFAULT);
-                    break;
-                    
-                case SupportsNull:
-                    if (isValidPropertyValueBoolean(value))
-                        setSupportsNull((boolean)value);
-                    else 
-                        setSupportsNull(Context.sf_SUPPORTS_NULL_DEFAULT);
-                    break;
-                    
+
                 default:
                     throw new IllegalStateException("No initialization available for Table Property: " + tp);                       
             }
@@ -124,10 +108,11 @@ public class Table extends TableElement
         m_numAllocCols = getNumAllocColumns(nCols);
         m_nextRowIdx = m_nextColIdx = 0;
         
-        m_cells = new Cell[m_numAllocRows * m_numAllocCols];
         m_rows = new Row[m_numAllocRows];
         m_cols = new Column[m_numAllocCols];
         
+        // set dirty flag, as table structure has changed
+        setDirty(true);
     }
     
     @Override
@@ -148,11 +133,25 @@ public class Table extends TableElement
             case NumAllocColumns:
                 return getNumAllocColumns();
                 
-            case ReadOnly:
-                return isReadOnly();
-                
             default:
                 return super.getProperty(key);
+        }
+    }
+    
+    @Override
+    public int getPropertyInt(TableProperty key)
+    {
+        // Some properties are built into the base Table Element object
+        switch (key)
+        {
+            case RowAllocIncr:
+            case ColumnAllocIncr:
+            case NumAllocRows:
+            case NumAllocColumns:
+                return (int)getProperty(key);
+                
+            default:
+                return super.getPropertyInt(key);
         }
     }
     
@@ -193,16 +192,6 @@ public class Table extends TableElement
     void setDirty(boolean dirty)
     {
         m_dirty = dirty;
-    }
-
-    protected boolean isReadOnly()
-    {
-        return m_readOnly;
-    }
-
-    protected void setReadOnly(boolean readOnly)
-    {
-        m_readOnly = readOnly;
     }
 
     synchronized protected int getRowAllocIncr()

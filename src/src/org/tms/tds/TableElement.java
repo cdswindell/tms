@@ -7,9 +7,8 @@ abstract public class TableElement extends BaseElement
 {
     private int m_index = -1;
     private Table m_table;
-    private boolean m_supportsNull;
 
-    public TableElement(ElementType eType, Table parentTable)
+    protected TableElement(ElementType eType, Table parentTable)
     {
         super(eType);
         setTable(parentTable);
@@ -30,14 +29,51 @@ abstract public class TableElement extends BaseElement
             case Context:
                 return getContext();
                 
-            case SupportsNull:
-                return isSupportsNull();
-                
             default:
                 return super.getProperty(key);
         }
     }
     
+    @Override
+    public int getPropertyInt(TableProperty key)
+    {
+        // Some properties are built into the base Table Element object
+        switch (key)
+        {
+            case Index:
+                return (int)getProperty(key);
+                                
+            default:
+                return super.getPropertyInt(key);
+        }
+    }
+    
+    @Override
+    public boolean getPropertyBoolean(TableProperty key)
+    {
+        // Some properties are built into the base Table Element object
+        switch (key)
+        {
+            default:
+                return (boolean)super.getPropertyBoolean(key);
+        }
+    }
+    
+    protected boolean initializeProperty(TableProperty tp, Object value)
+    {
+        if (super.initializeProperty(tp, value))
+            return true;
+        
+        boolean initializedProperty = true; // assume success
+        switch (tp) {
+            default:
+                initializedProperty = false;   
+                break;
+        }
+        
+        return initializedProperty;
+    }
+
     public int getIndex()
     {
         return m_index ;
@@ -71,15 +107,5 @@ abstract public class TableElement extends BaseElement
         m_table = t;
     }
     
-    protected boolean isSupportsNull()
-    {
-        return m_supportsNull;
-    }
-
-    protected void setSupportsNull(boolean supportsNull)
-    {
-        m_supportsNull = supportsNull;
-    }
-
     abstract protected void reset();
 }

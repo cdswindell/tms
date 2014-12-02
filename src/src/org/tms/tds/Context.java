@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
-import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.WeakHashSet;
 
 public class Context extends BaseElement
@@ -49,9 +48,6 @@ public class Context extends BaseElement
     private Set<Table> m_registeredTables;
     private boolean m_default;
     
-    private boolean m_supportsNull;
-    private boolean m_readOnly;
-    
     private int m_rowAllocIncr;
     private int m_columnAllocIncr;
     
@@ -93,35 +89,21 @@ public class Context extends BaseElement
             else
                 value = sourceContext.getProperty(tp);
             
+            if (super.initializeProperty(tp, value)) continue;
+            
             // set the corresponding value
             switch (tp)
             {
                 case RowAllocIncr:
-                    if (isValidPropertyValueInt(value))
-                        setRowAllocIncr((int)value);
-                    else 
-                        setRowAllocIncr(sf_ROW_ALLOC_INCR_DEFAULT);
+                    if (!isValidPropertyValueInt(value))
+                        value = sf_ROW_ALLOC_INCR_DEFAULT;
+                    setRowAllocIncr((int)value);
                     break;
                     
                 case ColumnAllocIncr:
-                    if (isValidPropertyValueInt(value))
-                        setColumnAllocIncr((int)value);
-                    else 
-                        setColumnAllocIncr(sf_COLUMN_ALLOC_INCR_DEFAULT);
-                    break;
-                    
-                case ReadOnly:
-                    if (isValidPropertyValueBoolean(value))
-                        setReadOnly((boolean)value);
-                    else 
-                        setReadOnly(sf_READ_ONLY_DEFAULT);
-                    break;
-                    
-                case SupportsNull:
-                    if (isValidPropertyValueBoolean(value))
-                        setSupportsNull((boolean)value);
-                    else 
-                        setSupportsNull(sf_SUPPORTS_NULL_DEFAULT);
+                    if (!isValidPropertyValueInt(value))
+                        value = sf_COLUMN_ALLOC_INCR_DEFAULT;
+                    setColumnAllocIncr((int)value);
                     break;
                     
                 default:
@@ -139,32 +121,6 @@ public class Context extends BaseElement
         return null;
     }
 
-    protected int getPropertyInt(TableProperty key)
-    {
-        switch (key)
-        {
-            case RowAllocIncr:
-            case ColumnAllocIncr:
-                return (int)getProperty(key);
-                
-            default:
-                throw new UnimplementedException(this, key);
-        }
-    }
-
-    protected boolean getPropertyBoolean(TableProperty key)
-    {
-        switch (key)
-        {
-            case ReadOnly:
-            case SupportsNull:
-                return (boolean)getProperty(key);
-                
-            default:
-                throw new UnimplementedException(this, key);
-        }
-    }
-  
     @Override
     public Object getProperty(TableProperty key)
     {
@@ -176,40 +132,28 @@ public class Context extends BaseElement
             case ColumnAllocIncr:
                 return getColumnAllocIncr();
                 
-            case ReadOnly:
-                return isReadOnly();
-                
-            case SupportsNull:
-                return isSupportsNull();
-                
             default:
                 return super.getProperty(key);
+        }        
+    }
+
+    @Override
+    public int getPropertyInt(TableProperty key)
+    {
+        switch(key)
+        {
+            case RowAllocIncr:
+            case ColumnAllocIncr:
+                return (int)getProperty(key);
+                
+            default:
+                return super.getPropertyInt(key);
         }        
     }
 
     protected boolean isDefault()
     {
         return m_default;
-    }
-
-    protected boolean isReadOnly()
-    {
-        return m_readOnly;
-    }
-
-    protected void setReadOnly(boolean readOnly)
-    {
-        m_readOnly = readOnly;
-    }
-
-    protected boolean isSupportsNull()
-    {
-        return m_supportsNull;
-    }
-
-    protected void setSupportsNull(boolean supportsNull)
-    {
-        m_supportsNull = supportsNull;
     }
 
     protected int getRowAllocIncr()

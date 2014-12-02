@@ -5,6 +5,7 @@ import static org.hamcrest.core.Is.is;
 
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.ReadOnlyException;
@@ -85,6 +86,51 @@ public class TableTest
     }
     
     @Test
+    public void getInitializablePropertiesTest()
+    {
+        Table t = new Table(12, 10);        
+        assert (t != null);
+
+        Set<TableProperty> props = t.getInitializableProperties();
+        for (TableProperty p : props) {
+            
+            Object value = t.getProperty(p);
+            if (value == null)
+                fail("Initializable Parameter not present: " + p);
+        }
+    }
+    
+    @Test
+    public void getBooleanPropertiesTest()
+    {
+        Table t = new Table(12, 10);        
+        assert (t != null);
+        
+        Set<TableProperty> props = t.getProperties();
+        for (TableProperty p : props) { 
+            if (!p.isBooleanValue()) continue;
+            
+            // will fail if property getter not implemented
+            t.getPropertyBoolean(p);
+        }
+    }
+
+    @Test
+    public void getIntPropertiesTest()
+    {
+        Table t = new Table(12, 10);        
+        assert (t != null);
+        
+        Set<TableProperty> props = t.getProperties();
+        for (TableProperty p : props) { 
+            if (!p.isIntValue()) continue;
+            
+            // will fail if property getter not implemented
+            t.getPropertyInt(p);
+        }
+    }
+    
+    @Ignore
     public void getPropertiesTest()
     {
         Table t = new Table(12, 10);        

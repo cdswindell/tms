@@ -1,5 +1,6 @@
 package org.tms.api.exceptions;
 
+import org.tms.api.TableProperty;
 import org.tms.tds.BaseElement;
 
 public final class InvalidPropertyException extends TableException
@@ -18,5 +19,10 @@ public final class InvalidPropertyException extends TableException
         super(te.getElementType(), 
               "Property not specified", 
               TableErrorClass.Invalid);
+    }
+
+    public InvalidPropertyException(BaseElement te, TableProperty tp, String msg)
+    {
+        super(te.getElementType(), tp, TableErrorClass.Invalid, msg);
     }
 }

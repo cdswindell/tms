@@ -16,6 +16,9 @@ abstract public class BaseElement
     private ElementType m_tableElementType;
     private HashMap<String, Object> m_elemProperties;
 
+    private boolean m_supportsNull;
+    private boolean m_readOnly;
+    
     protected BaseElement(ElementType eType)
     {
         setElementType(eType);
@@ -44,7 +47,7 @@ abstract public class BaseElement
         return m_elemProperties;
     }
 
-    public boolean isImplements(TableProperty tp)
+    protected boolean isImplements(TableProperty tp)
     {
         if (tp == null)
             return false;
@@ -52,7 +55,7 @@ abstract public class BaseElement
             return tp.isImplementedBy(this);
     }
     
-    public void setProperty(TableProperty key, Object value)
+    protected void setProperty(TableProperty key, Object value)
     {
         if (!key.isImplementedBy(this))
             throw new UnimplementedException(this, key);
@@ -62,7 +65,7 @@ abstract public class BaseElement
         setProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), value, false);
     }
     
-    public void setProperty(String key, Object value)
+    protected void setProperty(String key, Object value)
     {
         setProperty(key, value, true);
     }
@@ -75,12 +78,12 @@ abstract public class BaseElement
         getElemProperties(true).put(key,  value);
     }
 
-    public boolean clearProperty(String key)
+    protected boolean clearProperty(String key)
     {
         return clearProperty(key, true);
     }
     
-    public boolean clearProperty(TableProperty key)
+    protected boolean clearProperty(TableProperty key)
     {
         if (!key.isImplementedBy(this))
             throw new UnimplementedException(this, key);
@@ -104,12 +107,12 @@ abstract public class BaseElement
         return false;
     }
     
-    public boolean hasProperty(String key)
+    protected boolean hasProperty(String key)
     {
         return hasProperty(key, true);
     }
     
-    public boolean hasProperty(TableProperty key)
+    protected boolean hasProperty(TableProperty key)
     { 
         if (key.isImplementedBy(this)) {
             if (key.isReadOnly())
@@ -135,15 +138,56 @@ abstract public class BaseElement
         return false;
     }
     
-    public Object getProperty(TableProperty key)
+    protected Object getProperty(TableProperty key)
     {
         if (!key.isImplementedBy(this))
             throw new UnimplementedException(this, key);
         
-        return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+        // Some properties are built into the base element object
+        switch (key)
+        {
+            case SupportsNull:
+                return isSupportsNull();
+                
+            case ReadOnly:
+                return isReadOnly();
+                
+            default:
+                return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+        }      
     }
     
-    public Object getProperty(String key)
+    /**
+     * initialize properties defined in BaseElement
+     * @param tp
+     * @param value
+     * @return
+     */
+    protected boolean initializeProperty(TableProperty tp, Object value)
+    {
+        boolean initializedProperty = true; // assume success
+        switch (tp) {
+            case ReadOnly:
+                if (!isValidPropertyValueBoolean(value))
+                    value = Context.sf_READ_ONLY_DEFAULT;
+                setReadOnly((boolean)value);
+                break;
+                
+            case SupportsNull:
+                if (!isValidPropertyValueBoolean(value))
+                    value = Context.sf_SUPPORTS_NULL_DEFAULT;
+                setSupportsNull((boolean)value);
+                break;
+                
+            default:
+                initializedProperty = false;   
+                break;
+        }
+        
+        return initializedProperty;
+    } 
+    
+    protected Object getProperty(String key)
     {
         return getProperty(key, true);
     }
@@ -160,6 +204,38 @@ abstract public class BaseElement
             return null;
     }
 
+    protected boolean getPropertyBoolean(TableProperty key)
+    {
+        switch(key)
+        {
+            case ReadOnly:
+            case SupportsNull:
+                return (boolean)getProperty(key);
+                
+            default:
+                break;
+        }
+        
+        if (key.isBooleanValue())
+            throw new UnimplementedException(this, key, "boolean");
+        else
+            throw new InvalidPropertyException(this, key, "not boolean value");
+    }
+    
+    protected int getPropertyInt(TableProperty key)
+    {
+        switch(key)
+        {
+            default:
+                break;
+        }
+        
+        if (key.isIntValue())
+            throw new UnimplementedException(this, key, "int");
+        else
+            throw new InvalidPropertyException(this, key, "not int value");
+    }
+    
     public String getLabel()
     {
         return (String)getProperty(TableProperty.Label);
@@ -215,6 +291,26 @@ abstract public class BaseElement
         return value != null && value instanceof Boolean;    
     }
     
+    protected boolean isSupportsNull()
+    {
+        return m_supportsNull;
+    }
+
+    protected void setSupportsNull(boolean supportsNull)
+    {
+        m_supportsNull = supportsNull;
+    }
+
+    protected boolean isReadOnly()
+    {
+        return m_readOnly;
+    }
+
+    protected void setReadOnly(boolean readOnly)
+    {
+        m_readOnly = readOnly;
+    }
+
     private String vetKey(String key)
     {
         if (key == null || (key = key.trim()).length() == 0)
@@ -223,5 +319,5 @@ abstract public class BaseElement
             throw new InvalidPropertyException(this, key);
         
         return key;
-    } 
+    }
 }
