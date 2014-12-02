@@ -35,6 +35,12 @@ public class TableException extends RuntimeException
         m_property = null;       
     }
 
+    public TableException(String msg, TableErrorClass ec)
+    {
+        this(String.format("%s: %s", msg, ec));
+        m_errorClass = ec;
+    }
+
     protected TableException(String message)
     {
         super(message);

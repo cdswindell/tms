@@ -17,6 +17,7 @@ public class Context extends BaseElement
     
     static final boolean sf_READ_ONLY_DEFAULT = false;
     static final boolean sf_SUPPORTS_NULL_DEFAULT = true;
+    static final boolean sf_ENFORCE_DATA_TYPE_DEFAULT = false;
     
     static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();
     
@@ -47,6 +48,7 @@ public class Context extends BaseElement
 
     private Set<Table> m_registeredTables;
     private boolean m_default;
+    private boolean m_enforceDataType;
     
     private int m_rowAllocIncr;
     private int m_columnAllocIncr;
@@ -106,6 +108,12 @@ public class Context extends BaseElement
                     setColumnAllocIncr((int)value);
                     break;
                     
+                case isEnforceDataType:
+                    if (!isValidPropertyValueInt(value))
+                        value = sf_ENFORCE_DATA_TYPE_DEFAULT;
+                    setEnforceDataType((boolean)value);
+                    break;
+                    
                 default:
                     throw new IllegalStateException("No initialization available for Context Property: " + tp);                       
             }
@@ -132,6 +140,9 @@ public class Context extends BaseElement
             case ColumnAllocIncr:
                 return getColumnAllocIncr();
                 
+            case isEnforceDataType:
+                return isEnforceDataType();
+                
             default:
                 return super.getProperty(key);
         }        
@@ -148,6 +159,19 @@ public class Context extends BaseElement
                 
             default:
                 return super.getPropertyInt(key);
+        }        
+    }
+
+    @Override
+    public boolean getPropertyBoolean(TableProperty key)
+    {
+        switch(key)
+        {
+            case isEnforceDataType:
+                return (boolean)getProperty(key);
+                
+            default:
+                return super.getPropertyBoolean(key);
         }        
     }
 
@@ -190,6 +214,16 @@ public class Context extends BaseElement
             m_columnAllocIncr = columnAllocIncr;
     }
 
+    protected boolean isEnforceDataType()
+    {
+        return m_enforceDataType;
+    }
+
+    protected void setEnforceDataType(boolean enforceDataType)
+    {
+        m_enforceDataType = enforceDataType;
+    }
+
     protected Context register(Table table)
     {
         // register the table with this context
@@ -206,5 +240,11 @@ public class Context extends BaseElement
     protected boolean isRegistered(Table t)
     {
         return m_registeredTables.contains(t);
+    }
+
+    @Override
+    protected boolean isEmpty()
+    {
+         return m_registeredTables.isEmpty();
     }
 }

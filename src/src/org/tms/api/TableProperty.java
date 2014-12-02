@@ -7,24 +7,31 @@ import org.tms.tds.BaseElement;
 
 public enum TableProperty
 {
-    Index(true, false),
-    ReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column),
-    SupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    // Base Element Properties
+    Label,
+    Description,   
+    isEmpty(true, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    isReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column),
+    isSupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
+    // Table Element Properties (Context implements initializable ones)
+    Index(true, false),
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    
+    // Context/Table Properties  
+    RowAllocIncr(false, true, ElementType.Context, ElementType.Table),
+    ColumnAllocIncr(false, true, ElementType.Context, ElementType.Table),
+    
+    // Table Properties   
     Rows(true, false, ElementType.Table, ElementType.Range),
     Columns(true, false, ElementType.Table, ElementType.Range),
     Row(true, false, ElementType.Cell),
     Column(true, false, ElementType.Cell),
-    
     NumAllocRows(true, false, ElementType.Table),
     NumAllocColumns(true, false, ElementType.Table),
-    RowAllocIncr(false, true, ElementType.Context, ElementType.Table),
-    ColumnAllocIncr(false, true, ElementType.Context, ElementType.Table),
-    
-    Label,
-    Description;
+    ;
     
     private boolean m_optional;
     private boolean m_readOnly;
@@ -101,12 +108,11 @@ public enum TableProperty
     
     public boolean isBooleanValue()
     {
+        if (this.name().startsWith("is"))
+            return true;
+        
         switch(this)
         {
-            case ReadOnly:
-            case SupportsNull:
-                return true;
-                
             default:
                 return false;
         }

@@ -1,5 +1,8 @@
 package org.tms.tds;
 
+import java.util.Set;
+
+import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
@@ -10,6 +13,8 @@ public class Table extends TableElement
     private Cell [] m_cells;
     private Row [] m_rows;
     private Column [] m_cols;
+    
+    private Set<Range> m_ranges;
     
     private Context m_context;
     
@@ -34,7 +39,7 @@ public class Table extends TableElement
         setTable(this);
         setContext(c);        
         
-        initialize(nRows, nCols);
+        initialize(nRows, nCols, null);
     }
 
     protected Table(int nRows, int nCols, Table t)
@@ -46,41 +51,35 @@ public class Table extends TableElement
         initialize(nRows, nCols, t);
     }
     
-    @Override
-    protected void reset()
-    {
-        m_cells = null;
-        m_rows = null;
-        m_cols = null;
-        
-        m_rowAllocIncr = m_columnAllocIncr = 0;      
-        m_numAllocRows = m_numAllocCols = 0;
-        m_nextRowIdx = m_nextColIdx = 0;
-        
-        setIndex(-1);
-        setTable(this);
-        setContext(null);
-        setDirty(false);
-        
-        clearProperty(TableProperty.Label);
-        clearProperty(TableProperty.Description);        
-    }
-    
-    private void initialize(int nRows, int nCols)
-    {
-        initialize(nRows, nCols, null);
-    }
-    
     private void initialize(int nRows, int nCols, Table t)
     {
-        BaseElement source = null;
-        if (t != null)
-            source = t;
-        else if (getContext() != null)
-            source = getContext();
-        else 
-            source = Context.getDefaultContext();
+        initializeProperties(t);
         
+        m_numAllocRows = getNumAllocRows(nRows);
+        m_numAllocCols = getNumAllocColumns(nCols);
+        m_nextRowIdx = m_nextColIdx = 0;
+        
+        // allocate base memory for rows and columns
+        m_rows = new Row[m_numAllocRows];
+        m_cols = new Column[m_numAllocCols];
+                
+        // set all other arrays/sets/maps to null
+        m_cells = null;
+        m_ranges = null;
+        
+        // set dirty flag, as table structure has changed
+        setDirty(true);
+    }
+
+    @Override
+    protected void initialize(TableElement e) 
+    {
+        // noop for tables, initialization happens slightly differently
+    }
+    
+    protected void initializeProperties(Table e)
+    {
+        BaseElement source = getInitializationSource(e);
         for (TableProperty tp : this.getInitializableProperties()) {
             Object value = source.getProperty(tp);
             
@@ -103,16 +102,6 @@ public class Table extends TableElement
                     throw new IllegalStateException("No initialization available for Table Property: " + tp);                       
             }
         }
-        
-        m_numAllocRows = getNumAllocRows(nRows);
-        m_numAllocCols = getNumAllocColumns(nCols);
-        m_nextRowIdx = m_nextColIdx = 0;
-        
-        m_rows = new Row[m_numAllocRows];
-        m_cols = new Column[m_numAllocCols];
-        
-        // set dirty flag, as table structure has changed
-        setDirty(true);
     }
     
     @Override
@@ -268,5 +257,26 @@ public class Table extends TableElement
     protected int getNumAllocColumns()
     {
         return m_numAllocCols;
+    }
+
+    protected boolean add(Row r, Access access)
+    {
+        // allocate new row, if specified row is null
+        if (r == null)
+            r = new Row(this);
+        
+        return true;
+    }
+    
+    /**
+     * Empty tables contain no defined (set) cells
+     */
+    @Override
+    protected boolean isEmpty()
+    {
+        if (m_cols == null || m_rows == null || m_cells == null)
+            return true;
+        else
+            return false;
     }  
 }

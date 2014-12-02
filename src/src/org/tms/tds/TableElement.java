@@ -2,20 +2,37 @@ package org.tms.tds;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.InvalidParentException;
 
-abstract public class TableElement extends BaseElement
+abstract class TableElement extends BaseElement
 {
     private int m_index = -1;
     private Table m_table;
+    private boolean m_enforceDataType;
 
-    protected TableElement(ElementType eType, Table parentTable)
+    protected TableElement(ElementType eType, TableElement e)
     {
         super(eType);
-        setTable(parentTable);
+        if (e != null)
+            setTable(e.getTable());
+        
+        // perform base initialization
+        initialize(e);
     }
 
+    /**
+     * Perform general initializations
+     * @param e
+     */
+    protected void initialize(TableElement e)
+    {
+        setIndex(-1);
+        clearProperty(TableProperty.Label);
+        clearProperty(TableProperty.Description);
+    }
+    
     @Override
-    public Object getProperty(TableProperty key)
+    protected Object getProperty(TableProperty key)
     {
         // Some properties are built into the base Table Element object
         switch (key)
@@ -29,6 +46,9 @@ abstract public class TableElement extends BaseElement
             case Context:
                 return getContext();
                 
+            case isEnforceDataType:
+                return isEnforceDataType();
+                                
             default:
                 return super.getProperty(key);
         }
@@ -54,11 +74,15 @@ abstract public class TableElement extends BaseElement
         // Some properties are built into the base Table Element object
         switch (key)
         {
+            case isEnforceDataType:
+                return (boolean)getProperty(key);
+                                
             default:
                 return (boolean)super.getPropertyBoolean(key);
         }
     }
     
+    @Override
     protected boolean initializeProperty(TableProperty tp, Object value)
     {
         if (super.initializeProperty(tp, value))
@@ -66,6 +90,12 @@ abstract public class TableElement extends BaseElement
         
         boolean initializedProperty = true; // assume success
         switch (tp) {
+            case isEnforceDataType:
+                if (!isValidPropertyValueInt(value))
+                    value = Context.sf_ENFORCE_DATA_TYPE_DEFAULT;
+                setEnforceDataType((boolean)value);
+                break;
+                
             default:
                 initializedProperty = false;   
                 break;
@@ -74,7 +104,41 @@ abstract public class TableElement extends BaseElement
         return initializedProperty;
     }
 
-    public int getIndex()
+    protected BaseElement getInitializationSource(TableElement e)
+    {
+        BaseElement source = null;
+        if (e != null)
+            source = e;
+        else if (getTable() != null)
+            source = getTable();
+        else if (getContext() != null)
+            source = getContext();
+        else
+            source = Context.getDefaultContext();
+
+        return source;
+    }
+    
+    /**
+     * Makes sure the specified object has the same parent table as this object
+     * @param e
+     * @throws InvalidParentException if the specified element belongs to a different Table
+     */
+    void vetParent(TableElement... elems)
+    {
+        if (elems != null) {
+            for (TableElement e : elems) {
+                if (e == this)
+                    continue;               
+                else if (e.getTable() == null)
+                    e.setTable(this.getTable());              
+                else if (e.getTable() != getTable())
+                    throw new InvalidParentException(e.getElementType(), this.getElementType());
+            }
+        }       
+    }
+
+    protected int getIndex()
     {
         return m_index ;
     }
@@ -107,5 +171,13 @@ abstract public class TableElement extends BaseElement
         m_table = t;
     }
     
-    abstract protected void reset();
+    protected boolean isEnforceDataType()
+    {
+        return m_enforceDataType;
+    }
+
+    protected void setEnforceDataType(boolean enforceDataType)
+    {
+        m_enforceDataType = enforceDataType;
+    }
 }

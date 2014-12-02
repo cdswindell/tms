@@ -16,4 +16,9 @@ public final class UnimplementedException extends TableException
     {
         super(te.getElementType(), tp, TableErrorClass.Unimplemented, msg);
     }
+
+    public UnimplementedException(BaseElement te, String msg)
+    {
+        super(te.getElementType(), msg, TableErrorClass.Unimplemented);
+    }
 }

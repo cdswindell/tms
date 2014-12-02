@@ -92,11 +92,12 @@ public class TableTest
         assert (t != null);
 
         Set<TableProperty> props = t.getInitializableProperties();
-        for (TableProperty p : props) {
-            
+        for (TableProperty p : props) {         
             Object value = t.getProperty(p);
             if (value == null)
                 fail("Initializable Parameter not present: " + p);
+            System.out.println("Table initializable property: " + p);
+
         }
     }
     
@@ -109,6 +110,8 @@ public class TableTest
         Set<TableProperty> props = t.getProperties();
         for (TableProperty p : props) { 
             if (!p.isBooleanValue()) continue;
+            
+            System.out.println("Table boolean property: " + p);
             
             // will fail if property getter not implemented
             t.getPropertyBoolean(p);
@@ -125,6 +128,8 @@ public class TableTest
         for (TableProperty p : props) { 
             if (!p.isIntValue()) continue;
             
+            System.out.println("Table int property: " + p);
+            
             // will fail if property getter not implemented
             t.getPropertyInt(p);
         }
@@ -137,11 +142,11 @@ public class TableTest
         assert (t != null);
 
         Set<TableProperty> props = t.getProperties();
-        for (TableProperty p : props) {
-            
+        for (TableProperty p : props) {          
             Object value = t.getProperty(p);
             if (!p.isOptional() && value == null)
                 fail("Parameter not retrieved: " + p);
+            System.out.println("Table property: " + p);
         }
     }
 }

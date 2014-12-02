@@ -11,6 +11,8 @@ import org.tms.api.exceptions.UnimplementedException;
 
 abstract public class BaseElement 
 {
+    abstract protected boolean isEmpty();
+    
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
     private ElementType m_tableElementType;
@@ -78,11 +80,6 @@ abstract public class BaseElement
         getElemProperties(true).put(key,  value);
     }
 
-    protected boolean clearProperty(String key)
-    {
-        return clearProperty(key, true);
-    }
-    
     protected boolean clearProperty(TableProperty key)
     {
         if (!key.isImplementedBy(this))
@@ -91,6 +88,11 @@ abstract public class BaseElement
             throw new ReadOnlyException(this, key);
         
         return clearProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+    }
+    
+    protected boolean clearProperty(String key)
+    {
+        return clearProperty(key, true);
     }
     
     private boolean clearProperty(String key, boolean vetKey) 
@@ -107,21 +109,21 @@ abstract public class BaseElement
         return false;
     }
     
-    protected boolean hasProperty(String key)
-    {
-        return hasProperty(key, true);
-    }
-    
     protected boolean hasProperty(TableProperty key)
     { 
         if (key.isImplementedBy(this)) {
-            if (key.isReadOnly())
+            if (key.isNonOptional())
                 return true;
         
             return hasProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
         }
         
         return false;
+    }
+    
+    protected boolean hasProperty(String key)
+    {
+        return hasProperty(key, true);
     }
     
     private boolean hasProperty(String key, boolean vetKey) 
@@ -146,46 +148,22 @@ abstract public class BaseElement
         // Some properties are built into the base element object
         switch (key)
         {
-            case SupportsNull:
+            case isSupportsNull:
                 return isSupportsNull();
                 
-            case ReadOnly:
+            case isReadOnly:
                 return isReadOnly();
                 
+            case isEmpty:
+                return isEmpty();
+                
             default:
-                return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+                if (key.isOptional())
+                    return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+                else
+                    throw new UnimplementedException(this, key);
         }      
     }
-    
-    /**
-     * initialize properties defined in BaseElement
-     * @param tp
-     * @param value
-     * @return
-     */
-    protected boolean initializeProperty(TableProperty tp, Object value)
-    {
-        boolean initializedProperty = true; // assume success
-        switch (tp) {
-            case ReadOnly:
-                if (!isValidPropertyValueBoolean(value))
-                    value = Context.sf_READ_ONLY_DEFAULT;
-                setReadOnly((boolean)value);
-                break;
-                
-            case SupportsNull:
-                if (!isValidPropertyValueBoolean(value))
-                    value = Context.sf_SUPPORTS_NULL_DEFAULT;
-                setSupportsNull((boolean)value);
-                break;
-                
-            default:
-                initializedProperty = false;   
-                break;
-        }
-        
-        return initializedProperty;
-    } 
     
     protected Object getProperty(String key)
     {
@@ -204,14 +182,23 @@ abstract public class BaseElement
             return null;
     }
 
+    private String vetKey(String key)
+    {
+        if (key == null || (key = key.trim()).length() == 0)
+            throw new InvalidPropertyException(this);
+        else if (key.startsWith(sf_RESERVED_PROPERTY_PREFIX))
+            throw new InvalidPropertyException(this, key);
+        
+        return key;
+    }
+    
     protected boolean getPropertyBoolean(TableProperty key)
     {
+        if (key.isBooleanValue())
+            return (boolean) getProperty(key);
+        
         switch(key)
         {
-            case ReadOnly:
-            case SupportsNull:
-                return (boolean)getProperty(key);
-                
             default:
                 break;
         }
@@ -236,25 +223,35 @@ abstract public class BaseElement
             throw new InvalidPropertyException(this, key, "not int value");
     }
     
-    public String getLabel()
+    /**
+     * initialize properties defined in BaseElement
+     * @param tp
+     * @param value
+     * @return
+     */
+    protected boolean initializeProperty(TableProperty tp, Object value)
     {
-        return (String)getProperty(TableProperty.Label);
-    }
-
-    public void setLabel(String label)
-    {
-        setProperty(TableProperty.Label, (label != null ? label.trim() : null));
-    }
-
-    public String getDescription()
-    {
-        return (String)getProperty(TableProperty.Description);
-    }
-
-    public void setDescription(String description)
-    {
-        setProperty(TableProperty.Description, (description != null ? description.trim() : null));
-    }
+        boolean initializedProperty = true; // assume success
+        switch (tp) {
+            case isReadOnly:
+                if (!isValidPropertyValueBoolean(value))
+                    value = Context.sf_READ_ONLY_DEFAULT;
+                setReadOnly((boolean)value);
+                break;
+                
+            case isSupportsNull:
+                if (!isValidPropertyValueBoolean(value))
+                    value = Context.sf_SUPPORTS_NULL_DEFAULT;
+                setSupportsNull((boolean)value);
+                break;
+                
+            default:
+                initializedProperty = false;   
+                break;
+        }
+        
+        return initializedProperty;
+    } 
     
     Set<TableProperty> getProperties()
     {
@@ -291,6 +288,26 @@ abstract public class BaseElement
         return value != null && value instanceof Boolean;    
     }
     
+    public String getLabel()
+    {
+        return (String)getProperty(TableProperty.Label);
+    }
+
+    public void setLabel(String label)
+    {
+        setProperty(TableProperty.Label, (label != null ? label.trim() : null));
+    }
+
+    public String getDescription()
+    {
+        return (String)getProperty(TableProperty.Description);
+    }
+
+    public void setDescription(String description)
+    {
+        setProperty(TableProperty.Description, (description != null ? description.trim() : null));
+    }
+    
     protected boolean isSupportsNull()
     {
         return m_supportsNull;
@@ -309,15 +326,5 @@ abstract public class BaseElement
     protected void setReadOnly(boolean readOnly)
     {
         m_readOnly = readOnly;
-    }
-
-    private String vetKey(String key)
-    {
-        if (key == null || (key = key.trim()).length() == 0)
-            throw new InvalidPropertyException(this);
-        else if (key.startsWith(sf_RESERVED_PROPERTY_PREFIX))
-            throw new InvalidPropertyException(this, key);
-        
-        return key;
     }
 }
