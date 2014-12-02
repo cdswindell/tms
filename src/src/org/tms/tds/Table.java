@@ -99,6 +99,13 @@ public class Table extends TableElement
         m_context = c.register(this);
     }
     
+    void clearContext() 
+    {
+        if (getContext() != null)
+            getContext().unregister(this);
+        m_context = null;
+    }
+    
     @Override
     protected Context getContext()
     {

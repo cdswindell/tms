@@ -2,10 +2,12 @@ package org.tms.tds;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.util.WeakHashSet;
 
 public class Context extends BaseElement
 {
@@ -44,6 +46,7 @@ public class Context extends BaseElement
         return sf_DEFAULT_CONTEXT;
     }
 
+    private Set<Table> m_registeredTables;
     private boolean m_default;
     
     private boolean m_readOnly;
@@ -56,6 +59,7 @@ public class Context extends BaseElement
     {
         super(ElementType.Context);      
         m_default = isDefault;
+        m_registeredTables = new WeakHashSet<Table>();
         
         // initialize from default context, unless this the default
         initialize(otherContext);
@@ -242,9 +246,21 @@ public class Context extends BaseElement
             m_columnAllocIncr = columnAllocIncr;
     }
 
-    public Context register(Table table)
+    protected Context register(Table table)
     {
-        // TODO Auto-generated method stub
+        // register the table with this context
+        m_registeredTables.add(table);
         return this;
+    }
+    
+    protected void unregister(Table table)
+    {
+        if (table != null) 
+            m_registeredTables.remove(table);
+    }
+    
+    protected boolean isRegistered(Table t)
+    {
+        return m_registeredTables.contains(t);
     }
 }
