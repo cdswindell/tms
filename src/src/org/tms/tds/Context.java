@@ -49,8 +49,8 @@ public class Context extends BaseElement
     private Set<Table> m_registeredTables;
     private boolean m_default;
     
-    private boolean m_readOnly;
     private boolean m_supportsNull;
+    private boolean m_readOnly;
     
     private int m_rowAllocIncr;
     private int m_columnAllocIncr;
@@ -121,7 +121,7 @@ public class Context extends BaseElement
                     if (isValidPropertyValueBoolean(value))
                         setSupportsNull((boolean)value);
                     else 
-                        setReadOnly(sf_SUPPORTS_NULL_DEFAULT);
+                        setSupportsNull(sf_SUPPORTS_NULL_DEFAULT);
                     break;
                     
                 default:

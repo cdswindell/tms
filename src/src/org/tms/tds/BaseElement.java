@@ -1,7 +1,6 @@
 package org.tms.tds;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.tms.api.ElementType;
@@ -181,16 +180,29 @@ abstract public class BaseElement
         setProperty(TableProperty.Description, (description != null ? description.trim() : null));
     }
     
+    Set<TableProperty> getProperties()
+    {
+        return getElementType().getProperties();
+    }
+    
+    Set<TableProperty> getOptionalProperties()
+    {
+        return getElementType().getOptionalProperties();
+    }
+    
+    Set<TableProperty> getNonOptionalProperties()
+    {
+        return getElementType().getNonOptionalProperties();
+    }
+    
     Set<TableProperty> getInitializableProperties()
     {
-        Set<TableProperty> initializableProperties = new HashSet<TableProperty>();
-        
-        for (TableProperty tp : TableProperty.values()) {
-            if (tp.isImplementedBy(this) && tp.isInitializable())
-                initializableProperties.add(tp);
-        }
-        
-        return initializableProperties;
+        return getElementType().getInitializableProperties();
+    }
+    
+    Set<TableProperty> getReadOnlyProperties()
+    {
+        return getElementType().getReadOnlyProperties();
     }
     
     protected boolean isValidPropertyValueInt(Object value)

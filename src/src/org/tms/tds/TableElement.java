@@ -6,8 +6,8 @@ import org.tms.api.TableProperty;
 abstract public class TableElement extends BaseElement
 {
     private int m_index = -1;
-    private boolean m_readOnly;
     private Table m_table;
+    private boolean m_supportsNull;
 
     public TableElement(ElementType eType, Table parentTable)
     {
@@ -30,8 +30,8 @@ abstract public class TableElement extends BaseElement
             case Context:
                 return getContext();
                 
-            case ReadOnly:
-                return isReadOnly();
+            case SupportsNull:
+                return isSupportsNull();
                 
             default:
                 return super.getProperty(key);
@@ -71,14 +71,14 @@ abstract public class TableElement extends BaseElement
         m_table = t;
     }
     
-    protected boolean isReadOnly()
+    protected boolean isSupportsNull()
     {
-        return m_readOnly;
+        return m_supportsNull;
     }
 
-    protected void setReadOnly(boolean readOnly)
+    protected void setSupportsNull(boolean supportsNull)
     {
-        m_readOnly = readOnly;
+        m_supportsNull = supportsNull;
     }
 
     abstract protected void reset();

@@ -24,7 +24,6 @@ public class Table extends TableElement
     private int m_columnAllocIncr;
     
     private boolean m_readOnly;
-    private boolean m_supportsNull;
     
     public Table(int nRows, int nCols, Context c)
     {
@@ -33,6 +32,20 @@ public class Table extends TableElement
         setContext(c);        
         
         initialize(nRows, nCols);
+    }
+
+    public Table(int nRows, int nCols, Table t)
+    {
+        super(ElementType.Table, null);
+        setTable(this);
+        setContext(t != null ? t.getContext() : null);        
+        
+        initialize(nRows, nCols, t);
+    }
+
+    public Table(int nRows, int nCols)
+    {
+        this(nRows, nCols, Context.getDefaultContext());
     }
 
     @Override
@@ -55,12 +68,58 @@ public class Table extends TableElement
         clearProperty(TableProperty.Description);
     }
     
-    /**
-     * @param nRows
-     * @param nCols
-     */
     private void initialize(int nRows, int nCols)
     {
+        initialize(nRows, nCols, null);
+    }
+    
+    private void initialize(int nRows, int nCols, Table t)
+    {
+        BaseElement source = null;
+        if (t != null)
+            source = t;
+        else if (getContext() != null)
+            source = getContext();
+        else 
+            source = Context.getDefaultContext();
+        
+        for (TableProperty tp : this.getInitializableProperties()) {
+            Object value = source.getProperty(tp);
+            
+            switch (tp) {
+                case RowAllocIncr:
+                    if (isValidPropertyValueInt(value))
+                        setRowAllocIncr((int)value);
+                    else 
+                        setRowAllocIncr(Context.sf_ROW_ALLOC_INCR_DEFAULT);
+                    break;
+                    
+                case ColumnAllocIncr:
+                    if (isValidPropertyValueInt(value))
+                        setColumnAllocIncr((int)value);
+                    else 
+                        setColumnAllocIncr(Context.sf_COLUMN_ALLOC_INCR_DEFAULT);
+                    break;
+                    
+                case ReadOnly:
+                    if (isValidPropertyValueBoolean(value))
+                        setReadOnly((boolean)value);
+                    else 
+                        setReadOnly(Context.sf_READ_ONLY_DEFAULT);
+                    break;
+                    
+                case SupportsNull:
+                    if (isValidPropertyValueBoolean(value))
+                        setSupportsNull((boolean)value);
+                    else 
+                        setSupportsNull(Context.sf_SUPPORTS_NULL_DEFAULT);
+                    break;
+                    
+                default:
+                    throw new IllegalStateException("No initialization available for Table Property: " + tp);                       
+            }
+        }
+        
         m_numAllocRows = getNumAllocRows(nRows);
         m_numAllocCols = getNumAllocColumns(nCols);
         m_nextRowIdx = m_nextColIdx = 0;
@@ -86,17 +145,25 @@ public class Table extends TableElement
             case NumAllocRows:
                 return getNumAllocRows();
                 
+            case NumAllocColumns:
+                return getNumAllocColumns();
+                
+            case ReadOnly:
+                return isReadOnly();
+                
             default:
                 return super.getProperty(key);
         }
     }
     
-    private void setContext(Context c)
+    private Context setContext(Context c)
     {
         if (c == null)
             c = Context.getDefaultContext();
         
         m_context = c.register(this);
+        
+        return m_context;
     }
     
     void clearContext() 
@@ -118,7 +185,7 @@ public class Table extends TableElement
         return this;
     }
 
-    public boolean isDirty()
+    protected boolean isDirty()
     {
         return m_dirty;
     }
@@ -126,6 +193,16 @@ public class Table extends TableElement
     void setDirty(boolean dirty)
     {
         m_dirty = dirty;
+    }
+
+    protected boolean isReadOnly()
+    {
+        return m_readOnly;
+    }
+
+    protected void setReadOnly(boolean readOnly)
+    {
+        m_readOnly = readOnly;
     }
 
     synchronized protected int getRowAllocIncr()
@@ -199,4 +276,8 @@ public class Table extends TableElement
         return colAlloc;
     }
 
+    protected int getNumAllocColumns()
+    {
+        return m_numAllocCols;
+    }  
 }

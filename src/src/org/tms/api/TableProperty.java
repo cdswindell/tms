@@ -8,11 +8,11 @@ import org.tms.tds.BaseElement;
 public enum TableProperty
 {
     Index(true, false),
-    ReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    ReadOnly(false, true, ElementType.Context, ElementType.Table),
     SupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
-    Context(true, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
-    Table(true, true, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Rows(true, false, ElementType.Table, ElementType.Range),
     Columns(true, false, ElementType.Table, ElementType.Range),
     Row(true, false, ElementType.Cell),
@@ -26,6 +26,7 @@ public enum TableProperty
     Label,
     Description;
     
+    private boolean m_optional;
     private boolean m_readOnly;
     private boolean m_initializable;
     private Set<ElementType> m_implementedBy = new HashSet<ElementType>();
@@ -35,7 +36,8 @@ public enum TableProperty
      */
     private TableProperty()
     {
-        this(false /* isReadOnly */,
+        this(true  /* optional */,
+             false /* isReadOnly */,
              false /* Initializable */,
              ElementType.Table,
              ElementType.Row,
@@ -51,7 +53,8 @@ public enum TableProperty
      */
     private TableProperty(boolean readOnly, boolean initializable)
     {
-        this(readOnly,
+        this(false,
+             readOnly,
              initializable,
              ElementType.Table,
              ElementType.Row,
@@ -60,10 +63,32 @@ public enum TableProperty
              ElementType.Range);
     }
     
+    /**
+     * Constructor used by all required (non-optional) properties
+     * @param isReadOnly
+     * @param isInitializable
+     * @param implementedBy
+     */
     private TableProperty(boolean isReadOnly,
                           boolean isInitializable,
                           ElementType... implementedBy)
     {
+        this(false, isReadOnly, isInitializable, implementedBy);
+    }
+    
+    /**
+     * Full constructor
+     * @param isOptional
+     * @param isReadOnly
+     * @param isInitializable
+     * @param implementedBy
+     */
+    private TableProperty(boolean isOptional,
+                          boolean isReadOnly,
+                          boolean isInitializable,
+                          ElementType... implementedBy)
+    {
+        m_optional = isOptional;
         m_readOnly = isReadOnly;
         m_initializable = isInitializable;
         
@@ -77,6 +102,11 @@ public enum TableProperty
     public boolean isReadOnly()
     {
         return m_readOnly;
+    }
+    
+    public boolean isOptional()
+    {
+        return m_optional;
     }
     
     public boolean isInitializable()

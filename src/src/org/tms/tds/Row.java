@@ -4,9 +4,9 @@ import org.tms.api.ElementType;
 
 public class Row extends TableElement
 {
-    public Row(Table parentTable)
+    protected Row(Table parentTable)
     {
-        super(ElementType.Table, parentTable);
+        super(ElementType.Row, parentTable);
     }
 
     @Override
@@ -14,10 +14,4 @@ public class Row extends TableElement
     {
     }
 
-    @Override
-    protected Table getTable()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }
