@@ -403,9 +403,19 @@ public class Table extends TableElement
                 else
                     return -1;
                 
-            case ById:
-                break;
             case ByIndex:
+                if (md == null || !(md instanceof Integer))
+                    return -1;
+                
+                idx = ((int)md) - 1;               
+                if (idx < 0)
+                    return -1;
+                else if (isAdding || idx < getNumRows())
+                    return idx;
+                else 
+                    return -1;
+                
+            case ById:
                 break;
         }
         
