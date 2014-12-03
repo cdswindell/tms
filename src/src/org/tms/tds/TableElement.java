@@ -55,34 +55,6 @@ abstract class TableElement extends BaseElement
     }
     
     @Override
-    public int getPropertyInt(TableProperty key)
-    {
-        // Some properties are built into the base Table Element object
-        switch (key)
-        {
-            case Index:
-                return (int)getProperty(key);
-                                
-            default:
-                return super.getPropertyInt(key);
-        }
-    }
-    
-    @Override
-    public boolean getPropertyBoolean(TableProperty key)
-    {
-        // Some properties are built into the base Table Element object
-        switch (key)
-        {
-            case isEnforceDataType:
-                return (boolean)getProperty(key);
-                                
-            default:
-                return (boolean)super.getPropertyBoolean(key);
-        }
-    }
-    
-    @Override
     protected boolean initializeProperty(TableProperty tp, Object value)
     {
         if (super.initializeProperty(tp, value))
@@ -107,9 +79,9 @@ abstract class TableElement extends BaseElement
     protected BaseElement getInitializationSource(TableElement e)
     {
         BaseElement source = null;
-        if (e != null)
+        if (e != null && e != this)
             source = e;
-        else if (getTable() != null)
+        else if (getTable() != null && getTable() != this)
             source = getTable();
         else if (getContext() != null)
             source = getContext();

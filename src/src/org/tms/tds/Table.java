@@ -116,31 +116,17 @@ public class Table extends TableElement
             case ColumnAllocIncr:
                 return getColumnAllocIncr();
                 
-            case NumAllocRows:
+            case numRowsAlloc:
                 return getNumAllocRows();
                 
-            case NumAllocColumns:
+            case numColumnsAlloc:
                 return getNumAllocColumns();
+                
+            case numRanges:
+                return m_ranges == null ? 0 : m_ranges.size();
                 
             default:
                 return super.getProperty(key);
-        }
-    }
-    
-    @Override
-    public int getPropertyInt(TableProperty key)
-    {
-        // Some properties are built into the base Table Element object
-        switch (key)
-        {
-            case RowAllocIncr:
-            case ColumnAllocIncr:
-            case NumAllocRows:
-            case NumAllocColumns:
-                return (int)getProperty(key);
-                
-            default:
-                return super.getPropertyInt(key);
         }
     }
     

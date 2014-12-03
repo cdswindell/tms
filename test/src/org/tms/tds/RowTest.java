@@ -1,8 +1,6 @@
 package org.tms.tds;
 
-import static org.junit.Assert.*;
-
-import java.util.Set;
+import java.util.List;
 
 import org.junit.Test;
 import org.tms.api.TableProperty;
@@ -13,54 +11,59 @@ public class RowTest
     @Test
     public void getPropertiesTest()
     {
-        Table t = new Table(12, 10);        
-        assert (t != null);
-        
-        Row r = new Row(t);
+        Row r = new Row(null);
 
-        Set<TableProperty> props = r.getProperties();
+        List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) {
-            System.out.println("Row property: " + p);
-            Object value = t.getProperty(p);
-            if (!p.isOptional() && value == null)
-                fail("Parameter not retrieved: " + p);
+            System.out.print("Row property: " + p);
+            Object value = r.getProperty(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
     }
     
     @Test
     public void getBooleanPropertiesTest()
     {
-        Table t = new Table(12, 10);        
-        assert (t != null);
-        
-        Row r = new Row(t);
+        Row r = new Row(null);
 
-        Set<TableProperty> props = r.getProperties();
+        List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) { 
             if (!p.isBooleanValue()) continue;
             
             // will fail if property getter not implemented
-            System.out.println("Row boolean property: " + p);
-            r.getPropertyBoolean(p);
+            System.out.print("Row boolean property: " + p);
+            Object value = r.getPropertyBoolean(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
     }
 
     @Test
     public void getIntPropertiesTest()
     {
-        Table t = new Table(12, 10);        
-        assert (t != null);
-        
-        Row r = new Row(t);
+        Row r = new Row(null);
 
-        Set<TableProperty> props = r.getProperties();
+        List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) { 
             if (!p.isIntValue()) continue;
             
             // will fail if property getter not implemented
-            System.out.println("Row int property: " + p);
-            r.getPropertyInt(p);
+            System.out.print("Row int property: " + p);
+            Object value = r.getPropertyInt(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
     }
 
+    @Test
+    public void getInitializablePropertiesTest()
+    {
+        Row r = new Row(null);
+
+        List<TableProperty> props = r.getInitializableProperties();
+        for (TableProperty p : props) { 
+            // will fail if property getter not implemented
+            System.out.print("Row initializable property: " + p);
+            Object value = r.getProperty(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
+        }
+    }
 }

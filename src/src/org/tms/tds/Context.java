@@ -148,33 +148,6 @@ public class Context extends BaseElement
         }        
     }
 
-    @Override
-    public int getPropertyInt(TableProperty key)
-    {
-        switch(key)
-        {
-            case RowAllocIncr:
-            case ColumnAllocIncr:
-                return (int)getProperty(key);
-                
-            default:
-                return super.getPropertyInt(key);
-        }        
-    }
-
-    @Override
-    public boolean getPropertyBoolean(TableProperty key)
-    {
-        switch(key)
-        {
-            case isEnforceDataType:
-                return (boolean)getProperty(key);
-                
-            default:
-                return super.getPropertyBoolean(key);
-        }        
-    }
-
     protected boolean isDefault()
     {
         return m_default;

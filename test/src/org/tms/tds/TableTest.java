@@ -1,18 +1,17 @@
 package org.tms.tds;
 
-import static org.junit.Assert.*;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-import java.util.Set;
+import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.exceptions.TableException;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.tds.Table;
 
 public class TableTest
 {
@@ -91,13 +90,11 @@ public class TableTest
         Table t = new Table(12, 10);        
         assert (t != null);
 
-        Set<TableProperty> props = t.getInitializableProperties();
+        List<TableProperty> props = t.getInitializableProperties();
         for (TableProperty p : props) {         
+            System.out.print("Table initializable property: " + p);
             Object value = t.getProperty(p);
-            if (value == null)
-                fail("Initializable Parameter not present: " + p);
-            System.out.println("Table initializable property: " + p);
-
+            System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
     }
     
@@ -107,14 +104,13 @@ public class TableTest
         Table t = new Table(12, 10);        
         assert (t != null);
         
-        Set<TableProperty> props = t.getProperties();
+        List<TableProperty> props = t.getProperties();
         for (TableProperty p : props) { 
             if (!p.isBooleanValue()) continue;
             
-            System.out.println("Table boolean property: " + p);
-            
-            // will fail if property getter not implemented
-            t.getPropertyBoolean(p);
+            System.out.print("Table boolean property: " + p);
+            Object value = t.getPropertyBoolean(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
     }
 
@@ -124,29 +120,27 @@ public class TableTest
         Table t = new Table(12, 10);        
         assert (t != null);
         
-        Set<TableProperty> props = t.getProperties();
+        List<TableProperty> props = t.getProperties();
         for (TableProperty p : props) { 
             if (!p.isIntValue()) continue;
             
-            System.out.println("Table int property: " + p);
-            
-            // will fail if property getter not implemented
-            t.getPropertyInt(p);
+            System.out.print("Table int property: " + p);
+            Object value = t.getPropertyInt(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
     }
     
-    @Ignore
+    @Test
     public void getPropertiesTest()
     {
         Table t = new Table(12, 10);        
         assert (t != null);
 
-        Set<TableProperty> props = t.getProperties();
+        List<TableProperty> props = t.getProperties();
         for (TableProperty p : props) {          
+            System.out.print("Table property: " + p);
             Object value = t.getProperty(p);
-            if (!p.isOptional() && value == null)
-                fail("Parameter not retrieved: " + p);
-            System.out.println("Table property: " + p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
     }
 }

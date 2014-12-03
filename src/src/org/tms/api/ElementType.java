@@ -1,6 +1,9 @@
 package org.tms.api;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public enum ElementType
@@ -14,7 +17,7 @@ public enum ElementType
     Derivation;
     
     
-    public Set<TableProperty> getProperties()
+    public List<TableProperty> getProperties()
     {
         Set<TableProperty> properties = new HashSet<TableProperty>();
         
@@ -23,10 +26,10 @@ public enum ElementType
                 properties.add(tp);
         }
         
-        return properties;
+        return toSortedList(properties);
     }
 
-    public Set<TableProperty> getOptionalProperties()
+    public List<TableProperty> getOptionalProperties()
     {
         Set<TableProperty> properties = new HashSet<TableProperty>();
         
@@ -35,10 +38,10 @@ public enum ElementType
                 properties.add(tp);
         }
         
-        return properties;
+        return toSortedList(properties);
     }
     
-    public Set<TableProperty> getNonOptionalProperties()
+    public List<TableProperty> getNonOptionalProperties()
     {
         Set<TableProperty> properties = new HashSet<TableProperty>();
         
@@ -47,22 +50,22 @@ public enum ElementType
                 properties.add(tp);
         }
         
-        return properties;
+        return toSortedList(properties);
     }
     
-    public Set<TableProperty> getInitializableProperties()
+    public List<TableProperty> getInitializableProperties()
     {
-        Set<TableProperty> initializableProperties = new HashSet<TableProperty>();
+        Set<TableProperty> properties = new HashSet<TableProperty>();
         
         for (TableProperty tp : TableProperty.values()) {
             if (tp.isImplementedBy(this) && tp.isInitializable())
-                initializableProperties.add(tp);
+                properties.add(tp);
         }
         
-        return initializableProperties;
+        return toSortedList(properties);
     }
     
-    public Set<TableProperty> getReadOnlyProperties()
+    public List<TableProperty> getReadOnlyProperties()
     {
         Set<TableProperty> properties = new HashSet<TableProperty>();
         
@@ -71,6 +74,13 @@ public enum ElementType
                 properties.add(tp);
         }
         
-        return properties;
+        return toSortedList(properties);
+    }
+
+    private List<TableProperty> toSortedList(Set<TableProperty> props)
+    {
+        List<TableProperty> list = new ArrayList<TableProperty>(props);
+        Collections.sort(list);
+        return list;
     }
 }

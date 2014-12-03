@@ -16,6 +16,19 @@ abstract class TableElementSlice extends TableElement
     }
 
     @Override
+    protected Object getProperty(TableProperty key)
+    {
+        switch(key)
+        {
+            case numRanges:
+                return getRanges().size();
+                
+            default:
+                return super.getProperty(key);
+        }
+    }
+    
+    @Override
     protected void initialize(TableElement e)
     {
         super.initialize(e);
@@ -34,7 +47,7 @@ abstract class TableElementSlice extends TableElement
         }
         
         // initialize other member fields
-        m_ranges = new LinkedHashSet<Range>();
+        m_ranges = null;
     }
     
     protected boolean add(Range r)
@@ -47,7 +60,7 @@ abstract class TableElementSlice extends TableElement
             if (!r.contains(this))
                 return r.add(this);
             
-            return m_ranges.add(r);
+            return getRanges().add(r);
         }
         
         return false;
@@ -63,9 +76,17 @@ abstract class TableElementSlice extends TableElement
             if (r.contains(this))
                 return r.remove(this);
             
-            return m_ranges.remove(r);
+            return getRanges().remove(r);
         }
         
         return false;
+    }
+    
+    private Set<Range> getRanges()
+    {
+        if (m_ranges == null)
+            m_ranges = new LinkedHashSet<Range>();
+        
+        return m_ranges;
     }
 }

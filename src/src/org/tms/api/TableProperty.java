@@ -3,9 +3,11 @@ package org.tms.api;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.tms.api.exceptions.TableErrorClass;
+import org.tms.api.exceptions.TableException;
 import org.tms.tds.BaseElement;
 
-public enum TableProperty
+public enum TableProperty implements Comparable<TableProperty>
 {
     // Base Element Properties
     Label,
@@ -24,13 +26,20 @@ public enum TableProperty
     RowAllocIncr(false, true, ElementType.Context, ElementType.Table),
     ColumnAllocIncr(false, true, ElementType.Context, ElementType.Table),
     
-    // Table Properties   
+    // Table Properties (some shared with Ranges)
+    numRanges(true, false, ElementType.Table, ElementType.Row, ElementType.Column),
+    numRows(true, false, ElementType.Table, ElementType.Range),
+    numColumns(true, false, ElementType.Table, ElementType.Range),
+    numRowsAlloc(true, false, ElementType.Table),
+    numColumnsAlloc(true, false, ElementType.Table),
+    
     Rows(true, false, ElementType.Table, ElementType.Range),
-    Columns(true, false, ElementType.Table, ElementType.Range),
+    Columns(true, false, ElementType.Table, ElementType.Range),   
+    
+    // Cell properties
     Row(true, false, ElementType.Cell),
     Column(true, false, ElementType.Cell),
-    NumAllocRows(true, false, ElementType.Table),
-    NumAllocColumns(true, false, ElementType.Table),
+
     ;
     
     private boolean m_optional;
@@ -102,7 +111,8 @@ public enum TableProperty
         if (implementedBy != null)
         {
             for (ElementType t : implementedBy)
-                m_implementedBy.add(t);
+                if (!m_implementedBy.add(t))
+                    throw new TableException(String.format("Table Property: %s Duplicate BaseElementType: %s", this, t), TableErrorClass.Invalid);
         }
     }
     
@@ -120,11 +130,12 @@ public enum TableProperty
     
     public boolean isIntValue()
     {
+        if (this.name().startsWith("num"))
+            return true;
+        
         switch(this)
         {
             case Index:
-            case NumAllocRows:
-            case NumAllocColumns:
             case RowAllocIncr:
             case ColumnAllocIncr:
                 return true;

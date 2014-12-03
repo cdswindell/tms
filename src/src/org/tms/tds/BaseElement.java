@@ -1,7 +1,7 @@
 package org.tms.tds;
 
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
@@ -194,31 +194,26 @@ abstract public class BaseElement
     
     protected boolean getPropertyBoolean(TableProperty key)
     {
-        if (key.isBooleanValue())
-            return (boolean) getProperty(key);
-        
-        switch(key)
-        {
-            default:
-                break;
+        if (key.isBooleanValue()) {
+            Object value = getProperty(key);
+            if (value != null && value instanceof Boolean)
+                return (boolean)value;
+            else
+                throw new UnimplementedException(this, key, "boolean");
         }
-        
-        if (key.isBooleanValue())
-            throw new UnimplementedException(this, key, "boolean");
         else
             throw new InvalidPropertyException(this, key, "not boolean value");
     }
     
     protected int getPropertyInt(TableProperty key)
     {
-        switch(key)
-        {
-            default:
-                break;
+        if (key.isIntValue()) {
+            Object value = getProperty(key);
+            if (value != null && value instanceof Integer)
+                return (int)value;
+            else
+                throw new UnimplementedException(this, key, "int");
         }
-        
-        if (key.isIntValue())
-            throw new UnimplementedException(this, key, "int");
         else
             throw new InvalidPropertyException(this, key, "not int value");
     }
@@ -253,27 +248,27 @@ abstract public class BaseElement
         return initializedProperty;
     } 
     
-    Set<TableProperty> getProperties()
+    List<TableProperty> getProperties()
     {
         return getElementType().getProperties();
     }
     
-    Set<TableProperty> getOptionalProperties()
+    List<TableProperty> getOptionalProperties()
     {
         return getElementType().getOptionalProperties();
     }
     
-    Set<TableProperty> getNonOptionalProperties()
+    List<TableProperty> getNonOptionalProperties()
     {
         return getElementType().getNonOptionalProperties();
     }
     
-    Set<TableProperty> getInitializableProperties()
+    List<TableProperty> getInitializableProperties()
     {
         return getElementType().getInitializableProperties();
     }
     
-    Set<TableProperty> getReadOnlyProperties()
+    List<TableProperty> getReadOnlyProperties()
     {
         return getElementType().getReadOnlyProperties();
     }
