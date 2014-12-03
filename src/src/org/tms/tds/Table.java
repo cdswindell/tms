@@ -18,6 +18,9 @@ public class Table extends TableElement
     private Row [] m_rows;
     private Column [] m_cols;
     
+    private Row m_curRow;
+    private Column m_curCol;
+    
     private Set<Range> m_ranges;
     
     private Context m_context;
@@ -25,8 +28,8 @@ public class Table extends TableElement
     private int m_numAllocRows;
     private int m_numAllocCols;
     
-    private int m_nextRowIdx;
-    private int m_nextColIdx;
+    private int m_nRows;
+    private int m_nCols;
     
     //Initialized from context or source table
     private int m_rowAllocIncr;
@@ -61,7 +64,10 @@ public class Table extends TableElement
         
         m_numAllocRows = getNumAllocRows(nRows);
         m_numAllocCols = getNumAllocColumns(nCols);
-        m_nextRowIdx = m_nextColIdx = 0;
+        m_nRows = m_nCols = 0;
+        
+        m_curRow = null;
+        m_curCol = null;
         
         // allocate base memory for rows and columns
         m_rows = new Row[m_numAllocRows];
@@ -133,7 +139,7 @@ public class Table extends TableElement
                 return getRanges(); 
                 
             case numRows:
-                return null; // TODO: implement
+                return getNumRows(); 
                 
             case Rows:
                 return null; // TODO: implement
@@ -305,6 +311,106 @@ public class Table extends TableElement
             r = new Row(this);
         
         return true;
+    }
+    
+    protected int getNumRows()
+    {
+        return m_nRows;
+    }
+    
+    protected int getNumColumns()
+    {
+        return m_nCols;
+    }
+    
+    protected Row getCurrentRow()
+    {
+        return m_curRow;
+    }
+    
+    protected int getRowIndex(Access mode)
+    {
+        return getRowIndex(mode, false, null);
+    }
+    
+    protected int getRowIndex(Access mode, boolean isAdding)
+    {
+        return getRowIndex(mode, isAdding, null);
+    }
+    
+    protected int getRowIndex(Access mode, boolean isAdding, Object md)
+    {
+        // if we are doing a retrieval (not adding), and there are no rows, we're done
+        if (!isAdding && getNumRows() == 0)
+            return -1;
+        
+        int idx = -1;
+        switch (mode)
+        {
+            case First:
+                return 0;
+                
+            case Last:
+                if (isAdding)
+                    return getNumRows() == 0 ? 0 : getNumRows();
+                else
+                    return getNumRows() == 0 ? -1 : getNumRows() - 1;
+                
+            case Previous:
+                // special case for adding to an empty table
+                if (isAdding && getNumRows() == 0)
+                    return 0;
+                
+                // if there is no current row, this can't be done
+                if (getCurrentRow() == null)
+                    return -1;
+                
+                idx = getCurrentRow().getIndex();
+
+                // If adding a row, return the current row's index
+                if (isAdding)
+                  return idx;
+                
+                // if at the first row, there can be no previous
+                else if (idx == 0)
+                    return -1;
+                else 
+                    return (idx - 1);
+                
+            case Current:
+                // special case for adding to an empty table
+                if (isAdding && getNumRows() == 0)
+                    return 0;
+                
+                // if there is no current row, this can't be done
+                if (getCurrentRow() == null)
+                    return -1;
+                
+                return getCurrentRow().getIndex();
+                
+            case Next:
+                // special case for adding to an empty table
+                if (isAdding && getNumRows() == 0)
+                    return 0;
+                
+                // if there is no current row, this can't be done
+                if (getCurrentRow() == null)
+                    return -1;
+                
+                idx = getCurrentRow().getIndex();
+                if (isAdding || idx < getNumRows() - 1)
+                    return idx + 1;
+                else
+                    return -1;
+                
+            case ById:
+                break;
+            case ByIndex:
+                break;
+        }
+        
+        // if we get here, return the default, which indicates an error
+        return -1;
     }
     
     /**

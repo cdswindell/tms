@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import org.junit.Test;
+import org.tms.api.Access;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.TableErrorClass;
@@ -142,5 +143,26 @@ public class TableTest
             Object value = t.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
+    }
+    
+    @Test
+    public void basicRowAccessTest()
+    {
+        Table t = new Table(12, 10);        
+        assert (t != null);
+
+        // test the various access modes in "get" (not add) more
+        assertThat(t.getRowIndex(Access.First), is(-1));
+        assertThat(t.getRowIndex(Access.Last), is(-1));
+        assertThat(t.getRowIndex(Access.Previous), is(-1));
+        assertThat(t.getRowIndex(Access.Current), is(-1));
+        assertThat(t.getRowIndex(Access.Next), is(-1));
+        
+        // now test in "add" mode
+        assertThat(t.getRowIndex(Access.First, true), is(0));
+        assertThat(t.getRowIndex(Access.Last, true), is(0));
+        assertThat(t.getRowIndex(Access.Previous, true), is(0));
+        assertThat(t.getRowIndex(Access.Current, true), is(0));
+        assertThat(t.getRowIndex(Access.Next, true), is(0));
     }
 }
