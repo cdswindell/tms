@@ -34,7 +34,8 @@ public enum TableProperty implements Comparable<TableProperty>
     numColumnsAlloc(true, false, ElementType.Table),
     
     Rows(true, false, ElementType.Table, ElementType.Range),
-    Columns(true, false, ElementType.Table, ElementType.Range),   
+    Columns(true, false, ElementType.Table, ElementType.Range), 
+    Ranges(true, false, ElementType.Table, ElementType.Row, ElementType.Column),
     
     // Cell properties
     Row(true, false, ElementType.Cell),

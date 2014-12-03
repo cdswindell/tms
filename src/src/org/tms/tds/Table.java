@@ -1,6 +1,8 @@
 package org.tms.tds;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.tms.api.Access;
@@ -127,6 +129,21 @@ public class Table extends TableElement
             case numRanges:
                 return getRangesField(FieldAccess.ReturnEmptyIfNull).size();
                 
+            case Ranges:
+                return getRanges(); 
+                
+            case numRows:
+                return null; // TODO: implement
+                
+            case Rows:
+                return null; // TODO: implement
+                
+            case numColumns:
+                return null; // TODO: implement
+                
+            case Columns:
+                return null; // TODO: implement
+                
             default:
                 return super.getProperty(key);
         }
@@ -171,13 +188,21 @@ public class Table extends TableElement
     {
         FieldAccess fa = FieldAccess.checkAccess(fas);
         if (m_ranges == null) {
-            if (fa == FieldAccess.CreateIfNull)
-                m_ranges = new WeakHashSet<Range>();
-            else
+            if (fa == FieldAccess.ReturnEmptyIfNull)
                 return Collections.emptySet();
+            else
+                m_ranges = new WeakHashSet<Range>();
         }
         
-        return m_ranges;
+        if (fa == FieldAccess.Clone)
+            return ((WeakHashSet<Range>)m_ranges).clone();
+        else
+            return m_ranges;
+    }
+    
+    protected List<Range>getRanges()
+    {
+        return new ArrayList<Range>(getRangesField(FieldAccess.Clone));
     }
     
     protected boolean add(Range r)

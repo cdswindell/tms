@@ -1,6 +1,8 @@
 package org.tms.tds;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.tms.api.ElementType;
@@ -40,13 +42,13 @@ public class Range extends TableElement
                 return getRowsField(FieldAccess.ReturnEmptyIfNull).size();
                 
             case numColumns:
-                return getColumnField(FieldAccess.ReturnEmptyIfNull).size();
+                return getColumnsField(FieldAccess.ReturnEmptyIfNull).size();
                 
             case Rows:
-                return null; // TODO: implement
+                return getRows(); 
                 
             case Columns:
-                return null; // TODO: implement
+                return getColumns(); 
                 
             default:
                 return super.getProperty(key);
@@ -78,35 +80,51 @@ public class Range extends TableElement
     {
         FieldAccess fa = FieldAccess.checkAccess(fas);
         if (m_rows == null) {
-            if (fa == FieldAccess.CreateIfNull)
-                m_rows = new WeakHashSet<Row>();
-            else
+            if (fa == FieldAccess.ReturnEmptyIfNull)
                 return Collections.emptySet();
+            else
+                m_rows = new WeakHashSet<Row>();
         }
         
-        return m_rows;
+        if (fa == FieldAccess.Clone)
+            return ((WeakHashSet<Row>)m_rows).clone();
+        else
+            return m_rows;
     }
     
-    private Set<Column> getColumnField(FieldAccess... fas)
+    private Set<Column> getColumnsField(FieldAccess... fas)
     {
         FieldAccess fa = FieldAccess.checkAccess(fas);
         if (m_cols == null) {
-            if (fa == FieldAccess.CreateIfNull)
-                m_cols = new WeakHashSet<Column>();
-            else
+            if (fa == FieldAccess.ReturnEmptyIfNull)
                 return Collections.emptySet();
+            else
+                m_cols = new WeakHashSet<Column>();
         }
-        
-        return m_cols;
+                
+        if (fa == FieldAccess.Clone)
+            return ((WeakHashSet<Column>)m_cols).clone();
+        else
+            return m_cols;
     }
     
+    protected List<Row> getRows()
+    {
+        return new ArrayList<Row>(getRowsField(FieldAccess.Clone));
+    }
+
+    protected List<Column> getColumns()
+    {
+        return new ArrayList<Column>(getColumnsField(FieldAccess.Clone));
+    }
+
     protected boolean contains(TableElementSlice r)
     {
         if (r != null) {
             if (r instanceof Row)
                 return getRowsField(FieldAccess.ReturnEmptyIfNull).contains(r);
             else if (r instanceof Column)
-                return getColumnField(FieldAccess.ReturnEmptyIfNull).contains(r);
+                return getColumnsField(FieldAccess.ReturnEmptyIfNull).contains(r);
             else
                 throw new UnimplementedException(r, "contains");
         }
@@ -191,7 +209,7 @@ public class Range extends TableElement
             // iterate over all rows, adding them to the group
             for (Column c : cols) 
             {
-                if (getColumnField().add(c))
+                if (getColumnsField().add(c))
                     addedAny = true;
 
                 // add the group to the corresponding row
@@ -209,7 +227,7 @@ public class Range extends TableElement
             // iterate over all rows, removing them from the group
             for (Column c : cols) 
             {
-                if (getColumnField().remove(c))
+                if (getColumnsField().remove(c))
                     removedAny = true;
                 
                 // remove the group to the corresponding row

@@ -1,6 +1,8 @@
 package org.tms.tds;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.tms.api.ElementType;
@@ -23,6 +25,9 @@ abstract class TableElementSlice extends TableElement
         {
             case numRanges:
                 return getRangesField(FieldAccess.ReturnEmptyIfNull).size();
+                
+            case Ranges:
+                return getRanges();
                 
             default:
                 return super.getProperty(key);
@@ -83,6 +88,11 @@ abstract class TableElementSlice extends TableElement
         return false;
     }
     
+    protected List<Range> getRanges()
+    {
+        return new ArrayList<Range>(getRangesField(FieldAccess.Clone));
+    }
+    
     private Set<Range> getRangesField(FieldAccess... fas)
     {
         FieldAccess fa = FieldAccess.checkAccess(fas);
@@ -93,6 +103,9 @@ abstract class TableElementSlice extends TableElement
                 m_ranges = new WeakHashSet<Range>();
         }
         
-        return m_ranges;
+        if (fa == FieldAccess.Clone)
+            return ((WeakHashSet<Range>)m_ranges).clone();
+        else
+            return m_ranges;
     }
 }

@@ -4,7 +4,7 @@ public enum FieldAccess
 {
     CreateIfNull,
     ReturnEmptyIfNull,
-    ReturnCopy,
+    Clone,
     ;
     
     public static FieldAccess checkAccess(FieldAccess... values)

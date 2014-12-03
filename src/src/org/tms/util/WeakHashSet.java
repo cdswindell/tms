@@ -1,6 +1,7 @@
 package org.tms.util;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -13,6 +14,7 @@ import java.util.WeakHashMap;
 public class WeakHashSet<T> implements Set<T> 
 {
     private WeakHashMap<T, Object> m_backingMap;
+    
     public WeakHashSet()
     {
         m_backingMap = new WeakHashMap<T, Object>();
@@ -112,4 +114,17 @@ public class WeakHashSet<T> implements Set<T>
     {
         m_backingMap.clear();
     }  
+    
+    @Override
+    public Set<T> clone()
+    {
+        Set<T> copy = new HashSet<T>(size());
+        for (T e : m_backingMap.keySet()) 
+        {
+            if (e != null)
+                copy.add(e);
+        }
+        
+        return copy;
+    }
 }
