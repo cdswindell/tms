@@ -1,10 +1,13 @@
 package org.tms.tds;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.util.WeakHashSet;
 
 public class Table extends TableElement
 {
@@ -123,7 +126,7 @@ public class Table extends TableElement
                 return getNumAllocColumns();
                 
             case numRanges:
-                return m_ranges == null ? 0 : m_ranges.size();
+                return getRangesField(FieldAccess.ReturnEmptyIfNull).size();
                 
             default:
                 return super.getProperty(key);
@@ -164,6 +167,32 @@ public class Table extends TableElement
         return m_dirty;
     }
 
+    
+    private Set<Range> getRangesField(FieldAccess... fas)
+    {
+        FieldAccess fa = FieldAccess.checkAccess(fas);
+        if (m_ranges == null) {
+            if (fa == FieldAccess.CreateIfNull)
+                m_ranges = new WeakHashSet<Range>();
+            else
+                return Collections.emptySet();
+        }
+        
+        return m_ranges;
+    }
+    
+    protected boolean add(Range r)
+    {
+        vetParent(r);
+        return getRangesField().add(r);
+    }
+    
+    protected boolean remove(Range r)
+    {
+        vetParent(r);
+        return getRangesField().remove(r);
+    }
+    
     void setDirty(boolean dirty)
     {
         m_dirty = dirty;

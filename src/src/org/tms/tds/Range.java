@@ -1,20 +1,25 @@
 package org.tms.tds;
 
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.Set;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.util.WeakHashSet;
 
 public class Range extends TableElement
 {
     private Set<Row> m_rows;
     private Set<Column> m_cols;
     
-    public Range(Table parentTable)
+    protected Range(Table parentTable)
     {
         super(ElementType.Range, parentTable);
+        
+        // associate the group with the table
+        if (parentTable != null)
+            parentTable.add(this);
     }
 
     @Override
@@ -26,6 +31,28 @@ public class Range extends TableElement
         return !hasRows  && !hasCols;
     }
 
+    @Override
+    protected Object getProperty(TableProperty key)
+    {
+        switch(key)
+        {
+            case numRows:
+                return getRowsField(FieldAccess.ReturnEmptyIfNull).size();
+                
+            case numColumns:
+                return getColumnField(FieldAccess.ReturnEmptyIfNull).size();
+                
+            case Rows:
+                return null; // TODO: implement
+                
+            case Columns:
+                return null; // TODO: implement
+                
+            default:
+                return super.getProperty(key);
+        }
+    }
+    
     @Override
     protected void initialize(TableElement e)
     {
@@ -43,17 +70,43 @@ public class Range extends TableElement
             }
         }
         
-        m_rows = new LinkedHashSet<Row>();
-        m_cols = new LinkedHashSet<Column>();
+        m_rows = null;
+        m_cols = null;
+    }
+    
+    private Set<Row> getRowsField(FieldAccess... fas)
+    {
+        FieldAccess fa = FieldAccess.checkAccess(fas);
+        if (m_rows == null) {
+            if (fa == FieldAccess.CreateIfNull)
+                m_rows = new WeakHashSet<Row>();
+            else
+                return Collections.emptySet();
+        }
+        
+        return m_rows;
+    }
+    
+    private Set<Column> getColumnField(FieldAccess... fas)
+    {
+        FieldAccess fa = FieldAccess.checkAccess(fas);
+        if (m_cols == null) {
+            if (fa == FieldAccess.CreateIfNull)
+                m_cols = new WeakHashSet<Column>();
+            else
+                return Collections.emptySet();
+        }
+        
+        return m_cols;
     }
     
     protected boolean contains(TableElementSlice r)
     {
         if (r != null) {
             if (r instanceof Row)
-                return m_rows.contains(r);
+                return getRowsField(FieldAccess.ReturnEmptyIfNull).contains(r);
             else if (r instanceof Column)
-                return m_cols.contains(r);
+                return getColumnField(FieldAccess.ReturnEmptyIfNull).contains(r);
             else
                 throw new UnimplementedException(r, "contains");
         }
@@ -99,7 +152,7 @@ public class Range extends TableElement
             // iterate over all rows, adding them to the group
             for (Row r : rows) 
             {
-                if (m_rows.add(r))
+                if (getRowsField().add(r))
                     addedAny = true;
                 
                 // add the group to the corresponding row
@@ -117,7 +170,7 @@ public class Range extends TableElement
             // iterate over all rows, removing them from the group
             for (Row r : rows) 
             {
-                if (m_rows.remove(r))
+                if (getRowsField().remove(r))
                     removedAny = true;
                 
                 // remove the group to the corresponding row
@@ -138,7 +191,7 @@ public class Range extends TableElement
             // iterate over all rows, adding them to the group
             for (Column c : cols) 
             {
-                if (m_cols.add(c))
+                if (getColumnField().add(c))
                     addedAny = true;
 
                 // add the group to the corresponding row
@@ -156,7 +209,7 @@ public class Range extends TableElement
             // iterate over all rows, removing them from the group
             for (Column c : cols) 
             {
-                if (m_rows.remove(c))
+                if (getColumnField().remove(c))
                     removedAny = true;
                 
                 // remove the group to the corresponding row

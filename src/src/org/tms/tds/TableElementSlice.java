@@ -1,10 +1,11 @@
 package org.tms.tds;
 
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.Set;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.util.WeakHashSet;
 
 abstract class TableElementSlice extends TableElement
 {
@@ -21,7 +22,7 @@ abstract class TableElementSlice extends TableElement
         switch(key)
         {
             case numRanges:
-                return getRanges().size();
+                return getRangesField(FieldAccess.ReturnEmptyIfNull).size();
                 
             default:
                 return super.getProperty(key);
@@ -60,7 +61,7 @@ abstract class TableElementSlice extends TableElement
             if (!r.contains(this))
                 return r.add(this);
             
-            return getRanges().add(r);
+            return getRangesField().add(r);
         }
         
         return false;
@@ -76,16 +77,21 @@ abstract class TableElementSlice extends TableElement
             if (r.contains(this))
                 return r.remove(this);
             
-            return getRanges().remove(r);
+            return getRangesField().remove(r);
         }
         
         return false;
     }
     
-    private Set<Range> getRanges()
+    private Set<Range> getRangesField(FieldAccess... fas)
     {
-        if (m_ranges == null)
-            m_ranges = new LinkedHashSet<Range>();
+        FieldAccess fa = FieldAccess.checkAccess(fas);
+        if (m_ranges == null) {
+            if (fa == FieldAccess.ReturnEmptyIfNull)
+                return Collections.emptySet();
+            else
+                m_ranges = new WeakHashSet<Range>();
+        }
         
         return m_ranges;
     }
