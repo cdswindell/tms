@@ -288,7 +288,7 @@ public class Table extends TableElement
     @Override
     protected boolean isEmpty()
     {
-        if (m_cols == null || m_rows == null || m_cells == null)
+        if (m_cells == null)
             return true;
         else
             return false;
