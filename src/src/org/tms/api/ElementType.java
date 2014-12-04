@@ -80,7 +80,7 @@ public enum ElementType
     private List<TableProperty> toSortedList(Set<TableProperty> props)
     {
         List<TableProperty> list = new ArrayList<TableProperty>(props);
-        Collections.sort(list);
+        Collections.sort(list, TableProperty::compareByName);
         return list;
     }
 }

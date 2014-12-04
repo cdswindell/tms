@@ -8,8 +8,4 @@ public enum Access
     Previous,
     Current,
     ByIndex,
-    ById,
-    
-    
-    
 }

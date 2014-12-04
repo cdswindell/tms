@@ -1,5 +1,6 @@
 package org.tms.api.exceptions;
 
+import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.tds.BaseElement;
 
@@ -20,5 +21,10 @@ public final class UnimplementedException extends TableException
     public UnimplementedException(BaseElement te, String msg)
     {
         super(te.getElementType(), msg, TableErrorClass.Unimplemented);
+    }
+
+    public UnimplementedException(ElementType et, String msg)
+    {
+        super(et, msg, TableErrorClass.Unimplemented);
     }
 }

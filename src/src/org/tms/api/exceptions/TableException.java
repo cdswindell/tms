@@ -46,7 +46,7 @@ public class TableException extends RuntimeException
         super(message);
     }
 
-    public ElementType getTableElementType() { return m_elementType; }
+    public ElementType getTMSElementType() { return m_elementType; }
     public TableProperty    getTableProperty()    { return m_property; }
     public TableErrorClass  getTableErrorClass()  { return m_errorClass; }
     

@@ -12,8 +12,8 @@ public class Context extends BaseElement
 {
     private static Context sf_DEFAULT_CONTEXT;
     
-    static final int sf_ROW_ALLOC_INCR_DEFAULT = 10;
-    static final int sf_COLUMN_ALLOC_INCR_DEFAULT = 10;
+    static final int sf_ROW_CAPACITY_INCR_DEFAULT = 10;
+    static final int sf_COLUMN_CAPACITY_INCR_DEFAULT = 10;
     
     static final boolean sf_READ_ONLY_DEFAULT = false;
     static final boolean sf_SUPPORTS_NULL_DEFAULT = true;
@@ -50,8 +50,8 @@ public class Context extends BaseElement
     private boolean m_default;
     private boolean m_enforceDataType;
     
-    private int m_rowAllocIncr;
-    private int m_columnAllocIncr;
+    private int m_rowCapacityIncr;
+    private int m_columnCapacityIncr;
     
     private Context(boolean isDefault, Context otherContext)
     {
@@ -96,16 +96,16 @@ public class Context extends BaseElement
             // set the corresponding value
             switch (tp)
             {
-                case RowAllocIncr:
+                case RowCapacityIncr:
                     if (!isValidPropertyValueInt(value))
-                        value = sf_ROW_ALLOC_INCR_DEFAULT;
-                    setRowAllocIncr((int)value);
+                        value = sf_ROW_CAPACITY_INCR_DEFAULT;
+                    setRowCapacityIncr((int)value);
                     break;
                     
-                case ColumnAllocIncr:
+                case ColumnCapacityIncr:
                     if (!isValidPropertyValueInt(value))
-                        value = sf_COLUMN_ALLOC_INCR_DEFAULT;
-                    setColumnAllocIncr((int)value);
+                        value = sf_COLUMN_CAPACITY_INCR_DEFAULT;
+                    setColumnCapacityIncr((int)value);
                     break;
                     
                 case isEnforceDataType:
@@ -134,11 +134,11 @@ public class Context extends BaseElement
     {
         switch(key)
         {
-            case RowAllocIncr:
-                return getRowAllocIncr();
+            case RowCapacityIncr:
+                return getRowCapacityIncr();
                 
-            case ColumnAllocIncr:
-                return getColumnAllocIncr();
+            case ColumnCapacityIncr:
+                return getColumnCapacityIncr();
                 
             case isEnforceDataType:
                 return isEnforceDataType();
@@ -153,38 +153,38 @@ public class Context extends BaseElement
         return m_default;
     }
 
-    protected int getRowAllocIncr()
+    protected int getRowCapacityIncr()
     {
-        return m_rowAllocIncr;
+        return m_rowCapacityIncr;
     }
 
-    protected void setRowAllocIncr(int rowAllocIncr)
+    protected void setRowCapacityIncr(int rowCapacityIncr)
     {
-        if (rowAllocIncr <= 0) {
+        if (rowCapacityIncr <= 0) {
             if (this.isDefault()) 
-                m_rowAllocIncr = sf_ROW_ALLOC_INCR_DEFAULT;
+                m_rowCapacityIncr = sf_ROW_CAPACITY_INCR_DEFAULT;
             else
-                m_rowAllocIncr = Context.getDefaultContext().getRowAllocIncr();
+                m_rowCapacityIncr = Context.getDefaultContext().getRowCapacityIncr();
         }
         else
-            m_rowAllocIncr = rowAllocIncr;
+            m_rowCapacityIncr = rowCapacityIncr;
     }
 
-    protected int getColumnAllocIncr()
+    protected int getColumnCapacityIncr()
     {
-        return m_columnAllocIncr;
+        return m_columnCapacityIncr;
     }
 
-    protected void setColumnAllocIncr(int columnAllocIncr)
+    protected void setColumnCapacityIncr(int columnCapacityIncr)
     {
-        if (columnAllocIncr <= 0) {
+        if (columnCapacityIncr <= 0) {
             if (this.isDefault()) 
-                m_columnAllocIncr = sf_COLUMN_ALLOC_INCR_DEFAULT;
+                m_columnCapacityIncr = sf_COLUMN_CAPACITY_INCR_DEFAULT;
             else
-                m_columnAllocIncr = Context.getDefaultContext().getColumnAllocIncr();
+                m_columnCapacityIncr = Context.getDefaultContext().getColumnCapacityIncr();
         }
         else
-            m_columnAllocIncr = columnAllocIncr;
+            m_columnCapacityIncr = columnCapacityIncr;
     }
 
     protected boolean isEnforceDataType()

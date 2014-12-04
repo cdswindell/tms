@@ -21,17 +21,19 @@ public enum TableProperty implements Comparable<TableProperty>
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    isInUse(true, false, ElementType.Row, ElementType.Column, ElementType.Cell),
+    Offset(true, false, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     // Context/Table Properties  
-    RowAllocIncr(false, true, ElementType.Context, ElementType.Table),
-    ColumnAllocIncr(false, true, ElementType.Context, ElementType.Table),
+    RowCapacityIncr(false, true, ElementType.Context, ElementType.Table),
+    ColumnCapacityIncr(false, true, ElementType.Context, ElementType.Table),
     
     // Table Properties (some shared with Ranges)
     numRanges(true, false, ElementType.Table, ElementType.Row, ElementType.Column),
     numRows(true, false, ElementType.Table, ElementType.Range),
     numColumns(true, false, ElementType.Table, ElementType.Range),
-    numRowsAlloc(true, false, ElementType.Table),
-    numColumnsAlloc(true, false, ElementType.Table),
+    numRowsCapacity(true, false, ElementType.Table),
+    numColumnsCapacity(true, false, ElementType.Table),
     
     Rows(true, false, ElementType.Table, ElementType.Range),
     Columns(true, false, ElementType.Table, ElementType.Range), 
@@ -137,8 +139,9 @@ public enum TableProperty implements Comparable<TableProperty>
         switch(this)
         {
             case Index:
-            case RowAllocIncr:
-            case ColumnAllocIncr:
+            case Offset:
+            case RowCapacityIncr:
+            case ColumnCapacityIncr:
                 return true;
                 
             default:
@@ -180,5 +183,10 @@ public enum TableProperty implements Comparable<TableProperty>
             return false;
         else
             return m_implementedBy.contains(et);
+    }
+    
+    public static int compareByName(TableProperty a, TableProperty b)
+    {
+        return a.name().compareTo(b.name());
     }
 }

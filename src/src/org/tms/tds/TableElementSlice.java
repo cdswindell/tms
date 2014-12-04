@@ -1,17 +1,17 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
-import org.tms.util.WeakHashSet;
+import org.tms.util.JustInTimeSet;
 
 abstract class TableElementSlice extends TableElement
 {
-    private Set<Range> m_ranges;
+    private JustInTimeSet<Range> m_ranges;
+    private boolean m_inUse;
+    private int m_offset;
 
     public TableElementSlice(ElementType eType, TableElement e)
     {
@@ -24,10 +24,16 @@ abstract class TableElementSlice extends TableElement
         switch(key)
         {
             case numRanges:
-                return getRangesField(FieldAccess.ReturnEmptyIfNull).size();
+                return m_ranges.size();
                 
             case Ranges:
                 return getRanges();
+                
+            case isInUse:
+                return isInUse();
+                
+            case Offset:
+                return getOffset();
                 
             default:
                 return super.getProperty(key);
@@ -53,7 +59,29 @@ abstract class TableElementSlice extends TableElement
         }
         
         // initialize other member fields
-        m_ranges = null;
+        m_ranges = new JustInTimeSet<Range>();
+        m_inUse = false;
+        m_offset = -1;
+    }
+    
+    boolean isInUse()
+    {
+        return m_inUse;
+    }
+    
+    void setInUse(boolean inUse)
+    {
+        m_inUse = inUse;
+    }
+    
+    int getOffset()
+    {
+        return m_offset;
+    }
+    
+    void setOffset(int offset)
+    {
+        m_offset = offset;
     }
     
     protected boolean add(Range r)
@@ -66,7 +94,7 @@ abstract class TableElementSlice extends TableElement
             if (!r.contains(this))
                 return r.add(this);
             
-            return getRangesField().add(r);
+            return m_ranges.add(r);
         }
         
         return false;
@@ -82,7 +110,7 @@ abstract class TableElementSlice extends TableElement
             if (r.contains(this))
                 return r.remove(this);
             
-            return getRangesField().remove(r);
+            return m_ranges.remove(r);
         }
         
         return false;
@@ -90,22 +118,6 @@ abstract class TableElementSlice extends TableElement
     
     protected List<Range> getRanges()
     {
-        return new ArrayList<Range>(getRangesField(FieldAccess.Clone));
-    }
-    
-    private Set<Range> getRangesField(FieldAccess... fas)
-    {
-        FieldAccess fa = FieldAccess.checkAccess(fas);
-        if (m_ranges == null) {
-            if (fa == FieldAccess.ReturnEmptyIfNull)
-                return Collections.emptySet();
-            else
-                m_ranges = new WeakHashSet<Range>();
-        }
-        
-        if (fa == FieldAccess.Clone)
-            return ((WeakHashSet<Range>)m_ranges).clone();
-        else
-            return m_ranges;
-    }
+        return new ArrayList<Range>(m_ranges.clone());
+    }   
 }

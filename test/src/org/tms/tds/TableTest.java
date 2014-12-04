@@ -8,7 +8,9 @@ import java.util.List;
 
 import org.junit.Test;
 import org.tms.api.Access;
+import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.exceptions.TableException;
@@ -23,7 +25,7 @@ public class TableTest
         Table t = new Table(7, 10);        
         assert (t != null);
         
-        assertThat(t.getNumAllocRows(), is(Context.sf_ROW_ALLOC_INCR_DEFAULT));
+        assertThat(t.getNumRowsCapacity(), is(Context.sf_ROW_CAPACITY_INCR_DEFAULT));
         
         assertThat(t.hasProperty(TableProperty.Label), is(false));
         t.setLabel("abcdef");
@@ -151,18 +153,57 @@ public class TableTest
         Table t = new Table(12, 10);        
         assert (t != null);
 
-        // test the various access modes in "get" (not add) more
-        assertThat(t.getRowIndex(Access.First), is(-1));
-        assertThat(t.getRowIndex(Access.Last), is(-1));
-        assertThat(t.getRowIndex(Access.Previous), is(-1));
-        assertThat(t.getRowIndex(Access.Current), is(-1));
-        assertThat(t.getRowIndex(Access.Next), is(-1));
+        try {
+            t.calcIndex(null, Access.First);
+            fail("calcIndex sucessfully called with null ElementType");
+        }
+        catch (UnimplementedException e) 
+        {
+            assertThat(e.getTableErrorClass(), is(TableErrorClass.Unimplemented));
+        }
         
-        // now test in "add" mode
-        assertThat(t.getRowIndex(Access.First, true), is(0));
-        assertThat(t.getRowIndex(Access.Last, true), is(0));
-        assertThat(t.getRowIndex(Access.Previous, true), is(0));
-        assertThat(t.getRowIndex(Access.Current, true), is(0));
-        assertThat(t.getRowIndex(Access.Next, true), is(0));
+        try {
+            t.calcIndex(ElementType.Cell, Access.First);
+            fail("calcIndex sucessfully called with Cell ElementType");
+        }
+        catch (UnimplementedException e) 
+        {
+            assertThat(e.getTableErrorClass(), is(TableErrorClass.Unimplemented));
+            assertThat(e.getTMSElementType(), is(ElementType.Cell));
+        }
+        
+        try {
+            t.calcIndex(ElementType.Row, Access.ByIndex, true, "abc");
+            fail("calcIndex sucessfully called with invalid ByIndex metadata");
+        }
+        catch (InvalidException e) 
+        {
+            assertThat(e.getTableErrorClass(), is(TableErrorClass.Invalid));
+            assertThat(e.getTMSElementType(), is(ElementType.Table));
+        }
+        
+        // test the various access modes in "get" (not add) more
+        for (ElementType et : new ElementType []{ElementType.Row, ElementType.Column}) {
+            assertThat(t.calcIndex(et, Access.First), is(-1));
+            assertThat(t.calcIndex(et, Access.Last), is(-1));
+            assertThat(t.calcIndex(et, Access.Previous), is(-1));
+            assertThat(t.calcIndex(et, Access.Current), is(-1));
+            assertThat(t.calcIndex(et, Access.Next), is(-1));
+            
+            assertThat(t.calcIndex(et, Access.ByIndex), is(-1));
+            assertThat(t.calcIndex(et, Access.ByIndex, false, -1), is(-1));
+            assertThat(t.calcIndex(et, Access.ByIndex, false, 1), is(-1));
+            
+            // now test in "add" mode
+            assertThat(t.calcIndex(et, Access.First, true), is(0));
+            assertThat(t.calcIndex(et, Access.Last, true), is(0));
+            assertThat(t.calcIndex(et, Access.Previous, true), is(0));
+            assertThat(t.calcIndex(et, Access.Current, true), is(0));
+            assertThat(t.calcIndex(et, Access.Next, true), is(0));
+    
+            assertThat(t.calcIndex(et, Access.ByIndex, true, -1), is(-1));
+            assertThat(t.calcIndex(et, Access.ByIndex, true, 1), is(0));        
+            assertThat(t.calcIndex(et, Access.ByIndex, true, 11), is(10));
+        }
     }
 }
