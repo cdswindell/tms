@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
@@ -97,7 +98,23 @@ public class Row extends TableElementSlice
         // mark this row as current
         setCurrent();
         
+        // Add cells, if requested
+        if (addCells)
+            ensureCellCapacity();
+        
         return this;
+    }
+
+    @Override
+    void ensureCellCapacity()
+    {
+        Table table = getTable();
+        assert table != null : "Parent table required";
+        
+        // iterate over all non-null columns
+        List<Column> cols = table.getColumns();
+        if (cols != null)
+            cols.forEach(c -> { if (c != null) c.ensureCellCapacity();});
     }
 
     @Override

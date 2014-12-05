@@ -15,7 +15,6 @@ public class Table extends TableElement
 {
     private boolean m_dirty;
     
-    private ArrayList<Cell> m_cells;
     private ArrayList<Row> m_rows;
     private ArrayList<Column> m_cols;
     
@@ -71,7 +70,6 @@ public class Table extends TableElement
         m_curCol = null;
         
         // set all other arrays/sets/maps to null/JustInTime
-        m_cells = null;
         m_ranges = new JustInTimeSet<Range>();
         
         // clear dirty flag, as table is empty
@@ -615,10 +613,20 @@ public class Table extends TableElement
             {
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;
                 Object value = mda != null && mda.length > 1 ? mda[1] : null;
-                if (isAdding || key == null || !(key instanceof String) || value == null)
+                if (isAdding || key == null || value == null)
                     throw new InvalidException(this.getElementType(), 
-                            String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString())));  
-                TableElement target = find(slices, (String)key, value);
+                            String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString()))); 
+                
+                // key must either be a table property or a string
+                TableElement target;
+                if (key instanceof TableProperty) 
+                    target = find(slices, (TableProperty)key, value);
+                else if (key instanceof String) 
+                    target = find(slices, (String)key, value);
+                else
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString()))); 
+                    
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -688,14 +696,11 @@ public class Table extends TableElement
     }
     
     /**
-     * Empty tables contain no defined (set) cells
+     * Empty tables contain no rows or columns
      */
     @Override
     protected boolean isEmpty()
     {
-        if (m_cells == null)
-            return true;
-        else
-            return false;
+        return getNumRows() == 0 || getNumColumns() == 0;
     }
 }

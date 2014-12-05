@@ -121,6 +121,12 @@ public class RowTest
         retRow = t.getRow(Access.ByLabel, "Label Does Not Exist");
         assertThat(retRow, nullValue());
         
+        retRow = t.getRow(Access.ByProperty, TableProperty.Label, "Test Case");
+        assertThat(retRow, notNullValue());
+        assertThat(retRow, is(r));
+        assertThat(retRow.getTable(), is(t));
+        assertThat(retRow.getIndex(), is(6));
+        
         Row r2 = new Row(t);
         t.add(r2, Access.ByIndex, 6);
         assertThat(r2.getIndex(), is(6));
@@ -143,4 +149,28 @@ public class RowTest
         assertThat(r2.getIndex(), is(10));
         assertThat(r.getIndex(), is(11));
     }
+    
+    @Test
+    public void addRowColumnTest()
+    {
+        Table t = new Table(10, 10);
+        assertThat(t, notNullValue());
+        
+        Row r = new Row(t);
+        r.setLabel("Test Case");
+        
+        t.add(r, Access.ByIndex, t.getRowsCapacity());
+        assertThat(r.getIndex(), is(t.getRowsCapacity()));
+        assertThat(t.getNumRows(), is(t.getRowsCapacity()));
+        assertThat(t.calcIndex(ElementType.Row, Access.ByIndex, false, t.getRowsCapacity()), is(t.getRowsCapacity()-1));
+        
+        // add a column
+        Column c = t.addColumn(Access.ByIndex, 3);
+        assertThat(c, notNullValue());
+        
+        // add another row and make sure cell capacity is incremented
+        r = t.addRow(Access.Last);
+        assertThat(r, notNullValue());
+    }
+
 }

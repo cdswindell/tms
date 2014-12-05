@@ -7,11 +7,29 @@ import org.tms.api.TableProperty;
 
 public class Column extends TableElementSlice
 {
+    private Object m_cells;
+    private Class<? extends Object> m_dataType;
+    
     public Column(Table parentTable)
     {
         super(ElementType.Column, parentTable);
     }
 
+    /*
+     * Field getters and setters
+     */
+    protected Class<? extends Object> getDataType()
+    {
+        return m_dataType;
+    }
+    
+    /*
+     * Class-specific methods
+     */
+    
+    /*
+     * Overridden methods
+     */
     @Override
     protected void initialize(TableElement e)
     {
@@ -28,8 +46,24 @@ public class Column extends TableElementSlice
                     throw new IllegalStateException("No initialization available for Column Property: " + tp);                       
             }
         }
+        
+        m_cells = null;
+        m_dataType = null;
     }
 
+    @Override
+    protected Object getProperty(TableProperty key)
+    {
+        switch(key)
+        {
+            case DataType:
+                return getDataType();
+                
+            default:
+                return super.getProperty(key);
+        }
+    }
+    
     @Override
     protected Column insertSlice(int insertAt, boolean addCells)
     {
@@ -87,10 +121,30 @@ public class Column extends TableElementSlice
             cols.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});
         }       
         
+        // Add cells, if requested
+        if (addCells)
+            ensureCellCapacity();
+        
         // mark this column as current
         setCurrent();
         
         return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    void ensureCellCapacity()
+    {
+        Table table = getTable();
+        assert table != null : "Parent table required";
+        
+        // cell capacity is based on the number of rows in a table
+        if (table.getNumRows() > 0) {
+            if (m_cells == null)
+                m_cells = new ArrayList<Cell>(table.getRowsCapacity());
+            else 
+                ((ArrayList<Cell>)m_cells).ensureCapacity(table.getRowsCapacity());    
+        }
     }
 
     @Override
@@ -102,4 +156,12 @@ public class Column extends TableElementSlice
         
         return prevCurrent;
     }  
+    
+    protected boolean isEmpty()
+    {
+        if (m_cells == null)
+            return true;
+        
+        return super.isEmpty();
+    }
 }
