@@ -41,6 +41,7 @@ public class Context extends BaseElement
     {
         if (sf_DEFAULT_CONTEXT == null) {
             sf_DEFAULT_CONTEXT = new Context(true, null);
+            sf_DEFAULT_CONTEXT.setLabel("Default");
         }
             
         return sf_DEFAULT_CONTEXT;

@@ -152,4 +152,20 @@ abstract class TableElement extends BaseElement
     {
         m_enforceDataType = enforceDataType;
     }
+    
+    public String toString()
+    {
+        String label = (String)getProperty(TableProperty.Label);
+        if (label != null)
+            label = ": " + label;
+        else
+            label = "";
+        
+        int idx = getIndex();
+        
+        if (idx > 0)
+            return String.format("[%s %d%s]", getElementType(), idx, label);
+        else
+            return String.format("[%s%s]", getElementType(), label);
+    }
 }

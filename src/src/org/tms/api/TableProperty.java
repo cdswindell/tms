@@ -22,7 +22,6 @@ public enum TableProperty implements Comparable<TableProperty>
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     isInUse(true, false, ElementType.Row, ElementType.Column, ElementType.Cell),
-    Offset(true, false, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     // Context/Table Properties  
     RowCapacityIncr(false, true, ElementType.Context, ElementType.Table),
@@ -139,7 +138,6 @@ public enum TableProperty implements Comparable<TableProperty>
         switch(this)
         {
             case Index:
-            case Offset:
             case RowCapacityIncr:
             case ColumnCapacityIncr:
                 return true;

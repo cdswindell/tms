@@ -11,17 +11,15 @@ import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
-public class RowTest
+public class ColumnTest
 {
-
     @Test
     public void getPropertiesTest()
     {
-        Row r = new Row(null);
-
+        Column r = new Column(null);
         List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) {
-            System.out.print("Row property: " + p);
+            System.out.print("Col property: " + p);
             Object value = r.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
@@ -30,14 +28,13 @@ public class RowTest
     @Test
     public void getBooleanPropertiesTest()
     {
-        Row r = new Row(null);
-
+        Column r = new Column(null);
         List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) { 
             if (!p.isBooleanValue()) continue;
             
             // will fail if property getter not implemented
-            System.out.print("Row boolean property: " + p);
+            System.out.print("Column boolean property: " + p);
             Object value = r.getPropertyBoolean(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
@@ -46,14 +43,13 @@ public class RowTest
     @Test
     public void getIntPropertiesTest()
     {
-        Row r = new Row(null);
-
+        Column r = new Column(null);
         List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) { 
             if (!p.isIntValue()) continue;
             
             // will fail if property getter not implemented
-            System.out.print("Row int property: " + p);
+            System.out.print("Col int property: " + p);
             Object value = r.getPropertyInt(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
@@ -62,50 +58,28 @@ public class RowTest
     @Test
     public void getInitializablePropertiesTest()
     {
-        Row r = new Row(null);
-
+        Column r = new Column(null);
         List<TableProperty> props = r.getInitializableProperties();
         for (TableProperty p : props) { 
             // will fail if property getter not implemented
-            System.out.print("Row initializable property: " + p);
+            System.out.print("Column initializable property: " + p);
             Object value = r.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
     }
     
     @Test
-    public void addRowTest()
+    public void addColumnsTest()
     {
         Table t = new Table(10, 10);
         assertThat(t, notNullValue());
         
-        Row r = new Row(t);
+        Column c = new Column(t);
         
-        t.add(r, Access.ByIndex, 6);
-        assertThat(r.getIndex(), is(6));
-        assertThat(t.getNumRows(), is(6));
-        assertThat(t.calcIndex(ElementType.Row, Access.ByIndex, false, 6), is(5));
+        t.add(c, Access.ByIndex, 6);
+        assertThat(c.getIndex(), is(6));
+        assertThat(t.getNumColumns(), is(6));
+        assertThat(t.calcIndex(ElementType.Column, Access.ByIndex, false, 6), is(5));
         
-        Row r2 = new Row(t);
-        t.add(r2, Access.ByIndex, 6);
-        assertThat(r2.getIndex(), is(6));
-        assertThat(r.getIndex(), is(7));
-        assertThat(t.getNumRows(), is(7));
-        
-        t.addRow(Access.First);
-        assertThat(t.getNumRows(), is(8));
-        
-        t.addRow(Access.First);
-        assertThat(t.getNumRows(), is(9));
-        
-        t.addRow(Access.First);
-        assertThat(t.getNumRows(), is(10));
-        assertThat(r2.getIndex(), is(9));
-        assertThat(r.getIndex(), is(10));
-        
-        t.addRow(Access.First);
-        assertThat(t.getNumRows(), is(11));
-        assertThat(r2.getIndex(), is(10));
-        assertThat(r.getIndex(), is(11));
     }
 }

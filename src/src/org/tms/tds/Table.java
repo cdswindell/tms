@@ -15,9 +15,9 @@ public class Table extends TableElement
 {
     private boolean m_dirty;
     
-    private Cell [] m_cells;
-    private Row [] m_rows;
-    private Column [] m_cols;
+    private ArrayList<Cell> m_cells;
+    private ArrayList<Row> m_rows;
+    private ArrayList<Column> m_cols;
     
     private Row m_curRow;
     private Column m_curCol;
@@ -26,11 +26,8 @@ public class Table extends TableElement
     
     private Context m_context;
     
-    private int m_numRowsCapacity;
-    private int m_numColsCapacity;
-    
-    private int m_nRows;
-    private int m_nCols;
+    private int m_rowsCapacity;
+    private int m_colsCapacity;
     
     //Initialized from context or source table
     private int m_rowCapacityIncr;
@@ -63,17 +60,16 @@ public class Table extends TableElement
     {
         initializeProperties(t);
         
-        m_numRowsCapacity = getNumRowsCapacity(nRows);
-        m_numColsCapacity = getNumColumnsCapacity(nCols);
-        m_nRows = m_nCols = 0;
+        // allocate base memory for rows and columns
+        m_rows = new ArrayList<Row>(m_rowsCapacity);
+        m_cols = new ArrayList<Column>(m_colsCapacity);
+                
+        setRowsCapacity(calcRowsCapacity(nRows));
+        setColumnsCapacity(calcColumnsCapacity(nCols));
         
         m_curRow = null;
         m_curCol = null;
         
-        // allocate base memory for rows and columns
-        m_rows = new Row[m_numRowsCapacity];
-        m_cols = new Column[m_numColsCapacity];
-                
         // set all other arrays/sets/maps to null/JustInTime
         m_cells = null;
         m_ranges = new JustInTimeSet<Range>();
@@ -128,10 +124,10 @@ public class Table extends TableElement
                 return getColumnCapacityIncr();
                 
             case numRowsCapacity:
-                return getNumRowsCapacity();
+                return getRowsCapacity();
                 
             case numColumnsCapacity:
-                return getNumColumnsCapacity();
+                return getColumnsCapacity();
                 
             case numRanges:
                 return m_ranges.size();
@@ -143,13 +139,13 @@ public class Table extends TableElement
                 return getNumRows(); 
                 
             case Rows:
-                return null; // TODO: implement
+                return getRows(); 
                 
             case numColumns:
                 return getNumColumns(); 
                 
             case Columns:
-                return null; // TODO: implement
+                return getColumns(); 
                 
             default:
                 return super.getProperty(key);
@@ -219,6 +215,32 @@ public class Table extends TableElement
         m_dirty = dirty;
     }
 
+    /*
+     * Row manipulation methods
+     */
+    
+    /**
+     * Return the capacity of the Rows list. This is not the same as the actual number
+     * of created rows, see {@link #getNumRows()}
+     * @return
+     */
+    protected int getRowsCapacity()
+    {
+        return m_rowsCapacity;
+    }
+    
+    /**
+     * Sets the maximum capacity of the Rows data structure, (re)allocating space as needed
+     * @param capacity
+     */
+    void setRowsCapacity(int capacity)
+    {
+        if (m_rows != null) {
+            m_rows.ensureCapacity(capacity);
+            m_rowsCapacity = capacity;
+        }
+    }
+    
     protected int getRowCapacityIncr()
     {
         if (m_rowCapacityIncr <= 0) 
@@ -237,7 +259,40 @@ public class Table extends TableElement
         else
             m_rowCapacityIncr = rowCapacityIncr;
     }
+    
+    protected int getNumRows()
+    {
+        return m_rows == null ? 0 : m_rows.size();
+    }
+    
+    protected Row getCurrentRow()
+    {
+        return m_curRow;
+    }
+    
+    /**
+     * Return the raw rows arraylist. Allows Row class to insert a row into the table.
+     * Note: <b>for systems use only!</b>
+     * @return ArrayList&lt;Row&gt;
+     */
+    ArrayList<Row> getRows()
+    {
+        return m_rows;
+    }
 
+    protected Row addRow(Access mode)
+    {
+        return addRow(mode, null);
+    }
+    
+    protected Row addRow(Access mode, Object md)
+    {
+        return (Row)add(new Row(this), mode, md);
+    }
+    
+    /*
+     * Column manipulation methods
+     */
     protected int getColumnCapacityIncr()
     {
         if (m_colCapacityIncr <= 0) 
@@ -257,59 +312,72 @@ public class Table extends TableElement
             m_colCapacityIncr = colCapacityIncr;
     }
     
-    protected int getNumRowsCapacity()
+    int calcColumnsCapacity(int nCols)
     {
-        return m_numRowsCapacity;
-    }
-    
-    private int getNumRowsCapacity(int nRows)
-    {
-        int rowAlloc = getRowCapacityIncr();
-        if (nRows > 0) {
-            int remainder = nRows % rowAlloc;
-            rowAlloc = nRows + (remainder > 0 ? rowAlloc - remainder : 0);
-        }
-        
-        return rowAlloc;
-    }
-    
-    private int getNumColumnsCapacity(int nCols)
-    {
-        int colAlloc = getColumnCapacityIncr();
+        int capacity = getColumnCapacityIncr();
         if (nCols > 0) {
-            int remainder = nCols % colAlloc;
-            colAlloc = nCols + (remainder > 0 ? colAlloc - remainder : 0);
+            int remainder = nCols % capacity;
+            capacity = nCols + (remainder > 0 ? capacity - remainder : 0);
         }
         
-        return colAlloc;
+        return capacity;
     }
 
-    protected int getNumColumnsCapacity()
+    int calcRowsCapacity(int nRows)
     {
-        return m_numColsCapacity;
-    }
-
-    protected int getNumRows()
-    {
-        return m_nRows;
+        int capacity = getRowCapacityIncr();
+        if (nRows > 0) {
+            int remainder = nRows % capacity;
+            capacity = nRows + (remainder > 0 ? capacity - remainder : 0);
+        }
+        
+        return capacity;
     }
     
+    protected int getColumnsCapacity()
+    {
+        return m_colsCapacity;
+    }
+
+    void setColumnsCapacity(int capacity)
+    {
+        m_colsCapacity = capacity;
+    }
+
     protected int getNumColumns()
     {
-        return m_nCols;
+        return m_cols == null ? 0 : m_cols.size();
     }
     
-    protected Row getCurrentRow()
+    /**
+     * Return the raw rows arraylist. Allows Row class to insert a column into the table.
+     * Note: <b>for systems use only!</b>
+     * @return ArrayList&lt;Column&gt;
+     */
+    ArrayList<Column> getColumns()
     {
-        return m_curRow;
+        return m_cols;
     }
-    
+
     protected Column getCurrentColumn()
     {
         return m_curCol;
     }
     
-    private void setCurrent(TableElementSlice r)
+    protected Column addColumn(Access mode)
+    {
+        return addColumn(mode, null);
+    }
+    
+    protected Column addColumn(Access mode, Object md)
+    {
+        return (Column)add(new Column(this), mode, md);
+    }
+    
+    /*
+     * general methods that operate on Table Element Slices (rows or columns
+     */
+    protected void setCurrent(TableElementSlice r)
     {
         if (r instanceof Row)
             m_curRow = (Row)r;
@@ -317,17 +385,7 @@ public class Table extends TableElement
             m_curCol = (Column)r;
     }
 
-    protected boolean addRow(Access mode)
-    {
-        return add(new Row(this), mode, null);
-    }
-    
-    protected boolean addRow(Access mode, Object md)
-    {
-        return add(new Row(this), mode, md);
-    }
-    
-    synchronized protected boolean add(TableElementSlice r, Access mode, Object md)
+    synchronized protected TableElementSlice add(TableElementSlice r, Access mode, Object md)
     {
         // calculate the index where the row will go
         ElementType sliceType = r.getElementType();
@@ -336,24 +394,23 @@ public class Table extends TableElement
             throw new InvalidAccessException(ElementType.Table, sliceType, mode, true, md);
         
         // insert row into data structure at correct index, adding cells as/if required
-        boolean inserted = insertSlice(r, idx, true);
-        if (inserted)
+        if (r.insertSlice(idx, true) != null)
             setCurrent(r);
         
-        return inserted;
+        return r;
     }
     
     protected int calcIndex(ElementType et, Access mode)
     {
-        return calcIndex(et, mode, false, null);
+        return calcIndex(et, mode, false);
     }
     
     protected int calcIndex(ElementType et, Access mode, boolean isAdding)
     {
-        return calcIndex(et, mode, isAdding, null);
+        return calcIndex(et, mode, isAdding, (Object [])null);
     }
     
-    protected int calcIndex(ElementType et, Access mode, boolean isAdding, Object md)
+    protected int calcIndex(ElementType et, Access mode, boolean isAdding, Object... mda)
     {
         int numSlices = -1;
         TableElementSlice curSlice = null;
@@ -433,6 +490,8 @@ public class Table extends TableElement
                     return -1;
                 
             case ByIndex:
+            {
+                Object md = mda != null && mda.length > 0 ? mda[0] : null;
                 if (md == null || !(md instanceof Integer))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));
@@ -444,25 +503,76 @@ public class Table extends TableElement
                     return idx;
                 else 
                     return -1;
+            }
+                
+            case ByReference:
+            {
+                Object md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (isAdding || md == null || !(md instanceof TableElementSlice) || (((TableElementSlice)md).getElementType() != et))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));               
+                return ((TableElementSlice)md).getIndex();
+            }
+                
+            case ByLabel:
+            {
+                Object md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (isAdding || md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
+                TableElement target = find(et, TableProperty.Label, md.toString());
+                if (target != null)
+                    return target.getIndex();
+            }
+            
+            case ByDescription:
+            {
+                Object md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (isAdding || md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
+                TableElement target = find(et, TableProperty.Description, md.toString());
+                if (target != null)
+                    return target.getIndex();
+            }
+            
+            case ByProperty:
+            {
+                Object key = mda != null && mda.length > 0 ? mda[0] : null;
+                Object value = mda != null && mda.length > 1 ? mda[1] : null;
+                if (isAdding || key == null || !(key instanceof String) || value == null)
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString())));  
+                TableElement target = find(et, (String)key, value);
+                if (target != null)
+                    return target.getIndex();
+            }
         }
         
         // if we get here, return the default, which indicates an error
         return -1;
     }
     
-    private boolean insertSlice(TableElementSlice r, int idx, boolean addCells)
+    protected TableElement find(ElementType et, TableProperty key, String value)
     {
-        
-        return false;
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    protected TableElement find(ElementType et, String key, Object value)
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**
      * Reindex table elements, useful after a sort or manual manipulation
      * @param et
      */
+    @SuppressWarnings("unchecked")
     protected void reindex(ElementType et)
     {
-        TableElement [] a = null;
+        Object a = null;
         int nElems = 0;
         
         switch(et)
@@ -482,8 +592,10 @@ public class Table extends TableElement
         }
         
         if (a != null && nElems > 0) {
-            for (int i = 0; i < nElems; i++)
-                if (a[i] != null) a[i].setIndex(i);
+            for (int i = 0; i < nElems; i++) {
+                TableElement e = ((List<TableElement>)a).get(i);
+                if (e != null) e.setIndex(i);
+            }
         }
     }
     

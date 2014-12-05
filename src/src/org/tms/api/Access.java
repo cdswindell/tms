@@ -8,4 +8,8 @@ public enum Access
     Previous,
     Current,
     ByIndex,
+    ByReference,
+    ByLabel, 
+    ByDescription,
+    ByProperty,
 }

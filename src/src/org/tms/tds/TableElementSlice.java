@@ -9,9 +9,10 @@ import org.tms.util.JustInTimeSet;
 
 abstract class TableElementSlice extends TableElement
 {
+    abstract protected TableElementSlice insertSlice(int idx, boolean addCells);
+    
     private JustInTimeSet<Range> m_ranges;
     private boolean m_inUse;
-    private int m_offset;
 
     public TableElementSlice(ElementType eType, TableElement e)
     {
@@ -31,9 +32,6 @@ abstract class TableElementSlice extends TableElement
                 
             case isInUse:
                 return isInUse();
-                
-            case Offset:
-                return getOffset();
                 
             default:
                 return super.getProperty(key);
@@ -61,9 +59,14 @@ abstract class TableElementSlice extends TableElement
         // initialize other member fields
         m_ranges = new JustInTimeSet<Range>();
         m_inUse = false;
-        m_offset = -1;
     }
     
+    @Override
+    protected boolean isEmpty()
+    {
+        return !isInUse();
+    }
+
     boolean isInUse()
     {
         return m_inUse;
@@ -72,16 +75,6 @@ abstract class TableElementSlice extends TableElement
     void setInUse(boolean inUse)
     {
         m_inUse = inUse;
-    }
-    
-    int getOffset()
-    {
-        return m_offset;
-    }
-    
-    void setOffset(int offset)
-    {
-        m_offset = offset;
     }
     
     protected boolean add(Range r)
@@ -120,4 +113,10 @@ abstract class TableElementSlice extends TableElement
     {
         return new ArrayList<Range>(m_ranges.clone());
     }   
+
+    protected void setCurrent()
+    {
+        if (getTable() != null)
+            getTable().setCurrent(this);       
+    }
 }

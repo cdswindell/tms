@@ -25,7 +25,7 @@ public class TableTest
         Table t = new Table(7, 10);        
         assert (t != null);
         
-        assertThat(t.getNumRowsCapacity(), is(Context.sf_ROW_CAPACITY_INCR_DEFAULT));
+        assertThat(t.getRowsCapacity(), is(Context.sf_ROW_CAPACITY_INCR_DEFAULT));
         
         assertThat(t.hasProperty(TableProperty.Label), is(false));
         t.setLabel("abcdef");

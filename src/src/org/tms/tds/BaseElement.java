@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
@@ -16,7 +17,7 @@ abstract public class BaseElement
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
     private ElementType m_tableElementType;
-    private HashMap<String, Object> m_elemProperties;
+    private Map<String, Object> m_elemProperties;
 
     private boolean m_supportsNull;
     private boolean m_readOnly;
@@ -36,12 +37,12 @@ abstract public class BaseElement
         m_tableElementType = tableElementType;
     }
 
-    private synchronized HashMap<String, Object> getElemProperties()
+    private synchronized Map<String, Object> getElemProperties()
     {
         return getElemProperties(false);
     }
     
-    private synchronized HashMap<String, Object> getElemProperties(boolean createIfEmpty)
+    private synchronized Map<String, Object> getElemProperties(boolean createIfEmpty)
     {
         if (m_elemProperties == null && createIfEmpty)
             m_elemProperties = new HashMap<String, Object>();
@@ -100,7 +101,7 @@ abstract public class BaseElement
         if (vetKey) 
             key = vetKey(key);
         
-        HashMap<String, Object> props;      
+        Map<String, Object> props;      
         if ((props = getElemProperties()) != null) {
             if (props.remove(key) != null)
                 return true;
@@ -131,7 +132,7 @@ abstract public class BaseElement
         if (vetKey) 
             key = vetKey(key);
         
-        HashMap<String, Object> props;      
+        Map<String, Object> props;      
         if ((props = getElemProperties()) != null) {
             if (props.get(key) != null)
                 return true;
@@ -175,7 +176,7 @@ abstract public class BaseElement
         if (vetKey) 
             key = vetKey(key);
         
-        HashMap<String, Object> props;      
+        Map<String, Object> props;      
         if ((props = getElemProperties()) != null)
             return props.get(key);
         else
@@ -321,5 +322,15 @@ abstract public class BaseElement
     protected void setReadOnly(boolean readOnly)
     {
         m_readOnly = readOnly;
+    }
+    
+    public String toString()
+    {
+        String label = (String)getProperty(TableProperty.Label);
+        if (label != null)
+            label = ": " + label;
+        else
+            label = "";
+        return String.format("[%s%s]", getElementType(), label);
     }
 }
