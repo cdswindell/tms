@@ -241,6 +241,17 @@ public class Table extends TableElement
         }
     }
     
+    int calcRowsCapacity(int nRows)
+    {
+        int capacity = getRowCapacityIncr();
+        if (nRows > 0) {
+            int remainder = nRows % capacity;
+            capacity = nRows + (remainder > 0 ? capacity - remainder : 0);
+        }
+        
+        return capacity;
+    }
+    
     protected int getRowCapacityIncr()
     {
         if (m_rowCapacityIncr <= 0) 
@@ -323,17 +334,6 @@ public class Table extends TableElement
         return capacity;
     }
 
-    int calcRowsCapacity(int nRows)
-    {
-        int capacity = getRowCapacityIncr();
-        if (nRows > 0) {
-            int remainder = nRows % capacity;
-            capacity = nRows + (remainder > 0 ? capacity - remainder : 0);
-        }
-        
-        return capacity;
-    }
-    
     protected int getColumnsCapacity()
     {
         return m_colsCapacity;
@@ -341,7 +341,10 @@ public class Table extends TableElement
 
     void setColumnsCapacity(int capacity)
     {
-        m_colsCapacity = capacity;
+        if (m_cols != null) {
+            m_cols.ensureCapacity(capacity);
+            m_colsCapacity = capacity;
+        }
     }
 
     protected int getNumColumns()

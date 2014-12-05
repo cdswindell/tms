@@ -73,13 +73,23 @@ public class ColumnTest
     {
         Table t = new Table(10, 10);
         assertThat(t, notNullValue());
+            
+        assertThat(t.getNumColumns(), is(0));
+        Column c = t.addColumn(Access.Next);
+        assertThat(c, notNullValue());
+        assertThat(t.getNumColumns(), is(1));    
         
-        Column c = new Column(t);
-        
+        c = new Column(t);
         t.add(c, Access.ByIndex, 6);
         assertThat(c.getIndex(), is(6));
         assertThat(t.getNumColumns(), is(6));
         assertThat(t.calcIndex(ElementType.Column, Access.ByIndex, false, 6), is(5));
         
+        Column c2 = new Column(t);
+        t.add(c2, Access.ByIndex, 6);
+        assertThat(c2.getIndex(), is(6));
+        assertThat(c.getIndex(), is(7));
+        assertThat(t.getNumColumns(), is(7));       
+        assertThat(t.getNumRows(), is(0));       
     }
 }
