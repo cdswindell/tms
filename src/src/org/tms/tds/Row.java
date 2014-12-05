@@ -34,11 +34,11 @@ public class Row extends TableElementSlice
     protected Row insertSlice(int insertAt, boolean addCells)
     {
         // sanity check, insertAt must be >= 0 (indexes are 0-based)
-        assert insertAt >= 0;
+        assert insertAt >= 0 : insertAt;
         
         // sanity check, table must exist
         Table parent = getTable();
-        assert parent != null;
+        assert parent != null : "Parent Table Null";
         
         // sanity check, rows list must exist
         ArrayList<Row> rows = parent.getRows();
@@ -81,7 +81,6 @@ public class Row extends TableElementSlice
             
             // insert the new row
             rows.add(insertAt, this);
-            nRows++;
             
             // reindex from insertAt + 1 to the end of the array
             // use the new-fangled JDK 1.8 lambda functionality to reindex
@@ -95,6 +94,19 @@ public class Row extends TableElementSlice
 //            }
         }
         
+        // mark this row as current
+        setCurrent();
+        
         return this;
+    }
+
+    @Override
+    protected Row setCurrent()
+    {
+        Row prevCurrent = null;
+        if (getTable() != null) 
+            prevCurrent = getTable().setCurrentRow(this);
+        
+        return prevCurrent;
     }  
 }

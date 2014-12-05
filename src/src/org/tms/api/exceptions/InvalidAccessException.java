@@ -10,9 +10,9 @@ public class InvalidAccessException extends InvalidException
     private ElementType m_child;
     private Access m_access;
     private boolean m_insert;
-    private Object m_metaData;
+    private Object[] m_metaData;
     
-    public InvalidAccessException(ElementType parent, ElementType child, Access access, boolean insert, Object md)
+    public InvalidAccessException(ElementType parent, ElementType child, Access access, boolean insert, Object... md)
     {
         super(parent, 
               String.format("Invalid %s Request: %s Child: %s", (insert ? "Insert" : "Get"), access, child));

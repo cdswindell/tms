@@ -281,6 +281,14 @@ public class Table extends TableElement
         return m_curRow;
     }
     
+    protected Row setCurrentRow(Row row)
+    {
+        Row prevCurrent = getCurrentRow();
+        m_curRow = row;
+        
+        return prevCurrent;
+    }  
+    
     /**
      * Return the raw rows arraylist. Allows Row class to insert a row into the table.
      * Note: <b>for systems use only!</b>
@@ -293,12 +301,41 @@ public class Table extends TableElement
 
     protected Row addRow(Access mode)
     {
-        return addRow(mode, null);
+        return addRow(mode, (Object [])null);
     }
     
-    protected Row addRow(Access mode, Object md)
+    protected Row addRow(Access mode, Object... mda)
     {
-        return (Row)add(new Row(this), mode, md);
+        return (Row)add(new Row(this), mode, mda);
+    }
+    
+    protected Row getRow(Access mode, Object...mda)
+    {
+        return getRowInternal(true, mode, mda);
+    }
+    
+    private Row getRowInternal(boolean createIfNull, Access mode, Object...mda)
+    {
+        Row r = null;
+        
+        // calculate row index
+        int rowIdx = this.calcIndex(ElementType.Row, mode, false, mda);
+        if (rowIdx < 0)
+            return r;
+        
+        // retrieve the row, now that we have a valid reference
+        r = getRows().get(rowIdx);
+        
+        // if the row is null, create it
+        if (r == null && createIfNull) {
+            r = new Row(this);
+            r.setIndex(rowIdx);
+            
+            // add the row to the Rows array at the correct index
+            getRows().set(rowIdx,  r);
+        }
+        
+        return r;
     }
     
     /*
@@ -367,6 +404,14 @@ public class Table extends TableElement
         return m_curCol;
     }
     
+    protected Column setCurrentColumn(Column col)
+    {
+        Column prevCurrent = getCurrentColumn();
+        m_curCol = col;
+        
+        return prevCurrent;
+    }  
+    
     protected Column addColumn(Access mode)
     {
         return addColumn(mode, null);
@@ -377,15 +422,33 @@ public class Table extends TableElement
         return (Column)add(new Column(this), mode, md);
     }
     
-    /*
-     * general methods that operate on Table Element Slices (rows or columns
-     */
-    protected void setCurrent(TableElementSlice r)
+    protected Column getColumn(Access mode, Object...mda)
     {
-        if (r instanceof Row)
-            m_curRow = (Row)r;
-        else if (r instanceof Column)
-            m_curCol = (Column)r;
+        return getColumnInternal(true, mode, mda);
+    }
+    
+    private Column getColumnInternal(boolean createIfNull, Access mode, Object...mda)
+    {
+        Column r = null;
+        
+        // calculate column index
+        int colIdx = this.calcIndex(ElementType.Column, mode, false, mda);
+        if (colIdx < 0)
+            return r;
+        
+        // retrieve the column, now that we have a valid reference
+        r = getColumns().get(colIdx);
+        
+        // if the column is null, create it
+        if (r == null && createIfNull) {
+            r = new Column(this);
+            r.setIndex(colIdx);
+            
+            // add the column to the Columns array at the correct index
+            getColumns().set(colIdx,  r);
+        }
+        
+        return r;
     }
 
     synchronized protected TableElementSlice add(TableElementSlice r, Access mode, Object md)
@@ -398,7 +461,7 @@ public class Table extends TableElement
         
         // insert row into data structure at correct index, adding cells as/if required
         if (r.insertSlice(idx, true) != null)
-            setCurrent(r);
+            r.setCurrent();
         
         return r;
     }
@@ -417,14 +480,17 @@ public class Table extends TableElement
     {
         int numSlices = -1;
         TableElementSlice curSlice = null;
+        ArrayList<? extends TableElementSlice> slices;
         
         if (et == ElementType.Row) {
             numSlices = getNumRows();
             curSlice = getCurrentRow();
+            slices = getRows();
         }
         else if (et == ElementType.Column) {
             numSlices = getNumColumns();
             curSlice = getCurrentColumn();
+            slices = getColumns();
         }
         else
             throw new UnimplementedException(et, "calcIndex not supported");
@@ -475,7 +541,8 @@ public class Table extends TableElement
                 if (curSlice == null)
                     return -1;
                 
-                return curSlice.getIndex();
+                // indexes are 1-based; element arrays are 0-based
+                return curSlice.getIndex() - 1;
                 
             case Next:
                 // special case for adding to an empty table
@@ -514,7 +581,8 @@ public class Table extends TableElement
                 if (isAdding || md == null || !(md instanceof TableElementSlice) || (((TableElementSlice)md).getElementType() != et))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));               
-                return ((TableElementSlice)md).getIndex();
+                // indexes are 1-based; element arrays are 0-based
+                return ((TableElementSlice)md).getIndex() - 1;
             }
                 
             case ByLabel:
@@ -523,9 +591,11 @@ public class Table extends TableElement
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableElement target = find(et, TableProperty.Label, md.toString());
+                TableElement target = find(slices, TableProperty.Label, md);
+                // indexes are 1-based; element arrays are 0-based
                 if (target != null)
-                    return target.getIndex();
+                    return target.getIndex() - 1;
+                break;
             }
             
             case ByDescription:
@@ -534,9 +604,11 @@ public class Table extends TableElement
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableElement target = find(et, TableProperty.Description, md.toString());
+                TableElement target = find(slices, TableProperty.Description, md);
+                // indexes are 1-based; element arrays are 0-based
                 if (target != null)
-                    return target.getIndex();
+                    return target.getIndex() - 1;
+                break;
             }
             
             case ByProperty:
@@ -546,9 +618,11 @@ public class Table extends TableElement
                 if (isAdding || key == null || !(key instanceof String) || value == null)
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString())));  
-                TableElement target = find(et, (String)key, value);
+                TableElement target = find(slices, (String)key, value);
+                // indexes are 1-based; element arrays are 0-based
                 if (target != null)
-                    return target.getIndex();
+                    return target.getIndex() - 1;
+                break;
             }
         }
         
@@ -556,13 +630,24 @@ public class Table extends TableElement
         return -1;
     }
     
-    protected TableElement find(ElementType et, TableProperty key, String value)
+    protected TableElement find(ArrayList<? extends TableElementSlice> slices, TableProperty key, Object value)
     {
-        // TODO Auto-generated method stub
-        return null;
+        assert key != null : "TableProperty required";
+        TableElement foundElement = null;
+        if (slices != null && value != null) {
+            for (TableElementSlice tes : slices) {
+                if (tes != null) {
+                    Object p = tes.getProperty(key);
+                    if (p != null && p.equals(value))
+                        return tes;
+                }
+            }
+        }
+        
+        return foundElement;
     }
 
-    protected TableElement find(ElementType et, String key, Object value)
+    protected TableElement find(ArrayList<? extends TableElementSlice> slices, String key, Object value)
     {
         // TODO Auto-generated method stub
         return null;
@@ -612,5 +697,5 @@ public class Table extends TableElement
             return true;
         else
             return false;
-    }  
+    }
 }

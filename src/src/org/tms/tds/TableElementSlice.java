@@ -10,6 +10,7 @@ import org.tms.util.JustInTimeSet;
 abstract class TableElementSlice extends TableElement
 {
     abstract protected TableElementSlice insertSlice(int idx, boolean addCells);
+    abstract protected TableElementSlice setCurrent();
     
     private JustInTimeSet<Range> m_ranges;
     private boolean m_inUse;
@@ -113,10 +114,4 @@ abstract class TableElementSlice extends TableElement
     {
         return new ArrayList<Range>(m_ranges.clone());
     }   
-
-    protected void setCurrent()
-    {
-        if (getTable() != null)
-            getTable().setCurrent(this);       
-    }
 }

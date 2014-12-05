@@ -80,11 +80,46 @@ public class RowTest
         assertThat(t, notNullValue());
         
         Row r = new Row(t);
+        r.setLabel("Test Case");
         
         t.add(r, Access.ByIndex, 6);
         assertThat(r.getIndex(), is(6));
         assertThat(t.getNumRows(), is(6));
         assertThat(t.calcIndex(ElementType.Row, Access.ByIndex, false, 6), is(5));
+        
+        // check row retrieval
+        Row retRow = t.getRow(Access.Current);
+        assertThat(retRow, notNullValue());
+        assertThat(retRow, is(r));
+        assertThat(retRow.getTable(), is(t));
+        assertThat(retRow.getIndex(), is(6));
+        
+        retRow = t.getRow(Access.Last);
+        assertThat(retRow, notNullValue());
+        assertThat(retRow, is(r));
+        assertThat(retRow.getTable(), is(t));
+        assertThat(retRow.getIndex(), is(6));
+        
+        retRow = t.getRow(Access.ByReference, r);
+        assertThat(retRow, notNullValue());
+        assertThat(retRow, is(r));
+        assertThat(retRow.getTable(), is(t));
+        assertThat(retRow.getIndex(), is(6));
+        
+        retRow = t.getRow(Access.ByIndex, 6);
+        assertThat(retRow, notNullValue());
+        assertThat(retRow, is(r));
+        assertThat(retRow.getTable(), is(t));
+        assertThat(retRow.getIndex(), is(6));
+        
+        retRow = t.getRow(Access.ByLabel, "Test Case");
+        assertThat(retRow, notNullValue());
+        assertThat(retRow, is(r));
+        assertThat(retRow.getTable(), is(t));
+        assertThat(retRow.getIndex(), is(6));
+        
+        retRow = t.getRow(Access.ByLabel, "Label Does Not Exist");
+        assertThat(retRow, nullValue());
         
         Row r2 = new Row(t);
         t.add(r2, Access.ByIndex, 6);

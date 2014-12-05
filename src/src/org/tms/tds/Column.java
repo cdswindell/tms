@@ -81,13 +81,25 @@ public class Column extends TableElementSlice
             
             // insert the new column
             cols.add(insertAt, this);
-            nCols++;
             
             // reindex from insertAt + 1 to the end of the array use
             // the new-fangled JDK 1.8 lambda functionality to reindex
             cols.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});
-        }
+        }       
+        
+        // mark this column as current
+        setCurrent();
         
         return this;
     }
+
+    @Override
+    protected Column setCurrent()
+    {
+        Column prevCurrent = null;
+        if (getTable() != null) 
+            prevCurrent = getTable().setCurrentColumn(this);
+        
+        return prevCurrent;
+    }  
 }
