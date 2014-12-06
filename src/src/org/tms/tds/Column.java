@@ -104,6 +104,12 @@ public class Column extends TableElementSlice
             }
         } // of synchronized
         
+        // if the cell is non-null, mark the row and column as in use
+        if (c != null) {
+            this.setInUse(true);  
+            row.setInUse(true);
+        }
+        
         return c;
     }
     
@@ -243,10 +249,9 @@ public class Column extends TableElementSlice
     protected int getNumCells()
     {
         if (m_cells != null)
-        {
             return ((ArrayList<Cell>)m_cells).size();
-        }
-        else return 0;
+        else 
+            return 0;
     }
     
     @Override

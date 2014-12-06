@@ -176,12 +176,26 @@ public class RowTest
         assertThat(r, notNullValue());
         assertThat(r.getNumCells(), is(0));
         
+        // make sure row and col are marked not in use
+        assertThat(r.isInUse(), is(false));
+        assertThat(c.isInUse(), is(false));
+        assertThat(r.getNumCells(), is(0));
+        assertThat(c.getNumCells(), is(0));
+        
         // force cell creation
         Cell cell = t.getCell(r, c);
         assertThat(cell, notNullValue());
         
+        // make sure row and col are marked not in use
+        assertThat(r.isInUse(), is(true));
+        assertThat(c.isInUse(), is(true));
+        assertThat(r.getNumCells(), is(1));
+        assertThat(c.getNumCells(), is(1));
+        
         r = t.addRow(Access.ByIndex, t.getRowsCapacity());
         cell = t.getCell(r, c);
         assertThat(cell, notNullValue());
+        assertThat(r.getNumCells(), is(1));
+        assertThat(c.getNumCells(), is(2));
     }
 }

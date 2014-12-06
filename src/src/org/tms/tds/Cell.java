@@ -5,18 +5,32 @@ import org.tms.api.TableProperty;
 
 public class Cell extends TableElement
 {
-    private boolean m_isEmpty;
-
+    private Object m_cellValue;
+    
     public Cell(Table t)
     {
         super(ElementType.Cell, t);
-
     }
 
+    /*
+     * Field getters/setters
+     */
+    
+    protected Object getCellValue()
+    {
+        return m_cellValue;
+    }
+    
+    protected void setCellValue(Object value)
+    {
+        m_cellValue = value;
+    }
+    
     /*
      * Overridden methods
      */
     
+    @Override
     protected int getNumCells()
     {
         // Degenerate case
@@ -24,17 +38,12 @@ public class Cell extends TableElement
     }
     
     /**
-     * A cell is empty if it has been explicitly set to empty
+     * A cell is empty if it is null
      */
     @Override
     protected boolean isEmpty()
     {
-        return m_isEmpty;
-    }
-
-    private void setEmpty(boolean isEmpty)
-    {
-        m_isEmpty = isEmpty;
+        return m_cellValue == null;
     }
 
     @Override
@@ -46,8 +55,7 @@ public class Cell extends TableElement
         for (TableProperty tp : this.getInitializableProperties()) {
             Object value = source.getProperty(tp);
             
-            if (super.initializeProperty(tp, value)) continue;
-            
+            if (super.initializeProperty(tp, value)) continue;            
             switch (tp) {
                 default:
                     throw new IllegalStateException("No initialization available for Cell Property: " + tp);                       
@@ -55,6 +63,6 @@ public class Cell extends TableElement
         }
         
         // initialize other variables
-        setEmpty(true);
+        m_cellValue = null;
     }
 }

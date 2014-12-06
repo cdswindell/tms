@@ -181,20 +181,19 @@ public class Row extends TableElementSlice
         Table parent = getTable();
         assert parent != null : "Parent Table Null";
 
+        int numCells = 0;
         ArrayList<Column> cols = parent.getColumns();
         if (cols != null) {
-            int numCells = 0;
             for (Column c : cols) {
                 if (c == null) continue;
                 int numColCells = c.getNumCells();
                 if (cellOffset < numColCells) {
-                    // TODO: get column cells
+                    if (c.getCellInternal(this, false) != null)
+                        numCells++;
                 }
             }
-            
-            return numCells;
         }
-        else
-            return 0;
+        
+        return numCells;
     }   
 }
