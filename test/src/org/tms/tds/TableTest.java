@@ -18,7 +18,6 @@ import org.tms.api.exceptions.UnimplementedException;
 
 public class TableTest
 {
-
     @Test
     public void testTableBasicProperties()
     {
