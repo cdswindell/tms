@@ -1,18 +1,72 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
 public class Row extends TableElementSlice
 {
+    private int m_cellOffset;
+    
     protected Row(Table parentTable)
     {
         super(ElementType.Row, parentTable);
     }
 
+    /*
+     * Field getters/setters
+     */
+
+    protected int getCellOffset()
+    {
+        return m_cellOffset;
+    }
+    
+    void setCellOffset(int offset)
+    {
+        m_cellOffset = offset;
+    }
+    
+    /*
+     * Class-specific methods
+     */
+    
+    protected Cell getCell(Column col)
+    {
+        return getCellInternal(col, true);
+    }
+    
+    Cell getCellInternal(Column col, boolean createIfSparse)
+    {
+        assert col != null : "Column required";
+        assert this.getTable() != null: "Table required";
+        assert this.getTable() == col.getTable() : "Column not in same table";
+        
+        synchronized(getTable()) {
+            return col.getCellInternal(this, createIfSparse);
+        }
+    }
+
+    /*
+     * Overridden Methods
+     */
+    @Override
+    protected Object getProperty(TableProperty key)
+    {
+        switch(key)
+        {
+            case CellOffset:
+                return getCellOffset();
+                
+            case numCells:
+                return getNumCells();
+                
+            default:
+                return super.getProperty(key);
+        }
+    }
+    
     @Override
     protected void initialize(TableElement e)
     {
@@ -29,10 +83,12 @@ public class Row extends TableElementSlice
                     throw new IllegalStateException("No initialization available for Row Property: " + tp);                       
             }
         }
+        
+        m_cellOffset = -1;
     }
-
+    
     @Override
-    protected Row insertSlice(int insertAt, boolean addCells)
+    protected Row insertSlice(int insertAt)
     {
         // sanity check, insertAt must be >= 0 (indexes are 0-based)
         assert insertAt >= 0 : insertAt;
@@ -98,23 +154,7 @@ public class Row extends TableElementSlice
         // mark this row as current
         setCurrent();
         
-        // Add cells, if requested
-        if (addCells)
-            ensureCellCapacity();
-        
         return this;
-    }
-
-    @Override
-    void ensureCellCapacity()
-    {
-        Table table = getTable();
-        assert table != null : "Parent table required";
-        
-        // iterate over all non-null columns
-        List<Column> cols = table.getColumns();
-        if (cols != null)
-            cols.forEach(c -> { if (c != null) c.ensureCellCapacity();});
     }
 
     @Override
@@ -125,5 +165,36 @@ public class Row extends TableElementSlice
             prevCurrent = getTable().setCurrentRow(this);
         
         return prevCurrent;
-    }  
+    } 
+    
+    @Override
+    /**
+     * Returns the count of the number of allocated cells that exist for this row
+     */
+    protected int getNumCells()
+    {
+        // if the offset isn't set, there can be no cells
+        int cellOffset = getCellOffset();
+        if (cellOffset < 0)
+            return 0;
+        
+        Table parent = getTable();
+        assert parent != null : "Parent Table Null";
+
+        ArrayList<Column> cols = parent.getColumns();
+        if (cols != null) {
+            int numCells = 0;
+            for (Column c : cols) {
+                if (c == null) continue;
+                int numColCells = c.getNumCells();
+                if (cellOffset < numColCells) {
+                    // TODO: get column cells
+                }
+            }
+            
+            return numCells;
+        }
+        else
+            return 0;
+    }   
 }

@@ -4,11 +4,14 @@ import java.util.ArrayList;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.IllegalTableStateException;
 
 public class Column extends TableElementSlice
 {
     private Object m_cells;
     private Class<? extends Object> m_dataType;
+    private int m_cellsCapacity;
+    private boolean m_stronglyTyped;
     
     public Column(Table parentTable)
     {
@@ -23,31 +26,110 @@ public class Column extends TableElementSlice
         return m_dataType;
     }
     
+    protected int getCellsCapacity()
+    {
+        return m_cellsCapacity;
+    }
+    
+    protected boolean isStronglyTyped()
+    {
+        return m_stronglyTyped;
+    }
+
+    protected void setStronglyTyped(boolean stronglyTyped)
+    {
+        if (stronglyTyped && getDataType() == null)
+            throw new IllegalTableStateException("DataType Missing"); // can't strongly type a column without a datatype
+        
+        m_stronglyTyped = stronglyTyped;
+    }
+
     /*
      * Class-specific methods
-     */
+     */    
+
+    protected Cell getCell(Row row)
+    {
+        return getCellInternal(row, true);
+    }
+    
+    @SuppressWarnings("unchecked")
+    Cell getCellInternal(Row row, boolean createIfSparse)
+    {
+        assert row != null : "Row required";
+        assert this.getTable() != null: "Table required";
+        assert this.getTable() == row.getTable() : "Row not in same table";
+        
+        Cell c = null;
+        int numCells = getNumCells();
+        synchronized(getTable()) {
+            int cellOffset = row.getCellOffset();
+            if (cellOffset < 0) {
+                // if the cell offset is not defined, no cells have been created
+                if (!createIfSparse ) return c;
+                
+                // the next available offset is the current number of cells
+                cellOffset = numCells;
+                assert cellOffset >= 0 : "Invalid cell offset returned";
+                
+                row.setCellOffset(cellOffset);
+            }
+            
+            // get a type-safe reference to the cells array
+            ArrayList<Cell> cells = (ArrayList<Cell>)m_cells;
+            
+            // if offset is equal or greater than numCells, we haven't referenced this
+            // cell yet, create it and add it to the array, if createIfSparse is true
+            if (cellOffset < numCells) {
+                c = cells.get(cellOffset);
+                
+                if (c == null && createIfSparse) {
+                    c = new Cell(getTable());
+                    cells.set(cellOffset, c);
+                }
+            }
+            else {
+                // if cellOffset is equal to or > numCells, this should be a new slot
+                // in which case, cellOffset should equal numCells
+                assert !createIfSparse : "createIfSparse is false and cellOffset >= numCells";
+                assert cellOffset == numCells;
+                
+                // make sure sufficient capacity exists
+                ensureCellCapacity();
+                cells = (ArrayList<Cell>)m_cells; // reget the cells array, in case it was null
+                
+                c = new Cell(getTable());
+                c.setIndex(row.getIndex());
+                cells.add(c);
+            }
+        } // of synchronized
+        
+        return c;
+    }
     
     /*
      * Overridden methods
      */
+    
     @Override
     protected void initialize(TableElement e)
     {
         super.initialize(e);
         
         BaseElement source = getInitializationSource(e);        
-        for (TableProperty tp : this.getInitializableProperties()) {
-            Object value = source.getProperty(tp);
-            
-            if (super.initializeProperty(tp, value)) continue;
-            
+        for (TableProperty tp : this.getInitializableProperties()) 
+        {
+            Object value = source.getProperty(tp);            
+            if (super.initializeProperty(tp, value)) continue;            
             switch (tp) {
                 default:
                     throw new IllegalStateException("No initialization available for Column Property: " + tp);                       
             }
         }
         
+        setStronglyTyped(false);
         m_cells = null;
+        m_cellsCapacity = 0;
         m_dataType = null;
     }
 
@@ -59,13 +141,22 @@ public class Column extends TableElementSlice
             case DataType:
                 return getDataType();
                 
+            case isStronglyTyped:
+                return isStronglyTyped();
+                
+            case numCells:
+                return getNumCells();
+                
+            case numCellsCapacity:
+                return getCellsCapacity();
+                
             default:
                 return super.getProperty(key);
         }
     }
     
     @Override
-    protected Column insertSlice(int insertAt, boolean addCells)
+    protected Column insertSlice(int insertAt)
     {
         // sanity check, insertAt must be >= 0 (indexes are 0-based)
         assert insertAt >= 0;
@@ -121,10 +212,6 @@ public class Column extends TableElementSlice
             cols.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});
         }       
         
-        // Add cells, if requested
-        if (addCells)
-            ensureCellCapacity();
-        
         // mark this column as current
         setCurrent();
         
@@ -132,7 +219,6 @@ public class Column extends TableElementSlice
     }
 
     @SuppressWarnings("unchecked")
-    @Override
     void ensureCellCapacity()
     {
         Table table = getTable();
@@ -140,13 +226,29 @@ public class Column extends TableElementSlice
         
         // cell capacity is based on the number of rows in a table
         if (table.getNumRows() > 0) {
-            if (m_cells == null)
-                m_cells = new ArrayList<Cell>(table.getRowsCapacity());
-            else 
-                ((ArrayList<Cell>)m_cells).ensureCapacity(table.getRowsCapacity());    
+            int reqCapacity = table.getRowsCapacity();
+            if (m_cells == null) {
+                m_cells = new ArrayList<Cell>(reqCapacity);
+                m_cellsCapacity = reqCapacity;
+            }
+            else if (reqCapacity > m_cellsCapacity) {
+                ((ArrayList<Cell>)m_cells).ensureCapacity(reqCapacity);
+                m_cellsCapacity = reqCapacity;
+            }
         }
     }
 
+    @Override 
+    @SuppressWarnings("unchecked")
+    protected int getNumCells()
+    {
+        if (m_cells != null)
+        {
+            return ((ArrayList<Cell>)m_cells).size();
+        }
+        else return 0;
+    }
+    
     @Override
     protected Column setCurrent()
     {
@@ -159,7 +261,7 @@ public class Column extends TableElementSlice
     
     protected boolean isEmpty()
     {
-        if (m_cells == null)
+        if (getNumCells() <= 0)
             return true;
         
         return super.isEmpty();

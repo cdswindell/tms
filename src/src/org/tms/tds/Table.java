@@ -145,6 +145,9 @@ public class Table extends TableElement
             case Columns:
                 return getColumns(); 
                 
+            case numCells:
+                return getNumCells(); 
+                
             default:
                 return super.getProperty(key);
         }
@@ -449,7 +452,7 @@ public class Table extends TableElement
         return r;
     }
 
-    synchronized protected TableElementSlice add(TableElementSlice r, Access mode, Object md)
+    synchronized protected TableElementSlice add(TableElementSlice r, Access mode, Object... md)
     {
         // calculate the index where the row will go
         ElementType sliceType = r.getElementType();
@@ -457,8 +460,8 @@ public class Table extends TableElement
         if (idx <= -1)
             throw new InvalidAccessException(ElementType.Table, sliceType, mode, true, md);
         
-        // insert row into data structure at correct index, adding cells as/if required
-        if (r.insertSlice(idx, true) != null)
+        // insert row into data structure at correct index
+        if (r.insertSlice(idx) != null)
             r.setCurrent();
         
         return r;
@@ -640,7 +643,7 @@ public class Table extends TableElement
     
     protected TableElement find(ArrayList<? extends TableElementSlice> slices, TableProperty key, Object value)
     {
-        assert key != null : "TableProperty required";
+        assert key != null : "TableProperty required (enum)";
         TableElement foundElement = null;
         if (slices != null && value != null) {
             for (TableElementSlice tes : slices) {
@@ -657,8 +660,19 @@ public class Table extends TableElement
 
     protected TableElement find(ArrayList<? extends TableElementSlice> slices, String key, Object value)
     {
-        // TODO Auto-generated method stub
-        return null;
+        assert key != null : "TableProperty required (String)";
+        TableElement foundElement = null;
+        if (slices != null && value != null) {
+            for (TableElementSlice tes : slices) {
+                if (tes != null) {
+                    Object p = tes.getProperty(key);
+                    if (p != null && p.equals(value))
+                        return tes;
+                }
+            }
+        }
+        
+        return foundElement;
     }
 
     /**
@@ -694,6 +708,22 @@ public class Table extends TableElement
             }
         }
     }
+     
+    @Override
+    protected int getNumCells()
+    {
+        // TODO: Implement
+        return 0;
+    }
+    
+    protected Cell getCell(Row row, Column col)
+    {
+        assert row != null : "Row required";
+        assert col != null : "Column required";
+        assert this == row.getTable() && this == col.getTable(): "Row/Column table mismatch";
+        
+        return col.getCell(row);
+    }
     
     /**
      * Empty tables contain no rows or columns
@@ -701,6 +731,6 @@ public class Table extends TableElement
     @Override
     protected boolean isEmpty()
     {
-        return getNumRows() == 0 || getNumColumns() == 0;
+        return getNumRows() == 0 || getNumColumns() == 0 || getNumCells() == 0;
     }
 }

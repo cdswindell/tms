@@ -149,8 +149,8 @@ abstract public class BaseElement
         // Some properties are built into the base element object
         switch (key)
         {
-            case isSupportsNull:
-                return isSupportsNull();
+            case isSupportsEmpty:
+                return isSupportsEmpty();
                 
             case isReadOnly:
                 return isReadOnly();
@@ -235,10 +235,10 @@ abstract public class BaseElement
                 setReadOnly((boolean)value);
                 break;
                 
-            case isSupportsNull:
+            case isSupportsEmpty:
                 if (!isValidPropertyValueBoolean(value))
                     value = Context.sf_SUPPORTS_NULL_DEFAULT;
-                setSupportsNull((boolean)value);
+                setSupportsEmpty((boolean)value);
                 break;
                 
             default:
@@ -304,12 +304,12 @@ abstract public class BaseElement
         setProperty(TableProperty.Description, (description != null ? description.trim() : null));
     }
     
-    protected boolean isSupportsNull()
+    protected boolean isSupportsEmpty()
     {
         return m_supportsNull;
     }
 
-    protected void setSupportsNull(boolean supportsNull)
+    protected void setSupportsEmpty(boolean supportsNull)
     {
         m_supportsNull = supportsNull;
     }

@@ -49,6 +49,9 @@ public class Range extends TableElement
             case Columns:
                 return getColumns(); 
                 
+            case numCells:
+                return getNumCells();
+                
             default:
                 return super.getProperty(key);
         }
@@ -205,4 +208,10 @@ public class Range extends TableElement
         return removedAny;
     } 
     
+    @Override
+    protected int getNumCells()
+    {
+        // TODO: implement
+        return 0;
+    }
 }

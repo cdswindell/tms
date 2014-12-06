@@ -163,14 +163,25 @@ public class RowTest
         assertThat(r.getIndex(), is(t.getRowsCapacity()));
         assertThat(t.getNumRows(), is(t.getRowsCapacity()));
         assertThat(t.calcIndex(ElementType.Row, Access.ByIndex, false, t.getRowsCapacity()), is(t.getRowsCapacity()-1));
+        assertThat(r.getNumCells(), is(0));
         
         // add a column
         Column c = t.addColumn(Access.ByIndex, 3);
         assertThat(c, notNullValue());
+        assertThat(c.getNumCells(), is(0));
+        assertThat(r.getNumCells(), is(0));
         
-        // add another row and make sure cell capacity is incremented
+        // add another row and make sure cell count is still 0
         r = t.addRow(Access.Last);
         assertThat(r, notNullValue());
+        assertThat(r.getNumCells(), is(0));
+        
+        // force cell creation
+        Cell cell = t.getCell(r, c);
+        assertThat(cell, notNullValue());
+        
+        r = t.addRow(Access.ByIndex, t.getRowsCapacity());
+        cell = t.getCell(r, c);
+        assertThat(cell, notNullValue());
     }
-
 }

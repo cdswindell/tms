@@ -6,6 +6,8 @@ import org.tms.api.exceptions.InvalidParentException;
 
 abstract class TableElement extends BaseElement
 {
+    abstract protected int getNumCells();
+    
     private int m_index = -1;
     private Table m_table;
     private boolean m_enforceDataType;

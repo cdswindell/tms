@@ -9,9 +9,8 @@ import org.tms.util.JustInTimeSet;
 
 abstract class TableElementSlice extends TableElement
 {
-    abstract protected TableElementSlice insertSlice(int idx, boolean addCells);
+    abstract protected TableElementSlice insertSlice(int idx);
     abstract protected TableElementSlice setCurrent();
-    abstract void ensureCellCapacity();
     
     private JustInTimeSet<Range> m_ranges;
     private boolean m_inUse;

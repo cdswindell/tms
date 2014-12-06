@@ -14,7 +14,7 @@ public enum TableProperty implements Comparable<TableProperty>
     Description,   
     isEmpty(true, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     isReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column),
-    isSupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    isSupportsEmpty(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     // Table Element Properties (Context implements initializable ones)
     Index(true, false),
@@ -31,8 +31,10 @@ public enum TableProperty implements Comparable<TableProperty>
     numRanges(true, false, ElementType.Table, ElementType.Row, ElementType.Column),
     numRows(true, false, ElementType.Table, ElementType.Range),
     numColumns(true, false, ElementType.Table, ElementType.Range),
+    numCells(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
     numRowsCapacity(true, false, ElementType.Table),
     numColumnsCapacity(true, false, ElementType.Table),
+    numCellsCapacity(true, false, ElementType.Column),
     
     Rows(true, false, ElementType.Table, ElementType.Range),
     Columns(true, false, ElementType.Table, ElementType.Range), 
@@ -41,8 +43,9 @@ public enum TableProperty implements Comparable<TableProperty>
     // Cell properties
     Row(true, false, ElementType.Cell),
     Column(true, false, ElementType.Cell),
+    CellOffset(true, false, ElementType.Row),
     DataType(false, false, ElementType.Column, ElementType.Cell),
-
+    isStronglyTyped(false, false, ElementType.Column);
     ;
     
     private boolean m_optional;
@@ -139,6 +142,7 @@ public enum TableProperty implements Comparable<TableProperty>
         switch(this)
         {
             case Index:
+            case CellOffset:
             case RowCapacityIncr:
             case ColumnCapacityIncr:
                 return true;

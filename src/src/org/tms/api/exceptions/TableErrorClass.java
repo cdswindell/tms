@@ -5,5 +5,6 @@ public enum TableErrorClass
     ReadOnly,
     Unimplemented,
     Invalid,
+    Illegal,
     Unknown;
 }

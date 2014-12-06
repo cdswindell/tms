@@ -13,6 +13,16 @@ public class Cell extends TableElement
 
     }
 
+    /*
+     * Overridden methods
+     */
+    
+    protected int getNumCells()
+    {
+        // Degenerate case
+        return 1;
+    }
+    
     /**
      * A cell is empty if it has been explicitly set to empty
      */
