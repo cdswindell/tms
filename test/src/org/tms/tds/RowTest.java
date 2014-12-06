@@ -172,30 +172,57 @@ public class RowTest
         assertThat(r.getNumCells(), is(0));
         
         // add another row and make sure cell count is still 0
-        r = t.addRow(Access.Last);
-        assertThat(r, notNullValue());
-        assertThat(r.getNumCells(), is(0));
+        Row r2 = t.addRow(Access.Last);
+        assertThat(r2, notNullValue());
+        assertThat(r2.getNumCells(), is(0));
         
         // make sure row and col are marked not in use
-        assertThat(r.isInUse(), is(false));
+        assertThat(r2.isInUse(), is(false));
         assertThat(c.isInUse(), is(false));
-        assertThat(r.getNumCells(), is(0));
+        assertThat(r2.getNumCells(), is(0));
         assertThat(c.getNumCells(), is(0));
         
         // force cell creation
-        Cell cell = t.getCell(r, c);
+        Cell cell = t.getCell(r2, c);
         assertThat(cell, notNullValue());
         
         // make sure row and col are marked not in use
-        assertThat(r.isInUse(), is(true));
+        assertThat(r2.isInUse(), is(true));
         assertThat(c.isInUse(), is(true));
-        assertThat(r.getNumCells(), is(1));
+        assertThat(r2.getNumCells(), is(1));
         assertThat(c.getNumCells(), is(1));
         
-        r = t.addRow(Access.ByIndex, t.getRowsCapacity());
-        cell = t.getCell(r, c);
+        Row r3 = t.addRow(Access.ByIndex, t.getRowsCapacity());
+        cell = t.getCell(r3, c);
         assertThat(cell, notNullValue());
-        assertThat(r.getNumCells(), is(1));
+        assertThat(r3.getNumCells(), is(1));
         assertThat(c.getNumCells(), is(2));
+        assertThat(t.getNumCells(), is(2));
+        
+        // now add another column and check total cell count
+        c = t.addColumn(Access.ByIndex, 3);
+        assertThat(c, notNullValue());
+        assertThat(c.getNumCells(), is(0));
+        assertThat(r.getNumCells(), is(0));
+        assertThat(r2.getNumCells(), is(1));
+        assertThat(r3.getNumCells(), is(1));
+        assertThat(t.getNumCells(), is(2));
+        
+        // now get the cells in the new column and make sure the cell count goes up
+        cell = t.getCell(r2, c);
+        assertThat(cell, notNullValue());
+        assertThat(c.getNumCells(), is(1));
+        assertThat(r.getNumCells(), is(0));
+        assertThat(r2.getNumCells(), is(2));
+        assertThat(r3.getNumCells(), is(1));
+        assertThat(t.getNumCells(), is(3));
+        
+        cell = t.getCell(r3, c);
+        assertThat(cell, notNullValue());
+        assertThat(c.getNumCells(), is(2));
+        assertThat(r.getNumCells(), is(0));
+        assertThat(r2.getNumCells(), is(2));
+        assertThat(r3.getNumCells(), is(2));
+        assertThat(t.getNumCells(), is(4));
     }
 }

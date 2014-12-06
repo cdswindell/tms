@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.tms.api.Access;
@@ -712,8 +713,13 @@ public class Table extends TableElement
     @Override
     protected int getNumCells()
     {
-        // TODO: Implement
-        return 0;
+        int numCells = 0;
+        for (Column c : columnIterable()) {
+            if (c != null)
+                numCells += c.getNumCells();
+        }
+        
+        return numCells;
     }
     
     protected Cell getCell(Row row, Column col)
@@ -732,5 +738,53 @@ public class Table extends TableElement
     protected boolean isEmpty()
     {
         return getNumRows() == 0 || getNumColumns() == 0 || getNumCells() == 0;
+    }
+    
+    protected Iterable<Column> columnIterable()
+    {
+        return new TableIterator<Column>(getColumns());
+    }
+    
+    protected Iterator<Column> columnIterator()
+    {
+        return new TableIterator<Column>(getColumns());
+    }
+    
+    private class TableIterator<E extends TableElement> implements Iterator<E>, Iterable<E>
+    {
+        private Iterator<E> m_iter;
+        
+        @SuppressWarnings("unchecked")
+        public TableIterator(List<? extends TableElement> elems)
+        {
+            if (elems != null)
+                m_iter = (Iterator<E>) elems.iterator();
+            else
+                m_iter = null;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+           if (m_iter != null)
+               return m_iter.hasNext();
+           else
+               return false;
+        }
+
+        @Override
+        public E next()
+        {
+            if (m_iter != null)
+                return m_iter.next();
+            
+            return null;
+        }
+
+        @Override
+        public Iterator<E> iterator()
+        {
+            return m_iter;
+        }        
     }
 }
