@@ -18,6 +18,7 @@ public class Table extends TableElement
     
     private ArrayList<Row> m_rows;
     private ArrayList<Column> m_cols;
+    private int m_nextCellOffset;
     
     private Row m_curRow;
     private Column m_curCol;
@@ -69,6 +70,8 @@ public class Table extends TableElement
         
         m_curRow = null;
         m_curCol = null;
+        
+        m_nextCellOffset = 0;
         
         // set all other arrays/sets/maps to null/JustInTime
         m_ranges = new JustInTimeSet<Range>();
@@ -676,6 +679,10 @@ public class Table extends TableElement
         return foundElement;
     }
 
+	synchronized int getNextCellOffset() {
+		return m_nextCellOffset++;
+	}
+	
     /**
      * Reindex table elements, useful after a sort or manual manipulation
      * @param et
@@ -787,4 +794,5 @@ public class Table extends TableElement
             return m_iter;
         }        
     }
+
 }

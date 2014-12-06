@@ -186,7 +186,7 @@ public class Row extends TableElementSlice
         if (cols != null) {
             for (Column c : cols) {
                 if (c == null) continue;
-                int numColCells = c.getNumCells();
+                int numColCells = c.getCellsSize();
                 if (cellOffset < numColCells) {
                     if (c.getCellInternal(this, false) != null)
                         numCells++;

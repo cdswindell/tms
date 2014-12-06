@@ -61,19 +61,23 @@ public class Column extends TableElementSlice
         assert this.getTable() == row.getTable() : "Row not in same table";
         
         Cell c = null;
-        int numCells = getNumCells();
+        int numCells = getCellsSize();
+        Table table = getTable();
         synchronized(getTable()) {
             int cellOffset = row.getCellOffset();
             if (cellOffset < 0) {
                 // if the cell offset is not defined, no cells have been created
                 if (!createIfSparse ) return c;
                 
-                // the next available offset is the current number of cells
-                cellOffset = numCells;
+                /*
+                 *  consult the table for an available cell offset; this value is stored in
+                 *  the row structure, and is used as an offset into the column cell array
+                 */
+                cellOffset = table.getNextCellOffset();
                 assert cellOffset >= 0 : "Invalid cell offset returned";
                 
                 row.setCellOffset(cellOffset);
-            }
+            } // of assign cell offset to row
             
             // get a type-safe reference to the cells array
             ArrayList<Cell> cells = (ArrayList<Cell>)m_cells;
@@ -92,12 +96,21 @@ public class Column extends TableElementSlice
                 // if cellOffset is equal to or > numCells, this should be a new slot
                 // in which case, cellOffset should equal numCells
                 assert !createIfSparse : "createIfSparse is false and cellOffset >= numCells";
-                assert cellOffset == numCells;
+                assert cellOffset >= numCells;
                 
                 // make sure sufficient capacity exists
                 ensureCellCapacity();
                 cells = (ArrayList<Cell>)m_cells; // reget the cells array, in case it was null
                 
+                // if cellOffset is equal to or beyond num cells, add slots to cell array
+                while (cellOffset > numCells) {
+                	cells.add(null);
+                	numCells++;
+                }
+                
+                // create a new cell structure and add it to the array
+                // at this point, cellOffset should equal numCells
+                assert cellOffset == numCells : "cellOffset != numCells";
                 c = new Cell(getTable());
                 c.setIndex(row.getIndex());
                 cells.add(c);
@@ -111,6 +124,15 @@ public class Column extends TableElementSlice
         }
         
         return c;
+    }
+    
+    @SuppressWarnings("unchecked")
+	int getCellsSize()
+    {
+        if (m_cells != null) 
+        	return ((ArrayList<Cell>)m_cells).size();
+        else 
+            return 0;
     }
     
     /*
@@ -248,8 +270,13 @@ public class Column extends TableElementSlice
     @SuppressWarnings("unchecked")
     protected int getNumCells()
     {
-        if (m_cells != null)
-            return ((ArrayList<Cell>)m_cells).size();
+        if (m_cells != null) {
+        	int numNonNullCells = 0;
+        	for (Object o : (ArrayList<Cell>)m_cells)
+        		if (o != null) numNonNullCells++;
+        	
+        	return numNonNullCells;
+        }
         else 
             return 0;
     }
