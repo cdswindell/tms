@@ -23,61 +23,9 @@ public class Range extends TableElement
             parentTable.add(this);
     }
 
-    @Override
-    protected boolean isEmpty()
-    {
-        boolean hasRows = (m_rows != null && !m_rows.isEmpty());
-        boolean hasCols = (m_cols != null && !m_cols.isEmpty());
-        
-        return !hasRows  && !hasCols;
-    }
-
-    @Override
-    protected Object getProperty(TableProperty key)
-    {
-        switch(key)
-        {
-            case numRows:
-                return m_rows.size();
-                
-            case numColumns:
-                return m_cols.size();
-                
-            case Rows:
-                return getRows(); 
-                
-            case Columns:
-                return getColumns(); 
-                
-            case numCells:
-                return getNumCells();
-                
-            default:
-                return super.getProperty(key);
-        }
-    }
-    
-    @Override
-    protected void initialize(TableElement e)
-    {
-        super.initialize(e);
-        
-        BaseElement source = getInitializationSource(e);        
-        for (TableProperty tp : this.getInitializableProperties()) {
-            Object value = source.getProperty(tp);
-            
-            if (super.initializeProperty(tp, value)) continue;
-            
-            switch (tp) {
-                default:
-                    throw new IllegalStateException("No initialization available for Range Property: " + tp);                       
-            }
-        }
-        
-        m_rows = new JustInTimeSet<Row>();
-        m_cols = new JustInTimeSet<Column>();
-    }
-    
+    /*
+     * Field Getters/Setters
+     */
     protected List<Row> getRows()
     {
         return new ArrayList<Row>(((JustInTimeSet<Row>)m_rows).clone());
@@ -88,6 +36,9 @@ public class Range extends TableElement
         return new ArrayList<Column>(((JustInTimeSet<Column>)m_cols).clone());
     }
 
+    /*
+     * Class-specific methods
+     */
     protected boolean contains(TableElementSlice r)
     {
         if (r != null) {
@@ -208,10 +159,87 @@ public class Range extends TableElement
         return removedAny;
     } 
     
+    /*
+     * Overridden Methods
+     */
+    
+    @Override protected void delete()
+    {
+    	// Remove the range from its component rows and columns
+    	m_rows.forEach(r -> {if (r != null) r.remove(this);});
+    	m_cols.forEach(c -> {if (c != null) c.remove(this);});
+    	
+    	m_rows.clear();
+    	m_cols.clear();
+    	
+    	// remove the range from its parent table
+    	if (getTable() != null) getTable().remove(this);	
+    }
+    
+    @Override
+    protected boolean isEmpty()
+    {
+        boolean hasRows = (m_rows != null && !m_rows.isEmpty());
+        boolean hasCols = (m_cols != null && !m_cols.isEmpty());
+        
+        return !hasRows  && !hasCols;
+    }
+
+    @Override
+    protected Object getProperty(TableProperty key)
+    {
+        switch(key)
+        {
+            case numRows:
+                return m_rows.size();
+                
+            case numColumns:
+                return m_cols.size();
+                
+            case Rows:
+                return getRows(); 
+                
+            case Columns:
+                return getColumns(); 
+                
+            case numCells:
+                return getNumCells();
+                
+            default:
+                return super.getProperty(key);
+        }
+    }
+    
+    @Override
+    protected void initialize(TableElement e)
+    {
+        super.initialize(e);
+        
+        BaseElement source = getInitializationSource(e);        
+        for (TableProperty tp : this.getInitializableProperties()) {
+            Object value = source.getProperty(tp);
+            
+            if (super.initializeProperty(tp, value)) continue;
+            
+            switch (tp) {
+                default:
+                    throw new IllegalStateException("No initialization available for Range Property: " + tp);                       
+            }
+        }
+        
+        m_rows = new JustInTimeSet<Row>();
+        m_cols = new JustInTimeSet<Column>();
+    }
+        
     @Override
     protected int getNumCells()
     {
-        // TODO: implement
-        return 0;
+    	int numCells = 0;
+    	for (Column c : m_cols) {
+    		if (c != null) 
+    			numCells += c.getNumCells();
+    	}
+    	
+        return numCells;
     }
 }

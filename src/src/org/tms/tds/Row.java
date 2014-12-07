@@ -167,6 +167,20 @@ public class Row extends TableElementSlice
         return prevCurrent;
     } 
     
+    
+    @Override
+    protected void delete()
+    {
+    	// remove element from ranges that contain it
+    	removeFromRanges();
+    	
+    	// now, remove from the parent table, if it is defined
+    	Table parent = getTable();
+    	if (parent != null) {
+    		
+    	}
+    }
+    
     @Override
     /**
      * Returns the count of the number of allocated cells that exist for this row
@@ -195,5 +209,5 @@ public class Row extends TableElementSlice
         }
         
         return numCells;
-    }   
+    }
 }

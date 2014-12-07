@@ -135,6 +135,27 @@ public class Column extends TableElementSlice
             return 0;
     }
     
+
+    @SuppressWarnings("unchecked")
+    void ensureCellCapacity()
+    {
+        Table table = getTable();
+        assert table != null : "Parent table required";
+        
+        // cell capacity is based on the number of rows in a table
+        if (table.getNumRows() > 0) {
+            int reqCapacity = table.getRowsCapacity();
+            if (m_cells == null) {
+                m_cells = new ArrayList<Cell>(reqCapacity);
+                m_cellsCapacity = reqCapacity;
+            }
+            else if (reqCapacity > m_cellsCapacity) {
+                ((ArrayList<Cell>)m_cells).ensureCapacity(reqCapacity);
+                m_cellsCapacity = reqCapacity;
+            }
+        }
+    }
+
     /*
      * Overridden methods
      */
@@ -245,27 +266,7 @@ public class Column extends TableElementSlice
         
         return this;
     }
-
-    @SuppressWarnings("unchecked")
-    void ensureCellCapacity()
-    {
-        Table table = getTable();
-        assert table != null : "Parent table required";
-        
-        // cell capacity is based on the number of rows in a table
-        if (table.getNumRows() > 0) {
-            int reqCapacity = table.getRowsCapacity();
-            if (m_cells == null) {
-                m_cells = new ArrayList<Cell>(reqCapacity);
-                m_cellsCapacity = reqCapacity;
-            }
-            else if (reqCapacity > m_cellsCapacity) {
-                ((ArrayList<Cell>)m_cells).ensureCapacity(reqCapacity);
-                m_cellsCapacity = reqCapacity;
-            }
-        }
-    }
-
+    
     @Override 
     @SuppressWarnings("unchecked")
     protected int getNumCells()
@@ -291,11 +292,40 @@ public class Column extends TableElementSlice
         return prevCurrent;
     }  
     
-    protected boolean isEmpty()
+    @Override
+    protected void delete()
     {
-        if (getNumCells() <= 0)
-            return true;
-        
-        return super.isEmpty();
+    	// remove element from ranges that contain it
+    	removeFromRanges();
+    	
+    	// now, remove from the parent table, if it is defined
+    	Table parent = getTable();
+    	if (parent != null) {
+            // sanity check, columns list must exist
+            ArrayList<Column> cols = parent.getColumns();
+            assert cols != null;
+            
+            int idx = getIndex() -1;
+            assert idx >= 0 : "Invalid column index";
+            
+            TableElementSlice rc = cols.remove(idx);
+            assert rc == this : "Removed column mismatch";
+            
+            // reindex remaining columns
+            int nCols = parent.getNumColumns();
+            if (idx > nCols - 1)
+            	cols.listIterator(idx).forEachRemaining(c -> {if (c != null) c.setIndex(c.getIndex() - 1);});
+            
+            // sanity check
+            nCols = nCols--;
+            assert nCols == cols.size() : "Column array size mismatch";
+            
+            // compact memory, if there are too many free columns
+            int capacity = parent.getColumnsCapacity();
+            compactIfNeeded(cols, capacity);
+    	}   	
+
+        // help the garbage collector
+        this.m_cells = null;
     }
 }

@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -152,6 +153,9 @@ public class Table extends TableElement
             case numCells:
                 return getNumCells(); 
                 
+            case NextCellOffset:
+            	return this.getNextCellOffset();
+                
             default:
                 return super.getProperty(key);
         }
@@ -162,18 +166,14 @@ public class Table extends TableElement
         if (c == null)
             c = Context.getDefaultContext();
         
+        if (c != null)
+        	c.unregister(this);
+        
         m_context = c.register(this);
         
         return m_context;
     }
-    
-    void clearContext() 
-    {
-        if (getContext() != null)
-            getContext().unregister(this);
-        m_context = null;
-    }
-    
+
     @Override
     protected Context getContext()
     {
@@ -191,6 +191,19 @@ public class Table extends TableElement
         return new ArrayList<Range>(m_ranges.clone());
     }
     
+    protected void delete()
+    {
+    	m_ranges.clear();
+    	if (m_cols != null)
+    		m_cols.clear();
+    	
+    	if (m_rows != null)
+    		m_rows.clear();
+    	
+    	if (getContext() != null)
+    		getContext().unregister(this);;   	
+    }
+    
     protected boolean add(Range r)
     {
         vetParent(r);
@@ -199,14 +212,34 @@ public class Table extends TableElement
         return processed;
     }
     
-    protected boolean remove(Range r)
+    /*
+     * Delete TableELement methods
+     */
+    protected void remove(Range r)
     {
         vetParent(r);
         boolean processed = m_ranges.remove(r);
+        
         if (processed) markDirty();
-        return processed;
     }
  
+    protected void delete(Row r)
+    {
+        vetParent(r);
+        boolean processed = false;
+        
+        if (processed) markDirty();
+    }
+ 
+    protected void delete(Column c)
+    {
+        vetParent(c);
+        boolean processed = false;
+        
+        if (processed) markDirty();
+    }
+ 
+    
     protected boolean isDirty()
     {
         return m_dirty;
@@ -747,9 +780,19 @@ public class Table extends TableElement
         return getNumRows() == 0 || getNumColumns() == 0 || getNumCells() == 0;
     }
     
+    protected Iterable<Row> rowIterable()
+    {
+        return new TableIterator<Row>(getRows());
+    }
+    
     protected Iterable<Column> columnIterable()
     {
         return new TableIterator<Column>(getColumns());
+    }
+    
+    protected Iterable<Range> rangeIterable()
+    {
+        return new TableIterator<Range>(m_ranges);
     }
     
     protected Iterator<Column> columnIterator()
@@ -762,7 +805,7 @@ public class Table extends TableElement
         private Iterator<E> m_iter;
         
         @SuppressWarnings("unchecked")
-        public TableIterator(List<? extends TableElement> elems)
+        public TableIterator(Collection<? extends TableElement> elems)
         {
             if (elems != null)
                 m_iter = (Iterator<E>) elems.iterator();

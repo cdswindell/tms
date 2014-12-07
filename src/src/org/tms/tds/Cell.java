@@ -65,4 +65,10 @@ public class Cell extends TableElement
         // initialize other variables
         m_cellValue = null;
     }
+    
+    @Override
+    protected void delete()
+    {
+    	setCellValue(null);
+    }
 }
