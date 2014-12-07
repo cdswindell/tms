@@ -396,8 +396,10 @@ public class Table extends TableElement
 		m_unusedCellOffsets.offer(cellOffset);
 		
 		// if so-requested, free the cells in the component columns array
-		for (Column c : getColumns())
-			c.clearCell(cellOffset);
+		for (Column c : getColumns()) {
+			if (c != null) 
+				c.clearCell(cellOffset);
+		}
 	}
 
     /*
@@ -736,7 +738,19 @@ public class Table extends TableElement
         return foundElement;
     }
 
-	synchronized int getNextCellOffset() {
+    /**
+     * Returns an available cell offset value
+     * @return
+     */
+	synchronized int getNextCellOffset() 
+	{
+		Integer availableOffset = this.m_unusedCellOffsets.poll();
+		if (availableOffset != null) {
+			assert availableOffset >= 0 : "Invalid Cell Offset Value";
+			return availableOffset;
+		}
+		
+		// otherwise, just return the next available offset
 		return m_nextCellOffset++;
 	}
 	
