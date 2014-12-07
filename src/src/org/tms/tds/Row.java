@@ -177,7 +177,31 @@ public class Row extends TableElementSlice
     	// now, remove from the parent table, if it is defined
     	Table parent = getTable();
     	if (parent != null) {
-    		
+            // sanity check, columns list must exist
+            ArrayList<Row> rows = parent.getRows();
+            assert rows != null;
+            
+            int idx = getIndex() -1;
+            assert idx >= 0 : "Invalid row index";
+            
+            TableElementSlice rc = rows.remove(idx);
+            assert rc == this : "Removed row mismatch";
+            
+            // reindex remaining rows
+            int nRows = parent.getNumRows();
+            if (idx > nRows - 1)
+            	rows.listIterator(idx).forEachRemaining(c -> {if (c != null) c.setIndex(c.getIndex() - 1);});
+            
+            // sanity check
+            nRows = nRows--;
+            assert nRows == rows.size() : "Rows array size mismatch";
+            
+            // compact memory, if there are too many free Rows
+            int capacity = parent.getColumnsCapacity();
+            compactIfNeeded(rows, capacity);    
+            
+            // cache the cell offset so it can be reused, 
+            parent.cacheCellOffset(this.getCellOffset(), true);
     	}
     }
     

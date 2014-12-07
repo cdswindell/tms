@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
@@ -156,6 +157,17 @@ public class Column extends TableElementSlice
         }
     }
 
+
+	@SuppressWarnings("unchecked")
+	void clearCell(int cellOffset) 
+	{
+		if (m_cells != null) {
+			List<Cell> cells = (ArrayList<Cell>)m_cells;
+			if (cellOffset < cells.size())
+				cells.set(cellOffset, null);
+		}
+	}
+	
     /*
      * Overridden methods
      */

@@ -1,9 +1,11 @@
 package org.tms.tds;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 
 import org.tms.api.Access;
 import org.tms.api.ElementType;
@@ -20,6 +22,7 @@ public class Table extends TableElement
     private ArrayList<Row> m_rows;
     private ArrayList<Column> m_cols;
     private int m_nextCellOffset;
+    private Queue<Integer> m_unusedCellOffsets;
     
     private Row m_curRow;
     private Column m_curCol;
@@ -76,6 +79,7 @@ public class Table extends TableElement
         
         // set all other arrays/sets/maps to null/JustInTime
         m_ranges = new JustInTimeSet<Range>();
+        m_unusedCellOffsets = new ArrayDeque<Integer>();
         
         // clear dirty flag, as table is empty
         markClean();
@@ -376,6 +380,26 @@ public class Table extends TableElement
         return r;
     }
     
+
+    /**
+     * Cache the cell offset from the deleted row, allowing it to be reused for a 
+     * new row at a later date
+     * @param cellOffset
+     */
+	void cacheCellOffset(int cellOffset, boolean freeCellsNow) 
+	{
+		assert cellOffset >= 0 : "Invalid value";
+		
+		// add the cellOffset value to the queue of available/freed offset values
+		// these represent positions in the Column.m_cells array that are available
+		// for reuse
+		m_unusedCellOffsets.offer(cellOffset);
+		
+		// if so-requested, free the cells in the component columns array
+		for (Column c : getColumns())
+			c.clearCell(cellOffset);
+	}
+
     /*
      * Column manipulation methods
      */
@@ -837,5 +861,4 @@ public class Table extends TableElement
             return m_iter;
         }        
     }
-
 }
