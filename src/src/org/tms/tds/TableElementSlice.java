@@ -129,7 +129,8 @@ abstract class TableElementSlice extends TableElement
     }   
 
 	@Override
-	protected boolean isEmpty() {
+	protected boolean isEmpty() 
+	{
 		return getNumCells() == 0;
 	}   
 }
