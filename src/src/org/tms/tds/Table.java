@@ -371,16 +371,18 @@ public class Table extends TableElement
         // if the row is null, create it
         if (r == null && createIfNull) {
             r = new Row(this);
-            r.setIndex(rowIdx);
+            r.setIndex(rowIdx + 1);
             
             // add the row to the Rows array at the correct index
             getRows().set(rowIdx,  r);
         }
         
+        if (r != null)
+        	r.setCurrent();
+        
         return r;
     }
     
-
     /**
      * Cache the cell offset from the deleted row, allowing it to be reused for a 
      * new row at a later date
@@ -506,11 +508,14 @@ public class Table extends TableElement
         // if the column is null, create it
         if (r == null && createIfNull) {
             r = new Column(this);
-            r.setIndex(colIdx);
+            r.setIndex(colIdx + 1);
             
             // add the column to the Columns array at the correct index
             getColumns().set(colIdx,  r);
         }
+        
+        if (r != null)
+        	r.setCurrent();
         
         return r;
     }
@@ -584,14 +589,16 @@ public class Table extends TableElement
                 if (curSlice == null)
                     return -1;
                 
-                idx = curSlice.getIndex();
+                // if we are adding, insert the cell at the current position (e.g., the same as Access.Current)
+                // if we are retrieving, then retrieve the cell before the current one
+                idx = curSlice.getIndex() - 1;                
 
-                // If adding a row, return the current row's index
+                // If adding a row, return the current element's array index
                 if (isAdding)
                   return idx;
                 
                 // if at the first row, there can be no previous
-                else if (idx == 0)
+                else if (idx <= 0)
                     return -1;
                 else 
                     return (idx - 1);
@@ -618,8 +625,10 @@ public class Table extends TableElement
                     return -1;
                 
                 idx = curSlice.getIndex();
-                if (isAdding || idx < numSlices - 1)
-                    return idx + 1;
+                if (idx < numSlices)
+                	return idx;
+                else if (isAdding && idx == numSlices)
+                	return idx;
                 else
                     return -1;
                 

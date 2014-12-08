@@ -68,13 +68,16 @@ abstract class TableElementSlice extends TableElement
     {
         if (r != null) {
             /*
-             * if the range contains the row, use the range method to do all the work
+             * if the range contains the element, use the range method to do all the work
              * TableElementSlice.remove will be called again to finish up
              */
-        	return r.remove(this);
+        	if (r.contains(this))
+        		r.remove(this);
+        	
+        	return m_ranges.remove(r);
         }
-        else
-        	return false;
+        
+        return false;
     }
     
     protected void removeFromRanges()

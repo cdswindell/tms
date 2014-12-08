@@ -30,10 +30,20 @@ public class Range extends TableElement
     {
         return new ArrayList<Row>(((JustInTimeSet<Row>)m_rows).clone());
     }
+    
+    protected int getNumRows()
+    {
+    	return m_rows.size();
+    }
 
     protected List<Column> getColumns()
     {
         return new ArrayList<Column>(((JustInTimeSet<Column>)m_cols).clone());
+    }
+
+    protected int getNumColumns()
+    {
+    	return m_cols.size();
     }
 
     /*
@@ -57,9 +67,9 @@ public class Range extends TableElement
     {
         if (tes != null) {
             if (tes instanceof Row)
-                return add((Row)tes);
+                return add(new Row[] {(Row)tes});
             else if (tes instanceof Column)
-                return add((Column)tes);
+                return add(new Column[] {(Column)tes});
             else
                 throw new UnimplementedException(tes, "add");
         }
@@ -71,9 +81,9 @@ public class Range extends TableElement
     {
         if (tes != null) {
             if (tes instanceof Row)
-                return remove((Row)tes);
+                return remove(new Row[] {(Row)tes});
             else if (tes instanceof Column)
-                return remove((Column)tes);
+                return remove(new Column[] {(Column)tes});
             else
                 throw new UnimplementedException(tes, "remove");
         }
@@ -191,10 +201,10 @@ public class Range extends TableElement
         switch(key)
         {
             case numRows:
-                return m_rows.size();
+                return getNumRows();
                 
             case numColumns:
-                return m_cols.size();
+                return getNumColumns();
                 
             case Rows:
                 return getRows(); 

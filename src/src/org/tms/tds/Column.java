@@ -27,7 +27,7 @@ public class Column extends TableElementSlice
         return m_dataType;
     }
     
-    protected int getCellsCapacity()
+    int getCellsCapacity()
     {
         return m_cellsCapacity;
     }
@@ -109,9 +109,10 @@ public class Column extends TableElementSlice
                 	numCells++;
                 }
                 
-                // create a new cell structure and add it to the array
                 // at this point, cellOffset should equal numCells
                 assert cellOffset == numCells : "cellOffset != numCells";
+                
+                // create a new cell structure and add it to the array              
                 c = new Cell(getTable());
                 c.setIndex(row.getIndex());
                 cells.add(c);
@@ -254,23 +255,32 @@ public class Column extends TableElementSlice
             cols.add(this);
         }
         else {
-            /*
-             * Insert the col at position insertAt, moving all columns from 
-             * that position on down by one, and then reindex
-             */
-            
-            // first, handle edge case where capacity == nCols
-            if (nCols >= capacity) {
-                capacity = parent.calcColumnsCapacity(nCols + 1);
-                parent.setColumnsCapacity(capacity);
-            }
-            
-            // insert the new column
-            cols.add(insertAt, this);
-            
-            // reindex from insertAt + 1 to the end of the array use
-            // the new-fangled JDK 1.8 lambda functionality to reindex
-            cols.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});
+        	/*
+        	 * If cols[idx] is null, then this column slot hasn't been assigned, replace with
+        	 * the new column, otherwise, insert the column at this position
+        	 */
+        	
+        	if (cols.get(insertAt) == null)
+        		cols.set(insertAt,  this);
+        	else {      	
+	            /*
+	             * Insert the col at position insertAt, moving all columns from 
+	             * that position on down by one, and then reindex
+	             */
+	            
+	            // first, handle edge case where capacity == nCols
+	            if (nCols >= capacity) {
+	                capacity = parent.calcColumnsCapacity(nCols + 1);
+	                parent.setColumnsCapacity(capacity);
+	            }
+	            
+	            // insert the new column
+	            cols.add(insertAt, this);
+	            
+	            // reindex from insertAt + 1 to the end of the array use
+	            // the new-fangled JDK 1.8 lambda functionality to reindex
+	            cols.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});
+        	}
         }       
         
         // mark this column as current
@@ -317,7 +327,7 @@ public class Column extends TableElementSlice
             ArrayList<Column> cols = parent.getColumns();
             assert cols != null;
             
-            int idx = getIndex() -1;
+            int idx = getIndex() - 1;
             assert idx >= 0 : "Invalid column index";
             
             TableElementSlice rc = cols.remove(idx);
@@ -325,7 +335,7 @@ public class Column extends TableElementSlice
             
             // reindex remaining columns
             int nCols = parent.getNumColumns();
-            if (idx > nCols - 1)
+            if (idx < nCols)
             	cols.listIterator(idx).forEachRemaining(c -> {if (c != null) c.setIndex(c.getIndex() - 1);});
             
             // sanity check
@@ -337,6 +347,10 @@ public class Column extends TableElementSlice
             compactIfNeeded(cols, capacity);
     	}   	
 
+    	// Mark the column not in in use
+    	setIndex(-1);
+    	setInUse(false);
+    	
         // help the garbage collector
         this.m_cells = null;
     }
