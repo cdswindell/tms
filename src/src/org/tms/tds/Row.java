@@ -181,7 +181,7 @@ public class Row extends TableElementSlice
     protected void delete()
     {
     	// remove element from ranges that contain it
-    	removeFromRanges();
+    	removeFromAllRanges();
     	
     	// now, remove from the parent table, if it is defined
     	Table parent = getTable();

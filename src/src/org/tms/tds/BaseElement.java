@@ -1,6 +1,8 @@
 package org.tms.tds;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -332,5 +334,43 @@ abstract public class BaseElement
         else
             label = "";
         return String.format("[%s%s]", getElementType(), label);
+    }
+    
+    protected class BaseElementIterable<E extends BaseElement> implements Iterator<E>, Iterable<E>
+    {
+        private Iterator<E> m_iter;
+        
+        @SuppressWarnings("unchecked")
+        public BaseElementIterable(Collection<? extends TableElement> elems)
+        {
+            if (elems != null)
+                m_iter = (Iterator<E>) elems.iterator();
+            else
+                m_iter = null;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+           if (m_iter != null)
+               return m_iter.hasNext();
+           else
+               return false;
+        }
+
+        @Override
+        public E next()
+        {
+            if (m_iter != null)
+                return m_iter.next();
+            
+            return null;
+        }
+
+        @Override
+        public Iterator<E> iterator()
+        {
+            return m_iter;
+        }        
     }
 }

@@ -1,12 +1,14 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.tds.BaseElement.BaseElementIterable;
 import org.tms.util.JustInTimeSet;
 
 public class Range extends TableElement
@@ -91,6 +93,36 @@ public class Range extends TableElement
             return false;
     }
     
+    protected boolean addAll(Collection<? extends TableElementSlice> elems)
+    {
+        boolean addedAny = false;
+        if (elems != null) {            
+            // iterate over all rows, adding them to the group
+            for (TableElementSlice e : elems) 
+            {
+                if (this.add(e))
+                    addedAny = true;
+            }
+        }
+        
+        return addedAny;
+    }
+    
+    protected boolean removeAll(Collection<? extends TableElementSlice> elems)
+    {
+        boolean removedAny = false;
+        if (elems != null) {            
+            // iterate over all rows, adding them to the group
+            for (TableElementSlice e : elems) 
+            {
+                if (this.remove(e))
+                	removedAny = true;
+            }
+        }
+        
+        return removedAny;
+    }
+        
     protected boolean add(Row... rows)
     {
         boolean addedAny = false;
@@ -168,6 +200,16 @@ public class Range extends TableElement
         
         return removedAny;
     } 
+    
+    protected Iterable<Row> rowIterable()
+    {
+        return new BaseElementIterable<Row>(getRows());
+    }
+    
+    protected Iterable<Column> columnIterable()
+    {
+        return new BaseElementIterable<Column>(getColumns());
+    }
     
     /*
      * Overridden Methods

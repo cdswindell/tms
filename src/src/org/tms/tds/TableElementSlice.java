@@ -80,7 +80,7 @@ abstract class TableElementSlice extends TableElement
         return false;
     }
     
-    protected void removeFromRanges()
+    protected void removeFromAllRanges()
     {
     	// remove this table slice element from all ranges
     	m_ranges.forEach(r -> {if (r != null) r.remove(this);});

@@ -2,7 +2,6 @@ package org.tms.tds;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
@@ -829,59 +828,21 @@ public class Table extends TableElement
     
     protected Iterable<Row> rowIterable()
     {
-        return new TableIterator<Row>(getRows());
+        return new BaseElementIterable<Row>(getRows());
     }
     
     protected Iterable<Column> columnIterable()
     {
-        return new TableIterator<Column>(getColumns());
+        return new BaseElementIterable<Column>(getColumns());
     }
     
     protected Iterable<Range> rangeIterable()
     {
-        return new TableIterator<Range>(m_ranges);
+        return new BaseElementIterable<Range>(m_ranges);
     }
     
     protected Iterator<Column> columnIterator()
     {
-        return new TableIterator<Column>(getColumns());
-    }
-    
-    private class TableIterator<E extends TableElement> implements Iterator<E>, Iterable<E>
-    {
-        private Iterator<E> m_iter;
-        
-        @SuppressWarnings("unchecked")
-        public TableIterator(Collection<? extends TableElement> elems)
-        {
-            if (elems != null)
-                m_iter = (Iterator<E>) elems.iterator();
-            else
-                m_iter = null;
-        }
-
-        @Override
-        public boolean hasNext()
-        {
-           if (m_iter != null)
-               return m_iter.hasNext();
-           else
-               return false;
-        }
-
-        @Override
-        public E next()
-        {
-            if (m_iter != null)
-                return m_iter.next();
-            
-            return null;
-        }
-
-        @Override
-        public Iterator<E> iterator()
-        {
-            return m_iter;
-        }        
-    }
+        return new BaseElementIterable<Column>(getColumns());
+    }  
 }
