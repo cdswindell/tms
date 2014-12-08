@@ -37,7 +37,7 @@ public class JustInTimeSet<E> implements Set<E>
     @SuppressWarnings("unchecked")
     public Iterator<E> iterator()
     {
-        return m_backingSet == null ? (Iterator<E>)Collections.emptySet().iterator() : m_backingSet.iterator();
+        return m_backingSet == null ? (Iterator<E>)Collections.emptySet().iterator() : clone().iterator();
     }
 
     @Override

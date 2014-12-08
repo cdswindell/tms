@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.tds.BaseElement.BaseElementIterable;
 import org.tms.util.JustInTimeSet;
 
 abstract class TableElementSlice extends TableElement
@@ -84,6 +85,11 @@ abstract class TableElementSlice extends TableElement
     {
     	// remove this table slice element from all ranges
     	m_ranges.forEach(r -> {if (r != null) r.remove(this);});
+    }
+    
+    protected Iterable<Range> rangeIterable()
+    {
+        return new BaseElementIterable<Range>(m_ranges);
     }
     
     /*
