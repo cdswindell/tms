@@ -9,6 +9,19 @@ public class JustInTimeSet<E> implements Set<E>
 {
     private Set<E> m_backingSet;
 
+    public JustInTimeSet()
+    {
+        m_backingSet = null;
+    }
+    
+    public JustInTimeSet(Set<E> s)
+    {
+        if (s != null)
+            m_backingSet = new WeakHashSet<E>(s);
+        else
+            m_backingSet = null;
+    }
+
     synchronized private void createBackingSet()
     {
         if (m_backingSet == null)
@@ -37,7 +50,7 @@ public class JustInTimeSet<E> implements Set<E>
     @SuppressWarnings("unchecked")
     public Iterator<E> iterator()
     {
-        return m_backingSet == null ? (Iterator<E>)Collections.emptySet().iterator() : clone().iterator();
+        return m_backingSet == null ? (Iterator<E>)Collections.emptySet().iterator() : m_backingSet.iterator();
     }
 
     @Override
@@ -103,5 +116,10 @@ public class JustInTimeSet<E> implements Set<E>
             return Collections.emptySet();
         else
             return ((WeakHashSet<E>)m_backingSet).clone();
+    }
+    
+    public String toString()
+    {
+        return m_backingSet == null ? null : m_backingSet.toString();
     }
 }

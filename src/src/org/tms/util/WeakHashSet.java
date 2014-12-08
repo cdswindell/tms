@@ -25,6 +25,16 @@ public class WeakHashSet<T> implements Set<T>
         m_backingMap = new WeakHashMap<T, Object>(capacity);
     }
     
+    public WeakHashSet(Set<T> s)
+    {
+        if (s != null) {
+            m_backingMap = new WeakHashMap<T, Object>(s.size());
+            addAll(s);
+        }
+        else
+            m_backingMap = new WeakHashMap<T, Object>();            
+    }
+
     @Override
     public int size()
     {
@@ -52,13 +62,19 @@ public class WeakHashSet<T> implements Set<T>
     @Override
     public Object[] toArray()
     {
-        throw new IllegalStateException("Unsupported: toArray");
+        if (m_backingMap != null)
+            return m_backingMap.keySet().toArray();
+        else
+            return null;
     }
 
     @Override
     public <S> S[] toArray(S[] a)
     {
-        throw new IllegalStateException("Unsupported: toArray");
+        if (m_backingMap != null)
+            return m_backingMap.keySet().toArray(a);
+        else
+            return null;
     }
 
     @Override
@@ -126,5 +142,10 @@ public class WeakHashSet<T> implements Set<T>
         }
         
         return copy;
+    }
+    
+    public String toString()
+    {
+        return m_backingMap == null ? null : m_backingMap.keySet().toString();
     }
 }

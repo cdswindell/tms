@@ -1,5 +1,6 @@
 package org.tms.tds;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -336,15 +337,27 @@ abstract public class BaseElement
         return String.format("[%s%s]", getElementType(), label);
     }
     
+    /**
+     * Helper class to provide Iterable functionality to all list-based
+     * elements in the TDS framework. Importantly, BaseElementIterable
+     * creates a copy of the list to iterate. This isolates the source
+     * list from changes, albeit at the cost of the memory required to
+     * maintain a separate copy of the source list.
+     *
+     * @param <E>
+     */
     protected class BaseElementIterable<E extends BaseElement> implements Iterator<E>, Iterable<E>
     {
         private Iterator<E> m_iter;
         
         @SuppressWarnings("unchecked")
-        public BaseElementIterable(Collection<? extends TableElement> elems)
+        public BaseElementIterable(Collection<? extends BaseElement> elems)
         {
-            if (elems != null)
-                m_iter = (Iterator<E>) elems.iterator();
+            if (elems != null) {
+                List<BaseElement> copy = (List<BaseElement>) new ArrayList<E>(elems.size());
+                copy.addAll(elems);
+                m_iter = (Iterator<E>) (copy).iterator();
+            }
             else
                 m_iter = null;
         }
