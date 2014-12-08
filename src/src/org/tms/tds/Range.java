@@ -8,7 +8,6 @@ import java.util.Set;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.tds.BaseElement.BaseElementIterable;
 import org.tms.util.JustInTimeSet;
 
 public class Range extends TableElement
