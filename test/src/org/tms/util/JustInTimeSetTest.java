@@ -1,6 +1,6 @@
 package org.tms.util;
 
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -233,6 +233,21 @@ public class JustInTimeSetTest
         assertThat(s.containsAll(s2), is(true));
     }
 
+    @Test
+    public final void testWeakHashSetImplementation() throws InterruptedException
+    {
+        Set<String> s = createTestSet();
+        JustInTimeSet<String> jit = new JustInTimeSet<String>(s);        
+        assertThat(s.size() > 0, is(true));
+        
+        // clearing s should cause keys in jit to be freed
+        s = null;
+        System.gc();
+        Thread.sleep(1000);
+        
+        assertThat(jit.isEmpty(), is(true));
+    }
+        
     private Set<String> createTestSet()
     {
         Set<String> s = new LinkedHashSet<String>(4);
