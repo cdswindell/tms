@@ -3,7 +3,9 @@ package org.tms.tds;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 import org.tms.api.TableProperty;
@@ -67,5 +69,37 @@ public class RangeTest
         
         Thread.sleep(1000);
         assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
+   }
+    
+    @Test
+    public void rowsTest()
+    {
+        Table t = new Table(100, 100);
+        assert (t != null);
+        assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
+        
+        Range r = new Range(t);
+        assert (r != null);
+        
+        Row r1 = new Row(t);
+        Row r2 = new Row(t);
+        Row r3 = new Row(t);
+        
+        Set<Row> rs = new HashSet<Row>();
+        rs.add(r1);
+        rs.add(r2);
+        rs.add(r3);
+        
+        assertThat(r.addAll(rs), is(true));
+        assertThat(r.getNumRows(), is(3));
+        assertThat(r.contains(r1), is(true));
+        assertThat(r.contains(r2), is(true));
+        assertThat(r.contains(r3), is(true));
+        assertThat(r.containsAll(rs), is(true));
+        
+        r.remove(r1, r2, r3);
+        assertThat(r.getNumRows(), is(0));
+        
+        assertThat(r.removeAll(rs), is(false));
     }
 }

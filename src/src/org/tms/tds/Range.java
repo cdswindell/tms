@@ -115,11 +115,27 @@ public class Range extends TableElement
             for (TableElementSlice e : elems) 
             {
                 if (this.remove(e))
-                	removedAny = true;
+                    removedAny = true;
             }
         }
         
         return removedAny;
+    }
+        
+    protected boolean containsAll(Collection<? extends TableElementSlice> elems)
+    {
+        if (elems != null && !elems.isEmpty()) {            
+            // iterate over all elements
+            for (TableElementSlice e : elems) 
+            {
+                if (!this.contains(e))
+                    return false;
+            }
+            
+            return true;
+        }
+        
+        return false;
     }
         
     protected boolean add(Row... rows)
