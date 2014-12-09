@@ -4,14 +4,14 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidParentException;
 
-abstract class TableCellContainer extends TableElement
+abstract class TableCellsElement extends TableElement
 {
     abstract protected int getNumCells();
     
     private int m_index = -1;
     private Table m_table;
 
-    protected TableCellContainer(ElementType eType, TableElement e)
+    protected TableCellsElement(ElementType eType, TableElement e)
     {
         super(eType, e);
         if (e != null)
@@ -39,7 +39,7 @@ abstract class TableCellContainer extends TableElement
      * Perform general initializations
      * @param e
      */
-    protected void initialize(TableCellContainer e)
+    protected void initialize(TableCellsElement e)
     {
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
@@ -115,10 +115,10 @@ abstract class TableCellContainer extends TableElement
      * @param e
      * @throws InvalidParentException if the specified element belongs to a different Table
      */
-    void vetParent(TableCellContainer... elems)
+    void vetParent(TableCellsElement... elems)
     {
         if (elems != null) {
-            for (TableCellContainer e : elems) {
+            for (TableCellsElement e : elems) {
                 if (e == this)
                     continue;               
                 else if (e.getTable() == null)

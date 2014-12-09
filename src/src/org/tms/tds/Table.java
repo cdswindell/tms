@@ -15,7 +15,7 @@ import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class Table extends TableCellContainer
+public class Table extends TableCellsElement
 {
     private boolean m_dirty;
     
@@ -534,7 +534,7 @@ public class Table extends TableCellContainer
         return r;
     }
 
-    synchronized protected TableElementSlice add(TableElementSlice r, Access mode, Object... md)
+    synchronized protected TableSliceElement add(TableSliceElement r, Access mode, Object... md)
     {
         // calculate the index where the row will go
         ElementType sliceType = r.getElementType();
@@ -562,8 +562,8 @@ public class Table extends TableCellContainer
     protected int calcIndex(ElementType et, Access mode, boolean isAdding, Object... mda)
     {
         int numSlices = -1;
-        TableElementSlice curSlice = null;
-        ArrayList<? extends TableElementSlice> slices;
+        TableSliceElement curSlice = null;
+        ArrayList<? extends TableSliceElement> slices;
         
         if (et == ElementType.Row) {
             numSlices = getNumRows();
@@ -665,11 +665,11 @@ public class Table extends TableCellContainer
             case ByReference:
             {
                 Object md = mda != null && mda.length > 0 ? mda[0] : null;
-                if (isAdding || md == null || !(md instanceof TableElementSlice) || (((TableElementSlice)md).getElementType() != et))
+                if (isAdding || md == null || !(md instanceof TableSliceElement) || (((TableSliceElement)md).getElementType() != et))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));               
                 // indexes are 1-based; element arrays are 0-based
-                return ((TableElementSlice)md).getIndex() - 1;
+                return ((TableSliceElement)md).getIndex() - 1;
             }
                 
             case ByLabel:
@@ -678,7 +678,7 @@ public class Table extends TableCellContainer
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableElementSlice target = find(slices, TableProperty.Label, md);
+                TableSliceElement target = find(slices, TableProperty.Label, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -691,7 +691,7 @@ public class Table extends TableCellContainer
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableElementSlice target = find(slices, TableProperty.Description, md);
+                TableSliceElement target = find(slices, TableProperty.Description, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -707,7 +707,7 @@ public class Table extends TableCellContainer
                             String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString()))); 
                 
                 // key must either be a table property or a string
-                TableElementSlice target;
+                TableSliceElement target;
                 if (key instanceof TableProperty) 
                     target = find(slices, (TableProperty)key, value);
                 else if (key instanceof String) 
@@ -727,12 +727,12 @@ public class Table extends TableCellContainer
         return -1;
     }
     
-    protected TableElementSlice find(ArrayList<? extends TableElementSlice> slices, TableProperty key, Object value)
+    protected TableSliceElement find(ArrayList<? extends TableSliceElement> slices, TableProperty key, Object value)
     {
         assert key != null : "TableProperty required (enum)";
-        TableElementSlice foundElement = null;
+        TableSliceElement foundElement = null;
         if (slices != null && value != null) {
-            for (TableElementSlice tes : slices) {
+            for (TableSliceElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
                     if (p != null && p.equals(value))
@@ -744,12 +744,12 @@ public class Table extends TableCellContainer
         return foundElement;
     }
 
-    protected TableElementSlice find(ArrayList<? extends TableElementSlice> slices, String key, Object value)
+    protected TableSliceElement find(ArrayList<? extends TableSliceElement> slices, String key, Object value)
     {
         assert key != null : "TableProperty required (String)";
-        TableElementSlice foundElement = null;
+        TableSliceElement foundElement = null;
         if (slices != null && value != null) {
-            for (TableElementSlice tes : slices) {
+            for (TableSliceElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
                     if (p != null && p.equals(value))

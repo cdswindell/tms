@@ -7,15 +7,15 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.util.JustInTimeSet;
 
-abstract class TableElementSlice extends TableCellContainer
+abstract class TableSliceElement extends TableCellsElement
 {
-    abstract protected TableElementSlice insertSlice(int idx);
-    abstract protected TableElementSlice setCurrent();
+    abstract protected TableSliceElement insertSlice(int idx);
+    abstract protected TableSliceElement setCurrent();
     
     private JustInTimeSet<Range> m_ranges;
     private boolean m_inUse;
 
-    public TableElementSlice(ElementType eType, TableElement e)
+    public TableSliceElement(ElementType eType, TableElement e)
     {
         super(eType, e);
     }
@@ -42,7 +42,7 @@ abstract class TableElementSlice extends TableCellContainer
     /*
      * Class-specific methods
      */
-    void compactIfNeeded(ArrayList<? extends TableElementSlice> cols, int capacity) 
+    void compactIfNeeded(ArrayList<? extends TableSliceElement> cols, int capacity) 
     {
 		// TODO Auto-generated method stub
 		
@@ -53,7 +53,7 @@ abstract class TableElementSlice extends TableCellContainer
         if (r != null) {
             /*
              *  if the range doesn't contain the row, use the range method to do all the work
-             *  TableElementSlice.add will be called recursively to finish up
+             *  TableSliceElement.add will be called recursively to finish up
              */
             if (!r.contains(this))
                 return r.add(this);
@@ -69,7 +69,7 @@ abstract class TableElementSlice extends TableCellContainer
         if (r != null) {
             /*
              * if the range contains the element, use the range method to do all the work
-             * TableElementSlice.remove will be called again to finish up
+             * TableSliceElement.remove will be called again to finish up
              */
         	if (r.contains(this))
         		r.remove(this);

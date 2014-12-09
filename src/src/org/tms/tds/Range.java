@@ -10,7 +10,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class Range extends TableCellContainer
+public class Range extends TableCellsElement
 {
     private Set<Row> m_rows;
     private Set<Column> m_cols;
@@ -50,7 +50,7 @@ public class Range extends TableCellContainer
     /*
      * Class-specific methods
      */
-    protected boolean contains(TableElementSlice r)
+    protected boolean contains(TableSliceElement r)
     {
         if (r != null) {
             if (r instanceof Row)
@@ -64,7 +64,7 @@ public class Range extends TableCellContainer
             return false;
     }
     
-    boolean add(TableElementSlice tes)
+    boolean add(TableSliceElement tes)
     {
         if (tes != null) {
             if (tes instanceof Row)
@@ -78,7 +78,7 @@ public class Range extends TableCellContainer
             return false;
     }
     
-    boolean remove(TableElementSlice tes)
+    boolean remove(TableSliceElement tes)
     {
         if (tes != null) {
             if (tes instanceof Row)
@@ -92,12 +92,12 @@ public class Range extends TableCellContainer
             return false;
     }
     
-    protected boolean addAll(Collection<? extends TableElementSlice> elems)
+    protected boolean addAll(Collection<? extends TableSliceElement> elems)
     {
         boolean addedAny = false;
         if (elems != null) {            
             // iterate over all rows, adding them to the group
-            for (TableElementSlice e : elems) 
+            for (TableSliceElement e : elems) 
             {
                 if (this.add(e))
                     addedAny = true;
@@ -107,12 +107,12 @@ public class Range extends TableCellContainer
         return addedAny;
     }
     
-    protected boolean removeAll(Collection<? extends TableElementSlice> elems)
+    protected boolean removeAll(Collection<? extends TableSliceElement> elems)
     {
         boolean removedAny = false;
         if (elems != null) {            
             // iterate over all rows, adding them to the group
-            for (TableElementSlice e : elems) 
+            for (TableSliceElement e : elems) 
             {
                 if (this.remove(e))
                     removedAny = true;
@@ -122,11 +122,11 @@ public class Range extends TableCellContainer
         return removedAny;
     }
         
-    protected boolean containsAll(Collection<? extends TableElementSlice> elems)
+    protected boolean containsAll(Collection<? extends TableSliceElement> elems)
     {
         if (elems != null && !elems.isEmpty()) {            
             // iterate over all elements
-            for (TableElementSlice e : elems) 
+            for (TableSliceElement e : elems) 
             {
                 if (!this.contains(e))
                     return false;
