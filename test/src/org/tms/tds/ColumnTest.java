@@ -98,9 +98,9 @@ public class ColumnTest
         t.add(c4, Access.ByIndex, 2);
         assertThat(c1.getIndex(), is(1));
         assertThat(c4.getIndex(), is(2));
-        assertThat(c3.getIndex(), is(3));
-        assertThat(c2.getIndex(), is(4));
-        assertThat(t.getNumColumns(), is(4));       
+        assertThat(c3.getIndex(), is(4));
+        assertThat(c2.getIndex(), is(5));
+        assertThat(t.getNumColumns(), is(5));       
         assertThat(t.getNumRows(), is(0));   
         
         Column c = t.getColumn(Access.First);
@@ -120,11 +120,12 @@ public class ColumnTest
         assertThat(c.getIndex(), is(4));
         
         c = t.getColumn(Access.Next);
-        assertThat(c, nullValue());
+        assertThat(c, notNullValue());
+        assertThat(c.getIndex(), is(5));
         
         c = t.getColumn(Access.Last);
         assertThat(c, notNullValue());
-        assertThat(c.getIndex(), is(4));
+        assertThat(c.getIndex(), is(5));
         
         c = t.getColumn(Access.Next);
         assertThat(c, nullValue());
