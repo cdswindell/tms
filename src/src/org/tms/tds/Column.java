@@ -28,6 +28,11 @@ public class Column extends TableSliceElement
         return m_dataType;
     }
     
+    protected void setDataType(Class<? extends Object> dataType)
+    {
+        m_dataType = dataType;
+    }
+    
     int getCellsCapacity()
     {
         return m_cellsCapacity;
@@ -75,7 +80,7 @@ public class Column extends TableSliceElement
                  *  consult the table for an available cell offset; this value is stored in
                  *  the row structure, and is used as an offset into the column cell array
                  */
-                cellOffset = table.getNextCellOffset();
+                cellOffset = table.calcNextAvailableCellOffset();
                 assert cellOffset >= 0 : "Invalid cell offset returned";
                 
                 row.setCellOffset(cellOffset);
@@ -164,8 +169,9 @@ public class Column extends TableSliceElement
 	{
 		if (m_cells != null) {
 			List<Cell> cells = (ArrayList<Cell>)m_cells;
-			if (cellOffset < cells.size())
+			if (cellOffset < cells.size()) {
 				cells.set(cellOffset, null);
+			}
 		}
 	}
 	
@@ -305,6 +311,15 @@ public class Column extends TableSliceElement
         return prevCurrent;
     }  
     
+    @Override
+    protected boolean isDataTypeEnforced()
+    {
+        if (getTable() != null && getTable().isDataTypeEnforced())
+            return true;
+        else
+            return this.isEnforceDataType() && getDataType() != null;
+    }
+
     @Override
     protected void delete()
     {

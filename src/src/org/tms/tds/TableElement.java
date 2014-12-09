@@ -9,6 +9,7 @@ abstract class TableElement extends BaseElement
 	abstract protected Context getContext();
     abstract protected void delete();
     abstract protected void fill(Object o);
+    abstract protected boolean isDataTypeEnforced();
     
     private boolean m_enforceDataType;
 
@@ -96,6 +97,11 @@ abstract class TableElement extends BaseElement
     protected void setEnforceDataType(boolean enforceDataType)
     {
         m_enforceDataType = enforceDataType;
+    }
+
+    protected boolean isDataTypeEnforced(TableElement te)
+    {
+        return te.isDataTypeEnforced();
     }
     
     public String toString()

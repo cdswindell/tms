@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.DataTypeEnforcementException;
 
 public class Cell extends TableElement
 {
@@ -27,7 +28,50 @@ public class Cell extends TableElement
     
     protected void setCellValue(Object value)
     {
+        setCellValue(value, true);
+    }
+    
+    void setCellValueNoDataTypeCheck(Object value)
+    {
+        setCellValue(value, false);
+    }
+    
+    protected void setCellValue(Object value, boolean typeSafeCheck)
+    {
+        if (typeSafeCheck && value != null && this.isDataTypeEnforced()) {
+            if (isDatatypeMismatch(value))
+                throw new DataTypeEnforcementException(getEnforcedDataType(), value);
+        }
+        
         m_cellValue = value;
+    }
+    
+    private boolean isDatatypeMismatch(Object value)
+    {
+        if (value == null)
+            return false;
+        
+        Class<? extends Object> valueClazz = value.getClass();
+        
+        // column data type takes president over cell data type
+        Class<? extends Object> clazz = getColumn() != null && getColumn().getDataType() != null ? getColumn().getDataType() : null;
+        if (clazz != null)
+            return !clazz.isAssignableFrom(valueClazz);
+        
+        // finally, if the cell currently has a value, check prospect against cell
+        if (getCellValue() != null)
+            return !getDataType().isAssignableFrom(valueClazz);
+        
+        // if we get here, no mismatch
+        return false;
+    }
+    
+    Class<? extends Object> getEnforcedDataType()
+    {
+        if (getColumn() != null && getColumn().getDataType() != null)
+            return getColumn().getDataType();
+        else
+            return getDataType();
     }
     
     protected int getCellOffset()
@@ -64,6 +108,28 @@ public class Cell extends TableElement
      * Overridden methods
      */
     
+    /**
+     * A cell's data type will be enforced if:
+     * <ul>
+     * <li>The cell's parent table EnforceDataType property is set or</li>
+     * <li>The cell's parent row EnforceDataType property is set or</li>
+     * <li>The cell's parent column EnforceDataType property is set <i>and</i> the parent column has been assigned a data type or</li>
+     * <li>The cell's EnforceDataType property is set and the cell has a data type, by virtue of there being a non-null cell value</li>
+     * </ul>
+     * @return
+     */
+    protected boolean isDataTypeEnforced()
+    {
+        if (getTable() != null && getTable().isDataTypeEnforced())
+            return true;
+        else if (getRow() != null && getRow().isDataTypeEnforced())
+            return true;
+        else if (getColumn() != null && getColumn().isDataTypeEnforced() )
+            return true;
+        else
+            return this.isEnforceDataType() && this.getDataType() != null;
+    }
+
     /**
      * A cell is empty if it is null
      */

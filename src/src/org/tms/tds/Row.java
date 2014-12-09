@@ -27,6 +27,8 @@ public class Row extends TableSliceElement
     void setCellOffset(int offset)
     {
         m_cellOffset = offset;
+        if (offset >= 0 && getTable() != null)
+            getTable().mapCellOffsetToRow(this, offset);
     }
     
     /*
@@ -167,8 +169,16 @@ public class Row extends TableSliceElement
         
         return prevCurrent;
     } 
-    
-    
+       
+    @Override
+    protected boolean isDataTypeEnforced()
+    {
+        if (getTable() != null && getTable().isDataTypeEnforced())
+            return true;
+        else
+            return this.isEnforceDataType();
+    }
+
     @Override
     protected void delete()
     {

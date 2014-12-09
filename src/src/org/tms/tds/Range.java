@@ -230,6 +230,15 @@ public class Range extends TableCellsElement
      * Overridden Methods
      */
     
+    @Override
+    protected boolean isDataTypeEnforced()
+    {
+        if (getTable() != null && getTable().isDataTypeEnforced())
+            return true;
+        else
+            return isEnforceDataType();
+    }
+
     @Override protected void delete()
     {
     	// Remove the range from its component rows and columns

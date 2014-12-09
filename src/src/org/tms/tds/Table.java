@@ -3,8 +3,10 @@ package org.tms.tds;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import org.tms.api.Access;
@@ -24,6 +26,7 @@ public class Table extends TableCellsElement
     private int m_nextCellOffset;
     private Queue<Integer> m_unusedCellOffsets;
     private Deque<CellReference> m_currentCellStack;
+    private Map<Integer, Row> m_cellOffsetRowMap;
     
     private Row m_curRow;
     private Column m_curCol;
@@ -38,6 +41,12 @@ public class Table extends TableCellsElement
     //Initialized from context or source table
     private int m_rowCapacityIncr;
     private int m_colCapacityIncr;
+    
+    public Table()
+    {
+        this(Context.getPropertyInt(null, TableProperty.RowCapacityIncr),
+             Context.getPropertyInt(null, TableProperty.ColumnCapacityIncr));
+    }
     
     public Table(int nRows, int nCols)
     {
@@ -82,6 +91,7 @@ public class Table extends TableCellsElement
         m_ranges = new JustInTimeSet<Range>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_currentCellStack = new ArrayDeque<CellReference>();
+        m_cellOffsetRowMap = new HashMap<Integer, Row>(getRowsCapacity());
         
         // clear dirty flag, as table is empty
         markClean();
@@ -160,7 +170,7 @@ public class Table extends TableCellsElement
                 return getNumCells(); 
                 
             case NextCellOffset:
-            	return this.getNextCellOffset();
+            	return getNextCellOffset();
                 
             default:
                 return super.getProperty(key);
@@ -197,6 +207,7 @@ public class Table extends TableCellsElement
         return new ArrayList<Range>(m_ranges.clone());
     }
     
+    @Override
     protected void delete()
     {
     	m_ranges.clear();
@@ -210,6 +221,13 @@ public class Table extends TableCellsElement
     		getContext().unregister(this);;   	
     }
     
+    
+    @Override
+    protected boolean isDataTypeEnforced()
+    {
+        return this.isEnforceDataType();
+    }
+
     protected boolean add(Range r)
     {
         vetParent(r);
@@ -386,6 +404,27 @@ public class Table extends TableCellsElement
     }
     
     /**
+     * Returns an available cell offset value
+     * @return
+     */
+    synchronized int calcNextAvailableCellOffset() 
+    {
+        Integer availableOffset = this.m_unusedCellOffsets.poll();
+        if (availableOffset != null) {
+            assert availableOffset >= 0 : "Invalid Cell Offset Value";
+            return availableOffset;
+        }
+        
+        // otherwise, just return the next available offset
+        return m_nextCellOffset++;
+    }
+         
+    protected int getNextCellOffset()
+    {
+        return m_nextCellOffset;
+    }
+    
+    /**
      * Cache the cell offset from the deleted row, allowing it to be reused for a 
      * new row at a later date
      * @param cellOffset
@@ -398,6 +437,7 @@ public class Table extends TableCellsElement
 		// these represent positions in the Column.m_cells array that are available
 		// for reuse
 		m_unusedCellOffsets.offer(cellOffset);
+		m_cellOffsetRowMap.remove(cellOffset);
 		
 		// if so-requested, free the cells in the component columns array
 		for (Column c : getColumns()) {
@@ -406,18 +446,27 @@ public class Table extends TableCellsElement
 		}
 	}
 
-
 	protected Row getRowByCellOffset(int cellOffset) 
 	{
 		if (cellOffset >= 0) {
-			for (Row r : getRows())
-				if (r != null && r.getCellOffset() == cellOffset)
-					return r;
+		    Row r = m_cellOffsetRowMap.get(cellOffset);
+		    if (r != null)
+		        return r;
+		    
+		    // as a last resort, do a sequential search
+			for (Row row : getRows())
+				if (row != null && row.getCellOffset() == cellOffset)
+					return row;
 		}
 		
 		return null;
 	}
 	
+    void mapCellOffsetToRow(Row row, int offset)
+    {
+        if (row != null && offset >= 0)
+            m_cellOffsetRowMap.put(offset, row);
+    }
     /*
      * Column manipulation methods
      */
@@ -761,22 +810,6 @@ public class Table extends TableCellsElement
         return foundElement;
     }
 
-    /**
-     * Returns an available cell offset value
-     * @return
-     */
-	synchronized int getNextCellOffset() 
-	{
-		Integer availableOffset = this.m_unusedCellOffsets.poll();
-		if (availableOffset != null) {
-			assert availableOffset >= 0 : "Invalid Cell Offset Value";
-			return availableOffset;
-		}
-		
-		// otherwise, just return the next available offset
-		return m_nextCellOffset++;
-	}
-	     
     @Override
     protected int getNumCells()
     {
@@ -881,5 +914,4 @@ public class Table extends TableCellsElement
     		return m_col;
     	}
     }
-
 }
