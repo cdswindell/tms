@@ -133,18 +133,18 @@ public class RowTest
         assertThat(r.getIndex(), is(7));
         assertThat(t.getNumRows(), is(7));
         
-        t.addRow(Access.First);
+        t.addRow(Access.First); // Row 1
         assertThat(t.getNumRows(), is(8));
         
-        t.addRow(Access.First);
+        t.addRow(Access.First); // Row 2
         assertThat(t.getNumRows(), is(9));
         
-        t.addRow(Access.First);
+        t.addRow(Access.First); // Row 3
         assertThat(t.getNumRows(), is(10));
         assertThat(r2.getIndex(), is(9));
         assertThat(r.getIndex(), is(10));
         
-        t.addRow(Access.First);
+        t.addRow(Access.First); // Row 4
         assertThat(t.getNumRows(), is(11));
         assertThat(r2.getIndex(), is(10));
         assertThat(r.getIndex(), is(11));

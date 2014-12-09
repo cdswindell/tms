@@ -125,39 +125,30 @@ public class Row extends TableElementSlice
             rows.add(this);
         }
         else {
-        	/*
-        	 * If cols[idx] is null, then this column slot hasn't been assigned, replace with
-        	 * the new column, otherwise, insert the column at this position
-        	 */
-        	
-        	if (rows.get(insertAt) == null)
-        		rows.set(insertAt,  this);
-        	else {      	
-	            /*
-	             * Insert the row at position insertAt, moving all rows from 
-	             * that position on down by one, and then reindex
-	             */
-	            
-	            // first, handle edge case where capacity == nRows
-	            if (nRows >= capacity) {
-	                capacity = parent.calcRowsCapacity(nRows + 1);
-	                parent.setRowsCapacity(capacity);
-	            }
-	            
-	            // insert the new row
-	            rows.add(insertAt, this);
-	            
-	            // reindex from insertAt + 1 to the end of the array
-	            // use the new-fangled JDK 1.8 lambda functionality to reindex
-	            rows.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});
-	            
-	// uncomment the following lines to compile in JDK 1.7 and earlier
-	//            for (int i = insertAt + 1; i < nRows; i++) {
-	//                Row r = rows.get(i);
-	//                if (r != null)
-	//                    r.setIndex(i + 1);
-	//            }
-	        }
+            /*
+             * Insert the row at position insertAt, moving all rows from 
+             * that position on down by one, and then reindex
+             */
+            
+            // first, handle edge case where capacity == nRows
+            if (nRows >= capacity) {
+                capacity = parent.calcRowsCapacity(nRows + 1);
+                parent.setRowsCapacity(capacity);
+            }
+            
+            // insert the new row
+            rows.add(insertAt, this);
+            
+            // reindex from insertAt + 1 to the end of the array
+            // use the new-fangled JDK 1.8 lambda functionality to reindex
+            rows.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});
+            
+// uncomment the following lines to compile in JDK 1.7 and earlier
+//            for (int i = insertAt + 1; i < nRows; i++) {
+//                Row r = rows.get(i);
+//                if (r != null)
+//                    r.setIndex(i + 1);
+//            }
         }
         
         // mark this row as current
