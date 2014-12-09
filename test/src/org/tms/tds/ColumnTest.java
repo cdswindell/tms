@@ -129,6 +129,38 @@ public class ColumnTest
         
         c = t.getColumn(Access.Next);
         assertThat(c, nullValue());
+        
+        Column cx = t.addColumn(Access.ByIndex, 20);
+        assertThat(cx, notNullValue());
+        assertThat(t.getNumColumns(), is(20));    
+        
+        cx = t.getColumn(Access.Previous);
+        assertThat(cx, notNullValue());
+        assertThat(cx.getIndex(), is(19));    
+        
+        cx = t.getColumn(Access.Current);
+        assertThat(cx, notNullValue());
+        assertThat(cx.getIndex(), is(19));    
+        
+        cx = t.getColumn(Access.Previous);
+        assertThat(cx, notNullValue());
+        assertThat(cx.getIndex(), is(18));    
+        
+        cx = t.getColumn(Access.Current);
+        assertThat(cx, notNullValue());
+        assertThat(cx.getIndex(), is(18));    
+        
+        cx = t.getColumn(Access.Previous);
+        assertThat(cx, notNullValue());
+        assertThat(cx.getIndex(), is(17));    
+        
+        cx = t.getColumn(Access.Last);
+        assertThat(cx, notNullValue());
+        assertThat(cx.getIndex(), is(20));    
+        
+        cx = t.addColumn(Access.Last);
+        assertThat(cx, notNullValue());
+        assertThat(cx.getIndex(), is(21));    
     }
     
     @Test 
@@ -161,6 +193,7 @@ public class ColumnTest
         assertThat(c2, notNullValue());
         assertThat(c2.getIndex(), is(1));
         assertThat(t.getNumColumns(), is(1));
+        assertThat(c1.isInUse(), is(false));
         
         assertThat(r.getNumColumns(), is(1));
         assertThat(r.contains(c1), is(false));
@@ -168,5 +201,26 @@ public class ColumnTest
         
         c2.delete();       
         assertThat(t.getNumColumns(), is(0));    
+    }
+    
+    @Test
+    public void columnIterableTest()
+    {
+        Table t = new Table(10, 10);
+        assertThat(t, notNullValue());
+            
+        assertThat(t.getNumColumns(), is(0));
+        Column c1 = t.addColumn(Access.ByIndex, 100);
+        assertThat(c1, notNullValue());
+        assertThat(t.getNumColumns(), is(100));    
+        
+        int idx = 0;
+        for (Column c : t.columnIterable()) {
+        	idx++;
+        	if (c != null)
+        		assertThat(c.getIndex(), is(idx));
+        }
+        
+        assertThat(idx, is(100));   	
     }
 }
