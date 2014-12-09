@@ -29,77 +29,46 @@ public class CellTest
     @Test
     public void getInitializablePropertiesTest()
     {
-        Range r = new Range(null);
+        Cell c = new Cell(null, -1);
 
-        List<TableProperty> props = r.getInitializableProperties();
+        List<TableProperty> props = c.getInitializableProperties();
         for (TableProperty p : props) { 
             // will fail if property getter not implemented
-            System.out.print("Range initializable property: " + p);
-            Object value = r.getProperty(p);
+            System.out.print("Cell initializable property: " + p);
+            Object value = c.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
     }
     
     @Test
-    public void createRangeTest() throws InterruptedException
+    public void getIntPropertiesTest()
     {
-        Table t = new Table(10, 10);
-        assert (t != null);
-        assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
-        
-        Range r = new Range(t);
-        assert (r != null);
-        
-        int numRows = r.getPropertyInt(TableProperty.numRows);
-        assertThat(numRows, is(0));
-        assertThat(r.getTable(), is(t));
-        assertThat(r.getContext(), is(t.getContext()));
-        
-        assertThat(t.getPropertyInt(TableProperty.numRanges), is(1));
-        
-        t.remove(r);
-        assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
-        
-        // test weak reference ability
-        t.add(r);
-        assertThat(t.getPropertyInt(TableProperty.numRanges), is(1));
-        
-        r = null;
-        System.gc();
-        
-        Thread.sleep(1000);
-        assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
-   }
+        Cell c = new Cell(null, -1);
+
+        List<TableProperty> props = c.getProperties();
+        for (TableProperty p : props) { 
+        	if (!p.isIntValue()) continue;
+            // will fail if property getter not implemented
+            System.out.print("Cell int property: " + p);
+            Object value = c.getProperty(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
+        }
+    }
+    
     
     @Test
-    public void rowsTest()
+    public void getBooleanPropertiesTest()
     {
-        Table t = new Table(100, 100);
-        assert (t != null);
-        assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
-        
-        Range r = new Range(t);
-        assert (r != null);
-        
-        Row r1 = new Row(t);
-        Row r2 = new Row(t);
-        Row r3 = new Row(t);
-        
-        Set<Row> rs = new HashSet<Row>();
-        rs.add(r1);
-        rs.add(r2);
-        rs.add(r3);
-        
-        assertThat(r.addAll(rs), is(true));
-        assertThat(r.getNumRows(), is(3));
-        assertThat(r.contains(r1), is(true));
-        assertThat(r.contains(r2), is(true));
-        assertThat(r.contains(r3), is(true));
-        assertThat(r.containsAll(rs), is(true));
-        
-        r.remove(r1, r2, r3);
-        assertThat(r.getNumRows(), is(0));
-        
-        assertThat(r.removeAll(rs), is(false));
+        Cell c = new Cell(null, -1);
+
+        List<TableProperty> props = c.getProperties();
+        for (TableProperty p : props) { 
+        	if (!p.isBooleanValue()) continue;
+            // will fail if property getter not implemented
+            System.out.print("Cell boolean property: " + p);
+            Object value = c.getProperty(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
+        }
     }
+    
 }
