@@ -10,7 +10,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class Range extends TableElement
+public class Range extends TableCellContainer
 {
     private Set<Row> m_rows;
     private Set<Column> m_cols;

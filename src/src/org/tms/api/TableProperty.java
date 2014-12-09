@@ -17,11 +17,11 @@ public enum TableProperty implements Comparable<TableProperty>
     isSupportsEmpty(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     // Table Element Properties (Context implements initializable ones)
-    Index(true, false),
+    Index(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
-    isInUse(true, false, ElementType.Row, ElementType.Column, ElementType.Cell),
+    isInUse(true, false, ElementType.Row, ElementType.Column),
     
     // Context/Table Properties  
     RowCapacityIncr(false, true, ElementType.Context, ElementType.Table),
@@ -44,7 +44,7 @@ public enum TableProperty implements Comparable<TableProperty>
     // Cell properties
     Row(true, false, ElementType.Cell),
     Column(true, false, ElementType.Cell),
-    CellOffset(true, false, ElementType.Row),
+    CellOffset(true, false, ElementType.Row, ElementType.Cell),
     DataType(false, false, ElementType.Column, ElementType.Cell),
     isStronglyTyped(false, false, ElementType.Column);
     ;

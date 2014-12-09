@@ -7,7 +7,7 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.util.JustInTimeSet;
 
-abstract class TableElementSlice extends TableElement
+abstract class TableElementSlice extends TableCellContainer
 {
     abstract protected TableElementSlice insertSlice(int idx);
     abstract protected TableElementSlice setCurrent();

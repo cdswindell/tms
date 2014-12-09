@@ -90,7 +90,7 @@ public class Column extends TableElementSlice
                 c = cells.get(cellOffset);
                 
                 if (c == null && createIfSparse) {
-                    c = new Cell(getTable());
+                    c = new Cell(this, cellOffset);
                     cells.set(cellOffset, c);
                 }
             }
@@ -114,8 +114,7 @@ public class Column extends TableElementSlice
                 assert cellOffset == numCells : "cellOffset != numCells";
                 
                 // create a new cell structure and add it to the array              
-                c = new Cell(getTable());
-                c.setIndex(row.getIndex());
+                c = new Cell(this, cellOffset);
                 cells.add(c);
             }
         } // of synchronized

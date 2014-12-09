@@ -6,10 +6,14 @@ import org.tms.api.TableProperty;
 public class Cell extends TableElement
 {
     private Object m_cellValue;
+    private Column m_col;
+    private int m_cellOffset;
     
-    public Cell(Table t)
+    public Cell(Column col, int cellOffset)
     {
-        super(ElementType.Cell, t);
+        super(ElementType.Cell, col);
+        m_col = col;
+        m_cellOffset = cellOffset;
     }
 
     /*
@@ -26,16 +30,39 @@ public class Cell extends TableElement
         m_cellValue = value;
     }
     
+    protected int getCellOffset()
+    {
+    	return m_cellOffset;
+    }
+    
+    void setCellOffset(int offset)
+    {
+    	m_cellOffset = offset;
+    }
+    
+    protected Column getColumn()
+    {
+    	return m_col;
+    }
+    
+    protected Row getRow()
+    {
+    	if (getTable() != null)
+    		return getTable().getRowByCellOffset(getCellOffset());
+    	else
+    		return null;
+    }
+    
+    protected Class<? extends Object> getDataType()
+    {
+    	if (m_cellValue != null)
+    		return m_cellValue.getClass();
+    	else
+    		return null;
+    }
     /*
      * Overridden methods
      */
-    
-    @Override
-    protected int getNumCells()
-    {
-        // Degenerate case
-        return 1;
-    }
     
     /**
      * A cell is empty if it is null
@@ -46,6 +73,28 @@ public class Cell extends TableElement
         return m_cellValue == null;
     }
 
+    @Override
+    protected Object getProperty(TableProperty key)
+    {
+        // Some properties are built into the base Table Element object
+        switch (key)
+        {
+	        case CellOffset:
+	            return getCellOffset();
+	            
+	        case Column:
+	            return getColumn();
+	            
+	        case Row:
+	            return getRow();
+	            
+	        case DataType:
+	            return getColumn();
+	            
+            default:
+                return super.getProperty(key);
+        }
+    }
     @Override
     protected void initialize(TableElement e)
     {
@@ -64,6 +113,8 @@ public class Cell extends TableElement
         
         // initialize other variables
         m_cellValue = null;
+        m_cellOffset = -1;
+        m_col = null;
     }
     
     @Override
@@ -76,5 +127,23 @@ public class Cell extends TableElement
 	protected void fill(Object o) 
 	{
 		setCellValue(o);
+	}
+
+	@Override
+	protected Table getTable() 
+	{
+		if (m_col != null)
+			return m_col.getTable();
+		else
+			return null;
+	}
+
+	@Override
+	protected Context getContext() 
+	{
+		if (getTable() != null)
+			return getTable().getContext();
+		else
+			return null;
 	}
 }

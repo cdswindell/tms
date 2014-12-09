@@ -15,7 +15,7 @@ import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class Table extends TableElement
+public class Table extends TableCellContainer
 {
     private boolean m_dirty;
     
@@ -406,6 +406,18 @@ public class Table extends TableElement
 		}
 	}
 
+
+	protected Row getRowByCellOffset(int cellOffset) 
+	{
+		if (cellOffset >= 0) {
+			for (Row r : getRows())
+				if (r != null && r.getCellOffset() == cellOffset)
+					return r;
+		}
+		
+		return null;
+	}
+	
     /*
      * Column manipulation methods
      */
@@ -666,7 +678,7 @@ public class Table extends TableElement
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableElement target = find(slices, TableProperty.Label, md);
+                TableElementSlice target = find(slices, TableProperty.Label, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -679,7 +691,7 @@ public class Table extends TableElement
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableElement target = find(slices, TableProperty.Description, md);
+                TableElementSlice target = find(slices, TableProperty.Description, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -695,7 +707,7 @@ public class Table extends TableElement
                             String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString()))); 
                 
                 // key must either be a table property or a string
-                TableElement target;
+                TableElementSlice target;
                 if (key instanceof TableProperty) 
                     target = find(slices, (TableProperty)key, value);
                 else if (key instanceof String) 
@@ -715,10 +727,10 @@ public class Table extends TableElement
         return -1;
     }
     
-    protected TableElement find(ArrayList<? extends TableElementSlice> slices, TableProperty key, Object value)
+    protected TableElementSlice find(ArrayList<? extends TableElementSlice> slices, TableProperty key, Object value)
     {
         assert key != null : "TableProperty required (enum)";
-        TableElement foundElement = null;
+        TableElementSlice foundElement = null;
         if (slices != null && value != null) {
             for (TableElementSlice tes : slices) {
                 if (tes != null) {
@@ -732,10 +744,10 @@ public class Table extends TableElement
         return foundElement;
     }
 
-    protected TableElement find(ArrayList<? extends TableElementSlice> slices, String key, Object value)
+    protected TableElementSlice find(ArrayList<? extends TableElementSlice> slices, String key, Object value)
     {
         assert key != null : "TableProperty required (String)";
-        TableElement foundElement = null;
+        TableElementSlice foundElement = null;
         if (slices != null && value != null) {
             for (TableElementSlice tes : slices) {
                 if (tes != null) {
@@ -764,41 +776,7 @@ public class Table extends TableElement
 		// otherwise, just return the next available offset
 		return m_nextCellOffset++;
 	}
-	
-    /**
-     * Reindex table elements, useful after a sort or manual manipulation
-     * @param et
-     */
-    @SuppressWarnings("unchecked")
-    protected void reindex(ElementType et)
-    {
-        Object a = null;
-        int nElems = 0;
-        
-        switch(et)
-        {
-            case Row:
-                a = m_rows;
-                nElems = getNumRows();
-                break;
-                
-            case Column:
-                a = m_cols;
-                nElems = getNumColumns();
-                break;
-                
-            default:
-                throw new UnimplementedException(et, "reindex not supported");
-        }
-        
-        if (a != null && nElems > 0) {
-            for (int i = 0; i < nElems; i++) {
-                TableElement e = ((List<TableElement>)a).get(i);
-                if (e != null) e.setIndex(i);
-            }
-        }
-    }
-     
+	     
     @Override
     protected int getNumCells()
     {
