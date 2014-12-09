@@ -383,7 +383,7 @@ abstract public class BaseElement
         @Override
         public Iterator<E> iterator()
         {
-            return m_iter;
+            return this;
         }        
     }
 }
