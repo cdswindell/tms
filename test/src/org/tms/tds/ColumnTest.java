@@ -223,4 +223,25 @@ public class ColumnTest
         
         assertThat(idx, is(100));   	
     }
+    
+    @Test
+    public void fillTest()
+    {
+        Table t = new Table(10, 10);
+        assertThat(t, notNullValue());
+            
+        assertThat(t.getNumColumns(), is(0));
+        Column c1 = t.addColumn(Access.ByIndex, 16);
+        assertThat(c1, notNullValue());
+        assertThat(t.getNumColumns(), is(16)); 
+        assertThat(t.getNumCells(), is(0));
+        
+        Row r1 = t.addRow(Access.Next);
+        assertThat(t.getNumCells(), is(0));
+        c1.fill(42);
+        assertThat(t.getNumCells(), is(1));
+        r1.fill(64);
+        assertThat(t.getNumCells(), is(16));       
+    }
+        
 }

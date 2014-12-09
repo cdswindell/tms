@@ -3,6 +3,7 @@ package org.tms.tds;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -345,4 +346,23 @@ public class Column extends TableElementSlice
         // help the garbage collector
         this.m_cells = null;
     }
+
+	@Override
+	protected void fill(Object o) 
+	{
+		Table parent = getTable();
+		assert parent != null : "Parent table required";
+		
+		Row r = parent.getRow(Access.First);
+		if (r != null) {
+			while(r != null) {
+				Cell c = getCell(r);
+				c.setCellValue(o);
+				r.setInUse(true);
+				r = parent.getRow(Access.Next);
+			}
+			
+			this.setInUse(true);			
+		}
+	}
 }

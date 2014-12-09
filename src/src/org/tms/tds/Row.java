@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import java.util.ArrayList;
 
+import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
@@ -239,4 +240,23 @@ public class Row extends TableElementSlice
         
         return numCells;
     }
+    
+	@Override
+	protected void fill(Object o) 
+	{
+		Table parent = getTable();
+		assert parent != null : "Parent table required";
+		
+		Column col = parent.getColumn(Access.First);
+		if (col != null) {
+			while(col != null) {
+				Cell c = getCell(col);
+				c.setCellValue(o);
+				col.setInUse(true);
+				col = parent.getColumn(Access.Next);
+			}
+			
+			this.setInUse(true);			
+		}
+	}
 }

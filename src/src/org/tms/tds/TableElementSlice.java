@@ -11,6 +11,7 @@ abstract class TableElementSlice extends TableElement
 {
     abstract protected TableElementSlice insertSlice(int idx);
     abstract protected TableElementSlice setCurrent();
+    abstract protected void fill(Object o);
     
     private JustInTimeSet<Range> m_ranges;
     private boolean m_inUse;
