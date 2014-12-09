@@ -247,6 +247,7 @@ public class Row extends TableElementSlice
 		Table parent = getTable();
 		assert parent != null : "Parent table required";
 		
+		pushCurrent();
 		Column col = parent.getColumn(Access.First);
 		if (col != null) {
 			while(col != null) {
@@ -258,5 +259,7 @@ public class Row extends TableElementSlice
 			
 			this.setInUse(true);			
 		}
+		
+		popCurrent();
 	}
 }

@@ -11,7 +11,6 @@ abstract class TableElementSlice extends TableElement
 {
     abstract protected TableElementSlice insertSlice(int idx);
     abstract protected TableElementSlice setCurrent();
-    abstract protected void fill(Object o);
     
     private JustInTimeSet<Range> m_ranges;
     private boolean m_inUse;
@@ -90,6 +89,18 @@ abstract class TableElementSlice extends TableElement
     protected Iterable<Range> rangeIterable()
     {
         return new BaseElementIterable<Range>(m_ranges);
+    }
+    
+    protected void pushCurrent()
+    {
+    	if (getTable() != null)
+    		getTable().pushCurrent();
+    }
+    
+    protected void popCurrent()
+    {
+    	if (getTable() != null)
+    		getTable().popCurrent();
     }
     
     /*

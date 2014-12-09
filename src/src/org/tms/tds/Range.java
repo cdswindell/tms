@@ -309,4 +309,23 @@ public class Range extends TableElement
     	
         return numCells;
     }
+
+	@Override
+	protected void fill(Object o) 
+	{
+		if (!isEmpty()) {
+			if (getNumRows() == 0 && m_cols != null) 
+				m_cols.forEach(c->c.fill(o)); // if group is just columns, fill them
+			else if (getNumColumns() == 0 && m_rows != null) 
+				m_rows.forEach(r->r.fill(o)); // if group is just rows, fill them
+			else {
+				for (Column c : m_cols) {
+					for (Row r : m_rows) {
+						Cell cell = c.getCell(r);
+						cell.setCellValue(o);
+					}
+				}
+			}
+		}
+	}
 }

@@ -8,6 +8,7 @@ abstract class TableElement extends BaseElement
 {
     abstract protected int getNumCells();
     abstract protected void delete();
+    abstract protected void fill(Object o);
     
     private int m_index = -1;
     private Table m_table;

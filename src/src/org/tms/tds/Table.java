@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
@@ -22,6 +23,7 @@ public class Table extends TableElement
     private ArrayList<Column> m_cols;
     private int m_nextCellOffset;
     private Queue<Integer> m_unusedCellOffsets;
+    private Deque<CellReference> m_currentCellStack;
     
     private Row m_curRow;
     private Column m_curCol;
@@ -79,6 +81,7 @@ public class Table extends TableElement
         // set all other arrays/sets/maps to null/JustInTime
         m_ranges = new JustInTimeSet<Range>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
+        m_currentCellStack = new ArrayDeque<CellReference>();
         
         // clear dirty flag, as table is empty
         markClean();
@@ -826,7 +829,37 @@ public class Table extends TableElement
         return getNumRows() == 0 || getNumColumns() == 0 || getNumCells() == 0;
     }
     
-    protected Iterable<Row> rowIterable()
+	@Override
+	protected void fill(Object o) 
+	{
+		pushCurrent();
+		Column c = getColumn(Access.First);
+		while (c != null) {
+			c.fill(o);
+			c = getColumn(Access.Next);
+		}
+		
+		popCurrent();
+	}  
+	
+	synchronized protected void popCurrent() 
+    {
+		if (!m_currentCellStack.isEmpty()) {
+			CellReference cr = m_currentCellStack.pop();
+			if (cr != null) {
+				setCurrentRow(cr.getRow());
+				setCurrentColumn(cr.getColumn());
+			}
+		}		
+	}
+
+	synchronized protected void pushCurrent() 
+	{
+		CellReference cr = new CellReference(getCurrentRow(), getCurrentColumn());
+		m_currentCellStack.push(cr);
+	}
+
+	protected Iterable<Row> rowIterable()
     {
         return new BaseElementIterable<Row>(getRows());
     }
@@ -844,5 +877,31 @@ public class Table extends TableElement
     protected Iterator<Column> columnIterator()
     {
         return new BaseElementIterable<Column>(getColumns());
-    }  
+    }
+    
+    private class CellReference 
+    {
+    	private Row m_row;
+    	private Column m_col;
+    	
+    	public CellReference(Row r, Column c)
+    	{
+    		if (r != null && c != null)
+    			assert r.getTable() == c.getTable() : "Parent tables must match";
+    			
+    		m_row = r;
+    		m_col = c;
+    	}
+    	
+    	public Row getRow()
+    	{
+    		return m_row;
+    	}
+    	
+    	public Column getColumn()
+    	{
+    		return m_col;
+    	}
+    }
+
 }

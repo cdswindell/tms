@@ -353,6 +353,7 @@ public class Column extends TableElementSlice
 		Table parent = getTable();
 		assert parent != null : "Parent table required";
 		
+		pushCurrent();
 		Row r = parent.getRow(Access.First);
 		if (r != null) {
 			while(r != null) {
@@ -364,5 +365,6 @@ public class Column extends TableElementSlice
 			
 			this.setInUse(true);			
 		}
+		popCurrent();
 	}
 }

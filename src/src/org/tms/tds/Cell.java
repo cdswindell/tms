@@ -71,4 +71,10 @@ public class Cell extends TableElement
     {
     	setCellValue(null);
     }
+
+	@Override
+	protected void fill(Object o) 
+	{
+		setCellValue(o);
+	}
 }

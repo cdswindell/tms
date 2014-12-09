@@ -205,4 +205,21 @@ public class TableTest
             assertThat(t.calcIndex(et, Access.ByIndex, true, 11), is(10));
         }
     }
+    
+    @Test
+    public void fillTest()
+    {
+        Table t = new Table(12, 10);        
+        assert (t != null);
+        assertThat(t.getNumCells(), is (0));
+        
+        Row r1 = t.addRow(Access.ByIndex, 16);
+        Column c1 = t.addColumn(Access.ByIndex, 8);
+        assertThat(t.getNumCells(), is (0));
+        
+        t.fill(42);
+        assertThat(t.getNumCells(), is (16 * 8));
+        assertThat(t.getNumCells(), is (r1.getIndex() * c1.getIndex()));
+        assertThat(t.getNumCells(), is (t.getNumRows() * t.getNumColumns()));
+    }
 }
