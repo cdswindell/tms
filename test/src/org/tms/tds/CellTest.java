@@ -178,6 +178,8 @@ public class CellTest
         catch (DataTypeEnforcementException e)
         {
             assertThat(e, notNullValue());
+            assertThat(e.getAllowed(), is((Object)String.class));
+            assertThat(e.getRejected(), is((Object)Integer.class));
         }
         
         cR1C1.setCellValue(null);
