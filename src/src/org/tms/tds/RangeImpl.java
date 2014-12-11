@@ -10,12 +10,12 @@ import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class Range extends TableCellsElement
+public class RangeImpl extends TableCellsElement
 {
-    private Set<Row> m_rows;
-    private Set<Column> m_cols;
+    private Set<RowImpl> m_rows;
+    private Set<ColumnImpl> m_cols;
     
-    protected Range(Table parentTable)
+    protected RangeImpl(TableImpl parentTable)
     {
         super(ElementType.Range, parentTable);
         
@@ -27,9 +27,9 @@ public class Range extends TableCellsElement
     /*
      * Field Getters/Setters
      */
-    protected List<Row> getRows()
+    protected List<RowImpl> getRows()
     {
-        return new ArrayList<Row>(((JustInTimeSet<Row>)m_rows).clone());
+        return new ArrayList<RowImpl>(((JustInTimeSet<RowImpl>)m_rows).clone());
     }
     
     protected int getNumRows()
@@ -37,9 +37,9 @@ public class Range extends TableCellsElement
     	return m_rows.size();
     }
 
-    protected List<Column> getColumns()
+    protected List<ColumnImpl> getColumns()
     {
-        return new ArrayList<Column>(((JustInTimeSet<Column>)m_cols).clone());
+        return new ArrayList<ColumnImpl>(((JustInTimeSet<ColumnImpl>)m_cols).clone());
     }
 
     protected int getNumColumns()
@@ -53,9 +53,9 @@ public class Range extends TableCellsElement
     protected boolean contains(TableSliceElement r)
     {
         if (r != null) {
-            if (r instanceof Row)
+            if (r instanceof RowImpl)
                 return m_rows.contains(r);
-            else if (r instanceof Column)
+            else if (r instanceof ColumnImpl)
                 return m_cols.contains(r);
             else
                 throw new UnimplementedException(r, "contains");
@@ -67,10 +67,10 @@ public class Range extends TableCellsElement
     boolean add(TableSliceElement tes)
     {
         if (tes != null) {
-            if (tes instanceof Row)
-                return add(new Row[] {(Row)tes});
-            else if (tes instanceof Column)
-                return add(new Column[] {(Column)tes});
+            if (tes instanceof RowImpl)
+                return add(new RowImpl[] {(RowImpl)tes});
+            else if (tes instanceof ColumnImpl)
+                return add(new ColumnImpl[] {(ColumnImpl)tes});
             else
                 throw new UnimplementedException(tes, "add");
         }
@@ -81,10 +81,10 @@ public class Range extends TableCellsElement
     boolean remove(TableSliceElement tes)
     {
         if (tes != null) {
-            if (tes instanceof Row)
-                return remove(new Row[] {(Row)tes});
-            else if (tes instanceof Column)
-                return remove(new Column[] {(Column)tes});
+            if (tes instanceof RowImpl)
+                return remove(new RowImpl[] {(RowImpl)tes});
+            else if (tes instanceof ColumnImpl)
+                return remove(new ColumnImpl[] {(ColumnImpl)tes});
             else
                 throw new UnimplementedException(tes, "remove");
         }
@@ -138,7 +138,7 @@ public class Range extends TableCellsElement
         return false;
     }
         
-    protected boolean add(Row... rows)
+    protected boolean add(RowImpl... rows)
     {
         boolean addedAny = false;
         if (rows != null) {
@@ -146,7 +146,7 @@ public class Range extends TableCellsElement
             vetParent(rows);
             
             // iterate over all rows, adding them to the group
-            for (Row r : rows) 
+            for (RowImpl r : rows) 
             {
                 if (m_rows.add(r))
                     addedAny = true;
@@ -159,12 +159,12 @@ public class Range extends TableCellsElement
         return addedAny;
     }       
 
-    protected boolean remove(Row... rows)
+    protected boolean remove(RowImpl... rows)
     {
         boolean removedAny = false;
         if (rows != null) {
             // iterate over all rows, removing them from the group
-            for (Row r : rows) 
+            for (RowImpl r : rows) 
             {
                 if (m_rows.remove(r))
                     removedAny = true;
@@ -177,7 +177,7 @@ public class Range extends TableCellsElement
         return removedAny;
     } 
     
-    protected boolean add(Column... cols)
+    protected boolean add(ColumnImpl... cols)
     {
         boolean addedAny = false;
         if (cols != null) {
@@ -185,7 +185,7 @@ public class Range extends TableCellsElement
             vetParent(cols);
 
             // iterate over all rows, adding them to the group
-            for (Column c : cols) 
+            for (ColumnImpl c : cols) 
             {
                 if (m_cols.add(c))
                     addedAny = true;
@@ -198,12 +198,12 @@ public class Range extends TableCellsElement
         return addedAny;
     }
     
-    protected boolean remove(Column... cols)
+    protected boolean remove(ColumnImpl... cols)
     {
         boolean removedAny = false;
         if (cols != null) {
             // iterate over all rows, removing them from the group
-            for (Column c : cols) 
+            for (ColumnImpl c : cols) 
             {
                 if (m_cols.remove(c))
                     removedAny = true;
@@ -216,14 +216,14 @@ public class Range extends TableCellsElement
         return removedAny;
     } 
     
-    protected Iterable<Row> rowIterable()
+    protected Iterable<RowImpl> rowIterable()
     {
-        return new BaseElementIterable<Row>(getRows());
+        return new BaseElementIterable<RowImpl>(getRows());
     }
     
-    protected Iterable<Column> columnIterable()
+    protected Iterable<ColumnImpl> columnIterable()
     {
-        return new BaseElementIterable<Column>(getColumns());
+        return new BaseElementIterable<ColumnImpl>(getColumns());
     }
     
     /*
@@ -303,15 +303,15 @@ public class Range extends TableCellsElement
             }
         }
         
-        m_rows = new JustInTimeSet<Row>();
-        m_cols = new JustInTimeSet<Column>();
+        m_rows = new JustInTimeSet<RowImpl>();
+        m_cols = new JustInTimeSet<ColumnImpl>();
     }
         
     @Override
     protected int getNumCells()
     {
     	int numCells = 0;
-    	for (Column c : m_cols) {
+    	for (ColumnImpl c : m_cols) {
     		if (c != null) 
     			numCells += c.getNumCells();
     	}
@@ -328,9 +328,9 @@ public class Range extends TableCellsElement
 			else if (getNumColumns() == 0 && m_rows != null) 
 				m_rows.forEach(r->r.fill(o)); // if group is just rows, fill them
 			else {
-				for (Column c : m_cols) {
-					for (Row r : m_rows) {
-						Cell cell = c.getCell(r);
+				for (ColumnImpl c : m_cols) {
+					for (RowImpl r : m_rows) {
+						CellImpl cell = c.getCell(r);
 						cell.setCellValue(o);
 					}
 				}

@@ -9,7 +9,7 @@ abstract class TableCellsElement extends TableElement
     abstract protected int getNumCells();
     
     private int m_index = -1;
-    private Table m_table;
+    private TableImpl m_table;
 
     protected TableCellsElement(ElementType eType, TableElement e)
     {
@@ -25,12 +25,12 @@ abstract class TableCellsElement extends TableElement
      * Field getters and setters
      */
     
-    protected Table getTable()
+    protected TableImpl getTable()
     {
     	return m_table;
     }
     
-    void setTable(Table t)
+    void setTable(TableImpl t)
     {
     	m_table = t;
     }
@@ -86,7 +86,7 @@ abstract class TableCellsElement extends TableElement
         else if (getContext() != null)
             source = getContext();
         else
-            source = Context.getDefaultContext();
+            source = ContextImpl.getDefaultContext();
 
         return source;
     }
@@ -105,7 +105,7 @@ abstract class TableCellsElement extends TableElement
      * Retrieve the Context associated with this table element; the context is associated with the parent table
      * @return
      */
-    protected Context getContext()
+    protected ContextImpl getContext()
     {
         return getTable() != null ? getTable().getContext() : null;
     }

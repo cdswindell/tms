@@ -21,10 +21,10 @@ public class TableTest
     @Test
     public void testTableBasicProperties()
     {
-        Table t = new Table(7, 10);        
+        TableImpl t = new TableImpl(7, 10);        
         assert (t != null);
         
-        assertThat(t.getRowsCapacity(), is(Context.sf_ROW_CAPACITY_INCR_DEFAULT));
+        assertThat(t.getRowsCapacity(), is(ContextImpl.sf_ROW_CAPACITY_INCR_DEFAULT));
         
         assertThat(t.hasProperty(TableProperty.Label), is(false));
         t.setLabel("abcdef");
@@ -89,7 +89,7 @@ public class TableTest
     @Test
     public void getInitializablePropertiesTest()
     {
-        Table t = new Table(12, 10);        
+        TableImpl t = new TableImpl(12, 10);        
         assert (t != null);
 
         List<TableProperty> props = t.getInitializableProperties();
@@ -103,7 +103,7 @@ public class TableTest
     @Test
     public void getBooleanPropertiesTest()
     {
-        Table t = new Table(12, 10);        
+        TableImpl t = new TableImpl(12, 10);        
         assert (t != null);
         
         List<TableProperty> props = t.getProperties();
@@ -119,7 +119,7 @@ public class TableTest
     @Test
     public void getIntPropertiesTest()
     {
-        Table t = new Table(12, 10);        
+        TableImpl t = new TableImpl(12, 10);        
         assert (t != null);
         
         List<TableProperty> props = t.getProperties();
@@ -135,7 +135,7 @@ public class TableTest
     @Test
     public void getPropertiesTest()
     {
-        Table t = new Table(12, 10);        
+        TableImpl t = new TableImpl(12, 10);        
         assert (t != null);
 
         List<TableProperty> props = t.getProperties();
@@ -149,7 +149,7 @@ public class TableTest
     @Test
     public void basicRowAccessTest()
     {
-        Table t = new Table(12, 10);        
+        TableImpl t = new TableImpl(12, 10);        
         assert (t != null);
 
         try {
@@ -163,7 +163,7 @@ public class TableTest
         
         try {
             t.calcIndex(ElementType.Cell, Access.First);
-            fail("calcIndex sucessfully called with Cell ElementType");
+            fail("calcIndex sucessfully called with CellImpl ElementType");
         }
         catch (UnimplementedException e) 
         {
@@ -209,12 +209,12 @@ public class TableTest
     @Test
     public void fillTest()
     {
-        Table t = new Table(12, 10);        
+        TableImpl t = new TableImpl(12, 10);        
         assert (t != null);
         assertThat(t.getNumCells(), is (0));
         
-        Row r1 = t.addRow(Access.ByIndex, 16);
-        Column c1 = t.addColumn(Access.ByIndex, 8);
+        RowImpl r1 = t.addRow(Access.ByIndex, 16);
+        ColumnImpl c1 = t.addColumn(Access.ByIndex, 8);
         assertThat(t.getNumCells(), is (0));
         
         t.fill(42);

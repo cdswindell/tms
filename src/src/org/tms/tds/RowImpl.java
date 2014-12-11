@@ -6,11 +6,11 @@ import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
-public class Row extends TableSliceElement
+public class RowImpl extends TableSliceElement
 {
     private int m_cellOffset;
     
-    protected Row(Table parentTable)
+    protected RowImpl(TableImpl parentTable)
     {
         super(ElementType.Row, parentTable);
     }
@@ -35,12 +35,12 @@ public class Row extends TableSliceElement
      * Class-specific methods
      */
     
-    protected Cell getCell(Column col)
+    protected CellImpl getCell(ColumnImpl col)
     {
         return getCellInternal(col, true);
     }
     
-    Cell getCellInternal(Column col, boolean createIfSparse)
+    CellImpl getCellInternal(ColumnImpl col, boolean createIfSparse)
     {
         assert col != null : "Column required";
         assert this.getTable() != null: "Table required";
@@ -91,17 +91,17 @@ public class Row extends TableSliceElement
     }
     
     @Override
-    protected Row insertSlice(int insertAt)
+    protected RowImpl insertSlice(int insertAt)
     {
         // sanity check, insertAt must be >= 0 (indexes are 0-based)
         assert insertAt >= 0 : insertAt;
         
         // sanity check, table must exist
-        Table parent = getTable();
+        TableImpl parent = getTable();
         assert parent != null : "Parent Table Null";
         
         // sanity check, rows list must exist
-        ArrayList<Row> rows = parent.getRows();
+        ArrayList<RowImpl> rows = parent.getRows();
         assert rows != null;
         
         /*
@@ -161,9 +161,9 @@ public class Row extends TableSliceElement
     }
 
     @Override
-    protected Row setCurrent()
+    protected RowImpl setCurrent()
     {
-        Row prevCurrent = null;
+        RowImpl prevCurrent = null;
         if (getTable() != null) 
             prevCurrent = getTable().setCurrentRow(this);
         
@@ -186,10 +186,10 @@ public class Row extends TableSliceElement
     	removeFromAllRanges();
     	
     	// now, remove from the parent table, if it is defined
-    	Table parent = getTable();
+    	TableImpl parent = getTable();
     	if (parent != null) {
             // sanity check, columns list must exist
-            ArrayList<Row> rows = parent.getRows();
+            ArrayList<RowImpl> rows = parent.getRows();
             assert rows != null;
             
             int idx = getIndex() - 1;
@@ -232,13 +232,13 @@ public class Row extends TableSliceElement
         if (cellOffset < 0)
             return 0;
         
-        Table parent = getTable();
+        TableImpl parent = getTable();
         assert parent != null : "Parent Table Null";
 
         int numCells = 0;
-        ArrayList<Column> cols = parent.getColumns();
+        ArrayList<ColumnImpl> cols = parent.getColumns();
         if (cols != null) {
-            for (Column c : cols) {
+            for (ColumnImpl c : cols) {
                 if (c == null) continue;
                 int numColCells = c.getCellsSize();
                 if (cellOffset < numColCells) {
@@ -254,14 +254,14 @@ public class Row extends TableSliceElement
 	@Override
 	protected void fill(Object o) 
 	{
-		Table parent = getTable();
+		TableImpl parent = getTable();
 		assert parent != null : "Parent table required";
 		
 		pushCurrent();
-		Column col = parent.getColumn(Access.First);
+		ColumnImpl col = parent.getColumn(Access.First);
 		if (col != null) {
 			while(col != null) {
-				Cell c = getCell(col);
+				CellImpl c = getCell(col);
 				c.setCellValue(o);
 				col.setInUse(true);
 				col = parent.getColumn(Access.Next);

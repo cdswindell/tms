@@ -4,13 +4,13 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
 
-public class Cell extends TableElement
+public class CellImpl extends TableElement
 {
     private Object m_cellValue;
-    private Column m_col;
+    private ColumnImpl m_col;
     private int m_cellOffset;
     
-    public Cell(Column col, int cellOffset)
+    public CellImpl(ColumnImpl col, int cellOffset)
     {
         super(ElementType.Cell, col);
         m_col = col;
@@ -84,12 +84,12 @@ public class Cell extends TableElement
     	m_cellOffset = offset;
     }
     
-    protected Column getColumn()
+    protected ColumnImpl getColumn()
     {
     	return m_col;
     }
     
-    protected Row getRow()
+    protected RowImpl getRow()
     {
     	if (getTable() != null)
     		return getTable().getRowByCellOffset(getCellOffset());
@@ -173,7 +173,7 @@ public class Cell extends TableElement
             if (super.initializeProperty(tp, value)) continue;            
             switch (tp) {
                 default:
-                    throw new IllegalStateException("No initialization available for Cell Property: " + tp);                       
+                    throw new IllegalStateException("No initialization available for CellImpl Property: " + tp);                       
             }
         }
         
@@ -196,7 +196,7 @@ public class Cell extends TableElement
 	}
 
 	@Override
-	protected Table getTable() 
+	protected TableImpl getTable() 
 	{
 		if (m_col != null)
 			return m_col.getTable();
@@ -205,7 +205,7 @@ public class Cell extends TableElement
 	}
 
 	@Override
-	protected Context getContext() 
+	protected ContextImpl getContext() 
 	{
 		if (getTable() != null)
 			return getTable().getContext();

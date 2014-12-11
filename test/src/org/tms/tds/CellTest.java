@@ -18,11 +18,11 @@ public class CellTest
     @Test
     public void getPropertiesTest()
     {
-        Cell c = new Cell(null, -1);
+        CellImpl c = new CellImpl(null, -1);
 
         List<TableProperty> props = c.getProperties();
         for (TableProperty p : props) {
-            System.out.print("Cell property: " + p);
+            System.out.print("CellImpl property: " + p);
             Object value = c.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>"));
         }
@@ -31,12 +31,12 @@ public class CellTest
     @Test
     public void getInitializablePropertiesTest()
     {
-        Cell c = new Cell(null, -1);
+        CellImpl c = new CellImpl(null, -1);
 
         List<TableProperty> props = c.getInitializableProperties();
         for (TableProperty p : props) { 
             // will fail if property getter not implemented
-            System.out.print("Cell initializable property: " + p);
+            System.out.print("CellImpl initializable property: " + p);
             Object value = c.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
@@ -45,13 +45,13 @@ public class CellTest
     @Test
     public void getIntPropertiesTest()
     {
-        Cell c = new Cell(null, -1);
+        CellImpl c = new CellImpl(null, -1);
 
         List<TableProperty> props = c.getProperties();
         for (TableProperty p : props) { 
         	if (!p.isIntValue()) continue;
             // will fail if property getter not implemented
-            System.out.print("Cell int property: " + p);
+            System.out.print("CellImpl int property: " + p);
             Object value = c.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
@@ -61,13 +61,13 @@ public class CellTest
     @Test
     public void getBooleanPropertiesTest()
     {
-        Cell c = new Cell(null, -1);
+        CellImpl c = new CellImpl(null, -1);
 
         List<TableProperty> props = c.getProperties();
         for (TableProperty p : props) { 
         	if (!p.isBooleanValue()) continue;
             // will fail if property getter not implemented
-            System.out.print("Cell boolean property: " + p);
+            System.out.print("CellImpl boolean property: " + p);
             Object value = c.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
@@ -76,10 +76,10 @@ public class CellTest
     @Test
     public void enforceCellDataTypeHierarchyTest()
     {
-        Table t = new Table();
-        Row r1 = t.addRow(Access.Next);
-        Column c1 = t.addColumn(Access.Next);
-        Cell cR1C1 = t.getCell(r1,  c1);
+        TableImpl t = new TableImpl();
+        RowImpl r1 = t.addRow(Access.Next);
+        ColumnImpl c1 = t.addColumn(Access.Next);
+        CellImpl cR1C1 = t.getCell(r1,  c1);
         
         // sample the various combinations of enforcing cell data types
         assertThat(t.isDataTypeEnforced(), is(false));

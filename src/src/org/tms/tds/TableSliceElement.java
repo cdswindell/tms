@@ -12,7 +12,7 @@ abstract class TableSliceElement extends TableCellsElement
     abstract protected TableSliceElement insertSlice(int idx);
     abstract protected TableSliceElement setCurrent();
     
-    private JustInTimeSet<Range> m_ranges;
+    private JustInTimeSet<RangeImpl> m_ranges;
     private boolean m_inUse;
 
     public TableSliceElement(ElementType eType, TableElement e)
@@ -34,9 +34,9 @@ abstract class TableSliceElement extends TableCellsElement
         m_inUse = inUse;
     }
     
-    protected List<Range> getRanges()
+    protected List<RangeImpl> getRanges()
     {
-        return new ArrayList<Range>(m_ranges.clone());
+        return new ArrayList<RangeImpl>(m_ranges.clone());
     } 
     
     /*
@@ -48,7 +48,7 @@ abstract class TableSliceElement extends TableCellsElement
 		
 	}
     
-    protected boolean add(Range r)
+    protected boolean add(RangeImpl r)
     {
         if (r != null) {
             /*
@@ -64,7 +64,7 @@ abstract class TableSliceElement extends TableCellsElement
         return false;
     }
 
-    protected boolean remove(Range r)
+    protected boolean remove(RangeImpl r)
     {
         if (r != null) {
             /*
@@ -86,9 +86,9 @@ abstract class TableSliceElement extends TableCellsElement
     	m_ranges.forEach(r -> {if (r != null) r.remove(this);});
     }
     
-    protected Iterable<Range> rangeIterable()
+    protected Iterable<RangeImpl> rangeIterable()
     {
-        return new BaseElementIterable<Range>(m_ranges);
+        return new BaseElementIterable<RangeImpl>(m_ranges);
     }
     
     protected void pushCurrent()
@@ -125,7 +125,7 @@ abstract class TableSliceElement extends TableCellsElement
         }
         
         // initialize other member fields
-        m_ranges = new JustInTimeSet<Range>();
+        m_ranges = new JustInTimeSet<RangeImpl>();
         m_inUse = false;
     } 
 

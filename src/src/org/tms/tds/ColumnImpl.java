@@ -8,14 +8,14 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 
-public class Column extends TableSliceElement
+public class ColumnImpl extends TableSliceElement
 {
     private Object m_cells;
     private Class<? extends Object> m_dataType;
     private int m_cellsCapacity;
     private boolean m_stronglyTyped;
     
-    public Column(Table parentTable)
+    public ColumnImpl(TableImpl parentTable)
     {
         super(ElementType.Column, parentTable);
     }
@@ -55,21 +55,21 @@ public class Column extends TableSliceElement
      * Class-specific methods
      */    
 
-    protected Cell getCell(Row row)
+    protected CellImpl getCell(RowImpl row)
     {
         return getCellInternal(row, true);
     }
     
     @SuppressWarnings("unchecked")
-    Cell getCellInternal(Row row, boolean createIfSparse)
+    CellImpl getCellInternal(RowImpl row, boolean createIfSparse)
     {
         assert row != null : "Row required";
         assert this.getTable() != null: "Table required";
         assert this.getTable() == row.getTable() : "Row not in same table";
         
-        Cell c = null;
+        CellImpl c = null;
         int numCells = getCellsSize();
-        Table table = getTable();
+        TableImpl table = getTable();
         synchronized(getTable()) {
             int cellOffset = row.getCellOffset();
             if (cellOffset < 0) {
@@ -87,7 +87,7 @@ public class Column extends TableSliceElement
             } // of assign cell offset to row
             
             // get a type-safe reference to the cells array
-            ArrayList<Cell> cells = (ArrayList<Cell>)m_cells;
+            ArrayList<CellImpl> cells = (ArrayList<CellImpl>)m_cells;
             
             // if offset is equal or greater than numCells, we haven't referenced this
             // cell yet, create it and add it to the array, if createIfSparse is true
@@ -95,7 +95,7 @@ public class Column extends TableSliceElement
                 c = cells.get(cellOffset);
                 
                 if (c == null && createIfSparse) {
-                    c = new Cell(this, cellOffset);
+                    c = new CellImpl(this, cellOffset);
                     cells.set(cellOffset, c);
                 }
             }
@@ -107,7 +107,7 @@ public class Column extends TableSliceElement
                 
                 // make sure sufficient capacity exists
                 ensureCellCapacity();
-                cells = (ArrayList<Cell>)m_cells; // reget the cells array, in case it was null
+                cells = (ArrayList<CellImpl>)m_cells; // reget the cells array, in case it was null
                 
                 // if cellOffset is equal to or beyond num cells, add slots to cell array
                 while (cellOffset > numCells) {
@@ -119,7 +119,7 @@ public class Column extends TableSliceElement
                 assert cellOffset == numCells : "cellOffset != numCells";
                 
                 // create a new cell structure and add it to the array              
-                c = new Cell(this, cellOffset);
+                c = new CellImpl(this, cellOffset);
                 cells.add(c);
             }
         } // of synchronized
@@ -137,7 +137,7 @@ public class Column extends TableSliceElement
 	int getCellsSize()
     {
         if (m_cells != null) 
-        	return ((ArrayList<Cell>)m_cells).size();
+        	return ((ArrayList<CellImpl>)m_cells).size();
         else 
             return 0;
     }
@@ -146,18 +146,18 @@ public class Column extends TableSliceElement
     @SuppressWarnings("unchecked")
     void ensureCellCapacity()
     {
-        Table table = getTable();
+        TableImpl table = getTable();
         assert table != null : "Parent table required";
         
         // cell capacity is based on the number of rows in a table
         if (table.getNumRows() > 0) {
             int reqCapacity = table.getRowsCapacity();
             if (m_cells == null) {
-                m_cells = new ArrayList<Cell>(reqCapacity);
+                m_cells = new ArrayList<CellImpl>(reqCapacity);
                 m_cellsCapacity = reqCapacity;
             }
             else if (reqCapacity > m_cellsCapacity) {
-                ((ArrayList<Cell>)m_cells).ensureCapacity(reqCapacity);
+                ((ArrayList<CellImpl>)m_cells).ensureCapacity(reqCapacity);
                 m_cellsCapacity = reqCapacity;
             }
         }
@@ -168,9 +168,9 @@ public class Column extends TableSliceElement
 	void clearCell(int cellOffset) 
 	{
 		if (m_cells != null) {
-			List<Cell> cells = (ArrayList<Cell>)m_cells;
-			if (cellOffset < cells.size()) {
-				cells.set(cellOffset, null);
+			List<CellImpl> cellImpls = (ArrayList<CellImpl>)m_cells;
+			if (cellOffset < cellImpls.size()) {
+				cellImpls.set(cellOffset, null);
 			}
 		}
 	}
@@ -224,17 +224,17 @@ public class Column extends TableSliceElement
     }
     
     @Override
-    protected Column insertSlice(int insertAt)
+    protected ColumnImpl insertSlice(int insertAt)
     {
         // sanity check, insertAt must be >= 0 (indexes are 0-based)
         assert insertAt >= 0;
         
         // sanity check, table must exist
-        Table parent = getTable();
+        TableImpl parent = getTable();
         assert parent != null;
         
         // sanity check, columns list must exist
-        ArrayList<Column> cols = parent.getColumns();
+        ArrayList<ColumnImpl> cols = parent.getColumns();
         assert cols != null;
         
         /*
@@ -292,7 +292,7 @@ public class Column extends TableSliceElement
     {
         if (m_cells != null) {
         	int numNonNullCells = 0;
-        	for (Object o : (ArrayList<Cell>)m_cells)
+        	for (Object o : (ArrayList<CellImpl>)m_cells)
         		if (o != null) numNonNullCells++;
         	
         	return numNonNullCells;
@@ -302,9 +302,9 @@ public class Column extends TableSliceElement
     }
     
     @Override
-    protected Column setCurrent()
+    protected ColumnImpl setCurrent()
     {
-        Column prevCurrent = null;
+        ColumnImpl prevCurrent = null;
         if (getTable() != null) 
             prevCurrent = getTable().setCurrentColumn(this);
         
@@ -327,10 +327,10 @@ public class Column extends TableSliceElement
     	removeFromAllRanges();
     	
     	// now, remove from the parent table, if it is defined
-    	Table parent = getTable();
+    	TableImpl parent = getTable();
     	if (parent != null) {
             // sanity check, columns list must exist
-            ArrayList<Column> cols = parent.getColumns();
+            ArrayList<ColumnImpl> cols = parent.getColumns();
             assert cols != null;
             
             int idx = getIndex() - 1;
@@ -364,14 +364,14 @@ public class Column extends TableSliceElement
 	@Override
 	protected void fill(Object o) 
 	{
-		Table parent = getTable();
+		TableImpl parent = getTable();
 		assert parent != null : "Parent table required";
 		
 		pushCurrent();
-		Row r = parent.getRow(Access.First);
+		RowImpl r = parent.getRow(Access.First);
 		if (r != null) {
 			while(r != null) {
-				Cell c = getCell(r);
+				CellImpl c = getCell(r);
 				c.setCellValue(o);
 				r.setInUse(true);
 				r = parent.getRow(Access.Next);

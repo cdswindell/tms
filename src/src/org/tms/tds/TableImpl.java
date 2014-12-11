@@ -17,23 +17,23 @@ import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class Table extends TableCellsElement
+public class TableImpl extends TableCellsElement
 {
     private boolean m_dirty;
     
-    private ArrayList<Row> m_rows;
-    private ArrayList<Column> m_cols;
+    private ArrayList<RowImpl> m_rows;
+    private ArrayList<ColumnImpl> m_cols;
     private int m_nextCellOffset;
     private Queue<Integer> m_unusedCellOffsets;
     private Deque<CellReference> m_currentCellStack;
-    private Map<Integer, Row> m_cellOffsetRowMap;
+    private Map<Integer, RowImpl> m_cellOffsetRowMap;
     
-    private Row m_curRow;
-    private Column m_curCol;
+    private RowImpl m_curRow;
+    private ColumnImpl m_curCol;
     
-    private JustInTimeSet<Range> m_ranges;
+    private JustInTimeSet<RangeImpl> m_ranges;
     
-    private Context m_context;
+    private ContextImpl m_context;
     
     private int m_rowsCapacity;
     private int m_colsCapacity;
@@ -42,18 +42,18 @@ public class Table extends TableCellsElement
     private int m_rowCapacityIncr;
     private int m_colCapacityIncr;
     
-    public Table()
+    public TableImpl()
     {
-        this(Context.getPropertyInt(null, TableProperty.RowCapacityIncr),
-             Context.getPropertyInt(null, TableProperty.ColumnCapacityIncr));
+        this(ContextImpl.getPropertyInt(null, TableProperty.RowCapacityIncr),
+             ContextImpl.getPropertyInt(null, TableProperty.ColumnCapacityIncr));
     }
     
-    public Table(int nRows, int nCols)
+    public TableImpl(int nRows, int nCols)
     {
-        this(nRows, nCols, Context.getDefaultContext());
+        this(nRows, nCols, ContextImpl.getDefaultContext());
     }
 
-    protected Table(int nRows, int nCols, Context c)
+    protected TableImpl(int nRows, int nCols, ContextImpl c)
     {
         super(ElementType.Table, null);
         setTable(this);
@@ -62,7 +62,7 @@ public class Table extends TableCellsElement
         initialize(nRows, nCols, null);
     }
 
-    protected Table(int nRows, int nCols, Table t)
+    protected TableImpl(int nRows, int nCols, TableImpl t)
     {
         super(ElementType.Table, null);
         setTable(this);
@@ -71,13 +71,13 @@ public class Table extends TableCellsElement
         initialize(nRows, nCols, t);
     }
     
-    private void initialize(int nRows, int nCols, Table t)
+    private void initialize(int nRows, int nCols, TableImpl t)
     {
         initializeProperties(t);
         
         // allocate base memory for rows and columns
-        m_rows = new ArrayList<Row>(m_rowsCapacity);
-        m_cols = new ArrayList<Column>(m_colsCapacity);
+        m_rows = new ArrayList<RowImpl>(m_rowsCapacity);
+        m_cols = new ArrayList<ColumnImpl>(m_colsCapacity);
                 
         setRowsCapacity(calcRowsCapacity(nRows));
         setColumnsCapacity(calcColumnsCapacity(nCols));
@@ -88,10 +88,10 @@ public class Table extends TableCellsElement
         m_nextCellOffset = 0;
         
         // set all other arrays/sets/maps to null/JustInTime
-        m_ranges = new JustInTimeSet<Range>();
+        m_ranges = new JustInTimeSet<RangeImpl>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_currentCellStack = new ArrayDeque<CellReference>();
-        m_cellOffsetRowMap = new HashMap<Integer, Row>(getRowsCapacity());
+        m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
         
         // clear dirty flag, as table is empty
         markClean();
@@ -103,7 +103,7 @@ public class Table extends TableCellsElement
         // noop for tables, initialization happens slightly differently
     }
     
-    protected void initializeProperties(Table e)
+    protected void initializeProperties(TableImpl e)
     {
         BaseElement source = getInitializationSource(e);
         for (TableProperty tp : this.getInitializableProperties()) {
@@ -114,13 +114,13 @@ public class Table extends TableCellsElement
             switch (tp) {
                 case RowCapacityIncr:
                     if (!isValidPropertyValueInt(value))
-                        value = Context.sf_ROW_CAPACITY_INCR_DEFAULT;
+                        value = ContextImpl.sf_ROW_CAPACITY_INCR_DEFAULT;
                     setRowCapacityIncr((int)value);
                     break;
                     
                 case ColumnCapacityIncr:
                     if (!isValidPropertyValueInt(value))
-                        value = Context.sf_COLUMN_CAPACITY_INCR_DEFAULT;
+                        value = ContextImpl.sf_COLUMN_CAPACITY_INCR_DEFAULT;
                     setColumnCapacityIncr((int)value);
                     break;
 
@@ -177,10 +177,10 @@ public class Table extends TableCellsElement
         }
     }
     
-    private Context setContext(Context c)
+    private ContextImpl setContext(ContextImpl c)
     {
         if (c == null)
-            c = Context.getDefaultContext();
+            c = ContextImpl.getDefaultContext();
         
         if (c != null)
         	c.unregister(this);
@@ -191,20 +191,20 @@ public class Table extends TableCellsElement
     }
 
     @Override
-    protected Context getContext()
+    protected ContextImpl getContext()
     {
         return m_context;
     }
 
     @Override
-    protected Table getTable()
+    protected TableImpl getTable()
     {
         return this;
     }
 
-    protected List<Range>getRanges()
+    protected List<RangeImpl>getRanges()
     {
-        return new ArrayList<Range>(m_ranges.clone());
+        return new ArrayList<RangeImpl>(m_ranges.clone());
     }
     
     @Override
@@ -228,7 +228,7 @@ public class Table extends TableCellsElement
         return this.isEnforceDataType();
     }
 
-    protected boolean add(Range r)
+    protected boolean add(RangeImpl r)
     {
         vetParent(r);
         boolean processed = m_ranges.add(r);
@@ -239,7 +239,7 @@ public class Table extends TableCellsElement
     /*
      * Delete TableELement methods
      */
-    protected void remove(Range r)
+    protected void remove(RangeImpl r)
     {
         vetParent(r);
         boolean processed = m_ranges.remove(r);
@@ -247,7 +247,7 @@ public class Table extends TableCellsElement
         if (processed) markDirty();
     }
  
-    protected void delete(Row r)
+    protected void delete(RowImpl r)
     {
         vetParent(r);
         boolean processed = false;
@@ -255,7 +255,7 @@ public class Table extends TableCellsElement
         if (processed) markDirty();
     }
  
-    protected void delete(Column c)
+    protected void delete(ColumnImpl c)
     {
         vetParent(c);
         boolean processed = false;
@@ -317,7 +317,7 @@ public class Table extends TableCellsElement
     protected int getRowCapacityIncr()
     {
         if (m_rowCapacityIncr <= 0) 
-            m_rowCapacityIncr = Context.getPropertyInt(getContext(), TableProperty.RowCapacityIncr);
+            m_rowCapacityIncr = ContextImpl.getPropertyInt(getContext(), TableProperty.RowCapacityIncr);
         
         return m_rowCapacityIncr;
     }
@@ -338,14 +338,14 @@ public class Table extends TableCellsElement
         return m_rows == null ? 0 : m_rows.size();
     }
     
-    protected Row getCurrentRow()
+    protected RowImpl getCurrentRow()
     {
         return m_curRow;
     }
     
-    protected Row setCurrentRow(Row row)
+    protected RowImpl setCurrentRow(RowImpl row)
     {
-        Row prevCurrent = getCurrentRow();
+        RowImpl prevCurrent = getCurrentRow();
         m_curRow = row;
         
         return prevCurrent;
@@ -356,29 +356,29 @@ public class Table extends TableCellsElement
      * Note: <b>for systems use only!</b>
      * @return ArrayList&lt;Row&gt;
      */
-    ArrayList<Row> getRows()
+    ArrayList<RowImpl> getRows()
     {
         return m_rows;
     }
 
-    protected Row addRow(Access mode)
+    protected RowImpl addRow(Access mode)
     {
         return addRow(mode, (Object [])null);
     }
     
-    protected Row addRow(Access mode, Object... mda)
+    protected RowImpl addRow(Access mode, Object... mda)
     {
-        return (Row)add(new Row(this), mode, mda);
+        return (RowImpl)add(new RowImpl(this), mode, mda);
     }
     
-    protected Row getRow(Access mode, Object...mda)
+    protected RowImpl getRow(Access mode, Object...mda)
     {
         return getRowInternal(true, mode, mda);
     }
     
-    private Row getRowInternal(boolean createIfNull, Access mode, Object...mda)
+    private RowImpl getRowInternal(boolean createIfNull, Access mode, Object...mda)
     {
-        Row r = null;
+        RowImpl r = null;
         
         // calculate row index
         int rowIdx = this.calcIndex(ElementType.Row, mode, false, mda);
@@ -390,7 +390,7 @@ public class Table extends TableCellsElement
         
         // if the row is null, create it
         if (r == null && createIfNull) {
-            r = new Row(this);
+            r = new RowImpl(this);
             r.setIndex(rowIdx + 1);
             
             // add the row to the Rows array at the correct index
@@ -411,7 +411,7 @@ public class Table extends TableCellsElement
     {
         Integer availableOffset = this.m_unusedCellOffsets.poll();
         if (availableOffset != null) {
-            assert availableOffset >= 0 : "Invalid Cell Offset Value";
+            assert availableOffset >= 0 : "Invalid CellImpl Offset Value";
             return availableOffset;
         }
         
@@ -440,21 +440,21 @@ public class Table extends TableCellsElement
 		m_cellOffsetRowMap.remove(cellOffset);
 		
 		// if so-requested, free the cells in the component columns array
-		for (Column c : getColumns()) {
+		for (ColumnImpl c : getColumns()) {
 			if (c != null) 
 				c.clearCell(cellOffset);
 		}
 	}
 
-	protected Row getRowByCellOffset(int cellOffset) 
+	protected RowImpl getRowByCellOffset(int cellOffset) 
 	{
 		if (cellOffset >= 0) {
-		    Row r = m_cellOffsetRowMap.get(cellOffset);
+		    RowImpl r = m_cellOffsetRowMap.get(cellOffset);
 		    if (r != null)
 		        return r;
 		    
 		    // as a last resort, do a sequential search
-			for (Row row : getRows())
+			for (RowImpl row : getRows())
 				if (row != null && row.getCellOffset() == cellOffset)
 					return row;
 		}
@@ -462,7 +462,7 @@ public class Table extends TableCellsElement
 		return null;
 	}
 	
-    void mapCellOffsetToRow(Row row, int offset)
+    void mapCellOffsetToRow(RowImpl row, int offset)
     {
         if (row != null && offset >= 0)
             m_cellOffsetRowMap.put(offset, row);
@@ -473,7 +473,7 @@ public class Table extends TableCellsElement
     protected int getColumnCapacityIncr()
     {
         if (m_colCapacityIncr <= 0) 
-            m_colCapacityIncr = Context.getPropertyInt(getContext(), TableProperty.ColumnCapacityIncr);
+            m_colCapacityIncr = ContextImpl.getPropertyInt(getContext(), TableProperty.ColumnCapacityIncr);
         
         return m_colCapacityIncr;
     }
@@ -523,42 +523,42 @@ public class Table extends TableCellsElement
      * Note: <b>for systems use only!</b>
      * @return ArrayList&lt;Column&gt;
      */
-    ArrayList<Column> getColumns()
+    ArrayList<ColumnImpl> getColumns()
     {
         return m_cols;
     }
 
-    protected Column getCurrentColumn()
+    protected ColumnImpl getCurrentColumn()
     {
         return m_curCol;
     }
     
-    protected Column setCurrentColumn(Column col)
+    protected ColumnImpl setCurrentColumn(ColumnImpl col)
     {
-        Column prevCurrent = getCurrentColumn();
+        ColumnImpl prevCurrent = getCurrentColumn();
         m_curCol = col;
         
         return prevCurrent;
     }  
     
-    protected Column addColumn(Access mode)
+    protected ColumnImpl addColumn(Access mode)
     {
         return addColumn(mode, null);
     }
     
-    protected Column addColumn(Access mode, Object md)
+    protected ColumnImpl addColumn(Access mode, Object md)
     {
-        return (Column)add(new Column(this), mode, md);
+        return (ColumnImpl)add(new ColumnImpl(this), mode, md);
     }
     
-    protected Column getColumn(Access mode, Object...mda)
+    protected ColumnImpl getColumn(Access mode, Object...mda)
     {
         return getColumnInternal(true, mode, mda);
     }
     
-    private Column getColumnInternal(boolean createIfNull, Access mode, Object...mda)
+    private ColumnImpl getColumnInternal(boolean createIfNull, Access mode, Object...mda)
     {
-        Column r = null;
+        ColumnImpl r = null;
         
         // calculate column index
         int colIdx = this.calcIndex(ElementType.Column, mode, false, mda);
@@ -570,7 +570,7 @@ public class Table extends TableCellsElement
         
         // if the column is null, create it
         if (r == null && createIfNull) {
-            r = new Column(this);
+            r = new ColumnImpl(this);
             r.setIndex(colIdx + 1);
             
             // add the column to the Columns array at the correct index
@@ -814,7 +814,7 @@ public class Table extends TableCellsElement
     protected int getNumCells()
     {
         int numCells = 0;
-        for (Column c : columnIterable()) {
+        for (ColumnImpl c : columnIterable()) {
             if (c != null)
                 numCells += c.getNumCells();
         }
@@ -822,7 +822,7 @@ public class Table extends TableCellsElement
         return numCells;
     }
     
-    protected Cell getCell(Row row, Column col)
+    protected CellImpl getCell(RowImpl row, ColumnImpl col)
     {
         assert row != null : "Row required";
         assert col != null : "Column required";
@@ -844,7 +844,7 @@ public class Table extends TableCellsElement
 	protected void fill(Object o) 
 	{
 		pushCurrent();
-		Column c = getColumn(Access.First);
+		ColumnImpl c = getColumn(Access.First);
 		while (c != null) {
 			c.fill(o);
 			c = getColumn(Access.Next);
@@ -870,32 +870,32 @@ public class Table extends TableCellsElement
 		m_currentCellStack.push(cr);
 	}
 
-	protected Iterable<Row> rowIterable()
+	protected Iterable<RowImpl> rowIterable()
     {
-        return new BaseElementIterable<Row>(getRows());
+        return new BaseElementIterable<RowImpl>(getRows());
     }
     
-    protected Iterable<Column> columnIterable()
+    protected Iterable<ColumnImpl> columnIterable()
     {
-        return new BaseElementIterable<Column>(getColumns());
+        return new BaseElementIterable<ColumnImpl>(getColumns());
     }
     
-    protected Iterable<Range> rangeIterable()
+    protected Iterable<RangeImpl> rangeIterable()
     {
-        return new BaseElementIterable<Range>(m_ranges);
+        return new BaseElementIterable<RangeImpl>(m_ranges);
     }
     
-    protected Iterator<Column> columnIterator()
+    protected Iterator<ColumnImpl> columnIterator()
     {
-        return new BaseElementIterable<Column>(getColumns());
+        return new BaseElementIterable<ColumnImpl>(getColumns());
     }
     
     private class CellReference 
     {
-    	private Row m_row;
-    	private Column m_col;
+    	private RowImpl m_row;
+    	private ColumnImpl m_col;
     	
-    	public CellReference(Row r, Column c)
+    	public CellReference(RowImpl r, ColumnImpl c)
     	{
     		if (r != null && c != null)
     			assert r.getTable() == c.getTable() : "Parent tables must match";
@@ -904,12 +904,12 @@ public class Table extends TableCellsElement
     		m_col = c;
     	}
     	
-    	public Row getRow()
+    	public RowImpl getRow()
     	{
     		return m_row;
     	}
     	
-    	public Column getColumn()
+    	public ColumnImpl getColumn()
     	{
     		return m_col;
     	}

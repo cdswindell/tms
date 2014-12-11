@@ -8,9 +8,9 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.util.WeakHashSet;
 
-public class Context extends BaseElement
+public class ContextImpl extends BaseElement
 {
-    private static Context sf_DEFAULT_CONTEXT;
+    private static ContextImpl sf_DEFAULT_CONTEXT;
     
     static final int sf_ROW_CAPACITY_INCR_DEFAULT = 10;
     static final int sf_COLUMN_CAPACITY_INCR_DEFAULT = 10;
@@ -21,7 +21,7 @@ public class Context extends BaseElement
     
     static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();
     
-    protected static int getPropertyInt(Context c, TableProperty key)
+    protected static int getPropertyInt(ContextImpl c, TableProperty key)
     {
         if (c != null)
             return c.getPropertyInt(key);
@@ -29,7 +29,7 @@ public class Context extends BaseElement
             return getDefaultContext().getPropertyInt(key);
     }
 
-    protected static boolean getPropertyBoolean(Context c, TableProperty key)
+    protected static boolean getPropertyBoolean(ContextImpl c, TableProperty key)
     {
         if (c != null)
             return c.getPropertyBoolean(key);
@@ -37,51 +37,51 @@ public class Context extends BaseElement
             return getDefaultContext().getPropertyBoolean(key);
     }
 
-    synchronized protected static Context getDefaultContext()
+    synchronized protected static ContextImpl getDefaultContext()
     {
         if (sf_DEFAULT_CONTEXT == null) {
-            sf_DEFAULT_CONTEXT = new Context(true, null);
+            sf_DEFAULT_CONTEXT = new ContextImpl(true, null);
             sf_DEFAULT_CONTEXT.setLabel("Default");
         }
             
         return sf_DEFAULT_CONTEXT;
     }
 
-    private Set<Table> m_registeredTables;
+    private Set<TableImpl> m_registeredTables;
     private boolean m_default;
     private boolean m_enforceDataType;
     
     private int m_rowCapacityIncr;
     private int m_columnCapacityIncr;
     
-    private Context(boolean isDefault, Context otherContext)
+    private ContextImpl(boolean isDefault, ContextImpl otherContext)
     {
         super(ElementType.Context);      
         m_default = isDefault;
-        m_registeredTables = new WeakHashSet<Table>();
+        m_registeredTables = new WeakHashSet<TableImpl>();
         
         // initialize from default context, unless this the default
         initialize(otherContext);
      }
 
-    protected Context()
+    protected ContextImpl()
     {
         this(false, null);
     }
     
-    protected Context(Context otherContext)
+    protected ContextImpl(ContextImpl otherContext)
     {
         this(false, otherContext);
     }
     
     protected void initialize()
     {
-        initialize(Context.getDefaultContext());
+        initialize(ContextImpl.getDefaultContext());
     }
     
-    protected void initialize(Context otherContext)
+    protected void initialize(ContextImpl otherContext)
     {
-        Context sourceContext = isDefault() ? otherContext : (otherContext != null ? otherContext : Context.getDefaultContext());
+        ContextImpl sourceContext = isDefault() ? otherContext : (otherContext != null ? otherContext : ContextImpl.getDefaultContext());
         if (this == sourceContext)
             return; // nothing to do
         
@@ -165,7 +165,7 @@ public class Context extends BaseElement
             if (this.isDefault()) 
                 m_rowCapacityIncr = sf_ROW_CAPACITY_INCR_DEFAULT;
             else
-                m_rowCapacityIncr = Context.getDefaultContext().getRowCapacityIncr();
+                m_rowCapacityIncr = ContextImpl.getDefaultContext().getRowCapacityIncr();
         }
         else
             m_rowCapacityIncr = rowCapacityIncr;
@@ -182,7 +182,7 @@ public class Context extends BaseElement
             if (this.isDefault()) 
                 m_columnCapacityIncr = sf_COLUMN_CAPACITY_INCR_DEFAULT;
             else
-                m_columnCapacityIncr = Context.getDefaultContext().getColumnCapacityIncr();
+                m_columnCapacityIncr = ContextImpl.getDefaultContext().getColumnCapacityIncr();
         }
         else
             m_columnCapacityIncr = columnCapacityIncr;
@@ -198,20 +198,20 @@ public class Context extends BaseElement
         m_enforceDataType = enforceDataType;
     }
 
-    protected Context register(Table table)
+    protected ContextImpl register(TableImpl table)
     {
         // register the table with this context
         m_registeredTables.add(table);
         return this;
     }
     
-    protected void unregister(Table table)
+    protected void unregister(TableImpl table)
     {
         if (table != null) 
             m_registeredTables.remove(table);
     }
     
-    protected boolean isRegistered(Table t)
+    protected boolean isRegistered(TableImpl t)
     {
         return m_registeredTables.contains(t);
     }

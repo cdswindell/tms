@@ -17,7 +17,7 @@ public class RowTest
     @Test
     public void getPropertiesTest()
     {
-        Row r = new Row(null);
+        RowImpl r = new RowImpl(null);
 
         List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) {
@@ -30,7 +30,7 @@ public class RowTest
     @Test
     public void getBooleanPropertiesTest()
     {
-        Row r = new Row(null);
+        RowImpl r = new RowImpl(null);
 
         List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) { 
@@ -46,7 +46,7 @@ public class RowTest
     @Test
     public void getIntPropertiesTest()
     {
-        Row r = new Row(null);
+        RowImpl r = new RowImpl(null);
 
         List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) { 
@@ -62,7 +62,7 @@ public class RowTest
     @Test
     public void getInitializablePropertiesTest()
     {
-        Row r = new Row(null);
+        RowImpl r = new RowImpl(null);
 
         List<TableProperty> props = r.getInitializableProperties();
         for (TableProperty p : props) { 
@@ -76,10 +76,10 @@ public class RowTest
     @Test
     public void addRowTest()
     {
-        Table t = new Table(10, 10);
+        TableImpl t = new TableImpl(10, 10);
         assertThat(t, notNullValue());
         
-        Row r = new Row(t);
+        RowImpl r = new RowImpl(t);
         r.setLabel("Test Case");
         
         t.add(r, Access.ByIndex, 6);
@@ -88,7 +88,7 @@ public class RowTest
         assertThat(t.calcIndex(ElementType.Row, Access.ByIndex, false, 6), is(5));
         
         // check row retrieval
-        Row retRow = t.getRow(Access.Current);
+        RowImpl retRow = t.getRow(Access.Current);
         assertThat(retRow, notNullValue());
         assertThat(retRow, is(r));
         assertThat(retRow.getTable(), is(t));
@@ -127,7 +127,7 @@ public class RowTest
         assertThat(retRow.getTable(), is(t));
         assertThat(retRow.getIndex(), is(6));
         
-        Row r2 = new Row(t);
+        RowImpl r2 = new RowImpl(t);
         t.add(r2, Access.ByIndex, 6);
         assertThat(r2.getIndex(), is(6));
         assertThat(r.getIndex(), is(7));
@@ -153,10 +153,10 @@ public class RowTest
     @Test
     public void addRowColumnTest()
     {
-        Table t = new Table(10, 10);
+        TableImpl t = new TableImpl(10, 10);
         assertThat(t, notNullValue());
         
-        Row r1 = new Row(t);
+        RowImpl r1 = new RowImpl(t);
         r1.setLabel("Test Case");
         
         t.add(r1, Access.ByIndex, t.getRowsCapacity());
@@ -166,13 +166,13 @@ public class RowTest
         assertThat(r1.getNumCells(), is(0));
         
         // add a column
-        Column c1 = t.addColumn(Access.ByIndex, 3);
+        ColumnImpl c1 = t.addColumn(Access.ByIndex, 3);
         assertThat(c1, notNullValue());
         assertThat(c1.getNumCells(), is(0));
         assertThat(r1.getNumCells(), is(0));
         
         // add another row and make sure cell count is still 0
-        Row r2 = t.addRow(Access.Last);
+        RowImpl r2 = t.addRow(Access.Last);
         assertThat(r2, notNullValue());
         assertThat(r2.getNumCells(), is(0));
         
@@ -183,7 +183,7 @@ public class RowTest
         assertThat(c1.getNumCells(), is(0));
         
         // force cell creation
-        Cell cellR2C1 = t.getCell(r2, c1);
+        CellImpl cellR2C1 = t.getCell(r2, c1);
         assertThat(cellR2C1, notNullValue());
         cellR2C1.setCellValue("R2 C1");
         
@@ -193,15 +193,15 @@ public class RowTest
         assertThat(r2.getNumCells(), is(1));
         assertThat(c1.getNumCells(), is(1));
         
-        Row r3 = t.addRow(Access.ByIndex, t.getRowsCapacity());
-        Cell cellR3C1 = t.getCell(r3, c1);
+        RowImpl r3 = t.addRow(Access.ByIndex, t.getRowsCapacity());
+        CellImpl cellR3C1 = t.getCell(r3, c1);
         assertThat(cellR3C1, notNullValue());
         assertThat(r3.getNumCells(), is(1));
         assertThat(c1.getNumCells(), is(2));
         assertThat(t.getNumCells(), is(2));
         
         // now add another column and check total cell count
-        Column c2 = t.addColumn(Access.ByIndex, 3);
+        ColumnImpl c2 = t.addColumn(Access.ByIndex, 3);
         assertThat(c2, notNullValue());
         assertThat(c2.getNumCells(), is(0));
         assertThat(r1.getNumCells(), is(0));
@@ -210,7 +210,7 @@ public class RowTest
         assertThat(t.getNumCells(), is(2));
         
         // now get the cells in the new column and make sure the cell count goes up
-        Cell cellR1C2 = t.getCell(r1, c2);
+        CellImpl cellR1C2 = t.getCell(r1, c2);
         assertThat(cellR1C2, notNullValue());
         assertThat(c2.getNumCells(), is(1));
         assertThat(r1.getNumCells(), is(1));
@@ -218,7 +218,7 @@ public class RowTest
         assertThat(r3.getNumCells(), is(1));
         assertThat(t.getNumCells(), is(3));
         
-        Cell cellR3C2 = t.getCell(r3, c2);
+        CellImpl cellR3C2 = t.getCell(r3, c2);
         assertThat(cellR3C2, notNullValue());
         assertThat(c2.getNumCells(), is(2));
         assertThat(r1.getNumCells(), is(1));

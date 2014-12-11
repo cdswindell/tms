@@ -234,13 +234,13 @@ abstract public class BaseElement
         switch (tp) {
             case isReadOnly:
                 if (!isValidPropertyValueBoolean(value))
-                    value = Context.sf_READ_ONLY_DEFAULT;
+                    value = ContextImpl.sf_READ_ONLY_DEFAULT;
                 setReadOnly((boolean)value);
                 break;
                 
             case isSupportsEmpty:
                 if (!isValidPropertyValueBoolean(value))
-                    value = Context.sf_SUPPORTS_NULL_DEFAULT;
+                    value = ContextImpl.sf_SUPPORTS_NULL_DEFAULT;
                 setSupportsEmpty((boolean)value);
                 break;
                 

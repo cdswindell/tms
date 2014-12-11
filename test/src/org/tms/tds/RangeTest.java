@@ -16,7 +16,7 @@ public class RangeTest
     @Test
     public void getPropertiesTest()
     {
-        Range r = new Range(null);
+        RangeImpl r = new RangeImpl(null);
 
         List<TableProperty> props = r.getProperties();
         for (TableProperty p : props) {
@@ -29,7 +29,7 @@ public class RangeTest
     @Test
     public void getInitializablePropertiesTest()
     {
-        Range r = new Range(null);
+        RangeImpl r = new RangeImpl(null);
 
         List<TableProperty> props = r.getInitializableProperties();
         for (TableProperty p : props) { 
@@ -43,11 +43,11 @@ public class RangeTest
     @Test
     public void createRangeTest() throws InterruptedException
     {
-        Table t = new Table(10, 10);
+        TableImpl t = new TableImpl(10, 10);
         assert (t != null);
         assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
         
-        Range r = new Range(t);
+        RangeImpl r = new RangeImpl(t);
         assert (r != null);
         
         int numRows = r.getPropertyInt(TableProperty.numRows);
@@ -74,18 +74,18 @@ public class RangeTest
     @Test
     public void rowsTest()
     {
-        Table t = new Table(100, 100);
+        TableImpl t = new TableImpl(100, 100);
         assert (t != null);
         assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
         
-        Range r = new Range(t);
+        RangeImpl r = new RangeImpl(t);
         assert (r != null);
         
-        Row r1 = new Row(t);
-        Row r2 = new Row(t);
-        Row r3 = new Row(t);
+        RowImpl r1 = new RowImpl(t);
+        RowImpl r2 = new RowImpl(t);
+        RowImpl r3 = new RowImpl(t);
         
-        Set<Row> rs = new HashSet<Row>();
+        Set<RowImpl> rs = new HashSet<RowImpl>();
         rs.add(r1);
         rs.add(r2);
         rs.add(r3);

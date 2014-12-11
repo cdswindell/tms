@@ -5,8 +5,8 @@ import org.tms.api.TableProperty;
 
 abstract class TableElement extends BaseElement
 {
-	abstract protected Table getTable();
-	abstract protected Context getContext();
+	abstract protected TableImpl getTable();
+	abstract protected ContextImpl getContext();
     abstract protected void delete();
     abstract protected void fill(Object o);
     abstract protected boolean isDataTypeEnforced();
@@ -62,7 +62,7 @@ abstract class TableElement extends BaseElement
         switch (tp) {
             case isEnforceDataType:
                 if (!isValidPropertyValueInt(value))
-                    value = Context.sf_ENFORCE_DATA_TYPE_DEFAULT;
+                    value = ContextImpl.sf_ENFORCE_DATA_TYPE_DEFAULT;
                 setEnforceDataType((boolean)value);
                 break;
                 
@@ -84,7 +84,7 @@ abstract class TableElement extends BaseElement
         else if (getContext() != null)
             source = getContext();
         else
-            source = Context.getDefaultContext();
+            source = ContextImpl.getDefaultContext();
 
         return source;
     }
