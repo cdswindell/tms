@@ -25,4 +25,9 @@ public class Table extends TableImpl
         super(nRows, nCols, t);
     }
 
+    public TableContext getTableContext()
+    {
+        return (TableContext)getContext();
+    }
+
 }

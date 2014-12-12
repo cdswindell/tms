@@ -22,6 +22,12 @@ public class ParseResult
         m_parserStatusCode = status;
     }
     
+    ParseResult(String expr)
+    {
+        m_expression = expr;
+        m_parserStatusCode = null;
+    }
+    
     ParseResult(String expr, ParserStatusCode status)
     {
         m_expression = expr;
@@ -53,6 +59,11 @@ public class ParseResult
     public boolean isFailure()
     {
         return !isSuccess();
+    }
+    
+    public void addIssue(ParserStatusCode status, int pos)
+    {
+        addIssue(null, status, pos);
     }
     
     public void addIssue(String expr, ParserStatusCode status, int pos)

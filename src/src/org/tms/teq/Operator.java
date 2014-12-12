@@ -1,19 +1,23 @@
 package org.tms.teq;
 
-public enum Operator
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+public enum Operator implements Labeled
 {
     NULL_operator,
 
-    PlusOper,
-    MinusOper,
-    MultOper,
-    DivOper,
-    PowerOper,
-    ModOper,
+    PlusOper("+", TokenType.BinaryOp, 2),
+    MinusOper("-", TokenType.BinaryOp, 2),
+    MultOper("*", TokenType.BinaryOp, 4),
+    DivOper("/", TokenType.BinaryOp, 4),
+    PowerOper("^", TokenType.BinaryOp, 6),
+    ModOper("%", TokenType.BinaryOp, 4),
+    FactorialOper("!", TokenType.UnaryOp, 4),
 
-    NegOper,
+    NegOper("neg", TokenType.UnaryFunc, 6),
     ExpOper,
-    AbsOper,
+    AbsOper("abs", TokenType.UnaryFunc),
     SqrtOper,
     CbrtOper,
     LogOper,
@@ -66,8 +70,81 @@ public enum Operator
     NormalizeOper,
     ScaleOper,
 
-    Paren,
-    NOP,
+    Paren(8, TokenType.LeftParen, TokenType.RightParen),
+    NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.RangeRef, TokenType.CellRef),
 
-    LAST_operator
+    LAST_operator;
+    
+    private String m_label;
+    private Set<TokenType> m_tokenTypes;
+    private int m_priority;
+    
+    private Operator()
+    {
+        m_priority = 0;
+        m_tokenTypes = new LinkedHashSet<TokenType>();
+    }
+    
+    private Operator(int priority)
+    {
+        this();
+        m_priority = priority;
+    }
+    
+    private Operator(String label, TokenType tt)
+    {
+        this(label, tt, 0);
+    }
+    
+    private Operator(String label, TokenType tt, int priority)
+    {
+        this();
+        m_label = label;
+        m_priority = priority;
+        m_tokenTypes.add(tt);
+    }
+    
+    private Operator(int priority, TokenType... tts)
+    {
+        this();
+        m_priority = priority;
+        if (tts != null) {
+            for (TokenType tt : tts) {
+                m_tokenTypes.add(tt);
+            }
+        }
+    }
+    
+    public TokenType getPrimaryTokenType()
+    {
+        if (m_tokenTypes != null && m_tokenTypes.size() == 1) 
+            return m_tokenTypes.toArray(new TokenType [] {})[0];
+        else
+            return null;
+    }
+    
+    public Set<TokenType> getTokenTypes()
+    {
+        return m_tokenTypes;
+    }
+    
+    public int getPriority()
+    {
+        return m_priority;
+    }
+    
+    public String getLabel()
+    {
+        return m_label;
+    }
+    
+    public int getLabelLength()
+    {
+        return m_label != null ? m_label.length() : 0;
+    }
+    
+    public boolean isLabeled()
+    { 
+        return m_label != null;
+    }
 }

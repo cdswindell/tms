@@ -7,6 +7,10 @@ public enum ParserStatusCode
     ParenMismatch,
     IncompleteExpresion,
     InvalidExpression,
+    InvalidConstantLocation,
+    InvalidCommaLocation,
+    InvalidOperatorLocation,
+    NoSuchOperator,
     ;
     
     public boolean isSuccess()

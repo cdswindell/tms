@@ -1,30 +1,84 @@
 package org.tms.teq;
 
-public enum TokenType
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+public enum TokenType implements Labeled
 {
-    NULL_TokenType,
-    TableRef,
-    ColumnRef,
-    RowRef,
-    CellRef,
-    RangeRef,
-    Constant,
-    BuiltIn,
-    Variable,
-    Operand,
-    String,
-    GroupOp,
-    StatOp,
-    BinaryOp,
-    BinaryFunc,
-    UnaryOp,
-    Comma,
-    LeftParen,
-    RightParen,
-    NullOpValue,
-    GenericUnaryOp,
-    GenericBinaryFunc,
-    GenericOp,
-    GenericBinaryOp,
-    LAST_TokenType
+    NULL_TokenType(false),
+    
+    TableRef(false, "Table"),
+    ColumnRef(false, "Column", "Col"),
+    RowRef(false, "Row"),
+    CellRef(false, "Cell"),
+    RangeRef(false, "Range", "R"),
+    
+    Constant(false),
+    BuiltIn(false),
+    Variable(false),
+    Operand(false),
+    String(false),
+    RangeOp(true),
+    StatOp(true),
+    BinaryOp(true),
+    BinaryFunc(true),
+    UnaryOp(true),
+    UnaryFunc(true),
+    
+    Comma(true, ","),
+    LeftParen(true, "("),
+    RightParen(false, ")"),
+    
+    GenericUnaryOp(true),
+    GenericBinaryFunc(true),
+    GenericOp(true),
+    GenericBinaryOp(true),
+    
+    NullOpValue(false),
+    LAST_TokenType(false);
+    
+    private boolean m_leading;
+    private Set<String> m_labels;
+    
+    private TokenType(boolean isLeading)
+    {
+        this(isLeading, (String [])null);
+    }
+
+    private TokenType(boolean isLeading, String... labels)
+    {
+        m_leading = isLeading;
+        
+        m_labels = new LinkedHashSet<String>();
+        if (labels != null) {
+            for (String label : labels) {
+                m_labels.add(label);
+            }
+        }
+    }
+
+    public boolean isLeading()
+    {
+        return m_leading;
+    }
+    
+    public String getLabel()
+    {
+        return m_labels.isEmpty() ? null : m_labels.toArray(new String [] {})[0];
+    }
+    
+    public int getLabelLength()
+    {
+        return getLabel() != null ? getLabel().length() : 0;
+    }
+        
+    public boolean isLabeled()
+    { 
+        return getLabel() != null;
+    }
+    
+    public Set<String> getLabels()
+    {
+        return m_labels;
+    }
 }
