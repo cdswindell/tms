@@ -17,6 +17,16 @@ public class InfixExpressionParser
     {
         m_expr = expr;
         m_table = table;
+    }    
+
+    EquationStack getExpressionStack()
+    {
+        return m_ifs;
+    }
+
+    public String parsedInfixExpression()
+    {
+        return m_ifs != null ? m_ifs.toExpression() : null;
     }
     
     public ParseResult validateExpression()
@@ -130,13 +140,54 @@ public class InfixExpressionParser
                     return curPos;
                 
                 default:
+                    // valid token detected, push it onto the stack
                     ifs.push(tType, oper);
                     break;
             } // of switch tType
+        } // if if leading
+        else {
+            switch (tType) {
+                case RightParen:
+                case BinaryOp:
+                    ifs.push(tType, oper);
+                    break;
+                    
+                case Comma:
+                    if (isOkForComma(ifs))
+                        ifs.push(tType, oper);
+                    else {
+                        if (pr != null)
+                            pr.addIssue(ParserStatusCode.InvalidCommaLocation, curPos);
+                        return curPos;
+                    }
+                    break;
+                    
+                default:
+                    if (pr != null)
+                        pr.addIssue(ParserStatusCode.InvalidExpression, curPos);
+                    return curPos;
+            } // of switch
+        } // if not leading
+        
+        if (tType == TokenType.LeftParen)
+            parenCnt[0]++;
+        else if (tType == TokenType.RightParen) {
+            parenCnt[0]--;
+            if (parenCnt[0] < 0) {
+                if (pr != null)
+                    pr.addIssue(ParserStatusCode.ParenMismatch, curPos);
+                return curPos;
+            }
         }
         
         // if everything is ok, return the operator length
-        return oper.getLabelLength();
+        return t.getLabelLength();
+    }
+
+    private boolean isOkForComma(EquationStack ifs)
+    {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     private int parseText(char[] exprChars, int curPos, EquationStack ifs)
@@ -153,6 +204,7 @@ public class InfixExpressionParser
         double   value = 0.0;
         boolean foundDP   = false;
         boolean foundE    = false;
+        boolean foundP    = false;
         boolean eWasLast = false;
 
         /* if we are not at a leading expression, punt */
@@ -170,30 +222,49 @@ public class InfixExpressionParser
             sb.append(c);
             if (Character.isDigit(c)) {
                 eWasLast = false;
+                
+                // if we found the Exponent signal (e or E), indicate we now have digits 
+                // for the exponent power
+                if (foundE)
+                    foundP = true;
                 continue; /* digits are ok */
             }
 
-            if ((c == '.') && !foundDP && !eWasLast) 
-                foundDP = true;
+            if ((c == '.') && !foundDP && !foundE) 
+                foundDP = true; // decimal not allowed after exponent
             else if ((c == 'e') && !foundE) 
                 eWasLast = foundE = true;
             else if ((c == 'E') && !foundE)
                 eWasLast = foundE = true;
-            else if (foundE && (c == '-') && eWasLast )
+            else if (foundE && eWasLast && (c == '-'))
                 eWasLast = false;
-            else if (foundE && (c == '+') && eWasLast )
-                eWasLast = true;
+            else if (foundE && eWasLast && (c == '+'))
+                eWasLast = false;
             else {
-                sb.deleteCharAt(i);
+                sb.deleteCharAt(sb.length() - 1);
                 break;
             }
         } /* of for loop */
 
+        // check for invalid exponent
+        if (foundE && !foundP) {
+            if (pr != null)
+                pr.addIssue(ParserStatusCode.InvalidNumericExpression, curPos);
+            return curPos;
+        }
+            
         // decode the number
-        value = Double.parseDouble(sb.toString());
+        try {
+            value = Double.parseDouble(sb.toString());   
+        }
+        catch (NumberFormatException e) {
+            if (pr != null)
+                pr.addIssue(ParserStatusCode.InvalidNumericExpression, curPos);
+            return curPos;
+        }
         
-        ifs.push(TokenType.Operand, value);
-        return i;
+        ifs.push(value);
+        return sb.length();
 
     } /* of TEQ_ParseNumber */
     
@@ -204,5 +275,9 @@ public class InfixExpressionParser
         // TODO Auto-generated method stub
         return 0;
     }
-
+    
+    public String toString()
+    {
+        return String.format("[ %s ]", m_expr != null ? m_expr : "<null>");
+    }
 }

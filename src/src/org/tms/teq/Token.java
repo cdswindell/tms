@@ -96,8 +96,14 @@ public class Token implements Labeled
             return m_value.toString();
         else if (isLabeled())
             return getLabel();
-        else if (getOperator() != null)
+        else if (getTokenType() != null && getTokenType().getLabel() != null) 
+                return getTokenType().getLabel();
+        else if (getOperator() != null && getOperator().getLabel() != null) 
+            return getOperator().getLabel();
+        else if (getOperator() != Operator.NOP) 
             return getOperator().toString();
+        else if (getTokenType() != null) 
+            return getTokenType().toString();
         else
             return "<null>";
     }

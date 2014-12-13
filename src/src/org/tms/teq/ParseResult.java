@@ -113,5 +113,10 @@ public class ParseResult
         {
             return m_term;
         }
+        
+        public String toString()
+        {
+            return String.format("%s at position %d", getIssueStatusCode(), getOccuredAtPos());
+        }
     }
 }

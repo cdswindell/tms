@@ -1,8 +1,9 @@
 package org.tms.teq;
 
 import java.util.ArrayDeque;
+import java.util.Iterator;
 
-public class EquationStack extends ArrayDeque<Token>
+public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 {
     private static final long serialVersionUID = 112242556423961843L;
 
@@ -15,9 +16,9 @@ public class EquationStack extends ArrayDeque<Token>
         return t.isLeading();
     }
     
-    public void push (TokenType tt, double value)
+    public void push (double value)
     {
-        Token t = new Token(tt);
+        Token t = new Token(TokenType.Operand);
         t.setOperator(Operator.NULL_operator);
         t.setValue(value);
         
@@ -38,5 +39,44 @@ public class EquationStack extends ArrayDeque<Token>
         t.setOperator(oper);
         
         push(t);
+    }
+    
+    public String toExpression()
+    {
+        if (isEmpty())
+            return null;
+        else {
+            StringBuffer sb = new StringBuffer();
+            
+            Iterator<Token> di = this.descendingIterator();
+            boolean addLeadingSpace = false;
+            while (di != null && di.hasNext()) {
+                if (addLeadingSpace) sb.append(" ");
+                
+                sb.append(di.next().toString());
+                
+                addLeadingSpace = true;
+            }
+            
+            return sb.toString();
+        }
+    }
+    
+    public String toString()
+    {
+        if (isEmpty())
+            return "[ <empty> ]";
+        else {
+            StringBuffer sb = new StringBuffer();
+            sb.append("[ ");
+            
+            Iterator<Token> di = this.descendingIterator();
+            while (di != null && di.hasNext()) {
+                sb.append("{").append(di.next().toString()).append("} ");
+            }
+            
+            sb.append("]");
+            return sb.toString();
+        }
     }
 }
