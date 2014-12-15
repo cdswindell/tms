@@ -280,8 +280,4 @@ public class InfixExpressionParser
     {
         return String.format("[ %s ]", m_expr != null ? m_expr : "<null>");
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> branch 'master' of https://github.com/cdswindell/tms.git
 }
