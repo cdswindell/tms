@@ -77,7 +77,60 @@ public class InfixExpressionParserTest
     }
 
     @Test
+<<<<<<< HEAD
     public final void testValidateNumericExpression()
+=======
+    public final void testInvalidNumericExpressions()
+    {
+        InfixExpressionParser iep = new InfixExpressionParser("123E");
+        assertThat(iep, notNullValue());
+        
+        ParseResult pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.isFailure(), is(true));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidNumericExpression));
+        
+        iep = new InfixExpressionParser("123.456.578");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.isFailure(), is(true));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
+        
+        iep = new InfixExpressionParser("123.456e+.25");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.isFailure(), is(true));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidNumericExpression));
+        
+        iep = new InfixExpressionParser("e25");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.isFailure(), is(true));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidExpression));
+        
+        iep = new InfixExpressionParser("123e.25");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.isFailure(), is(true));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidNumericExpression));
+    }
+    
+    @Test
+    public final void testParseInfixExpression()
+>>>>>>> branch 'master' of https://github.com/cdswindell/tms.git
     {
         InfixExpressionParser iep = new InfixExpressionParser("123+456+789");
         assertThat(iep, notNullValue());

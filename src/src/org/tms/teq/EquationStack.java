@@ -49,13 +49,8 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             StringBuffer sb = new StringBuffer();
             
             Iterator<Token> di = this.descendingIterator();
-            boolean addLeadingSpace = false;
             while (di != null && di.hasNext()) {
-                if (addLeadingSpace) sb.append(" ");
-                
                 sb.append(di.next().toString());
-                
-                addLeadingSpace = true;
             }
             
             return sb.toString();
