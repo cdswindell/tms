@@ -74,6 +74,13 @@ public class InfixExpressionParserTest
         pr = iep.validateExpression();
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(true));
+
+        iep = new InfixExpressionParser("2 + 3^5 - 6 % 4*3 *(2+6)");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
     }
 
     @Test
@@ -134,7 +141,7 @@ public class InfixExpressionParserTest
         ParseResult pr = iep.validateExpression();
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(true));
-        assertThat(iep.getExpressionStack().size(), is(5));
+        assertThat(iep.getInfixStack().size(), is(5));
         assertThat(iep.parsedInfixExpression(), is("123.0 + 456.0 + 789.0"));
 
         iep = new InfixExpressionParser("123.45 * (3e6 + 4/2) - 1");
@@ -143,6 +150,6 @@ public class InfixExpressionParserTest
         pr = iep.validateExpression();
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(true));
-        assertThat(iep.getExpressionStack().size(), is(11));
+        assertThat(iep.getInfixStack().size(), is(11));
     }  
 }

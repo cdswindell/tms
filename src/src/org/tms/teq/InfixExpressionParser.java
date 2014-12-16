@@ -19,8 +19,25 @@ public class InfixExpressionParser
         m_table = table;
     }    
 
-    EquationStack getExpressionStack()
+    public Table getTable()
     {
+        return m_table;
+    }
+    
+    public String getExpression()
+    {
+        return m_expr;
+    }
+    
+    EquationStack getInfixStack()
+    {
+        if (m_ifs == null) {
+            ParseResult pr = parseInfixExpression();
+            if (pr != null && pr.isFailure()) {
+                // TODO: throw exception
+            }
+        }
+        
         return m_ifs;
     }
 
@@ -34,7 +51,7 @@ public class InfixExpressionParser
         return validateExpression(m_table);
     }
 
-    public ParseResult validateExpression(Table table)
+    protected ParseResult validateExpression(Table table)
     {
         if (table == null)
             table = m_table;
@@ -42,13 +59,19 @@ public class InfixExpressionParser
         return parseInfixExpression(table);
     }
 
-    public ParseResult parseInfixExpression(Table table)
+    public ParseResult parseInfixExpression()
+    {
+        m_ifs = Token.createTokenStack();
+        return parseInfixExpression(m_ifs, m_table);
+    }
+    
+    protected ParseResult parseInfixExpression(Table table)
     {
         m_ifs = Token.createTokenStack();
         return parseInfixExpression(m_ifs, table);
     }
     
-    public ParseResult parseInfixExpression(EquationStack ifs, Table table)
+    protected ParseResult parseInfixExpression(EquationStack ifs, Table table)
     {
         if (m_expr == null || (m_expr = m_expr.trim()).length() <= 0)
             return new ParseResult(ParserStatusCode.EmptyExpression);
