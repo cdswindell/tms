@@ -121,6 +121,7 @@ public class PostfixExpressionParser
                     }
                     break;
                     
+                case BinaryFunc:
                 case BinaryOp:
                     oper = ift.getOperator();
                     do {
@@ -143,7 +144,6 @@ public class PostfixExpressionParser
                     ops.push(tt, oper);
                     break;
                     
-                case BinaryFunc:
                 case Comma:
                 case GenericBinaryFunc:
                 case GenericBinaryOp:
