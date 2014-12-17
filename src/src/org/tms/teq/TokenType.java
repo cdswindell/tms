@@ -81,4 +81,14 @@ public enum TokenType implements Labeled
     {
         return m_labels;
     }
+
+    public boolean isLeftParen()
+    {
+        return this == LeftParen;
+    }
+
+    public boolean isRightParen()
+    {
+        return this == RightParen;
+    }
 }

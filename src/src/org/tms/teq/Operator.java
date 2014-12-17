@@ -75,6 +75,8 @@ public enum Operator implements Labeled
 
     LAST_operator;
     
+    static final public int MAX_PRIORITY = 8;
+    
     private String m_label;
     private Set<TokenType> m_tokenTypes;
     private int m_priority;

@@ -61,12 +61,12 @@ public class ParseResult
         return !isSuccess();
     }
     
-    public void addIssue(ParserStatusCode status, int pos)
+    public ParseResult addIssue(ParserStatusCode status, int pos)
     {
-        addIssue(null, status, pos);
+        return addIssue(null, status, pos);
     }
     
-    public void addIssue(String expr, ParserStatusCode status, int pos)
+    public ParseResult addIssue(String expr, ParserStatusCode status, int pos)
     {
         if (m_expression == null && expr != null)
             m_expression = expr;
@@ -78,6 +78,8 @@ public class ParseResult
             m_parserStatusCode = status;
         
         m_parseIssues.add(new ParseIssue(status, pos, null));
+        
+        return this;
     }
     
     public String toString()
