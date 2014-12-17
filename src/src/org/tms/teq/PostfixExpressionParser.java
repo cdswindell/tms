@@ -77,7 +77,8 @@ public class PostfixExpressionParser
         if (pfs == null)
             return pr.addIssue(ParserStatusCode.EmptyStack, 0); 
         
-        // create the temporary op stack
+        // create the temporary op stack, ops will be pushed onto this stack 
+        // until one with a lessor priority is encountered        
         EquationStack ops = new EquationStack();
         int infixParens = 0;
         Token t = null;
