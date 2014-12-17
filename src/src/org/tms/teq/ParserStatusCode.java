@@ -4,6 +4,7 @@ public enum ParserStatusCode
 {
     Success,
     EmptyExpression,
+    EmptyStack,
     ParenMismatch,
     IncompleteExpresion,
     InvalidExpression,

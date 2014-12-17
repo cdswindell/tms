@@ -57,6 +57,14 @@ public class Token implements Labeled
         return m_value;
     }
 
+    public Double getNumericValue()
+    {
+        if (m_value != null && m_value instanceof Double)
+            return (Double)m_value;
+        else
+            return null;
+    }
+
     void setValue(Object value)
     {
         m_value = value;
@@ -72,6 +80,7 @@ public class Token implements Labeled
 
     public int getPriority()
     {
+        // TODO: handle operators that came from table
         return m_oper != null ? m_oper.getPriority() : 0;
     }
     
@@ -106,5 +115,15 @@ public class Token implements Labeled
             return getTokenType().toString();
         else
             return "<null>";
+    }
+
+    public boolean isLeftParen()
+    {
+        return getTokenType() != null && getTokenType().isLeftParen();
+    }
+
+    public boolean isRightParen()
+    {
+        return getTokenType() != null && getTokenType().isRightParen();
     }
 }
