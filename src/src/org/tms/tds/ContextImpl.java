@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.ElementType;
+import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.util.WeakHashSet;
 
-public class ContextImpl extends BaseElement
+public class ContextImpl extends BaseElementImpl implements TableContext
 {
     private static ContextImpl sf_DEFAULT_CONTEXT;
     
@@ -47,7 +49,7 @@ public class ContextImpl extends BaseElement
         return sf_DEFAULT_CONTEXT;
     }
 
-    private Set<TableImpl> m_registeredTables;
+    private Set<Table> m_registeredTables;
     private boolean m_default;
     private boolean m_enforceDataType;
     
@@ -58,7 +60,7 @@ public class ContextImpl extends BaseElement
     {
         super(ElementType.Context);      
         m_default = isDefault;
-        m_registeredTables = new WeakHashSet<TableImpl>();
+        m_registeredTables = new WeakHashSet<Table>();
         
         // initialize from default context, unless this the default
         initialize(otherContext);
@@ -198,7 +200,7 @@ public class ContextImpl extends BaseElement
         m_enforceDataType = enforceDataType;
     }
 
-    protected ContextImpl register(TableImpl table)
+    protected ContextImpl register(Table table)
     {
         // register the table with this context
         m_registeredTables.add(table);
@@ -211,7 +213,7 @@ public class ContextImpl extends BaseElement
             m_registeredTables.remove(table);
     }
     
-    protected boolean isRegistered(TableImpl t)
+    protected boolean isRegistered(Table t)
     {
         return m_registeredTables.contains(t);
     }

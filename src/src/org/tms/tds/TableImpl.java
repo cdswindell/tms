@@ -11,14 +11,37 @@ import java.util.Queue;
 
 import org.tms.api.Access;
 import org.tms.api.ElementType;
+import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.util.JustInTimeSet;
 
-public class TableImpl extends TableCellsElement
+public class TableImpl extends TableCellsElementImpl implements Table
 {
+	public static final Table createTable() 
+	{
+		return new TableImpl();
+	}
+	
+	public static final Table createTable(int nRows, int nCols) 
+	{
+		return new TableImpl(nRows, nCols);
+	}
+	
+	public static final Table createTable(int nRows, int nCols, TableContext c) 
+	{
+		return new TableImpl(nRows, nCols, c);
+	}
+	
+	public static final Table createTable(int nRows, int nCols, Table t) 
+	{
+		return new TableImpl(nRows, nCols, t);
+	}
+	
     private boolean m_dirty;
     
     private ArrayList<RowImpl> m_rows;
@@ -42,18 +65,18 @@ public class TableImpl extends TableCellsElement
     private int m_rowCapacityIncr;
     private int m_colCapacityIncr;
     
-    public TableImpl()
+    protected TableImpl()
     {
         this(ContextImpl.getPropertyInt(null, TableProperty.RowCapacityIncr),
              ContextImpl.getPropertyInt(null, TableProperty.ColumnCapacityIncr));
     }
     
-    public TableImpl(int nRows, int nCols)
+    protected TableImpl(int nRows, int nCols)
     {
         this(nRows, nCols, ContextImpl.getDefaultContext());
     }
 
-    protected TableImpl(int nRows, int nCols, ContextImpl c)
+    protected TableImpl(int nRows, int nCols, TableContext c)
     {
         super(ElementType.Table, null);
         setTable(this);
@@ -62,13 +85,16 @@ public class TableImpl extends TableCellsElement
         initialize(nRows, nCols, null);
     }
 
-    protected TableImpl(int nRows, int nCols, TableImpl t)
+    protected TableImpl(int nRows, int nCols, Table t)
     {
         super(ElementType.Table, null);
         setTable(this);
-        setContext(t != null ? t.getContext() : null);        
+        setContext(t != null ? t.getTableContext() : null);        
         
-        initialize(nRows, nCols, t);
+        if (t != null && !(t instanceof TableImpl))
+        	throw new UnsupportedImplementationException(t);
+        
+        initialize(nRows, nCols, (TableImpl)t);
     }
     
     private void initialize(int nRows, int nCols, TableImpl t)
@@ -98,14 +124,14 @@ public class TableImpl extends TableCellsElement
     }
 
     @Override
-    protected void initialize(TableElement e) 
+    protected void initialize(TableElementImpl e) 
     {
         // noop for tables, initialization happens slightly differently
     }
     
     protected void initializeProperties(TableImpl e)
     {
-        BaseElement source = getInitializationSource(e);
+        BaseElementImpl source = getInitializationSource(e);
         for (TableProperty tp : this.getInitializableProperties()) {
             Object value = source.getProperty(tp);
             
@@ -177,7 +203,15 @@ public class TableImpl extends TableCellsElement
         }
     }
     
-    private ContextImpl setContext(ContextImpl c)
+    private TableContext setContext(TableContext c)
+    {
+    	if (c == null || c instanceof ContextImpl)
+    		return setContext((ContextImpl)c);  	
+    	else 
+    		throw new UnsupportedImplementationException(c);
+    }
+    
+    private TableContext setContext(ContextImpl c)
     {
         if (c == null)
             c = ContextImpl.getDefaultContext();
@@ -191,13 +225,13 @@ public class TableImpl extends TableCellsElement
     }
 
     @Override
-    protected ContextImpl getContext()
+    public ContextImpl getTableContext()
     {
         return m_context;
     }
 
     @Override
-    protected TableImpl getTable()
+    public TableImpl getTable()
     {
         return this;
     }
@@ -208,7 +242,7 @@ public class TableImpl extends TableCellsElement
     }
     
     @Override
-    protected void delete()
+    public void delete()
     {
     	m_ranges.clear();
     	if (m_cols != null)
@@ -217,8 +251,8 @@ public class TableImpl extends TableCellsElement
     	if (m_rows != null)
     		m_rows.clear();
     	
-    	if (getContext() != null)
-    		getContext().unregister(this);;   	
+    	if (getTableContext() != null)
+    		getTableContext().unregister(this);;   	
     }
     
     
@@ -317,7 +351,7 @@ public class TableImpl extends TableCellsElement
     protected int getRowCapacityIncr()
     {
         if (m_rowCapacityIncr <= 0) 
-            m_rowCapacityIncr = ContextImpl.getPropertyInt(getContext(), TableProperty.RowCapacityIncr);
+            m_rowCapacityIncr = ContextImpl.getPropertyInt(getTableContext(), TableProperty.RowCapacityIncr);
         
         return m_rowCapacityIncr;
     }
@@ -473,7 +507,7 @@ public class TableImpl extends TableCellsElement
     protected int getColumnCapacityIncr()
     {
         if (m_colCapacityIncr <= 0) 
-            m_colCapacityIncr = ContextImpl.getPropertyInt(getContext(), TableProperty.ColumnCapacityIncr);
+            m_colCapacityIncr = ContextImpl.getPropertyInt(getTableContext(), TableProperty.ColumnCapacityIncr);
         
         return m_colCapacityIncr;
     }
@@ -811,7 +845,7 @@ public class TableImpl extends TableCellsElement
     }
 
     @Override
-    protected int getNumCells()
+    public int getNumCells()
     {
         int numCells = 0;
         for (ColumnImpl c : columnIterable()) {
@@ -841,7 +875,7 @@ public class TableImpl extends TableCellsElement
     }
     
 	@Override
-	protected void fill(Object o) 
+	public void fill(Object o) 
 	{
 		pushCurrent();
 		ColumnImpl c = getColumn(Access.First);

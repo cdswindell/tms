@@ -72,10 +72,10 @@ public class PostfixExpressionParser
         ParseResult pr = new ParseResult();
         
         if (ifs == null || ifs.isEmpty()) 
-            return pr.addIssue(ParserStatusCode.EmptyStack, 0); 
+            return pr.addIssue(ParserStatusCode.EmptyStack, "Infix Stack"); 
         
         if (pfs == null)
-            return pr.addIssue(ParserStatusCode.EmptyStack, 0); 
+            return pr.addIssue(ParserStatusCode.EmptyStack, "Postfix Stack"); 
         
         // create the temporary op stack, ops will be pushed onto this stack 
         // until one with a lessor priority is encountered        

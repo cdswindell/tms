@@ -45,7 +45,7 @@ public class TableTest
         
         // expect failure
         try {
-            t.setProperty(BaseElement.sf_RESERVED_PROPERTY_PREFIX + "Label", "abc");
+            t.setProperty(BaseElementImpl.sf_RESERVED_PROPERTY_PREFIX + "Label", "abc");
             fail("set invalid property");
         }
         catch (TableException te)

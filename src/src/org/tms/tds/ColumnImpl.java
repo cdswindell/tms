@@ -180,11 +180,11 @@ public class ColumnImpl extends TableSliceElement
      */
     
     @Override
-    protected void initialize(TableElement e)
+    protected void initialize(TableElementImpl e)
     {
         super.initialize(e);
         
-        BaseElement source = getInitializationSource(e);        
+        BaseElementImpl source = getInitializationSource(e);        
         for (TableProperty tp : this.getInitializableProperties()) 
         {
             Object value = source.getProperty(tp);            
@@ -288,7 +288,7 @@ public class ColumnImpl extends TableSliceElement
     
     @Override 
     @SuppressWarnings("unchecked")
-    protected int getNumCells()
+    public int getNumCells()
     {
         if (m_cells != null) {
         	int numNonNullCells = 0;
@@ -321,7 +321,7 @@ public class ColumnImpl extends TableSliceElement
     }
 
     @Override
-    protected void delete()
+    public void delete()
     {
     	// remove element from ranges that contain it
     	removeFromAllRanges();
@@ -362,7 +362,7 @@ public class ColumnImpl extends TableSliceElement
     }
 
 	@Override
-	protected void fill(Object o) 
+	public void fill(Object o) 
 	{
 		TableImpl parent = getTable();
 		assert parent != null : "Parent table required";

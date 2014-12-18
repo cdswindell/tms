@@ -71,11 +71,11 @@ public class RowImpl extends TableSliceElement
     }
     
     @Override
-    protected void initialize(TableElement e)
+    protected void initialize(TableElementImpl e)
     {
         super.initialize(e);
         
-        BaseElement source = getInitializationSource(e);        
+        BaseElementImpl source = getInitializationSource(e);        
         for (TableProperty tp : this.getInitializableProperties()) {
             Object value = source.getProperty(tp);
             
@@ -180,7 +180,7 @@ public class RowImpl extends TableSliceElement
     }
 
     @Override
-    protected void delete()
+    public void delete()
     {
     	// remove element from ranges that contain it
     	removeFromAllRanges();
@@ -225,7 +225,7 @@ public class RowImpl extends TableSliceElement
     /**
      * Returns the count of the number of allocated cells that exist for this row
      */
-    protected int getNumCells()
+    public int getNumCells()
     {
         // if the offset isn't set, there can be no cells
         int cellOffset = getCellOffset();
@@ -252,7 +252,7 @@ public class RowImpl extends TableSliceElement
     }
     
 	@Override
-	protected void fill(Object o) 
+	public void fill(Object o) 
 	{
 		TableImpl parent = getTable();
 		assert parent != null : "Parent table required";

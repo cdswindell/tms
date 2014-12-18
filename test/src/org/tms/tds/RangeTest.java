@@ -53,7 +53,7 @@ public class RangeTest
         int numRows = r.getPropertyInt(TableProperty.numRows);
         assertThat(numRows, is(0));
         assertThat(r.getTable(), is(t));
-        assertThat(r.getContext(), is(t.getContext()));
+        assertThat(r.getTableContext(), is(t.getTableContext()));
         
         assertThat(t.getPropertyInt(TableProperty.numRanges), is(1));
         

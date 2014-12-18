@@ -1,19 +1,23 @@
 package org.tms.tds;
 
 import org.tms.api.ElementType;
+import org.tms.api.Table;
+import org.tms.api.TableContext;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 
-abstract class TableElement extends BaseElement
+abstract class TableElementImpl extends BaseElementImpl implements TableElement
 {
-	abstract protected TableImpl getTable();
-	abstract protected ContextImpl getContext();
-    abstract protected void delete();
-    abstract protected void fill(Object o);
+	abstract public Table getTable();
+	abstract public TableContext getTableContext();
+    abstract public void delete();
+    abstract public void fill(Object o);
+    
     abstract protected boolean isDataTypeEnforced();
     
     private boolean m_enforceDataType;
 
-    protected TableElement(ElementType eType, TableElement e)
+    protected TableElementImpl(ElementType eType, TableElementImpl e)
     {
         super(eType);
         
@@ -25,7 +29,7 @@ abstract class TableElement extends BaseElement
      * Perform general initializations
      * @param e
      */
-    protected void initialize(TableElement e)
+    protected void initialize(TableElementImpl e)
     {
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
@@ -42,7 +46,7 @@ abstract class TableElement extends BaseElement
                 return getTable();
                 
             case Context:
-                return getContext();
+                return getTableContext();
                 
             case isEnforceDataType:
                 return isEnforceDataType();
@@ -74,15 +78,15 @@ abstract class TableElement extends BaseElement
         return initializedProperty;
     }
 
-    protected BaseElement getInitializationSource(TableElement e)
+    protected BaseElementImpl getInitializationSource(TableElementImpl e)
     {
-        BaseElement source = null;
+        BaseElementImpl source = null;
         if (e != null && e != this)
             source = e;
         else if (getTable() != null && getTable() != this)
-            source = getTable();
-        else if (getContext() != null)
-            source = getContext();
+            source = (BaseElementImpl) getTable();
+        else if (getTableContext() != null)
+            source = (BaseElementImpl) getTableContext();
         else
             source = ContextImpl.getDefaultContext();
 
@@ -99,7 +103,7 @@ abstract class TableElement extends BaseElement
         m_enforceDataType = enforceDataType;
     }
 
-    protected boolean isDataTypeEnforced(TableElement te)
+    protected boolean isDataTypeEnforced(TableElementImpl te)
     {
         return te.isDataTypeEnforced();
     }

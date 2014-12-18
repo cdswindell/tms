@@ -11,20 +11,19 @@ public enum Operator implements Labeled
     MinusOper("-", TokenType.BinaryOp, 2),
     MultOper("*", TokenType.BinaryOp, 4),
     DivOper("/", TokenType.BinaryOp, 4),
-    PowerOper("^", TokenType.BinaryOp, 6),
-    ModOper("%", TokenType.BinaryOp, 4),
-    FactorialOper("!", TokenType.UnaryOp, 4),
+    PowerOper(TokenType.BinaryOp, 5, "^", "exp"),
+    ModOper(TokenType.BinaryOp, 5,"%", "mod"),
+    FactorialOper("!", TokenType.UnaryOp, 5),
 
-    NegOper("neg", TokenType.UnaryFunc, 6),
-    ExpOper,
-    AbsOper("abs", TokenType.UnaryFunc),
-    SqrtOper,
+    NegOper("neg", TokenType.UnaryFunc, 6, Math.class, "negateExact"),
+    AbsOper("abs", TokenType.UnaryFunc, 6, Math.class),
+    SqrtOper("sqrt", TokenType.UnaryFunc, 6, Math.class),
     CbrtOper,
     LogOper,
     Log10Oper,
 
-    SinOper,
-    CosOper,
+    SinOper("sin", TokenType.UnaryFunc, 6, Math.class),
+    CosOper("cos", TokenType.UnaryFunc, 6, Math.class),
     TanOper,
     ASinOper,
     ACosOper,
@@ -70,21 +69,25 @@ public enum Operator implements Labeled
     NormalizeOper,
     ScaleOper,
 
-    Paren(8, TokenType.LeftParen, TokenType.RightParen),
+    Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.RangeRef, TokenType.CellRef),
 
     LAST_operator;
     
-    static final public int MAX_PRIORITY = 8;
+    static final public int MAX_PRIORITY = 6;
     
     private String m_label;
+    private Set<String> m_aliases;
     private Set<TokenType> m_tokenTypes;
     private int m_priority;
+    private Class<? extends Object> m_clazz;
+    private String m_method;
     
     private Operator()
     {
         m_priority = 0;
         m_tokenTypes = new LinkedHashSet<TokenType>();
+        m_aliases = new LinkedHashSet<String>();
     }
     
     private Operator(int priority)
@@ -95,15 +98,30 @@ public enum Operator implements Labeled
     
     private Operator(String label, TokenType tt)
     {
-        this(label, tt, 0);
+        this(label, tt, 6);
     }
     
     private Operator(String label, TokenType tt, int priority)
     {
         this();
         m_label = label;
+        if (label != null && label.trim().length() >= 0)
+        	m_aliases.add(label.trim().toLowerCase());
+        
         m_priority = priority;
         m_tokenTypes.add(tt);
+    }
+    
+    private Operator(String label, TokenType tt, int priority, Class<? extends Object> clazz)
+    {
+        this(label, tt, priority, clazz, label);
+    }
+    
+    private Operator(String label, TokenType tt, int priority, Class<? extends Object> clazz, String method)
+    {
+        this(label, tt, priority);
+        m_clazz = clazz;
+        m_method = method;
     }
     
     private Operator(int priority, TokenType... tts)
@@ -113,6 +131,21 @@ public enum Operator implements Labeled
         if (tts != null) {
             for (TokenType tt : tts) {
                 m_tokenTypes.add(tt);
+            }
+        }
+    }
+    
+    private Operator(TokenType tt, int priority, String... labels)
+    {
+        this();
+        m_priority = priority;
+        m_tokenTypes.add(tt);
+        if (labels != null) {
+            for (String label : labels) {
+            	if (m_label == null)
+            		m_label = label;
+            	else
+            		;
             }
         }
     }
@@ -138,6 +171,11 @@ public enum Operator implements Labeled
     public String getLabel()
     {
         return m_label;
+    }
+    
+    public Set<String> getAliases()
+    {
+        return m_aliases;
     }
     
     public int getLabelLength()

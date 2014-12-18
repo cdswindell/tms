@@ -13,7 +13,7 @@ import org.tms.api.exceptions.InvalidPropertyException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnimplementedException;
 
-abstract public class BaseElement 
+abstract public class BaseElementImpl 
 {
     abstract protected boolean isEmpty();
     
@@ -25,7 +25,7 @@ abstract public class BaseElement
     private boolean m_supportsNull;
     private boolean m_readOnly;
     
-    protected BaseElement(ElementType eType)
+    protected BaseElementImpl(ElementType eType)
     {
         setElementType(eType);
     }
@@ -346,15 +346,15 @@ abstract public class BaseElement
      *
      * @param <E>
      */
-    protected class BaseElementIterable<E extends BaseElement> implements Iterator<E>, Iterable<E>
+    protected class BaseElementIterable<E extends BaseElementImpl> implements Iterator<E>, Iterable<E>
     {
         private Iterator<E> m_iter;
         
         @SuppressWarnings("unchecked")
-        public BaseElementIterable(Collection<? extends BaseElement> elems)
+        public BaseElementIterable(Collection<? extends BaseElementImpl> elems)
         {
             if (elems != null) {
-                List<BaseElement> copy = (List<BaseElement>) new ArrayList<E>(elems.size());
+                List<BaseElementImpl> copy = (List<BaseElementImpl>) new ArrayList<E>(elems.size());
                 copy.addAll(elems);
                 m_iter = (Iterator<E>) (copy).iterator();
             }

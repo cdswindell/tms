@@ -111,7 +111,7 @@ public class InfixExpressionParser
                 curPos += parseOperator(exprChars, curPos, ifs, parenCnt, tm, table, pr);
 
             if (curPos <= prevPos) {
-                if (pr.isSuccess())
+                if (pr != null)
                     pr.addIssue(m_expr, ParserStatusCode.InvalidExpression, curPos);
                 return pr;
             }

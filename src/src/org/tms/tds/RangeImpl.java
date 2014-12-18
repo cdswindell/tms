@@ -10,7 +10,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class RangeImpl extends TableCellsElement
+public class RangeImpl extends TableCellsElementImpl
 {
     private Set<RowImpl> m_rows;
     private Set<ColumnImpl> m_cols;
@@ -239,7 +239,8 @@ public class RangeImpl extends TableCellsElement
             return isEnforceDataType();
     }
 
-    @Override protected void delete()
+    @Override 
+    public void delete()
     {
     	// Remove the range from its component rows and columns
     	m_rows.forEach(r -> {if (r != null) r.remove(this);});
@@ -287,11 +288,11 @@ public class RangeImpl extends TableCellsElement
     }
     
     @Override
-    protected void initialize(TableElement e)
+    protected void initialize(TableElementImpl e)
     {
         super.initialize(e);
         
-        BaseElement source = getInitializationSource(e);        
+        BaseElementImpl source = getInitializationSource(e);        
         for (TableProperty tp : this.getInitializableProperties()) {
             Object value = source.getProperty(tp);
             
@@ -308,7 +309,7 @@ public class RangeImpl extends TableCellsElement
     }
         
     @Override
-    protected int getNumCells()
+    public int getNumCells()
     {
     	int numCells = 0;
     	for (ColumnImpl c : m_cols) {
@@ -320,7 +321,7 @@ public class RangeImpl extends TableCellsElement
     }
 
 	@Override
-	protected void fill(Object o) 
+	public void fill(Object o) 
 	{
 		if (!isEmpty()) {
 			if (getNumRows() == 0 && m_cols != null) 

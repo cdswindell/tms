@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.exceptions.TableException;
-import org.tms.tds.BaseElement;
+import org.tms.tds.BaseElementImpl;
 
 public enum TableProperty implements Comparable<TableProperty>
 {
@@ -174,7 +174,7 @@ public enum TableProperty implements Comparable<TableProperty>
         return m_initializable;
     }
     
-    public boolean isImplementedBy(BaseElement te)
+    public boolean isImplementedBy(BaseElementImpl te)
     {
         if (te == null)
             return false;

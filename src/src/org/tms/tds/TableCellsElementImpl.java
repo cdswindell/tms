@@ -1,21 +1,22 @@
 package org.tms.tds;
 
 import org.tms.api.ElementType;
+import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidParentException;
 
-abstract class TableCellsElement extends TableElement
+abstract class TableCellsElementImpl extends TableElementImpl implements TableCellsElement
 {
-    abstract protected int getNumCells();
+    abstract public int getNumCells();
     
     private int m_index = -1;
     private TableImpl m_table;
 
-    protected TableCellsElement(ElementType eType, TableElement e)
+    protected TableCellsElementImpl(ElementType eType, TableElementImpl e)
     {
         super(eType, e);
         if (e != null)
-            setTable(e.getTable());
+            setTable((TableImpl)e.getTable());
         
         // perform base initialization
         initialize(e);
@@ -25,7 +26,7 @@ abstract class TableCellsElement extends TableElement
      * Field getters and setters
      */
     
-    protected TableImpl getTable()
+    public TableImpl getTable()
     {
     	return m_table;
     }
@@ -76,15 +77,15 @@ abstract class TableCellsElement extends TableElement
         return initializedProperty;
     }
 
-    protected BaseElement getInitializationSource(TableElement e)
+    protected BaseElementImpl getInitializationSource(TableElementImpl e)
     {
-        BaseElement source = null;
+        BaseElementImpl source = null;
         if (e != null && e != this)
             source = e;
-        else if (getTable() != null && getTable() != (TableElement)this)
+        else if (getTable() != null && getTable() != (TableElementImpl)this)
             source = getTable();
-        else if (getContext() != null)
-            source = getContext();
+        else if (getTableContext() != null)
+            source = getTableContext();
         else
             source = ContextImpl.getDefaultContext();
 
@@ -105,9 +106,9 @@ abstract class TableCellsElement extends TableElement
      * Retrieve the Context associated with this table element; the context is associated with the parent table
      * @return
      */
-    protected ContextImpl getContext()
+    public ContextImpl getTableContext()
     {
-        return getTable() != null ? getTable().getContext() : null;
+        return getTable() != null ? getTable().getTableContext() : null;
     }
     
     /**
@@ -115,10 +116,10 @@ abstract class TableCellsElement extends TableElement
      * @param e
      * @throws InvalidParentException if the specified element belongs to a different Table
      */
-    void vetParent(TableCellsElement... elems)
+    void vetParent(TableCellsElementImpl... elems)
     {
         if (elems != null) {
-            for (TableCellsElement e : elems) {
+            for (TableCellsElementImpl e : elems) {
                 if (e == this)
                     continue;               
                 else if (e.getTable() == null)

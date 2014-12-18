@@ -1,33 +1,6 @@
 package org.tms.api;
 
-import org.tms.tds.TableImpl;
 
-public class Table extends TableImpl
+public interface Table extends TableElement
 {
-
-    public Table()
-    {
-        super();
-    }
-
-    public Table(int nRows, int nCols)
-    {
-        super(nRows, nCols);
-    }
-
-    public Table(int nRows, int nCols, TableContext c)
-    {
-        super(nRows, nCols, c);
-    }
-
-    public Table(int nRows, int nCols, Table t)
-    {
-        super(nRows, nCols, t);
-    }
-
-    public TableContext getTableContext()
-    {
-        return (TableContext)getContext();
-    }
-
 }

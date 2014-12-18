@@ -4,7 +4,7 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
 
-public class CellImpl extends TableElement
+public class CellImpl extends TableElementImpl
 {
     private Object m_cellValue;
     private ColumnImpl m_col;
@@ -162,11 +162,11 @@ public class CellImpl extends TableElement
         }
     }
     @Override
-    protected void initialize(TableElement e)
+    protected void initialize(TableElementImpl e)
     {
         super.initialize(e);
         
-        BaseElement source = getInitializationSource(e);        
+        BaseElementImpl source = getInitializationSource(e);        
         for (TableProperty tp : this.getInitializableProperties()) {
             Object value = source.getProperty(tp);
             
@@ -184,19 +184,19 @@ public class CellImpl extends TableElement
     }
     
     @Override
-    protected void delete()
+    public void delete()
     {
     	setCellValue(null);
     }
 
 	@Override
-	protected void fill(Object o) 
+	public void fill(Object o) 
 	{
 		setCellValue(o);
 	}
 
 	@Override
-	protected TableImpl getTable() 
+	public TableImpl getTable() 
 	{
 		if (m_col != null)
 			return m_col.getTable();
@@ -205,10 +205,10 @@ public class CellImpl extends TableElement
 	}
 
 	@Override
-	protected ContextImpl getContext() 
+	public ContextImpl getTableContext() 
 	{
 		if (getTable() != null)
-			return getTable().getContext();
+			return getTable().getTableContext();
 		else
 			return null;
 	}

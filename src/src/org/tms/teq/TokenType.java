@@ -8,10 +8,10 @@ public enum TokenType implements Labeled
     NULL_TokenType(false),
     
     TableRef(false, "Table"),
-    ColumnRef(false, "Column", "Col"),
-    RowRef(false, "Row"),
+    ColumnRef(false, "Column", "Col", "C"),
+    RowRef(false, "Row","R"),
     CellRef(false, "Cell"),
-    RangeRef(false, "Range", "R"),
+    RangeRef(false, "Range"),
     
     Constant(false),
     BuiltIn(false),

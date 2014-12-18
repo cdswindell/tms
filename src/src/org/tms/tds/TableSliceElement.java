@@ -7,7 +7,7 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.util.JustInTimeSet;
 
-abstract class TableSliceElement extends TableCellsElement
+abstract class TableSliceElement extends TableCellsElementImpl
 {
     abstract protected TableSliceElement insertSlice(int idx);
     abstract protected TableSliceElement setCurrent();
@@ -15,7 +15,7 @@ abstract class TableSliceElement extends TableCellsElement
     private JustInTimeSet<RangeImpl> m_ranges;
     private boolean m_inUse;
 
-    public TableSliceElement(ElementType eType, TableElement e)
+    public TableSliceElement(ElementType eType, TableElementImpl e)
     {
         super(eType, e);
     }
@@ -107,11 +107,11 @@ abstract class TableSliceElement extends TableCellsElement
      * Overridden methods
      */
     @Override
-    protected void initialize(TableElement e)
+    protected void initialize(TableElementImpl e)
     {
         super.initialize(e);
         
-        BaseElement source = getInitializationSource(e);        
+        BaseElementImpl source = getInitializationSource(e);        
         for (TableProperty tp : this.getInitializableProperties()) {
             Object value = source.getProperty(tp);
             

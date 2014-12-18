@@ -6,5 +6,6 @@ public enum TableErrorClass
     Unimplemented,
     Invalid,
     Illegal,
+    UnsupportedImplementation,
     Unknown;
 }

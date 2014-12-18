@@ -19,7 +19,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     public void push (double value)
     {
         Token t = new Token(TokenType.Operand);
-        t.setOperator(Operator.NULL_operator);
+        t.setOperator(Operator.NOP);
         t.setValue(value);
         
         push(t);
@@ -29,6 +29,15 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     {
         Token t = new Token(tType);
         t.setOperator(oper);
+       
+        push(t);
+    }
+
+    public void push(TokenType tType, Object value)
+    {
+        Token t = new Token(tType);
+        t.setOperator(Operator.NOP);
+        t.setValue(value);
        
         push(t);
     }

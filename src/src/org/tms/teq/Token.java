@@ -19,6 +19,12 @@ public class Token implements Labeled
         setTokenType(tt);
     }
 
+    public Token(TokenType tt, Object value)
+    {
+        setTokenType(tt);
+        setValue(value);
+    }
+
     public Token(TokenType tt, Operator o)
     {
         setTokenType(tt);
