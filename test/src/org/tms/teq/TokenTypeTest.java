@@ -48,7 +48,7 @@ public class TokenTypeTest
         assertThat(TokenType.ColumnRef.getLabels(), notNullValue()); 
         assertThat(TokenType.ColumnRef.getLabels().contains("Column"), is(true)); 
         assertThat(TokenType.ColumnRef.getLabels().contains("Col"), is(true)); 
-        assertThat(TokenType.ColumnRef.getLabels().size(), is(2)); 
+        assertThat(TokenType.ColumnRef.getLabels().size(), is(3)); 
     }
 
 }

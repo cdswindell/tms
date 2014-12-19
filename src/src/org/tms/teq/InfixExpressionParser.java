@@ -61,13 +61,13 @@ public class InfixExpressionParser
 
     public ParseResult parseInfixExpression()
     {
-        m_ifs = Token.createTokenStack();
+        m_ifs = EquationStack.createInfixStack();
         return parseInfixExpression(m_ifs, m_table);
     }
     
     protected ParseResult parseInfixExpression(Table table)
     {
-        m_ifs = Token.createTokenStack();
+        m_ifs = EquationStack.createInfixStack();
         return parseInfixExpression(m_ifs, table);
     }
     
@@ -84,7 +84,7 @@ public class InfixExpressionParser
         int [] parenCnt = {0};        
         
         if (ifs == null)
-            ifs = Token.createTokenStack();
+            ifs = EquationStack.createInfixStack();
         else
             ifs.clear();
         

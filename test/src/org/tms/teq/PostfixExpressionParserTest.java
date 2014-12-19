@@ -13,7 +13,7 @@ public class PostfixExpressionParserTest
     @Test
     public final void testPostfixExpressionParserStringTable()
     {
-        PostfixExpressionParser pep = new PostfixExpressionParser("3 + 5", null); 
+        PostfixStackGenerator pep = new PostfixStackGenerator("3 + 5", null); 
         assertThat(pep, notNullValue());
         
         EquationStack ifs = pep.getInfixStack();
@@ -49,7 +49,7 @@ public class PostfixExpressionParserTest
     @Test
     public final void testConvertInfixToPostfix()
     {
-        PostfixExpressionParser pep = new PostfixExpressionParser("3 + 5", null); 
+        PostfixStackGenerator pep = new PostfixStackGenerator("3 + 5", null); 
         assertThat(pep, notNullValue());
         
         EquationStack ifs = pep.getInfixStack();
@@ -67,7 +67,7 @@ public class PostfixExpressionParserTest
         assertThat(pfs.size(), is(3));
         
         
-        pep = new PostfixExpressionParser("3^2 * (5+3*(8/2+3)) -8/4", null); 
+        pep = new PostfixStackGenerator("3^2 * (5+3*(8/2+3)) -8/4", null); 
         assertThat(pep, notNullValue());
         
         ifs = pep.getInfixStack();

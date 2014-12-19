@@ -5,8 +5,28 @@ import java.util.Iterator;
 
 public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 {
+    static public EquationStack createInfixStack()
+    {
+        EquationStack s = new EquationStack(StackType.Infix );
+        return s;
+    }
+    
+    static public EquationStack createPostfixStack()
+    {
+        EquationStack s = new EquationStack(StackType.Postfix );
+        return s;
+    }
+    
     private static final long serialVersionUID = 112242556423961843L;
+    
+    private StackType m_stackType;
 
+    protected EquationStack(StackType st) 
+    {
+    	super();
+    	m_stackType = st;
+    }
+    
     public boolean isLeading()
     {
         if (isEmpty())
@@ -75,7 +95,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             return "[ <empty> ]";
         else {
             StringBuffer sb = new StringBuffer();
-            sb.append("[ ");
+            sb.append(m_stackType.toString()).append(" Stack: ").append("[ ");
             
             Iterator<Token> di = this.descendingIterator();
             while (di != null && di.hasNext()) {

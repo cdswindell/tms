@@ -3,12 +3,6 @@ package org.tms.teq;
 
 public class Token implements Labeled
 {
-    static public EquationStack createTokenStack()
-    {
-        EquationStack s = new EquationStack();
-        return s;
-    }
-    
     private String m_label;
     private TokenType m_tokenType;
     private Operator m_oper;

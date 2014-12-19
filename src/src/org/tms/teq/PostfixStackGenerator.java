@@ -5,13 +5,13 @@ import java.util.Iterator;
 import org.tms.api.Table;
 import org.tms.api.exceptions.InvalidExpressionException;
 
-public class PostfixExpressionParser
+public class PostfixStackGenerator
 {
     private EquationStack m_ifs;
     private EquationStack m_pfs;
     private Table m_table;
     
-    public PostfixExpressionParser(String infixExpr, Table table)
+    public PostfixStackGenerator(String infixExpr, Table table)
     {
         InfixExpressionParser ifp = new InfixExpressionParser(infixExpr);
         ParseResult pr = ifp.parseInfixExpression(table);
@@ -22,7 +22,7 @@ public class PostfixExpressionParser
         m_table = table;
     }
 
-    public PostfixExpressionParser(InfixExpressionParser ife)
+    public PostfixStackGenerator(InfixExpressionParser ife)
     {
        if (ife.getInfixStack() == null || ife.getInfixStack().isEmpty()) {
            ParseResult pr = ife.parseInfixExpression();
@@ -34,7 +34,7 @@ public class PostfixExpressionParser
        m_table = ife.getTable();
     }
 
-    public PostfixExpressionParser(EquationStack ifs, Table table)
+    public PostfixStackGenerator(EquationStack ifs, Table table)
     {
         m_ifs = ifs;
         m_table = table;
@@ -63,7 +63,7 @@ public class PostfixExpressionParser
     
     protected ParseResult convertInfixToPostfix()
     {
-        m_pfs = new EquationStack();
+        m_pfs = EquationStack.createPostfixStack();
         return convertInfixToPostfix(m_ifs, m_pfs);
     }
     
@@ -79,7 +79,7 @@ public class PostfixExpressionParser
         
         // create the temporary op stack, ops will be pushed onto this stack 
         // until one with a lessor priority is encountered        
-        EquationStack ops = new EquationStack();
+        EquationStack ops = new EquationStack(StackType.Op);
         int infixParens = 0;
         Token t = null;
         Operator oper = null;
