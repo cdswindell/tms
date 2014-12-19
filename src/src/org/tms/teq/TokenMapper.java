@@ -13,9 +13,11 @@ public class TokenMapper
     static {
         for (Operator o : Operator.values()) {
             if (o.isLabeled()) {
-                String label = o.getLabel();
-                Token t = new Token(label, o.getPrimaryTokenType(), o);
-                sf_TokenMap.put(label.toLowerCase(), t);  
+                Set<String> labels = o.getAliases();
+                for (String label: labels) {
+	                Token t = new Token(label, o.getPrimaryTokenType(), o);
+	                sf_TokenMap.put(label.toLowerCase(), t);  
+                }
             }
             else {
                 Set<TokenType> tts = o.getTokenTypes();

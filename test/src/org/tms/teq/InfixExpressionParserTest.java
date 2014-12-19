@@ -151,5 +151,18 @@ public class InfixExpressionParserTest
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(true));
         assertThat(iep.getInfixStack().size(), is(11));
+    } 
+    
+    @Test
+    public final void testAlaisedOperastors()
+    {
+        InfixExpressionParser iep = new InfixExpressionParser("5 % 2 + 7 mod 5");
+        assertThat(iep, notNullValue());
+        
+        ParseResult pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        assertThat(iep.getInfixStack().size(), is(7));
+        assertThat(iep.parsedInfixExpression(), is("5.0 % 2.0 + 7.0 % 5.0"));
     }  
 }

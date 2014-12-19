@@ -15,19 +15,19 @@ public enum Operator implements Labeled
     ModOper(TokenType.BinaryOp, 5,"%", "mod"),
     FactorialOper("!", TokenType.UnaryOp, 5),
 
-    NegOper("neg", TokenType.UnaryFunc, 6, Math.class, "negateExact"),
-    AbsOper("abs", TokenType.UnaryFunc, 6, Math.class),
-    SqrtOper("sqrt", TokenType.UnaryFunc, 6, Math.class),
+    NegOper("neg", TokenType.UnaryOp, 6, Math.class, "negateExact"),
+    AbsOper("abs", TokenType.UnaryOp, 6, Math.class),
+    SqrtOper("sqrt", TokenType.UnaryOp, 6, Math.class),
     CbrtOper,
     LogOper,
     Log10Oper,
 
-    SinOper("sin", TokenType.UnaryFunc, 6, Math.class),
-    CosOper("cos", TokenType.UnaryFunc, 6, Math.class),
-    TanOper,
-    ASinOper,
-    ACosOper,
-    ATanOper,
+    SinOper("sin", TokenType.UnaryOp, 6, Math.class),
+    CosOper("cos", TokenType.UnaryOp, 6, Math.class),
+    TanOper("tan", TokenType.UnaryOp, 6, Math.class),
+    ASinOper("asin", TokenType.UnaryOp, 6, Math.class),
+    ACosOper("acos", TokenType.UnaryOp, 6, Math.class),
+    ATanOper("atan", TokenType.UnaryOp, 6, Math.class),
 
     SinDOper,
     CosDOper,
@@ -40,7 +40,7 @@ public enum Operator implements Labeled
     CeilOper,
     FracOper,
     SignOper,
-    FactOper,
+    FactOp(TokenType.UnaryOp, 5,"factorial", "fact", "!"),
     RoundOper,
 
     RandOper,
@@ -144,8 +144,7 @@ public enum Operator implements Labeled
             for (String label : labels) {
             	if (m_label == null)
             		m_label = label;
-            	else
-            		;
+            	m_aliases.add(label.toLowerCase());
             }
         }
     }
@@ -187,4 +186,10 @@ public enum Operator implements Labeled
     { 
         return m_label != null;
     }
+
+	public Object numArgs() 
+	{
+		TokenType tt = getPrimaryTokenType();
+		return tt != null ? tt.numArgs() : 0;
+	}
 }

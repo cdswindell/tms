@@ -126,4 +126,9 @@ public class Token implements Labeled
     {
         return getTokenType() != null && getTokenType().isRightParen();
     }
+
+	public boolean isOperand() 
+	{
+        return getTokenType() != null && getTokenType().isOperand();
+	}
 }

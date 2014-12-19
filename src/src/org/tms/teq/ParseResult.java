@@ -34,6 +34,12 @@ public class ParseResult
         m_parserStatusCode = status;
     }
     
+    ParseResult(ParserStatusCode status, String msg)
+    {
+        m_parserStatusCode = status;
+        this.addIssue(status, msg);
+    }
+    
     public ParserStatusCode getParserStatusCode()
     {
         if (m_parserStatusCode == null)
@@ -74,6 +80,11 @@ public class ParseResult
     public ParseResult addIssue(ParserStatusCode status, String msg)
     {
         return addIssue(null, status, -1, msg);
+    }
+    
+    public ParseResult addIssue(ParserStatusCode status, int pos, String msg)
+    {
+        return addIssue(null, status, pos, msg);
     }
     
     public ParseResult addIssue(String expr, ParserStatusCode status, int pos, String msg)

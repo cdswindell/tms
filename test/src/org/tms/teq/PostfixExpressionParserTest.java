@@ -86,10 +86,45 @@ public class PostfixExpressionParserTest
         
     }
 
+    
     @Test
     public final void testConvertInfixToPostfixEquationStackEquationStack()
     {
-        fail("Not yet implemented"); // TODO
-    }
-
+        InfixExpressionParser iep = new InfixExpressionParser("5 % 2 + 7 mod 5");
+        assertThat(iep, notNullValue());
+        
+        ParseResult pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        assertThat(iep.parsedInfixExpression(), is("5.0 % 2.0 + 7.0 % 5.0"));
+        
+        EquationStack ifs = iep.getInfixStack();
+        assertThat(ifs, notNullValue());
+        assertThat(ifs.size(), is(7));
+              
+        PostfixStackGenerator pfp = new PostfixStackGenerator(ifs, null);
+        assertThat(pfp, notNullValue());
+        
+        EquationStack pfs = pfp.getPostfixStack();
+        assertThat(pfs, notNullValue());  
+        
+        
+        iep = new InfixExpressionParser("5 % (2 + 7) mod 5");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        ifs = iep.getInfixStack();
+        assertThat(ifs, notNullValue());
+        assertThat(ifs.size(), is(9));
+        assertThat(ifs.toExpression(), is("5.0 % ( 2.0 + 7.0 ) % 5.0"));
+              
+        pfp = new PostfixStackGenerator(ifs, null);
+        assertThat(pfp, notNullValue());
+        
+        pfs = pfp.getPostfixStack();
+        assertThat(pfs, notNullValue());        
+    }  
 }

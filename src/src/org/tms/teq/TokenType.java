@@ -18,31 +18,37 @@ public enum TokenType implements Labeled
     Variable(false),
     Operand(false),
     String(false),
-    RangeOp(true),
-    StatOp(true),
-    BinaryOp(true),
-    BinaryFunc(true),
-    UnaryOp(true),
-    UnaryFunc(true),
+    RangeOp(true, 1),
+    StatOp(true, 1),
+    BinaryOp(true, 2),
+    BinaryFunc(true, 2),
+    UnaryOp(true, 1),
     
     Comma(true, ","),
     LeftParen(true, "("),
     RightParen(false, ")"),
     
-    GenericUnaryOp(true),
-    GenericBinaryFunc(true),
     GenericOp(true),
-    GenericBinaryOp(true),
+    GenericUnaryOp(true, 1),
+    GenericBinaryFunc(true, 2),
+    GenericBinaryOp(true, 2),
     
     NullOpValue(false),
     LAST_TokenType(false);
     
     private boolean m_leading;
     private Set<String> m_labels;
+    private int m_numArgs;
     
     private TokenType(boolean isLeading)
     {
         this(isLeading, (String [])null);
+    }
+
+    private TokenType(boolean isLeading, int numArgs)
+    {
+        this(isLeading, (String [])null);
+        m_numArgs = numArgs;
     }
 
     private TokenType(boolean isLeading, String... labels)
@@ -91,4 +97,14 @@ public enum TokenType implements Labeled
     {
         return this == RightParen;
     }
+
+	public boolean isOperand() 
+	{
+        return this == Operand;
+	}
+
+	public int numArgs() 
+	{
+		return m_numArgs;
+	}
 }

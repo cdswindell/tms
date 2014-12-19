@@ -8,6 +8,7 @@ public enum ParserStatusCode
     ParenMismatch,
     IncompleteExpresion,
     InvalidExpression,
+    InvalidExpressionStack,
     InvalidNumericExpression,
     InvalidConstantLocation,
     InvalidCommaLocation,

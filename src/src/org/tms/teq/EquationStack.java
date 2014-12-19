@@ -106,4 +106,9 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             return sb.toString();
         }
     }
+
+	public StackType getStackType() 
+	{
+		return m_stackType;
+	}
 }

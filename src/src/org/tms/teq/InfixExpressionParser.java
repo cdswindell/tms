@@ -99,7 +99,7 @@ public class InfixExpressionParser
             
             prevPos = curPos;
             if (Character.isLetter(c))
-                curPos += parseLabel(exprChars, curPos, ifs, table, pr);    
+                curPos += parseLabel(exprChars, curPos, ifs, tm, table, pr);    
             
             else if (Character.isDigit(c))
                 curPos += parseNumber(exprChars, curPos, ifs, table, pr);    
@@ -108,7 +108,7 @@ public class InfixExpressionParser
                 curPos += parseText(exprChars, curPos, ifs);
 
             else
-                curPos += parseOperator(exprChars, curPos, ifs, parenCnt, tm, table, pr);
+                curPos += parseSimpleOperator(exprChars, curPos, ifs, parenCnt, tm, table, pr);
 
             if (curPos <= prevPos) {
                 if (pr != null)
@@ -120,7 +120,7 @@ public class InfixExpressionParser
         return pr;
     }
 
-    private int parseOperator(char[] exprChars, int curPos, EquationStack ifs, int[] parenCnt, 
+    private int parseSimpleOperator(char[] exprChars, int curPos, EquationStack ifs, int[] parenCnt, 
                               TokenMapper tm, Table table, ParseResult pr)
     {
         Token t = tm.lookUpToken(exprChars[curPos]);
@@ -292,11 +292,59 @@ public class InfixExpressionParser
     } /* of TEQ_ParseNumber */
     
     private int parseLabel(char[] exprChars, int curPos, 
-                           EquationStack ifs, Table table,
+                           EquationStack ifs, TokenMapper tm, Table table,
                            ParseResult pr)
     {
-        // TODO Auto-generated method stub
-        return 0;
+    	int charsParsed = 0; // assume the worst
+    	
+        // find a "word", as defined by letters, digits, #'s, _'s, and :'s     	
+    	StringBuffer sb = new StringBuffer();
+    	int maxPos = exprChars.length;
+        for (int i = curPos; i < maxPos; i++) {
+        	char c = exprChars[i];
+        	if (Character.isLetterOrDigit(c) || c == '#' || c == '_' || c == ':') {
+        		sb.append(c);
+        		continue;
+        	}
+        	else
+        		break;
+        }
+
+        /* check if the word is an operator */
+        Token t = tm.lookUpToken(sb.toString());
+        TokenType tt = null;
+        Operator oper = null;
+        if (t != null) {
+        	charsParsed = sb.length();
+        	tt = t.getTokenType();
+        	oper =t.getOperator();
+        	
+        	// TODO: handle row/col/range references
+        }
+        else {
+        	// TODO: handle other tricks in teq_parse
+        }
+        
+        if (ifs.isLeading()) {
+        	if (tt == TokenType.BinaryOp) {
+        		if (pr != null)
+        			pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos, tt.toString());
+        		return 0;
+        	}
+        	
+        	ifs.push(tt, oper);
+        }
+        else {
+        	if (tt != TokenType.BinaryOp) {
+        		if (pr != null)
+        			pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos, tt.toString());
+        		return 0;
+        	}
+        	
+        	ifs.push(tt, oper);        	
+        }
+        
+        return charsParsed;
     }
     
     public String toString()

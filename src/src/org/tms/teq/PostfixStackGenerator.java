@@ -24,18 +24,33 @@ public class PostfixStackGenerator
 
     public PostfixStackGenerator(InfixExpressionParser ife)
     {
-       if (ife.getInfixStack() == null || ife.getInfixStack().isEmpty()) {
-           ParseResult pr = ife.parseInfixExpression();
-           if (pr != null && pr.isFailure())
-               throw new InvalidExpressionException(pr);
-       }
-       
-       m_ifs = ife.getInfixStack();
-       m_table = ife.getTable();
+    	if (ife.getInfixStack() == null || ife.getInfixStack().isEmpty()) {
+    		ParseResult pr = ife.parseInfixExpression();
+    		if (pr != null && pr.isFailure())
+    			throw new InvalidExpressionException(pr);
+    	}
+
+    	m_ifs = ife.getInfixStack();
+    	if (m_ifs == null) {
+    		ParseResult pr = new ParseResult(ParserStatusCode.EmptyStack);
+    		throw new InvalidExpressionException(pr);            
+    	}
+
+    	m_table = ife.getTable();
     }
 
     public PostfixStackGenerator(EquationStack ifs, Table table)
     {
+    	if (ifs == null) {
+            ParseResult pr = new ParseResult(ParserStatusCode.EmptyStack);
+            throw new InvalidExpressionException(pr);            
+    	}
+    	
+    	if (ifs.getStackType() != StackType.Infix) {
+            ParseResult pr = new ParseResult(ParserStatusCode.InvalidExpressionStack);
+            throw new InvalidExpressionException(pr);            
+    	}
+    	
         m_ifs = ifs;
         m_table = table;
     }
@@ -157,7 +172,6 @@ public class PostfixStackGenerator
                 case StatOp:
                 case String:
                 case TableRef:
-                case UnaryFunc:
                 case UnaryOp:
                 case Variable:
                 default:
