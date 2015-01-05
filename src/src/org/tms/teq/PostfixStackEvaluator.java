@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.tms.api.Table;
 import org.tms.api.exceptions.InvalidOperandsException;
+import org.tms.api.exceptions.UnimplementedException;
 
 public class PostfixStackEvaluator 
 {
@@ -51,9 +52,7 @@ public class PostfixStackEvaluator
 					if (x == null || !x.isOperand()) // stack is in invalid state
 						throw new InvalidOperandsException(this, oper, x);
 					
-					if (tt == TokenType.UnaryOp)
-						m_opStack.push(doUnaryOp(oper, x));
-					
+					m_opStack.push(doUnaryOp(oper, x));					
 					break;
 					
 				case BinaryOp:
@@ -72,7 +71,9 @@ public class PostfixStackEvaluator
 						m_opStack.push(doBinaryFunc(oper, x, y));
 					
 					break;
-						
+					
+				default:
+					throw new UnimplementedException("");
 			}
 		}
 		
@@ -83,34 +84,38 @@ public class PostfixStackEvaluator
 		return retVal;
 	}
 
-	private Operator doBinaryFunc(Operator oper, Token x, Token y) 
+	private Token doBinaryFunc(Operator oper, Token x, Token y) 
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private Operator doBinaryOp(Operator oper, Token x, Token y) 
+	private Token doBinaryOp(Operator oper, Token x, Token y) 
 	{
 		Object xVal = x.getValue();
 		Object yVal = y.getValue();
-		Object result = null;
+		Token result = null;
 		
 		switch (oper) {
 			case PlusOper:
 				result = addArgs(xVal, yVal);
 				break;
 		}
-		return null;
+		
+		return result;
 	}
 
-	private Object addArgs(Object xVal, Object yVal) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private Operator doUnaryOp(Operator oper, Token x) 
+	private Token addArgs(Object xVal, Object yVal) 
 	{
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private Token doUnaryOp(Operator oper, Token x) 
+	{
+		if (x.isNull())
+			return Token.createNullToken();
+		
 		return null;
 	}
 }

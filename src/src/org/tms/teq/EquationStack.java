@@ -27,15 +27,48 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     	m_stackType = st;
     }
     
-    public boolean isLeading()
+    @Override
+	public boolean add(Token t) 
     {
-        if (isEmpty())
-            return true;
-        
-        Token t = this.peek();
-        return t.isLeading();
-    }
-    
+		return super.add(t.clone());
+	}
+
+	@Override
+	public void addFirst(Token t) 
+	{
+		super.addFirst(t.clone());
+	}
+
+	@Override
+	public void addLast(Token t) 
+	{
+		super.addLast(t.clone());
+	}
+
+	@Override
+	public boolean offer(Token t) 
+	{
+		return super.offer(t.clone());
+	}
+
+	@Override
+	public boolean offerFirst(Token t)
+	{
+		return super.offerFirst(t.clone());
+	}
+
+	@Override
+	public boolean offerLast(Token t) 
+	{
+		return super.offerLast(t.clone());
+	}
+
+	@Override
+	public void push(Token t) 
+	{
+		super.push(t.clone());
+	}
+
     public void push (double value)
     {
         Token t = new Token(TokenType.Operand);
@@ -68,6 +101,15 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
         t.setOperator(oper);
         
         push(t);
+    }
+    
+	public boolean isLeading()
+    {
+        if (isEmpty())
+            return true;
+        
+        Token t = this.peek();
+        return t.isLeading();
     }
     
     public String toExpression()

@@ -3,6 +3,12 @@ package org.tms.teq;
 
 public class Token implements Labeled
 {
+	public static Token createNullToken()
+	{
+		Token t = new Token(TokenType.NullValue, Operator.NULL_operator);
+		return t;
+	}
+	
     private String m_label;
     private TokenType m_tokenType;
     private Operator m_oper;
@@ -32,7 +38,15 @@ public class Token implements Labeled
         setOperator(o);
     }
 
-    public TokenType getTokenType()
+    private Token(Token token)
+    {
+		setTokenType(token.getTokenType());
+		setOperator(token.getOperator());
+		setValue(token.getValue());
+		m_label = token.getLabel() != null ? new String(token.getLabel()) : null;
+	}
+
+	public TokenType getTokenType()
     {
         return m_tokenType;
     }
@@ -130,5 +144,16 @@ public class Token implements Labeled
 	public boolean isOperand() 
 	{
         return getTokenType() != null && getTokenType().isOperand();
+	}
+
+	public boolean isNull() 
+	{
+		return (getTokenType() == TokenType.NullValue) || (getTokenType() == TokenType.Operand && getValue() == null);
+	}
+
+	@Override
+	protected Token clone() 
+	{
+		return new Token(this);
 	}
 }

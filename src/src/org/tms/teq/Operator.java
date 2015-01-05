@@ -1,5 +1,6 @@
 package org.tms.teq;
 
+import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -81,7 +82,8 @@ public enum Operator implements Labeled
     private Set<TokenType> m_tokenTypes;
     private int m_priority;
     private Class<? extends Object> m_clazz;
-    private String m_method;
+    private String m_methodName;
+    private Method m_method;
     
     private Operator()
     {
@@ -121,7 +123,7 @@ public enum Operator implements Labeled
     {
         this(label, tt, priority);
         m_clazz = clazz;
-        m_method = method;
+        m_methodName = method;
     }
     
     private Operator(int priority, TokenType... tts)
@@ -191,5 +193,14 @@ public enum Operator implements Labeled
 	{
 		TokenType tt = getPrimaryTokenType();
 		return tt != null ? tt.numArgs() : 0;
+	}
+	
+	public Method getMethod()
+	{
+		if (m_method == null && this.m_clazz != null) {
+			
+		}
+		
+		return m_method;
 	}
 }

@@ -7,6 +7,8 @@ public enum TokenType implements Labeled
 {
     NULL_TokenType(false),
     
+    NullValue(false, "Null", "Empty"),
+    
     TableRef(false, "Table"),
     ColumnRef(false, "Column", "Col", "C"),
     RowRef(false, "Row","R"),

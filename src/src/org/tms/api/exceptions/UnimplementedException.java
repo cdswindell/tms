@@ -27,4 +27,9 @@ public final class UnimplementedException extends TableException
     {
         super(et, msg, TableErrorClass.Unimplemented);
     }
+
+    public UnimplementedException(String msg)
+    {
+        super(msg, TableErrorClass.Unimplemented);
+    }
 }
