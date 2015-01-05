@@ -117,18 +117,6 @@ public class PostfixStackEvaluatorTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(1.0));
-    }  
-    
-    @Test
-    public final void testBuiltIns()
-    {
-        // Factorial edge cases
-        PostfixStackEvaluator pse = new PostfixStackEvaluator("Random", null);
-        assertThat(pse, notNullValue());
+    }   
 
-        Token t = pse.evaluate();
-        assertThat(t, notNullValue());
-        assertThat(t.isNumeric(), is(true));
-        assertThat(t.getNumericValue() >= 0 && t.getNumericValue() < 1.0, is(true));
-    }        
 }
