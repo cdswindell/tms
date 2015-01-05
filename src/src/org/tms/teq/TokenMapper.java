@@ -11,7 +11,7 @@ public class TokenMapper
 {
     static final private Map<String, Token> sf_TokenMap = new HashMap<String, Token>();
     static {
-        for (Operator o : Operator.values()) {
+        for (BuiltinOperator o : BuiltinOperator.values()) {
             if (o.isLabeled()) {
                 Set<String> labels = o.getAliases();
                 for (String label: labels) {

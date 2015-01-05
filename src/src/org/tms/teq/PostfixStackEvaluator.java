@@ -2,6 +2,7 @@ package org.tms.teq;
 
 import java.util.Iterator;
 
+import org.tms.api.Operator;
 import org.tms.api.Table;
 import org.tms.api.exceptions.InvalidOperandsException;
 import org.tms.api.exceptions.UnimplementedException;
@@ -48,6 +49,7 @@ public class PostfixStackEvaluator
 					break;
 					
 				case UnaryOp:
+				case UnaryFunc:
 					x = m_opStack.removeFirst();
 					if (x == null || !x.isOperand()) // stack is in invalid state
 						throw new InvalidOperandsException(this, oper, x);
@@ -65,15 +67,11 @@ public class PostfixStackEvaluator
 					if (x == null || !x.isOperand()) // stack is in invalid state
 						throw new InvalidOperandsException(this, oper, y, x);
 
-					if (tt == TokenType.BinaryOp)
-						m_opStack.push(doBinaryOp(oper, x, y));
-					else if (tt == TokenType.BinaryFunc)
-						m_opStack.push(doBinaryFunc(oper, x, y));
-					
+                    m_opStack.push(doBinaryOp(oper, x, y));					
 					break;
 					
 				default:
-					throw new UnimplementedException("");
+					throw new UnimplementedException(String.format("Unsupported token type: %s (%s)", tt, t));
 			}
 		}
 		
@@ -84,23 +82,44 @@ public class PostfixStackEvaluator
 		return retVal;
 	}
 
-	private Token doBinaryFunc(Operator oper, Token x, Token y) 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	private Token doBinaryOp(Operator oper, Token x, Token y) 
 	{
+        if (x.isNull() || y.isNull())
+            return Token.createNullToken();
+        
 		Object xVal = x.getValue();
 		Object yVal = y.getValue();
 		Token result = null;
 		
-		switch (oper) {
-			case PlusOper:
-				result = addArgs(xVal, yVal);
-				break;
+		BuiltinOperator bio = oper.getBuiltinOperator();
+		if (bio != null) {
+    		switch (bio) {
+    			case PlusOper:
+    				result = addArgs(xVal, yVal);
+    				break;
+    				
+                case MinusOper:
+                    result = addArgs(xVal, yVal);
+                    break;
+                    
+                case MultOper:
+                    result = addArgs(xVal, yVal);
+                    break;
+                    
+                case DivOper:
+                    result = addArgs(xVal, yVal);
+                    break;
+                    
+    			default:
+    			    break;
+    		}
+    		
+    		if (result != null)
+    		    return result;
 		}
+		
+		// evaluate the result
+		result = oper.evaluate(x, y);
 		
 		return result;
 	}
@@ -116,6 +135,8 @@ public class PostfixStackEvaluator
 		if (x.isNull())
 			return Token.createNullToken();
 		
-		return null;
+		Token val = oper.evaluate(x);
+		
+		return val;
 	}
 }

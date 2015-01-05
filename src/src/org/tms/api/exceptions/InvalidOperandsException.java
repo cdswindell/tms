@@ -1,6 +1,6 @@
 package org.tms.api.exceptions;
 
-import org.tms.teq.Operator;
+import org.tms.api.Operator;
 import org.tms.teq.PostfixStackEvaluator;
 import org.tms.teq.Token;
 

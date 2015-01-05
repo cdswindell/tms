@@ -1,5 +1,6 @@
 package org.tms.teq;
 
+import org.tms.api.Operator;
 import org.tms.api.Table;
 
 public class InfixExpressionParser
@@ -142,12 +143,12 @@ public class InfixExpressionParser
                     return curPos;
                     
                 case BinaryOp:
-                    switch (oper) {
+                    switch (oper.getBuiltinOperator()) {
                         case PlusOper: // ignore
                             break;
 
                         case MinusOper:     /* negation operator */
-                            ifs.push(Operator.NegOper);
+                            ifs.push(BuiltinOperator.NegOper);
                             break;
 
                         default:
@@ -183,6 +184,10 @@ public class InfixExpressionParser
                             pr.addIssue(ParserStatusCode.InvalidCommaLocation, curPos);
                         return curPos;
                     }
+                    break;
+                    
+                case UnaryOp:
+                    ifs.push(tType, oper);
                     break;
                     
                 default:
@@ -317,7 +322,7 @@ public class InfixExpressionParser
         if (t != null) {
         	charsParsed = sb.length();
         	tt = t.getTokenType();
-        	oper =t.getOperator();
+        	oper = t.getOperator();
         	
         	// TODO: handle row/col/range references
         }

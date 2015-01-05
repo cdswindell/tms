@@ -3,6 +3,8 @@ package org.tms.teq;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 
+import org.tms.api.Operator;
+
 public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 {
     static public EquationStack createInfixStack()
@@ -72,7 +74,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     public void push (double value)
     {
         Token t = new Token(TokenType.Operand);
-        t.setOperator(Operator.NOP);
+        t.setOperator(BuiltinOperator.NOP);
         t.setValue(value);
         
         push(t);
@@ -89,7 +91,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     public void push(TokenType tType, Object value)
     {
         Token t = new Token(tType);
-        t.setOperator(Operator.NOP);
+        t.setOperator(BuiltinOperator.NOP);
         t.setValue(value);
        
         push(t);
@@ -97,7 +99,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 
     public void push(Operator oper)
     {
-        Token t = new Token(oper.getPrimaryTokenType());
+        Token t = new Token(oper.getTokenType());
         t.setOperator(oper);
         
         push(t);

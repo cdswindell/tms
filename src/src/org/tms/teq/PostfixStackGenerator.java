@@ -2,6 +2,7 @@ package org.tms.teq;
 
 import java.util.Iterator;
 
+import org.tms.api.Operator;
 import org.tms.api.Table;
 import org.tms.api.exceptions.InvalidExpressionException;
 
@@ -13,7 +14,7 @@ public class PostfixStackGenerator
     
     public PostfixStackGenerator(String infixExpr, Table table)
     {
-        InfixExpressionParser ifp = new InfixExpressionParser(infixExpr);
+        InfixExpressionParser ifp = new InfixExpressionParser(infixExpr, table);
         ParseResult pr = ifp.parseInfixExpression(table);
         if (pr != null && pr.isFailure())
             throw new InvalidExpressionException(pr);
@@ -125,7 +126,7 @@ public class PostfixStackGenerator
                     
                 case LeftParen:
                     infixParens++;
-                    ops.push(tt, Operator.Paren);
+                    ops.push(tt, BuiltinOperator.Paren);
                     break;
                     
                 case RightParen:
@@ -137,6 +138,8 @@ public class PostfixStackGenerator
                     }
                     break;
                     
+                case UnaryOp:
+                case UnaryFunc:
                 case BinaryFunc:
                 case BinaryOp:
                     oper = ift.getOperator();
@@ -148,7 +151,7 @@ public class PostfixStackGenerator
                         else if ((p1 = t.getPriority()) <
                                  (p2 = oper.getPriority()))
                             endRight = true;
-                        else if (p1 == p2 && p2 == Operator.MAX_PRIORITY)
+                        else if (p1 == p2 && p2 == BuiltinOperator.MAX_PRIORITY)
                             endRight = true;
                         else {
                             endRight = false;
@@ -159,7 +162,7 @@ public class PostfixStackGenerator
                     } while (!endRight);
                     ops.push(tt, oper);
                     break;
-                    
+                                        
                 case Comma:
                 case GenericBinaryFunc:
                 case GenericBinaryOp:
@@ -172,7 +175,6 @@ public class PostfixStackGenerator
                 case StatOp:
                 case String:
                 case TableRef:
-                case UnaryOp:
                 case Variable:
                 default:
                     break;

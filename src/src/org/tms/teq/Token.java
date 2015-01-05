@@ -1,11 +1,13 @@
 package org.tms.teq;
 
+import org.tms.api.Operator;
+
 
 public class Token implements Labeled
 {
 	public static Token createNullToken()
 	{
-		Token t = new Token(TokenType.NullValue, Operator.NULL_operator);
+		Token t = new Token(TokenType.NullValue, BuiltinOperator.NULL_operator);
 		return t;
 	}
 	
@@ -14,6 +16,12 @@ public class Token implements Labeled
     private Operator m_oper;
     private Object m_value;
     
+    public Token(Object val)
+    {
+        setTokenType(TokenType.Operand);
+        setValue(val);
+    }
+
     public Token(TokenType tt)
     {
         setTokenType(tt);
@@ -46,7 +54,7 @@ public class Token implements Labeled
 		m_label = token.getLabel() != null ? new String(token.getLabel()) : null;
 	}
 
-	public TokenType getTokenType()
+    public TokenType getTokenType()
     {
         return m_tokenType;
     }
@@ -94,7 +102,6 @@ public class Token implements Labeled
 
     public int getPriority()
     {
-        // TODO: handle operators that came from table
         return m_oper != null ? m_oper.getPriority() : 0;
     }
     
@@ -123,7 +130,7 @@ public class Token implements Labeled
                 return getTokenType().getLabel();
         else if (getOperator() != null && getOperator().getLabel() != null) 
             return getOperator().getLabel();
-        else if (getOperator() != Operator.NOP) 
+        else if (getOperator() != BuiltinOperator.NOP) 
             return getOperator().toString();
         else if (getTokenType() != null) 
             return getTokenType().toString();
@@ -146,6 +153,18 @@ public class Token implements Labeled
         return getTokenType() != null && getTokenType().isOperand();
 	}
 
+
+    public boolean isNumeric()
+    {
+        if (isOperand()) {
+            Object val = getValue();
+            if (val != null)
+                return Number.class.isAssignableFrom(val.getClass());
+        }
+        
+        return false;
+    }
+    
 	public boolean isNull() 
 	{
 		return (getTokenType() == TokenType.NullValue) || (getTokenType() == TokenType.Operand && getValue() == null);

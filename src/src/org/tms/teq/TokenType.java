@@ -8,6 +8,7 @@ public enum TokenType implements Labeled
     NULL_TokenType(false),
     
     NullValue(false, "Null", "Empty"),
+    ErrorValue(false, "Error"),
     
     TableRef(false, "Table"),
     ColumnRef(false, "Column", "Col", "C"),
@@ -24,7 +25,8 @@ public enum TokenType implements Labeled
     StatOp(true, 1),
     BinaryOp(true, 2),
     BinaryFunc(true, 2),
-    UnaryOp(true, 1),
+    UnaryOp(false, 1),
+    UnaryFunc(true, 1), 
     
     Comma(true, ","),
     LeftParen(true, "("),
