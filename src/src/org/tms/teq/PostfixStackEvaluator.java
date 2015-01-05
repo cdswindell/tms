@@ -70,6 +70,13 @@ public class PostfixStackEvaluator
                     m_opStack.push(doBinaryOp(oper, x, y));					
 					break;
 					
+				case BuiltIn:
+                    x = m_opStack.peekFirst();
+                    if (x != null) // stack is in invalid state
+                        throw new InvalidOperandsException(this, oper, x);
+                    m_opStack.push(doBuiltInOp(oper));                 
+				    break;
+					
 				default:
 					throw new UnimplementedException(String.format("Unsupported token type: %s (%s)", tt, t));
 			}
@@ -82,7 +89,17 @@ public class PostfixStackEvaluator
 		return retVal;
 	}
 
-	private Token doBinaryOp(Operator oper, Token x, Token y) 
+	private Token doBuiltInOp(Operator oper)
+    {
+	    assert oper.numArgs() == 0 : "Too many arguments";
+	    
+        // evaluate the result
+        Token result = oper.evaluate();
+        
+        return result;
+    }
+
+    private Token doBinaryOp(Operator oper, Token x, Token y) 
 	{
         if (x.isNull() || y.isNull())
             return Token.createNullToken();

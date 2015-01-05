@@ -12,19 +12,20 @@ public enum BuiltinOperator implements Labeled, Operator
 {
     NULL_operator,
 
+    // Basic math operators, implementation supported for numbers and strings (+ & -)
     PlusOper("+", TokenType.BinaryOp, 2),
     MinusOper("-", TokenType.BinaryOp, 2),
     MultOper("*", TokenType.BinaryOp, 4),
     DivOper("/", TokenType.BinaryOp, 4),
-    ModOper("%", TokenType.BinaryOp, 5),
     
+    // Special math operators, implemented in Java Math class
+    ModOper(TokenType.BinaryOp, 5, Math.class, "IEEEremainder", "%"),  
     PowerOper(TokenType.BinaryOp, 5, Math.class, "pow", "^"),
     
+    // Factorial operator, implemented in code
     FactOper("!", TokenType.UnaryOp, 5),
     
-    ModFunc(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "mod"),
-    PowerFunc(TokenType.BinaryFunc, 5, Math.class, "pow", "pow", "power"),
-
+    // Unary functions, mostly supported in Java Math
     FracOper("frac", TokenType.UnaryFunc, 6),
     NegOper("neg", TokenType.UnaryFunc, 6),
     
@@ -58,13 +59,18 @@ public enum BuiltinOperator implements Labeled, Operator
     SignOper(TokenType.UnaryFunc, 6, Math.class, "signum", "sign", "signum"),
     RoundOper("round", TokenType.UnaryFunc, 6, Math.class),
     
-    RandOper,
+    // Binary functions, mostly supported in Java Math
+    ModFunc(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "mod"),
+    PowerFunc(TokenType.BinaryFunc, 5, Math.class, "pow", "pow", "power"),
+
     BiggerOper(TokenType.BinaryFunc, 5, Math.class, "max", "bigger"),
     SmallerOper(TokenType.BinaryFunc, 5, Math.class, "min", "smaller"),
-    HypotOper(TokenType.BinaryFunc, 5, Math.class, "hypot", "hypot"),
+    HypotOper(TokenType.BinaryFunc, 5, Math.class, "hypot"),
 
-    ColumnIndex,
-    RowIndex,
+    // Builtin functions
+    RandOper(TokenType.BuiltIn, 6, Math.class, "random"),
+    ColumnIndex(TokenType.BuiltIn, 6, "ColumnIndex", "cidx"),
+    RowIndex(TokenType.BuiltIn, 6, "RowIndex", "ridx"),
 
     Column,
     Row,
@@ -148,12 +154,16 @@ public enum BuiltinOperator implements Labeled, Operator
         this();
         m_priority = priority;
         m_tokenTypes.add(tt);
-        if (labels != null) {
+        if (labels != null && labels.length > 0) {
             for (String label : labels) {
                 if (m_label == null)
                     m_label = label;
                 m_aliases.add(label.toLowerCase());
             }
+        }
+        else {
+            m_label = methodName;
+            m_aliases.add(methodName.toLowerCase());
         }
         
         m_clazz = clazz;

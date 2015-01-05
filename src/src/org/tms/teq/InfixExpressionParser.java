@@ -138,6 +138,13 @@ public class InfixExpressionParser
         if (ifs.isLeading()) {
             switch (tType) {
                 case RightParen:
+                    // the construct x() is allowed
+                    Token tmpT = ifs.peek();
+                    if (t != null && tmpT.isLeftParen()) {
+                        ifs.push(tType, oper);
+                        break;
+                    }
+                    
                     if (pr != null)
                         pr.addIssue(ParserStatusCode.ParenMismatch, curPos);
                     return curPos;
