@@ -367,7 +367,7 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getNumericValue(), is(2.0));
         
         // power operator
-        pse = new PostfixStackEvaluator("pow((1 + 2), 4)", null);
+        pse = new PostfixStackEvaluator("pow((1 + 2), bigger(4,3))", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
