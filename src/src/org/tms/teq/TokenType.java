@@ -32,10 +32,7 @@ public enum TokenType implements Labeled
     LeftParen(true, "("),
     RightParen(false, ")"),
     
-    GenericOp(true),
-    GenericUnaryOp(true, 1),
-    GenericBinaryFunc(true, 2),
-    GenericBinaryOp(true, 2),
+    GenericFunc(true),
     
     NullOpValue(false),
     LAST_TokenType(false);

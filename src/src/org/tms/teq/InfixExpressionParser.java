@@ -1,5 +1,7 @@
 package org.tms.teq;
 
+import java.util.Iterator;
+
 import org.tms.api.Operator;
 import org.tms.api.Table;
 
@@ -221,8 +223,101 @@ public class InfixExpressionParser
 
     private boolean isOkForComma(EquationStack ifs)
     {
-        // TODO Auto-generated method stub
-        return false;
+        /* 
+         * Commas are used to separate arguments in function calls.
+         * The number of arguments a function takes is determined
+         * by the numArgs method on the Operator element of the 
+         * function token. In the simple case, when we encounter a 
+         * comma, we count the arguments we've encountered since the
+         * containing function call, and as long as the number of 
+         * commas is less than the arg count, we are ok.
+         * 
+         * Complicating matters is, of course, that individual args
+         * can themselves be self-contained expressions. We will impose 
+         * the restriction that expression arguments must be contained 
+         * within parenthesis.
+         * 
+         * the following code implements this rule checker 
+         */
+
+        if (ifs.isEmpty())
+            return false;
+        
+        int argCnt = 0;
+        int parenCnt = 0;
+        boolean foundFuncOpenParen = false;
+        boolean foundFunc = false;
+        
+        boolean commaIsOk = true;
+        
+        Iterator<Token> iter = ifs.iterator();
+        while (iter != null && iter.hasNext()) {
+            Token t = iter.next();
+            TokenType tt = t.getTokenType();
+            Operator oper = t.getOperator();
+            
+            switch (tt) {
+                case RightParen:
+                    if (foundFuncOpenParen) 
+                        commaIsOk = false;
+                    else
+                        parenCnt++;
+                    break;
+                    
+                case LeftParen:
+                    if (parenCnt > 0) {
+                        parenCnt--;
+                        if (parenCnt == 0)
+                            argCnt++;
+                    }
+                    else
+                        foundFuncOpenParen = true;
+                    break;
+                    
+                case CellRef:
+                case ColumnRef:
+                case RowRef:
+                case Operand:
+                case BuiltIn:
+                case Constant:
+                case Variable: 
+                case String:
+                    if (parenCnt == 0)
+                        argCnt++;
+                    break;
+                
+                case RangeOp: // handled as expression arg
+                case StatOp:  // handled as expression arg
+                case Comma: // skip these elements
+                    break;
+                    
+                case GenericFunc:
+                case BinaryFunc:
+                    if (parenCnt == 0) {
+                        foundFunc = true;
+                        if (oper != null && argCnt < oper.numArgs()) 
+                            return true; // comma is ok   
+                        else
+                            commaIsOk = false;
+                    }
+                    break;
+                    
+                default:
+                    if (parenCnt == 0)
+                        commaIsOk = false;
+                    break;
+            }
+            
+            if (!commaIsOk)
+                break;
+        }
+        
+        // if we get here and did not find a function, comma is misplaced
+        if (!foundFunc)
+            commaIsOk = false;
+        
+        // return final status
+        return commaIsOk;
     }
 
     private int parseText(char[] exprChars, int curPos, EquationStack ifs)

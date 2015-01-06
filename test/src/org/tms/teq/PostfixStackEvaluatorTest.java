@@ -303,4 +303,56 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(t.getNumericValue(), is(Math.PI));
     }
+    
+    @Test
+    public final void testHypot()
+    {
+        // hypot operator
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("hypot((1 + 2), 4, 6)", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(5.0));
+    }
+    
+    @Test
+    public final void testBinaryFunc()
+    {
+        // bigger operator
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("bigger((1 + 2), 4)", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(4.0));
+        
+        // smaller operator
+        pse = new PostfixStackEvaluator("smaller((1 + 2), 4)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(3.0));
+        
+        // power operator
+        pse = new PostfixStackEvaluator("pow((1 + 2), 4)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(81.0));
+    }
 }

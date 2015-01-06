@@ -163,11 +163,9 @@ public class PostfixStackGenerator
                     ops.push(tt, oper);
                     break;
                                         
-                case Comma:
-                case GenericBinaryFunc:
-                case GenericBinaryOp:
-                case GenericOp:
-                case GenericUnaryOp:
+                case Comma: // eat commas, they are a noop
+                    break;
+                    
                 case LAST_TokenType:
                 case NULL_TokenType:
                 case NullOpValue:
