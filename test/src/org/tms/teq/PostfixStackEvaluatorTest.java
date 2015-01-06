@@ -204,7 +204,7 @@ public class PostfixStackEvaluatorTest
     @Test
     public final void testTrig()
     {
-        // Factorial edge cases
+        // sin (radians arg)
         PostfixStackEvaluator pse = new PostfixStackEvaluator("sin(toRadians(30))", null);
         assertThat(pse, notNullValue());
 
@@ -214,5 +214,82 @@ public class PostfixStackEvaluatorTest
         assertThat(t.isError(), is(false));
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(Math.abs(0.5 - t.getNumericValue()) < 0.0001, is(true));
+        
+        // sin (degrees arg)
+        pse = new PostfixStackEvaluator("sinD(30)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(Math.abs(0.5 - t.getNumericValue()) < 0.0001, is(true));
+        
+        // sin (degrees arg)
+        pse = new PostfixStackEvaluator("sinD(390)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(Math.abs(0.5 - t.getNumericValue()) < 0.0001, is(true));
+        
+        // tan (degrees arg)
+        pse = new PostfixStackEvaluator("tanD(90)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(Double.POSITIVE_INFINITY));
+        
+        // tan (degrees arg)
+        pse = new PostfixStackEvaluator("tanD(450)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(Double.POSITIVE_INFINITY));
+        
+        // tan (degrees arg)
+        pse = new PostfixStackEvaluator("tanD(270)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(Double.NEGATIVE_INFINITY));
+        
+        // aSinD
+        pse = new PostfixStackEvaluator("asinD(.5)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(Math.abs(30.0 - t.getNumericValue()) < 0.00001, is(true));
+        
+        // pi
+        pse = new PostfixStackEvaluator("pi", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(Math.PI));
     }
 }

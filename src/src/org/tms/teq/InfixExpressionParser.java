@@ -102,7 +102,7 @@ public class InfixExpressionParser
             if (Character.isLetter(c))
                 curPos += parseLabel(exprChars, curPos, ifs, tm, table, pr);    
             
-            else if (Character.isDigit(c))
+            else if (Character.isDigit(c) || c == '.')
                 curPos += parseNumber(exprChars, curPos, ifs, table, pr);    
             
             else if ((c == '\"') || (c == '\''))

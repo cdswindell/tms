@@ -23,11 +23,11 @@ public enum BuiltinOperator implements Labeled, Operator
     PowerOper(TokenType.BinaryOp, 5, Math.class, "pow", "^"),
     
     // Factorial operator, implemented in code
-    FactOper("!", TokenType.UnaryOp, 5),
+    FactOper(TokenType.UnaryOp, 5, MathUtil.class, "fact", "!"),
     
     // Unary functions, mostly supported in Java Math
-    FracOper("frac", TokenType.UnaryFunc, 6),
-    NegOper("neg", TokenType.UnaryFunc, 6),
+    FracOper("frac", TokenType.UnaryFunc, 6, MathUtil.class),
+    NegOper("neg", TokenType.UnaryFunc, 6, MathUtil.class),
     
     AbsOper("abs", TokenType.UnaryFunc, 6, Math.class),
     SqrtOper("sqrt", TokenType.UnaryFunc, 6, Math.class),
@@ -35,11 +35,12 @@ public enum BuiltinOperator implements Labeled, Operator
     ExpOper(TokenType.UnaryFunc, 6, Math.class, "exp", "e", "exp"),
     LogOper(TokenType.UnaryFunc, 6, Math.class, "log", "loge"),
     Log10Oper(TokenType.UnaryFunc, 6, Math.class, "log10", "log", "log10"),
-    RandIntOper(TokenType.UnaryFunc, 6, "randomInt", "randInt"),
+    RandIntOper(TokenType.UnaryFunc, 6, MathUtil.class, "randomInt", "randomInt", "randInt"),
 
     toDegreesOper("toDegrees", TokenType.UnaryFunc, 6, Math.class),
     toRadiansOper("toRadians", TokenType.UnaryFunc, 6, Math.class),
     
+    // trig functions, radians
     SinOper("sin", TokenType.UnaryFunc, 6, Math.class),
     CosOper("cos", TokenType.UnaryFunc, 6, Math.class),
     TanOper("tan", TokenType.UnaryFunc, 6, Math.class),
@@ -47,14 +48,14 @@ public enum BuiltinOperator implements Labeled, Operator
     ACosOper("acos", TokenType.UnaryFunc, 6, Math.class),
     ATanOper("atan", TokenType.UnaryFunc, 6, Math.class),
 
-    SinDOper,
-    CosDOper,
-    TanDOper,
-    ASinDOper,
-    ACosDOper,
-    ATanDOper,
+    SinDOper("sinD", TokenType.UnaryFunc, 6, MathUtil.class),
+    CosDOper("cosD", TokenType.UnaryFunc, 6, MathUtil.class),
+    TanDOper("tanD", TokenType.UnaryFunc, 6, MathUtil.class),
+    ASinDOper("asinD", TokenType.UnaryFunc, 6, MathUtil.class),
+    ACosDOper("acosD", TokenType.UnaryFunc, 6, MathUtil.class),
+    ATanDOper("atanD", TokenType.UnaryFunc, 6, MathUtil.class),
 
-    FactFunc(TokenType.UnaryFunc, 5, "factorial", "fact"),
+    FactFunc(TokenType.UnaryFunc, 5, MathUtil.class, "fact", "factorial"),
     FloorOper("floor", TokenType.UnaryFunc, 6, Math.class),
     CeilOper("ceil", TokenType.UnaryFunc, 6, Math.class),
     SignOper(TokenType.UnaryFunc, 6, Math.class, "signum", "sign", "signum"),
@@ -69,29 +70,30 @@ public enum BuiltinOperator implements Labeled, Operator
     HypotOper(TokenType.BinaryFunc, 5, Math.class, "hypot"),
 
     // Builtin functions
+    PiOper(TokenType.BuiltIn, 6, MathUtil.class, "pi"),
     RandOper(TokenType.BuiltIn, 6, Math.class, "random"),
     ColumnIndex(TokenType.BuiltIn, 6, "ColumnIndex", "cidx"),
     RowIndex(TokenType.BuiltIn, 6, "RowIndex", "ridx"),
 
-    Column,
-    Row,
-    Cell,
+    Column(TokenType.BuiltIn, 6),
+    Row(TokenType.BuiltIn, 6),
+    Cell(TokenType.BuiltIn, 6),
 
     SplineOper,
-    SumOper,
-    MeanOper,
-    MedianOper,
-    StdevOper,
-    VarOper,
-    MinOper,
-    MaxOper,
-    RangeOper,
-    KurtOper,
-    SkewOper,
-    CountOper,
-    MeanCenterOper,
-    NormalizeOper,
-    ScaleOper,
+    SumOper(TokenType.StatOp, 6),
+    MeanOper(TokenType.StatOp, 6),
+    MedianOper(TokenType.StatOp, 6),
+    StdevOper(TokenType.StatOp, 6),
+    VarOper(TokenType.StatOp, 6),
+    MinOper(TokenType.StatOp, 6),
+    MaxOper(TokenType.StatOp, 6),
+    RangeOper(TokenType.StatOp, 6),
+    KurtOper(TokenType.StatOp, 6),
+    SkewOper(TokenType.StatOp, 6),
+    CountOper(TokenType.StatOp, 6),
+    MeanCenterOper(TokenType.StatOp, 6),
+    NormalizeOper(TokenType.StatOp, 6),
+    ScaleOper(TokenType.StatOp, 6),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.RangeRef, TokenType.CellRef),
@@ -292,63 +294,9 @@ public enum BuiltinOperator implements Labeled, Operator
     public Token evaluate(Token... args)
     {
         assert numArgs() <= args.length : "Insufficent number of tokens suppled: " + this.toString();
-        
-        // handle some special cases
-        Token retVal = null;
-        Token x = null;
-        
-        // handle certain special cases that are not implemented
-        // in the Java Math class; all other builtins are handled
-        // via invoking the appropriate class method
-        switch (this) {
-            case NegOper:
-                x = args[0];
-                if (x.isNumeric())
-                    retVal = new Token(-x.getNumericValue());
-                break;
-                
-            case FracOper:
-                x = args[0];
-                if (x.isNumeric()) {
-                    double d = x.getNumericValue();
-                    retVal = new Token(d - Math.floor(d));
-                }
-                break;
-                
-            case FactOper:
-            case FactFunc:
-                x = args[0];
-                if (x.isNumeric()) {
-                    double d = x.getNumericValue();
-                    double rVal = 1;
-                    if (d > 1.0) {
-                        long dl = Math.round(d);
-                        for (long i = dl; i > 1; i--) {
-                            rVal *= i;
-                        }
-                    }
-                    
-                    retVal = new Token(rVal);
-                }                
-                break;
-                
-            case RandIntOper:
-                x = args[0];
-                if (x.isNumeric()) {
-                    double d = Math.ceil(Math.abs(x.getNumericValue()));
-                    retVal = new Token(1 + Math.floor(d * Math.random()));
-                }
-                break;
-                                   
-            default: 
-                break;
-        }
-        
-        if (retVal != null)
-            return retVal;
-        
         assert getMethod() != null : "No method available: " + this.toString();       
         
+        Token retVal = null;
         int numArgs = numArgs();
         Object [] params = new Object[numArgs];
         for (int i = 0; i < numArgs; i++)
