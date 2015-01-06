@@ -196,6 +196,23 @@ public class Token implements Labeled
         return false;
     }
     
+    public boolean isFunction()
+    {
+        if (this.getTokenType() != null) {
+            switch (getTokenType()) {
+                case UnaryFunc:
+                case BinaryFunc:
+                case GenericFunc:
+                    return true;
+                    
+                default:
+                    break;
+            }
+        }
+        
+        return false;
+    }
+    
     public boolean isNull() 
     {
         return (getTokenType() == TokenType.NullValue) || (getTokenType() == TokenType.Operand && getValue() == null);

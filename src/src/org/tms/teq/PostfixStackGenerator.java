@@ -121,7 +121,7 @@ public class PostfixStackGenerator
                     break;
                    
                 case Operand:
-                    pfs.push(ift.getNumericValue());
+                    pfs.push(TokenType.Operand, ift.getValue());
                     break;
                     
                 case LeftParen:
@@ -142,6 +142,7 @@ public class PostfixStackGenerator
                 case UnaryFunc:
                 case BinaryFunc:
                 case BinaryOp:
+                case GenericFunc:
                     oper = ift.getOperator();
                     do {
                         if (ops.isEmpty())
@@ -163,7 +164,14 @@ public class PostfixStackGenerator
                     ops.push(tt, oper);
                     break;
                                         
-                case Comma: // eat commas, they are a noop
+                case Comma: // eat commas, unless the top of the ops stack is a function
+                    if (!ops.isEmpty()) {
+                        t = ops.peek();
+                        if (t != null && t.isFunction()) {
+                            ops.pop(); // remove the element, as we are about to process it
+                            pfs.push(t);
+                        }
+                    }
                     break;
                     
                 case LAST_TokenType:

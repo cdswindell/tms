@@ -308,7 +308,7 @@ public class PostfixStackEvaluatorTest
     public final void testHypot()
     {
         // hypot operator
-        PostfixStackEvaluator pse = new PostfixStackEvaluator("hypot((1 + 2), 4, 6)", null);
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("hypot((1 + 2), 4)", null);
         assertThat(pse, notNullValue());
 
         Token t = pse.evaluate();
@@ -344,6 +344,28 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(t.getNumericValue(), is(3.0));
         
+        // smaller operator
+        pse = new PostfixStackEvaluator("smaller(smaller(1, (1 + 1)), 4)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(1.0));
+        
+        // smaller operator
+        pse = new PostfixStackEvaluator("smaller(bigger(1, (1 + 1)), 4)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(2.0));
+        
         // power operator
         pse = new PostfixStackEvaluator("pow((1 + 2), 4)", null);
         assertThat(pse, notNullValue());
@@ -354,5 +376,20 @@ public class PostfixStackEvaluatorTest
         assertThat(t.isError(), is(false));
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(t.getNumericValue(), is(81.0));
+    }
+    
+    @Test
+    public void testComplexExpression()
+    {
+        // smaller operator
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("smaller(bigger(1, smaller((1 + 1), 3)), 4)", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(2.0));
     }
 }
