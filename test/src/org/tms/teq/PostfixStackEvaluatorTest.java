@@ -281,6 +281,17 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(Math.abs(30.0 - t.getNumericValue()) < 0.00001, is(true));
         
+        // aTanD
+        pse = new PostfixStackEvaluator("atanD(tanD(90.0))", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(90.0));
+        
         // pi
         pse = new PostfixStackEvaluator("pi", null);
         assertThat(pse, notNullValue());

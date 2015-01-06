@@ -211,22 +211,6 @@ public enum BuiltinOperator implements Labeled, Operator
         return m_tokenTypes;
     }
     
-    Method getMethod()
-    {
-        if (m_method == null && this.m_clazz != null) {
-            try
-            {
-                m_method = m_clazz.getMethod(m_methodName, getArgTypes());
-            }
-            catch (NoSuchMethodException | SecurityException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        
-        return m_method;
-    }
-    
     @Override
     public TokenType getTokenType()
     {
@@ -290,6 +274,22 @@ public enum BuiltinOperator implements Labeled, Operator
 	    return this;
 	}
 
+    Method getMethod()
+    {
+        if (m_method == null && this.m_clazz != null) {
+            try
+            {
+                m_method = m_clazz.getMethod(m_methodName, getArgTypes());
+            }
+            catch (NoSuchMethodException | SecurityException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        
+        return m_method;
+    }
+    
     @Override
     public Token evaluate(Token... args)
     {

@@ -63,5 +63,20 @@ public class MathUtil
     {
         return Math.toDegrees(Math.asin(arg));
     }
-    
+
+    static final public double acosD(double arg)
+    {
+        return Math.toDegrees(Math.acos(arg));
+    }   
+
+    static final public double atanD(double arg)
+    {
+        // handle special cases first
+        if (Double.POSITIVE_INFINITY == arg)
+            return 90.0;
+        else if (Double.NEGATIVE_INFINITY == arg)
+            return -90.0;
+        else
+            return Math.toDegrees(Math.atan(arg));
+    }   
 }
