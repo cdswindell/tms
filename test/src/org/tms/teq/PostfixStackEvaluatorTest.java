@@ -131,4 +131,51 @@ public class PostfixStackEvaluatorTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getNumericValue() >= 0 && t.getNumericValue() < 1.0, is(true));
     }    
+    
+    @Test
+    public final void testRandom()
+    {
+        // Factorial edge cases
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("RandInt(10)", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getNumericValue() >= 1 && t.getNumericValue() <= 10.0, is(true));
+        
+        // Alternate Spelling
+        pse = new PostfixStackEvaluator("RandomInt(10)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getNumericValue() >= 1 && t.getNumericValue() <= 10.0, is(true));
+        
+        // check distribution
+        int [] vals = new int[] {0,0,0,0,0,0,0,0,0,0,0};
+
+        for (int i = 0; i < 1000; i++) {
+            t = pse.evaluate();
+            assertThat(t, notNullValue());
+            assertThat(t.isNumeric(), is(true));
+            assertThat(t.getNumericValue() >= 1 && t.getNumericValue() <= 10.0, is(true));
+            
+            int rVal = t.getNumericValue().intValue();
+            vals[rVal]++;
+        }
+        
+        assertThat(vals, notNullValue());
+        
+        // expression
+        pse = new PostfixStackEvaluator("RandomInt(4 + 3)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getNumericValue() >= 1 && t.getNumericValue() <= 10.0, is(true));
+        
+    }    
 }
