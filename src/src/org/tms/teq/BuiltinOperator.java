@@ -35,6 +35,7 @@ public enum BuiltinOperator implements Labeled, Operator
     ExpOper(TokenType.UnaryFunc, 6, Math.class, "exp", "e", "exp"),
     LogOper(TokenType.UnaryFunc, 6, Math.class, "log", "loge"),
     Log10Oper(TokenType.UnaryFunc, 6, Math.class, "log10", "log", "log10"),
+    RandIntOper(TokenType.UnaryFunc, 6, "randomInt", "randInt"),
 
     toDegreesOper("toDegrees", TokenType.UnaryFunc, 6, Math.class),
     toRadiansOper("toRadians", TokenType.UnaryFunc, 6, Math.class),
@@ -328,10 +329,17 @@ public enum BuiltinOperator implements Labeled, Operator
                     }
                     
                     retVal = new Token(rVal);
-                }
-                
+                }                
                 break;
                 
+            case RandIntOper:
+                x = args[0];
+                if (x.isNumeric()) {
+                    double d = Math.ceil(Math.abs(x.getNumericValue()));
+                    retVal = new Token(1 + Math.floor(d * Math.random()));
+                }
+                break;
+                                   
             default: 
                 break;
         }

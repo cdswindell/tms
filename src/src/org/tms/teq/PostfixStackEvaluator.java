@@ -21,7 +21,15 @@ public class PostfixStackEvaluator
 		m_pfs = psg.getPostfixStack();
 	}
 	
-	public Token evaluate()
+    public Token evaluate()
+    {
+        m_opStack = new EquationStack(StackType.Op);
+        m_pfsIter = m_pfs.descendingIterator();
+        
+        return reevaluate();
+    }
+    
+	public Token reevaluate()
 	{
 		assert m_pfs != null : "Requires Postfix Stack";
 		
