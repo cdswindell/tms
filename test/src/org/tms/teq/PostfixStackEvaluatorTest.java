@@ -175,7 +175,44 @@ public class PostfixStackEvaluatorTest
         t = pse.evaluate();
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
-        assertThat(t.getNumericValue() >= 1 && t.getNumericValue() <= 10.0, is(true));
+        assertThat(t.getNumericValue() >= 1 && t.getNumericValue() <= 7.0, is(true));      
         
-    }    
+        // expression
+        pse = new PostfixStackEvaluator("RandomInt(4 + 3*2)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getNumericValue() >= 1 && t.getNumericValue() <= 10.0, is(true));      
+    } 
+    
+    @Test
+    public final void testDivideByZero()
+    {
+        // Factorial edge cases
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("5/0", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isError(), is(true));
+        assertThat(t.getErrorCode(), is(ErrorCode.DivideByZero));
+    }
+    
+    @Test
+    public final void testTrig()
+    {
+        // Factorial edge cases
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("sin(toRadians(30))", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(Math.abs(0.5 - t.getNumericValue()) < 0.0001, is(true));
+    }
 }

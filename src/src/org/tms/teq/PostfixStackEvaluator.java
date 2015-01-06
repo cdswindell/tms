@@ -33,7 +33,6 @@ public class PostfixStackEvaluator
 	{
 		assert m_pfs != null : "Requires Postfix Stack";
 		
-		Token retVal = null;
 		if (m_opStack == null)
 			m_opStack = new EquationStack(StackType.Op);
 		
@@ -58,7 +57,7 @@ public class PostfixStackEvaluator
 					
 				case UnaryOp:
 				case UnaryFunc:
-					x = m_opStack.removeFirst();
+					x = m_opStack.pollFirst();
 					if (x == null || !x.isOperand()) // stack is in invalid state
 						throw new InvalidOperandsException(this, oper, x);
 					
@@ -67,11 +66,11 @@ public class PostfixStackEvaluator
 					
 				case BinaryOp:
 				case BinaryFunc:
-					y = m_opStack.removeFirst();
+					y = m_opStack.pollFirst();
 					if (y == null || !y.isOperand()) // stack is in invalid state
 						throw new InvalidOperandsException(this, oper, y);
 					
-					x = m_opStack.removeFirst();
+					x = m_opStack.pollFirst();
 					if (x == null || !x.isOperand()) // stack is in invalid state
 						throw new InvalidOperandsException(this, oper, y, x);
 
@@ -79,9 +78,6 @@ public class PostfixStackEvaluator
 					break;
 					
 				case BuiltIn:
-                    x = m_opStack.peekFirst();
-                    if (x != null) // stack is in invalid state
-                        throw new InvalidOperandsException(this, oper, x);
                     m_opStack.push(doBuiltInOp(oper));                 
 				    break;
 					
@@ -91,12 +87,21 @@ public class PostfixStackEvaluator
 		}
 		
 		// opStack should only have one value at this point
-		x = m_opStack.removeFirst();
-		
-		retVal = new Token(TokenType.Operand, x.getValue());
+		int stackSize = m_opStack.size();
+        if (stackSize < 1)
+            return Token.createErrorToken(ErrorCode.StackUnderflow);
+        else if (stackSize > 1)
+            return Token.createErrorToken(ErrorCode.StackOverflow);
+        
+		Token retVal = m_opStack.pollFirst().clone();
 		return retVal;
 	}
 
+	public Table getTable()
+	{
+	    return m_table;
+	}
+	
 	private Token doBuiltInOp(Operator oper)
     {
 	    assert oper.numArgs() == 0 : "Too many arguments";
@@ -112,27 +117,15 @@ public class PostfixStackEvaluator
         if (x.isNull() || y.isNull())
             return Token.createNullToken();
         
-		Object xVal = x.getValue();
-		Object yVal = y.getValue();
-		Token result = null;
-		
+		Token result = null;	
 		BuiltinOperator bio = oper.getBuiltinOperator();
 		if (bio != null) {
     		switch (bio) {
     			case PlusOper:
-    				result = addArgs(xVal, yVal);
-    				break;
-    				
                 case MinusOper:
-                    result = addArgs(xVal, yVal);
-                    break;
-                    
                 case MultOper:
-                    result = addArgs(xVal, yVal);
-                    break;
-                    
                 case DivOper:
-                    result = addArgs(xVal, yVal);
+                    result = doBuiltInOp(bio, x, y);
                     break;
                     
     			default:
@@ -149,13 +142,40 @@ public class PostfixStackEvaluator
 		return result;
 	}
 
-	private Token addArgs(Object xVal, Object yVal) 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
+	private Token doBuiltInOp(BuiltinOperator bio, Token x, Token y)
+    {
+        if (x.isNumeric() && y.isNumeric())
+            return doBuiltInOp(bio, x.getNumericValue(), y.getNumericValue());
+        
+        throw new UnimplementedException(String.format("Unimplemented built in operator: %s (%s, %s)", 
+                bio, 
+                x.getDataType() != null ? x.getDataType().getSimpleName() : "null",
+                y.getDataType() != null ? y.getDataType().getSimpleName() : "null"));    
+    }
 
-	private Token doUnaryOp(Operator oper, Token x) 
+    private Token doBuiltInOp(BuiltinOperator bio, double x, double y)
+    {
+        switch (bio) {
+            case PlusOper:
+                return new Token(x + y);
+                
+            case MinusOper:
+                return new Token(x - y);
+                
+            case MultOper:
+                return new Token(x * y);
+                
+            case DivOper:
+                if (y == 0.0)
+                    return Token.createErrorToken(ErrorCode.DivideByZero);
+                else
+                    return new Token(x / y);
+            default:
+                throw new UnimplementedException("Unimplemented built in operator: " + bio);    
+        }
+    }
+
+    private Token doUnaryOp(Operator oper, Token x) 
 	{
 		if (x.isNull())
 			return Token.createNullToken();

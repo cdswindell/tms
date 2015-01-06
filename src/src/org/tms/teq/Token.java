@@ -11,6 +11,11 @@ public class Token implements Labeled
 		return t;
 	}
 	
+    public static Token createErrorToken(ErrorCode eCode)
+    {
+        return new Token(TokenType.EvaluationError, eCode);
+    }
+    
     private String m_label;
     private TokenType m_tokenType;
     private Operator m_oper;
@@ -87,11 +92,27 @@ public class Token implements Labeled
             return null;
     }
 
+    public String getStringValue()
+    {
+        if (m_value != null && m_value instanceof String)
+            return (String)m_value;
+        else
+            return null;
+    }
+
     void setValue(Object value)
     {
         m_value = value;
     }
 
+    public Class<? extends Object> getDataType()
+    {
+        if (isNull())
+            return null;
+        else
+            return getValue().getClass();
+    }
+            
     public boolean isLeading()
     {
         if (getTokenType() != null)
@@ -153,7 +174,6 @@ public class Token implements Labeled
         return getTokenType() != null && getTokenType().isOperand();
 	}
 
-
     public boolean isNumeric()
     {
         if (isOperand()) {
@@ -165,10 +185,40 @@ public class Token implements Labeled
         return false;
     }
     
-	public boolean isNull() 
-	{
-		return (getTokenType() == TokenType.NullValue) || (getTokenType() == TokenType.Operand && getValue() == null);
-	}
+    public boolean isString()
+    {
+        if (isOperand()) {
+            Object val = getValue();
+            if (val != null)
+                return String.class.isAssignableFrom(val.getClass());
+        }
+        
+        return false;
+    }
+    
+    public boolean isNull() 
+    {
+        return (getTokenType() == TokenType.NullValue) || (getTokenType() == TokenType.Operand && getValue() == null);
+    }
+    
+    public boolean isError() 
+    {
+        return (getTokenType() == TokenType.EvaluationError);
+    }
+    
+    public ErrorCode getErrorCode()
+    {
+        if (isError()) {
+            if (m_value == null)
+                return ErrorCode.Unspecified;
+            else if (m_value instanceof ErrorCode)
+                return (ErrorCode)m_value;
+            else
+                return ErrorCode.SeeErrorMessage;
+        }
+        else
+            return ErrorCode.NoError;
+    }
 
 	@Override
 	protected Token clone() 
