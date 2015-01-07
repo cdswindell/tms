@@ -4,12 +4,12 @@ import org.tms.tds.TableImpl;
 
 public class TableFactory 
 {
-	static public Table createTable()
-	{
-		Table t = TableImpl.createTable();
-		return t;
-	}
-	
+    static public Table createTable()
+    {
+        Table t = TableImpl.createTable();
+        return t;
+    }
+    
     static public Table createTable(int nRows, int nCols)
     {
 		Table t = TableImpl.createTable(nRows, nCols);

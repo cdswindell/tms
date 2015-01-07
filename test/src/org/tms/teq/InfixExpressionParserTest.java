@@ -120,7 +120,7 @@ public class InfixExpressionParserTest
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(false));
         assertThat(pr.isFailure(), is(true));
-        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidExpression));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
         
         iep = new InfixExpressionParser("123e.25");
         assertThat(iep, notNullValue());

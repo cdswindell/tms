@@ -93,7 +93,9 @@ public class InfixExpressionParser
         
         char [] exprChars = m_expr.toCharArray();
         TokenMapper tm = TokenMapper.fetchTokenMapper(table);
+        boolean parsingLabel = false;
         while (curPos < exprLen) {
+            parsingLabel = false;
             char c = exprChars[curPos];
             if (Character.isWhitespace(c)) {
                 curPos++;
@@ -101,8 +103,10 @@ public class InfixExpressionParser
             }
             
             prevPos = curPos;
-            if (Character.isLetter(c))
+            if (Character.isLetter(c)) {
+                parsingLabel = true;
                 curPos += parseLabel(exprChars, curPos, ifs, tm, table, pr);    
+            }
             
             else if (Character.isDigit(c) || c == '.')
                 curPos += parseNumber(exprChars, curPos, ifs, table, pr);    
@@ -114,8 +118,12 @@ public class InfixExpressionParser
                 curPos += parseSimpleOperator(exprChars, curPos, ifs, parenCnt, tm, table, pr);
 
             if (curPos <= prevPos) {
-                if (pr != null)
-                    pr.addIssue(m_expr, ParserStatusCode.InvalidExpression, curPos);
+                if (pr != null) {
+                    if (parsingLabel)
+                        pr.addIssue(m_expr, ParserStatusCode.NoSuchOperator, curPos);
+                    else
+                        pr.addIssue(m_expr, ParserStatusCode.InvalidExpression, curPos);
+                }
                 return pr;
             }
         }

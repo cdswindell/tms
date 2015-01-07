@@ -2,13 +2,14 @@ package org.tms.teq;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.tms.api.Operator;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.TableContextFactory;
 import org.tms.api.exceptions.IllegalTableStateException;
-import org.tms.tds.ContextImpl;
 
 public class TokenMapper
 {
@@ -40,14 +41,14 @@ public class TokenMapper
     
     static public TokenMapper fetchTokenMapper(Table t)
     {
-        TableContext c = t != null ? t.getTableContext() : ContextImpl.getDefaultContext();
+        TableContext c = t != null ? t.getTableContext() : TableContextFactory.fetchDefaultTableContext();
         return fetchTokenMapper(c);
     }
     
     static public TokenMapper fetchTokenMapper(TableContext c)
     {
         if (c == null)
-            throw new IllegalTableStateException("Table Context Required");
+            c = TableContextFactory.fetchDefaultTableContext();
             
         TokenMapper tm = c.getTokenMapper();
         if (tm != null)
@@ -55,6 +56,22 @@ public class TokenMapper
         
         // token mapper not created, create it now
         tm = new TokenMapper(c);
+        
+        return tm;
+    }
+       
+    public static TokenMapper cloneTokenMapper(TokenMapper source, TableContext c)
+    {
+        if (c == null)
+            c = TableContextFactory.fetchDefaultTableContext();
+            
+        // token mapper not created, create it now
+        TokenMapper tm = new TokenMapper(c);
+        
+        // copy the user content
+        for (Entry<String, Token> e: source.m_userTokenMap.entrySet()) {
+            tm.m_userTokenMap.put(e.getKey(), e.getValue());
+        }
         
         return tm;
     }
@@ -117,7 +134,26 @@ public class TokenMapper
     
     public void registerOperator(TokenType tt, Operator oper)
     {
+        if (tt == null)
+            throw new IllegalTableStateException("TokenType required");
+        
+        if (oper == null)
+            throw new IllegalTableStateException("Operator required");
+        
         String label = oper.getLabel();
+        if (label == null || label.trim().length() == 0)
+            throw new IllegalTableStateException("Labeled operator required");
+        
+        switch(tt) {
+            case Constant:
+            case UnaryFunc:
+            case BinaryFunc:
+            case GenericFunc:
+                break;
+                
+            default:
+                throw new IllegalTableStateException("TokenType not supported");
+        }
         
         Token t = new Token(tt, oper);
         m_userTokenMap.put(label,  t);

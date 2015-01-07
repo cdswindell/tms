@@ -78,6 +78,7 @@ public class PostfixStackEvaluator
 					break;
 					
 				case BuiltIn:
+				case Constant:
                     m_opStack.push(doBuiltInOp(oper));                 
 				    break;
 					
