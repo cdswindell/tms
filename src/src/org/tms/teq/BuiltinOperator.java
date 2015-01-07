@@ -334,8 +334,7 @@ public enum BuiltinOperator implements Labeled, Operator
         }
         catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            return Token.createErrorToken(e.getMessage());
         }
         
         return retVal;

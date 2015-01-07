@@ -16,6 +16,12 @@ public class Token implements Labeled
         return new Token(TokenType.EvaluationError, eCode);
     }
     
+
+    public static Token createErrorToken(String msg)
+    {
+        return new Token(TokenType.EvaluationError, msg);
+    }
+    
     private String m_label;
     private TokenType m_tokenType;
     private Operator m_oper;
