@@ -227,7 +227,7 @@ public class PostfixStackEvaluatorTest
         assertThat(Math.abs(0.5 - t.getNumericValue()) < 0.0001, is(true));
         
         // sin (degrees arg)
-        pse = new PostfixStackEvaluator("sinD(390)", null);
+        pse = new PostfixStackEvaluator("sind(390)", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
@@ -238,7 +238,7 @@ public class PostfixStackEvaluatorTest
         assertThat(Math.abs(0.5 - t.getNumericValue()) < 0.0001, is(true));
         
         // tan (degrees arg)
-        pse = new PostfixStackEvaluator("tanD(90)", null);
+        pse = new PostfixStackEvaluator("tand(90)", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
@@ -271,7 +271,7 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getNumericValue(), is(Double.NEGATIVE_INFINITY));
         
         // aSinD
-        pse = new PostfixStackEvaluator("asinD(.5)", null);
+        pse = new PostfixStackEvaluator("asind(.5)", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
@@ -290,10 +290,25 @@ public class PostfixStackEvaluatorTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.isError(), is(false));
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
-        assertThat(t.getNumericValue(), is(90.0));
-        
-        // pi
-        pse = new PostfixStackEvaluator("pi", null);
+        assertThat(t.getNumericValue(), is(90.0));       
+    }
+    
+    @Test
+    public final void testConstants()
+    {
+        // hypot operator
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("hypot((1 + 2), 4)", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(5.0));
+
+        // e
+        pse = new PostfixStackEvaluator("e", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
@@ -301,8 +316,8 @@ public class PostfixStackEvaluatorTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.isError(), is(false));
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
-        assertThat(t.getNumericValue(), is(Math.PI));
-    }
+        assertThat(t.getNumericValue(), is(Math.E));
+}
     
     @Test
     public final void testHypot()

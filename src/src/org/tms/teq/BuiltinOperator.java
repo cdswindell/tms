@@ -32,8 +32,8 @@ public enum BuiltinOperator implements Labeled, Operator
     AbsOper("abs", TokenType.UnaryFunc, 5, Math.class),
     SqrtOper("sqrt", TokenType.UnaryFunc, 5, Math.class),
     CbrtOper("cbrt", TokenType.UnaryFunc, 5, Math.class),
-    ExpOper(TokenType.UnaryFunc, 5, Math.class, "exp", "e", "exp"),
-    LogOper(TokenType.UnaryFunc, 5, Math.class, "log", "loge"),
+    ExpOper(TokenType.UnaryFunc, 5, Math.class, "exp"),
+    LogOper(TokenType.UnaryFunc, 5, Math.class, "log", "ln", "loge"),
     Log10Oper(TokenType.UnaryFunc, 5, Math.class, "log10", "log", "log10"),
     RandIntOper(TokenType.UnaryFunc, 5, MathUtil.class, "randomInt", "randomInt", "randInt"),
 
@@ -55,6 +55,10 @@ public enum BuiltinOperator implements Labeled, Operator
     ACosDOper("acosD", TokenType.UnaryFunc, 5, MathUtil.class),
     ATanDOper("atanD", TokenType.UnaryFunc, 5, MathUtil.class),
 
+    SinHOper("sinh", TokenType.UnaryFunc, 5, Math.class),
+    CosHOper("cosh", TokenType.UnaryFunc, 5, Math.class),
+    TanHOper("tanh", TokenType.UnaryFunc, 5, Math.class),
+
     FactFunc(TokenType.UnaryFunc, 5, MathUtil.class, "fact", "factorial"),
     FloorOper("floor", TokenType.UnaryFunc, 5, Math.class),
     CeilOper("ceil", TokenType.UnaryFunc, 5, Math.class),
@@ -71,6 +75,7 @@ public enum BuiltinOperator implements Labeled, Operator
 
     // Builtin functions
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
+    EOper(TokenType.BuiltIn, 5, MathUtil.class, "e"),
     RandOper(TokenType.BuiltIn, 5, Math.class, "random"),
     ColumnIndex(TokenType.BuiltIn, 5, "ColumnIndex", "cidx"),
     RowIndex(TokenType.BuiltIn, 5, "RowIndex", "ridx"),

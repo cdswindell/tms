@@ -31,6 +31,11 @@ public class MathUtil
         return 1 + Math.floor(d * Math.random());
     }
     
+    static final public double e()
+    {
+        return Math.E;
+    }
+    
     static final public double pi()
     {
         return Math.PI;
