@@ -41,6 +41,8 @@ public class PostfixStackEvaluator
 		
 		Token x;
 		Token y;
+		int numArgs;
+		Token [] args;
 		
 		// walk through postfix stack from tail to head
 		while(m_pfsIter.hasNext()) {
@@ -59,8 +61,7 @@ public class PostfixStackEvaluator
 				case UnaryFunc:
 					x = m_opStack.pollFirst();
 					if (x == null || !x.isOperand()) // stack is in invalid state
-						throw new InvalidOperandsException(this, oper, x);
-					
+					    return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);					
 					m_opStack.push(doUnaryOp(oper, x));					
 					break;
 					
@@ -68,20 +69,37 @@ public class PostfixStackEvaluator
 				case BinaryFunc:
 					y = m_opStack.pollFirst();
 					if (y == null || !y.isOperand()) // stack is in invalid state
-						throw new InvalidOperandsException(this, oper, y);
+                        return Token.createErrorToken(y == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);                    
 					
 					x = m_opStack.pollFirst();
 					if (x == null || !x.isOperand()) // stack is in invalid state
-						throw new InvalidOperandsException(this, oper, y, x);
+                        return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);                    
 
                     m_opStack.push(doBinaryOp(oper, x, y));					
 					break;
 					
-				case BuiltIn:
-				case Constant:
+                case GenericFunc:
+                    args = null;
+                    numArgs = oper.numArgs();
+                    if (numArgs > 0) {
+                        args = new Token[numArgs];
+                        
+                        for (int i = numArgs - 1; i >= 0; i--) {
+                            x = m_opStack.pollFirst();
+                            if (x == null || !x.isOperand()) // stack is in invalid state
+                                return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);  
+                            
+                            args[i] = x;
+                        }
+                    }
+                    
+                    m_opStack.push(doGenericOp(oper, args));                 
+                    break;
+                    
+                case BuiltIn:
                     m_opStack.push(doBuiltInOp(oper));                 
-				    break;
-					
+                    break;
+                    
 				default:
 					throw new UnimplementedException(String.format("Unsupported token type: %s (%s)", tt, t));
 			}
@@ -98,11 +116,17 @@ public class PostfixStackEvaluator
 		return retVal;
 	}
 
-	public Table getTable()
+    public Table getTable()
 	{
 	    return m_table;
 	}
 	
+    private Token doGenericOp(Operator oper, Token... args)
+    {
+        Token t = oper.evaluate(args);
+        return t;
+    }
+
 	private Token doBuiltInOp(Operator oper)
     {
 	    assert oper.numArgs() == 0 : "Too many arguments";

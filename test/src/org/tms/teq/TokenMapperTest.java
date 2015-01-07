@@ -70,6 +70,19 @@ public class TokenMapperTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(36.0));
+        
+        // register new operator
+        Add3 add3 = new Add3();
+        tm.registerOperator(TokenType.GenericFunc, add3);
+        
+        // reparse expression
+        pse = new PostfixStackEvaluator("add3(1,2,3)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(6.0));
     }
     
     public class Square implements Operator
@@ -113,6 +126,53 @@ public class TokenMapperTest
             double d = args[0].getNumericValue();
             
             return new Token(d * d);
+        }       
+    }
+
+    
+    public class Add3 implements Operator
+    {
+
+        @Override
+        public TokenType getTokenType()
+        {
+            return TokenType.GenericFunc;
+        }
+
+        @Override
+        public int getPriority()
+        {
+            return 5;
+        }
+
+        @Override
+        public String getLabel()
+        {
+            return "add3";
+        }
+
+        @Override
+        public int numArgs()
+        {
+            return 3;
+        }
+
+        @Override
+        public Class<?>[] getArgTypes()
+        {
+            return new Class<?>[] {double.class, double.class, double.class};
+        }
+
+        @Override
+        public Token evaluate(Token... args)
+        {
+            assert args != null && args.length == 1;
+            
+            double d1 = args[0].getNumericValue();
+            double d2 = args[1].getNumericValue();
+            double d3 = args[2].getNumericValue();
+            
+            return new Token(d1 + d2 + d3);
         }       
     }
 

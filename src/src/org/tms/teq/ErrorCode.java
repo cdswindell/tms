@@ -6,6 +6,7 @@ public enum ErrorCode
     SeeErrorMessage, 
     StackOverflow, 
     StackUnderflow, 
+    OperandRequired,
     Unspecified, 
     
     NoError,
