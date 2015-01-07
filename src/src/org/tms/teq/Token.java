@@ -62,14 +62,6 @@ public class Token implements Labeled
         setOperator(o);
     }
 
-    private Token(Token token)
-    {
-		setTokenType(token.getTokenType());
-		setOperator(token.getOperator());
-		setValue(token.getValue());
-		m_label = token.getLabel() != null ? new String(token.getLabel()) : null;
-	}
-
     public TokenType getTokenType()
     {
         return m_tokenType;
@@ -268,10 +260,4 @@ public class Token implements Labeled
         else
             return ErrorCode.NoError;
     }
-
-//	@Override
-	protected Token cloneccc() 
-	{
-		return new Token(this);
-	}
 }
