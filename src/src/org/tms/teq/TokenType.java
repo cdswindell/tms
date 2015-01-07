@@ -17,7 +17,7 @@ public enum TokenType implements Labeled
     RangeRef(false, "Range"),
     
     Constant(false),
-    BuiltIn(true),
+    BuiltIn(false),
     Variable(false),
     Operand(false),
     String(false),

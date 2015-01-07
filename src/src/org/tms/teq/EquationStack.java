@@ -111,7 +111,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             return true;
         
         Token t = this.peek();
-        return t.isLeading();
+        return t != null ? t.isLeading() : true;
     }
     
     public String toExpression()
