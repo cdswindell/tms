@@ -249,6 +249,7 @@ public class InfixExpressionParser
         boolean foundFunc = false;
         
         boolean commaIsOk = true;
+        boolean processedFirstToken = false;
         
         Iterator<Token> iter = ifs.iterator();
         while (iter != null && iter.hasNext()) {
@@ -288,7 +289,11 @@ public class InfixExpressionParser
                 
                 case RangeOp: // handled as expression arg
                 case StatOp:  // handled as expression arg
+                    break;
+                    
                 case Comma: // skip these elements
+                    if (!processedFirstToken)
+                        commaIsOk = false;
                     break;
                     
                 case GenericFunc:
@@ -307,6 +312,8 @@ public class InfixExpressionParser
                         commaIsOk = false;
                     break;
             }
+            
+            processedFirstToken = true;
             
             if (!commaIsOk)
                 break;
@@ -340,7 +347,7 @@ public class InfixExpressionParser
         /* if we are not at a leading expression, punt */
         if (!ifs.isLeading()) {
             if (pr != null)
-                pr.addIssue(ParserStatusCode.InvalidConstantLocation, curPos);
+                pr.addIssue(ParserStatusCode.InvalidOperandLocation, curPos);
             return 0;
         }
 

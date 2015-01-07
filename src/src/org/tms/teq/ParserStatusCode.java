@@ -10,7 +10,7 @@ public enum ParserStatusCode
     InvalidExpression,
     InvalidExpressionStack,
     InvalidNumericExpression,
-    InvalidConstantLocation,
+    InvalidOperandLocation,
     InvalidCommaLocation,
     InvalidOperatorLocation,
     NoSuchOperator,
