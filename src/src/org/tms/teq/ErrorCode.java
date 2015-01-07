@@ -3,6 +3,7 @@ package org.tms.teq;
 public enum ErrorCode
 {
     DivideByZero, 
+    InvalidOperand, 
     SeeErrorMessage, 
     StackOverflow, 
     StackUnderflow,

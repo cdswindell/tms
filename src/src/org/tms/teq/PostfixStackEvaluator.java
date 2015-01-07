@@ -176,11 +176,34 @@ public class PostfixStackEvaluator
             return doBuiltInOp(bio, x.getNumericValue(), y.getNumericValue());        
         else if (x.isString() && y.isString())
             return doBuiltInOp(bio, x.getStringValue(), y.getStringValue());
+        else if (x.isString() && y.isNumeric())
+            return doBuiltInOp(bio, x.getStringValue(), y.getNumericValue());
         
         throw new UnimplementedException(String.format("Unimplemented built in operator: %s (%s, %s)", 
                 bio, 
                 x.getDataType() != null ? x.getDataType().getSimpleName() : "null",
                 y.getDataType() != null ? y.getDataType().getSimpleName() : "null"));    
+    }
+
+    private Token doBuiltInOp(BuiltinOperator bio, String s1, Double n2)
+    {
+        switch (bio) {
+            case MultOper:
+                if (n2 >= 0.5) {
+                    StringBuffer sb = new StringBuffer();
+                    long max = Math.round(n2);
+                    for (int i = 0; i < max; i++) {
+                        sb.append(s1);
+                    }
+                    
+                    return new Token(TokenType.Operand, sb.toString());
+                }
+                else
+                   return Token.createErrorToken(ErrorCode.InvalidOperand);
+                
+            default:
+                throw new UnimplementedException("Unimplemented built in String/Numeric operator: " + bio);    
+        }               
     }
 
     private Token doBuiltInOp(BuiltinOperator bio, String s1, String s2)

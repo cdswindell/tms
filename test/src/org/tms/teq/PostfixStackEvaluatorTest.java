@@ -480,5 +480,17 @@ public class PostfixStackEvaluatorTest
         assertThat(t.isError(), is(false));
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(t.getNumericValue(), is(550.0));
+        
+        // mult operator
+        pse = new PostfixStackEvaluator("'abc' * 3", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getStringValue(), is("abcabcabc"));
     }
 }
