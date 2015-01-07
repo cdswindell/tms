@@ -24,6 +24,17 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     
     static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();
     
+
+    public static TableContext createContext()
+    {
+        return new ContextImpl(false, null);
+    }
+    
+    public static TableContext createDefaultContext()
+    {
+        return getDefaultContext();
+    }
+    
     protected static int getPropertyInt(ContextImpl c, TableProperty key)
     {
         if (c != null)
@@ -40,7 +51,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
             return getDefaultContext().getPropertyBoolean(key);
     }
 
-    synchronized public static ContextImpl getDefaultContext()
+    synchronized protected static ContextImpl getDefaultContext()
     {
         if (sf_DEFAULT_CONTEXT == null) {
             sf_DEFAULT_CONTEXT = new ContextImpl(true, null);
@@ -117,6 +128,8 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                 case TokenMapper:
                     if (value == null)
                         value = TokenMapper.fetchTokenMapper(this);
+                    else 
+                        value = TokenMapper.cloneTokenMapper((TokenMapper)value, this);
                     setTokenMapper((TokenMapper)value);
                     break;
                     
