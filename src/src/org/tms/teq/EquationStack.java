@@ -32,43 +32,43 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     @Override
 	public boolean add(Token t) 
     {
-		return super.add(t.clone());
+		return super.add(t);
 	}
 
 	@Override
 	public void addFirst(Token t) 
 	{
-		super.addFirst(t.clone());
+		super.addFirst(t);
 	}
 
 	@Override
 	public void addLast(Token t) 
 	{
-		super.addLast(t.clone());
+		super.addLast(t);
 	}
 
 	@Override
 	public boolean offer(Token t) 
 	{
-		return super.offer(t.clone());
+		return super.offer(t);
 	}
 
 	@Override
 	public boolean offerFirst(Token t)
 	{
-		return super.offerFirst(t.clone());
+		return super.offerFirst(t);
 	}
 
 	@Override
 	public boolean offerLast(Token t) 
 	{
-		return super.offerLast(t.clone());
+		return super.offerLast(t);
 	}
 
 	@Override
 	public void push(Token t) 
 	{
-		super.push(t.clone());
+		super.push(t);
 	}
 
     public void push (double value)

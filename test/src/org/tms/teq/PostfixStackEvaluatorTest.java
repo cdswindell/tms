@@ -470,6 +470,17 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getNumericValue(), is(3.0));
         
         // function operator
+        pse = new PostfixStackEvaluator("toNumber('abc')", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(false));
+        assertThat(t.isError(), is(true));
+        assertThat(t.getErrorCode(), is(ErrorCode.NaN));
+        
+        // function operator
         pse = new PostfixStackEvaluator("toNumber('54' + '6') + toNumber(4)", null);
         assertThat(pse, notNullValue());
 

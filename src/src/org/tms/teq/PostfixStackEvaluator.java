@@ -115,7 +115,8 @@ public class PostfixStackEvaluator
         else if (stackSize > 1)
             return Token.createErrorToken(ErrorCode.StackOverflow);
         
-		Token retVal = m_opStack.pollFirst().clone();
+        Token stackVal = m_opStack.pollFirst();
+		Token retVal = stackVal;
 		return retVal;
 	}
 

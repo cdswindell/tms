@@ -29,8 +29,7 @@ public class Token implements Labeled
     
     public Token(Object val)
     {
-        setTokenType(TokenType.Operand);
-        setValue(val);
+        this(TokenType.Operand, val);
     }
 
     public Token(TokenType tt)
@@ -40,8 +39,14 @@ public class Token implements Labeled
 
     public Token(TokenType tt, Object value)
     {
-        setTokenType(tt);
-        setValue(value);
+        if (value.equals(Double.NaN)) {
+            setTokenType(TokenType.EvaluationError);
+            setValue(ErrorCode.NaN);
+        }
+        else {
+            setTokenType(tt);
+            setValue(value);
+        }
     }
 
     public Token(TokenType tt, Operator o)
@@ -87,7 +92,10 @@ public class Token implements Labeled
 
     public Object getValue()
     {
-        return m_value;
+        if (getTokenType() == TokenType.EvaluationError && getErrorCode() == ErrorCode.NaN)
+            return Double.NaN;
+        else
+            return m_value;
     }
 
     public Double getNumericValue()
@@ -261,8 +269,8 @@ public class Token implements Labeled
             return ErrorCode.NoError;
     }
 
-	@Override
-	protected Token clone() 
+//	@Override
+	protected Token cloneccc() 
 	{
 		return new Token(this);
 	}
