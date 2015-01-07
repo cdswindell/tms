@@ -92,7 +92,7 @@ public class InfixExpressionParser
             ifs.clear();
         
         char [] exprChars = m_expr.toCharArray();
-        TokenMapper tm = new TokenMapper(table != null ? table.getTableContext() : null);
+        TokenMapper tm = TokenMapper.fetchTokenMapper(table);
         while (curPos < exprLen) {
             char c = exprChars[curPos];
             if (Character.isWhitespace(c)) {

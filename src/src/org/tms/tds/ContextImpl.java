@@ -8,6 +8,7 @@ import org.tms.api.ElementType;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
+import org.tms.teq.TokenMapper;
 import org.tms.util.WeakHashSet;
 
 public class ContextImpl extends BaseElementImpl implements TableContext
@@ -39,7 +40,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
             return getDefaultContext().getPropertyBoolean(key);
     }
 
-    synchronized protected static ContextImpl getDefaultContext()
+    synchronized public static ContextImpl getDefaultContext()
     {
         if (sf_DEFAULT_CONTEXT == null) {
             sf_DEFAULT_CONTEXT = new ContextImpl(true, null);
@@ -55,6 +56,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     
     private int m_rowCapacityIncr;
     private int m_columnCapacityIncr;
+    private TokenMapper m_tokenMapper;
     
     private ContextImpl(boolean isDefault, ContextImpl otherContext)
     {
@@ -66,11 +68,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         initialize(otherContext);
      }
 
-    protected ContextImpl()
-    {
-        this(false, null);
-    }
-    
     protected ContextImpl(ContextImpl otherContext)
     {
         this(false, otherContext);
@@ -117,6 +114,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                     setEnforceDataType((boolean)value);
                     break;
                     
+                case TokenMapper:
+                    if (value == null)
+                        value = TokenMapper.fetchTokenMapper(this);
+                    setTokenMapper((TokenMapper)value);
+                    break;
+                    
                 default:
                     throw new IllegalStateException("No initialization available for Context Property: " + tp);                       
             }
@@ -146,6 +149,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext
             case isEnforceDataType:
                 return isEnforceDataType();
                 
+            case TokenMapper:
+                return getTokenMapper();
+                
             default:
                 return super.getProperty(key);
         }        
@@ -156,6 +162,19 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         return m_default;
     }
 
+    public TokenMapper getTokenMapper()
+    {
+        return m_tokenMapper;
+    }
+
+    protected void setTokenMapper(TokenMapper tm)
+    {
+        if (tm == null)
+            tm = TokenMapper.fetchTokenMapper(this);
+        
+        m_tokenMapper = tm;
+    }
+    
     protected int getRowCapacityIncr()
     {
         return m_rowCapacityIncr;

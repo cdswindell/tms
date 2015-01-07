@@ -24,6 +24,7 @@ public enum TableProperty implements Comparable<TableProperty>
     isInUse(true, false, ElementType.Row, ElementType.Column),
     
     // Context/Table Properties  
+    TokenMapper(true, true, ElementType.Context),
     RowCapacityIncr(false, true, ElementType.Context, ElementType.Table),
     ColumnCapacityIncr(false, true, ElementType.Context, ElementType.Table),
     
