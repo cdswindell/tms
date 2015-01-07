@@ -132,20 +132,20 @@ public class TokenMapper
         return m_context;
     }
     
-    public void registerOperator(TokenType tt, Operator oper)
+    public void registerOperator(Operator oper)
     {
-        if (tt == null)
-            throw new IllegalTableStateException("TokenType required");
-        
         if (oper == null)
             throw new IllegalTableStateException("Operator required");
+        
+        TokenType tt = oper.getTokenType();
+        if (tt == null)
+            throw new IllegalTableStateException("Operator TokenType required");
         
         String label = oper.getLabel();
         if (label == null || label.trim().length() == 0)
             throw new IllegalTableStateException("Labeled operator required");
         
         switch(tt) {
-            case Constant:
             case UnaryFunc:
             case BinaryFunc:
             case GenericFunc:

@@ -125,7 +125,11 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             boolean addLeadingSpace = false;
             while (di != null && di.hasNext()) {
                 if (addLeadingSpace) sb.append(' ');
-                sb.append(di.next().toString());
+                Token t = di.next();
+                
+                if (t.isString()) sb.append('"');
+                sb.append(t.toString());
+                if (t.isString()) sb.append('"');
                 addLeadingSpace = true;
             }
             

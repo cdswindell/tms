@@ -113,6 +113,24 @@ public class Token implements Labeled
             return getValue().getClass();
     }
             
+    public boolean isA(Class<?> targetClazz)
+    {
+        Class<?> dataType = getDataType();
+        if (dataType == null)
+            return true;
+        
+        if (targetClazz.isAssignableFrom(dataType))
+            return true;
+        else if (targetClazz.isPrimitive() && !dataType.isPrimitive()) {
+            if (targetClazz == double.class && dataType == Double.class ||
+                targetClazz == int.class && dataType == Integer.class ||
+                targetClazz == boolean.class && dataType == Boolean.class)
+                return true;
+        }
+        
+        return false;
+    }
+
     public boolean isLeading()
     {
         if (getTokenType() != null)

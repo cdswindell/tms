@@ -165,4 +165,44 @@ public class InfixExpressionParserTest
         assertThat(iep.getInfixStack().size(), is(10));
         assertThat(iep.parsedInfixExpression(), is("5.0 % 2.0 + mod ( 7.0 , 5.0 )"));
     }  
+    
+    @Test
+    public final void testTextParsing()
+    {
+        InfixExpressionParser iep = new InfixExpressionParser("'abc'");
+        assertThat(iep, notNullValue());
+        
+        ParseResult pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        assertThat(iep.getInfixStack().size(), is(1));
+        assertThat(iep.parsedInfixExpression(), is("\"abc\""));
+        
+        iep = new InfixExpressionParser("'abc' + 'def'");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        assertThat(iep.getInfixStack().size(), is(3));
+        assertThat(iep.parsedInfixExpression(), is("\"abc\" + \"def\""));
+        
+        // negative tests
+        iep = new InfixExpressionParser("'abc' + 'def");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.SingletonQuote));
+        
+        // negative tests
+        iep = new InfixExpressionParser("'abc' + def'");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
+    }  
 }

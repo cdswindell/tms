@@ -112,7 +112,7 @@ public class InfixExpressionParser
                 curPos += parseNumber(exprChars, curPos, ifs, table, pr);    
             
             else if ((c == '\"') || (c == '\''))
-                curPos += parseText(exprChars, curPos, ifs);
+                curPos += parseText(exprChars, curPos, ifs, pr);
 
             else
                 curPos += parseSimpleOperator(exprChars, curPos, ifs, parenCnt, tm, table, pr);
@@ -290,7 +290,6 @@ public class InfixExpressionParser
                 case BuiltIn:
                 case Constant:
                 case Variable: 
-                case String:
                     if (parenCnt == 0)
                         argCnt++;
                     break;
@@ -335,10 +334,39 @@ public class InfixExpressionParser
         return commaIsOk;
     }
 
-    private int parseText(char[] exprChars, int curPos, EquationStack ifs)
+    private int parseText(char[] exprChars, int curPos, EquationStack ifs, ParseResult pr)
     {
-        // TODO Auto-generated method stub
-        return 0;
+        char delim = exprChars[curPos];
+        StringBuffer text = new StringBuffer();
+        
+        int exprLen = exprChars.length;
+        // special case boundary test; if quote is last character of expression, this is an error
+        if (curPos == exprLen - 1) {
+            pr.addIssue(ParserStatusCode.SingletonQuote, curPos);
+            return 0;
+        }
+          
+        boolean foundTrailingDelim = false;
+        for (int i = curPos + 1; i < exprLen; i++) {
+            char c = exprChars[i];
+            if (c == delim) {
+                foundTrailingDelim = true;
+                break;       
+            }
+            
+            text.append(c);
+        }
+        
+        if (!foundTrailingDelim) {
+            pr.addIssue(ParserStatusCode.SingletonQuote, curPos);
+            return 0;
+        }
+        
+        // add the text to the stack as an operand
+        ifs.push(TokenType.Operand, text.toString());
+        
+        // return the number of consumed characters
+        return text.length() + 2;
     }
 
     private int parseNumber(char[] exprChars, int curPos, EquationStack ifs, 

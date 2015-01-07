@@ -5,7 +5,8 @@ public enum ErrorCode
     DivideByZero, 
     SeeErrorMessage, 
     StackOverflow, 
-    StackUnderflow, 
+    StackUnderflow,
+    OperandDataTypeMismatch,
     OperandRequired,
     Unspecified, 
     

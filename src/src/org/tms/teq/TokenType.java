@@ -20,7 +20,6 @@ public enum TokenType implements Labeled
     BuiltIn(false),
     Variable(false),
     Operand(false),
-    String(false),
     RangeOp(true, 1),
     StatOp(true, 1),
     BinaryOp(true, 2),

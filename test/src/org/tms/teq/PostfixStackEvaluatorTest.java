@@ -418,4 +418,67 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(t.getNumericValue(), is(2.0));
     }
+    
+    @Test
+    public void testTextExpression()
+    {
+        // plus operator
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("'abc' + 'def'", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getStringValue(), is("abcdef"));
+        
+        // minus operator
+        pse = new PostfixStackEvaluator("'abcdef' - 'def'", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getStringValue(), is("abc"));
+        
+        // negative test
+        pse = new PostfixStackEvaluator("sin('abcdef' - 'def')", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(false));
+        assertThat(t.isError(), is(true));
+        assertThat(t.getErrorCode(), is(ErrorCode.OperandDataTypeMismatch));
+        
+        // function operator
+        pse = new PostfixStackEvaluator("len('abcdef' - 'def')", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(3.0));
+        
+        // function operator
+        pse = new PostfixStackEvaluator("toNumber('54' + '6') + toNumber(4)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(550.0));
+    }
 }

@@ -60,7 +60,7 @@ public class TokenMapperTest
         
         // register new operator
         Square sOp = new Square();
-        tm.registerOperator(TokenType.UnaryFunc, sOp);
+        tm.registerOperator(sOp);
         
         // reparse expression
         pse = new PostfixStackEvaluator("square(-6)", null);
@@ -73,7 +73,7 @@ public class TokenMapperTest
         
         // register new operator
         Add3 add3 = new Add3();
-        tm.registerOperator(TokenType.GenericFunc, add3);
+        tm.registerOperator(add3);
         
         // reparse expression
         pse = new PostfixStackEvaluator("add3(1,2,3)", null);
@@ -128,11 +128,9 @@ public class TokenMapperTest
             return new Token(d * d);
         }       
     }
-
     
     public class Add3 implements Operator
     {
-
         @Override
         public TokenType getTokenType()
         {
@@ -175,5 +173,4 @@ public class TokenMapperTest
             return new Token(d1 + d2 + d3);
         }       
     }
-
 }

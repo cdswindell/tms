@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import org.tms.api.Operator;
 import org.tms.api.Table;
-import org.tms.api.exceptions.InvalidOperandsException;
 import org.tms.api.exceptions.UnimplementedException;
 
 public class PostfixStackEvaluator 
@@ -82,12 +81,16 @@ public class PostfixStackEvaluator
                     args = null;
                     numArgs = oper.numArgs();
                     if (numArgs > 0) {
+                        Class<?> [] argTypes = oper.getArgTypes();
+                        
                         args = new Token[numArgs];
                         
                         for (int i = numArgs - 1; i >= 0; i--) {
                             x = m_opStack.pollFirst();
                             if (x == null || !x.isOperand()) // stack is in invalid state
                                 return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);  
+                            else if (!x.isA(argTypes[i]))
+                                return Token.createErrorToken(ErrorCode.OperandDataTypeMismatch);  
                             
                             args[i] = x;
                         }
@@ -170,12 +173,28 @@ public class PostfixStackEvaluator
 	private Token doBuiltInOp(BuiltinOperator bio, Token x, Token y)
     {
         if (x.isNumeric() && y.isNumeric())
-            return doBuiltInOp(bio, x.getNumericValue(), y.getNumericValue());
+            return doBuiltInOp(bio, x.getNumericValue(), y.getNumericValue());        
+        else if (x.isString() && y.isString())
+            return doBuiltInOp(bio, x.getStringValue(), y.getStringValue());
         
         throw new UnimplementedException(String.format("Unimplemented built in operator: %s (%s, %s)", 
                 bio, 
                 x.getDataType() != null ? x.getDataType().getSimpleName() : "null",
                 y.getDataType() != null ? y.getDataType().getSimpleName() : "null"));    
+    }
+
+    private Token doBuiltInOp(BuiltinOperator bio, String s1, String s2)
+    {
+        switch (bio) {
+            case PlusOper:
+                return new Token(TokenType.Operand, s1.concat(s2));
+                
+            case MinusOper:
+                return new Token(TokenType.Operand, s1.replace(s2, ""));
+                
+            default:
+                throw new UnimplementedException("Unimplemented built in String operator: " + bio);    
+        }               
     }
 
     private Token doBuiltInOp(BuiltinOperator bio, double x, double y)

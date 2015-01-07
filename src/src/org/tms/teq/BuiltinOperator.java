@@ -65,6 +65,10 @@ public enum BuiltinOperator implements Labeled, Operator
     SignOper(TokenType.UnaryFunc, 5, Math.class, "signum", "sign", "signum"),
     RoundOper("round", TokenType.UnaryFunc, 5, Math.class),
     
+    // String functions
+    LenOper("len", TokenType.UnaryFunc, 5, MathUtil.class, "length", String.class),
+    toNumberOper("toNumber", TokenType.UnaryFunc, 5, MathUtil.class, "toNumber", Object.class),
+   
     // Binary functions, mostly supported in Java Math
     ModFunc(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "mod"),
     PowerFunc(TokenType.BinaryFunc, 5, Math.class, "pow", "pow", "power"),
@@ -155,6 +159,14 @@ public enum BuiltinOperator implements Labeled, Operator
         this(label, tt, priority);
         m_clazz = clazz;
         m_methodName = methodName;
+    }
+    
+    private BuiltinOperator(String label, TokenType tt, int priority, Class<? extends Object> clazz, String methodName, Class<?>... argTypes)
+    {
+        this(label, tt, priority);
+        m_clazz = clazz;
+        m_methodName = methodName;
+        m_methodArgs = argTypes;
     }
     
     private BuiltinOperator(TokenType tt, int priority, Class<? extends Object> clazz, String methodName, String...labels)
@@ -304,9 +316,15 @@ public enum BuiltinOperator implements Labeled, Operator
         Token retVal = null;
         int numArgs = numArgs();
         Object [] params = new Object[numArgs];
+        Class<?> [] argTypes = getArgTypes();
         for (int i = 0; i < numArgs; i++)
         {
-            params[i] = args[i] != null ? args[i].getValue() : null;
+            if (args[i] == null || args[i].isNull())
+                return Token.createNullToken();
+            else if (!args[i].isA(argTypes[i]))
+                return Token.createErrorToken(ErrorCode.OperandDataTypeMismatch);
+                        
+            params[i] = args[i].getValue();
         }
         
         try

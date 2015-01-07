@@ -83,5 +83,30 @@ public class MathUtil
             return -90.0;
         else
             return Math.toDegrees(Math.atan(arg));
+    } 
+    
+    static final public double length(String arg)
+    {
+        return arg != null ? arg.length() : 0;
+    }   
+    
+    static final public double toNumber(Object arg)
+    {
+        if (arg instanceof Number)
+            return (Double)arg;
+        else if (arg instanceof Boolean) 
+            return ((Boolean)arg).booleanValue() ? 1 : 0;
+        else if (arg instanceof String) {
+            try {
+                double d = Double.valueOf((String)arg);
+                return d;
+            }
+            catch (NumberFormatException e) 
+            {
+                return Double.NaN;
+            }
+        }
+        else
+            return Double.NaN;
     }   
 }

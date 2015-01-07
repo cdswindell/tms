@@ -13,7 +13,8 @@ public enum ParserStatusCode
     InvalidOperandLocation,
     InvalidCommaLocation,
     InvalidOperatorLocation,
-    NoSuchOperator,
+    NoSuchOperator, 
+    SingletonQuote,
     ;
     
     public boolean isSuccess()
