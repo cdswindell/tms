@@ -50,18 +50,22 @@ public class TwoVariableStatEngine
             case LinearInterceptOper:
                 return calculateIntercept();
                 
-            case LinearR2Oper:
-                return calculateR2();
+            case LinearCorrelationOper:
+                return calculateCorrelation();
                            
             default:
                 throw new UnimplementedException("Unsupported binary statistic: " + stat);            
         }
     }
 
-    private double calculateR2()
+    private double calculateCorrelation()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        double sumX = m_statX.calcStatistic(BuiltinOperator.SumOper);
+        double sumY = m_statY.calcStatistic(BuiltinOperator.SumOper);
+        double sumX2 = m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
+        double sumY2 = m_statY.calcStatistic(BuiltinOperator.Sum2Oper);
+        return (m_n * m_sumXY - sumX*sumY)/
+                Math.sqrt((m_n*sumX2 - sumX*sumX)*(m_n*sumY2 - sumY*sumY));
     }
 
     private double calculateIntercept()
@@ -72,15 +76,24 @@ public class TwoVariableStatEngine
         return meanY - calculateSlope() * meanX;
     }
 
-    private double calculateSlope()
+    protected double calculateSlope()
     {
         double sumX = m_statX.calcStatistic(BuiltinOperator.SumOper);
-        double sumX2 = m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
         double sumY = m_statY.calcStatistic(BuiltinOperator.SumOper);
-        
+        double sumX2 = m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
+         
         return ((sumX*sumY/m_n) - m_sumXY)/((sumX*sumX/m_n) - sumX2);
     }
     
+    protected double calculateSlope2()
+    {
+        double meanX = m_statX.calcStatistic(BuiltinOperator.MeanOper);
+        double meanY = m_statY.calcStatistic(BuiltinOperator.MeanOper);
+        double sumX2 = m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
+        
+        return (m_sumXY - m_n*meanX*meanY)/(sumX2 - m_n*meanX*meanX);
+    }
+
     public double calculateY(double x) 
     {
         return calculateSlope() * x + calculateIntercept();

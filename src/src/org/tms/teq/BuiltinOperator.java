@@ -105,7 +105,7 @@ public enum BuiltinOperator implements Labeled, Operator
     
     LinearSlopeOper(TokenType.BinaryStatOp, 5),
     LinearInterceptOper(TokenType.BinaryStatOp, 5),
-    LinearR2Oper(TokenType.BinaryStatOp, 5),
+    LinearCorrelationOper(TokenType.BinaryStatOp, 5),
     
     SplineOper,
     MeanCenterOper(TokenType.StatOp, 5),
