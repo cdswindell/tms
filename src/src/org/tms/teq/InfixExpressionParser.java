@@ -297,6 +297,7 @@ public class InfixExpressionParser
                 
                 case RangeOp: // handled as expression arg
                 case StatOp:  // handled as expression arg
+                case BinaryStatOp:  // handled as expression arg
                     break;
                     
                 case Comma: // skip these elements

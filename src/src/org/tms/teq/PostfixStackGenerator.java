@@ -184,6 +184,7 @@ public class PostfixStackGenerator
                 case NullOpValue:
                 case RangeOp:
                 case StatOp:
+                case BinaryStatOp:
                 case TableRef:
                 case Variable:
                 default:

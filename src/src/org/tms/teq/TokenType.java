@@ -22,6 +22,7 @@ public enum TokenType implements Labeled
     Operand(false),
     RangeOp(true, 1),
     StatOp(true, 1),
+    BinaryStatOp(true, 2),
     BinaryOp(true, 2),
     BinaryFunc(true, 2),
     UnaryOp(false, 1),
