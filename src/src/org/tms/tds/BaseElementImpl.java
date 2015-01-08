@@ -209,7 +209,7 @@ abstract public class BaseElementImpl
             throw new InvalidPropertyException(this, key, "not boolean value");
     }
     
-    protected int getPropertyInt(TableProperty key)
+    public int getPropertyInt(TableProperty key)
     {
         if (key.isIntValue()) {
             Object value = getProperty(key);

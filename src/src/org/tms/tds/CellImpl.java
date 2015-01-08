@@ -140,7 +140,7 @@ public class CellImpl extends TableElementImpl
     }
 
     @Override
-    protected Object getProperty(TableProperty key)
+    public Object getProperty(TableProperty key)
     {
         // Some properties are built into the base Table Element object
         switch (key)

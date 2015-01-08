@@ -4,9 +4,10 @@ import java.util.ArrayList;
 
 import org.tms.api.Access;
 import org.tms.api.ElementType;
+import org.tms.api.Row;
 import org.tms.api.TableProperty;
 
-public class RowImpl extends TableSliceElement
+public class RowImpl extends TableSliceElement implements Row
 {
     private int m_cellOffset;
     
@@ -55,7 +56,7 @@ public class RowImpl extends TableSliceElement
      * Overridden Methods
      */
     @Override
-    protected Object getProperty(TableProperty key)
+    public Object getProperty(TableProperty key)
     {
         switch(key)
         {

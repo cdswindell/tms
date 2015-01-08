@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.tms.api.Access;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 
-public class ColumnImpl extends TableSliceElement
+public class ColumnImpl extends TableSliceElement implements Column
 {
     private Object m_cells;
     private Class<? extends Object> m_dataType;
@@ -202,7 +203,7 @@ public class ColumnImpl extends TableSliceElement
     }
 
     @Override
-    protected Object getProperty(TableProperty key)
+    public Object getProperty(TableProperty key)
     {
         switch(key)
         {

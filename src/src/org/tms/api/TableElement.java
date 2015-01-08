@@ -7,5 +7,8 @@ public interface TableElement extends BaseElement
     public Table getTable();
     public void delete();
     public void fill(Object o);
+    
+    public Object getProperty(TableProperty p);
+    public int getPropertyInt(TableProperty p);
 
 }

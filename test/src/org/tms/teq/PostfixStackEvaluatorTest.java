@@ -5,6 +5,12 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.tms.api.Access;
+import org.tms.api.Column;
+import org.tms.api.Row;
+import org.tms.api.Table;
+import org.tms.api.TableFactory;
+import org.tms.api.TableProperty;
 
 public class PostfixStackEvaluatorTest
 {
@@ -504,4 +510,56 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(t.getStringValue(), is("abcabcabc"));
     }
+    
+    
+    @Test
+    public void testTableBuiltinExpression()
+    {
+        Table tbl = TableFactory.createTable(12, 10);        
+        assert (tbl != null);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        Row r1 = tbl.addRow(Access.ByIndex, 16);
+        Column c1 = tbl.addColumn(Access.ByIndex, 8);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        tbl.fill(42);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (16*8));
+        
+        // RowIndex operator
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("RowIndex", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate(r1, c1);
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(16.0));
+        
+        // ridx operator
+        pse = new PostfixStackEvaluator("RIDX", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate(r1, c1);
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(16.0));
+        
+        // cidx operator
+        pse = new PostfixStackEvaluator("cidx", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate(r1, c1);
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(8.0));
+    }    
 }

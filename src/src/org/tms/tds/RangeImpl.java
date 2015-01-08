@@ -263,7 +263,7 @@ public class RangeImpl extends TableCellsElementImpl
     }
 
     @Override
-    protected Object getProperty(TableProperty key)
+    public Object getProperty(TableProperty key)
     {
         switch(key)
         {

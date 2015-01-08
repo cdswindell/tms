@@ -92,7 +92,7 @@ public class Token implements Labeled
 
     public Double getNumericValue()
     {
-        if (m_value != null && m_value instanceof Double)
+        if (m_value != null && m_value instanceof Number)
             return (Double)m_value;
         else
             return null;
@@ -108,6 +108,17 @@ public class Token implements Labeled
 
     void setValue(Object value)
     {
+        if (value instanceof Number && value.getClass() != Double.class) {
+            if (value instanceof Integer)
+                value = ((Integer)value).doubleValue();
+            if (value instanceof Long)
+                value = ((Long)value).doubleValue();
+            else if (value instanceof Float)
+                value = ((Float)value).doubleValue();
+            else if (value instanceof Short)
+                value = ((Short)value).doubleValue();
+        }
+        
         m_value = value;
     }
 

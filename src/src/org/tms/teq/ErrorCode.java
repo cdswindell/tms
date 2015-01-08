@@ -5,6 +5,7 @@ public enum ErrorCode
     DivideByZero, 
     NaN,
     InvalidOperand, 
+    InvalidTableOperand, 
     SeeErrorMessage, 
     StackOverflow, 
     StackUnderflow,

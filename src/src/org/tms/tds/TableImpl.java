@@ -400,7 +400,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return addRow(mode, (Object [])null);
     }
     
-    protected RowImpl addRow(Access mode, Object... mda)
+    public RowImpl addRow(Access mode, Object... mda)
     {
         return (RowImpl)add(new RowImpl(this), mode, mda);
     }
@@ -577,15 +577,15 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     protected ColumnImpl addColumn(Access mode)
     {
-        return addColumn(mode, null);
+        return addColumn(mode, (Object [])null);
     }
     
-    protected ColumnImpl addColumn(Access mode, Object md)
+    public ColumnImpl addColumn(Access mode, Object... md)
     {
         return (ColumnImpl)add(new ColumnImpl(this), mode, md);
     }
     
-    protected ColumnImpl getColumn(Access mode, Object...mda)
+    public ColumnImpl getColumn(Access mode, Object...mda)
     {
         return getColumnInternal(true, mode, mda);
     }

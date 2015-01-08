@@ -2,8 +2,11 @@ package org.tms.teq;
 
 import java.util.Iterator;
 
+import org.tms.api.Column;
 import org.tms.api.Operator;
+import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
 
 public class PostfixStackEvaluator 
@@ -22,13 +25,18 @@ public class PostfixStackEvaluator
 	
     public Token evaluate()
     {
+        return evaluate(null, null);
+    }
+    
+    public Token evaluate(Row row, Column col)
+    {
         m_opStack = new EquationStack(StackType.Op);
         m_pfsIter = m_pfs.descendingIterator();
         
-        return reevaluate();
+        return reevaluate(row, col);
     }
     
-	public Token reevaluate()
+	public Token reevaluate(Row row, Column col)
 	{
 		assert m_pfs != null : "Requires Postfix Stack";
 		
@@ -100,7 +108,7 @@ public class PostfixStackEvaluator
                     break;
                     
                 case BuiltIn:
-                    m_opStack.push(doBuiltInOp(oper));                 
+                    m_opStack.push(doBuiltInOp(oper, row, col));                 
                     break;
                     
 				default:
@@ -131,12 +139,38 @@ public class PostfixStackEvaluator
         return t;
     }
 
-	private Token doBuiltInOp(Operator oper)
+	private Token doBuiltInOp(Operator oper, Row row, Column col)
     {
 	    assert oper.numArgs() == 0 : "Too many arguments";
 	    
+	    Token result = null;
+        BuiltinOperator bio = oper.getBuiltinOperator();
+        if (bio != null) {
+            switch (bio) {
+                case RowIndex:
+                    if (row == null)
+                        result = Token.createErrorToken(ErrorCode.InvalidTableOperand);
+                    else
+                        result = new Token(row.getPropertyInt(TableProperty.Index));
+                    break;
+                    
+                case ColumnIndex:
+                    if (col == null)
+                        result = Token.createErrorToken(ErrorCode.InvalidTableOperand);
+                    else
+                        result = new Token(col.getPropertyInt(TableProperty.Index));
+                    break;
+                    
+                default:
+                    break;
+            }
+        }
+        
+        if (result != null)
+            return result;
+        
         // evaluate the result
-        Token result = oper.evaluate();
+        result = oper.evaluate();
         
         return result;
     }
