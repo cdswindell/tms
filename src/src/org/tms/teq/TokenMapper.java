@@ -156,6 +156,19 @@ public class TokenMapper
         }
         
         Token t = new Token(tt, oper);
-        m_userTokenMap.put(label,  t);
+        m_userTokenMap.put(label.trim().toLowerCase(),  t);
+    }
+    
+    public void unRegisterOperator(Operator oper)
+    {
+        if (oper == null)
+            throw new IllegalTableStateException("Operator required");
+        
+        String label = oper.getLabel();
+        if (label == null || label.trim().length() == 0)
+            throw new IllegalTableStateException("Labeled operator required");
+        
+        m_userTokenMap.remove(label.trim().toLowerCase());
+        
     }
 }
