@@ -7,6 +7,7 @@ import org.tms.api.Operator;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
 
 public class PostfixStackEvaluator 
@@ -16,13 +17,22 @@ public class PostfixStackEvaluator
 	private EquationStack m_opStack;
 	private Iterator<Token> m_pfsIter;
 	
-	public PostfixStackEvaluator(String expr, Table table)
-	{
-		PostfixStackGenerator psg = new PostfixStackGenerator(expr, table);
-		m_table = table;
-		m_pfs = psg.getPostfixStack();
-	}
-	
+    public PostfixStackEvaluator(String expr, Table table)
+    {
+        PostfixStackGenerator psg = new PostfixStackGenerator(expr, table);
+        m_table = table;
+        m_pfs = psg.getPostfixStack();
+    }
+    
+    public PostfixStackEvaluator(EquationStack pfs, Table table)
+    {
+        if (pfs == null || pfs.getStackType() != StackType.Postfix)
+            throw new IllegalTableStateException("Postfix stack required");
+        
+        m_table = table;
+        m_pfs = pfs;
+    }
+    
     public Token evaluate()
     {
         return evaluate(null, null);

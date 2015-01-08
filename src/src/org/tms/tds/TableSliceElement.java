@@ -3,17 +3,20 @@ package org.tms.tds;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
 
-abstract class TableSliceElement extends TableCellsElementImpl
+abstract class TableSliceElement extends TableCellsElementImpl implements Derivable
 {
     abstract protected TableSliceElement insertSlice(int idx);
     abstract protected TableSliceElement setCurrent();
     
     private JustInTimeSet<RangeImpl> m_ranges;
     private boolean m_inUse;
+    private Derivation m_deriv;
 
     public TableSliceElement(ElementType eType, TableElementImpl e)
     {
@@ -38,6 +41,27 @@ abstract class TableSliceElement extends TableCellsElementImpl
     {
         return new ArrayList<RangeImpl>(m_ranges.clone());
     } 
+    
+    public boolean isDerived()
+    {
+        return m_deriv != null;       
+    }
+    
+    public String getDerivation()
+    {
+        if (m_deriv != null)
+            return m_deriv.getInfixExpression();
+        else
+            return null;
+    }
+    
+    public void setDerivation(String expr)
+    {
+        if (m_deriv != null)
+            m_deriv.destroy();
+        
+        m_deriv = Derivation.create(expr, this);
+    }
     
     /*
      * Class-specific methods
@@ -142,6 +166,9 @@ abstract class TableSliceElement extends TableCellsElementImpl
                 
             case isInUse:
                 return isInUse();
+                
+            case Derivation:
+                return getDerivation();
                 
             default:
                 return super.getProperty(key);

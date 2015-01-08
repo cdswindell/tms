@@ -4,5 +4,7 @@ public interface Table extends TableElement
 {
     public Row addRow(Access mode, Object... mda);   
     public Column addColumn(Access mode, Object... mda);   
+    public void pushCurrent();
+    public void popCurrent();
     
 }

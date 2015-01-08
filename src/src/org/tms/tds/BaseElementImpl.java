@@ -7,13 +7,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.tms.api.BaseElement;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidPropertyException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnimplementedException;
 
-abstract public class BaseElementImpl 
+abstract public class BaseElementImpl implements BaseElement
 {
     abstract protected boolean isEmpty();
     
@@ -317,7 +318,7 @@ abstract public class BaseElementImpl
         m_supportsNull = supportsNull;
     }
 
-    protected boolean isReadOnly()
+    public boolean isReadOnly()
     {
         return m_readOnly;
     }

@@ -887,7 +887,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		popCurrent();
 	}  
 	
-	synchronized protected void popCurrent() 
+	synchronized public void popCurrent() 
     {
 		if (!m_currentCellStack.isEmpty()) {
 			CellReference cr = m_currentCellStack.pop();
@@ -898,7 +898,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		}		
 	}
 
-	synchronized protected void pushCurrent() 
+	synchronized public void pushCurrent() 
 	{
 		CellReference cr = new CellReference(getCurrentRow(), getCurrentColumn());
 		m_currentCellStack.push(cr);
