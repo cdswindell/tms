@@ -55,7 +55,7 @@ public class Token implements Labeled
         setOperator(o);
     }
 
-    Token(String label, TokenType tt, Operator o)
+    public Token(String label, TokenType tt, Operator o)
     {
         m_label = label;
         setTokenType(tt);

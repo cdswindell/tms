@@ -168,7 +168,35 @@ public class TokenMapper
         if (label == null || label.trim().length() == 0)
             throw new IllegalTableStateException("Labeled operator required");
         
-        m_userTokenMap.remove(label.trim().toLowerCase());
-        
+        m_userTokenMap.remove(label.trim().toLowerCase());        
     }
+    
+    public void overloadOperator(String theOp, Operator oper)
+    {
+        if (theOp == null || theOp.trim().length() == 0)
+            throw new IllegalTableStateException("+, -, *, or / required");
+        
+        theOp = theOp.trim();
+        if (theOp != "+" && theOp != "-" && theOp != "*" && theOp != "/")
+            throw new IllegalTableStateException("+, -, *, or / required");
+        
+        if (oper == null)
+            throw new IllegalTableStateException("Operator required");
+        
+        TokenType tt = oper.getTokenType();
+        if (tt == null)
+            throw new IllegalTableStateException("Operator TokenType required");
+                
+        switch(tt) {
+            case UnaryOp:
+            case BinaryOp:
+                break;
+                
+            default:
+                throw new IllegalTableStateException("TokenType not supported");
+        }
+        
+        Token t = new Token(theOp, tt, oper);
+    }
+
 }
