@@ -96,13 +96,13 @@ public class TokenMapperTest
 		AddStringNum plusOverload = new AddStringNum();
         tm.overloadOperator("+", plusOverload);
         
-        PostfixStackEvaluator pse = new PostfixStackEvaluator("'5' + 6 * 2", null);
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("'5' + 6 * 2 + ('2' + 1)", null);
         assertThat(pse, notNullValue());
         
         Token t = pse.evaluate();
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
-        assertThat(t.getValue(), is(17.0));
+        assertThat(t.getValue(), is(20.0));
     }
         
     public class Square implements Operator
