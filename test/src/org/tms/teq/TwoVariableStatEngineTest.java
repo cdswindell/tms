@@ -32,6 +32,12 @@ public class TwoVariableStatEngineTest extends BaseTest
         
         assertThat(te.calcStatistic(BuiltinOperator.LinearInterceptOper), is(1.0));
         assertThat(te.calcStatistic(BuiltinOperator.LinearSlopeOper), is(0.5));
+        
+        assertThat(te.calculateY(0), is(1.0));
+        assertThat(te.calculateY(2), is(2.0));
+        assertThat(te.calculateY(4), is(3.0));
+        assertThat(te.calculateY(6), is(4.0));
+        assertThat(te.calculateY(100), is(51.0));
     }
 
 }
