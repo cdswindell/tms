@@ -1,6 +1,8 @@
 package org.tms.teq;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -77,6 +79,7 @@ public class TokenMapper
     }
     
     private Map<String, Token> m_userTokenMap = new HashMap<String, Token>();
+    private Map<OverloadKey, Token> m_userOverloadedOps = new HashMap<OverloadKey, Token>();
     private Table m_operTable;
     private TableContext m_context;
     
@@ -159,7 +162,7 @@ public class TokenMapper
         m_userTokenMap.put(label.trim().toLowerCase(),  t);
     }
     
-    public void unRegisterOperator(Operator oper)
+    public boolean unRegisterOperator(Operator oper)
     {
         if (oper == null)
             throw new IllegalTableStateException("Operator required");
@@ -168,9 +171,15 @@ public class TokenMapper
         if (label == null || label.trim().length() == 0)
             throw new IllegalTableStateException("Labeled operator required");
         
-        m_userTokenMap.remove(label.trim().toLowerCase());        
+        Token t = m_userTokenMap.remove(label.trim().toLowerCase()); 
+        return t != null;
     }
     
+    public void unRegisterAllOperators()
+    {
+    	m_userTokenMap.clear();
+    }
+
     public void overloadOperator(String theOp, Operator oper)
     {
         if (theOp == null || theOp.trim().length() == 0)
@@ -183,12 +192,14 @@ public class TokenMapper
         if (oper == null)
             throw new IllegalTableStateException("Operator required");
         
+        if (oper.numArgs() != 2)
+            throw new IllegalTableStateException("Operator must take exactly 2 arguments");
+        
         TokenType tt = oper.getTokenType();
         if (tt == null)
             throw new IllegalTableStateException("Operator TokenType required");
                 
         switch(tt) {
-            case UnaryOp:
             case BinaryOp:
                 break;
                 
@@ -197,6 +208,123 @@ public class TokenMapper
         }
         
         Token t = new Token(theOp, tt, oper);
+        OverloadKey key = new OverloadKey(theOp, oper.getArgTypes());
+        
+        m_userOverloadedOps.put(key, t);
+    }
+    
+    public boolean unOverloadOperator(String theOp, Operator oper)
+    {
+    	if (theOp == null || theOp.trim().length() == 0)
+    		throw new IllegalTableStateException("+, -, *, or / required");
+
+    	theOp = theOp.trim();
+    	if (theOp != "+" && theOp != "-" && theOp != "*" && theOp != "/")
+    		throw new IllegalTableStateException("+, -, *, or / required");
+
+    	if (oper == null)
+    		throw new IllegalTableStateException("Operator required");
+
+    	if (oper.numArgs() != 2)
+    		throw new IllegalTableStateException("Operator must take exactly 2 arguments");
+
+
+    	OverloadKey key = new OverloadKey(theOp, oper.getArgTypes());
+
+    	Token t =  m_userOverloadedOps.remove(key);
+    	return t != null;
+    }
+    
+    public void unOverloadAllOperators()
+    {
+    	m_userOverloadedOps.clear();
+    }
+
+    public Operator fetchOverload(String theOp, Class<?>... paramTypes) 
+    {
+    	if (theOp == null || theOp.trim().length() == 0)
+    		throw new IllegalTableStateException("+, -, *, or / required");
+
+    	theOp = theOp.trim();
+    	if (theOp != "+" && theOp != "-" && theOp != "*" && theOp != "/")
+    		throw new IllegalTableStateException("+, -, *, or / required");
+
+    	if (paramTypes == null)
+    		throw new IllegalTableStateException("Parameter types required");
+
+    	if (paramTypes.length != 2)
+    		throw new IllegalTableStateException("Must specify 2 parameter types");
+
+
+    	OverloadKey key = new OverloadKey(theOp, paramTypes);
+    	Token t = m_userOverloadedOps.get(key);
+    	
+    	if (t != null)
+    		return t.getOperator();
+    	else
+    		return null;   	
+    }
+    
+    static private class OverloadKey 
+    {
+    	private String m_op;
+    	private List<Class<?>> m_argTypes;
+    	
+    	private OverloadKey(String theOp, Class<?>... paramTypes)
+    	{
+    		m_op = theOp;
+    		m_argTypes = new ArrayList<Class<?>>();
+    		
+    		if (paramTypes != null) {
+    			for (Class<?> pType : paramTypes) {
+    				m_argTypes.add(pType);
+    			}
+    		}    		
+    	}
+
+		@Override
+		public int hashCode() 
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result +  m_op.hashCode();
+			
+			if (m_argTypes != null) {
+				for (Class<?> pType : m_argTypes) {
+					result = prime * result + pType.hashCode();
+				}
+			}
+			
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) 
+		{
+			if (this == obj)
+				return true;
+			
+			if (obj == null)
+				return false;
+			
+			if (getClass() != obj.getClass())
+				return false;
+			
+			OverloadKey other = (OverloadKey) obj;
+			if (!m_op.equals(other.m_op))
+				return false;
+			
+			int numArgs = m_argTypes.size();
+			if (numArgs != other.m_argTypes.size())
+				return false;
+			
+			for (int i = 0; i < numArgs; i++) {
+				if (m_argTypes.get(i) != other.m_argTypes.get(i))
+					return false;
+			}
+			
+			return true;
+		}
     }
 
 }

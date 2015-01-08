@@ -85,6 +85,26 @@ public class TokenMapperTest
         assertThat(t.getValue(), is(6.0));
     }
     
+    @Test
+    public final void testOverloadOperator()
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        assertThat(tm, notNullValue());
+        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+        
+        // register new operator
+		AddStringNum plusOverload = new AddStringNum();
+        tm.overloadOperator("+", plusOverload);
+        
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("'5' + 6", null);
+        assertThat(pse, notNullValue());
+        
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(11.0));
+    }
+        
     public class Square implements Operator
     {
 
@@ -171,6 +191,50 @@ public class TokenMapperTest
             double d3 = args[2].getNumericValue();
             
             return new Token(d1 + d2 + d3);
+        }       
+    }
+    
+    public class AddStringNum implements Operator
+    {
+        @Override
+        public TokenType getTokenType()
+        {
+            return TokenType.BinaryOp;
+        }
+
+        @Override
+        public int getPriority()
+        {
+            return 2;
+        }
+
+        @Override
+        public String getLabel()
+        {
+            return "+";
+        }
+
+        @Override
+        public int numArgs()
+        {
+            return 2;
+        }
+
+        @Override
+        public Class<?>[] getArgTypes()
+        {
+            return new Class<?>[] {String.class, Double.class};
+        }
+
+        @Override
+        public Token evaluate(Token... args)
+        {
+            assert args != null && args.length == 1;
+            
+            String s1 = args[0].getStringValue();
+            double d2 = args[1].getNumericValue();
+            
+            return new Token(Double.valueOf(s1) + d2);
         }       
     }
 }

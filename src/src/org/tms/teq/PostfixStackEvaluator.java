@@ -180,6 +180,16 @@ public class PostfixStackEvaluator
         else if (x.isString() && y.isNumeric())
             return doBuiltInOp(bio, x.getStringValue(), y.getNumericValue());
         
+        // if a token mapper exists, look for a supporting overload
+        TokenMapper tm = m_pfs.getTokenMapper();
+        if (tm != null) {
+        	Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
+        	if (oper != null) {
+        		Token t = oper.evaluate(x, y);
+        		return t;
+        	}
+        }
+        
         throw new UnimplementedException(String.format("Unimplemented built in operator: %s (%s, %s)", 
                 bio, 
                 x.getDataType() != null ? x.getDataType().getSimpleName() : "null",
@@ -203,6 +213,17 @@ public class PostfixStackEvaluator
                    return Token.createErrorToken(ErrorCode.InvalidOperand);
                 
             default:
+                // if a token mapper exists, look for a supporting overload
+                TokenMapper tm = m_pfs.getTokenMapper();
+                if (tm != null) {
+                	Token x = new Token(TokenType.Operand, s1);
+                	Token y = new Token(TokenType.Operand, n2);
+                	Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
+                	if (oper != null) {
+                		Token t = oper.evaluate(x, y);
+                		return t;
+                	}
+                }
                 throw new UnimplementedException("Unimplemented built in String/Numeric operator: " + bio);    
         }               
     }
@@ -217,6 +238,17 @@ public class PostfixStackEvaluator
                 return new Token(TokenType.Operand, s1.replace(s2, ""));
                 
             default:
+                // if a token mapper exists, look for a supporting overload
+                TokenMapper tm = m_pfs.getTokenMapper();
+                if (tm != null) {
+                	Token x = new Token(TokenType.Operand, s1);
+                	Token y = new Token(TokenType.Operand, s2);
+                	Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
+                	if (oper != null) {
+                		Token t = oper.evaluate(x, y);
+                		return t;
+                	}
+                }
                 throw new UnimplementedException("Unimplemented built in String operator: " + bio);    
         }               
     }

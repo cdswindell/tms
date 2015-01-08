@@ -93,6 +93,7 @@ public class InfixExpressionParser
         
         char [] exprChars = m_expr.toCharArray();
         TokenMapper tm = TokenMapper.fetchTokenMapper(table);
+        ifs.setTokenMapper(tm);
         boolean parsingLabel = false;
         while (curPos < exprLen) {
             parsingLabel = false;

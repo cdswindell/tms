@@ -23,12 +23,24 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     
     private StackType m_stackType;
 
+	private TokenMapper m_tokenMapper;
+
     protected EquationStack(StackType st) 
     {
     	super();
     	m_stackType = st;
     }
     
+	public TokenMapper getTokenMapper()
+	{
+		return m_tokenMapper;
+	}
+	
+	public void setTokenMapper(TokenMapper tm) 
+	{
+		m_tokenMapper = tm;
+	}
+	
     @Override
 	public boolean add(Token t) 
     {

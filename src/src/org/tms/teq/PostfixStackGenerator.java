@@ -93,6 +93,11 @@ public class PostfixStackGenerator
         if (pfs == null)
             return pr.addIssue(ParserStatusCode.EmptyStack, "Postfix Stack"); 
         
+        // set the postfix stac k's token mapper to that of the ifs
+        // the token mapper may be used to process operator overloads
+        // during evaluation
+        pfs.setTokenMapper(ifs.getTokenMapper());
+        
         // create the temporary op stack, ops will be pushed onto this stack 
         // until one with a lessor priority is encountered        
         EquationStack ops = new EquationStack(StackType.Op);
