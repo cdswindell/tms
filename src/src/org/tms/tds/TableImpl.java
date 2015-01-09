@@ -464,9 +464,22 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private synchronized void ensureRowsExist()
     {
         pushCurrent();
+        
         for (int i = 1; i <= this.getNumRows(); i++) {
             RowImpl r = this.getRowInternal(true, Access.ByIndex, i);
             assert r != null;
+        }
+        
+        popCurrent();
+    }
+    
+    private synchronized void ensureColumnsExist()
+    {
+        pushCurrent();
+        
+        for (int i = 1; i <= this.getNumColumns(); i++) {
+            ColumnImpl c = this.getColumnInternal(true, Access.ByIndex, i);
+            assert c != null;
         }
         
         popCurrent();
@@ -956,6 +969,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
 	public Iterable<Column> columnIterable()
     {
+        ensureColumnsExist();
         return new BaseElementIterable<Column>(getColumns());
     }
     
