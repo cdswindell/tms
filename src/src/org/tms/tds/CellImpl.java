@@ -1,10 +1,12 @@
 package org.tms.tds;
 
+import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
+import org.tms.teq.Token;
 
-public class CellImpl extends TableElementImpl
+public class CellImpl extends TableElementImpl implements Cell
 {
     private Object m_cellValue;
     private ColumnImpl m_col;
@@ -21,7 +23,7 @@ public class CellImpl extends TableElementImpl
      * Field getters/setters
      */
     
-    protected Object getCellValue()
+    public Object getCellValue()
     {
         return m_cellValue;
     }
@@ -29,6 +31,16 @@ public class CellImpl extends TableElementImpl
     protected void setCellValue(Object value)
     {
         setCellValue(value, true);
+    }
+    
+    protected void setDerivedCellValue(Token t)
+    {
+        if (t.isError())
+            ;
+        else if (t.isNull())
+            ;
+        else
+            setCellValue(t.getValue(), true);
     }
     
     void setCellValueNoDataTypeCheck(Object value)

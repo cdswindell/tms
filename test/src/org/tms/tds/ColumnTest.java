@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.tms.api.Access;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 
@@ -215,10 +216,10 @@ public class ColumnTest
         assertThat(t.getNumColumns(), is(100));    
         
         int idx = 0;
-        for (ColumnImpl c : t.columnIterable()) {
+        for (Column c : t.columnIterable()) {
         	idx++;
         	if (c != null)
-        		assertThat(c.getIndex(), is(idx));
+        		assertThat(((ColumnImpl)c).getIndex(), is(idx));
         }
         
         assertThat(idx, is(100));   	

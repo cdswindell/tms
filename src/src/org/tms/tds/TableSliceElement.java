@@ -1,7 +1,9 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
@@ -17,6 +19,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     private JustInTimeSet<RangeImpl> m_ranges;
     private boolean m_inUse;
     private Derivation m_deriv;
+    private Set<TableSliceElement> m_affects;
 
     public TableSliceElement(ElementType eType, TableElementImpl e)
     {
@@ -50,7 +53,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     public String getDerivation()
     {
         if (m_deriv != null)
-            return m_deriv.getInfixExpression();
+            return m_deriv.getAsEnteredExpression();
         else
             return null;
     }
@@ -61,11 +64,27 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             m_deriv.destroy();
         
         m_deriv = Derivation.create(expr, this);
+        
+        // evaluate values
+        if (m_deriv != null && m_deriv.isConverted()) {
+            m_deriv.recalculateTarget();
+        }           
     }
     
     /*
      * Class-specific methods
      */
+    
+    public void addToAffects(Derivable elem)
+    {
+        m_affects.add((TableSliceElement)elem);
+    }
+    
+    public void removeFromAffects(Derivable elem)
+    {
+        m_affects.remove((TableSliceElement)elem);
+    }
+    
     void compactIfNeeded(ArrayList<? extends TableSliceElement> cols, int capacity) 
     {
 		// TODO Auto-generated method stub
@@ -149,6 +168,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         }
         
         // initialize other member fields
+        m_affects = new HashSet<TableSliceElement>();
         m_ranges = new JustInTimeSet<RangeImpl>();
         m_inUse = false;
     } 

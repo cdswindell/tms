@@ -10,7 +10,9 @@ import java.util.Map;
 import java.util.Queue;
 
 import org.tms.api.Access;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
@@ -18,6 +20,7 @@ import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.teq.Token;
 import org.tms.util.JustInTimeSet;
 
 public class TableImpl extends TableCellsElementImpl implements Table
@@ -156,6 +159,22 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
     }
     
+    /*
+     * Methods defined by interface Table; mostly adapters
+     */
+    
+    @Override
+    public CellImpl getCell(Row row, Column col)
+    {
+        return getCell((RowImpl)row, (ColumnImpl)col);
+    }    
+    
+    @Override
+    public void setCellValue(Row row, Column col, Token t)
+    {
+        setCellValue((RowImpl)row, (ColumnImpl)col, t);        
+    }
+
     @Override
     public Object getProperty(TableProperty key)
     {
@@ -435,6 +454,22 @@ public class TableImpl extends TableCellsElementImpl implements Table
         	r.setCurrent();
         
         return r;
+    }
+    
+    /**
+     * As the rows array is created sparse, where individual rows are created 
+     * only when accessed, this method is needed to build out all rows when
+     * in the case where they are to be iterated over
+     */
+    private synchronized void ensureRowsExist()
+    {
+        pushCurrent();
+        for (int i = 1; i <= this.getNumRows(); i++) {
+            RowImpl r = this.getRowInternal(true, Access.ByIndex, i);
+            assert r != null;
+        }
+        
+        popCurrent();
     }
     
     /**
@@ -848,9 +883,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
     public int getNumCells()
     {
         int numCells = 0;
-        for (ColumnImpl c : columnIterable()) {
-            if (c != null)
-                numCells += c.getNumCells();
+        for (Column c : columnIterable()) {
+            if (c != null) {
+                ColumnImpl col = (ColumnImpl)c;
+                numCells += col.getNumCells();
+            }
         }
         
         return numCells;
@@ -863,6 +900,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
         assert this == row.getTable() && this == col.getTable(): "Row/Column table mismatch";
         
         return col.getCell(row);
+    }
+    
+    protected void setCellValue(RowImpl row, ColumnImpl col, Token t) 
+    {
+        CellImpl cell = getCell(row, col);
+        if (cell != null)
+            cell.setDerivedCellValue(t);
     }
     
     /**
@@ -904,24 +948,25 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		m_currentCellStack.push(cr);
 	}
 
-	protected Iterable<RowImpl> rowIterable()
+	public Iterable<Row> rowIterable()
     {
-        return new BaseElementIterable<RowImpl>(getRows());
+	    ensureRowsExist();
+        return new BaseElementIterable<Row>(getRows());
     }
     
-    protected Iterable<ColumnImpl> columnIterable()
+	public Iterable<Column> columnIterable()
     {
-        return new BaseElementIterable<ColumnImpl>(getColumns());
+        return new BaseElementIterable<Column>(getColumns());
     }
     
-    protected Iterable<RangeImpl> rangeIterable()
+	public Iterable<RangeImpl> rangeIterable()
     {
         return new BaseElementIterable<RangeImpl>(m_ranges);
     }
     
-    protected Iterator<ColumnImpl> columnIterator()
+    protected Iterator<Column> columnIterator()
     {
-        return new BaseElementIterable<ColumnImpl>(getColumns());
+        return new BaseElementIterable<Column>(getColumns());
     }
     
     private class CellReference 

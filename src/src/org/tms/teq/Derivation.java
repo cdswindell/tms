@@ -1,9 +1,11 @@
 package org.tms.teq;
 
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.tms.api.BaseElement;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.Row;
@@ -14,9 +16,12 @@ import org.tms.api.exceptions.ReadOnlyException;
 
 public class Derivation  
 {
-
     public static Derivation create(String expr, Derivable elem)
     {
+        // create the derivation structure and save the as-entered exprerssion
+        Derivation deriv = new Derivation();
+        deriv.m_asEntered = new String(expr);
+        
         // parse the expression
         Table t = elem.getTable();
         InfixExpressionParser ifParser = new InfixExpressionParser(expr, t);
@@ -26,7 +31,6 @@ public class Derivation
             throw new InvalidExpressionException(pr);
 
         // otherwise, harvest the infix stack
-        Derivation deriv = new Derivation();
         deriv.m_ifs = ifParser.getInfixStack();
         deriv.m_parsed = true;
         
@@ -43,6 +47,32 @@ public class Derivation
         // create an evaluator
         PostfixStackEvaluator pfe = new PostfixStackEvaluator(deriv.m_pfs, t);
         deriv.m_pfe = pfe;
+        
+        // note cols/rows that affect this derivation
+        Iterator<Token> iter = deriv.m_ifs.iterator();
+        while(iter != null && iter.hasNext()) {
+            Token tk = iter.next();
+            TokenType tt = tk.getTokenType();
+            
+            switch (tt) {
+                case ColumnRef:
+                    if (tk.getColumnValue() != null) {
+                        deriv.m_affectedByCols.add(tk.getColumnValue());
+                        tk.getColumnValue().addToAffects(elem);
+                    }
+                    break;
+                    
+                case RowRef:
+                    if (tk.getRowValue() != null) {
+                        deriv.m_affectedByRows.add(tk.getRowValue());
+                        tk.getRowValue().addToAffects(elem);
+                    }
+                    break;
+                    
+                default:
+                    break;
+            }            
+        }
         
         // finally, retain the derivable element and return the derivation
         deriv.m_target = elem;
@@ -86,7 +116,7 @@ public class Derivation
     public String getPostfixExpression()
     {
         if (m_pfs != null)
-            return m_ifs.toExpression();
+            return m_pfs.toExpression();
         else
             return null;
     }
@@ -109,13 +139,54 @@ public class Derivation
         Table t = m_target.getTable();
         t.pushCurrent();
         
+        // currently support derived rows, columns, and cells, 
+        // dispatch to correct handler
+        if (m_target instanceof Column)
+            recalculateTargetColumn();
+        else if (m_target instanceof Row)
+            recalculateTargetRow();
+        else if (m_target instanceof Cell)
+            recalculateTargetCell();
+        
         t.popCurrent();      
     }
     
+    private void recalculateTargetCell()
+    {
+        Cell cell = (Cell)m_target;
+        
+    }
+
+    private void recalculateTargetRow()
+    {
+        Row row = (Row)m_target;
+        Table tbl = row.getTable();
+        for (Column col : tbl.columnIterable()) {
+            Token t = m_pfe.evaluate(row, col);
+            tbl.setCellValue(row, col, t);
+        }        
+    }
+
+    private void recalculateTargetColumn()
+    {
+        Column col = (Column)m_target;
+        Table tbl = col.getTable();
+        for (Row row : tbl.rowIterable()) {
+            Token t = m_pfe.evaluate(row, col);
+            tbl.setCellValue(row, col, t);
+        }       
+    }
+
     public void destroy()
     {
         // TODO Auto-generated method stub
         
     }
-
+    
+    public String toString()
+    {
+        return String.format("%s [%s %s]", 
+                this.getAsEnteredExpression(),
+                isParsed() ? "parsed" : "", isConverted() ? "converted" : "");
+    }
 }

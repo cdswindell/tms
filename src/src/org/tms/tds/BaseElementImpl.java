@@ -347,15 +347,15 @@ abstract public class BaseElementImpl implements BaseElement
      *
      * @param <E>
      */
-    protected class BaseElementIterable<E extends BaseElementImpl> implements Iterator<E>, Iterable<E>
+    protected class BaseElementIterable<E extends BaseElement> implements Iterator<E>, Iterable<E>
     {
         private Iterator<E> m_iter;
         
         @SuppressWarnings("unchecked")
-        public BaseElementIterable(Collection<? extends BaseElementImpl> elems)
+        public BaseElementIterable(Collection<? extends BaseElement> elems)
         {
             if (elems != null) {
-                List<BaseElementImpl> copy = (List<BaseElementImpl>) new ArrayList<E>(elems.size());
+                List<BaseElement> copy = (List<BaseElement>) new ArrayList<E>(elems.size());
                 copy.addAll(elems);
                 m_iter = (Iterator<E>) (copy).iterator();
             }

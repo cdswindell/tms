@@ -1,6 +1,8 @@
 package org.tms.teq;
 
+import org.tms.api.Column;
 import org.tms.api.Operator;
+import org.tms.api.Row;
 
 
 public class Token implements Labeled
@@ -106,6 +108,22 @@ public class Token implements Labeled
             return null;
     }
 
+    public Column getColumnValue()
+    {
+        if (m_value != null && m_value instanceof Column)
+            return (Column)m_value;
+        else
+            return null;
+    }
+    
+    public Row getRowValue()
+    {
+        if (m_value != null && m_value instanceof Row)
+            return (Row)m_value;
+        else
+            return null;
+    }
+    
     void setValue(Object value)
     {
         if (value instanceof Number && value.getClass() != Double.class) {
