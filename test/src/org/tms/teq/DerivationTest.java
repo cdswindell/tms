@@ -33,6 +33,7 @@ public class DerivationTest
         String expr = c1.getDerivation();
         assertThat(expr, notNullValue());
         assertThat(expr, is("RowIndex + Cidx"));      
+        assertThat(tbl.getCellValue(r1,  c1), is(18.0));
         
         // get the cell and make sure it's value is correct
         Cell c = tbl.getCell(r1,  c1);
@@ -40,6 +41,32 @@ public class DerivationTest
         assertThat(c.getCellValue(), is(18.0));
     }
 
+    @Test
+    public final void testSetDerivationRow()
+    {
+        Table tbl = TableFactory.createTable(12, 10);        
+        assert (tbl != null);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        Row r1 = tbl.addRow(Access.ByIndex, 10);
+        Column c1 = tbl.addColumn(Access.ByIndex, 8);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        // create the derivation
+        r1.setDerivation("ColumnIndex * 2");
+        assertThat(r1.isDerived(), is(true));
+        
+        String expr = r1.getDerivation();
+        assertThat(expr, notNullValue());
+        assertThat(expr, is("ColumnIndex * 2"));      
+        assertThat(tbl.getCellValue(r1,  c1), is(16.0));
+        
+        // get the cell and make sure it's value is correct
+        Cell c = tbl.getCell(r1,  c1);
+        assertThat(c, notNullValue());
+        assertThat(c.getCellValue(), is(16.0));
+    }
+    
     @Test
     public final void testCreate()
     {

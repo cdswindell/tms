@@ -1,7 +1,5 @@
 package org.tms.api;
 
-import org.tms.teq.Token;
-
 public interface Table extends TableElement
 {
     
@@ -12,7 +10,9 @@ public interface Table extends TableElement
     public Column addColumn(Access mode, Object... mda);   
     
     public Cell getCell(Row row, Column col);
-    public void setCellValue(Row row, Column col, Token t);
+       
+    public Object getCellValue(Row row, Column col);
+    public void setCellValue(Row row, Column col, Object o);
 
     public void pushCurrent();
     public void popCurrent();

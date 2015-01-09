@@ -170,9 +170,15 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }    
     
     @Override
-    public void setCellValue(Row row, Column col, Token t)
+    public Object getCellValue(Row row, Column col)
     {
-        setCellValue((RowImpl)row, (ColumnImpl)col, t);        
+        return getCellValue((RowImpl)row, (ColumnImpl)col);        
+    }
+    
+    @Override
+    public void setCellValue(Row row, Column col, Object o)
+    {
+        setCellValue((RowImpl)row, (ColumnImpl)col, o);        
     }
 
     @Override
@@ -915,11 +921,25 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return col.getCell(row);
     }
     
-    protected void setCellValue(RowImpl row, ColumnImpl col, Token t) 
+    protected void setCellValue(RowImpl row, ColumnImpl col, Object o) 
     {
         CellImpl cell = getCell(row, col);
-        if (cell != null)
-            cell.setDerivedCellValue(t);
+        if (cell != null) {
+            if (o instanceof Token)
+                cell.setDerivedCellValue((Token)o);
+            else
+                cell.setCellValue(o);
+        }
+    }
+    
+    protected Object getCellValue(RowImpl row, ColumnImpl col) 
+    {
+        CellImpl cell = getCell(row, col);
+        if (cell != null) {
+            return cell.getCellValue();
+        }
+        else
+            return null;
     }
     
     /**
