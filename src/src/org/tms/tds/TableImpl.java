@@ -872,8 +872,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
             for (TableSliceElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
-                    if (p != null && p.equals(value))
+                    if (p != null && p.equals(value)) {
+                    	tes.setCurrent();
                         return tes;
+                    }
                 }
             }
         }
@@ -889,8 +891,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
             for (TableSliceElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
-                    if (p != null && p.equals(value))
+                    if (p != null && p.equals(value)) {
+                    	tes.setCurrent();
                         return tes;
+                    }
                 }
             }
         }
@@ -918,6 +922,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
         assert col != null : "Column required";
         assert this == row.getTable() && this == col.getTable(): "Row/Column table mismatch";
         
+        row.setCurrent();
+        col.setCurrent();
         return col.getCell(row);
     }
     
@@ -936,6 +942,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     {
         CellImpl cell = getCell(row, col);
         if (cell != null) {
+            row.setCurrent();
+            col.setCurrent();
             return cell.getCellValue();
         }
         else
