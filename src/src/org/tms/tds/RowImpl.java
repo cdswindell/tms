@@ -214,6 +214,8 @@ public class RowImpl extends TableSliceElement implements Row
             
             // cache the cell offset so it can be reused, 
             parent.cacheCellOffset(this.getCellOffset(), true);
+            
+            parent.setCurrentRow(null);
     	}
     	
     	// Mark the column not in in use

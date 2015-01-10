@@ -127,6 +127,8 @@ public class ColumnImpl extends TableSliceElement implements Column
         
         // if the cell is non-null, mark the row and column as in use
         if (c != null) {
+        	this.setCurrent();
+        	row.setCurrent();
             this.setInUse(true);  
             row.setInUse(true);
         }
@@ -352,6 +354,8 @@ public class ColumnImpl extends TableSliceElement implements Column
             // compact memory, if there are too many free columns
             int capacity = parent.getColumnsCapacity();
             compactIfNeeded(cols, capacity);
+            
+            parent.setCurrentColumn(null);
     	}   	
 
     	// Mark the column not in in use
@@ -369,6 +373,7 @@ public class ColumnImpl extends TableSliceElement implements Column
 		assert parent != null : "Parent table required";
 		
 		pushCurrent();
+		
 		RowImpl r = parent.getRow(Access.First);
 		if (r != null) {
 			while(r != null) {
@@ -380,6 +385,7 @@ public class ColumnImpl extends TableSliceElement implements Column
 			
 			this.setInUse(true);			
 		}
+		
 		popCurrent();
 	}
 }
