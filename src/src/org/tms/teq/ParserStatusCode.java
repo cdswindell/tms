@@ -7,6 +7,10 @@ public enum ParserStatusCode
     EmptyStack,
     ParenMismatch,
     IncompleteExpresion,
+    InvalidCellReferemce,
+    InvalidColumnReferemce,
+    InvalidRangeReferemce,
+    InvalidRowReferemce,
     InvalidExpression,
     InvalidExpressionStack,
     InvalidNumericExpression,
@@ -14,7 +18,7 @@ public enum ParserStatusCode
     InvalidCommaLocation,
     InvalidOperatorLocation,
     NoSuchOperator, 
-    SingletonQuote,
+    SingletonQuote
     ;
     
     public boolean isSuccess()

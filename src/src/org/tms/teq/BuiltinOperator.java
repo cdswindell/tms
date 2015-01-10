@@ -84,8 +84,8 @@ public enum BuiltinOperator implements Labeled, Operator
     ColumnIndex(TokenType.BuiltIn, 5, "ColumnIndex", "cidx"),
     RowIndex(TokenType.BuiltIn, 5, "RowIndex", "ridx"),
 
-    Column(TokenType.BuiltIn, 6),
-    Row(TokenType.BuiltIn, 6),
+    Column(TokenType.BuiltIn, 6, "Column", "Col", "C"),
+    Row(TokenType.BuiltIn, 6, "Row", "R"),
     Cell(TokenType.BuiltIn, 6),
 
     SumOper(TokenType.StatOp, 5),

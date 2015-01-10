@@ -100,6 +100,15 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
         push(t);
     }
 
+    public void push(TokenType tType, Operator oper, Object value)
+    {
+        Token t = new Token(tType);
+        t.setOperator(oper);
+        t.setValue(value);
+        
+        push(t);
+    }
+
     public void push(TokenType tType, Object value)
     {
         Token t = new Token(tType);

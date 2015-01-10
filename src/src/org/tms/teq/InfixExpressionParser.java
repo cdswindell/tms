@@ -4,9 +4,12 @@ import java.util.Iterator;
 
 import org.tms.api.Operator;
 import org.tms.api.Table;
+import org.tms.api.exceptions.InvalidExpressionException;
 
 public class InfixExpressionParser
 {
+	private static final String sf_TABLE_REF = "::" ;
+	
     private String m_expr;
     private Table m_table;
     private EquationStack m_ifs;
@@ -36,9 +39,8 @@ public class InfixExpressionParser
     {
         if (m_ifs == null) {
             ParseResult pr = parseInfixExpression();
-            if (pr != null && pr.isFailure()) {
-                // TODO: throw exception
-            }
+            if (pr != null && pr.isFailure()) 
+                throw new InvalidExpressionException(pr);
         }
         
         return m_ifs;
@@ -371,7 +373,9 @@ public class InfixExpressionParser
         return text.length() + 2;
     }
 
-    private int parseNumber(char[] exprChars, int curPos, EquationStack ifs, 
+    private int parseNumber(char[] exprChars, 
+    						int curPos, 
+    						EquationStack ifs, 
                             Table table,
                             ParseResult pr)
     {
@@ -466,12 +470,24 @@ public class InfixExpressionParser
         Token t = tm.lookUpToken(sb.toString());
         TokenType tt = null;
         Operator oper = null;
+        Object value = null;
         if (t != null) {
         	charsParsed = sb.length();
         	tt = t.getTokenType();
         	oper = t.getOperator();
+        	int additionalCharsParsed = 0;
         	
-        	// TODO: handle row/col/range references
+        	// handle Row/Column/Range references
+        	if (oper.getBuiltinOperator() == BuiltinOperator.Column) {
+        		additionalCharsParsed = parseColumnReference(exprChars, curPos + charsParsed, table, t);
+        		if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+        			charsParsed += additionalCharsParsed;
+        		else {
+        			if (pr != null)
+        				pr.addIssue(ParserStatusCode.InvalidColumnReferemce, curPos + charsParsed);
+        			return 0;
+        		}
+        	}
         }
         else {
         	// TODO: handle other tricks in teq_parse
@@ -484,7 +500,7 @@ public class InfixExpressionParser
         		return 0;
         	}
         	
-        	ifs.push(tt, oper);
+        	ifs.push(tt, oper, value);
         }
         else {
         	if (tt != TokenType.BinaryOp) {
@@ -493,13 +509,19 @@ public class InfixExpressionParser
         		return 0;
         	}
         	
-        	ifs.push(tt, oper);        	
+        	ifs.push(tt, oper, value);        	
         }
         
         return charsParsed;
     }
     
-    public String toString()
+    private int parseColumnReference(char[] exprChars, int curPos, Table table, Token t) 
+    {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public String toString()
     {
         return String.format("[ %s ]", m_expr != null ? m_expr : "<null>");
     }

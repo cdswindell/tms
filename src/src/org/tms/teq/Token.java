@@ -126,6 +126,7 @@ public class Token implements Labeled
     
     void setValue(Object value)
     {
+    	// we store numbers as doubles, so do some type conversion
         if (value instanceof Number && value.getClass() != Double.class) {
             if (value instanceof Integer)
                 value = ((Integer)value).doubleValue();
