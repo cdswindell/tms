@@ -16,7 +16,7 @@ import org.tms.api.exceptions.UnimplementedException;
 
 abstract public class BaseElementImpl implements BaseElement
 {
-    abstract protected boolean isEmpty();
+    abstract protected boolean isNull();
     
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
@@ -159,8 +159,8 @@ abstract public class BaseElementImpl implements BaseElement
             case isReadOnly:
                 return isReadOnly();
                 
-            case isEmpty:
-                return isEmpty();
+            case isNull:
+                return isNull();
                 
             default:
                 if (key.isOptional())

@@ -12,7 +12,7 @@ public enum TableProperty implements Comparable<TableProperty>
     // Base Element Properties
     Label,
     Description,   
-    isEmpty(true, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    isNull(true, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     isReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column),
     isSupportsEmpty(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     

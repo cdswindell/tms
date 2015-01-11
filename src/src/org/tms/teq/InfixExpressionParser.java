@@ -2,6 +2,8 @@ package org.tms.teq;
 
 import java.util.Iterator;
 
+import org.tms.api.Access;
+import org.tms.api.Column;
 import org.tms.api.Operator;
 import org.tms.api.Table;
 import org.tms.api.exceptions.InvalidExpressionException;
@@ -478,7 +480,7 @@ public class InfixExpressionParser
         	int additionalCharsParsed = 0;
         	
         	// handle Row/Column/Range references
-        	if (oper.getBuiltinOperator() == BuiltinOperator.Column) {
+        	if (tt == TokenType.ColumnRef) {
         		additionalCharsParsed = parseColumnReference(exprChars, curPos + charsParsed, table, t);
         		if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
         			charsParsed += additionalCharsParsed;
@@ -517,12 +519,131 @@ public class InfixExpressionParser
     
     private int parseColumnReference(char[] exprChars, int curPos, Table table, Token t) 
     {
-		// TODO Auto-generated method stub
-		return 0;
+    	ElementReference er = parseElementReference(exprChars, curPos);
+    	if (er.foundToken()) {
+    		Column col = null;
+    		if (er.isIndex()) 
+    			col = table.getColumn(Access.ByIndex, er.getIndex());
+    		else {
+    			String label = er.getLabel();
+    			col = table.getColumn(Access.ByLabel, label);
+    			
+    			int tblRefIdx = 0;
+    			if (col == null && (tblRefIdx = label.indexOf(sf_TABLE_REF)) > -1) {
+    				
+    			}
+    		}
+    		
+    		// if we found a column, save it in the token and return the consumed chars
+    		if (col != null) {
+    			t.setValue(col);
+    			return er.getCharsParsed();
+    		}
+    	}
+    	
+    	// failure
+    	return 0;
+	}
+
+	private ElementReference parseElementReference(char[] exprChars, int curPos) 
+	{
+    	int charsParsed = 0; // assume the worst
+    	
+        /*
+         * Find a parsable token, as defined as:
+         *	-- an integer
+         *  -- an unquoted word
+         *  -- a quoted string
+         */
+    	StringBuffer sb = new StringBuffer();
+    	int maxPos = exprChars.length;
+    	char quoteChar = 0;
+    	boolean foundToken = false;
+    	boolean foundNonDigit = false;
+    	for (int i = curPos; i < maxPos; i++) {
+    		char c = exprChars[i];
+    		charsParsed++;
+    		
+    		// handle whitespace
+    		if (Character.isWhitespace(c)) {
+    			if (quoteChar != 0) // include whitespace in labels
+    				;
+    			else if (foundToken) // if we've found a token, white space terminates it
+    				break;
+    			else
+    				continue;
+    		}
+    		
+    		// found terminating quote?
+    		if (quoteChar != 0 && c == quoteChar) 
+    			break;
+    		
+    		// found leading quote?
+    		if (!foundToken && quoteChar == 0 && (c == '"' || c == '\'')) {
+    			quoteChar = c;
+    			break;
+    		}
+    		
+    		if (!Character.isDigit(c))
+    			foundNonDigit = true;
+    		
+    		// add the token character to the buffer
+    		foundToken = true;
+    		sb.append(c);
+    	}
+    	
+    	// if all characters are digits, parse them
+    	String label = sb.toString().trim();
+    	int idx = 0;
+    	if (quoteChar == 0 && !foundNonDigit)
+    		idx = Integer.valueOf(label);
+    	
+    	ElementReference er = new ElementReference(foundToken ? charsParsed : 0, label, idx);
+    	
+		return er;
 	}
 
 	public String toString()
     {
         return String.format("[ %s ]", m_expr != null ? m_expr : "<null>");
     }
+	
+	private static class ElementReference
+	{
+		private int m_charsParsed;
+		private int m_index;
+		private String m_label;
+		
+		public ElementReference(int charsParsed, String label, int idx)
+		{
+			m_charsParsed = charsParsed;
+			m_label = label;
+			m_index = idx;
+		}
+		
+		public boolean foundToken()
+		{
+			return m_charsParsed > 0;
+		}
+		
+		public int getCharsParsed()
+		{
+			return m_charsParsed;
+		}
+		
+		public int getIndex()
+		{
+			return m_index;
+		}
+		
+		public boolean isIndex()
+		{
+			return m_index > 0;
+		}
+		
+		public String getLabel()
+		{
+			return m_label;
+		}
+	}
 }

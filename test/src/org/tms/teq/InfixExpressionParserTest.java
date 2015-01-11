@@ -5,6 +5,11 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.tms.api.Access;
+import org.tms.api.Column;
+import org.tms.api.Row;
+import org.tms.api.Table;
+import org.tms.api.TableFactory;
 
 public class InfixExpressionParserTest
 {
@@ -205,4 +210,38 @@ public class InfixExpressionParserTest
         assertThat(pr.isSuccess(), is(false));
         assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
     }  
+    
+    @Test
+    public void testColumnReferenceParsing()
+    {
+        Table t = TableFactory.createTable(10, 10);
+        assertThat(t, notNullValue());           
+        assertThat(t.getNumColumns(), is(0));
+        assertThat(t.getNumRows(), is(0));
+        
+        Row r10 = t.addRow(Access.ByIndex, 10);
+        assertThat(t.getNumRows(), is(10));
+        
+        Column c1 = t.addColumn(Access.Next);
+        assertThat(c1, notNullValue());
+        
+        Column c2 = t.addColumn(Access.Next);
+        assertThat(c2, notNullValue());
+        
+        Column c3 = t.addColumn(Access.Next);
+        assertThat(c3, notNullValue());
+        c3.fill(3);
+        
+        Column c4 = t.addColumn(Access.Next);
+        assertThat(c4, notNullValue());
+        c4.fill(4);
+        
+        assertThat(t.getNumColumns(), is(4));       
+        assertThat(t.getNumRows(), is(10));   
+        
+        // test column index references
+        c2.setDerivation("col 3 + col 4");
+        assertThat(c2.isDerived(), is(true));       
+        assertThat(t.getCellValue(r10, c2), is(7.0));  	
+    }
 }

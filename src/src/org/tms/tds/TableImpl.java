@@ -392,7 +392,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             m_rowCapacityIncr = rowCapacityIncr;
     }
     
-    protected int getNumRows()
+    public int getNumRows()
     {
         return m_rows == null ? 0 : m_rows.size();
     }
@@ -430,7 +430,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return (RowImpl)add(new RowImpl(this), mode, mda);
     }
     
-    protected RowImpl getRow(Access mode, Object...mda)
+    public RowImpl getRow(Access mode, Object...mda)
     {
         return getRowInternal(true, mode, mda);
     }
@@ -601,7 +601,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
     }
 
-    protected int getNumColumns()
+    public int getNumColumns()
     {
         return m_cols == null ? 0 : m_cols.size();
     }
@@ -954,7 +954,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * Empty tables contain no rows or columns
      */
     @Override
-    protected boolean isEmpty()
+    public boolean isNull()
     {
         return getNumRows() == 0 || getNumColumns() == 0 || getNumCells() == 0;
     }

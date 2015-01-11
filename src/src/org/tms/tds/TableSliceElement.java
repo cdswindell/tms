@@ -196,7 +196,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }   
 
 	@Override
-	protected boolean isEmpty() 
+	protected boolean isNull() 
 	{
 		return getNumCells() == 0;
 	}   

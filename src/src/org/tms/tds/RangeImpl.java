@@ -254,7 +254,7 @@ public class RangeImpl extends TableCellsElementImpl
     }
     
     @Override
-    protected boolean isEmpty()
+    protected boolean isNull()
     {
         boolean hasRows = (m_rows != null && !m_rows.isEmpty());
         boolean hasCols = (m_cols != null && !m_cols.isEmpty());
@@ -323,7 +323,7 @@ public class RangeImpl extends TableCellsElementImpl
 	@Override
 	public void fill(Object o) 
 	{
-		if (!isEmpty()) {
+		if (!isNull()) {
 			if (getNumRows() == 0 && m_cols != null) 
 				m_cols.forEach(c->c.fill(o)); // if group is just columns, fill them
 			else if (getNumColumns() == 0 && m_rows != null) 

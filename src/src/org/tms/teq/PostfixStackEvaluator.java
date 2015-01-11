@@ -2,6 +2,7 @@ package org.tms.teq;
 
 import java.util.Iterator;
 
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Operator;
 import org.tms.api.Row;
@@ -56,10 +57,15 @@ public class PostfixStackEvaluator
 		if (m_pfsIter == null)
 			m_pfsIter = m_pfs.descendingIterator();
 		
+		Table tbl = (col != null && row != null) ? col.getTable() : null;
+		
 		Token x;
 		Token y;
 		int numArgs;
 		Token [] args;
+		
+		Column colRef = null;
+		Row rowRef = null;
 		
 		// walk through postfix stack from tail to head
 		while(m_pfsIter.hasNext()) {
@@ -72,6 +78,19 @@ public class PostfixStackEvaluator
 			switch (tt) {
 				case Operand:
 					m_opStack.push(tt, value);
+					break;
+					
+				case ColumnRef:
+					if (value != null && value instanceof Column) {
+						colRef = (Column) value;
+						Cell cell = tbl.getCell(row, colRef);
+						if (cell == null || cell.isNull())
+							m_opStack.push(Token.createNullToken());
+						else
+							m_opStack.push(TokenType.Operand, cell.getCellValue());
+					}
+					else
+						m_opStack.push(Token.createNullToken());
 					break;
 					
 				case UnaryOp:

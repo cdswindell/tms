@@ -251,7 +251,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     }
 
     @Override
-    protected boolean isEmpty()
+    protected boolean isNull()
     {
          return m_registeredTables.isEmpty();
     }

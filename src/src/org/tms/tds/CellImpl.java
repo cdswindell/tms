@@ -146,7 +146,7 @@ public class CellImpl extends TableElementImpl implements Cell
      * A cell is empty if it is null
      */
     @Override
-    protected boolean isEmpty()
+    public boolean isNull()
     {
         return m_cellValue == null;
     }
