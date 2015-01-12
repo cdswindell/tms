@@ -37,13 +37,29 @@ public class PostfixExpressionParserTest
     @Test
     public final void testGetInfixStack()
     {
-        fail("Not yet implemented"); // TODO
+        PostfixStackGenerator pep = new PostfixStackGenerator("3 + 5*7", null); 
+        assertThat(pep, notNullValue());
+        
+        EquationStack ifs = pep.getInfixStack();
+        assertThat(ifs, notNullValue());
+        assertThat(ifs.isEmpty(), is(false));
+        assertThat(ifs.size(), is(5));
     }
 
     @Test
     public final void testGetPostfixStack()
     {
-        fail("Not yet implemented"); // TODO
+        PostfixStackGenerator pep = new PostfixStackGenerator("3 + 5*7 + pi", null); 
+        assertThat(pep, notNullValue());
+        
+        EquationStack ifs = pep.getInfixStack();
+        assertThat(ifs, notNullValue());
+        assertThat(ifs.isEmpty(), is(false));
+        assertThat(ifs.size(), is(7));
+        
+        EquationStack pfs = pep.getPostfixStack();
+        assertThat(pfs, notNullValue());
+        assertThat(pfs.size(), is(7));
     }
 
     @Test
