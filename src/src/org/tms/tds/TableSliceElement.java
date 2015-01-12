@@ -1,7 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -45,11 +45,13 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         return new ArrayList<RangeImpl>(m_ranges.clone());
     } 
     
+    @Override
     public boolean isDerived()
     {
         return m_deriv != null;       
     }
     
+    @Override
     public String getDerivation()
     {
         if (m_deriv != null)
@@ -58,15 +60,31 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             return null;
     }
     
+    @Override
     public void setDerivation(String expr)
     {
-        if (m_deriv != null)
+        if (m_deriv != null) {
+            Derivable elem = m_deriv.getTarget();
+            for (Derivable d : m_deriv.getAffectedBy()) {
+                TableSliceElement tse = (TableSliceElement)d;
+                tse.removeFromAffects(elem);
+            }
+            
             m_deriv.destroy();
+            m_deriv = null;
+        }
         
         m_deriv = Derivation.create(expr, this);
         
-        // evaluate values
+        // mark the rows/columns that impact the deriv, and evaluate values
         if (m_deriv != null && m_deriv.isConverted()) {
+            Derivable elem = m_deriv.getTarget();
+            for (Derivable d : m_deriv.getAffectedBy()) {
+                TableSliceElement tse = (TableSliceElement)d;
+                tse.addToAffects(elem);
+            }
+            
+            m_inUse = true;
             m_deriv.recalculateTarget();
         }           
     }
@@ -75,12 +93,12 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
      * Class-specific methods
      */
     
-    public void addToAffects(Derivable elem)
+    protected void addToAffects(Derivable elem)
     {
         m_affects.add((TableSliceElement)elem);
     }
     
-    public void removeFromAffects(Derivable elem)
+    protected void removeFromAffects(Derivable elem)
     {
         m_affects.remove((TableSliceElement)elem);
     }
@@ -168,7 +186,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         }
         
         // initialize other member fields
-        m_affects = new HashSet<TableSliceElement>();
+        m_affects = new LinkedHashSet<TableSliceElement>();
         m_ranges = new JustInTimeSet<RangeImpl>();
         m_inUse = false;
     } 

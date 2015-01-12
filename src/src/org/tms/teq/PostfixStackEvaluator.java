@@ -74,25 +74,39 @@ public class PostfixStackEvaluator
 			TokenType tt = t.getTokenType();
 			Operator oper = t.getOperator();
 			Object value = t.getValue();
+			boolean haveRef = false;
+			rowRef = null;
+			colRef = null;
 			
 			switch (tt) {
 				case Operand:
 					m_opStack.push(tt, value);
 					break;
 					
-				case ColumnRef:
-					if (value != null && value instanceof Column) {
-						colRef = (Column) value;
-						Cell cell = tbl.getCell(row, colRef);
-						if (cell == null || cell.isNull())
-							m_opStack.push(Token.createNullToken());
-						else
-							m_opStack.push(TokenType.Operand, cell.getCellValue());
-					}
-					else
-						m_opStack.push(Token.createNullToken());
-					break;
-					
+                case RowRef:
+                case ColumnRef:
+                    if (value != null && value instanceof Column) {
+                        haveRef = true;
+                        rowRef = row;
+                        colRef = (Column) value;
+                    }
+                    else if (value != null && value instanceof Row) {
+                        haveRef = true;
+                        rowRef = (Row) value;
+                        colRef = col;
+                    }
+                    
+                    if (haveRef) {
+                        Cell cell = tbl.getCell(rowRef, colRef);
+                        if (cell == null || cell.isNull())
+                            m_opStack.push(Token.createNullToken());
+                        else
+                            m_opStack.push(TokenType.Operand, cell.getCellValue());
+                    }
+                    else
+                        m_opStack.push(Token.createNullToken());
+                    break;
+                                        
 				case UnaryOp:
 				case UnaryFunc:
 					x = m_opStack.pollFirst();

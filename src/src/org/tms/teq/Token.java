@@ -1,6 +1,7 @@
 package org.tms.teq;
 
 import org.tms.api.Column;
+import org.tms.api.Derivable;
 import org.tms.api.Operator;
 import org.tms.api.Row;
 
@@ -120,6 +121,14 @@ public class Token implements Labeled
     {
         if (m_value != null && m_value instanceof Row)
             return (Row)m_value;
+        else
+            return null;
+    }
+    
+    public Derivable getDerivableValue()
+    {
+        if (m_value != null && m_value instanceof Derivable)
+            return (Derivable)m_value;
         else
             return null;
     }

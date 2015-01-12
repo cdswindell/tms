@@ -1,7 +1,9 @@
 package org.tms.teq;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.tms.api.BaseElement;
@@ -55,18 +57,10 @@ public class Derivation
             TokenType tt = tk.getTokenType();
             
             switch (tt) {
-                case ColumnRef:
-                    if (tk.getColumnValue() != null) {
-                        deriv.m_affectedByCols.add(tk.getColumnValue());
-                        tk.getColumnValue().addToAffects(elem);
-                    }
-                    break;
-                    
                 case RowRef:
-                    if (tk.getRowValue() != null) {
-                        deriv.m_affectedByRows.add(tk.getRowValue());
-                        tk.getRowValue().addToAffects(elem);
-                    }
+                case ColumnRef:
+                    if (tk.getDerivableValue() != null) 
+                        deriv.m_affectedBy.add(tk.getDerivableValue());
                     break;
                     
                 default:
@@ -83,16 +77,14 @@ public class Derivation
     private EquationStack m_ifs;
     private EquationStack m_pfs;
     private PostfixStackEvaluator m_pfe;
-    private Set<Row> m_affectedByRows;
-    private Set<Column> m_affectedByCols;
+    private Set<Derivable> m_affectedBy;
     private boolean m_parsed;
     private boolean m_converted;
     private Derivable m_target;
     
     private Derivation()
     {
-        m_affectedByRows = new LinkedHashSet<Row>();
-        m_affectedByCols = new LinkedHashSet<Column>();
+        m_affectedBy = new LinkedHashSet<Derivable>();
     }
     
     public boolean isParsed()
@@ -177,6 +169,25 @@ public class Derivation
         }       
     }
 
+    public List<Derivable> getAffectedBy()
+    {
+        List<Derivable> affectedBy = new ArrayList<Derivable>();
+        
+        if (m_affectedBy != null) {
+            for (Derivable d : m_affectedBy) {
+                affectedBy.add(d);
+            }
+        }
+        
+        return affectedBy;       
+    }
+    
+
+    public Derivable getTarget()
+    {
+        return m_target;
+    }
+    
     public void destroy()
     {
         // TODO Auto-generated method stub

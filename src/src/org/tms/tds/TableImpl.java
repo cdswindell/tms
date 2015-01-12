@@ -867,7 +867,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     protected TableSliceElement find(ArrayList<? extends TableSliceElement> slices, TableProperty key, Object value)
     {
         assert key != null : "TableProperty required (enum)";
-        TableSliceElement foundElement = null;
+        assert value != null : "Value required";
+        
         if (slices != null && value != null) {
             for (TableSliceElement tes : slices) {
                 if (tes != null) {
@@ -880,13 +881,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
             }
         }
         
-        return foundElement;
+        return null;
     }
 
     protected TableSliceElement find(ArrayList<? extends TableSliceElement> slices, String key, Object value)
     {
         assert key != null : "TableProperty required (String)";
-        TableSliceElement foundElement = null;
+        assert value != null : "Value required";
+        
         if (slices != null && value != null) {
             for (TableSliceElement tes : slices) {
                 if (tes != null) {
@@ -899,7 +901,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             }
         }
         
-        return foundElement;
+        return null;
     }
 
     @Override
