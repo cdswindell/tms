@@ -543,8 +543,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		    
 		    // as a last resort, do a sequential search
 			for (RowImpl row : getRows())
-				if (row != null && row.getCellOffset() == cellOffset)
+				if (row != null && row.getCellOffset() == cellOffset) {
+				    if (m_cellOffsetRowMap != null)
+				        m_cellOffsetRowMap.put(cellOffset, row);
 					return row;
+				}
 		}
 		
 		return null;

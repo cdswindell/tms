@@ -13,6 +13,7 @@ import org.tms.api.Derivable;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.api.exceptions.ReadOnlyException;
 
@@ -146,7 +147,18 @@ public class Derivation
     private void recalculateTargetCell()
     {
         Cell cell = (Cell)m_target;
+        Row row = cell.getRow();
+        Column col = cell.getColumn();
         
+        if (row == null || col == null)
+            throw new IllegalTableStateException("Row/Column required");
+        
+        Table tbl = row.getTable();
+        if (tbl == null)
+            throw new IllegalTableStateException("Table required");
+        
+        Token t = m_pfe.evaluate(row, col);
+        tbl.setCellValue(row, col, t);
     }
 
     private void recalculateTargetRow()

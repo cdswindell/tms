@@ -96,12 +96,12 @@ public class CellImpl extends TableElementImpl implements Cell
     	m_cellOffset = offset;
     }
     
-    protected ColumnImpl getColumn()
+    public ColumnImpl getColumn()
     {
     	return m_col;
     }
     
-    protected RowImpl getRow()
+    public RowImpl getRow()
     {
     	if (getTable() != null)
     		return getTable().getRowByCellOffset(getCellOffset());
