@@ -911,7 +911,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     public int getNumCells()
     {
         int numCells = 0;
-        for (Column c : columnIterable()) {
+        for (Column c : columns()) {
             if (c != null) {
                 ColumnImpl col = (ColumnImpl)c;
                 numCells += col.getNumCells();
@@ -994,13 +994,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		m_currentCellStack.push(cr);
 	}
 
-	public Iterable<Row> rowIterable()
+	public Iterable<Row> rows()
     {
 	    ensureRowsExist();
         return new BaseElementIterable<Row>(getRows());
     }
     
-	public Iterable<Column> columnIterable()
+	public Iterable<Column> columns()
     {
         ensureColumnsExist();
         return new BaseElementIterable<Column>(getColumns());

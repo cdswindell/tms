@@ -3,8 +3,8 @@ package org.tms.api;
 public interface Table extends TableElement
 {
     
-    public Iterable<Row> rowIterable();
-    public Iterable<Column> columnIterable();
+    public Iterable<Row> rows();
+    public Iterable<Column> columns();
 
     public Row addRow(Access mode, Object... mda);   
     public Column addColumn(Access mode, Object... mda);   

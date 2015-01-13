@@ -216,7 +216,7 @@ public class ColumnTest
         assertThat(t.getNumColumns(), is(100));    
         
         int idx = 0;
-        for (Column c : t.columnIterable()) {
+        for (Column c : t.columns()) {
         	idx++;
         	if (c != null)
         		assertThat(((ColumnImpl)c).getIndex(), is(idx));

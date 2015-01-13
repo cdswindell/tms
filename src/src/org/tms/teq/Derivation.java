@@ -196,7 +196,7 @@ public class Derivation
     {
         Row row = (Row)m_target;
         Table tbl = row.getTable();
-        for (Column col : tbl.columnIterable()) {
+        for (Column col : tbl.columns()) {
             Token t = m_pfe.evaluate(row, col);
             tbl.setCellValue(row, col, t);
         }        
@@ -206,7 +206,7 @@ public class Derivation
     {
         Column col = (Column)m_target;
         Table tbl = col.getTable();
-        for (Row row : tbl.rowIterable()) {
+        for (Row row : tbl.rows()) {
             Token t = m_pfe.evaluate(row, col);
             tbl.setCellValue(row, col, t);
         }       
