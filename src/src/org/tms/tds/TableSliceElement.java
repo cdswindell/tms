@@ -98,6 +98,13 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             return null;
     }
     
+    @Override
+    public void recalculate()
+    {
+        if (isDerived())
+            m_deriv.recalculateTarget();
+    }
+    
     /*
      * Class-specific methods
      */

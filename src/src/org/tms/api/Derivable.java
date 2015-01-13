@@ -12,5 +12,5 @@ public interface Derivable
     public void setDerivation(String expression);
     public boolean isDerived();
     public List<Derivable> getAffectedBy();
-
+    public void recalculate();
 }

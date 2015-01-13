@@ -67,6 +67,11 @@ public enum BuiltinOperator implements Labeled, Operator
     
     // String functions
     LenOper("len", TokenType.UnaryFunc, 5, MathUtil.class, "length", String.class),
+    toLowerOper("toLower", TokenType.UnaryFunc, 5, MathUtil.class, "toLower", String.class),
+    toUpperOper("toUpper", TokenType.UnaryFunc, 5, MathUtil.class, "toUpper", String.class),
+    trimOper("trim", TokenType.UnaryFunc, 5, MathUtil.class, "trim", String.class),
+    reverseOper("reverse", TokenType.UnaryFunc, 5, MathUtil.class, "reverse", String.class),
+    toStringOper("toString", TokenType.UnaryFunc, 5, MathUtil.class, "toString", Object.class),
     toNumberOper("toNumber", TokenType.UnaryFunc, 5, MathUtil.class, "toNumber", Object.class),
    
     // Binary functions, mostly supported in Java Math

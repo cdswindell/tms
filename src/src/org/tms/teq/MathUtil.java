@@ -85,6 +85,40 @@ public class MathUtil
             return Math.toDegrees(Math.atan(arg));
     } 
     
+    static final public String toLower(String arg)
+    {
+        return arg != null ? arg.toLowerCase() : null;
+    }   
+    
+    static final public String toUpper(String arg)
+    {
+        return arg != null ? arg.toUpperCase() : null;
+    }   
+    
+    static final public String trim(String arg)
+    {
+        return arg != null ? arg.trim() : null;
+    }   
+    
+    static final public String reverse(String arg)
+    {
+        if (arg != null) {
+            int len = arg.length();
+            StringBuffer sb = new StringBuffer();
+            
+            if (len > 0) {
+                char [] chars = arg.toCharArray();
+                for (int i = len - 1; i >= 0; i--) {
+                    sb.append(chars[i]);
+                }
+            }
+            
+            return sb.toString();
+        }
+        else 
+            return null;
+    }   
+    
     static final public double length(String arg)
     {
         return arg != null ? arg.length() : 0;
@@ -108,5 +142,13 @@ public class MathUtil
         }
         else
             return Double.NaN;
+    }   
+    
+    static final public String toString(Object arg)
+    {
+        if (arg == null)
+            return null;
+        else
+            return arg.toString().trim();
     }   
 }
