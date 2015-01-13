@@ -24,6 +24,7 @@ public class Derivation
         // create the derivation structure and save the as-entered exprerssion
         Derivation deriv = new Derivation();
         deriv.m_asEntered = new String(expr);
+        deriv.m_target = elem;
         
         // parse the expression
         Table t = elem.getTable();
@@ -32,7 +33,7 @@ public class Derivation
         ParseResult pr = ifParser.parseInfixExpression();
         if (pr != null && pr.isFailure())
             throw new InvalidExpressionException(pr);
-
+        
         // otherwise, harvest the infix stack
         deriv.m_ifs = ifParser.getInfixStack();
         deriv.m_parsed = true;
@@ -69,11 +70,29 @@ public class Derivation
             }            
         }
         
-        // finally, retain the derivable element and return the derivation
-        deriv.m_target = elem;
+        // check for circular reference (e.g., c1<==c2<==c3<==c1)
+        if (deriv.isCircularReference()) {
+            pr = new ParseResult(ParserStatusCode.CircularReference, String.format("Expression contains circular reference to %s", elem));
+            throw new InvalidExpressionException(pr);
+        }
+
+        // finally, return the derivation
         return deriv;
     }
     
+    private static boolean checkCircularReference(Derivable target, List<Derivable> affectedBy)
+    {
+        if (affectedBy == null)
+            return false;
+        
+        for (Derivable d : affectedBy) {
+            if (target == d || checkCircularReference(target, d.getAffectedBy()))
+                return true;
+        }
+        
+        return false;
+    }
+
     private String m_asEntered;
     private EquationStack m_ifs;
     private EquationStack m_pfs;
@@ -194,12 +213,19 @@ public class Derivation
         return affectedBy;       
     }
     
-
     public Derivable getTarget()
     {
         return m_target;
     }
     
+    private boolean isCircularReference()
+    {
+        if (m_ifs == null || m_ifs.isEmpty() || !isParsed())
+            return false;
+        
+        return checkCircularReference(getTarget(), getAffectedBy());
+    }
+
     public void destroy()
     {
         // TODO Auto-generated method stub

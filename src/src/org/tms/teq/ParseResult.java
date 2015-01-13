@@ -144,16 +144,14 @@ public class ParseResult
         
         public String toString()
         {
-        	if (m_occuredAtPos >= -1)
+        	if (m_occuredAtPos >= 0)
         		return String.format("%s at position %d%s", 
         				getIssueStatusCode(), 
-        				getOccuredAtPos(),
+                        getOccuredAtPos(),
         				m_msg != null ? " (" + m_msg + ")" : "");
-        	else
-        		
+        	else       		
         		return String.format("%s%s", 
         				getIssueStatusCode(), 
-        				getOccuredAtPos(),
         				m_msg != null ? ": " + m_msg : "");
         }
     }

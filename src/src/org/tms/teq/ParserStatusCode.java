@@ -6,6 +6,7 @@ public enum ParserStatusCode
     EmptyExpression,
     EmptyStack,
     ParenMismatch,
+    CircularReference,
     IncompleteExpresion,
     InvalidCellReferemce,
     InvalidColumnReferemce,

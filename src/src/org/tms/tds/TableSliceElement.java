@@ -89,6 +89,15 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         }           
     }
     
+    @Override
+    public List<Derivable> getAffectedBy()
+    {
+        if (m_deriv != null)
+            return m_deriv.getAffectedBy();
+        else
+            return null;
+    }
+    
     /*
      * Class-specific methods
      */
