@@ -160,16 +160,19 @@ public class Derivation
         Table t = m_target.getTable();
         t.pushCurrent();
         
-        // currently support derived rows, columns, and cells, 
-        // dispatch to correct handler
-        if (m_target instanceof Column)
-            recalculateTargetColumn();
-        else if (m_target instanceof Row)
-            recalculateTargetRow();
-        else if (m_target instanceof Cell)
-            recalculateTargetCell();
-        
-        t.popCurrent();      
+        try {
+            // currently support derived rows, columns, and cells, 
+            // dispatch to correct handler
+            if (m_target instanceof Column)
+                recalculateTargetColumn();
+            else if (m_target instanceof Row)
+                recalculateTargetRow();
+            else if (m_target instanceof Cell)
+                recalculateTargetCell();
+        }
+        finally {      
+            t.popCurrent();  
+        }
     }
     
     private void recalculateTargetCell()
