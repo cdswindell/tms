@@ -21,7 +21,7 @@ public class Derivation
 {
     public static Derivation create(String expr, Derivable elem)
     {
-        // create the derivation structure and save the as-entered exprerssion
+        // create the derivation structure and save the as-entered expression
         Derivation deriv = new Derivation();
         deriv.m_asEntered = new String(expr);
         deriv.m_target = elem;
