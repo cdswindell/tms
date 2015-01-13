@@ -28,56 +28,65 @@ public class Derivation
         
         // parse the expression
         Table t = elem.getTable();
-        InfixExpressionParser ifParser = new InfixExpressionParser(expr, t);
+        if (t != null)
+            t.pushCurrent();
         
-        ParseResult pr = ifParser.parseInfixExpression();
-        if (pr != null && pr.isFailure())
-            throw new InvalidExpressionException(pr);
-        
-        // otherwise, harvest the infix stack
-        deriv.m_ifs = ifParser.getInfixStack();
-        deriv.m_parsed = true;
-        
-        // convert infix to postfix
-        PostfixStackGenerator pfg = new PostfixStackGenerator(deriv.m_ifs, t);
-        pr =  pfg.convertInfixToPostfix();
-        if (pr != null && pr.isFailure())
-            throw new InvalidExpressionException(pr);
-        
-        // harvest the postfix stack
-        deriv.m_pfs = pfg.getPostfixStack();
-        deriv.m_converted = true;
-        
-        // create an evaluator
-        PostfixStackEvaluator pfe = new PostfixStackEvaluator(deriv.m_pfs, t);
-        deriv.m_pfe = pfe;
-        
-        // note cols/rows that affect this derivation
-        Iterator<Token> iter = deriv.m_ifs.iterator();
-        while(iter != null && iter.hasNext()) {
-            Token tk = iter.next();
-            TokenType tt = tk.getTokenType();
+        try {
+            InfixExpressionParser ifParser = new InfixExpressionParser(expr, t);
             
-            switch (tt) {
-                case RowRef:
-                case ColumnRef:
-                    if (tk.getDerivableValue() != null) 
-                        deriv.m_affectedBy.add(tk.getDerivableValue());
-                    break;
-                    
-                default:
-                    break;
-            }            
+            ParseResult pr = ifParser.parseInfixExpression();
+            if (pr != null && pr.isFailure())
+                throw new InvalidExpressionException(pr);
+            
+            // otherwise, harvest the infix stack
+            deriv.m_ifs = ifParser.getInfixStack();
+            deriv.m_parsed = true;
+            
+            // convert infix to postfix
+            PostfixStackGenerator pfg = new PostfixStackGenerator(deriv.m_ifs, t);
+            pr =  pfg.convertInfixToPostfix();
+            if (pr != null && pr.isFailure())
+                throw new InvalidExpressionException(pr);
+            
+            // harvest the postfix stack
+            deriv.m_pfs = pfg.getPostfixStack();
+            deriv.m_converted = true;
+            
+            // create an evaluator
+            PostfixStackEvaluator pfe = new PostfixStackEvaluator(deriv.m_pfs, t);
+            deriv.m_pfe = pfe;
+            
+            // note cols/rows that affect this derivation
+            Iterator<Token> iter = deriv.m_ifs.iterator();
+            while(iter != null && iter.hasNext()) {
+                Token tk = iter.next();
+                TokenType tt = tk.getTokenType();
+                
+                switch (tt) {
+                    case RowRef:
+                    case ColumnRef:
+                        if (tk.getDerivableValue() != null) 
+                            deriv.m_affectedBy.add(tk.getDerivableValue());
+                        break;
+                        
+                    default:
+                        break;
+                }            
+            }
+            
+            // check for circular reference (e.g., c1<==c2<==c3<==c1)
+            if (deriv.isCircularReference()) {
+                pr = new ParseResult(ParserStatusCode.CircularReference, String.format("Expression contains circular reference to %s", elem));
+                throw new InvalidExpressionException(pr);
+            }
+    
+            // finally, return the derivation
+            return deriv;
         }
-        
-        // check for circular reference (e.g., c1<==c2<==c3<==c1)
-        if (deriv.isCircularReference()) {
-            pr = new ParseResult(ParserStatusCode.CircularReference, String.format("Expression contains circular reference to %s", elem));
-            throw new InvalidExpressionException(pr);
+        finally {
+            if (t != null)
+                t.popCurrent();
         }
-
-        // finally, return the derivation
-        return deriv;
     }
     
     private static boolean checkCircularReference(Derivable target, List<Derivable> affectedBy)
