@@ -63,30 +63,25 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     @Override
     public void setDerivation(String expr)
     {
-        if (m_deriv != null) {
-            Derivable elem = m_deriv.getTarget();
-            for (Derivable d : m_deriv.getAffectedBy()) {
-                TableSliceElement tse = (TableSliceElement)d;
-                tse.removeFromAffects(elem);
-            }
+        // clear out any existing derivations
+        if (m_deriv != null) 
+            clearDerivation();
+        
+        if (expr != null && expr.trim().length() > 0) {
+            m_deriv = Derivation.create(expr.trim(), this);
             
-            m_deriv.destroy();
-            m_deriv = null;
+            // mark the rows/columns that impact the deriv, and evaluate values
+            if (m_deriv != null && m_deriv.isConverted()) {
+                Derivable elem = m_deriv.getTarget();
+                for (Derivable d : m_deriv.getAffectedBy()) {
+                    TableSliceElement tse = (TableSliceElement)d;
+                    tse.addToAffects(elem);
+                }
+                
+                m_inUse = true;
+                recalculate();
+            }  
         }
-        
-        m_deriv = Derivation.create(expr, this);
-        
-        // mark the rows/columns that impact the deriv, and evaluate values
-        if (m_deriv != null && m_deriv.isConverted()) {
-            Derivable elem = m_deriv.getTarget();
-            for (Derivable d : m_deriv.getAffectedBy()) {
-                TableSliceElement tse = (TableSliceElement)d;
-                tse.addToAffects(elem);
-            }
-            
-            m_inUse = true;
-            m_deriv.recalculateTarget();
-        }           
     }
     
     @Override
@@ -99,10 +94,51 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }
     
     @Override
+    public void clearDerivation()
+    {
+        if (m_deriv != null) {
+            Derivable elem = m_deriv.getTarget();
+            for (Derivable d : m_deriv.getAffectedBy()) {
+                TableSliceElement tse = (TableSliceElement)d;
+                tse.removeFromAffects(elem);
+            }
+            
+            m_deriv.destroy();
+            m_deriv = null;
+        }        
+    }
+    
+    @Override
     public void recalculate()
     {
-        if (isDerived())
+        if (isDerived()) {
             m_deriv.recalculateTarget();
+            
+            // recalculate dependent columns
+            List<Derivable> affects = m_deriv.getTarget().getAffects();
+            if (affects != null) {
+                for (Derivable d : affects) {
+                    d.recalculate();
+                }
+            }
+        }
+    }
+       
+    @Override
+    public List<Derivable> getAffects()
+    {
+        int numAffects = 0;
+        List<Derivable> affects = new ArrayList<Derivable>(m_affects != null ? (numAffects = m_affects.size()) : 0);
+        
+        // attempt to order the elements so that they can be recalculated in one pass
+        // (independent elements first, dependent elements last)
+        if (numAffects == 1)
+            affects.addAll(m_affects);
+        else if (numAffects > 1) {
+            
+        }        
+        
+        return affects;
     }
     
     /*
@@ -230,7 +266,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }   
 
 	@Override
-	protected boolean isNull() 
+	public boolean isNull() 
 	{
 		return getNumCells() == 0;
 	}   

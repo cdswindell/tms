@@ -1,5 +1,8 @@
 package org.tms.tds;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
@@ -86,6 +89,16 @@ public class CellImpl extends TableElementImpl implements Cell
             return getDataType();
     }
     
+    public boolean isNumericValue()
+    {
+        return m_cellValue != null && (m_cellValue instanceof Number);
+    }
+    
+    public boolean isStringValue()
+    {
+        return m_cellValue != null && (m_cellValue instanceof String);
+    }
+    
     protected int getCellOffset()
     {
     	return m_cellOffset;
@@ -167,7 +180,7 @@ public class CellImpl extends TableElementImpl implements Cell
 	            return getRow();
 	            
 	        case DataType:
-	            return getColumn();
+	            return getDataType();
 	            
             default:
                 return super.getProperty(key);
@@ -193,6 +206,12 @@ public class CellImpl extends TableElementImpl implements Cell
         m_cellValue = null;
         m_cellOffset = -1;
         m_col = null;
+    }
+    
+    @Override
+    public int getNumCells()
+    {
+        return 1;
     }
     
     @Override
@@ -224,4 +243,37 @@ public class CellImpl extends TableElementImpl implements Cell
 		else
 			return null;
 	}
+	
+	@Override
+	public Iterable<Cell> cells()
+	{
+        return new CellIterable();
+	}
+	
+    protected class CellIterable implements Iterator<Cell>, Iterable<Cell>
+    {
+        private boolean m_hasNext = true;
+        
+        @Override
+        public Iterator<Cell> iterator()
+        {
+            return this;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return m_hasNext;
+        }
+
+        @Override
+        public Cell next()
+        {
+            if (!hasNext())
+                throw new NoSuchElementException();
+            
+            m_hasNext = false;
+            return CellImpl.this;
+        }        
+    }
 }

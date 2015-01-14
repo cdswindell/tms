@@ -387,4 +387,44 @@ abstract public class BaseElementImpl implements BaseElement
             return this;
         }        
     }
+    
+    protected class BaseElementIterableInternal<E extends BaseElement> implements Iterator<E>, Iterable<E>
+    {
+        private Iterator<E> m_iter;
+        
+        @SuppressWarnings("unchecked")
+        public BaseElementIterableInternal(Collection<? extends BaseElement> elems, boolean createElements)
+        {
+            if (elems != null) 
+                m_iter = (Iterator<E>) elems.iterator();
+            else
+                m_iter = null;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+           if (m_iter != null)
+               return m_iter.hasNext();
+           else
+               return false;
+        }
+
+        @Override
+        public E next()
+        {
+            if (m_iter != null) {
+                E next = m_iter.next();
+                return next;
+            }
+            
+            return null;
+        }
+
+        @Override
+        public Iterator<E> iterator()
+        {
+            return this;
+        }        
+    }
 }

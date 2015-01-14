@@ -6,6 +6,7 @@ public enum ErrorCode
     NaN,
     InvalidOperand, 
     InvalidTableOperand, 
+    ReferenceRequired, 
     SeeErrorMessage, 
     StackOverflow, 
     StackUnderflow,

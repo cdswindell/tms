@@ -7,9 +7,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
@@ -467,7 +469,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * only when accessed, this method is needed to build out all rows when
      * in the case where they are to be iterated over
      */
-    private synchronized void ensureRowsExist()
+    synchronized void ensureRowsExist()
     {
         pushCurrent();
         
@@ -479,7 +481,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         popCurrent();
     }
     
-    private synchronized void ensureColumnsExist()
+    synchronized void ensureColumnsExist()
     {
         pushCurrent();
         
@@ -1006,16 +1008,79 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return new BaseElementIterable<Column>(getColumns());
     }
     
-	public Iterable<RangeImpl> rangeIterable()
+	public Iterable<RangeImpl> ranges()
     {
         return new BaseElementIterable<RangeImpl>(m_ranges);
     }
     
-    protected Iterator<Column> columnIterator()
-    {
-        return new BaseElementIterable<Column>(getColumns());
-    }
-    
+	@Override
+	public Iterable<Cell> cells()
+	{
+	    return new TableCellIterable();
+	}
+	
+	protected class TableCellIterable implements Iterator<Cell>, Iterable<Cell>
+	{
+        private TableImpl m_table;
+        private int m_rowIndex;
+        private int m_colIndex;
+        private int m_numRows;
+        private int m_numCols;
+        
+        private List<RowImpl> m_rows;
+        private List<ColumnImpl> m_cols;
+
+        public TableCellIterable()
+        {
+            m_table = TableImpl.this;
+            m_rowIndex = m_colIndex = 1;
+            
+            m_numRows = m_table.getNumRows();
+            m_numCols = m_table.getNumColumns();
+            
+            m_table.ensureRowsExist();
+            m_rows = new ArrayList<RowImpl>(m_table.getRows());
+            
+            m_table.ensureColumnsExist();
+            m_cols = new ArrayList<ColumnImpl>(m_table.getColumns());
+        }
+        
+        @Override
+        public Iterator<Cell> iterator()
+        {
+            return this;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return m_rowIndex <= m_numRows && m_colIndex <= m_numCols;
+        }
+
+        @Override
+        public Cell next()
+        {
+            if (!hasNext())
+                throw new NoSuchElementException();
+            
+            ColumnImpl col = m_cols.get(m_colIndex - 1);
+            RowImpl row = m_rows.get(m_rowIndex - 1); 
+            
+            Cell c = col.getCell(row);
+            
+            // Iterate over cells one column at a time; once
+            // all rows are visited, reset row index and
+            // increment column index
+            if (++m_rowIndex > m_numRows) {
+                m_rowIndex = 1;
+                m_colIndex++;
+            }            
+            
+            // return the target cell
+            return c;
+        }	    
+	}
+	
     private class CellReference 
     {
     	private RowImpl m_row;

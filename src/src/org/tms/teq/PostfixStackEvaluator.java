@@ -7,6 +7,7 @@ import org.tms.api.Column;
 import org.tms.api.Operator;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
@@ -154,6 +155,13 @@ public class PostfixStackEvaluator
                     m_opStack.push(doBuiltInOp(oper, row, col));                 
                     break;
                     
+                case StatOp:
+                    x = m_opStack.pollFirst();
+                    if (x == null || !x.isReference()) // stack is in invalid state
+                        return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.ReferenceRequired);                    
+                    m_opStack.push(doStatOp(oper, x));                 
+                    break;
+                    
 				default:
 					throw new UnimplementedException(String.format("Unsupported token type: %s (%s)", tt, t));
 			}
@@ -180,6 +188,27 @@ public class PostfixStackEvaluator
     {
         Token t = oper.evaluate(args);
         return t;
+    }
+
+    private Token doStatOp(Operator oper, Token x)
+    {
+        Token result = null;
+        BuiltinOperator bio = oper.getBuiltinOperator();
+        if (bio != null) {
+            SingleVariableStatEngine svse = new SingleVariableStatEngine();
+            
+            TableCellsElement ref = x.getReferenceValue();
+            if (ref != null) {
+                for (Cell c : ref.cells()) {
+                    if (c.isNumericValue())
+                        svse.enter((double)c.getCellValue());
+                }
+            }
+            else
+                result = Token.createNullToken();            
+        }
+        
+        return result;
     }
 
 	private Token doBuiltInOp(Operator oper, Row row, Column col)

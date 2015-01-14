@@ -108,4 +108,9 @@ public enum TokenType implements Labeled
 	{
 		return m_numArgs;
 	}
+
+    public boolean isReference()
+    {
+        return this == ColumnRef || this == RowRef || this == CellRef || this == TableRef;
+    }
 }

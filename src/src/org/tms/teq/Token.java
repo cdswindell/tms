@@ -4,6 +4,7 @@ import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.Operator;
 import org.tms.api.Row;
+import org.tms.api.TableCellsElement;
 
 
 public class Token implements Labeled
@@ -129,6 +130,14 @@ public class Token implements Labeled
     {
         if (m_value != null && m_value instanceof Derivable)
             return (Derivable)m_value;
+        else
+            return null;
+    }
+    
+    public TableCellsElement getReferenceValue()
+    {
+        if (m_value != null && m_value instanceof TableCellsElement)
+            return (TableCellsElement)m_value;
         else
             return null;
     }
@@ -274,6 +283,11 @@ public class Token implements Labeled
         }
         
         return false;
+    }    
+
+    public boolean isReference()
+    {
+        return getTokenType() != null && getTokenType().isReference() && getValue() != null && getValue() instanceof TableCellsElement;
     }
     
     public boolean isNull() 

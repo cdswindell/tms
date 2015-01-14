@@ -1,8 +1,8 @@
 package org.tms.util;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -134,7 +134,7 @@ public class WeakHashSet<T> implements Set<T>
     @Override
     public Set<T> clone()
     {
-        Set<T> copy = new HashSet<T>(size());
+        Set<T> copy = new LinkedHashSet<T>(size());
         for (T e : m_backingMap.keySet()) 
         {
             if (e != null)

@@ -1,8 +1,11 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
@@ -275,4 +278,53 @@ public class RowImpl extends TableSliceElement implements Row
 		
 		popCurrent();
 	}
+
+    @Override
+    public Iterable<Cell> cells()
+    {
+        return new RowCellIterable();
+    }
+    
+    /**
+     * Iterator to produce a row's table cells in column order. Columns and
+     * cells are created, as needed, if they do not already exist.
+     */
+    protected class RowCellIterable implements Iterator<Cell>, Iterable<Cell>
+    {
+        private int m_index;
+        private int m_numCols;
+        private RowImpl m_row;
+        private TableImpl m_table;
+        
+        public RowCellIterable()
+        {
+            m_row = RowImpl.this;
+            m_table = m_row.getTable();
+            m_index = 1;
+            m_numCols = m_table != null ? m_table.getNumColumns() : 0;
+        }
+
+        @Override
+        public Iterator<Cell> iterator()
+        {
+            return this;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return m_index < m_numCols;
+        }
+
+        @Override
+        public CellImpl next()
+        {
+            if (!hasNext())
+                throw new NoSuchElementException();
+            
+            ColumnImpl col = m_table.getColumn(Access.ByIndex, m_index++);
+            CellImpl c = m_row.getCell(col);
+            return c;
+        }       
+    }
 }

@@ -1,6 +1,6 @@
 package org.tms.api;
 
-public interface Table extends TableElement
+public interface Table extends TableElement, TableCellsElement
 {
     
     public Iterable<Row> rows();

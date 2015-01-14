@@ -1,9 +1,12 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
@@ -374,18 +377,70 @@ public class ColumnImpl extends TableSliceElement implements Column
 		
 		pushCurrent();
 		
-		RowImpl r = parent.getRow(Access.First);
-		if (r != null) {
-			while(r != null) {
-				CellImpl c = getCell(r);
-				c.setCellValue(o);
-				r.setInUse(true);
-				r = parent.getRow(Access.Next);
-			}
-			
-			this.setInUse(true);			
+		try {
+    		RowImpl r = parent.getRow(Access.First);
+    		if (r != null) {
+    			while(r != null) {
+    				CellImpl c = getCell(r);
+    				c.setCellValue(o);
+    				r.setInUse(true);
+    				r = parent.getRow(Access.Next);
+    			}
+    			
+    			this.setInUse(true);			
+    		}
 		}
-		
-		popCurrent();
+		finally {		
+		    popCurrent();
+		}
 	}
+
+    @Override
+    public Iterable<Cell> cells()
+    {
+        return new ColumnCellIterable();
+    }
+    
+    /**
+     * Iterator to produce a column's table cells in row order. Rows and
+     * cells are created, as needed, if they do not already exist.
+     */
+    protected class ColumnCellIterable implements Iterator<Cell>, Iterable<Cell>
+    {
+        private int m_index;
+        private int m_numRows;
+        private ColumnImpl m_col;
+        private TableImpl m_table;
+        
+        public ColumnCellIterable()
+        {
+            m_col = ColumnImpl.this;
+            m_table = m_col.getTable();
+            m_index = 1;
+            m_numRows = m_table != null ? m_table.getNumRows() : 0;
+        }
+
+        @Override
+        public Iterator<Cell> iterator()
+        {
+            return this;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return m_index < m_numRows;
+        }
+
+        @Override
+        public CellImpl next()
+        {
+            if (!hasNext())
+                throw new NoSuchElementException();
+            
+            RowImpl row = m_table.getRow(Access.ByIndex, m_index++);
+            CellImpl c = m_col.getCell(row);
+            return c;
+        }       
+    }
 }

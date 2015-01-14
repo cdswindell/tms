@@ -148,6 +148,8 @@ public class PostfixStackGenerator
                 case BinaryFunc:
                 case BinaryOp:
                 case GenericFunc:
+                case StatOp:
+                case BinaryStatOp:
                     oper = ift.getOperator();
                     do {
                         if (ops.isEmpty())
@@ -172,7 +174,7 @@ public class PostfixStackGenerator
                 case Comma: // eat commas, unless the top of the ops stack is a function
                     if (!ops.isEmpty()) {
                         t = ops.peek();
-                        if (t != null && t.isFunction()) {
+                        if (t != null && (t.isFunction() || t.getTokenType() == TokenType.BinaryStatOp)) {
                             ops.pop(); // remove the element, as we are about to process it
                             pfs.push(t);
                         }
@@ -183,8 +185,6 @@ public class PostfixStackGenerator
                 case NULL_TokenType:
                 case NullOpValue:
                 case RangeOp:
-                case StatOp:
-                case BinaryStatOp:
                 case TableRef:
                 case Variable:
                 default:

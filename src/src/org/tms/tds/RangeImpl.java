@@ -2,9 +2,12 @@ package org.tms.tds;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
@@ -216,14 +219,14 @@ public class RangeImpl extends TableCellsElementImpl
         return removedAny;
     } 
     
-    protected Iterable<RowImpl> rowIterable()
+    protected Iterable<RowImpl> rows()
     {
-        return new BaseElementIterable<RowImpl>(getRows());
+        return new BaseElementIterable<RowImpl>(m_rows.isEmpty() ? getTable().getRows() : getRows());
     }
     
-    protected Iterable<ColumnImpl> columnIterable()
+    protected Iterable<ColumnImpl> columns()
     {
-        return new BaseElementIterable<ColumnImpl>(getColumns());
+        return new BaseElementIterable<ColumnImpl>(m_cols.isEmpty() ? getTable().getColumns() : getColumns());
     }
     
     /*
@@ -254,7 +257,7 @@ public class RangeImpl extends TableCellsElementImpl
     }
     
     @Override
-    protected boolean isNull()
+    public boolean isNull()
     {
         boolean hasRows = (m_rows != null && !m_rows.isEmpty());
         boolean hasCols = (m_cols != null && !m_cols.isEmpty());
@@ -338,4 +341,84 @@ public class RangeImpl extends TableCellsElementImpl
 			}
 		}
 	}
+	
+    @Override
+    public Iterable<Cell> cells()
+    {
+        return new RangeCellIterable();
+    }
+    
+    protected class RangeCellIterable implements Iterator<Cell>, Iterable<Cell>
+    {
+        private RangeImpl m_range;
+        private TableImpl m_table;
+        private int m_rowIndex;
+        private int m_colIndex;
+        private int m_numRows;
+        private int m_numCols;
+        
+        private List<RowImpl> m_rows;
+        private List<ColumnImpl> m_cols;
+
+        public RangeCellIterable()
+        {
+            m_range = RangeImpl.this;
+            m_table = m_range.getTable();
+            
+            m_rowIndex = m_colIndex = 1;
+            
+            if (m_range.getNumRows() > 0)
+                m_rows = m_range.getRows();
+            else {
+                m_table.ensureRowsExist();
+                m_rows = new ArrayList<RowImpl>(m_table.getRows());
+            }
+            
+            m_numRows = m_rows.size();
+                       
+            if (m_range.getNumColumns() > 0)
+                m_cols = m_range.getColumns();
+            else {
+                m_table.ensureColumnsExist();
+                m_cols = new ArrayList<ColumnImpl>(m_table.getColumns());
+            }
+            
+            m_numCols = m_cols.size();
+        }
+
+        @Override
+        public Iterator<Cell> iterator()
+        {
+            return this;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return m_rowIndex <= m_numRows && m_colIndex <= m_numCols;
+        }
+
+        @Override
+        public Cell next()
+        {
+            if (!hasNext())
+                throw new NoSuchElementException();
+            
+            ColumnImpl col = m_cols.get(m_colIndex - 1);
+            RowImpl row = m_rows.get(m_rowIndex - 1); 
+            
+            Cell c = col.getCell(row);
+            
+            // Iterate over cells one column at a time; once
+            // all rows are visited, reset row index and
+            // increment column index
+            if (++m_rowIndex > m_numRows) {
+                m_rowIndex = 1;
+                m_colIndex++;
+            }            
+            
+            // return the target cell
+            return c;
+        }      
+    }
 }
