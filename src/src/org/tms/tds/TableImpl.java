@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Set;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -55,6 +57,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private Queue<Integer> m_unusedCellOffsets;
     private Deque<CellReference> m_currentCellStack;
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
+    
+    private Set<CellImpl> m_derivedCells;
     
     private RowImpl m_curRow;
     private ColumnImpl m_curCol;
@@ -123,6 +127,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_currentCellStack = new ArrayDeque<CellReference>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
+        m_derivedCells = new LinkedHashSet<CellImpl>(m_rowsCapacity * m_colsCapacity / 4);
         
         // clear dirty flag, as table is empty
         markClean();
@@ -966,18 +971,31 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return getNumRows() == 0 || getNumColumns() == 0 || getNumCells() == 0;
     }
     
-	@Override
-	public void fill(Object o) 
-	{
-		pushCurrent();
-		ColumnImpl c = getColumn(Access.First);
-		while (c != null) {
-			c.fill(o);
-			c = getColumn(Access.Next);
-		}
-		
-		popCurrent();
-	}  
+    @Override
+    public void fill(Object o) 
+    {
+        pushCurrent();
+        ColumnImpl c = getColumn(Access.First);
+        while (c != null) {
+            c.fill(o);
+            c = getColumn(Access.Next);
+        }
+        
+        popCurrent();
+    }  
+    
+    @Override
+    public void clear() 
+    {
+        pushCurrent();
+        ColumnImpl c = getColumn(Access.First);
+        while (c != null) {
+            c.clear();
+            c = getColumn(Access.Next);
+        }
+        
+        popCurrent();
+    }  
 	
 	synchronized public void popCurrent() 
     {
@@ -996,6 +1014,30 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		m_currentCellStack.push(cr);
 	}
 
+	public void recalculate()
+	{
+	    // TODO: handle recalcuation of derived rows and cols
+	    for (CellImpl cell : derivedCells())
+	        cell.recalculate();
+	}
+	
+    protected void registerDerivedCell(CellImpl cell)
+    {
+        if (cell != null)
+            m_derivedCells.add(cell);
+    }
+    
+    protected void deregisterDerivedCell(CellImpl cell)
+    {
+        if (cell != null)
+            m_derivedCells.remove(cell);
+    }
+    
+    protected Iterable<CellImpl> derivedCells()
+    {
+        return new BaseElementIterableInternal<CellImpl>(m_derivedCells);
+    }
+    
 	public Iterable<Row> rows()
     {
 	    ensureRowsExist();

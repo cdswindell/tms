@@ -153,8 +153,8 @@ abstract public class BaseElementImpl implements BaseElement
         // Some properties are built into the base element object
         switch (key)
         {
-            case isSupportsEmpty:
-                return isSupportsEmpty();
+            case isSupportsNull:
+                return isSupportsNull();
                 
             case isReadOnly:
                 return isReadOnly();
@@ -239,10 +239,10 @@ abstract public class BaseElementImpl implements BaseElement
                 setReadOnly((boolean)value);
                 break;
                 
-            case isSupportsEmpty:
+            case isSupportsNull:
                 if (!isValidPropertyValueBoolean(value))
                     value = ContextImpl.sf_SUPPORTS_NULL_DEFAULT;
-                setSupportsEmpty((boolean)value);
+                setSupportsNull((boolean)value);
                 break;
                 
             default:
@@ -308,12 +308,12 @@ abstract public class BaseElementImpl implements BaseElement
         setProperty(TableProperty.Description, (description != null ? description.trim() : null));
     }
     
-    protected boolean isSupportsEmpty()
+    protected boolean isSupportsNull()
     {
         return m_supportsNull;
     }
 
-    protected void setSupportsEmpty(boolean supportsNull)
+    protected void setSupportsNull(boolean supportsNull)
     {
         m_supportsNull = supportsNull;
     }
@@ -393,7 +393,7 @@ abstract public class BaseElementImpl implements BaseElement
         private Iterator<E> m_iter;
         
         @SuppressWarnings("unchecked")
-        public BaseElementIterableInternal(Collection<? extends BaseElement> elems, boolean createElements)
+        public BaseElementIterableInternal(Collection<? extends BaseElement> elems)
         {
             if (elems != null) 
                 m_iter = (Iterator<E>) elems.iterator();

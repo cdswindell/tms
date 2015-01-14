@@ -5,6 +5,8 @@ public interface Table extends TableElement, TableCellsElement
     
     public Iterable<Row> rows();
     public Iterable<Column> columns();
+    
+    public void recalculate();
 
     public Row addRow(Access mode, Object... mda);   
     public Column addColumn(Access mode, Object... mda);   

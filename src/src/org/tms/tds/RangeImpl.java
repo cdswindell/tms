@@ -342,6 +342,15 @@ public class RangeImpl extends TableCellsElementImpl
 		}
 	}
 	
+	@Override
+	public void clear()
+	{
+	    for (Cell c : cells()) {
+	        if (c != null)
+	            ((CellImpl)c).setCellValue(null);
+	    }
+	}
+	
     @Override
     public Iterable<Cell> cells()
     {

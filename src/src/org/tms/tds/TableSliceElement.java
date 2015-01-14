@@ -5,9 +5,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
 
@@ -264,6 +266,52 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
                 return super.getProperty(key);
         }
     }   
+
+    @Override
+    public void fill(Object o) 
+    {
+        TableImpl parent = getTable();
+        assert parent != null : "Parent table required";
+        
+        if (this.isReadOnly())
+            throw new ReadOnlyException(this, TableProperty.CellValue);
+        
+        pushCurrent();
+        
+        try {
+            for (Cell c : cells()) {
+                if (c != null)
+                    ((CellImpl)c).setCellValue(o);
+            }
+            
+            this.setInUse(true);                  
+        }
+        finally {       
+            popCurrent();
+        }
+    }
+
+    @Override
+    public void clear() 
+    {
+        TableImpl parent = getTable();
+        assert parent != null : "Parent table required";
+        
+        if (this.isReadOnly())
+            throw new ReadOnlyException(this, TableProperty.CellValue);
+        
+        pushCurrent();
+        
+        try {
+            for (Cell c : cells()) {
+                if (c != null)
+                    ((CellImpl)c).setCellValue(null);
+            }
+        }
+        finally {       
+            popCurrent();
+        }
+    }
 
 	@Override
 	public boolean isNull() 

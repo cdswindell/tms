@@ -9,6 +9,7 @@ import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
+import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.teq.Derivation;
 import org.tms.teq.ErrorCode;
 import org.tms.teq.Token;
@@ -43,10 +44,10 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected void setDerivedCellValue(Token t)
     {
-        if (t.isError())
-            ;
+        if (t.isError()) 
+            this.setCellValueNoDataTypeCheck(t.getErrorCode());
         else if (t.isNull())
-            ;
+            setCellValue(null, true);
         else
             setCellValue(t.getValue(), true);
     }
@@ -205,9 +206,12 @@ public class CellImpl extends TableElementImpl implements Cell
 	        case Row:
 	            return getRow();
 	            
-	        case DataType:
-	            return getDataType();
-	            
+            case DataType:
+                return getDataType();
+                
+            case CellValue:
+                return getCellValue();
+                
             default:
                 return super.getProperty(key);
         }
@@ -246,11 +250,24 @@ public class CellImpl extends TableElementImpl implements Cell
     	setCellValue(null);
     }
 
-	@Override
-	public void fill(Object o) 
-	{
-		setCellValue(o);
-	}
+    @Override
+    public void fill(Object o) 
+    {
+        if (isReadOnly())
+            throw new ReadOnlyException(this, TableProperty.CellValue);
+        
+        setCellValue(o);
+    }
+
+    @Override
+    public void clear() 
+    {
+        if (isReadOnly())
+            throw new ReadOnlyException(this, TableProperty.CellValue);
+        if (!isSupportsNull())
+        
+        setCellValue(null);
+    }
 
 	@Override
 	public TableImpl getTable() 
@@ -299,6 +316,8 @@ public class CellImpl extends TableElementImpl implements Cell
                 
                 this.getRow().setInUse(true);
                 this.getColumn().setInUse(true);
+                getTable().registerDerivedCell(this);
+                
                 recalculate();
             }  
         }
@@ -313,6 +332,8 @@ public class CellImpl extends TableElementImpl implements Cell
                 TableSliceElement tse = (TableSliceElement)d;
                 tse.removeFromAffects(elem);
             }
+            
+            getTable().deregisterDerivedCell(this);
             
             m_deriv.destroy();
             m_deriv = null;

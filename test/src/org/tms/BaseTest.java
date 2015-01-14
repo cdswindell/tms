@@ -8,4 +8,9 @@ public class BaseTest
         return withIn > Math.abs(x - y);
     }
 
+    public boolean closeTo(Object x, double y, double withIn) 
+    {
+        return withIn > Math.abs((Double)x - y);
+    }
+
 }

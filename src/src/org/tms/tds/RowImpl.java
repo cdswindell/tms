@@ -257,28 +257,6 @@ public class RowImpl extends TableSliceElement implements Row
         return numCells;
     }
     
-	@Override
-	public void fill(Object o) 
-	{
-		TableImpl parent = getTable();
-		assert parent != null : "Parent table required";
-		
-		pushCurrent();
-		ColumnImpl col = parent.getColumn(Access.First);
-		if (col != null) {
-			while(col != null) {
-				CellImpl c = getCell(col);
-				c.setCellValue(o);
-				col.setInUse(true);
-				col = parent.getColumn(Access.Next);
-			}
-			
-			this.setInUse(true);			
-		}
-		
-		popCurrent();
-	}
-
     @Override
     public Iterable<Cell> cells()
     {
@@ -313,7 +291,7 @@ public class RowImpl extends TableSliceElement implements Row
         @Override
         public boolean hasNext()
         {
-            return m_index < m_numCols;
+            return m_index <= m_numCols;
         }
 
         @Override

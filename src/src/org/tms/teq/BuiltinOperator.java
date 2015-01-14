@@ -103,7 +103,7 @@ public enum BuiltinOperator implements Labeled, Operator
     VarSampleOper(TokenType.StatOp, 5, "varSample", "varianceOfSample"),
     MinOper(TokenType.StatOp, 5, "min", "minimum"),
     MaxOper(TokenType.StatOp, 5, "max", "maximum"),
-    RangeOper(TokenType.StatOp, 5, "xxx"),
+    RangeOper(TokenType.StatOp, 5, "spread"),
     CountOper(TokenType.StatOp, 5, "count", "cnt"),
     KurtOper(TokenType.StatOp, 5),
     SkewOper(TokenType.StatOp, 5),
