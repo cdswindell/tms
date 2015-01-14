@@ -617,6 +617,13 @@ public class InfixExpressionParser
     		if (quoteChar != 0 && c == quoteChar) 
     			break;
     		
+            // comma or right paren also terminate
+    		if ((c == ')' || c == ',') && quoteChar == 0 ) {
+    		    // don't consume character
+    		    charsParsed--;
+    		    break;
+    		}
+    		
     		// found leading quote?
     		if (!foundToken && quoteChar == 0 && (c == '"' || c == '\'')) {
     			quoteChar = c;

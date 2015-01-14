@@ -19,7 +19,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     private JustInTimeSet<RangeImpl> m_ranges;
     private boolean m_inUse;
     private Derivation m_deriv;
-    private Set<TableSliceElement> m_affects;
+    private Set<Derivable> m_affects;
 
     public TableSliceElement(ElementType eType, TableElementImpl e)
     {
@@ -135,7 +135,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         if (numAffects == 1)
             affects.addAll(m_affects);
         else if (numAffects > 1) {
-            
+            // TODO: implement
         }        
         
         return affects;
@@ -147,12 +147,12 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     
     protected void addToAffects(Derivable elem)
     {
-        m_affects.add((TableSliceElement)elem);
+        m_affects.add(elem);
     }
     
     protected void removeFromAffects(Derivable elem)
     {
-        m_affects.remove((TableSliceElement)elem);
+        m_affects.remove(elem);
     }
     
     void compactIfNeeded(ArrayList<? extends TableSliceElement> cols, int capacity) 
@@ -238,7 +238,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         }
         
         // initialize other member fields
-        m_affects = new LinkedHashSet<TableSliceElement>();
+        m_affects = new LinkedHashSet<Derivable>();
         m_ranges = new JustInTimeSet<RangeImpl>();
         m_inUse = false;
     } 

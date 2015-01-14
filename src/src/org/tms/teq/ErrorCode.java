@@ -4,6 +4,7 @@ public enum ErrorCode
 {
     DivideByZero, 
     NaN,
+    Infinity,
     InvalidOperand, 
     InvalidTableOperand, 
     ReferenceRequired, 
@@ -12,6 +13,7 @@ public enum ErrorCode
     StackUnderflow,
     OperandDataTypeMismatch,
     OperandRequired,
+    UnimplementedStatistic,
     Unspecified, 
     
     NoError,

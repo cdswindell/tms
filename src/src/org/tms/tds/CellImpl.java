@@ -1,12 +1,16 @@
 package org.tms.tds;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.tms.api.Cell;
+import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
+import org.tms.teq.Derivation;
+import org.tms.teq.ErrorCode;
 import org.tms.teq.Token;
 
 public class CellImpl extends TableElementImpl implements Cell
@@ -14,6 +18,7 @@ public class CellImpl extends TableElementImpl implements Cell
     private Object m_cellValue;
     private ColumnImpl m_col;
     private int m_cellOffset;
+    private Derivation m_deriv;
     
     public CellImpl(ColumnImpl col, int cellOffset)
     {
@@ -97,6 +102,27 @@ public class CellImpl extends TableElementImpl implements Cell
     public boolean isStringValue()
     {
         return m_cellValue != null && (m_cellValue instanceof String);
+    }
+    
+    public boolean isErrorValue()
+    {
+        return getErrorCode() != ErrorCode.NoError;
+    }
+    
+    public ErrorCode getErrorCode()
+    {
+        if (getDataType() == Double.class) {
+            if ((double) getCellValue() == Double.NaN)
+                return ErrorCode.NaN;
+            else if ((double)getCellValue() == Double.POSITIVE_INFINITY)
+                return ErrorCode.Infinity;
+            else if ((double)getCellValue() == Double.NEGATIVE_INFINITY)
+                return ErrorCode.Infinity;
+        }
+        else if (getCellValue() != null && getCellValue() instanceof ErrorCode)
+            return (ErrorCode)getCellValue();
+        
+        return ErrorCode.NoError;
     }
     
     protected int getCellOffset()
@@ -244,6 +270,93 @@ public class CellImpl extends TableElementImpl implements Cell
 			return null;
 	}
 	
+    @Override
+    public String getDerivation()
+    {
+        if (m_deriv != null)
+            return m_deriv.getAsEnteredExpression();
+        else
+            return null;
+    }
+
+    @Override
+    public void setDerivation(String expr)
+    {
+        // clear out any existing derivations
+        if (m_deriv != null) 
+            clearDerivation();
+        
+        if (expr != null && expr.trim().length() > 0) {
+            m_deriv = Derivation.create(expr.trim(), this);
+            
+            // mark the rows/columns that impact the deriv, and evaluate values
+            if (m_deriv != null && m_deriv.isConverted()) {
+                Derivable elem = m_deriv.getTarget();
+                for (Derivable d : m_deriv.getAffectedBy()) {
+                    TableSliceElement tse = (TableSliceElement)d;
+                    tse.addToAffects(elem);
+                }
+                
+                this.getRow().setInUse(true);
+                this.getColumn().setInUse(true);
+                recalculate();
+            }  
+        }
+    }
+
+    @Override
+    public void clearDerivation()
+    {
+        if (m_deriv != null) {
+            Derivable elem = m_deriv.getTarget();
+            for (Derivable d : m_deriv.getAffectedBy()) {
+                TableSliceElement tse = (TableSliceElement)d;
+                tse.removeFromAffects(elem);
+            }
+            
+            m_deriv.destroy();
+            m_deriv = null;
+        }        
+    }
+
+    @Override
+    public boolean isDerived()
+    {
+        return m_deriv != null;       
+    }
+
+    @Override
+    public List<Derivable> getAffectedBy()
+    {
+        if (m_deriv != null)
+            return m_deriv.getAffectedBy();
+        else
+            return null;
+    }
+
+    @Override
+    public List<Derivable> getAffects()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void recalculate()
+    {
+        if (isDerived()) {
+            m_deriv.recalculateTarget();
+            
+            // recalculate dependent columns
+            List<Derivable> affects = m_deriv.getTarget().getAffects();
+            if (affects != null) {
+                for (Derivable d : affects) {
+                    d.recalculate();
+                }
+            }
+        }
+    }
+    
 	@Override
 	public Iterable<Cell> cells()
 	{

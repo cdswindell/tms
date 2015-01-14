@@ -49,6 +49,14 @@ public class SingleVariableStatEngine
         return m_n;
     }
     
+    public int enter(Number x) 
+    {
+        if (x != null)
+            enter(x.doubleValue());
+        
+        return m_n;
+    }
+    
     public int enter(double x) 
     {
         m_sumX += x;

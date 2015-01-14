@@ -65,9 +65,6 @@ public class PostfixStackEvaluator
 		int numArgs;
 		Token [] args;
 		
-		Column colRef = null;
-		Row rowRef = null;
-		
 		// walk through postfix stack from tail to head
 		while(m_pfsIter.hasNext()) {
 			Token t = m_pfsIter.next();
@@ -75,42 +72,17 @@ public class PostfixStackEvaluator
 			TokenType tt = t.getTokenType();
 			Operator oper = t.getOperator();
 			Object value = t.getValue();
-			boolean haveRef = false;
-			rowRef = null;
-			colRef = null;
 			
 			switch (tt) {
+                case RowRef:
+                case ColumnRef:
 				case Operand:
 					m_opStack.push(tt, value);
 					break;
 					
-                case RowRef:
-                case ColumnRef:
-                    if (value != null && value instanceof Column) {
-                        haveRef = true;
-                        rowRef = row;
-                        colRef = (Column) value;
-                    }
-                    else if (value != null && value instanceof Row) {
-                        haveRef = true;
-                        rowRef = (Row) value;
-                        colRef = col;
-                    }
-                    
-                    if (haveRef) {
-                        Cell cell = tbl.getCell(rowRef, colRef);
-                        if (cell == null || cell.isNull())
-                            m_opStack.push(Token.createNullToken());
-                        else
-                            m_opStack.push(TokenType.Operand, cell.getCellValue());
-                    }
-                    else
-                        m_opStack.push(Token.createNullToken());
-                    break;
-                                        
 				case UnaryOp:
 				case UnaryFunc:
-					x = m_opStack.pollFirst();
+					x = asOperand(m_opStack.pollFirst(), tbl, row, col);
 					if (x == null || !x.isOperand()) // stack is in invalid state
 					    return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);					
 					m_opStack.push(doUnaryOp(oper, x));					
@@ -118,11 +90,11 @@ public class PostfixStackEvaluator
 					
 				case BinaryOp:
 				case BinaryFunc:
-					y = m_opStack.pollFirst();
+					y = asOperand(m_opStack.pollFirst(), tbl, row, col);
 					if (y == null || !y.isOperand()) // stack is in invalid state
                         return Token.createErrorToken(y == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);                    
 					
-					x = m_opStack.pollFirst();
+					x = asOperand(m_opStack.pollFirst(), tbl, row, col);
 					if (x == null || !x.isOperand()) // stack is in invalid state
                         return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);                    
 
@@ -138,7 +110,7 @@ public class PostfixStackEvaluator
                         args = new Token[numArgs];
                         
                         for (int i = numArgs - 1; i >= 0; i--) {
-                            x = m_opStack.pollFirst();
+                            x = asOperand(m_opStack.pollFirst(), tbl, row, col);
                             if (x == null || !x.isOperand()) // stack is in invalid state
                                 return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);  
                             else if (!x.isA(argTypes[i]))
@@ -184,6 +156,50 @@ public class PostfixStackEvaluator
 	    return m_table;
 	}
 	
+    private Token asOperand(Token t, Table tbl, Row row, Column col)
+    {
+        if (t == null)
+            return t;        
+        else if (t.isOperand())
+            return t;        
+        else if (t.isReference()) {
+            boolean haveRef = false;
+            Row rowRef = null;
+            Column colRef = null;
+            Cell cell = null;
+            
+            TableCellsElement value = t.getReferenceValue();
+            if (value != null && value instanceof Column) {
+                haveRef = true;
+                rowRef = row;
+                colRef = (Column) value;
+            }
+            else if (value != null && value instanceof Row) {
+                haveRef = true;
+                rowRef = (Row) value;
+                colRef = col;
+            }
+            else if (value != null && value instanceof Cell) 
+                cell = (Cell)value;
+            
+            if (haveRef) 
+                cell = tbl.getCell(rowRef, colRef);
+            
+            if (cell != null) {
+                if (cell.isNull())
+                    return Token.createNullToken();
+                if (cell.isErrorValue())
+                    return Token.createErrorToken(cell.getErrorCode());
+                else
+                    return new Token(TokenType.Operand, cell.getCellValue());
+            }
+            else
+                return t;
+        }
+        else
+            return t;
+    }
+    
     private Token doGenericOp(Operator oper, Token... args)
     {
         Token t = oper.evaluate(args);
@@ -201,7 +217,15 @@ public class PostfixStackEvaluator
             if (ref != null) {
                 for (Cell c : ref.cells()) {
                     if (c.isNumericValue())
-                        svse.enter((double)c.getCellValue());
+                        svse.enter((Number)c.getCellValue());
+                }
+                
+                try {
+                    double value = svse.calcStatistic(bio);
+                    result = new Token(TokenType.Operand, value);
+                }
+                catch (UnimplementedException ue) {
+                    result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
                 }
             }
             else
