@@ -57,7 +57,7 @@ public class Derivation
             deriv.m_pfe = pfe;
             
             // note cols/rows that affect this derivation
-            Iterator<Token> iter = deriv.m_ifs.iterator();
+            Iterator<Token> iter = deriv.m_pfs.iterator();
             while(iter != null && iter.hasNext()) {
                 Token tk = iter.next();
                 TokenType tt = tk.getTokenType();
@@ -65,6 +65,8 @@ public class Derivation
                 switch (tt) {
                     case RowRef:
                     case ColumnRef:
+                    case CellRef:
+                    case TableRef:
                         if (tk.getDerivableValue() != null) 
                             deriv.m_affectedBy.add(tk.getDerivableValue());
                         break;

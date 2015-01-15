@@ -27,6 +27,7 @@ public enum TableProperty implements Comparable<TableProperty>
     TokenMapper(true, true, ElementType.Context),
     RowCapacityIncr(false, true, ElementType.Context, ElementType.Table),
     ColumnCapacityIncr(false, true, ElementType.Context, ElementType.Table),
+    isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
     
     // Table Properties (some shared with Ranges)
     numRanges(true, false, ElementType.Table, ElementType.Row, ElementType.Column),

@@ -114,13 +114,17 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     public void recalculate()
     {
         if (isDerived()) {
+            deactivateAutoRecalculation();
             m_deriv.recalculateTarget();
+            activateAutoRecalculation();
             
             // recalculate dependent columns
-            List<Derivable> affects = m_deriv.getTarget().getAffects();
-            if (affects != null) {
-                for (Derivable d : affects) {
-                    d.recalculate();
+            if (getTable().isAutoRecalculate()) {
+                List<Derivable> affects = m_deriv.getTarget().getAffects();
+                if (affects != null) {
+                    for (Derivable d : affects) {
+                        d.recalculate();
+                    }
                 }
             }
         }
@@ -138,6 +142,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             affects.addAll(m_affects);
         else if (numAffects > 1) {
             // TODO: implement
+            affects.addAll(m_affects);
         }        
         
         return affects;
@@ -208,14 +213,26 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     
     protected void pushCurrent()
     {
-    	if (getTable() != null)
-    		getTable().pushCurrent();
+        if (getTable() != null)
+            getTable().pushCurrent();
     }
     
     protected void popCurrent()
     {
-    	if (getTable() != null)
-    		getTable().popCurrent();
+        if (getTable() != null)
+            getTable().popCurrent();
+    }
+    
+    protected void deactivateAutoRecalculation()
+    {
+        if (getTable() != null)
+            getTable().deactivateAutoRecalculation();
+    }
+    
+    protected void activateAutoRecalculation()
+    {
+        if (getTable() != null)
+            getTable().activateAutoRecalculation();
     }
     
     /*
@@ -268,6 +285,18 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }   
 
     @Override
+    public boolean isReadOnly()
+    {
+        return (getTable() != null ? getTable().isReadOnly() : false) || super.isReadOnly();
+    }
+    
+    @Override
+    public void clear() 
+    {
+        fill(null);
+    }
+
+    @Override
     public void fill(Object o) 
     {
         TableImpl parent = getTable();
@@ -276,40 +305,44 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         if (this.isReadOnly())
             throw new ReadOnlyException(this, TableProperty.CellValue);
         
+        deactivateAutoRecalculation();
         pushCurrent();
         
+        // Clear derivation, since fill should override
+        clearDerivation();
+        
+        boolean setSome = false;
         try {
+            boolean readOnlyExceptionEncountered = false;
             for (Cell c : cells()) {
-                if (c != null)
-                    ((CellImpl)c).setCellValue(o);
+                if (c != null) {
+                    try {
+                        ((CellImpl)c).setCellValue(o, true);
+                        setSome = true;
+                    }
+                    catch (ReadOnlyException e) {
+                        readOnlyExceptionEncountered = true;
+                    }
+                }
             }
             
-            this.setInUse(true);                  
+            if (setSome)
+                this.setInUse(true); 
+            else if (readOnlyExceptionEncountered)
+                throw new ReadOnlyException(this, TableProperty.CellValue);
         }
-        finally {       
+        finally { 
             popCurrent();
+            activateAutoRecalculation();
         }
-    }
-
-    @Override
-    public void clear() 
-    {
-        TableImpl parent = getTable();
-        assert parent != null : "Parent table required";
         
-        if (this.isReadOnly())
-            throw new ReadOnlyException(this, TableProperty.CellValue);
-        
-        pushCurrent();
-        
-        try {
-            for (Cell c : cells()) {
-                if (c != null)
-                    ((CellImpl)c).setCellValue(null);
+        if (setSome && parent != null && parent.isAutoRecalculate()) {
+            List<Derivable> affecteds = getAffects();
+            if (affecteds != null) {
+                for (Derivable affected : affecteds) {
+                    affected.recalculate();
+                }
             }
-        }
-        finally {       
-            popCurrent();
         }
     }
 

@@ -73,6 +73,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     //Initialized from context or source table
     private int m_rowCapacityIncr;
     private int m_colCapacityIncr;
+
+    private boolean m_autoRecalculate;
     
     protected TableImpl()
     {
@@ -160,6 +162,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     setColumnCapacityIncr((int)value);
                     break;
 
+                case isAutoRecalculate:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_AUTO_RECALCULATE_DEFAULT;
+                    setAutoRecalculate((boolean)value);
+                    break;
+
                 default:
                     throw new IllegalStateException("No initialization available for Table Property: " + tp);                       
             }
@@ -228,7 +236,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 return getNumCells(); 
                 
             case NextCellOffset:
-            	return getNextCellOffset();
+                return getNextCellOffset();
+                
+            case isAutoRecalculate:
+                return isAutoRecalculate();
                 
             default:
                 return super.getProperty(key);
@@ -288,6 +299,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
     
+    public boolean isAutoRecalculate()
+    {
+        return m_autoRecalculate;
+    }
+    
+    protected void setAutoRecalculate(boolean value)
+    {
+        m_autoRecalculate = value;
+    }
+
     @Override
     protected boolean isDataTypeEnforced()
     {
@@ -305,7 +326,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     /*
      * Delete TableELement methods
      */
-    protected void remove(RangeImpl r)
+    protected void delete(RangeImpl r)
     {
         vetParent(r);
         boolean processed = m_ranges.remove(r);
@@ -318,6 +339,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
         vetParent(r);
         boolean processed = false;
         
+        // TODO: Delete element
+        
         if (processed) markDirty();
     }
  
@@ -326,23 +349,24 @@ public class TableImpl extends TableCellsElementImpl implements Table
         vetParent(c);
         boolean processed = false;
         
+        // TODO: Delete element
+        
         if (processed) markDirty();
     }
- 
     
     protected boolean isDirty()
     {
         return m_dirty;
     }
     
-    void markDirty() { setDirty(true); }
-    void markClean() { setDirty(false); };
-    
     void setDirty(boolean dirty)
     {
         m_dirty = dirty;
     }
 
+    void markDirty() { setDirty(true); }
+    void markClean() { setDirty(false); };
+    
     /*
      * Row manipulation methods
      */
@@ -972,8 +996,15 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
     @Override
+    public boolean isReadOnly()
+    {
+        return (getTableContext() != null ? getTableContext().isReadOnly() : false) || super.isReadOnly();
+    }
+    
+    @Override
     public void fill(Object o) 
     {
+        deactivateAutoRecalculation();
         pushCurrent();
         ColumnImpl c = getColumn(Access.First);
         while (c != null) {
@@ -982,6 +1013,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
         
         popCurrent();
+        activateAutoRecalculation();
     }  
     
     @Override
@@ -1014,6 +1046,18 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		m_currentCellStack.push(cr);
 	}
 
+    protected void deactivateAutoRecalculation()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    protected void activateAutoRecalculation()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+    
 	public void recalculate()
 	{
 	    // TODO: handle recalcuation of derived rows and cols
@@ -1021,6 +1065,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	        cell.recalculate();
 	}
 	
+    protected void recalculate(CellImpl modifiedCell)
+    {
+        recalculate();        
+    }
+    
     protected void registerDerivedCell(CellImpl cell)
     {
         if (cell != null)

@@ -39,7 +39,16 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected void setCellValue(Object value)
     {
-        setCellValue(value, true);
+        // explicitly set cells can't be derived
+        clearDerivation();
+        
+        // set the cell value, taking datatype enforcement into account, if enabled
+        boolean valuesDiffer = setCellValue(value, true);
+        
+        // recalculate affected table elements
+        if (valuesDiffer && getTable() != null && getTable().isAutoRecalculate()) {
+            getTable().recalculate(this);
+        }
     }
     
     protected void setDerivedCellValue(Token t)
@@ -52,19 +61,26 @@ public class CellImpl extends TableElementImpl implements Cell
             setCellValue(t.getValue(), true);
     }
     
-    void setCellValueNoDataTypeCheck(Object value)
+    boolean setCellValueNoDataTypeCheck(Object value)
     {
-        setCellValue(value, false);
+        return setCellValue(value, false);
     }
     
-    protected void setCellValue(Object value, boolean typeSafeCheck)
+    protected boolean setCellValue(Object value, boolean typeSafeCheck)
     {
         if (typeSafeCheck && value != null && this.isDataTypeEnforced()) {
             if (isDatatypeMismatch(value))
                 throw new DataTypeEnforcementException(getEnforcedDataType(), value);
         }
         
-        m_cellValue = value;
+        boolean valuesDiffer = false;
+        
+        if (value != m_cellValue) {
+            m_cellValue = value;
+            valuesDiffer = true;
+        }
+        
+        return valuesDiffer;
     }
     
     private boolean isDatatypeMismatch(Object value)
@@ -247,9 +263,17 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public void delete()
     {
-    	setCellValue(null);
+    	setCellValue(null, false);
     }
 
+    @Override
+    public boolean isReadOnly()
+    {
+        return (getColumn() != null ? getColumn().isReadOnly() : false) ||
+               (getRow() != null ? getRow().isReadOnly() : false) ||
+               super.isReadOnly();
+    }
+    
     @Override
     public void fill(Object o) 
     {
@@ -262,11 +286,7 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public void clear() 
     {
-        if (isReadOnly())
-            throw new ReadOnlyException(this, TableProperty.CellValue);
-        if (!isSupportsNull())
-        
-        setCellValue(null);
+        fill(null);
     }
 
 	@Override
@@ -369,10 +389,12 @@ public class CellImpl extends TableElementImpl implements Cell
             m_deriv.recalculateTarget();
             
             // recalculate dependent columns
-            List<Derivable> affects = m_deriv.getTarget().getAffects();
-            if (affects != null) {
-                for (Derivable d : affects) {
-                    d.recalculate();
+            if (getTable().isAutoRecalculate()) {
+                List<Derivable> affects = m_deriv.getTarget().getAffects();
+                if (affects != null) {
+                    for (Derivable d : affects) {
+                        d.recalculate();
+                    }
                 }
             }
         }

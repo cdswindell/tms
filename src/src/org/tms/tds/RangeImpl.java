@@ -219,12 +219,12 @@ public class RangeImpl extends TableCellsElementImpl
         return removedAny;
     } 
     
-    protected Iterable<RowImpl> rows()
+    public Iterable<RowImpl> rows()
     {
         return new BaseElementIterable<RowImpl>(m_rows.isEmpty() ? getTable().getRows() : getRows());
     }
     
-    protected Iterable<ColumnImpl> columns()
+    public Iterable<ColumnImpl> columns()
     {
         return new BaseElementIterable<ColumnImpl>(m_cols.isEmpty() ? getTable().getColumns() : getColumns());
     }
@@ -252,8 +252,8 @@ public class RangeImpl extends TableCellsElementImpl
     	m_rows.clear();
     	m_cols.clear();
     	
-    	// remove the range from its parent table
-    	if (getTable() != null) getTable().remove(this);	
+    	// delete the range from its parent table
+    	if (getTable() != null) getTable().delete(this);	
     }
     
     @Override
@@ -327,28 +327,37 @@ public class RangeImpl extends TableCellsElementImpl
 	public void fill(Object o) 
 	{
 		if (!isNull()) {
-			if (getNumRows() == 0 && m_cols != null) 
-				m_cols.forEach(c->c.fill(o)); // if group is just columns, fill them
-			else if (getNumColumns() == 0 && m_rows != null) 
-				m_rows.forEach(r->r.fill(o)); // if group is just rows, fill them
-			else {
-				for (ColumnImpl c : m_cols) {
-					for (RowImpl r : m_rows) {
-						CellImpl cell = c.getCell(r);
-						cell.setCellValue(o);
-					}
-				}
-			}
+		    TableImpl tbl = getTable();
+		    
+		    tbl.deactivateAutoRecalculation();
+		    
+		    try {
+    			if (getNumRows() == 0 && m_cols != null) 
+    				m_cols.forEach(c->c.fill(o)); // if group is just columns, fill them
+    			else if (getNumColumns() == 0 && m_rows != null) 
+    				m_rows.forEach(r->r.fill(o)); // if group is just rows, fill them
+    			else {
+    				for (ColumnImpl c : m_cols) {
+    					for (RowImpl r : m_rows) {
+    						CellImpl cell = c.getCell(r);
+    						cell.setCellValue(o, true);
+    					}
+    				}
+    			}
+		    }
+		    finally {
+	            tbl.activateAutoRecalculation();
+	            
+	            if (tbl.isAutoRecalculate())
+	                tbl.recalculate();
+		    }
 		}
 	}
 	
 	@Override
 	public void clear()
 	{
-	    for (Cell c : cells()) {
-	        if (c != null)
-	            ((CellImpl)c).setCellValue(null);
-	    }
+	    fill(null);
 	}
 	
     @Override

@@ -21,6 +21,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     static final boolean sf_READ_ONLY_DEFAULT = false;
     static final boolean sf_SUPPORTS_NULL_DEFAULT = true;
     static final boolean sf_ENFORCE_DATA_TYPE_DEFAULT = false;
+    static final boolean sf_AUTO_RECALCULATE_DEFAULT = true;
     
     static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();
     
@@ -68,6 +69,8 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     private int m_rowCapacityIncr;
     private int m_columnCapacityIncr;
     private TokenMapper m_tokenMapper;
+
+    private boolean m_autoRecalculate;
     
     private ContextImpl(boolean isDefault, ContextImpl otherContext)
     {
@@ -120,9 +123,15 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                     break;
                     
                 case isEnforceDataType:
-                    if (!isValidPropertyValueInt(value))
+                    if (!isValidPropertyValueBoolean(value))
                         value = sf_ENFORCE_DATA_TYPE_DEFAULT;
                     setEnforceDataType((boolean)value);
+                    break;
+                    
+                case isAutoRecalculate:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_AUTO_RECALCULATE_DEFAULT;
+                    setAutoRecalculate((boolean)value);
                     break;
                     
                 case TokenMapper:
@@ -162,6 +171,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext
             case isEnforceDataType:
                 return isEnforceDataType();
                 
+            case isAutoRecalculate:
+                return isAutoRecalculate();
+                
             case TokenMapper:
                 return getTokenMapper();
                 
@@ -173,6 +185,16 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     protected boolean isDefault()
     {
         return m_default;
+    }
+
+    public boolean isAutoRecalculate()
+    {
+        return m_autoRecalculate;
+    }
+    
+    protected void setAutoRecalculate(boolean value)
+    {
+        m_autoRecalculate = value;
     }
 
     public TokenMapper getTokenMapper()
