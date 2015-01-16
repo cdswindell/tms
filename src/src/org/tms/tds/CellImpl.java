@@ -270,8 +270,16 @@ public class CellImpl extends TableElementImpl implements Cell
     public boolean isReadOnly()
     {
         return (getColumn() != null ? getColumn().isReadOnly() : false) ||
-               (getRow() != null ? getRow().isReadOnly() : false) ||
-               super.isReadOnly();
+                (getRow() != null ? getRow().isReadOnly() : false) ||
+                super.isReadOnly();
+    }
+    
+    @Override
+    public boolean isSupportsNull()
+    {
+        return (getColumn() != null ? getColumn().isSupportsNull() : false) ||
+                (getRow() != null ? getRow().isSupportsNull() : false) ||
+                super.isSupportsNull();
     }
     
     @Override

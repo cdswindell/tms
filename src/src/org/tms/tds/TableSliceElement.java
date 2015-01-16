@@ -9,6 +9,7 @@ import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
@@ -291,6 +292,12 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }
     
     @Override
+    public boolean isSupportsNull()
+    {
+        return (getTable() != null ? getTable().isSupportsNull() : false) || super.isSupportsNull();
+    }
+    
+    @Override
     public void clear() 
     {
         fill(null);
@@ -304,6 +311,8 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         
         if (this.isReadOnly())
             throw new ReadOnlyException(this, TableProperty.CellValue);
+        else if (o == null && !isSupportsNull())
+            throw new NullValueException(this, TableProperty.CellValue);
         
         deactivateAutoRecalculation();
         pushCurrent();

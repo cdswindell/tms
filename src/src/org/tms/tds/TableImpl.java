@@ -1001,6 +1001,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return (getTableContext() != null ? getTableContext().isReadOnly() : false) || super.isReadOnly();
     }
     
+
+    @Override
+    public boolean isSupportsNull()
+    {
+        return (getTableContext() != null ? getTableContext().isSupportsNull() : false) || super.isSupportsNull();
+    }
+    
     @Override
     public void fill(Object o) 
     {

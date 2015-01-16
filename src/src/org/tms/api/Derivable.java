@@ -8,6 +8,10 @@ public interface Derivable extends BaseElement, TableCellsElement
     public void setDerivation(String expression);
     public void clearDerivation();
     
+    /**
+     * Returns {@code true} if this element is derived
+     * @return {@code true} if this element is derived
+     */
     public boolean isDerived();
     
     /**
@@ -16,7 +20,12 @@ public interface Derivable extends BaseElement, TableCellsElement
      * @return a List of the Derivable elements that affect this derivation
      */
     public List<Derivable> getAffectedBy();
-    
+   
+    /**
+     * Returns a {@link java.collections.List<Derivable>} of the {@code Derivable} elements
+     * that this {@code Derivable} impacts when modified
+     * @return a List of the Derivable elements that this element affects
+     */
     public List<Derivable> getAffects();
     
     /**
