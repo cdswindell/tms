@@ -501,25 +501,31 @@ public class TableImpl extends TableCellsElementImpl implements Table
     synchronized void ensureRowsExist()
     {
         pushCurrent();
-        
-        for (int i = 1; i <= this.getNumRows(); i++) {
-            RowImpl r = this.getRowInternal(true, Access.ByIndex, i);
-            assert r != null;
+
+        try {
+            for (int i = 1; i <= this.getNumRows(); i++) {
+                RowImpl r = this.getRowInternal(true, Access.ByIndex, i);
+                assert r != null;
+            }
         }
-        
-        popCurrent();
+        finally {        
+            popCurrent();
+        }
     }
     
     synchronized void ensureColumnsExist()
     {
         pushCurrent();
-        
-        for (int i = 1; i <= this.getNumColumns(); i++) {
-            ColumnImpl c = this.getColumnInternal(true, Access.ByIndex, i);
-            assert c != null;
+
+        try {
+            for (int i = 1; i <= this.getNumColumns(); i++) {
+                ColumnImpl c = this.getColumnInternal(true, Access.ByIndex, i);
+                assert c != null;
+            }
         }
-        
-        popCurrent();
+        finally {        
+            popCurrent();
+        }
     }
     
     /**
@@ -1013,33 +1019,40 @@ public class TableImpl extends TableCellsElementImpl implements Table
     {
         deactivateAutoRecalculation();
         pushCurrent();
-        ColumnImpl c = getColumn(Access.First);
-        while (c != null) {
-            c.fill(o);
-            c = getColumn(Access.Next);
+
+        try {
+            ColumnImpl c = getColumn(Access.First);
+            while (c != null) {
+                c.fill(o);
+                c = getColumn(Access.Next);
+            }
         }
-        
-        popCurrent();
-        activateAutoRecalculation();
+        finally {        
+            popCurrent();
+            activateAutoRecalculation();
+        }
     }  
     
     @Override
     public void clear() 
     {
         pushCurrent();
-        ColumnImpl c = getColumn(Access.First);
-        while (c != null) {
-            c.clear();
-            c = getColumn(Access.Next);
+        try {
+            ColumnImpl c = getColumn(Access.First);
+            while (c != null) {
+                c.clear();
+                c = getColumn(Access.Next);
+            }
         }
-        
-        popCurrent();
+        finally {
+            popCurrent();
+        }
     }  
 	
 	synchronized public void popCurrent() 
     {
-		if (!m_currentCellStack.isEmpty()) {
-			CellReference cr = m_currentCellStack.pop();
+		if (m_currentCellStack != null && !m_currentCellStack.isEmpty()) {
+			CellReference cr = m_currentCellStack.pollFirst();
 			if (cr != null) {
 				setCurrentRow(cr.getRow());
 				setCurrentColumn(cr.getColumn());

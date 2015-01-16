@@ -228,6 +228,9 @@ public class CellImpl extends TableElementImpl implements Cell
             case CellValue:
                 return getCellValue();
                 
+            case Derivation:
+                return getDerivation();
+                
             default:
                 return super.getProperty(key);
         }
@@ -263,6 +266,9 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public void delete()
     {
+        if (isDerived()) 
+            clearDerivation();
+        
     	setCellValue(null, false);
     }
 
