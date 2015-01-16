@@ -15,18 +15,12 @@ public interface Derivable extends BaseElement, TableCellsElement
     public boolean isDerived();
     
     /**
-     * Returns a {@link java.collections.List<Derivable>} of the {@code Derivable} elements
+     * Returns a {@link java.collections.List<TableElement>} of the elements
      * that affect this {@code Derivable}'s calculation
-     * @return a List of the Derivable elements that affect this derivation
+     * @return a List of the TableElement elements that affect this derivation
      */
-    public List<Derivable> getAffectedBy();
+    public List<TableElement> getAffectedBy();
    
-    /**
-     * Returns a {@link java.collections.List<Derivable>} of the {@code Derivable} elements
-     * that this {@code Derivable} impacts when modified
-     * @return a List of the Derivable elements that this element affects
-     */
-    public List<Derivable> getAffects();
     
     /**
      * Recalculates the derived element. Once complete, recalculates all dependent elements

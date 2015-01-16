@@ -109,10 +109,10 @@ public class DerivationTest
         // these derivations should all succeed
         c1.setDerivation("col 2 + col 4");
         c2.setDerivation("col 3");
-        c3.setDerivation("col 4 ");
+        c3.setDerivation("col 4 + col 7 ");
         c4.setDerivation("col 5");
         c5.setDerivation("col 6");
-        c6.setDerivation("col 7");
+        c6.setDerivation("col 7 + col 8");
         c7.setDerivation("col 8");
         
         // this should fail

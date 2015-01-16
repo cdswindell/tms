@@ -7,8 +7,10 @@ import java.util.NoSuchElementException;
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
+import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.teq.Derivation;
 import org.tms.teq.ErrorCode;
@@ -39,6 +41,11 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected void setCellValue(Object value)
     {
+        if (isReadOnly())
+            throw new ReadOnlyException(this, TableProperty.CellValue);
+        else if (value == null && !isSupportsNull())
+            throw new NullValueException(this, TableProperty.CellValue);
+        
         // explicitly set cells can't be derived
         clearDerivation();
         
@@ -46,9 +53,8 @@ public class CellImpl extends TableElementImpl implements Cell
         boolean valuesDiffer = setCellValue(value, true);
         
         // recalculate affected table elements
-        if (valuesDiffer && getTable() != null && getTable().isAutoRecalculate()) {
-            getTable().recalculate(this);
-        }
+        if (valuesDiffer && getTable() != null && getTable().isAutoRecalculateEnabled()) 
+            getTable().recalculateAffected(this);
     }
     
     protected void setDerivedCellValue(Token t)
@@ -264,15 +270,6 @@ public class CellImpl extends TableElementImpl implements Cell
     }
     
     @Override
-    public void delete()
-    {
-        if (isDerived()) 
-            clearDerivation();
-        
-    	setCellValue(null, false);
-    }
-
-    @Override
     public boolean isReadOnly()
     {
         return (getColumn() != null ? getColumn().isReadOnly() : false) ||
@@ -291,9 +288,6 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public void fill(Object o) 
     {
-        if (isReadOnly())
-            throw new ReadOnlyException(this, TableProperty.CellValue);
-        
         setCellValue(o);
     }
 
@@ -301,6 +295,12 @@ public class CellImpl extends TableElementImpl implements Cell
     public void clear() 
     {
         fill(null);
+    }
+
+    @Override
+    public void delete()
+    {
+        clear();
     }
 
 	@Override
@@ -334,8 +334,7 @@ public class CellImpl extends TableElementImpl implements Cell
     public void setDerivation(String expr)
     {
         // clear out any existing derivations
-        if (m_deriv != null) 
-            clearDerivation();
+        clearDerivation();
         
         if (expr != null && expr.trim().length() > 0) {
             m_deriv = Derivation.create(expr.trim(), this);
@@ -343,8 +342,8 @@ public class CellImpl extends TableElementImpl implements Cell
             // mark the rows/columns that impact the deriv, and evaluate values
             if (m_deriv != null && m_deriv.isConverted()) {
                 Derivable elem = m_deriv.getTarget();
-                for (Derivable d : m_deriv.getAffectedBy()) {
-                    TableSliceElement tse = (TableSliceElement)d;
+                for (TableElement d : m_deriv.getAffectedBy()) {
+                    TableCellsElementImpl tse = (TableCellsElementImpl)d;
                     tse.addToAffects(elem);
                 }
                 
@@ -362,8 +361,8 @@ public class CellImpl extends TableElementImpl implements Cell
     {
         if (m_deriv != null) {
             Derivable elem = m_deriv.getTarget();
-            for (Derivable d : m_deriv.getAffectedBy()) {
-                TableSliceElement tse = (TableSliceElement)d;
+            for (TableElement d : m_deriv.getAffectedBy()) {
+                TableCellsElementImpl tse = (TableCellsElementImpl)d;
                 tse.removeFromAffects(elem);
             }
             
@@ -381,7 +380,7 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
-    public List<Derivable> getAffectedBy()
+    public List<TableElement> getAffectedBy()
     {
         if (m_deriv != null)
             return m_deriv.getAffectedBy();
@@ -403,14 +402,9 @@ public class CellImpl extends TableElementImpl implements Cell
             m_deriv.recalculateTarget();
             
             // recalculate dependent columns
-            if (getTable().isAutoRecalculate()) {
-                List<Derivable> affects = m_deriv.getTarget().getAffects();
-                if (affects != null) {
-                    for (Derivable d : affects) {
-                        d.recalculate();
-                    }
-                }
-            }
+            TableImpl table = getTable();
+            if (table != null && table.isAutoRecalculateEnabled()) 
+                table.recalculateAffected(this);
         }
     }
     

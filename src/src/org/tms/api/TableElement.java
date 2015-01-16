@@ -1,5 +1,7 @@
 package org.tms.api;
 
+import java.util.List;
+
 
 public interface TableElement extends BaseElement
 {
@@ -11,5 +13,11 @@ public interface TableElement extends BaseElement
     
     public Object getProperty(TableProperty p);
     public int getPropertyInt(TableProperty p);
-
+    
+    /**
+     * Returns a {@link java.collections.List<Derivable>} of the {@code Derivable} elements
+     * that this {@code TableElement} impacts when modified
+     * @return a List of the Derivable elements that this element affects
+     */
+    public List<Derivable> getAffects();
 }

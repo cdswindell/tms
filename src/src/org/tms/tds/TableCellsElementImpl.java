@@ -1,5 +1,11 @@
 package org.tms.tds;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
@@ -11,6 +17,7 @@ abstract class TableCellsElementImpl extends TableElementImpl implements TableCe
     
     private int m_index = -1;
     private TableImpl m_table;
+    private Set<Derivable> m_affects;
 
     protected TableCellsElementImpl(ElementType eType, TableElementImpl e)
     {
@@ -40,11 +47,15 @@ abstract class TableCellsElementImpl extends TableElementImpl implements TableCe
      * Perform general initializations
      * @param e
      */
-    protected void initialize(TableCellsElement e)
+    protected void initialize(TableElementImpl e)
     {
+        super.initialize(e);
+        
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
         setIndex(-1);
+        
+        m_affects = new LinkedHashSet<Derivable>();
     }
     
     @Override
@@ -130,6 +141,38 @@ abstract class TableCellsElementImpl extends TableElementImpl implements TableCe
         }       
     }
 
+    @Override
+    public List<Derivable> getAffects()
+    {
+        int numAffects = 0;
+        List<Derivable> affects = new ArrayList<Derivable>(m_affects != null ? (numAffects = m_affects.size()) : 0);
+        
+        // attempt to order the elements so that they can be recalculated in one pass
+        // (independent elements first, dependent elements last)
+        if (numAffects == 1)
+            affects.addAll(m_affects);
+        else if (numAffects > 1) {
+            // TODO: implement
+            affects.addAll(m_affects);
+        }        
+        
+        return affects;
+    }
+    
+    /*
+     * Class-specific methods
+     */
+    
+    protected void addToAffects(Derivable elem)
+    {
+        m_affects.add(elem);
+    }
+    
+    protected void removeFromAffects(Derivable elem)
+    {
+        m_affects.remove(elem);
+    }
+    
     public String toString()
     {
         String label = (String)getProperty(TableProperty.Label);

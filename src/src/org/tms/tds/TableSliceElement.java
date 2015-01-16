@@ -1,13 +1,12 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
@@ -22,7 +21,6 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     private JustInTimeSet<RangeImpl> m_ranges;
     private boolean m_inUse;
     private Derivation m_deriv;
-    private Set<Derivable> m_affects;
 
     public TableSliceElement(ElementType eType, TableElementImpl e)
     {
@@ -76,7 +74,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             // mark the rows/columns that impact the deriv, and evaluate values
             if (m_deriv != null && m_deriv.isConverted()) {
                 Derivable elem = m_deriv.getTarget();
-                for (Derivable d : m_deriv.getAffectedBy()) {
+                for (TableElement d : m_deriv.getAffectedBy()) {
                     TableSliceElement tse = (TableSliceElement)d;
                     tse.addToAffects(elem);
                 }
@@ -88,7 +86,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }
     
     @Override
-    public List<Derivable> getAffectedBy()
+    public List<TableElement> getAffectedBy()
     {
         if (m_deriv != null)
             return m_deriv.getAffectedBy();
@@ -101,7 +99,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     {
         if (m_deriv != null) {
             Derivable elem = m_deriv.getTarget();
-            for (Derivable d : m_deriv.getAffectedBy()) {
+            for (TableElement d : m_deriv.getAffectedBy()) {
                 TableSliceElement tse = (TableSliceElement)d;
                 tse.removeFromAffects(elem);
             }
@@ -120,49 +118,12 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             activateAutoRecalculation();
             
             // recalculate dependent columns
-            if (getTable().isAutoRecalculate()) {
-                List<Derivable> affects = m_deriv.getTarget().getAffects();
-                if (affects != null) {
-                    for (Derivable d : affects) {
-                        d.recalculate();
-                    }
-                }
-            }
+            TableImpl table = getTable();
+            if (table != null && table.isAutoRecalculateEnabled()) 
+                table.recalculateAffected(this);
         }
     }
        
-    @Override
-    public List<Derivable> getAffects()
-    {
-        int numAffects = 0;
-        List<Derivable> affects = new ArrayList<Derivable>(m_affects != null ? (numAffects = m_affects.size()) : 0);
-        
-        // attempt to order the elements so that they can be recalculated in one pass
-        // (independent elements first, dependent elements last)
-        if (numAffects == 1)
-            affects.addAll(m_affects);
-        else if (numAffects > 1) {
-            // TODO: implement
-            affects.addAll(m_affects);
-        }        
-        
-        return affects;
-    }
-    
-    /*
-     * Class-specific methods
-     */
-    
-    protected void addToAffects(Derivable elem)
-    {
-        m_affects.add(elem);
-    }
-    
-    protected void removeFromAffects(Derivable elem)
-    {
-        m_affects.remove(elem);
-    }
-    
     void compactIfNeeded(ArrayList<? extends TableSliceElement> cols, int capacity) 
     {
 		// TODO Auto-generated method stub
@@ -258,7 +219,6 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         }
         
         // initialize other member fields
-        m_affects = new LinkedHashSet<Derivable>();
         m_ranges = new JustInTimeSet<RangeImpl>();
         m_inUse = false;
     } 
@@ -323,14 +283,18 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         boolean setSome = false;
         try {
             boolean readOnlyExceptionEncountered = false;
+            boolean nullValueExceptionEncountered = false;
             for (Cell c : cells()) {
                 if (c != null) {
                     try {
-                        ((CellImpl)c).setCellValue(o, true);
-                        setSome = true;
+                        if (((CellImpl)c).setCellValue(o, true));
+                            setSome = true;
                     }
                     catch (ReadOnlyException e) {
                         readOnlyExceptionEncountered = true;
+                    }
+                    catch (NullValueException e) {
+                        nullValueExceptionEncountered = true;
                     }
                 }
             }
@@ -339,20 +303,16 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
                 this.setInUse(true); 
             else if (readOnlyExceptionEncountered)
                 throw new ReadOnlyException(this, TableProperty.CellValue);
+            else if (nullValueExceptionEncountered)
+                throw new NullValueException(this, TableProperty.CellValue);
         }
         finally { 
             popCurrent();
             activateAutoRecalculation();
         }
         
-        if (setSome && parent != null && parent.isAutoRecalculate()) {
-            List<Derivable> affecteds = getAffects();
-            if (affecteds != null) {
-                for (Derivable affected : affecteds) {
-                    affected.recalculate();
-                }
-            }
-        }
+        if (setSome && parent != null && parent.isAutoRecalculateEnabled())
+            parent.recalculateAffected(this);
     }
 
 	@Override

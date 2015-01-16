@@ -348,7 +348,7 @@ public class RangeImpl extends TableCellsElementImpl
 		    finally {
 	            tbl.activateAutoRecalculation();
 	            
-	            if (tbl.isAutoRecalculate())
+	            if (tbl.isAutoRecalculateEnabled())
 	                tbl.recalculate();
 		    }
 		}

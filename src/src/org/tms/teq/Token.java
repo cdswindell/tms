@@ -1,10 +1,10 @@
 package org.tms.teq;
 
 import org.tms.api.Column;
-import org.tms.api.Derivable;
 import org.tms.api.Operator;
 import org.tms.api.Row;
 import org.tms.api.TableCellsElement;
+import org.tms.api.TableElement;
 
 
 public class Token implements Labeled
@@ -126,10 +126,10 @@ public class Token implements Labeled
             return null;
     }
     
-    public Derivable getDerivableValue()
+    public TableElement getTableElementValue()
     {
-        if (m_value != null && m_value instanceof Derivable)
-            return (Derivable)m_value;
+        if (m_value != null && m_value instanceof TableElement)
+            return (TableElement)m_value;
         else
             return null;
     }

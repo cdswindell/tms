@@ -12,6 +12,7 @@ import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidExpressionException;
@@ -66,9 +67,10 @@ public class Derivation
                     case RowRef:
                     case ColumnRef:
                     case CellRef:
+                    case RangeRef:
                     case TableRef:
-                        if (tk.getDerivableValue() != null) 
-                            deriv.m_affectedBy.add(tk.getDerivableValue());
+                        if (tk.getTableElementValue() != null) 
+                            deriv.m_affectedBy.add(tk.getTableElementValue());
                         break;
                         
                     default:
@@ -91,13 +93,13 @@ public class Derivation
         }
     }
     
-    private static boolean checkCircularReference(Derivable target, List<Derivable> affectedBy)
+    private static boolean checkCircularReference(Derivable target, List<TableElement> affectedBy)
     {
         if (affectedBy == null)
             return false;
         
-        for (Derivable d : affectedBy) {
-            if (target == d || checkCircularReference(target, d.getAffectedBy()))
+        for (TableElement d : affectedBy) {
+            if (target == d || (d instanceof Derivable && checkCircularReference(target, ((Derivable)d).getAffectedBy())))
                 return true;
         }
         
@@ -108,14 +110,14 @@ public class Derivation
     private EquationStack m_ifs;
     private EquationStack m_pfs;
     private PostfixStackEvaluator m_pfe;
-    private Set<Derivable> m_affectedBy;
+    private Set<TableElement> m_affectedBy;
     private boolean m_parsed;
     private boolean m_converted;
     private Derivable m_target;
     
     private Derivation()
     {
-        m_affectedBy = new LinkedHashSet<Derivable>();
+        m_affectedBy = new LinkedHashSet<TableElement>();
     }
     
     public boolean isParsed()
@@ -214,12 +216,12 @@ public class Derivation
         }       
     }
 
-    public List<Derivable> getAffectedBy()
+    public List<TableElement> getAffectedBy()
     {
-        List<Derivable> affectedBy = new ArrayList<Derivable>();
+        List<TableElement> affectedBy = new ArrayList<TableElement>();
         
         if (m_affectedBy != null) {
-            for (Derivable d : m_affectedBy) {
+            for (TableElement d : m_affectedBy) {
                 affectedBy.add(d);
             }
         }

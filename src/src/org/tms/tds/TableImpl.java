@@ -15,10 +15,12 @@ import java.util.Set;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
@@ -75,6 +77,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private int m_colCapacityIncr;
 
     private boolean m_autoRecalculate;
+    private boolean m_autoRecalculateDeactivated;
     
     protected TableImpl()
     {
@@ -130,6 +133,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_currentCellStack = new ArrayDeque<CellReference>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
         m_derivedCells = new LinkedHashSet<CellImpl>(m_rowsCapacity * m_colsCapacity / 4);
+        m_autoRecalculateDeactivated = false;
         
         // clear dirty flag, as table is empty
         markClean();
@@ -298,6 +302,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
     		getTableContext().unregister(this);;   	
     }
     
+    
+    public boolean isAutoRecalculateEnabled()
+    {
+        return m_autoRecalculate && !m_autoRecalculateDeactivated;
+    }
     
     public boolean isAutoRecalculate()
     {
@@ -1068,14 +1077,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     protected void deactivateAutoRecalculation()
     {
-        // TODO Auto-generated method stub
-        
+        m_autoRecalculateDeactivated = true;
     }
 
     protected void activateAutoRecalculation()
     {
-        // TODO Auto-generated method stub
-        
+        m_autoRecalculateDeactivated = false;
     }
     
 	public void recalculate()
@@ -1085,9 +1092,17 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	        cell.recalculate();
 	}
 	
-    protected void recalculate(CellImpl modifiedCell)
+    protected void recalculateAffected(TableElement element)
     {
-        recalculate();        
+        if (element == null) return;
+        
+        // if the element is a Derivable, use the contained information
+        // to selectively recalculate
+        if (element instanceof Derivable) {
+            ((Derivable) element).getAffects();
+        }
+        else
+            recalculate();   // otherwise, just recalculate everything
     }
     
     protected void registerDerivedCell(CellImpl cell)
