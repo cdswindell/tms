@@ -1,10 +1,12 @@
 package org.tms.teq;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.BaseElement;
@@ -127,10 +129,30 @@ public class Derivation
     {
         assert affected != null;
         
-        // TODO: calculate a recalculation plan that takes
-        // dependencies into account
+        // elements that don't affect others should be calced last
+        // elements that affect others should be calced first
+        Set<Derivable> doLast = new HashSet<Derivable>(affected.size());
+        Map<Derivable, List<Derivable>> doFirst = new HashMap<Derivable, List<Derivable>>(affected.size());
+        for (Derivable d : affected) {
+            List<Derivable> affecteds = d.getAffects();
+            if (affecteds == null || affecteds.isEmpty()) 
+                doLast.add(d);
+            else
+                doFirst.put(d, affecteds);
+        }
         
-        return new ArrayList<Derivable>(affected);
+        // if all of the elements don't affect anything, we're done
+        if (doFirst.isEmpty())
+            return new ArrayList<Derivable>(affected);  
+        
+        List<Derivable> orderedDerivables = new ArrayList<Derivable>(doFirst.size() + doLast.size());
+        
+        orderedDerivables.addAll(doFirst.keySet());
+        
+        // finally, add all of the doLast derivables
+        orderedDerivables.addAll(doLast);
+        
+        return orderedDerivables;
     }
 
     /**
