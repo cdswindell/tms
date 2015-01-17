@@ -243,7 +243,7 @@ public class Token implements Labeled
 
 	public boolean isOperand() 
 	{
-        return getTokenType() != null && getTokenType().isOperand();
+        return getTokenType() != null && (getTokenType().isOperand() || getTokenType().isNull());
 	}
 
     public boolean isNumeric()

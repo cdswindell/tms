@@ -113,4 +113,9 @@ public enum TokenType implements Labeled
     {
         return this == ColumnRef || this == RowRef || this == CellRef || this == TableRef;
     }
+
+    public boolean isNull()
+    {
+        return this == NullValue;
+    }
 }

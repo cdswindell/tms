@@ -38,7 +38,7 @@ public class CellImpl extends TableElementImpl implements Cell
         return m_cellValue;
     }
     
-    protected void setCellValue(Object value)
+    public boolean setCellValue(Object value)
     {
         if (isReadOnly())
             throw new ReadOnlyException(this, TableProperty.CellValue);
@@ -55,6 +55,8 @@ public class CellImpl extends TableElementImpl implements Cell
         TableImpl parentTable = getTable();
         if (valuesDiffer && parentTable != null) 
             parentTable.recalculateAffected(this);
+        
+        return valuesDiffer;
     }
     
     protected void setDerivedCellValue(Token t)
@@ -440,6 +442,18 @@ public class CellImpl extends TableElementImpl implements Cell
 	public Iterable<Cell> cells()
 	{
         return new CellIterable();
+	}
+	
+	@Override
+	public String toString()
+	{
+        String label = (String)getProperty(TableProperty.Label);
+        if (label != null)
+            label = ": " + label;
+        else
+            label = "";
+        
+        return String.format("[%s%s <%s>]", getElementType(), label, isNull() ? "null" : getCellValue().toString());
 	}
 	
     protected class CellIterable implements Iterator<Cell>, Iterable<Cell>

@@ -1,12 +1,11 @@
 package org.tms.teq;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.BaseElement;
@@ -98,20 +97,14 @@ public class Derivation
     
     public static void recalculateAffected(TableElement element)
     {
-        assert element != null : "TableElement required";
+        List<Derivable> derivedElements = calculateDependencyPlan(element);
+        if (derivedElements == null || derivedElements.isEmpty()) return;
         
-        List<Derivable> affected = element.getAffects();
-        if (affected == null || affected.isEmpty())
-            return;
+        // remove current element from recalc plan
+        derivedElements.remove(element);
         
-        // harvest all of the elements affected 
+        // recalculate impacted elements
         Table parentTable = element.getTable();
-        Set<Derivable> visited = new HashSet<Derivable>();
-        Set<Derivable> globalAffected = new HashSet<Derivable>(affected.size());
-        
-        calculateGlobalAffected(globalAffected, visited, affected);
-        
-        List<Derivable> derivedElements = generateOnePassPlan(globalAffected);
         if (parentTable != null)
             parentTable.pushCurrent();
         try {
@@ -125,34 +118,72 @@ public class Derivation
         }       
     }
     
-    public static List<Derivable> generateOnePassPlan(Set<Derivable> affected)
+    public static List<Derivable> calculateDependencyPlan(TableElement modifiedElement)
     {
-        assert affected != null;
+        assert modifiedElement != null : "TableElement required";
         
-        // elements that don't affect others should be calced last
-        // elements that affect others should be calced first
-        Set<Derivable> doLast = new HashSet<Derivable>(affected.size());
-        Map<Derivable, List<Derivable>> doFirst = new HashMap<Derivable, List<Derivable>>(affected.size());
-        for (Derivable d : affected) {
-            List<Derivable> affecteds = d.getAffects();
-            if (affecteds == null || affecteds.isEmpty()) 
-                doLast.add(d);
-            else
-                doFirst.put(d, affecteds);
+        List<Derivable> affected = modifiedElement.getAffects();
+        if (affected == null || affected.isEmpty())
+            return null;
+        
+        // harvest all of the elements affected 
+        Set<Derivable> visited = new HashSet<Derivable>();
+        Set<Derivable> globalAffected = new HashSet<Derivable>(affected.size());
+        
+        calculateGlobalAffected(globalAffected, visited, affected);        
+        int numAffected = globalAffected.size();
+        
+        Set<Derivable> resolved = new LinkedHashSet<Derivable>(numAffected);
+        Set<Derivable> unresolved = new HashSet<Derivable>(numAffected);
+        
+        for (Derivable d : globalAffected) {
+            if (!resolved.contains(d))
+                resolveDependencies(d, resolved, unresolved);
+        }
+               
+        List<Derivable> orderedDerivables = new ArrayList<Derivable>(resolved);        
+        return orderedDerivables;
+    }
+
+
+    public static List<Derivable> calculateDependencyPlan(Collection<Derivable> derived)
+    {
+        assert derived != null : "Set<Derived> required";
+        
+        int numAffected = derived.size();
+
+        Set<Derivable> resolved = new LinkedHashSet<Derivable>(numAffected);
+        Set<Derivable> unresolved = new HashSet<Derivable>(numAffected);
+        
+        for (Derivable d : derived) {
+            if (!resolved.contains(d))
+                resolveDependencies(d, resolved, unresolved);
+        }
+               
+        List<Derivable> orderedDerivables = new ArrayList<Derivable>(resolved);        
+        return orderedDerivables;
+    }
+    
+    private static void resolveDependencies(Derivable d, Set<Derivable> resolved, Set<Derivable> unresolved)
+    {
+        List<TableElement> affectedBy = d.getAffectedBy();
+        if (affectedBy != null) {
+            unresolved.add(d);
+            for (TableElement te : affectedBy) {
+                if (!(te instanceof Derivable)) continue;
+                
+                Derivable ted = (Derivable)te;
+                if (!ted.isDerived()) continue;
+                
+                if (!resolved.contains(ted))
+                    resolveDependencies(ted, resolved, unresolved);
+            }
+            
+            unresolved.remove(d); 
         }
         
-        // if all of the elements don't affect anything, we're done
-        if (doFirst.isEmpty())
-            return new ArrayList<Derivable>(affected);  
-        
-        List<Derivable> orderedDerivables = new ArrayList<Derivable>(doFirst.size() + doLast.size());
-        
-        orderedDerivables.addAll(doFirst.keySet());
-        
-        // finally, add all of the doLast derivables
-        orderedDerivables.addAll(doLast);
-        
-        return orderedDerivables;
+        resolved.add(d);
+
     }
 
     /**
@@ -299,13 +330,9 @@ public class Derivation
 
     public List<TableElement> getAffectedBy()
     {
-        List<TableElement> affectedBy = new ArrayList<TableElement>();
-        
-        if (m_affectedBy != null) {
-            for (TableElement d : m_affectedBy) {
-                affectedBy.add(d);
-            }
-        }
+        List<TableElement> affectedBy = new ArrayList<TableElement>();       
+        if (m_affectedBy != null) 
+            affectedBy.addAll(m_affectedBy);
         
         return affectedBy;       
     }

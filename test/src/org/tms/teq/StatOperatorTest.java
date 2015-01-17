@@ -99,7 +99,7 @@ public class StatOperatorTest extends BaseTest
         assertThat(c.getErrorCode(), is(ErrorCode.NaN));
         
         // set some data to known values to test stat calculation
-        ((TableImpl)tbl).deactivateAutoRecalculation();
+        ((TableImpl)tbl).deactivateAutoRecalculate();
         
         tbl.setCellValue(r1, c8, 3.68);
         tbl.setCellValue(r2, c8, 1.28);
@@ -107,7 +107,7 @@ public class StatOperatorTest extends BaseTest
         tbl.setCellValue(r4, c8, 3.68);
         tbl.setCellValue(r5, c8, 1.83);
         tbl.setCellValue(r6, c8, 6.0);
-        ((TableImpl)tbl).activateAutoRecalculation();
+        ((TableImpl)tbl).activateAutoRecalculate();
         
         tbl.recalculate();
         

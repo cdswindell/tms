@@ -323,12 +323,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_autoRecalculate = value;
     }
 
-    public void deactivateAutoRecalculation()
+    public void deactivateAutoRecalculate()
     {
         m_autoRecalculateDeactivated = true;
     }
 
-    public void activateAutoRecalculation()
+    public void activateAutoRecalculate()
     {
         m_autoRecalculateDeactivated = false;
     }
@@ -1099,7 +1099,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	    boolean autoRecalc = this.isAutoRecalculate();
 	    pushCurrent();
 	    try {
-    	    List<Derivable> orderedDerivables = Derivation.generateOnePassPlan(derived);
+    	    List<Derivable> orderedDerivables = Derivation.calculateDependencyPlan(derived);
     	    for (Derivable d : orderedDerivables) {
     	        d.recalculate();
     	    }
@@ -1113,20 +1113,26 @@ public class TableImpl extends TableCellsElementImpl implements Table
     protected void recalculateAffected(TableElementImpl element)
     {
         if (isAutoRecalculateEnabled()) {
-            switch (element.getElementType()) {
-                case Table:
-                case Range:
-                    recalculate();
-                    break;
-                    
-                case Row:
-                case Column:
-                case Cell:
-                    Derivation.recalculateAffected(element);
-                    break;
-                    
-                default:
-                    break;
+            deactivateAutoRecalculate();
+            try {
+                switch (element.getElementType()) {
+                    case Table:
+                    case Range:
+                        recalculate();
+                        break;
+                        
+                    case Row:
+                    case Column:
+                    case Cell:
+                        Derivation.recalculateAffected(element);
+                        break;
+                        
+                    default:
+                        break;
+                }
+            }
+            finally {
+                activateAutoRecalculate();
             }
         }
     }
