@@ -329,8 +329,7 @@ public class RangeImpl extends TableCellsElementImpl
 		if (!isNull()) {
 		    TableImpl tbl = getTable();
 		    
-		    tbl.deactivateAutoRecalculation();
-		    
+		    tbl.pushCurrent();
 		    try {
     			if (getNumRows() == 0 && m_cols != null) 
     				m_cols.forEach(c->c.fill(o)); // if group is just columns, fill them
@@ -345,12 +344,11 @@ public class RangeImpl extends TableCellsElementImpl
     				}
     			}
 		    }
-		    finally {
-	            tbl.activateAutoRecalculation();
-	            
-	            if (tbl.isAutoRecalculateEnabled())
-	                tbl.recalculate();
+		    finally {	            
+	            tbl.popCurrent();
 		    }
+		    
+		    tbl.recalculateAffected(this);
 		}
 	}
 	

@@ -13,6 +13,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableFactory;
 import org.tms.api.TableProperty;
+import org.tms.tds.TableImpl;
 
 public class StatOperatorTest extends BaseTest
 {
@@ -94,12 +95,15 @@ public class StatOperatorTest extends BaseTest
         assertThat(c.getErrorCode(), is(ErrorCode.NaN));
         
         // set some data to known values to test stat calculation
+        ((TableImpl)tbl).deactivateAutoRecalculation();
+        
         tbl.setCellValue(r1, c8, 3.68);
         tbl.setCellValue(r2, c8, 1.28);
         tbl.setCellValue(r3, c8, 1.84);
         tbl.setCellValue(r4, c8, 3.68);
         tbl.setCellValue(r5, c8, 1.83);
         tbl.setCellValue(r6, c8, 6.0);
+        ((TableImpl)tbl).activateAutoRecalculation();
         
         tbl.recalculate();
         

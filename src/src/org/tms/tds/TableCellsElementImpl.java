@@ -146,15 +146,8 @@ abstract class TableCellsElementImpl extends TableElementImpl implements TableCe
     {
         int numAffects = 0;
         List<Derivable> affects = new ArrayList<Derivable>(m_affects != null ? (numAffects = m_affects.size()) : 0);
-        
-        // attempt to order the elements so that they can be recalculated in one pass
-        // (independent elements first, dependent elements last)
-        if (numAffects == 1)
+        if (numAffects > 0)
             affects.addAll(m_affects);
-        else if (numAffects > 1) {
-            // TODO: implement
-            affects.addAll(m_affects);
-        }        
         
         return affects;
     }
@@ -163,12 +156,12 @@ abstract class TableCellsElementImpl extends TableElementImpl implements TableCe
      * Class-specific methods
      */
     
-    protected void addToAffects(Derivable elem)
+    public void registerAffects(Derivable elem)
     {
         m_affects.add(elem);
     }
     
-    protected void removeFromAffects(Derivable elem)
+    public void deregisterAffects(Derivable elem)
     {
         m_affects.remove(elem);
     }

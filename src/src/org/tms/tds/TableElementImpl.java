@@ -1,5 +1,6 @@
 package org.tms.tds;
 
+import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
@@ -12,6 +13,9 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
 	abstract public TableContext getTableContext();
     abstract public void delete();
     abstract public void fill(Object o);
+    
+    abstract protected void registerAffects(Derivable d);
+    abstract protected void deregisterAffects(Derivable d);
     
     abstract protected boolean isDataTypeEnforced();
     

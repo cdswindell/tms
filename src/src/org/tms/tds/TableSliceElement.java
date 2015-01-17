@@ -75,8 +75,8 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             if (m_deriv != null && m_deriv.isConverted()) {
                 Derivable elem = m_deriv.getTarget();
                 for (TableElement d : m_deriv.getAffectedBy()) {
-                    TableSliceElement tse = (TableSliceElement)d;
-                    tse.addToAffects(elem);
+                    TableElementImpl tse = (TableElementImpl)d;
+                    tse.registerAffects(elem);
                 }
                 
                 m_inUse = true;
@@ -100,8 +100,8 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         if (m_deriv != null) {
             Derivable elem = m_deriv.getTarget();
             for (TableElement d : m_deriv.getAffectedBy()) {
-                TableSliceElement tse = (TableSliceElement)d;
-                tse.removeFromAffects(elem);
+                TableElementImpl tse = (TableElementImpl)d;
+                tse.deregisterAffects(elem);
             }
             
             m_deriv.destroy();
@@ -113,13 +113,11 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     public void recalculate()
     {
         if (isDerived()) {
-            deactivateAutoRecalculation();
             m_deriv.recalculateTarget();
-            activateAutoRecalculation();
             
             // recalculate dependent columns
             TableImpl table = getTable();
-            if (table != null && table.isAutoRecalculateEnabled()) 
+            if (table != null) 
                 table.recalculateAffected(this);
         }
     }
@@ -183,18 +181,6 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     {
         if (getTable() != null)
             getTable().popCurrent();
-    }
-    
-    protected void deactivateAutoRecalculation()
-    {
-        if (getTable() != null)
-            getTable().deactivateAutoRecalculation();
-    }
-    
-    protected void activateAutoRecalculation()
-    {
-        if (getTable() != null)
-            getTable().activateAutoRecalculation();
     }
     
     /*
@@ -274,14 +260,13 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         else if (o == null && !isSupportsNull())
             throw new NullValueException(this, TableProperty.CellValue);
         
-        deactivateAutoRecalculation();
         pushCurrent();
-        
-        // Clear derivation, since fill should override
-        clearDerivation();
         
         boolean setSome = false;
         try {
+            // Clear derivation, since fill should override
+            clearDerivation();
+            
             boolean readOnlyExceptionEncountered = false;
             boolean nullValueExceptionEncountered = false;
             for (Cell c : cells()) {
@@ -308,10 +293,9 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         }
         finally { 
             popCurrent();
-            activateAutoRecalculation();
         }
         
-        if (setSome && parent != null && parent.isAutoRecalculateEnabled())
+        if (setSome && parent != null)
             parent.recalculateAffected(this);
     }
 

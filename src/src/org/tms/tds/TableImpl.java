@@ -4,8 +4,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -20,12 +21,12 @@ import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
-import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.teq.Derivation;
 import org.tms.teq.Token;
 import org.tms.util.JustInTimeSet;
 
@@ -60,7 +61,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private Deque<CellReference> m_currentCellStack;
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
     
-    private Set<CellImpl> m_derivedCells;
+    private Map<CellImpl, Derivation> m_derivedCells;
+    private Map<CellImpl, Set<Derivable>> m_cellAffects;
     
     private RowImpl m_curRow;
     private ColumnImpl m_curCol;
@@ -132,7 +134,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_currentCellStack = new ArrayDeque<CellReference>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
-        m_derivedCells = new LinkedHashSet<CellImpl>(m_rowsCapacity * m_colsCapacity / 4);
+        
+        int expectedNoOfDerivedCells = m_rowsCapacity * m_colsCapacity / 5; // assume 20%
+        m_derivedCells = new HashMap<CellImpl, Derivation>(expectedNoOfDerivedCells);
+        m_cellAffects = new LinkedHashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
         m_autoRecalculateDeactivated = false;
         
         // clear dirty flag, as table is empty
@@ -318,6 +323,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_autoRecalculate = value;
     }
 
+    public void deactivateAutoRecalculation()
+    {
+        m_autoRecalculateDeactivated = true;
+    }
+
+    public void activateAutoRecalculation()
+    {
+        m_autoRecalculateDeactivated = false;
+    }
+    
     @Override
     protected boolean isDataTypeEnforced()
     {
@@ -1026,7 +1041,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     public void fill(Object o) 
     {
-        deactivateAutoRecalculation();
         pushCurrent();
 
         try {
@@ -1038,24 +1052,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
         finally {        
             popCurrent();
-            activateAutoRecalculation();
         }
     }  
     
     @Override
     public void clear() 
     {
-        pushCurrent();
-        try {
-            ColumnImpl c = getColumn(Access.First);
-            while (c != null) {
-                c.clear();
-                c = getColumn(Access.Next);
-            }
-        }
-        finally {
-            popCurrent();
-        }
+        fill(null);
     }  
 	
 	synchronized public void popCurrent() 
@@ -1075,16 +1078,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		m_currentCellStack.push(cr);
 	}
 
-    protected void deactivateAutoRecalculation()
-    {
-        m_autoRecalculateDeactivated = true;
-    }
-
-    protected void activateAutoRecalculation()
-    {
-        m_autoRecalculateDeactivated = false;
-    }
-    
 	public void recalculate()
 	{
 	    // TODO: handle recalcuation of derived rows and cols
@@ -1092,34 +1085,119 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	        cell.recalculate();
 	}
 	
-    protected void recalculateAffected(TableElement element)
+    protected void recalculateAffected(TableElementImpl element)
     {
-        if (element == null) return;
-        
-        // if the element is a Derivable, use the contained information
-        // to selectively recalculate
-        if (element instanceof Derivable) {
-            ((Derivable) element).getAffects();
+        if (isAutoRecalculateEnabled()) {
+            switch (element.getElementType()) {
+                case Table:
+                case Range:
+                    recalculate();
+                    break;
+                    
+                case Row:
+                case Column:
+                case Cell:
+                    Derivation.recalculateAffected(element);
+                    break;
+                    
+                default:
+                    break;
+            }
         }
+    }
+    
+    protected Derivation getCellDerivation(CellImpl cell)
+    {
+        return m_derivedCells.get(cell);
+    }
+    
+    protected Derivation registerDerivedCell(CellImpl cell, Derivation d)
+    {
+        if (cell != null && d != null)
+            return m_derivedCells.put(cell, d);
         else
-            recalculate();   // otherwise, just recalculate everything
+            return null;
     }
     
-    protected void registerDerivedCell(CellImpl cell)
+    protected Derivation deregisterDerivedCell(CellImpl cell)
     {
         if (cell != null)
-            m_derivedCells.add(cell);
+            return m_derivedCells.remove(cell);
+        else
+            return null;
     }
     
-    protected void deregisterDerivedCell(CellImpl cell)
+    /**
+     * Registers the {@code Derivable} as being affected by changes to the
+     * value of the specified cell
+     * @param cell that effects {@code Derivable}
+     * @param d the {@code Derivable} affected
+     */
+    protected void registerAffects(CellImpl cell, Derivable d)
     {
-        if (cell != null)
-            m_derivedCells.remove(cell);
+        assert cell != null : "Cell required";
+        assert d != null : "Derivable required";
+        
+        Set<Derivable> affected = null;
+        synchronized (m_cellAffects) {
+            affected = m_cellAffects.get(cell);
+            if (affected == null) {
+                affected = new HashSet<Derivable>();
+                m_cellAffects.put(cell, affected);
+            }
+        }
+        
+        affected.add(d);
+    }
+    
+    protected void deregisterAffects(CellImpl cell, Derivable d)
+    {
+        assert cell != null : "Cell required";
+        assert d != null : "Derivable required";
+        
+        Set<Derivable> affected = m_cellAffects.get(cell);
+        if (affected != null)
+            affected.remove(d);        
+    }
+    
+    protected List<Derivable> getCellAffects(CellImpl cell)
+    {
+        assert cell != null : "Cell required";
+        
+        Set<Derivable> affected = m_cellAffects.get(cell);
+        
+        int numAffects = 0;
+        Set<Derivable> affects = new HashSet<Derivable>(affected != null ? (numAffects = affected.size()) : 0);
+        if (numAffects > 0)
+            affects.addAll(affected);
+        
+        // also add parent column and row affects
+        ColumnImpl col = cell.getColumn();
+        if (col != null)
+            affects.addAll(col.getAffects());
+        
+        RowImpl row = cell.getRow();
+        if (row != null)
+            affects.addAll(row.getAffects());
+        
+        return new ArrayList<Derivable>(affects);
     }
     
     protected Iterable<CellImpl> derivedCells()
     {
-        return new BaseElementIterableInternal<CellImpl>(m_derivedCells);
+        return new BaseElementIterableInternal<CellImpl>(m_derivedCells.keySet());
+    }
+    
+    protected List<Derivable> getAffects(TableElementImpl te)
+    {
+        if (te == null) return null;
+        else if (te instanceof TableCellsElementImpl)
+            return ((TableCellsElementImpl)te).getAffects();
+        else if (te instanceof CellImpl) {
+            return getCellAffects((CellImpl)te);
+        }
+            
+        return null;
     }
     
 	public Iterable<Row> rows()

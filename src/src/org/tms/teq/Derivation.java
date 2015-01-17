@@ -1,6 +1,7 @@
 package org.tms.teq;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -93,6 +94,64 @@ public class Derivation
         }
     }
     
+    public static void recalculateAffected(TableElement element)
+    {
+        assert element != null : "TableElement required";
+        
+        List<Derivable> affected = element.getAffects();
+        if (affected == null || affected.isEmpty())
+            return;
+        
+        // harvest all of the elements affected 
+        Table parentTable = element.getTable();
+        Set<Derivable> visited = new HashSet<Derivable>();
+        Set<Derivable> globalAffected = new HashSet<Derivable>(affected.size());
+        
+        calculateGlobalAffected(globalAffected, visited, affected);
+        
+        List<Derivable> derivedElements = generateOnePassPlan(globalAffected);
+        if (parentTable != null)
+            parentTable.pushCurrent();
+        try {
+            for (Derivable d : derivedElements) {
+                d.recalculate();
+            }
+        }
+        finally {
+            if (parentTable != null)
+                parentTable.popCurrent();
+        }       
+    }
+    
+    public static List<Derivable> generateOnePassPlan(Set<Derivable> affected)
+    {
+        assert affected != null;
+        
+        // TODO: calculate a recalculation plan that takes
+        // dependencies into account
+        
+        return new ArrayList<Derivable>(affected);
+    }
+
+    /**
+     * Recursive method to determine complete set of Derivables to recalculate
+     * @param globalAffected
+     * @param visited
+     * @param affected
+     */
+    private static void calculateGlobalAffected(Set<Derivable> globalAffected, Set<Derivable> visited, List<Derivable> affected)
+    {
+        if (affected == null || affected.isEmpty())
+            return;
+        
+        for (Derivable d : affected) {
+            if (visited.contains(d)) continue;
+            visited.add(d);
+            globalAffected.add(d);
+            calculateGlobalAffected(globalAffected, visited, d.getAffects());
+        }        
+    }
+
     private static boolean checkCircularReference(Derivable target, List<TableElement> affectedBy)
     {
         if (affectedBy == null)
