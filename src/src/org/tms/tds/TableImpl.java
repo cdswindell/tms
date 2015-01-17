@@ -1078,11 +1078,36 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		m_currentCellStack.push(cr);
 	}
 
+	@Override
 	public void recalculate()
 	{
-	    // TODO: handle recalcuation of derived rows and cols
+	    Set<Derivable> derived = new HashSet<Derivable>();
+	    
+        for (ColumnImpl col : getColumns()) {
+            if (col != null && col.isDerived())
+                derived.add(col);
+        }
+        
+        for (RowImpl row : getRows()) {
+            if (row != null && row.isDerived())
+                derived.add(row);
+        }
+        
 	    for (CellImpl cell : derivedCells())
-	        cell.recalculate();
+	        derived.add(cell);
+	    
+	    boolean autoRecalc = this.isAutoRecalculate();
+	    pushCurrent();
+	    try {
+    	    List<Derivable> orderedDerivables = Derivation.generateOnePassPlan(derived);
+    	    for (Derivable d : orderedDerivables) {
+    	        d.recalculate();
+    	    }
+	    }
+	    finally {
+	        popCurrent();
+	        setAutoRecalculate(autoRecalc);	        
+	    }	    
 	}
 	
     protected void recalculateAffected(TableElementImpl element)

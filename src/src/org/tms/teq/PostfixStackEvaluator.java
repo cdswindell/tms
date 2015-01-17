@@ -147,7 +147,7 @@ public class PostfixStackEvaluator
             return Token.createErrorToken(ErrorCode.StackOverflow);
         
         Token stackVal = m_opStack.pollFirst();
-		Token retVal = stackVal;
+		Token retVal = asOperand(stackVal, tbl, row, col);
 		return retVal;
 	}
 

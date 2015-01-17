@@ -39,8 +39,12 @@ public class StatOperatorTest extends BaseTest
         Column c8 = tbl.addColumn(Access.ByIndex, 8);
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
         
+        Column c7 = tbl.getColumn(Access.ByIndex, 7);
+        c7.setDerivation("col 8");
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 2));
+        
         c8.fill(42);
-        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows()));
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 2));
         
         // mean oper
         Cell c = tbl.getCell(r1,  c1);
