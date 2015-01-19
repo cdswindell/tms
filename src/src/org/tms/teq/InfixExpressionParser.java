@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Operator;
+import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.InvalidExpressionException;
@@ -502,6 +503,16 @@ public class InfixExpressionParser
                     return 0;
                 }
             }
+            else if (tt == TokenType.RangeRef) {
+                additionalCharsParsed = parseRangeReference(exprChars, curPos + charsParsed, table, t);
+                if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+                    charsParsed += additionalCharsParsed;
+                else {
+                    if (pr != null)
+                        pr.addIssue(ParserStatusCode.InvalidRangeReferemce, curPos + charsParsed);
+                    return 0;
+                }
+            }
         }
         else {
         	// TODO: handle other tricks in teq_parse
@@ -585,6 +596,30 @@ public class InfixExpressionParser
         return 0;
     }
 
+    private int parseRangeReference(char[] exprChars, int curPos, Table table, Token t) 
+    {
+        ElementReference er = parseElementReference(exprChars, curPos);
+        if (er.foundToken()) {
+            Range range = null;
+            String label = er.getLabel();
+            range = table.getRange(Access.ByLabel, label);
+            
+            int tblRefIdx = 0;
+            if (range == null && (tblRefIdx = label.indexOf(sf_TABLE_REF)) > -1) {
+                
+            }
+            
+            // if we found a range, save it in the token and return the consumed chars
+            if (range != null) {
+                t.setValue(range);
+                return er.getCharsParsed();
+            }
+        }
+        
+        // failure
+        return 0;
+    }
+
 	private ElementReference parseElementReference(char[] exprChars, int curPos) 
 	{
     	int charsParsed = 0; // assume the worst
@@ -628,7 +663,7 @@ public class InfixExpressionParser
     		// found leading quote?
     		if (!foundToken && quoteChar == 0 && (c == '"' || c == '\'')) {
     			quoteChar = c;
-    			break;
+    			continue;
     		}
     		
     		if (!Character.isDigit(c))

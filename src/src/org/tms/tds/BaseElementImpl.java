@@ -170,7 +170,7 @@ abstract public class BaseElementImpl implements BaseElement
         }      
     }
     
-    protected Object getProperty(String key)
+    public Object getProperty(String key)
     {
         return getProperty(key, true);
     }
@@ -295,7 +295,8 @@ abstract public class BaseElementImpl implements BaseElement
 
     public void setLabel(String label)
     {
-        setProperty(TableProperty.Label, (label != null ? label.trim() : null));
+        setProperty(TableProperty.Label, 
+                (label != null && (label = label.trim()) .length() > 0 ? label : null));
     }
 
     public String getDescription()
@@ -305,7 +306,8 @@ abstract public class BaseElementImpl implements BaseElement
 
     public void setDescription(String description)
     {
-        setProperty(TableProperty.Description, (description != null ? description.trim() : null));
+        setProperty(TableProperty.Description, 
+                (description != null && (description = description.trim()).length() > 0 ? description : null));
     }
     
     protected boolean isSupportsNull()

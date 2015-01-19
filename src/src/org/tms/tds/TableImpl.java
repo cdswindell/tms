@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,8 +19,10 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
+import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableCellsElement;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidAccessException;
@@ -392,6 +395,65 @@ public class TableImpl extends TableCellsElementImpl implements Table
     void markClean() { setDirty(false); };
     
     /*
+     * Range manipulation routines
+     */
+    @Override
+    public RangeImpl getRange(Access mode, Object... mda)
+    {
+        Object md = null;
+        switch (mode) {
+            case ByLabel:
+            case ByDescription:
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (md == null ? "<null>" : md.toString())));
+                return (RangeImpl)find(m_ranges, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+                
+            case ByProperty:
+                Object key = mda != null && mda.length > 0 ? mda[0] : null;
+                Object value = mda != null && mda.length > 1 ? mda[1] : null;
+                if (key == null || value == null)
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (key == null ? "<null>" : key.toString()))); 
+                
+                // key must either be a table property or a string
+                if (key instanceof TableProperty) 
+                    return (RangeImpl)find(m_ranges, (TableProperty)key, value);
+                else if (key instanceof String) 
+                    return (RangeImpl)find(m_ranges, (String)key, value);
+                else
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (key == null ? "<null>" : key.toString())));                 
+            default:
+                throw new InvalidAccessException(ElementType.Table, ElementType.Range, mode, false, mda);                
+        }
+    }
+    
+
+    @Override
+    public RangeImpl addRange(Access mode, Object... mda)
+    {
+        Object md = null;
+        if (mda != null && mda.length > 0)
+            md = mda[0];
+        
+        RangeImpl range = null;
+        switch (mode) {
+            case ByLabel:
+                range = new RangeImpl(this);
+                if (md != null && md instanceof String)
+                    range.setLabel((String)md);;
+                break;
+                
+                default:
+                    throw new InvalidAccessException(ElementType.Table, ElementType.Range, mode, true, mda);                
+        }
+        
+        return range;
+    }
+    
+   /*
      * Row manipulation methods
      */
     
@@ -879,7 +941,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableSliceElement target = find(slices, TableProperty.Label, md);
+                TableSliceElement target = (TableSliceElement)find(slices, TableProperty.Label, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -892,7 +954,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableSliceElement target = find(slices, TableProperty.Description, md);
+                TableSliceElement target = (TableSliceElement)find(slices, TableProperty.Description, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -910,9 +972,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 // key must either be a table property or a string
                 TableSliceElement target;
                 if (key instanceof TableProperty) 
-                    target = find(slices, (TableProperty)key, value);
+                    target = (TableSliceElement)find(slices, (TableProperty)key, value);
                 else if (key instanceof String) 
-                    target = find(slices, (String)key, value);
+                    target = (TableSliceElement)find(slices, (String)key, value);
                 else
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString()))); 
@@ -928,17 +990,18 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return -1;
     }
     
-    protected TableSliceElement find(ArrayList<? extends TableSliceElement> slices, TableProperty key, Object value)
+    protected TableCellsElement find(Collection<? extends TableCellsElement> slices, TableProperty key, Object value)
     {
         assert key != null : "TableProperty required (enum)";
         assert value != null : "Value required";
         
         if (slices != null && value != null) {
-            for (TableSliceElement tes : slices) {
+            for (TableCellsElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
                     if (p != null && p.equals(value)) {
-                    	tes.setCurrent();
+                        if (tes instanceof TableSliceElement)
+                            ((TableSliceElement)tes).setCurrent();
                         return tes;
                     }
                 }
@@ -948,17 +1011,18 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return null;
     }
 
-    protected TableSliceElement find(ArrayList<? extends TableSliceElement> slices, String key, Object value)
+    protected TableCellsElement find(Collection<? extends TableCellsElement> slices, String key, Object value)
     {
         assert key != null : "TableProperty required (String)";
         assert value != null : "Value required";
         
         if (slices != null && value != null) {
-            for (TableSliceElement tes : slices) {
+            for (TableCellsElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
                     if (p != null && p.equals(value)) {
-                    	tes.setCurrent();
+                        if (tes instanceof TableSliceElement)
+                            ((TableSliceElement)tes).setCurrent();
                         return tes;
                     }
                 }
@@ -1243,9 +1307,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return new BaseElementIterable<Column>(getColumns());
     }
     
-	public Iterable<RangeImpl> ranges()
+	public Iterable<Range> ranges()
     {
-        return new BaseElementIterable<RangeImpl>(m_ranges);
+        return new BaseElementIterable<Range>(m_ranges);
     }
     
 	@Override

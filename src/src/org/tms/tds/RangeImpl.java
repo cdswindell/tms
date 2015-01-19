@@ -9,11 +9,13 @@ import java.util.Set;
 
 import org.tms.api.Cell;
 import org.tms.api.ElementType;
+import org.tms.api.Range;
+import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class RangeImpl extends TableCellsElementImpl
+public class RangeImpl extends TableCellsElementImpl implements Range
 {
     private Set<RowImpl> m_rows;
     private Set<ColumnImpl> m_cols;
@@ -25,6 +27,14 @@ public class RangeImpl extends TableCellsElementImpl
         // associate the group with the table
         if (parentTable != null)
             parentTable.add(this);
+    }
+
+    protected RangeImpl(TableImpl parentTable, String label)
+    {
+        this(parentTable);
+        
+        if (label != null && (label = label.trim()).length() > 0)
+            this.setLabel(label);
     }
 
     /*
@@ -217,7 +227,20 @@ public class RangeImpl extends TableCellsElementImpl
         }
         
         return removedAny;
-    } 
+    }     
+
+    @Override
+    public void add(TableCellsElement... tableCellElements)
+    {
+        assert tableCellElements != null : "TableCellElements required";
+        
+        for (TableCellsElement tce : tableCellElements) {
+            if (tce instanceof RowImpl)
+                add((RowImpl)tce);
+            else if (tce instanceof ColumnImpl)
+                add((ColumnImpl)tce);
+        }
+    }
     
     public Iterable<RowImpl> rows()
     {

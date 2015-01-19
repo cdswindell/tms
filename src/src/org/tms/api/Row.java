@@ -1,5 +1,5 @@
 package org.tms.api;
 
-public interface Row extends TableElement, Derivable
+public interface Row extends TableCellsElement, Derivable
 {
 }

@@ -11,6 +11,7 @@ public interface TableElement extends BaseElement
     public void fill(Object o);
     public void clear();
     
+    public Object getProperty(String p);
     public Object getProperty(TableProperty p);
     public int getPropertyInt(TableProperty p);
     

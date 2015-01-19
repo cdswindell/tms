@@ -76,6 +76,7 @@ public class PostfixStackEvaluator
 			switch (tt) {
                 case RowRef:
                 case ColumnRef:
+                case RangeRef:
 				case Operand:
 					m_opStack.push(tt, value);
 					break;

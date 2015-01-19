@@ -112,7 +112,7 @@ public enum TokenType implements Labeled
 
     public boolean isReference()
     {
-        return this == ColumnRef || this == RowRef || this == CellRef || this == TableRef;
+        return this == ColumnRef || this == RowRef || this == CellRef || this == RangeRef || this == TableRef;
     }
 
     public boolean isNull()
