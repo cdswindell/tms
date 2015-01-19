@@ -53,12 +53,9 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }
     
     @Override
-    public String getDerivation()
+    public Derivation getDerivation()
     {
-        if (m_deriv != null)
-            return m_deriv.getAsEnteredExpression();
-        else
-            return null;
+        return m_deriv;
     }
     
     @Override

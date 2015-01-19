@@ -32,7 +32,6 @@ public class CellImpl extends TableElementImpl implements Cell
     /*
      * Field getters/setters
      */
-    
     public Object getCellValue()
     {
         return m_cellValue;
@@ -324,13 +323,10 @@ public class CellImpl extends TableElementImpl implements Cell
 	}
 	
     @Override
-    public String getDerivation()
+    public Derivation getDerivation()
     {
         Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
-        if (deriv != null)
-            return deriv.getAsEnteredExpression();
-        else
-            return null;
+        return deriv;
     }
 
     @Override

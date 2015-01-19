@@ -35,7 +35,7 @@ public class DerivationTest
         c1.setDerivation("RowIndex + Cidx");
         assertThat(c1.isDerived(), is(true));
 
-        String expr = c1.getDerivation();
+        String expr = c1.getDerivation().getAsEnteredExpression();
         assertThat(expr, notNullValue());
         assertThat(expr, is("RowIndex + Cidx"));      
         assertThat(tbl.getCellValue(r1,  c1), is(18.0));
@@ -61,7 +61,7 @@ public class DerivationTest
         r1.setDerivation("ColumnIndex * 2");
         assertThat(r1.isDerived(), is(true));
 
-        String expr = r1.getDerivation();
+        String expr = r1.getDerivation().getAsEnteredExpression();
         assertThat(expr, notNullValue());
         assertThat(expr, is("ColumnIndex * 2"));      
         assertThat(tbl.getCellValue(r1,  c1), is(16.0));

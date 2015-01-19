@@ -2,9 +2,11 @@ package org.tms.api;
 
 import java.util.List;
 
+import org.tms.teq.Derivation;
+
 public interface Derivable extends BaseElement, TableCellsElement
 {    
-    public String getDerivation();
+    public Derivation getDerivation();
     public void setDerivation(String expression);
     public void clearDerivation();
     
