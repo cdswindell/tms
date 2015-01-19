@@ -21,13 +21,14 @@ public class SingleVariableStatEngineTest extends BaseTest
     
         assertThat(se.calcStatistic(BuiltinOperator.CountOper), is(6.0));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.MeanOper), 2053751.8, 0.1), is(true));
-        assertThat(closeTo(se.calcStatistic(BuiltinOperator.StDevOper), 1840895.1, 0.1), is(true));
+        assertThat(closeTo(se.calcStatistic(BuiltinOperator.StDevPopulationOper), 1840895.1, 0.1), is(true));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.StDevSampleOper), 2016599.5, 0.1), is(true));
-        assertThat(closeTo(se.calcStatistic(BuiltinOperator.VarOper), 3.3888947439634e12, 1), is(true));
+        assertThat(closeTo(se.calcStatistic(BuiltinOperator.VarPopulationOper), 3.3888947439634e12, 1), is(true));
         assertThat(se.calcStatistic(BuiltinOperator.MinOper), is(511297.0));
         assertThat(se.calcStatistic(BuiltinOperator.MaxOper), is(5725983.0));
         assertThat(se.calcStatistic(BuiltinOperator.RangeOper), is(5725983.0 - 511297.0));
         assertThat(se.calcStatistic(BuiltinOperator.MedianOper), is(1034660.5));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.ModeOper), 2053751.8, 0.1), is(true));
+        assertThat(closeTo(se.calcStatistic(BuiltinOperator.SkewOper), 1.586183, 0.000001), is(true));
     }
 }

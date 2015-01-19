@@ -108,7 +108,7 @@ public class SingleVariableStatEngine
             case MaxOper:
                 return m_max;
                 
-            case StDevOper:
+            case StDevPopulationOper:
                 tmpX = calcStatistic(BuiltinOperator.MeanOper);
                 return Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/m_n);
             
@@ -118,8 +118,8 @@ public class SingleVariableStatEngine
                 tmpX = calcStatistic(BuiltinOperator.MeanOper);
                 return Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/(m_n-1));
                 
-            case VarOper:
-                tmpX = calcStatistic(BuiltinOperator.StDevOper);
+            case VarPopulationOper:
+                tmpX = calcStatistic(BuiltinOperator.StDevPopulationOper);
                 return tmpX * tmpX;
             
             case VarSampleOper:
@@ -135,9 +135,26 @@ public class SingleVariableStatEngine
             case ModeOper:
                 return calcMode();
             
+            case SkewOper:
+                return calcSkew();
+            
             default:
                 throw new UnimplementedException("Unsupported statistic: " + stat);            
         }
+    }
+
+    private double calcSkew()
+    {
+        double mean = calcStatistic(BuiltinOperator.MeanOper);
+        double stDev = calcStatistic(BuiltinOperator.StDevSampleOper);
+        double sum3 = 0;
+        
+        for (double d : m_values) {
+            sum3 += Math.pow((d - mean)/stDev, 3);
+        }
+        
+        double skew = (m_n/((m_n-1.0)*(m_n-2.0))) * sum3;
+        return skew;
     }
 
     private double calcMode()
