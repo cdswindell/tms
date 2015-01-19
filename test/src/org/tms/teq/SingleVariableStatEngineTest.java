@@ -11,9 +11,9 @@ public class SingleVariableStatEngineTest extends BaseTest
 {
 
     @Test
-    public final void testStats()
+    public final void testSingleVariableStats()
     {
-        SingleVariableStatEngine se = new SingleVariableStatEngine();
+        SingleVariableStatEngine se = new SingleVariableStatEngine(true);
         assertThat(se, notNullValue());
         
         int n = se.enter(3096951.0, 1123560.0,5725983.0,918959.0,945761.0, 511297.0);
@@ -27,6 +27,7 @@ public class SingleVariableStatEngineTest extends BaseTest
         assertThat(se.calcStatistic(BuiltinOperator.MinOper), is(511297.0));
         assertThat(se.calcStatistic(BuiltinOperator.MaxOper), is(5725983.0));
         assertThat(se.calcStatistic(BuiltinOperator.RangeOper), is(5725983.0 - 511297.0));
+        assertThat(se.calcStatistic(BuiltinOperator.MedianOper), is(1034660.5));
+        assertThat(closeTo(se.calcStatistic(BuiltinOperator.ModeOper), 2053751.8, 0.1), is(true));
     }
-
 }

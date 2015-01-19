@@ -2,6 +2,7 @@ package org.tms.teq;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -97,7 +98,7 @@ public class Derivation
     
     public static void recalculateAffected(TableElement element)
     {
-        List<Derivable> derivedElements = calculateDependencyPlan(element);
+        List<Derivable> derivedElements = calculateDependencies(element);
         if (derivedElements == null || derivedElements.isEmpty()) return;
         
         // remove current element from recalc plan
@@ -109,7 +110,8 @@ public class Derivation
             parentTable.pushCurrent();
         try {
             for (Derivable d : derivedElements) {
-                d.recalculate();
+                Derivation deriv = d.getDerivation();
+                deriv.recalculateTarget(element);
             }
         }
         finally {
@@ -118,7 +120,7 @@ public class Derivation
         }       
     }
     
-    public static List<Derivable> calculateDependencyPlan(TableElement modifiedElement)
+    public static List<Derivable> calculateDependencies(TableElement modifiedElement)
     {
         assert modifiedElement != null : "TableElement required";
         
@@ -146,7 +148,7 @@ public class Derivation
     }
 
 
-    public static List<Derivable> calculateDependencyPlan(Collection<Derivable> derived)
+    public static List<Derivable> calculateDependencies(Collection<Derivable> derived)
     {
         assert derived != null : "Set<Derived> required";
         
@@ -270,6 +272,11 @@ public class Derivation
 
     public void recalculateTarget()
     {
+        recalculateTarget(null);
+    }
+    
+    protected void recalculateTarget(TableElement modifiedElement)
+    {
         if (m_target.isReadOnly())
             throw new ReadOnlyException((BaseElement)m_target, TableProperty.Derivation);
         
@@ -280,18 +287,18 @@ public class Derivation
             // currently support derived rows, columns, and cells, 
             // dispatch to correct handler
             if (m_target instanceof Column)
-                recalculateTargetColumn();
+                recalculateTargetColumn(modifiedElement);
             else if (m_target instanceof Row)
-                recalculateTargetRow();
+                recalculateTargetRow(modifiedElement);
             else if (m_target instanceof Cell)
-                recalculateTargetCell();
+                recalculateTargetCell(modifiedElement);
         }
         finally {      
             t.popCurrent();  
         }
     }
     
-    private void recalculateTargetCell()
+    private void recalculateTargetCell(TableElement modifiedElement)
     {
         Cell cell = (Cell)m_target;
         Row row = cell.getRow();
@@ -308,21 +315,41 @@ public class Derivation
         tbl.setCellValue(row, col, t);
     }
 
-    private void recalculateTargetRow()
+    private void recalculateTargetRow(TableElement modifiedElement)
     {
         Row row = (Row)m_target;
         Table tbl = row.getTable();
-        for (Column col : tbl.columns()) {
+        
+        Iterable<Column> cols = null;
+        if (modifiedElement instanceof Cell) {
+            Column col = ((Cell)modifiedElement).getColumn();
+            assert col != null : "Column required";
+            cols = Collections.singletonList(col);
+        }
+        else
+            cols = tbl.columns();
+        
+        for (Column col : cols) {
             Token t = m_pfe.evaluate(row, col);
             tbl.setCellValue(row, col, t);
         }        
     }
 
-    private void recalculateTargetColumn()
+    private void recalculateTargetColumn(TableElement modifiedElement)
     {
-        Column col = (Column)m_target;
+        Column col = (Column)m_target;        
         Table tbl = col.getTable();
-        for (Row row : tbl.rows()) {
+        
+        Iterable<Row> rows = null;
+        if (modifiedElement instanceof Cell) {
+            Row row = ((Cell)modifiedElement).getRow();
+            assert row != null : "Row required";
+            rows = Collections.singletonList(row);
+        }
+        else
+            rows = tbl.rows();
+        
+        for (Row row : rows) {
             Token t = m_pfe.evaluate(row, col);
             tbl.setCellValue(row, col, t);
         }       

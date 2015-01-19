@@ -150,6 +150,7 @@ public class PostfixStackGenerator
                 case GenericFunc:
                 case StatOp:
                 case BinaryStatOp:
+                case TransformOp:
                     oper = ift.getOperator();
                     do {
                         if (ops.isEmpty())

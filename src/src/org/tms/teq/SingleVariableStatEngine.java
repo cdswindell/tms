@@ -2,7 +2,12 @@ package org.tms.teq;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.tms.api.exceptions.UnimplementedException;
 
@@ -31,6 +36,12 @@ public class SingleVariableStatEngine
             m_values = new ArrayList<Double>();
     }
     
+    public SingleVariableStatEngine(Double[] values)
+    {
+        this();
+        enter(values);
+    }
+
     public void reset() 
     {
         m_n = 0;
@@ -121,11 +132,66 @@ public class SingleVariableStatEngine
             case MedianOper:
                 return calcMedian();
             
+            case ModeOper:
+                return calcMode();
+            
             default:
                 throw new UnimplementedException("Unsupported statistic: " + stat);            
         }
     }
 
+    private double calcMode()
+    {
+        // special cases
+        if (m_n == 0 || !m_retainDataset)
+            return Double.NaN;
+        
+        if (m_n == 1)
+            return m_values.get(0);
+        
+        // iterate through the set of values to calculate the frequencies
+        Map<Double, Integer> frequencies = new HashMap<Double, Integer>(m_n);
+        for (double d : m_values) {
+            Integer count = frequencies.get(d);
+            if (count == null) 
+                frequencies.put(d, 1);
+            else
+                count++;
+        }
+        
+        // now invert the map and tabulate the the frequencies        
+        int maxFrequency = Integer.MIN_VALUE;
+        Map<Integer, Set<Double>> freqMap = new HashMap<Integer, Set<Double>>(m_n);
+        for (Entry<Double, Integer> e : frequencies.entrySet()) {
+            int freq = e.getValue();
+            double value = e.getKey();
+            
+            Set<Double> valSet = freqMap.get(freq);
+            if (valSet == null) {
+                valSet = new HashSet<Double>();
+                freqMap.put(freq,  valSet);
+            }
+            
+            valSet.add(value);
+            
+            if (freq > maxFrequency)
+                maxFrequency = freq;
+        }
+        
+        // at this point, we have the key, maxFrequency, into the freqMap, 
+        // who's value is the set of most frequent values, e.g., the mode
+        Set<Double> modeValues = freqMap.get(maxFrequency);
+        
+        Double [] modeValuesArray = modeValues.toArray(new Double[] {});
+        if (modeValues.size() > 1) {
+            // return the mean value
+            SingleVariableStatEngine svse = new SingleVariableStatEngine(modeValuesArray);
+            return svse.calcStatistic(BuiltinOperator.MeanOper);
+        }
+        else
+            return modeValuesArray[0];
+    }
+    
     private double calcMedian()
     {
         // special cases

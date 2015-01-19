@@ -1099,7 +1099,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	    boolean autoRecalc = this.isAutoRecalculate();
 	    pushCurrent();
 	    try {
-    	    List<Derivable> orderedDerivables = Derivation.calculateDependencyPlan(derived);
+    	    List<Derivable> orderedDerivables = Derivation.calculateDependencies(derived);
     	    for (Derivable d : orderedDerivables) {
     	        d.recalculate();
     	    }

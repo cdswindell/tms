@@ -97,25 +97,26 @@ public enum BuiltinOperator implements Labeled, Operator
     Sum2Oper(TokenType.StatOp, 5, "sumOfSquares"),
     MeanOper(TokenType.StatOp, 5, "mean", "ave", "average"),
     MedianOper(TokenType.StatOp, 5, "median"),
-    StDevOper(TokenType.StatOp, 5, "stDev"),
+    ModeOper(TokenType.StatOp, 5, "mode"),
+    StDevOper(TokenType.StatOp, 5, "stDev", "stDevOfPopulation"),
     StDevSampleOper(TokenType.StatOp, 5, "stDevSample", "stDevOfSample"),
-    VarOper(TokenType.StatOp, 5, "var", "variance"),
+    VarOper(TokenType.StatOp, 5, "var", "variance", "varianceOfPopulation"),
     VarSampleOper(TokenType.StatOp, 5, "varSample", "varianceOfSample"),
     MinOper(TokenType.StatOp, 5, "min", "minimum"),
     MaxOper(TokenType.StatOp, 5, "max", "maximum"),
     RangeOper(TokenType.StatOp, 5, "spread"),
     CountOper(TokenType.StatOp, 5, "count", "cnt"),
+    SkewOper(TokenType.StatOp, 5, "skewness", "skew"),
     KurtOper(TokenType.StatOp, 5),
-    SkewOper(TokenType.StatOp, 5),
     
     LinearSlopeOper(TokenType.BinaryStatOp, 5),
     LinearInterceptOper(TokenType.BinaryStatOp, 5),
     LinearCorrelationOper(TokenType.BinaryStatOp, 5),
     
     SplineOper,
-    MeanCenterOper(TokenType.StatOp, 5),
-    NormalizeOper(TokenType.StatOp, 5),
-    ScaleOper(TokenType.StatOp, 5),
+    MeanCenterOper(TokenType.TransformOp, 5),
+    NormalizeOper(TokenType.TransformOp, 5),
+    ScaleOper(TokenType.TransformOp, 5),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.RangeRef, TokenType.CellRef),
@@ -225,6 +226,22 @@ public enum BuiltinOperator implements Labeled, Operator
             		m_label = label;
             	m_aliases.add(label.toLowerCase());
             }
+        }
+    }
+    
+    /*
+     * Class methods
+     */
+    public boolean isRequiresRetainedDataset()
+    {
+        switch(this) {
+            case ModeOper:
+            case SkewOper:
+            case MedianOper:
+                return true;
+                
+            default:
+                return false;
         }
     }
     

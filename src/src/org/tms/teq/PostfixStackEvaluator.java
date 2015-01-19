@@ -211,7 +211,7 @@ public class PostfixStackEvaluator
         Token result = null;
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
-            SingleVariableStatEngine svse = new SingleVariableStatEngine();
+            SingleVariableStatEngine svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());
             
             TableCellsElement ref = x.getReferenceValue();
             if (ref != null) {
