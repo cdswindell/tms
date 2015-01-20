@@ -31,6 +31,8 @@ public class StatOperatorTest extends BaseTest
         Row r5 = tbl.addRow(Access.ByIndex, 5);
         Row r6 = tbl.addRow(Access.ByIndex, 6);
         Row r7 = tbl.addRow(Access.ByIndex, 7);
+        Row r8 = tbl.addRow(Access.ByIndex, 8);
+        Row r9 = tbl.addRow(Access.ByIndex, 9);
         Column c1 = tbl.addColumn(Access.ByIndex, 1);
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
         
@@ -41,11 +43,15 @@ public class StatOperatorTest extends BaseTest
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
         
         Column c7 = tbl.getColumn(Access.ByIndex, 7);
-        c7.setDerivation("col 8");
+        c7.setDerivation("meanCenter(col 8)");
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 2));
         
+        Column c6 = tbl.getColumn(Access.ByIndex, 6);
+        c6.setDerivation("normalize(col 8)");
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 3));
+        
         c8.fill(42);
-        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 2));
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 3));
         
         // mean oper
         Cell c = tbl.getCell(r1,  c1);
@@ -94,6 +100,21 @@ public class StatOperatorTest extends BaseTest
         c = tbl.getCell(r6,  c1);
         assertThat(c, notNullValue());
         c.setDerivation("spread(col 8)");
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(0.0));
+        
+        // normalize oper
+        c = tbl.getCell(r8,  c1);
+        assertThat(c, notNullValue());
+        c.setDerivation("mean(col 6)");
+        assertThat(c.isNumericValue(), is(false));
+        assertThat(c.isErrorValue(), is(true));
+        
+        // meanCenter oper
+        c = tbl.getCell(r9,  c1);
+        assertThat(c, notNullValue());
+        c.setDerivation("mean(col 7)");
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.isErrorValue(), is(false));
         assertThat(c.getCellValue(), is(0.0));

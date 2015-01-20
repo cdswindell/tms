@@ -114,8 +114,8 @@ public enum BuiltinOperator implements Labeled, Operator
     LinearCorrelationOper(TokenType.BinaryStatOp, 5),
     
     SplineOper,
-    MeanCenterOper(TokenType.TransformOp, 5),
-    NormalizeOper(TokenType.TransformOp, 5),
+    MeanCenterOper(TokenType.TransformOp, 5, "meanCenter"),
+    NormalizeOper(TokenType.TransformOp, 5, "normalize"),
     ScaleOper(TokenType.TransformOp, 5),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),

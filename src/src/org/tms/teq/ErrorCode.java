@@ -14,6 +14,7 @@ public enum ErrorCode
     OperandDataTypeMismatch,
     OperandRequired,
     UnimplementedStatistic,
+    UnimplementedTransformation,
     Unspecified, 
     
     NoError,

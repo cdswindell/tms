@@ -5,11 +5,9 @@ public interface Table extends TableCellsElement
     
     public Iterable<Row> rows();
     public Iterable<Column> columns();
-    public Iterable<Range> ranges();
     
     public Row addRow(Access mode, Object... mda);   
-    public Column addColumn(Access mode, Object... mda);   
-    
+    public Column addColumn(Access mode, Object... mda);    
     public Range addRange(Access mode, Object... mda);
     
     public Column getColumn(Access mode, Object...mda);
@@ -23,6 +21,7 @@ public interface Table extends TableCellsElement
 
     public int getNumColumns();
     public int getNumRows();
+    public int getNumRanges();
     
     public void pushCurrent();
     public void popCurrent();

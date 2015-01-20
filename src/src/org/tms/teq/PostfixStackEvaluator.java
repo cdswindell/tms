@@ -146,6 +146,13 @@ public class PostfixStackEvaluator
                     m_opStack.push(doStatOp(oper, x, dc));                 
                     break;
                     
+                case TransformOp:
+                    x = m_opStack.pollFirst();
+                    if (x == null || !x.isReference()) // stack is in invalid state
+                        return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.ReferenceRequired);                    
+                    m_opStack.push(doTransformOp(oper, x, tbl, row, col, dc));                 
+                    break;
+                    
 				default:
 					throw new UnimplementedException(String.format("Unsupported token type: %s (%s)", tt, t));
 			}
@@ -235,8 +242,7 @@ public class PostfixStackEvaluator
                 }
                 
                 if (svse == null) {
-                	svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset()); 
-                	
+                	svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                	
 	                for (Cell c : ref.cells()) {
 	                    if (c.isNumericValue())
 	                        svse.enter((Number)c.getCellValue());
@@ -248,6 +254,86 @@ public class PostfixStackEvaluator
                 
                 try {
                     double value = svse.calcStatistic(bio);
+                    result = new Token(TokenType.Operand, value);
+                }
+                catch (UnimplementedException ue) {
+                    result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
+                }
+            }
+            else
+                result = Token.createNullToken();            
+        }
+        
+        return result;
+    }
+
+    private Token doTransformOp(Operator oper, Token x, Table tbl, Row curRow, Column curCol, DerivationContext dc)
+    {        
+        Token result = null;
+        Cell cell = null;
+        BuiltinOperator bio = oper.getBuiltinOperator();
+        if (bio != null) {
+            TableCellsElement ref = null;
+            if (x.getRowValue() != null) {
+                ref = x.getRowValue();                
+                cell = tbl.getCell((Row)ref, curCol);
+            }
+            else if (x.getColumnValue() != null) {
+                ref = x.getColumnValue();
+                cell = tbl.getCell(curRow, (Column)ref);
+            }
+            
+            if (ref != null) {
+                if (cell == null || cell.isNull())
+                    return Token.createNullToken();
+                else if (cell.isErrorValue())
+                    return Token.createErrorToken(cell.getErrorCode());
+                else if (!cell.isNumericValue())
+                    return Token.createErrorToken(ErrorCode.OperandDataTypeMismatch);
+                
+                double value = ((Number)cell.getCellValue()).doubleValue();
+                
+                SingleVariableStatEngine svse = null;
+                
+                if (dc != null) {
+                    svse = dc.getCachedSVSE(ref);
+                    
+                    if (svse != null && bio.isRequiresRetainedDataset()  && !svse.isRetainDataset())
+                        svse = null;
+                }
+                
+                if (svse == null) {
+                    svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                   
+                    for (Cell c : ref.cells()) {
+                        if (c.isNumericValue())
+                            svse.enter((Number)c.getCellValue());
+                    }
+                    
+                    if (dc != null)
+                        dc.cacheSVSE(ref, svse);
+                }
+                
+                try {
+                    double mean;
+                    double stDev;
+                    switch (bio) {
+                        case MeanCenterOper:
+                            mean = svse.calcStatistic(BuiltinOperator.MeanOper);
+                            value = value - mean;
+                            break;
+                            
+                        case NormalizeOper:
+                            mean = svse.calcStatistic(BuiltinOperator.MeanOper);
+                            stDev = svse.calcStatistic(BuiltinOperator.StDevSampleOper);
+                            if (stDev == 0.0)
+                                return Token.createErrorToken(ErrorCode.DivideByZero);
+                            value = (value - mean)/stDev;
+                            break;
+                            
+                        default:
+                            throw new UnimplementedException("Unimplemented Transformation: " + bio);
+                    }
+                    
                     result = new Token(TokenType.Operand, value);
                 }
                 catch (UnimplementedException ue) {

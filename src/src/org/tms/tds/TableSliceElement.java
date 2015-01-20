@@ -171,11 +171,6 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     	m_ranges.forEach(r -> {if (r != null) r.remove(this);});
     }
     
-    protected Iterable<RangeImpl> rangeIterable()
-    {
-        return new BaseElementIterable<RangeImpl>(m_ranges);
-    }
-    
     protected void pushCurrent()
     {
         if (getTable() != null)

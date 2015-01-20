@@ -227,7 +227,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 return getColumnsCapacity();
                 
             case numRanges:
-                return m_ranges.size();
+                return getNumRanges();
                 
             case Ranges:
                 return getRanges(); 
@@ -294,6 +294,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
     public List<Range>getRanges()
     {
         return new ArrayList<Range>(m_ranges.clone());
+    }
+
+    @Override
+    public int getNumRanges()
+    {
+        return m_ranges.size();
     }
     
     @Override
