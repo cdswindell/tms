@@ -350,11 +350,11 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         
         int numCols = m_cols.size();
         if (numCols == 0)
-            numCols = getTable().getNumColumns();
+            numCols = getTable() == null ? 0 : getTable().getNumColumns();
         
         int numRows = m_rows.size();
         if (numRows == 0)
-            numRows = getTable().getNumRows();
+            numRows = getTable() == null ? 0 : getTable().getNumRows();
         
         int numCells = numRows * numCols;
     	
@@ -461,8 +461,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         @Override
         public boolean hasNext()
         {
-            return m_rowIndex <= m_numRows && m_colIndex <= m_numCols && 
-                   (m_rangeIndex <= m_numRanges || (m_rangeIterator != null && m_rangeIterator.hasNext())) && 
+            return m_rowIndex <= m_numRows && m_colIndex <= m_numCols || 
+                   (m_rangeIndex <= m_numRanges || (m_rangeIterator != null && m_rangeIterator.hasNext())) || 
                    m_cellIndex <= m_numCells;
         }
 
