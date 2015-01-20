@@ -14,6 +14,8 @@ import org.tms.api.exceptions.InvalidParentException;
 abstract class TableCellsElementImpl extends TableElementImpl implements TableCellsElement
 {
     abstract public int getNumCells();
+    abstract protected boolean remove(RangeImpl range);
+    abstract protected boolean add(RangeImpl rangeImpl);
     
     private int m_index = -1;
     private TableImpl m_table;

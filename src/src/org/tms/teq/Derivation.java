@@ -15,6 +15,7 @@ import org.tms.api.BaseElement;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
+import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableCellsElement;
@@ -433,6 +434,8 @@ public class Derivation
     		assert tse != null : "TableCellsElement required";
     		
     		m_cachedSVSEs.remove(tse);
+    		for (Range r : tse.getRanges())
+    		    remove(r);
 		}
 
 		public void cacheSVSE(TableCellsElement d, SingleVariableStatEngine se) 

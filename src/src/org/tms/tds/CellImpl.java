@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
+import org.tms.api.Range;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
@@ -16,7 +17,7 @@ import org.tms.teq.Derivation;
 import org.tms.teq.ErrorCode;
 import org.tms.teq.Token;
 
-public class CellImpl extends TableElementImpl implements Cell
+public class CellImpl extends TableCellsElementImpl implements Cell
 {
     private Object m_cellValue;
     private ColumnImpl m_col;
@@ -411,7 +412,7 @@ public class CellImpl extends TableElementImpl implements Cell
     }    
 
     @Override
-    protected void registerAffects(Derivable d)
+    public void registerAffects(Derivable d)
     {
         /**
          * To minimize cell footprint, the set of elements
@@ -423,7 +424,7 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
-    protected void deregisterAffects(Derivable d)
+    public void deregisterAffects(Derivable d)
     {
         /**
          * To minimize cell footprint, the set of elements
@@ -440,6 +441,30 @@ public class CellImpl extends TableElementImpl implements Cell
         return new CellIterable();
 	}
 	
+    protected boolean add(RangeImpl r)
+    {
+        return false;
+    }
+    
+    protected boolean remove(RangeImpl r)
+    {
+        return false;
+    }
+    
+    @Override
+    public List<Range> getRanges()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Iterable<Range> ranges()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
 	@Override
 	public String toString()
 	{

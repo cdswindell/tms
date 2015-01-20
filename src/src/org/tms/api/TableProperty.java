@@ -30,7 +30,7 @@ public enum TableProperty implements Comparable<TableProperty>
     isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
     
     // Table Properties (some shared with Ranges)
-    numRanges(true, false, ElementType.Table, ElementType.Row, ElementType.Column),
+    numRanges(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
     numRows(true, false, ElementType.Table, ElementType.Range),
     numColumns(true, false, ElementType.Table, ElementType.Range),
     numCells(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
@@ -42,7 +42,7 @@ public enum TableProperty implements Comparable<TableProperty>
     
     Rows(true, false, ElementType.Table, ElementType.Range),
     Columns(true, false, ElementType.Table, ElementType.Range), 
-    Ranges(true, false, ElementType.Table, ElementType.Row, ElementType.Column),
+    Ranges(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
     
     // CellImpl properties
     Row(true, false, ElementType.Cell),

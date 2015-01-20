@@ -12,6 +12,7 @@ import org.tms.api.ElementType;
 import org.tms.api.Range;
 import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
@@ -19,6 +20,9 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 {
     private Set<RowImpl> m_rows;
     private Set<ColumnImpl> m_cols;
+    private Set<RangeImpl> m_ranges;
+    private Set<CellImpl> m_cells;
+    private int m_numCells = Integer.MIN_VALUE;
     
     protected RangeImpl(TableImpl parentTable)
     {
@@ -45,6 +49,11 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return new ArrayList<RowImpl>(((JustInTimeSet<RowImpl>)m_rows).clone());
     }
     
+    public Iterable<RowImpl> rows()
+    {
+        return new BaseElementIterable<RowImpl>(m_rows.isEmpty() ? getTable().getRows() : getRows());
+    }
+    
     protected int getNumRows()
     {
     	return m_rows.size();
@@ -55,62 +64,61 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return new ArrayList<ColumnImpl>(((JustInTimeSet<ColumnImpl>)m_cols).clone());
     }
 
+    public Iterable<ColumnImpl> columns()
+    {
+        return new BaseElementIterable<ColumnImpl>(m_cols.isEmpty() ? getTable().getColumns() : getColumns());
+    }
+    
     protected int getNumColumns()
     {
-    	return m_cols.size();
+        return m_cols.size();
+    }
+
+    @Override
+    public List<Range> getRanges()
+    {
+        return new ArrayList<Range>(((JustInTimeSet<RangeImpl>)m_ranges).clone());
+    }
+
+    @Override
+    public Iterable<Range> ranges()
+    {
+        return new BaseElementIterable<Range>(m_ranges);
+    }
+    
+    protected int getNumRanges()
+    {
+        return m_ranges.size();
     }
 
     /*
      * Class-specific methods
      */
-    protected boolean contains(TableSliceElement r)
+    @Override
+    public boolean contains(TableCellsElement r)
     {
         if (r != null) {
             if (r instanceof RowImpl)
                 return m_rows.contains(r);
             else if (r instanceof ColumnImpl)
                 return m_cols.contains(r);
+            else if (r instanceof RangeImpl)
+                return m_ranges.contains(r);
+            else if (r instanceof CellImpl)
+                return m_cells.contains(r);
             else
-                throw new UnimplementedException(r, "contains");
+                throw new UnimplementedException((TableCellsElementImpl)r, "contains");
         }
         else
             return false;
     }
     
-    boolean add(TableSliceElement tes)
-    {
-        if (tes != null) {
-            if (tes instanceof RowImpl)
-                return add(new RowImpl[] {(RowImpl)tes});
-            else if (tes instanceof ColumnImpl)
-                return add(new ColumnImpl[] {(ColumnImpl)tes});
-            else
-                throw new UnimplementedException(tes, "add");
-        }
-        else
-            return false;
-    }
-    
-    boolean remove(TableSliceElement tes)
-    {
-        if (tes != null) {
-            if (tes instanceof RowImpl)
-                return remove(new RowImpl[] {(RowImpl)tes});
-            else if (tes instanceof ColumnImpl)
-                return remove(new ColumnImpl[] {(ColumnImpl)tes});
-            else
-                throw new UnimplementedException(tes, "remove");
-        }
-        else
-            return false;
-    }
-    
-    protected boolean addAll(Collection<? extends TableSliceElement> elems)
+    protected boolean addAll(Collection<? extends TableCellsElement> elems)
     {
         boolean addedAny = false;
         if (elems != null) {            
             // iterate over all rows, adding them to the group
-            for (TableSliceElement e : elems) 
+            for (TableCellsElement e : elems) 
             {
                 if (this.add(e))
                     addedAny = true;
@@ -120,12 +128,12 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return addedAny;
     }
     
-    protected boolean removeAll(Collection<? extends TableSliceElement> elems)
+    protected boolean removeAll(Collection<? extends TableCellsElement> elems)
     {
         boolean removedAny = false;
         if (elems != null) {            
             // iterate over all rows, adding them to the group
-            for (TableSliceElement e : elems) 
+            for (TableCellsElement e : elems) 
             {
                 if (this.remove(e))
                     removedAny = true;
@@ -135,11 +143,11 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return removedAny;
     }
         
-    protected boolean containsAll(Collection<? extends TableSliceElement> elems)
+    protected boolean containsAll(Collection<? extends TableCellsElement> elems)
     {
         if (elems != null && !elems.isEmpty()) {            
             // iterate over all elements
-            for (TableSliceElement e : elems) 
+            for (TableCellsElement e : elems) 
             {
                 if (!this.contains(e))
                     return false;
@@ -151,105 +159,89 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return false;
     }
         
-    protected boolean add(RowImpl... rows)
+    public boolean remove(TableCellsElement... tableCellElements)
     {
-        boolean addedAny = false;
-        if (rows != null) {
-            // make sure all of the rows belong to the same table
-            vetParent(rows);
-            
-            // iterate over all rows, adding them to the group
-            for (RowImpl r : rows) 
-            {
-                if (m_rows.add(r))
-                    addedAny = true;
+        boolean removedAny = false;
+        if (tableCellElements != null) {
+            for (TableCellsElement tce : tableCellElements) {               
+                if (tce instanceof RowImpl)
+                    removedAny = m_rows.remove((RowImpl)tce) ? true : removedAny;
+                else if (tce instanceof ColumnImpl)
+                    removedAny = m_cols.remove((ColumnImpl)tce) ? true : removedAny;
+                else if (tce instanceof RangeImpl)
+                    removedAny = m_ranges.remove((RangeImpl)tce) ? true : removedAny;
+                else if (tce instanceof CellImpl)
+                    removedAny = m_cells.remove((CellImpl)tce) ? true : removedAny;
                 
-                // add the group to the corresponding row
-                r.add(this);
+                // remove the range from the corresponding object
+                ((TableCellsElementImpl)tce).remove(this);
             }
         }
         
-        return addedAny;
-    }       
-
-    protected boolean remove(RowImpl... rows)
-    {
-        boolean removedAny = false;
-        if (rows != null) {
-            // iterate over all rows, removing them from the group
-            for (RowImpl r : rows) 
-            {
-                if (m_rows.remove(r))
-                    removedAny = true;
-                
-                // remove the group to the corresponding row
-                r.remove(this);
-            }
-        }
-        
-        return removedAny;
-    } 
-    
-    protected boolean add(ColumnImpl... cols)
-    {
-        boolean addedAny = false;
-        if (cols != null) {
-            // make sure all of the columns belong to the same table
-            vetParent(cols);
-
-            // iterate over all rows, adding them to the group
-            for (ColumnImpl c : cols) 
-            {
-                if (m_cols.add(c))
-                    addedAny = true;
-
-                // add the group to the corresponding row
-                c.add(this);
-            }
-        }
-
-        return addedAny;
-    }
-    
-    protected boolean remove(ColumnImpl... cols)
-    {
-        boolean removedAny = false;
-        if (cols != null) {
-            // iterate over all rows, removing them from the group
-            for (ColumnImpl c : cols) 
-            {
-                if (m_cols.remove(c))
-                    removedAny = true;
-                
-                // remove the group to the corresponding row
-                c.remove(this);
-            }
-        }
+        if (removedAny)
+            m_numCells = Integer.MIN_VALUE;
         
         return removedAny;
     }     
 
     @Override
-    public void add(TableCellsElement... tableCellElements)
+    public boolean add(TableCellsElement... tableCellElements)
     {
         assert tableCellElements != null : "TableCellElements required";
         
+        boolean addedAny = false;
         for (TableCellsElement tce : tableCellElements) {
             if (tce instanceof RowImpl)
-                add((RowImpl)tce);
+                addedAny = m_rows.add((RowImpl)tce) ? true : addedAny;
             else if (tce instanceof ColumnImpl)
-                add((ColumnImpl)tce);
+                addedAny = m_cols.add((ColumnImpl)tce) ? true : addedAny;
+            else if (tce instanceof RangeImpl)
+                addedAny = m_ranges.add((RangeImpl)tce) ? true : addedAny;
+            else if (tce instanceof CellImpl)
+                addedAny = m_cells.add((CellImpl)tce) ? true : addedAny;
+            
+            // remove the range from the corresponding object
+            ((TableCellsElementImpl)tce).add(this);
         }
-    }
-    
-    public Iterable<RowImpl> rows()
+               
+        if (addedAny)
+            m_numCells = Integer.MIN_VALUE;
+        
+        return addedAny;
+    }   
+
+    @Override
+    protected boolean add(RangeImpl r)
     {
-        return new BaseElementIterable<RowImpl>(m_rows.isEmpty() ? getTable().getRows() : getRows());
+        if (r != null) {
+            /*
+             *  if the range doesn't contain the range, use the range method to do all the work
+             *  TableSliceElement.add will be called recursively to finish up
+             */
+            if (!r.contains(this))
+                return r.add(new TableCellsElement[] {this});
+            
+            return m_ranges.add(r);
+        }
+        
+        return false;
     }
-    
-    public Iterable<ColumnImpl> columns()
+
+    @Override
+    protected boolean remove(RangeImpl r)
     {
-        return new BaseElementIterable<ColumnImpl>(m_cols.isEmpty() ? getTable().getColumns() : getColumns());
+        if (r != null) {
+            /*
+             * if the range contains the element, use the range method to do all the work
+             * TableSliceElement.remove will be called again to finish up
+             */
+            if (r.contains(this))
+                r.remove(new TableCellsElement[] {this});
+            
+            return m_ranges.remove(r);
+        }
+        
+        return false;
     }
     
     /*
@@ -270,22 +262,30 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     {
     	// Remove the range from its component rows and columns
     	m_rows.forEach(r -> {if (r != null) r.remove(this);});
-    	m_cols.forEach(c -> {if (c != null) c.remove(this);});
+        m_cols.forEach(c -> {if (c != null) c.remove(this);});
+        m_ranges.forEach(r -> {if (r != null) r.remove(this);});
+        m_cells.forEach(c -> {if (c != null) c.remove(this);});
     	
-    	m_rows.clear();
-    	m_cols.clear();
+        m_rows.clear();
+        m_cols.clear();
+        m_ranges.clear();
+        m_cells.clear();
+        
+        m_numCells = Integer.MIN_VALUE;
     	
     	// delete the range from its parent table
     	if (getTable() != null) getTable().delete(this);	
     }
     
-    @Override
+   @Override
     public boolean isNull()
     {
         boolean hasRows = (m_rows != null && !m_rows.isEmpty());
         boolean hasCols = (m_cols != null && !m_cols.isEmpty());
+        boolean hasRanges = (m_ranges != null && !m_ranges.isEmpty());
+        boolean hasCells = (m_cells != null && !m_cells.isEmpty());
         
-        return !hasRows  && !hasCols;
+        return !(hasRows || hasCols || hasRanges || hasCells);
     }
 
     @Override
@@ -299,11 +299,17 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             case numColumns:
                 return getNumColumns();
                 
+            case numRanges:
+                return getNumRanges();
+                
             case Rows:
                 return getRows(); 
                 
             case Columns:
                 return getColumns(); 
+                
+            case Ranges:
+                return getRanges(); 
                 
             case numCells:
                 return getNumCells();
@@ -332,17 +338,30 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         
         m_rows = new JustInTimeSet<RowImpl>();
         m_cols = new JustInTimeSet<ColumnImpl>();
+        m_ranges = new JustInTimeSet<RangeImpl>();
+        m_cells = new JustInTimeSet<CellImpl>();
     }
         
     @Override
     public int getNumCells()
     {
-    	int numCells = 0;
-    	for (ColumnImpl c : m_cols) {
-    		if (c != null) 
-    			numCells += c.getNumCells();
-    	}
+        if (m_numCells != Integer.MIN_VALUE)
+            return m_numCells;
+        
+        int numCols = m_cols.size();
+        if (numCols == 0)
+            numCols = getTable().getNumColumns();
+        
+        int numRows = m_rows.size();
+        if (numRows == 0)
+            numRows = getTable().getNumRows();
+        
+        int numCells = numRows * numCols;
     	
+    	for (RangeImpl range : m_ranges) 
+    	    numCells += range.getNumCells();
+    	
+    	m_numCells = numCells += m_cells.size();
         return numCells;
     }
 
@@ -354,18 +373,9 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 		    
 		    tbl.pushCurrent();
 		    try {
-    			if (getNumRows() == 0 && m_cols != null) 
-    				m_cols.forEach(c->c.fill(o)); // if group is just columns, fill them
-    			else if (getNumColumns() == 0 && m_rows != null) 
-    				m_rows.forEach(r->r.fill(o)); // if group is just rows, fill them
-    			else {
-    				for (ColumnImpl c : m_cols) {
-    					for (RowImpl r : m_rows) {
-    						CellImpl cell = c.getCell(r);
-    						cell.setCellValue(o, true);
-    					}
-    				}
-    			}
+		        for (Cell cell : cells()) {
+		            ((CellImpl)cell).setCellValue(o, true);
+		        }		        
 		    }
 		    finally {	            
 	            tbl.popCurrent();
@@ -393,18 +403,27 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         private TableImpl m_table;
         private int m_rowIndex;
         private int m_colIndex;
+        private int m_rangeIndex;
+        private int m_cellIndex;
         private int m_numRows;
         private int m_numCols;
+        private int m_numRanges;
+        private int m_numCells;
         
         private List<RowImpl> m_rows;
         private List<ColumnImpl> m_cols;
+        private List<RangeImpl> m_ranges;
+        private List<CellImpl> m_cells;
+        
+        private Iterator<Cell> m_rangeIterator;
 
         public RangeCellIterable()
         {
             m_range = RangeImpl.this;
             m_table = m_range.getTable();
             
-            m_rowIndex = m_colIndex = 1;
+            m_rowIndex = m_colIndex = m_rangeIndex = m_cellIndex = 1;
+            m_rangeIterator = null;
             
             if (m_range.getNumRows() > 0)
                 m_rows = m_range.getRows();
@@ -423,6 +442,14 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             }
             
             m_numCols = m_cols.size();
+            
+            m_numRanges = m_range.m_ranges.size();
+            if (m_numRanges > 0) 
+                m_ranges = new ArrayList<RangeImpl>(m_range.m_ranges);
+            
+            m_numCells = m_range.m_cells.size();
+            if (m_numCells > 0)
+                m_cells = new ArrayList<CellImpl>(m_range.m_cells);
         }
 
         @Override
@@ -434,7 +461,9 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         @Override
         public boolean hasNext()
         {
-            return m_rowIndex <= m_numRows && m_colIndex <= m_numCols;
+            return m_rowIndex <= m_numRows && m_colIndex <= m_numCols && 
+                   (m_rangeIndex <= m_numRanges || (m_rangeIterator != null && m_rangeIterator.hasNext())) && 
+                   m_cellIndex <= m_numCells;
         }
 
         @Override
@@ -443,21 +472,36 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             if (!hasNext())
                 throw new NoSuchElementException();
             
-            ColumnImpl col = m_cols.get(m_colIndex - 1);
-            RowImpl row = m_rows.get(m_rowIndex - 1); 
+            if (m_rowIndex <= m_numRows && m_colIndex <= m_numCols) {
+                ColumnImpl col = m_cols.get(m_colIndex - 1);
+                RowImpl row = m_rows.get(m_rowIndex - 1); 
+                
+                Cell c = col.getCell(row);
+                
+                // Iterate over cells one column at a time; once
+                // all rows are visited, reset row index and
+                // increment column index
+                if (++m_rowIndex > m_numRows) {
+                    m_rowIndex = 1;
+                    m_colIndex++;
+                }            
+                
+                // return the target cell
+                return c;
+            }
+            else if ((m_rangeIndex <= m_numRanges) || (m_rangeIterator != null && m_rangeIterator.hasNext())) {
+                if (m_rangeIterator != null && m_rangeIterator.hasNext())
+                    return m_rangeIterator.next();
+                
+                RangeImpl range = m_ranges.get(m_rangeIndex++);
+                m_rangeIterator = range.cells().iterator();                
+            }
+            else if (m_cellIndex <= m_numCells) {
+                Cell c = m_cells.get(m_cellIndex++);
+                return c;
+            }
             
-            Cell c = col.getCell(row);
-            
-            // Iterate over cells one column at a time; once
-            // all rows are visited, reset row index and
-            // increment column index
-            if (++m_rowIndex > m_numRows) {
-                m_rowIndex = 1;
-                m_colIndex++;
-            }            
-            
-            // return the target cell
-            return c;
+            throw new IllegalTableStateException("Range cell supply exhasted");
         }      
     }
 }

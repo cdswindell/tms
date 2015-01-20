@@ -291,9 +291,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return this;
     }
 
-    protected List<RangeImpl>getRanges()
+    public List<Range>getRanges()
     {
-        return new ArrayList<RangeImpl>(m_ranges.clone());
+        return new ArrayList<Range>(m_ranges.clone());
     }
     
     @Override
@@ -351,14 +351,19 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
     /*
-     * Delete TableELement methods
+     * Delete TableElement methods
      */
     protected void delete(RangeImpl r)
     {
-        vetParent(r);
-        boolean processed = m_ranges.remove(r);
+        boolean processed = remove(r);
         
         if (processed) markDirty();
+    }
+    
+    protected boolean remove(RangeImpl r)
+    {
+        vetParent(r);
+        return m_ranges.remove(r);
     }
  
     protected void delete(RowImpl r)

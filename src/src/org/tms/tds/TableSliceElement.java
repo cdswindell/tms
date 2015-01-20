@@ -6,6 +6,7 @@ import java.util.List;
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
+import org.tms.api.Range;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.NullValueException;
@@ -41,10 +42,17 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         m_inUse = inUse;
     }
     
-    protected List<RangeImpl> getRanges()
+    @Override
+    public List<Range> getRanges()
     {
-        return new ArrayList<RangeImpl>(m_ranges.clone());
+        return new ArrayList<Range>(m_ranges.clone());
     } 
+    
+    @Override
+    public Iterable<Range> ranges()
+    {
+        return new BaseElementIterable<Range>(m_ranges);
+    }
     
     @Override
     public boolean isDerived()
