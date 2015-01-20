@@ -30,6 +30,7 @@ public class StatOperatorTest extends BaseTest
         Row r4 = tbl.addRow(Access.ByIndex, 4);
         Row r5 = tbl.addRow(Access.ByIndex, 5);
         Row r6 = tbl.addRow(Access.ByIndex, 6);
+        Row r7 = tbl.addRow(Access.ByIndex, 7);
         Column c1 = tbl.addColumn(Access.ByIndex, 1);
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
         
@@ -80,6 +81,14 @@ public class StatOperatorTest extends BaseTest
         c.setDerivation("count(col 8)");
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.getCellValue(), is(0.0d + tbl.getNumRows()));
+        
+        // median oper
+        c = tbl.getCell(r7,  c1);
+        assertThat(c, notNullValue());
+        c.setDerivation("median(col 8)");
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(42.0));
         
         // spread oper
         c = tbl.getCell(r6,  c1);

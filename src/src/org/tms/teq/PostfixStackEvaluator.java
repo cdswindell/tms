@@ -11,6 +11,7 @@ import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.teq.Derivation.DerivationContext;
 
 public class PostfixStackEvaluator 
 {
@@ -42,13 +43,23 @@ public class PostfixStackEvaluator
     
     public Token evaluate(Row row, Column col)
     {
+        return evaluate(row, col, null);
+    }
+    
+    protected Token evaluate(Row row, Column col, DerivationContext dc)
+    {
         m_opStack = new EquationStack(StackType.Op);
         m_pfsIter = m_pfs.descendingIterator();
         
-        return reevaluate(row, col);
+        return reevaluate(row, col, dc);
     }
     
 	public Token reevaluate(Row row, Column col)
+	{
+		return reevaluate(row, col, null);
+	}
+	
+	protected Token reevaluate(Row row, Column col, DerivationContext dc)
 	{
 		assert m_pfs != null : "Requires Postfix Stack";
 		
@@ -132,7 +143,7 @@ public class PostfixStackEvaluator
                     x = m_opStack.pollFirst();
                     if (x == null || !x.isReference()) // stack is in invalid state
                         return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.ReferenceRequired);                    
-                    m_opStack.push(doStatOp(oper, x));                 
+                    m_opStack.push(doStatOp(oper, x, dc));                 
                     break;
                     
 				default:
@@ -207,18 +218,32 @@ public class PostfixStackEvaluator
         return t;
     }
 
-    private Token doStatOp(Operator oper, Token x)
+    private Token doStatOp(Operator oper, Token x, DerivationContext dc)
     {
         Token result = null;
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
-            SingleVariableStatEngine svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());
-            
-            TableCellsElement ref = x.getReferenceValue();
+            TableCellsElement ref = x.getReferenceValue();           
             if (ref != null) {
-                for (Cell c : ref.cells()) {
-                    if (c.isNumericValue())
-                        svse.enter((Number)c.getCellValue());
+                SingleVariableStatEngine svse = null;
+                
+                if (dc != null) {
+                	svse = dc.getCachedSVSE(ref);
+                	
+                	if (svse != null && bio.isRequiresRetainedDataset()  && !svse.isRetainDataset())
+                		svse = null;
+                }
+                
+                if (svse == null) {
+                	svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset()); 
+                	
+	                for (Cell c : ref.cells()) {
+	                    if (c.isNumericValue())
+	                        svse.enter((Number)c.getCellValue());
+	                }
+	                
+	                if (dc != null)
+	                	dc.cacheSVSE(ref, svse);
                 }
                 
                 try {

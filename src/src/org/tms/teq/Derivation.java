@@ -3,10 +3,12 @@ package org.tms.teq;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.BaseElement;
@@ -15,6 +17,7 @@ import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableCellsElement;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -109,9 +112,11 @@ public class Derivation
         if (parentTable != null)
             parentTable.pushCurrent();
         try {
+        	DerivationContext dc = new DerivationContext();
+        	
             for (Derivable d : derivedElements) {
                 Derivation deriv = d.getDerivation();
-                deriv.recalculateTarget(element);
+                deriv.recalculateTarget(element, dc);
             }
         }
         finally {
@@ -272,10 +277,10 @@ public class Derivation
 
     public void recalculateTarget()
     {
-        recalculateTarget(null);
+        recalculateTarget(null, null);
     }
     
-    protected void recalculateTarget(TableElement modifiedElement)
+    protected void recalculateTarget(TableElement modifiedElement, DerivationContext dc)
     {
         if (m_target.isReadOnly())
             throw new ReadOnlyException((BaseElement)m_target, TableProperty.Derivation);
@@ -287,18 +292,18 @@ public class Derivation
             // currently support derived rows, columns, and cells, 
             // dispatch to correct handler
             if (m_target instanceof Column)
-                recalculateTargetColumn(modifiedElement);
+                recalculateTargetColumn(modifiedElement, dc);
             else if (m_target instanceof Row)
-                recalculateTargetRow(modifiedElement);
+                recalculateTargetRow(modifiedElement, dc);
             else if (m_target instanceof Cell)
-                recalculateTargetCell(modifiedElement);
+                recalculateTargetCell(modifiedElement, dc);
         }
         finally {      
             t.popCurrent();  
         }
     }
     
-    private void recalculateTargetCell(TableElement modifiedElement)
+    private void recalculateTargetCell(TableElement modifiedElement, DerivationContext dc)
     {
         Cell cell = (Cell)m_target;
         Row row = cell.getRow();
@@ -311,17 +316,21 @@ public class Derivation
         if (tbl == null)
             throw new IllegalTableStateException("Table required");
         
-        Token t = m_pfe.evaluate(row, col);
-        tbl.setCellValue(row, col, t);
+        Token t = m_pfe.evaluate(row, col, dc);
+        boolean modified = tbl.setCellValue(row, col, t);
+        if (modified && dc != null) {
+        	dc.remove(row);
+        	dc.remove(col);
+        }
     }
 
-    private void recalculateTargetRow(TableElement modifiedElement)
+    private void recalculateTargetRow(TableElement modifiedElement, DerivationContext dc)
     {
         Row row = (Row)m_target;
         Table tbl = row.getTable();
         
         Iterable<Column> cols = null;
-        if (modifiedElement instanceof Cell) {
+        if (modifiedElement != null && modifiedElement instanceof Cell) {
             Column col = ((Cell)modifiedElement).getColumn();
             assert col != null : "Column required";
             cols = Collections.singletonList(col);
@@ -329,19 +338,27 @@ public class Derivation
         else
             cols = tbl.columns();
         
+        boolean anyModified = false;
         for (Column col : cols) {
-            Token t = m_pfe.evaluate(row, col);
-            tbl.setCellValue(row, col, t);
+            Token t = m_pfe.evaluate(row, col, dc);
+            boolean modified = tbl.setCellValue(row, col, t);
+            if (modified && dc != null) {
+            	dc.remove(col);
+            	anyModified = true;
+            }
         }        
+        
+        if (anyModified && dc != null)
+        	dc.remove(row);
     }
 
-    private void recalculateTargetColumn(TableElement modifiedElement)
+    private void recalculateTargetColumn(TableElement modifiedElement, DerivationContext dc)
     {
         Column col = (Column)m_target;        
         Table tbl = col.getTable();
         
         Iterable<Row> rows = null;
-        if (modifiedElement instanceof Cell) {
+        if (modifiedElement != null && modifiedElement instanceof Cell) {
             Row row = ((Cell)modifiedElement).getRow();
             assert row != null : "Row required";
             rows = Collections.singletonList(row);
@@ -349,10 +366,18 @@ public class Derivation
         else
             rows = tbl.rows();
         
+        boolean anyModified = false;
         for (Row row : rows) {
-            Token t = m_pfe.evaluate(row, col);
-            tbl.setCellValue(row, col, t);
-        }       
+            Token t = m_pfe.evaluate(row, col, dc);
+            boolean modified = tbl.setCellValue(row, col, t);
+            if (modified && dc != null) {
+            	dc.remove(row);
+            	anyModified = true;
+            }
+        }  
+        
+        if (anyModified && dc != null)
+        	dc.remove(col);
     }
 
     public List<TableElement> getAffectedBy()
@@ -388,5 +413,42 @@ public class Derivation
         return String.format("%s [%s %s]", 
                 this.getAsEnteredExpression(),
                 isParsed() ? "parsed" : "", isConverted() ? "converted" : "");
+    }
+    
+    protected  static class DerivationContext 
+    {
+    	private Map<TableCellsElement, SingleVariableStatEngine> m_cachedSVSEs;
+    	private boolean m_cachedAny = false;
+    	
+    	public DerivationContext()
+    	{
+    		m_cachedSVSEs = new HashMap<TableCellsElement, SingleVariableStatEngine>();
+    	}
+    	
+    	public void remove(TableCellsElement tse) 
+    	{
+    		if (!m_cachedAny)
+    			return;
+    		
+    		assert tse != null : "TableCellsElement required";
+    		
+    		m_cachedSVSEs.remove(tse);
+		}
+
+		public void cacheSVSE(TableCellsElement d, SingleVariableStatEngine se) 
+    	{
+    		assert d != null : "TableCellsElement required";
+    		assert se != null : "SingleVariableStatEngine required";
+    		
+    		m_cachedSVSEs.put(d, se);
+    		m_cachedAny = true;
+    	}
+    	
+    	public SingleVariableStatEngine getCachedSVSE(TableCellsElement d)
+    	{
+    		assert d != null : "TableCellsElement required";
+    		
+    		return m_cachedSVSEs.get(d);
+    	}
     }
 }

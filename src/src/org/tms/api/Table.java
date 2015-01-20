@@ -19,7 +19,7 @@ public interface Table extends TableCellsElement
     public Cell getCell(Row row, Column col);
        
     public Object getCellValue(Row row, Column col);
-    public void setCellValue(Row row, Column col, Object o);
+    public boolean setCellValue(Row row, Column col, Object o);
 
     public int getNumColumns();
     public int getNumRows();

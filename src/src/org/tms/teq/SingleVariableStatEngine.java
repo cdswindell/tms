@@ -42,6 +42,12 @@ public class SingleVariableStatEngine
         enter(values);
     }
 
+
+	public boolean isRetainDataset() 
+	{
+		return m_retainDataset;
+	}
+	
     public void reset() 
     {
         m_n = 0;

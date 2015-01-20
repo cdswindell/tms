@@ -58,14 +58,14 @@ public class CellImpl extends TableElementImpl implements Cell
         return valuesDiffer;
     }
     
-    protected void setDerivedCellValue(Token t)
+    protected boolean setDerivedCellValue(Token t)
     {
         if (t.isError()) 
-            this.setCellValueNoDataTypeCheck(t.getErrorCode());
+            return this.setCellValueNoDataTypeCheck(t.getErrorCode());
         else if (t.isNull())
-            setCellValue(null, true);
+        	return setCellValue(null, true);
         else
-            setCellValue(t.getValue(), true);
+        	return setCellValue(t.getValue(), true);
     }
     
     boolean setCellValueNoDataTypeCheck(Object value)
