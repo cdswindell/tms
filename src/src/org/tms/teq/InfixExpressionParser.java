@@ -303,7 +303,6 @@ public class InfixExpressionParser
                 
                 case RangeOp: // handled as expression arg
                 case StatOp:  // handled as expression arg
-                case BinaryStatOp:  // handled as expression arg
                 case TransformOp:
                     break;
                     
@@ -314,6 +313,8 @@ public class InfixExpressionParser
                     
                 case GenericFunc:
                 case BinaryFunc:
+                case BinaryStatOp:  
+                case TrinaryTransformOp:  
                     if (parenCnt == 0) {
                         foundFunc = true;
                         if (oper != null && argCnt < oper.numArgs()) 

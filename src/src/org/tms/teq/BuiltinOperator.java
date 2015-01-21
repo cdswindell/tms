@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.tms.api.Operator;
+import org.tms.api.TableCellsElement;
+import org.tms.api.TableRowColumn;
 
 public enum BuiltinOperator implements Labeled, Operator
 {
@@ -115,7 +117,7 @@ public enum BuiltinOperator implements Labeled, Operator
     
     SplineOper,
     MeanCenterOper(TokenType.TransformOp, 5, "meanCenter"),
-    NormalizeOper(TokenType.TransformOp, 5, "normalize"),
+    NormalizeOper(TokenType.TransformOp, 5, "normalize", "standardize"),
     ScaleOper(TokenType.TransformOp, 5),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
@@ -306,9 +308,26 @@ public enum BuiltinOperator implements Labeled, Operator
         // allocate array and set all elements to Double
         if (m_methodArgs == null) {
             int numArgs = numArgs();
-            if (numArgs > 0) {
+            TokenType tt = getPrimaryTokenType();
+            if (numArgs > 0 && tt != null) {
                 m_methodArgs = new Class<?>[numArgs];
-                Arrays.fill(m_methodArgs, double.class);
+                switch (tt) {
+                    case StatOp:
+                        m_methodArgs[0] = TableCellsElement.class;
+                        break;
+                        
+                    case BinaryStatOp:
+                        m_methodArgs[0] = m_methodArgs[1] = TableCellsElement.class;
+                        break;
+                        
+                    case TransformOp:
+                        m_methodArgs[0] = TableRowColumn.class;
+                        break;
+                        
+                    default:
+                        Arrays.fill(m_methodArgs, double.class);
+                        break;
+                }
             }
         }
         
