@@ -151,18 +151,45 @@ public class StatOperatorTest extends BaseTest
         c = tbl.getCell(r2,  c1);
         assertThat(c, notNullValue());
         assertThat(c.isNumericValue(), is(true));
-        assertThat(closeTo(c.getCellValue(), 6.0, 0.0001), is(true));
+        assertThat(c.getCellValue(), is(6.0));
         
         // min oper
         c = tbl.getCell(r3,  c1);
         assertThat(c, notNullValue());
         assertThat(c.isNumericValue(), is(true));
-        assertThat(closeTo(c.getCellValue(), 1.28, 0.0001), is(true));     
+        assertThat(c.getCellValue(), is(1.28));     
         
         // stDev oper
         c = tbl.getCell(r4,  c1);
         assertThat(c, notNullValue());
         assertThat(c.isNumericValue(), is(true));
         assertThat(closeTo(c.getCellValue(), 1.7653, 0.0001), is(true));
+        
+        // do some more positive testing
+        c7.setDerivation("12 + normalize(col 8)");
+        c = tbl.getCell(r9,  c1);
+        assertThat(c, notNullValue());
+        
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(12.0));
+        
+        // do some more positive testing
+        c7.setDerivation("normalize(col 8) + hypot(3,4) ");
+        c = tbl.getCell(r9,  c1);
+        assertThat(c, notNullValue());
+        
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(5.0));
+        
+        // do some more positive testing
+        c7.setDerivation("normalize(col 8) + hypot(3,4) * 2");
+        c = tbl.getCell(r9,  c1);
+        assertThat(c, notNullValue());
+        
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(10.0));
     }    
 }

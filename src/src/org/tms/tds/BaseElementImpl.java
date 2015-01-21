@@ -114,7 +114,7 @@ abstract public class BaseElementImpl implements BaseElement
         return false;
     }
     
-    protected boolean hasProperty(TableProperty key)
+    public boolean hasProperty(TableProperty key)
     { 
         if (key.isImplementedBy(this)) {
             if (key.isNonOptional())
@@ -197,7 +197,7 @@ abstract public class BaseElementImpl implements BaseElement
         return key;
     }
     
-    protected boolean getPropertyBoolean(TableProperty key)
+    public boolean getPropertyBoolean(TableProperty key)
     {
         if (key.isBooleanValue()) {
             Object value = getProperty(key);

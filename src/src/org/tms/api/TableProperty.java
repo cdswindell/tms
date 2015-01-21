@@ -20,6 +20,7 @@ public enum TableProperty implements Comparable<TableProperty>
     Index(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    Precision(false, true, ElementType.Context, ElementType.Table),
     isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     isInUse(true, false, ElementType.Row, ElementType.Column),
     
@@ -151,6 +152,7 @@ public enum TableProperty implements Comparable<TableProperty>
             case NextCellOffset:
             case RowCapacityIncr:
             case ColumnCapacityIncr:
+            case Precision:
                 return true;
                 
             default:

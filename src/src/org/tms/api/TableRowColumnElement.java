@@ -5,5 +5,5 @@ package org.tms.api;
  */
 public interface TableRowColumnElement
 {
-
+    public int getIndex();
 }

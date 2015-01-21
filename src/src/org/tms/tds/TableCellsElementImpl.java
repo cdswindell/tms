@@ -105,7 +105,7 @@ abstract class TableCellsElementImpl extends TableElementImpl implements TableCe
         return source;
     }
     
-    protected int getIndex()
+    public int getIndex()
     {
         return m_index ;
     }

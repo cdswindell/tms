@@ -11,9 +11,14 @@ public interface TableElement extends BaseElement
     public void fill(Object o);
     public void clear();
     
+    public boolean hasProperty(TableProperty p);
     public Object getProperty(String p);
     public Object getProperty(TableProperty p);
     public int getPropertyInt(TableProperty p);
+    public boolean getPropertyBoolean(TableProperty p);
+    
+    public String getLabel();
+    public void setLabel(String label);
     
     /**
      * Returns a {@link java.collections.List<Derivable>} of the {@code Derivable} elements

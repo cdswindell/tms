@@ -128,13 +128,13 @@ public class RangeRefTest extends BaseTest
         c = tbl.getCell(r2,  c1);
         assertThat(c, notNullValue());
         assertThat(c.isNumericValue(), is(true));
-        assertThat(closeTo(c.getCellValue(), 6.0, 0.0001), is(true));
+        assertThat(c.getCellValue(), is(6.0));
         
         // min oper
         c = tbl.getCell(r3,  c1);
         assertThat(c, notNullValue());
         assertThat(c.isNumericValue(), is(true));
-        assertThat(closeTo(c.getCellValue(), 1.28, 0.0001), is(true));     
+        assertThat(c.getCellValue(), is(1.28));     
         
         // stDev oper
         c = tbl.getCell(r4,  c1);

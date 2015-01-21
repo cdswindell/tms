@@ -1,5 +1,6 @@
 package org.tms.teq;
 
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +28,8 @@ import org.tms.api.exceptions.ReadOnlyException;
 
 public class Derivation  
 {
+    public static final int sf_DEFAULT_PRECISION = 10;
+    
     public static Derivation create(String expr, Derivable elem)
     {
         // create the derivation structure and save the as-entered expression
@@ -36,8 +39,16 @@ public class Derivation
         
         // parse the expression
         Table t = elem.getTable();
-        if (t != null)
+        if (t != null) {
             t.pushCurrent();
+            
+            if (t.hasProperty(TableProperty.Precision)) {
+                int precision = t.getPropertyInt(TableProperty.Precision);
+                if (precision < 0)
+                    precision = sf_DEFAULT_PRECISION;
+                deriv.m_precision = new MathContext(precision);
+            }
+        }            
         
         try {
             InfixExpressionParser ifParser = new InfixExpressionParser(expr, t);            
@@ -60,7 +71,7 @@ public class Derivation
             deriv.m_converted = true;
             
             // create an evaluator
-            PostfixStackEvaluator pfe = new PostfixStackEvaluator(deriv.m_pfs, t);
+            PostfixStackEvaluator pfe = new PostfixStackEvaluator(deriv);
             deriv.m_pfe = pfe;
             
             // note cols/rows that affect this derivation
@@ -233,10 +244,20 @@ public class Derivation
     private boolean m_parsed;
     private boolean m_converted;
     private Derivable m_target;
+    private MathContext m_precision;
     
     private Derivation()
     {
         m_affectedBy = new LinkedHashSet<TableElement>();
+        m_precision = new MathContext(sf_DEFAULT_PRECISION);
+    }
+    
+    public Table getTable()
+    {
+        if (m_target != null)
+            return m_target.getTable();
+        else
+            return null;
     }
     
     public boolean isParsed()
@@ -275,6 +296,16 @@ public class Derivation
             return null;
     }
 
+    protected EquationStack getPostfixStack()
+    {
+        return m_pfs;
+    }
+    
+    protected MathContext getPrecision()
+    {
+        return m_precision;
+    }
+    
     public void recalculateTarget()
     {
         recalculateTarget(null, null);

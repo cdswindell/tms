@@ -98,55 +98,71 @@ public class SingleVariableStatEngine
             return Double.NaN;
         
         double tmpX = 0.0;
+        double value = 0.0;
         switch (stat) {
             case SumOper:
-                return m_sumX;
+                value = m_sumX;
+                break;
                 
             case Sum2Oper:
-                return m_sumX2;
+                value = m_sumX2;
+                break;
                 
             case MeanOper:
-                return m_sumX / m_n;
+                value = m_sumX / m_n;
+                break;
                 
             case MinOper:   
-                return m_min;
+                value = m_min;
+                break;
                 
             case MaxOper:
-                return m_max;
+                value = m_max;
+                break;
                 
             case StDevPopulationOper:
                 tmpX = calcStatistic(BuiltinOperator.MeanOper);
-                return Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/m_n);
+                value = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/m_n);
+                break;
             
             case StDevSampleOper:
                 if (m_n == 1)
                     return Double.NaN;
                 tmpX = calcStatistic(BuiltinOperator.MeanOper);
-                return Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/(m_n-1));
+                value = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/(m_n-1));
+                break;
                 
             case VarPopulationOper:
                 tmpX = calcStatistic(BuiltinOperator.StDevPopulationOper);
-                return tmpX * tmpX;
+                value = tmpX * tmpX;
+                break;
             
             case VarSampleOper:
                 tmpX = calcStatistic(BuiltinOperator.StDevSampleOper);
-                return tmpX * tmpX;
+                value = tmpX * tmpX;
+                break;
                 
             case RangeOper:
-                return Math.abs(m_max - m_min);
+                value = Math.abs(m_max - m_min);
+                break;
                 
             case MedianOper:
-                return calcMedian();
+                value = calcMedian();
+                break;
             
             case ModeOper:
-                return calcMode();
+                value = calcMode();
+                break;
             
             case SkewOper:
-                return calcSkew();
+                value = calcSkew();
+                break;
             
             default:
                 throw new UnimplementedException("Unsupported statistic: " + stat);            
         }
+        
+        return value;
     }
 
     private double calcSkew()

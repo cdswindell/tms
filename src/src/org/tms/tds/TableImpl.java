@@ -80,6 +80,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     //Initialized from context or source table
     private int m_rowCapacityIncr;
     private int m_colCapacityIncr;
+    private int m_precision;
 
     private boolean m_autoRecalculate;
     private boolean m_autoRecalculateDeactivated;
@@ -174,6 +175,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     setColumnCapacityIncr((int)value);
                     break;
 
+                case Precision:
+                    if (!isValidPropertyValueInt(value))
+                        value = Derivation.sf_DEFAULT_PRECISION;
+                    setPrecision((int)value);
+                    break;
+
                 case isAutoRecalculate:
                     if (!isValidPropertyValueBoolean(value))
                         value = ContextImpl.sf_AUTO_RECALCULATE_DEFAULT;
@@ -249,6 +256,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 
             case NextCellOffset:
                 return getNextCellOffset();
+                
+            case Precision:
+                return getPrecision();
                 
             case isAutoRecalculate:
                 return isAutoRecalculate();
@@ -808,6 +818,25 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return r;
     }
 
+    protected int getPrecision()
+    {
+        if (m_precision < 0) 
+            m_precision = ContextImpl.getPropertyInt(getTableContext(), TableProperty.Precision);
+        
+        return m_precision;
+    }
+
+    protected void setPrecision(int precision)
+    {
+        if (precision < 0) {
+            // force a reset of the row capacity value
+            m_precision = -1;
+            getPrecision();
+        }
+        else
+            m_precision = precision;
+    }
+    
     synchronized protected TableSliceElement add(TableSliceElement r, Access mode, Object... md)
     {
         // calculate the index where the row will go

@@ -1,5 +1,7 @@
 package org.tms.teq;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Iterator;
 
 import org.tms.api.Cell;
@@ -19,6 +21,7 @@ public class PostfixStackEvaluator
 	private Table m_table;
 	private EquationStack m_opStack;
 	private Iterator<Token> m_pfsIter;
+    private MathContext m_precision;
 	
     public PostfixStackEvaluator(String expr, Table table)
     {
@@ -36,6 +39,16 @@ public class PostfixStackEvaluator
         m_pfs = pfs;
     }
     
+    public PostfixStackEvaluator(Derivation deriv)
+    {
+        m_table = deriv.getTable();
+        m_pfs = deriv.getPostfixStack();
+        m_precision = deriv.getPrecision();
+        
+        if (m_pfs == null || m_pfs.getStackType() != StackType.Postfix)
+            throw new IllegalTableStateException("Postfix stack required");
+    }
+
     public Token evaluate()
     {
         return evaluate(null, null);
@@ -254,7 +267,7 @@ public class PostfixStackEvaluator
                 
                 try {
                     double value = svse.calcStatistic(bio);
-                    result = new Token(TokenType.Operand, value);
+                    result = new Token(TokenType.Operand, applyPrecision(value));
                 }
                 catch (UnimplementedException ue) {
                     result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
@@ -319,7 +332,7 @@ public class PostfixStackEvaluator
                     switch (bio) {
                         case MeanCenterOper:
                             mean = svse.calcStatistic(BuiltinOperator.MeanOper);
-                            value = value - mean;
+                            value = applyPrecision(value - mean);
                             break;
                             
                         case NormalizeOper:
@@ -327,7 +340,7 @@ public class PostfixStackEvaluator
                             stDev = svse.calcStatistic(BuiltinOperator.StDevSampleOper);
                             if (stDev == 0.0)
                                 return Token.createErrorToken(ErrorCode.DivideByZero);
-                            value = (value - mean)/stDev;
+                            value = applyPrecision((value - mean)/stDev);
                             break;
                             
                         default:
@@ -499,19 +512,19 @@ public class PostfixStackEvaluator
     {
         switch (bio) {
             case PlusOper:
-                return new Token(x + y);
+                return new Token(applyPrecision(x + y));
                 
             case MinusOper:
-                return new Token(x - y);
+                return new Token(applyPrecision(x - y));
                 
             case MultOper:
-                return new Token(x * y);
+                return new Token(applyPrecision(x * y));
                 
             case DivOper:
                 if (y == 0.0)
                     return Token.createErrorToken(ErrorCode.DivideByZero);
                 else
-                    return new Token(x / y);
+                    return new Token(applyPrecision(x / y));
             default:
                 throw new UnimplementedException("Unimplemented built in operator: " + bio);    
         }
@@ -526,4 +539,19 @@ public class PostfixStackEvaluator
 		
 		return val;
 	}
+    
+    protected double applyPrecision(double value)
+    {
+        if (m_precision != null) {
+            try {
+                BigDecimal bd = BigDecimal.valueOf(value);
+                value = bd.round(m_precision).doubleValue();
+            }
+            catch (NumberFormatException e) {
+                // nop, return unprocessed value
+            }           
+        }
+        
+        return value;
+    }
 }

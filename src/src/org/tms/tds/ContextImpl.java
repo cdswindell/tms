@@ -8,6 +8,7 @@ import org.tms.api.ElementType;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
+import org.tms.teq.Derivation;
 import org.tms.teq.TokenMapper;
 import org.tms.util.WeakHashSet;
 
@@ -69,6 +70,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     private int m_rowCapacityIncr;
     private int m_columnCapacityIncr;
     private TokenMapper m_tokenMapper;
+    private int m_precision;
 
     private boolean m_autoRecalculate;
     
@@ -122,6 +124,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                     setColumnCapacityIncr((int)value);
                     break;
                     
+                case Precision:
+                    if (!isValidPropertyValueInt(value))
+                        value = Derivation.sf_DEFAULT_PRECISION;
+                    setPrecision((int)value);
+                    break;
+                    
                 case isEnforceDataType:
                     if (!isValidPropertyValueBoolean(value))
                         value = sf_ENFORCE_DATA_TYPE_DEFAULT;
@@ -167,6 +175,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                 
             case ColumnCapacityIncr:
                 return getColumnCapacityIncr();
+                
+            case Precision:
+                return getPrecision();
                 
             case isEnforceDataType:
                 return isEnforceDataType();
@@ -242,6 +253,23 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         }
         else
             m_columnCapacityIncr = columnCapacityIncr;
+    }
+
+    protected int getPrecision()
+    {
+        return m_precision;
+    }
+
+    protected void setPrecision(int precision)
+    {
+        if (precision <= 0) {
+            if (this.isDefault()) 
+                m_precision = Derivation.sf_DEFAULT_PRECISION;
+            else
+                m_precision = ContextImpl.getDefaultContext().getPrecision();
+        }
+        else
+            m_precision = precision;
     }
 
     protected boolean isEnforceDataType()
