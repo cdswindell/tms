@@ -1,6 +1,7 @@
 package org.tms.teq;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -33,6 +34,7 @@ public class StatOperatorTest extends BaseTest
         Row r7 = tbl.addRow(Access.ByIndex, 7);
         Row r8 = tbl.addRow(Access.ByIndex, 8);
         Row r9 = tbl.addRow(Access.ByIndex, 9);
+        Row r10 = tbl.addRow(Access.ByIndex, 10);
         Column c1 = tbl.addColumn(Access.ByIndex, 1);
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
         
@@ -175,6 +177,15 @@ public class StatOperatorTest extends BaseTest
         assertThat(c.getCellValue(), is(12.0));
         
         // do some more positive testing
+        c7.setDerivation("normalize(col 8) + hypot(3,4) * 2");
+        c = tbl.getCell(r9,  c1);
+        assertThat(c, notNullValue());
+        
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(10.0));
+        
+        // do some more positive testing
         c7.setDerivation("normalize(col 8) + hypot(3,4) ");
         c = tbl.getCell(r9,  c1);
         assertThat(c, notNullValue());
@@ -183,13 +194,61 @@ public class StatOperatorTest extends BaseTest
         assertThat(c.isErrorValue(), is(false));
         assertThat(c.getCellValue(), is(5.0));
         
-        // do some more positive testing
-        c7.setDerivation("normalize(col 8) + hypot(3,4) * 2");
+        // disable precision, value should be slightly different than 5.0
+        ((TableImpl)tbl).setPrecision(-1);
+        c7.setDerivation("normalize(col 8) + hypot(3,4) ");
         c = tbl.getCell(r9,  c1);
+        c.setDerivation("mean(col 7)");
         assertThat(c, notNullValue());
         
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.isErrorValue(), is(false));
-        assertThat(c.getCellValue(), is(10.0));
+        assertThat(c.getCellValue(), not(5.0));        
+        
+        // reset precision, value should now be 5.0
+        ((TableImpl)tbl).setPrecision(Integer.MAX_VALUE);
+        c7.setDerivation("normalize(col 8) + hypot(3,4) ");
+        c = tbl.getCell(r9,  c1);
+        c.setDerivation("mean(col 7)");
+        assertThat(c, notNullValue());
+        
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(5.0)); 
+        
+        // test with very small numbers, make sure all is well
+        ((TableImpl)tbl).deactivateAutoRecalculate();
+        
+        tbl.setCellValue(r1, c8, 3.68e-30);
+        tbl.setCellValue(r2, c8, 1.28e-30);
+        tbl.setCellValue(r3, c8, 1.84e-30);
+        tbl.setCellValue(r4, c8, 3.68e-30);
+        tbl.setCellValue(r5, c8, 1.83e-30);
+        tbl.setCellValue(r6, c8, 6.0e-30);
+        
+        ((TableImpl)tbl).activateAutoRecalculate();
+        
+        c = tbl.getCell(r1,  c1);
+        assertThat(c, notNullValue());
+        c.setDerivation("mean(col 8)");
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(closeTo(c.getCellValue(), 3.0517e-30, 0.0001e-30), is(true));
+        
+        c7.setDerivation("normalize(col 8) + hypot(3,4) ");
+        c = tbl.getCell(r9,  c1);
+        c.setDerivation("mean(col 7)");
+        assertThat(c, notNullValue());
+        
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(5.0)); 
+        
+        c = tbl.getCell(r10,  c1);
+        assertThat(c, notNullValue());
+        
+        c.setDerivation("stDev(col 7)");
+        assertThat(c.isNumericValue(), is(true));
+        assertThat(c.isErrorValue(), is(false));
+        assertThat(c.getCellValue(), is(1.0));        
     }    
 }

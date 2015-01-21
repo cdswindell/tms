@@ -1,5 +1,6 @@
 package org.tms.teq;
 
+import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,7 @@ import org.tms.api.exceptions.ReadOnlyException;
 
 public class Derivation  
 {
-    public static final int sf_DEFAULT_PRECISION = 10;
+    public static final int sf_DEFAULT_PRECISION = 15;
     
     public static Derivation create(String expr, Derivable elem)
     {
@@ -45,8 +46,9 @@ public class Derivation
             if (t.hasProperty(TableProperty.Precision)) {
                 int precision = t.getPropertyInt(TableProperty.Precision);
                 if (precision < 0)
-                    precision = sf_DEFAULT_PRECISION;
-                deriv.m_precision = new MathContext(precision);
+                    deriv.m_precision = null;
+                else 
+                    deriv.m_precision = new MathContext(precision);
             }
         }            
         
@@ -348,6 +350,8 @@ public class Derivation
             throw new IllegalTableStateException("Table required");
         
         Token t = m_pfe.evaluate(row, col, dc);
+        if (t.isNumeric()) 
+            t.setValue(applyPrecision(t.getNumericValue()));
         boolean modified = tbl.setCellValue(row, col, t);
         if (modified && dc != null) {
         	dc.remove(row);
@@ -372,6 +376,8 @@ public class Derivation
         boolean anyModified = false;
         for (Column col : cols) {
             Token t = m_pfe.evaluate(row, col, dc);
+            if (t.isNumeric() )
+                t.setValue(applyPrecision(t.getNumericValue()));
             boolean modified = tbl.setCellValue(row, col, t);
             if (modified && dc != null) {
             	dc.remove(col);
@@ -400,6 +406,8 @@ public class Derivation
         boolean anyModified = false;
         for (Row row : rows) {
             Token t = m_pfe.evaluate(row, col, dc);
+            if (t.isNumeric())
+                t.setValue(applyPrecision(t.getNumericValue()));
             boolean modified = tbl.setCellValue(row, col, t);
             if (modified && dc != null) {
             	dc.remove(row);
@@ -437,6 +445,21 @@ public class Derivation
     {
         // TODO Auto-generated method stub
         
+    }
+      
+    protected double applyPrecision(double value)
+    {
+        if (m_precision != null) {
+            try {
+                BigDecimal bd = BigDecimal.valueOf(value);
+                value = bd.round(m_precision).doubleValue();
+            }
+            catch (NumberFormatException e) {
+                // nop, return unprocessed value
+            }           
+        }
+        
+        return value;
     }
     
     public String toString()

@@ -818,23 +818,17 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return r;
     }
 
-    protected int getPrecision()
+    public int getPrecision()
     {
-        if (m_precision < 0) 
+        if (m_precision == Integer.MAX_VALUE || m_precision == Integer.MIN_VALUE) 
             m_precision = ContextImpl.getPropertyInt(getTableContext(), TableProperty.Precision);
         
         return m_precision;
     }
 
-    protected void setPrecision(int precision)
+    public void setPrecision(int precision)
     {
-        if (precision < 0) {
-            // force a reset of the row capacity value
-            m_precision = -1;
-            getPrecision();
-        }
-        else
-            m_precision = precision;
+        m_precision = precision;
     }
     
     synchronized protected TableSliceElement add(TableSliceElement r, Access mode, Object... md)
