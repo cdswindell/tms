@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.tms.api.Operator;
 import org.tms.api.TableCellsElement;
-import org.tms.api.TableRowColumn;
+import org.tms.api.TableRowColumnElement;
 
 public enum BuiltinOperator implements Labeled, Operator
 {
@@ -321,7 +321,12 @@ public enum BuiltinOperator implements Labeled, Operator
                         break;
                         
                     case TransformOp:
-                        m_methodArgs[0] = TableRowColumn.class;
+                        m_methodArgs[0] = TableRowColumnElement.class;
+                        break;
+                        
+                    case TrinaryTransformOp:
+                        m_methodArgs[0] = TableRowColumnElement.class;
+                        m_methodArgs[1] = m_methodArgs[2] = double.class;
                         break;
                         
                     default:

@@ -146,6 +146,11 @@ public class TokenMapperTest
             double d = args[0].getNumericValue();
             
             return new Token(d * d);
+        }
+
+        public Class<?> getResultType()
+        {
+            return double.class;
         }       
     }
     
@@ -191,6 +196,11 @@ public class TokenMapperTest
             double d3 = args[2].getNumericValue();
             
             return new Token(d1 + d2 + d3);
+        }
+
+        public Class<?> getResultType()
+        {
+            return double.class;
         }       
     }
     
@@ -235,6 +245,11 @@ public class TokenMapperTest
             double d2 = args[1].getNumericValue();
             
             return new Token(Double.valueOf(s1) + d2);
+        }
+
+        public Class<?> getResultType()
+        {
+            return double.class;
         }       
     }
 }

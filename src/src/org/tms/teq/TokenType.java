@@ -20,6 +20,7 @@ public enum TokenType implements Labeled
     BuiltIn(false),
     Variable(false),
     Operand(false),
+    
     RangeOp(true, 1),
     StatOp(true, 1),
     BinaryStatOp(true, 2),
@@ -66,6 +67,23 @@ public enum TokenType implements Labeled
         }
     }
 
+    public boolean isFunction()
+    {
+        switch (this) {
+            case RangeOp:
+            case StatOp:
+            case BinaryStatOp:
+            case TransformOp:
+            case TrinaryTransformOp:
+            case BinaryFunc:
+            case UnaryFunc: 
+                return true;
+             
+            default:
+                return false;
+        }
+    }
+    
     public boolean isLeading()
     {
         return m_leading;

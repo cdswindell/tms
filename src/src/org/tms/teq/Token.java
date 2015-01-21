@@ -177,7 +177,10 @@ public class Token implements Labeled
             return true;
         else if (targetClazz.isPrimitive() && !dataType.isPrimitive()) {
             if (targetClazz == double.class && dataType == Double.class ||
+                targetClazz == float.class && dataType == Float.class ||
                 targetClazz == int.class && dataType == Integer.class ||
+                targetClazz == short.class && dataType == Short.class ||
+                targetClazz == long.class && dataType == Long.class ||
                 targetClazz == boolean.class && dataType == Boolean.class)
                 return true;
         }
@@ -270,17 +273,8 @@ public class Token implements Labeled
     
     public boolean isFunction()
     {
-        if (this.getTokenType() != null) {
-            switch (getTokenType()) {
-                case UnaryFunc:
-                case BinaryFunc:
-                case GenericFunc:
-                    return true;
-                    
-                default:
-                    break;
-            }
-        }
+        if (this.getTokenType() != null) 
+            return this.getTokenType().isFunction();
         
         return false;
     }    

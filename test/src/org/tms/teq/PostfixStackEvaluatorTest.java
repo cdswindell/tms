@@ -452,17 +452,6 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(t.getStringValue(), is("abc"));
         
-        // negative test
-        pse = new PostfixStackEvaluator("sin('abcdef' - 'def')", null);
-        assertThat(pse, notNullValue());
-
-        t = pse.evaluate();
-        assertThat(t, notNullValue());
-        assertThat(t.isNumeric(), is(false));
-        assertThat(t.isString(), is(false));
-        assertThat(t.isError(), is(true));
-        assertThat(t.getErrorCode(), is(ErrorCode.OperandDataTypeMismatch));
-        
         // function operator
         pse = new PostfixStackEvaluator("len('abcdef' - 'def')", null);
         assertThat(pse, notNullValue());

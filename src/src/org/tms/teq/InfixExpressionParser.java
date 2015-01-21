@@ -3,6 +3,7 @@ package org.tms.teq;
 import java.util.Iterator;
 
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Operator;
 import org.tms.api.Range;
@@ -131,21 +132,168 @@ public class InfixExpressionParser
                     else
                         pr.addIssue(m_expr, ParserStatusCode.InvalidExpression, curPos);
                 }
+                
                 return pr;
             }
         }
         
+        if (pr.isSuccess())
+            validateSemantics(ifs, pr);
+        
         return pr;
     }
 
+    private void validateSemantics(EquationStack ifs, ParseResult pr)
+    {
+        // check for simple semantics, like argument count
+        Iterator<Token> tIter = ifs.descendingIterator();
+        while(tIter != null && tIter.hasNext()) {
+            Token t = tIter.next();
+            
+            // scan for functions, make sure there are sufficient arguments and check arg types
+            if (t.isFunction()) {
+                validateFunctionUsage(t, tIter, pr);
+                if (pr.isFailure())
+                    return;
+            }
+        }
+    }
+
+    private void validateFunctionUsage(Token ft, Iterator<Token> tIter, ParseResult pr)
+    {
+        TokenType ftt = ft.getTokenType();
+        Operator foper = ft.getOperator();
+        int requiredArgs = ftt.numArgs();
+        Class<?> [] argTypes = foper.getArgTypes();
+        
+        boolean foundFuncOpenParen = false;
+        int argCnt = 0;
+        int parenCnt = 0;
+        Class<?> lastArgClass = null;
+        
+        boolean continueIterating = true;
+        while (continueIterating && tIter.hasNext()) {
+            Token t = tIter.next();
+            TokenType tt = t.getTokenType();
+            
+            if (tt.isFunction()) {
+                validateFunctionUsage(t, tIter, pr);
+                if (pr.isFailure())
+                    return;
+                else
+                    lastArgClass = Object.class;
+            }
+            
+            switch (tt) {
+                case LeftParen:
+                    parenCnt++;
+                    if (!foundFuncOpenParen)
+                        foundFuncOpenParen = true;
+                    break;
+                    
+                case RightParen:
+                    parenCnt--;
+                    if (parenCnt == 0) {
+                        if (foundFuncOpenParen) {
+                            validateArgument(argCnt, lastArgClass, argTypes, foper, pr);
+                            argCnt++;
+                            continueIterating = false;
+                            break;
+                        }
+                    }
+                    break;
+                    
+                case Comma:
+                    validateArgument(argCnt, lastArgClass, argTypes, foper, pr);
+                    argCnt++;
+                    break;
+                
+                case ColumnRef:
+                    lastArgClass = Column.class;
+                    break;
+                    
+                case RowRef:
+                    lastArgClass = Row.class;
+                    break;
+                    
+                case CellRef:
+                    lastArgClass = Cell.class;
+                    break;
+                    
+                case RangeRef:
+                    lastArgClass = Range.class;
+                    break;
+                    
+                case Operand:
+                    lastArgClass = t.getDataType();
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            // special case check for functions used without parens, like neg
+            if (requiredArgs == 1 && argCnt == 0 && parenCnt == 0 && lastArgClass != null) {
+                validateArgument(argCnt, lastArgClass, argTypes, foper, pr);
+                argCnt++;
+                continueIterating = false;
+            }
+            
+            if (argCnt > requiredArgs) {
+                continueIterating = false;
+                pr.addIssue(ParserStatusCode.ArgumentCountMismatch, foper.getLabel());
+            } 
+            
+            if (pr.isFailure())
+                continueIterating = false;
+        }
+        
+        if (pr.isSuccess()) {
+            if (argCnt < requiredArgs)
+                pr.addIssue(ParserStatusCode.ArgumentCountMismatch, foper.getLabel());
+        }   
+    }
+
+    private void validateArgument(int argCnt, Class<?> lastArgClass, Class<?>[] argTypes, 
+                                  Operator oper, ParseResult pr)
+    {
+        assert pr != null : "ParseResult required";
+        assert oper != null : "Operator required";
+        
+        if (argTypes == null || argCnt >= argTypes.length) {
+            pr.addIssue(ParserStatusCode.ArgumentCountMismatch, oper.getLabel());
+            return;
+        }
+        
+        Class<?> requiredArgType = argTypes[argCnt];
+        if (lastArgClass == null || requiredArgType == null)
+            pr.addIssue(ParserStatusCode.ArgumentTypeMismatch, oper.getLabel());
+        else {
+            if (requiredArgType.isAssignableFrom(lastArgClass))
+                return;
+            else if (requiredArgType.isPrimitive() && !lastArgClass.isPrimitive()) {
+                if (lastArgClass == Object.class ||
+                    requiredArgType == double.class && lastArgClass == Double.class ||
+                    requiredArgType == float.class && lastArgClass == Float.class ||
+                    requiredArgType == int.class && lastArgClass == Integer.class ||
+                    requiredArgType == short.class && lastArgClass == Short.class ||
+                    requiredArgType == long.class && lastArgClass == Long.class ||
+                    requiredArgType == boolean.class && lastArgClass == Boolean.class)
+                    return;
+            }
+            
+            pr.addIssue(ParserStatusCode.ArgumentTypeMismatch, oper.getLabel());
+        }
+    }
+
     private int parseSimpleOperator(char[] exprChars, int curPos, EquationStack ifs, int[] parenCnt, 
-                              TokenMapper tm, Table table, ParseResult pr)
+                                    TokenMapper tm, Table table, ParseResult pr)
     {
         Token t = tm.lookUpToken(exprChars[curPos]);
         if (t == null) {
             if (pr != null)
                 pr.addIssue(ParserStatusCode.NoSuchOperator, curPos);
-            return curPos;
+            return 0;
         }
         
         TokenType tType = t.getTokenType();
@@ -164,7 +312,7 @@ public class InfixExpressionParser
                     
                     if (pr != null)
                         pr.addIssue(ParserStatusCode.ParenMismatch, curPos);
-                    return curPos;
+                    return 0;
                     
                 case BinaryOp:
                     switch (oper.getBuiltinOperator()) {
@@ -178,14 +326,14 @@ public class InfixExpressionParser
                         default:
                             if (pr != null)
                                 pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos);
-                            return curPos;
+                            return 0;
                     }
                     break;
                 
                 case Comma:
                     if (pr != null)
                         pr.addIssue(ParserStatusCode.InvalidCommaLocation, curPos);
-                    return curPos;
+                    return 0;
                 
                 default:
                     // valid token detected, push it onto the stack
@@ -201,12 +349,12 @@ public class InfixExpressionParser
                     break;
                     
                 case Comma:
-                    if (isOkForComma(ifs))
+                    if (isOkForComma(ifs, pr, curPos))
                         ifs.push(tType, oper);
                     else {
                         if (pr != null)
                             pr.addIssue(ParserStatusCode.InvalidCommaLocation, curPos);
-                        return curPos;
+                        return 0;
                     }
                     break;
                     
@@ -217,7 +365,7 @@ public class InfixExpressionParser
                 default:
                     if (pr != null)
                         pr.addIssue(ParserStatusCode.InvalidExpression, curPos);
-                    return curPos;
+                    return 0;
             } // of switch
         } // if not leading
         
@@ -228,7 +376,7 @@ public class InfixExpressionParser
             if (parenCnt[0] < 0) {
                 if (pr != null)
                     pr.addIssue(ParserStatusCode.ParenMismatch, curPos);
-                return curPos;
+                return 0;
             }
         }
         
@@ -236,7 +384,7 @@ public class InfixExpressionParser
         return t.getLabelLength();
     }
 
-    private boolean isOkForComma(EquationStack ifs)
+    private boolean isOkForComma(EquationStack ifs, ParseResult pr, int curPos)
     {
         /* 
          * Commas are used to separate arguments in function calls.
@@ -319,8 +467,11 @@ public class InfixExpressionParser
                         foundFunc = true;
                         if (oper != null && argCnt < oper.numArgs()) 
                             return true; // comma is ok   
-                        else
+                        else {
                             commaIsOk = false;
+                            if (pr != null)
+                                pr.addIssue(ParserStatusCode.ArgumentCountMismatch, curPos);
+                        }
                     }
                     break;
                     
@@ -490,7 +641,7 @@ public class InfixExpressionParser
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
-                        pr.addIssue(ParserStatusCode.InvalidColumnReferemce, curPos + charsParsed);
+                        pr.addIssue(ParserStatusCode.InvalidColumnReference, curPos + charsParsed);
                     return 0;
                 }
             }
@@ -500,7 +651,7 @@ public class InfixExpressionParser
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
-                        pr.addIssue(ParserStatusCode.InvalidRowReferemce, curPos + charsParsed);
+                        pr.addIssue(ParserStatusCode.InvalidRowReference, curPos + charsParsed);
                     return 0;
                 }
             }
@@ -510,7 +661,7 @@ public class InfixExpressionParser
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
-                        pr.addIssue(ParserStatusCode.InvalidRangeReferemce, curPos + charsParsed);
+                        pr.addIssue(ParserStatusCode.InvalidRangeReference, curPos + charsParsed);
                     return 0;
                 }
             }

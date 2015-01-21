@@ -1,5 +1,5 @@
 package org.tms.api;
 
-public interface Column extends TableCellsElement, Derivable, TableRowColumn
+public interface Column extends TableCellsElement, Derivable, TableRowColumnElement
 {
 }

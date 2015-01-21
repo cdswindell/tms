@@ -13,7 +13,6 @@ import org.tms.api.TableFactory;
 
 public class InfixExpressionParserTest
 {
-
     @Test
     public final void testValidateSimpleNumericExpression()
     {
@@ -209,6 +208,15 @@ public class InfixExpressionParserTest
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(false));
         assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
+        
+        // negative test
+        iep = new InfixExpressionParser("sin('abcdef' - 'def')", null);
+        assertThat(iep, notNullValue());
+
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));        
     }  
     
     @Test
@@ -243,5 +251,53 @@ public class InfixExpressionParserTest
         c2.setDerivation("col 3 + col 4");
         assertThat(c2.isDerived(), is(true));       
         assertThat(t.getCellValue(r10, c2), is(7.0));  	
+    }
+    
+    @Test
+    public final void testCommaParsing()
+    {
+        // hypot operator
+        InfixExpressionParser iep = new InfixExpressionParser("hypot((1 + 2), 4)");
+        assertThat(iep, notNullValue());
+
+        ParseResult pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        // positive test 
+        iep = new InfixExpressionParser("hypot(4, (1 + 2))");
+        assertThat(iep, notNullValue());
+
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        // negative test (too many args)
+        iep = new InfixExpressionParser("hypot((1 + 2), 4, 7)");
+        assertThat(iep, notNullValue());
+
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentCountMismatch));
+        
+        // negative test (too many args)
+        iep = new InfixExpressionParser("hypot(4, 7, (1 + 2))");
+        assertThat(iep, notNullValue());
+
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentCountMismatch));
+        
+        
+        // negative test (too few args)
+        iep = new InfixExpressionParser("3 + hypot(3, hypot(4))");
+        assertThat(iep, notNullValue());
+
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentCountMismatch));
     }
 }

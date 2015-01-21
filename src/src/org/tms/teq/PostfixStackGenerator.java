@@ -172,10 +172,10 @@ public class PostfixStackGenerator
                     ops.push(tt, oper);
                     break;
                                         
-                case Comma: // eat commas, unless the top of the ops stack is a function
+                case Comma: // eat commas, unless the top of the ops stack is a multi-arg function
                     if (!ops.isEmpty()) {
                         t = ops.peek();
-                        if (t != null && (t.isFunction() || t.getTokenType() == TokenType.BinaryStatOp)) {
+                        if (t != null && (t.isFunction() && t.getTokenType().numArgs() > 1)) {
                             ops.pop(); // remove the element, as we are about to process it
                             pfs.push(t);
                         }
