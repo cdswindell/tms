@@ -40,9 +40,8 @@ public class Derivation
             t.pushCurrent();
         
         try {
-            InfixExpressionParser ifParser = new InfixExpressionParser(expr, t);
-            
-            ParseResult pr = ifParser.parseInfixExpression();
+            InfixExpressionParser ifParser = new InfixExpressionParser(expr, t);            
+            ParseResult pr = ifParser.parseInfixExpression(elem);
             if (pr != null && pr.isFailure())
                 throw new InvalidExpressionException(pr);
             

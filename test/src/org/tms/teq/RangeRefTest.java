@@ -3,6 +3,7 @@ package org.tms.teq;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.tms.BaseTest;
@@ -14,6 +15,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableFactory;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.tds.TableImpl;
 
 public class RangeRefTest extends BaseTest
@@ -139,5 +141,27 @@ public class RangeRefTest extends BaseTest
         assertThat(c, notNullValue());
         assertThat(c.isNumericValue(), is(true));
         assertThat(closeTo(c.getCellValue(), 1.7653, 0.0001), is(true));
+        
+        // negative test; can't transform a range        
+        try {
+            c.setDerivation("normalize(range 'rng1')");
+            fail("Derivation succeeded");
+        }
+        catch (InvalidExpressionException e) {
+            ParseResult pr = e.getParseResult();
+            assertThat(pr, notNullValue());
+            assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));
+        }
+        
+        // negative test; can't transform a cell        
+        try {
+            c.setDerivation("normalize(col 8)");
+            fail("Derivation succeeded");
+        }
+        catch (InvalidExpressionException e) {
+            ParseResult pr = e.getParseResult();
+            assertThat(pr, notNullValue());
+            assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidFunctionTarget));
+        }
     }    
 }

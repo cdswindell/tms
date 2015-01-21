@@ -18,6 +18,7 @@ public enum ParserStatusCode
     InvalidExpressionStack,
     InvalidNumericExpression,
     InvalidOperandLocation,
+    InvalidFunctionTarget,
     InvalidCommaLocation,
     InvalidOperatorLocation,
     NoSuchOperator, 

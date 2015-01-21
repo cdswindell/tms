@@ -300,4 +300,35 @@ public class InfixExpressionParserTest
         assertThat(pr.isSuccess(), is(false));
         assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentCountMismatch));
     }
+    
+    @Test
+    public final void testArgumentTypeChecking()
+    {
+        // mean operator, too many arguments
+        InfixExpressionParser iep = new InfixExpressionParser("mean((1 + 2), 4)");
+        assertThat(iep, notNullValue());
+
+        ParseResult pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentCountMismatch));
+        
+        // mean operator, wrong argument type
+        iep = new InfixExpressionParser("mean(4)");
+        assertThat(iep, notNullValue());
+
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));
+        
+        // mean operator, wrong argument type
+        iep = new InfixExpressionParser("mean('abc')");
+        assertThat(iep, notNullValue());
+
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));
+    }
 }

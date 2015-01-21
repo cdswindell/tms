@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.Derivable;
 import org.tms.api.Operator;
 import org.tms.api.Range;
 import org.tms.api.Row;
@@ -75,13 +76,30 @@ public class InfixExpressionParser
         return parseInfixExpression(m_ifs, m_table);
     }
     
+    public ParseResult parseInfixExpression(Derivable target)
+    {
+        m_ifs = EquationStack.createInfixStack();
+        return parseInfixExpression(m_ifs, m_table, target);
+    }
+    
     protected ParseResult parseInfixExpression(Table table)
     {
         m_ifs = EquationStack.createInfixStack();
         return parseInfixExpression(m_ifs, table);
     }
     
+    protected ParseResult parseInfixExpression(Table table, Derivable target)
+    {
+        m_ifs = EquationStack.createInfixStack();
+        return parseInfixExpression(m_ifs, table);
+    }
+    
     protected ParseResult parseInfixExpression(EquationStack ifs, Table table)
+    {
+        return parseInfixExpression(ifs, table, (Derivable)null);
+    }
+    
+    protected ParseResult parseInfixExpression(EquationStack ifs, Table table, Derivable target)
     {
         if (m_expr == null || (m_expr = m_expr.trim()).length() <= 0)
             return new ParseResult(ParserStatusCode.EmptyExpression);
@@ -138,12 +156,12 @@ public class InfixExpressionParser
         }
         
         if (pr.isSuccess())
-            validateSemantics(ifs, pr);
+            validateSemantics(ifs, target, pr);
         
         return pr;
     }
 
-    private void validateSemantics(EquationStack ifs, ParseResult pr)
+    private void validateSemantics(EquationStack ifs, Derivable target, ParseResult pr)
     {
         // check for simple semantics, like argument count
         Iterator<Token> tIter = ifs.descendingIterator();
@@ -155,6 +173,23 @@ public class InfixExpressionParser
                 validateFunctionUsage(t, tIter, pr);
                 if (pr.isFailure())
                     return;
+            }
+        }
+        
+        // finally, check that the target of the derivation is appropriate
+        // only Row, Column, and Cell can be targets of a derivation
+        // Cells do not support transform functions
+        if (pr.isSuccess() && target != null && target instanceof Cell) {
+            tIter = ifs.descendingIterator();
+            while(tIter != null && tIter.hasNext()) {
+                Token t = tIter.next();
+                if (!t.isFunction()) continue;
+                
+                TokenType tt = t.getTokenType();
+                if (tt.isTransform()) {
+                    pr.addIssue(ParserStatusCode.InvalidFunctionTarget, t.getOperator().getLabel());
+                    return;
+                }
             }
         }
     }
@@ -450,15 +485,16 @@ public class InfixExpressionParser
                     break;
                 
                 case RangeOp: // handled as expression arg
-                case StatOp:  // handled as expression arg
-                case TransformOp:
                     break;
                     
                 case Comma: // skip these elements
                     if (!processedFirstToken)
                         commaIsOk = false;
                     break;
-                    
+                
+                case UnaryFunc:
+                case StatOp:
+                case TransformOp:
                 case GenericFunc:
                 case BinaryFunc:
                 case BinaryStatOp:  

@@ -84,6 +84,18 @@ public enum TokenType implements Labeled
         }
     }
     
+    public boolean isTransform()
+    {
+        switch (this) {
+            case TransformOp:
+            case TrinaryTransformOp:
+                return true;
+             
+            default:
+                return false;
+        }
+    }
+    
     public boolean isLeading()
     {
         return m_leading;
