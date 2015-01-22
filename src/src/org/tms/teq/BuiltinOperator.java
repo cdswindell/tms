@@ -83,6 +83,7 @@ public enum BuiltinOperator implements Labeled, Operator
     BiggerOper(TokenType.BinaryFunc, 5, Math.class, "max", "bigger"),
     SmallerOper(TokenType.BinaryFunc, 5, Math.class, "min", "smaller"),
     HypotOper(TokenType.BinaryFunc, 5, Math.class, "hypot"),
+    numberOfOper("numberOf", TokenType.GenericFunc, 5, MathUtil.class, "numberOf", TableCellsElement.class, Object.class),    
 
     // Builtin functions
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
@@ -298,8 +299,12 @@ public enum BuiltinOperator implements Labeled, Operator
 	@Override
     public int numArgs() 
 	{
-		TokenType tt = getPrimaryTokenType();
-		return tt != null ? tt.numArgs() : 0;
+	    if (m_methodArgs != null)
+	        return m_methodArgs.length;
+	    else {
+    		TokenType tt = getPrimaryTokenType();
+    		return tt != null ? tt.numArgs() : 0;
+	    }
 	}	
 
     @Override

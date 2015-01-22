@@ -83,6 +83,10 @@ public class CellImpl extends TableCellsElementImpl implements Cell
         
         boolean valuesDiffer = false;
         
+//        // coerce all numbers to double
+//        if (value != null && value instanceof Number)
+//            value = ((Number)value).doubleValue();
+//        
         if (value != m_cellValue) {
             m_cellValue = value;
             valuesDiffer = true;

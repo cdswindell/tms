@@ -189,7 +189,7 @@ public class TokenMapperTest
         @Override
         public Token evaluate(Token... args)
         {
-            assert args != null && args.length == 1;
+            assert args != null && args.length == 3;
             
             double d1 = args[0].getNumericValue();
             double d2 = args[1].getNumericValue();
@@ -239,7 +239,7 @@ public class TokenMapperTest
         @Override
         public Token evaluate(Token... args)
         {
-            assert args != null && args.length == 1;
+            assert args != null && args.length == 2;
             
             String s1 = args[0].getStringValue();
             double d2 = args[1].getNumericValue();

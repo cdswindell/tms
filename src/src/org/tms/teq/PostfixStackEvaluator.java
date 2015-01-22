@@ -131,8 +131,8 @@ public class PostfixStackEvaluator
                         args = new Token[numArgs];
                         
                         for (int i = numArgs - 1; i >= 0; i--) {
-                            x = asOperand(m_opStack.pollFirst(), tbl, row, col);
-                            if (x == null || !x.isOperand()) // stack is in invalid state
+                            x = asOperand(m_opStack.pollFirst(), tbl, row, col, argTypes[i]);
+                            if (x == null) // stack is in invalid state
                                 return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);  
                             else if (!x.isA(argTypes[i]))
                                 return Token.createErrorToken(ErrorCode.OperandDataTypeMismatch);  
@@ -186,9 +186,16 @@ public class PostfixStackEvaluator
 	
     private Token asOperand(Token t, Table tbl, Row row, Column col)
     {
+        return asOperand(t, tbl, row, col, null);
+    }
+    
+    private Token asOperand(Token t, Table tbl, Row row, Column col, Class<?> requiredArgType)
+    {
         if (t == null)
             return t;        
         else if (t.isOperand())
+            return t;        
+        else if (requiredArgType != null && t.isA(requiredArgType))
             return t;        
         else if (t.isReference()) {
             boolean haveRef = false;

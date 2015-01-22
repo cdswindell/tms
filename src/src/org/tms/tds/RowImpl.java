@@ -50,9 +50,7 @@ public class RowImpl extends TableSliceElement implements Row
         assert this.getTable() != null: "Table required";
         assert this.getTable() == col.getTable() : "Column not in same table";
         
-        synchronized(getTable()) {
-            return col.getCellInternal(this, createIfSparse);
-        }
+        return col.getCellInternal(this, createIfSparse);
     }
 
     /*

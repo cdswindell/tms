@@ -1082,8 +1082,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     protected CellImpl getCell(RowImpl row, ColumnImpl col)
     {
-        assert row != null : "Row required";
-        assert col != null : "Column required";
+        if (row == null || col == null)
+            return null;
+        
         assert this == row.getTable() && this == col.getTable(): "Row/Column table mismatch";
         
         row.setCurrent();

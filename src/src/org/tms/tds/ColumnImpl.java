@@ -104,9 +104,11 @@ public class ColumnImpl extends TableSliceElement implements Column
                 }
             }
             else {
+                if (!createIfSparse)
+                    return c;
+                
                 // if cellOffset is equal to or > numCells, this should be a new slot
                 // in which case, cellOffset should equal numCells
-                assert !createIfSparse : "createIfSparse is false and cellOffset >= numCells";
                 assert cellOffset >= numCells;
                 
                 // make sure sufficient capacity exists

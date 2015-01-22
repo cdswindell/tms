@@ -1,5 +1,10 @@
 package org.tms.teq;
 
+import java.math.BigDecimal;
+
+import org.tms.api.Cell;
+import org.tms.api.TableCellsElement;
+
 public class MathUtil
 {
     static final public double neg(double arg)
@@ -143,6 +148,38 @@ public class MathUtil
         else
             return Double.NaN;
     }   
+    
+    static final public double numberOf(TableCellsElement te, Object q)
+    {
+        int count = 0;
+        if (te != null && q != null) {
+            BigDecimal bdQ = toBigDecimal(q);
+            for (Cell c : te.cells()) {
+                Object cellValue = c.getCellValue();
+                if (q.equals(c.getCellValue()) ||
+                    (bdQ != null && bdQ.compareTo(toBigDecimal(cellValue)) == 0))
+                    count++;
+            }
+        }
+        
+        return (double)count;
+    }   
+    
+    static final private BigDecimal toBigDecimal(Object n)
+    {
+        if (n != null && (n instanceof Number)) {
+            if (n instanceof Double)
+                return BigDecimal.valueOf((Double)n);
+            if (n instanceof Integer)
+                return BigDecimal.valueOf((Integer)n);
+            if (n instanceof Long)
+                return BigDecimal.valueOf((Long)n);
+            if (n instanceof Short)
+                return BigDecimal.valueOf((Short)n);
+        }
+        
+        return null;
+    }
     
     static final public String toString(Object arg)
     {
