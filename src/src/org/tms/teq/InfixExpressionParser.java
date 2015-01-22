@@ -10,6 +10,7 @@ import org.tms.api.Operator;
 import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableCellsElement;
 import org.tms.api.exceptions.InvalidExpressionException;
 
 public class InfixExpressionParser
@@ -304,8 +305,12 @@ public class InfixExpressionParser
         if (lastArgClass == null || requiredArgType == null)
             pr.addIssue(ParserStatusCode.ArgumentTypeMismatch, oper.getLabel());
         else {
-            if (requiredArgType.isAssignableFrom(lastArgClass))
-                return;
+        	if (requiredArgType == lastArgClass)
+        		return; // simple equality
+        	else if (requiredArgType.isAssignableFrom(lastArgClass))
+                return; // argument types match/can be coerced
+            else if (requiredArgType.isPrimitive() && TableCellsElement.class.isAssignableFrom(lastArgClass))
+            	return; // assume argument is table cells element
             else if (requiredArgType.isPrimitive() && !lastArgClass.isPrimitive()) {
                 if (lastArgClass == Object.class ||
                     requiredArgType == double.class && lastArgClass == Double.class ||
@@ -314,7 +319,7 @@ public class InfixExpressionParser
                     requiredArgType == short.class && lastArgClass == Short.class ||
                     requiredArgType == long.class && lastArgClass == Long.class ||
                     requiredArgType == boolean.class && lastArgClass == Boolean.class)
-                    return;
+                    return; // function requires primitive type, arg is a number
             }
             
             pr.addIssue(ParserStatusCode.ArgumentTypeMismatch, oper.getLabel());
