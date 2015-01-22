@@ -234,6 +234,30 @@ public class PostfixStackEvaluator
         return t;
     }
 
+    private SingleVariableStatEngine fetchSVSE(TableCellsElement ref, BuiltinOperator bio, DerivationContext dc) 
+    {
+    	SingleVariableStatEngine svse = null;
+        if (dc != null) {
+        	svse = dc.getCachedSVSE(ref);
+        	
+        	if (svse != null && bio.isRequiresRetainedDataset()  && !svse.isRetainDataset())
+        		svse = null;
+        }
+        
+        if (svse == null) {
+        	svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                	
+            for (Cell c : ref.cells()) {
+                if (c.isNumericValue())
+                    svse.enter((Number)c.getCellValue());
+            }
+            
+            if (dc != null)
+            	dc.cacheSVSE(ref, svse);
+        }
+        
+        return svse;
+	}
+
     private Token doStatOp(Operator oper, Token x, DerivationContext dc)
     {
         Token result = null;
@@ -241,26 +265,7 @@ public class PostfixStackEvaluator
         if (bio != null) {
             TableCellsElement ref = x.getReferenceValue();           
             if (ref != null) {
-                SingleVariableStatEngine svse = null;
-                
-                if (dc != null) {
-                	svse = dc.getCachedSVSE(ref);
-                	
-                	if (svse != null && bio.isRequiresRetainedDataset()  && !svse.isRetainDataset())
-                		svse = null;
-                }
-                
-                if (svse == null) {
-                	svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                	
-	                for (Cell c : ref.cells()) {
-	                    if (c.isNumericValue())
-	                        svse.enter((Number)c.getCellValue());
-	                }
-	                
-	                if (dc != null)
-	                	dc.cacheSVSE(ref, svse);
-                }
-                
+                SingleVariableStatEngine svse = fetchSVSE(ref, bio, dc);
                 try {
                     double value = svse.calcStatistic(bio);
                     result = new Token(TokenType.Operand, value);
@@ -272,11 +277,13 @@ public class PostfixStackEvaluator
             else
                 result = Token.createNullToken();            
         }
+        else
+        	result = oper.evaluate(x);
         
         return result;
     }
 
-    private Token doTransformOp(Operator oper, Token x, Table tbl, Row curRow, Column curCol, DerivationContext dc)
+	private Token doTransformOp(Operator oper, Token x, Table tbl, Row curRow, Column curCol, DerivationContext dc)
     {        
         Token result = null;
         Cell cell = null;
@@ -300,35 +307,17 @@ public class PostfixStackEvaluator
                 else if (!cell.isNumericValue())
                     return Token.createErrorToken(ErrorCode.OperandDataTypeMismatch);
                 
-                double value = ((Number)cell.getCellValue()).doubleValue();
-                
-                SingleVariableStatEngine svse = null;
-                
-                if (dc != null) {
-                    svse = dc.getCachedSVSE(ref);
-                    
-                    if (svse != null && bio.isRequiresRetainedDataset()  && !svse.isRetainDataset())
-                        svse = null;
-                }
-                
-                if (svse == null) {
-                    svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                   
-                    for (Cell c : ref.cells()) {
-                        if (c.isNumericValue())
-                            svse.enter((Number)c.getCellValue());
-                    }
-                    
-                    if (dc != null)
-                        dc.cacheSVSE(ref, svse);
-                }
-                
                 try {
                     double mean;
                     double stDev;
+                    double value = ((Number)cell.getCellValue()).doubleValue();              
+                    SingleVariableStatEngine svse = fetchSVSE(ref, bio, dc); 
+                    
                     switch (bio) {
                         case MeanCenterOper:
                             mean = svse.calcStatistic(BuiltinOperator.MeanOper);
                             value = value - mean;
+                            result = new Token(TokenType.Operand, value);
                             break;
                             
                         case NormalizeOper:
@@ -337,16 +326,21 @@ public class PostfixStackEvaluator
                             if (stDev == 0.0)
                                 return Token.createErrorToken(ErrorCode.DivideByZero);
                             value = (value - mean)/stDev;
+                            result = new Token(TokenType.Operand, value);
                             break;
                             
                         default:
-                            throw new UnimplementedException("Unimplemented Transformation: " + bio);
+                            break;
                     }
-                    
-                    result = new Token(TokenType.Operand, value);
                 }
                 catch (UnimplementedException ue) {
                     result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
+                }
+                
+                // if we do
+                if (result == null) {
+                	Token y = new Token(TokenType.CellRef, cell);
+                	result = oper.evaluate(x, y);
                 }
             }
             else
