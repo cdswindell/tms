@@ -310,10 +310,11 @@ public class Derivation
     
     public void recalculateTarget()
     {
-        recalculateTarget(null, null);
+    	DerivationContext dc = new DerivationContext();
+        recalculateTarget(null, dc);
     }
     
-    protected void recalculateTarget(TableElement modifiedElement, DerivationContext dc)
+    private void recalculateTarget(TableElement modifiedElement, DerivationContext dc)
     {
         if (m_target.isReadOnly())
             throw new ReadOnlyException((BaseElement)m_target, TableProperty.Derivation);
@@ -375,6 +376,10 @@ public class Derivation
         
         boolean anyModified = false;
         for (Column col : cols) {
+        	// derived cells have president over derived rows
+        	Cell cell = tbl.getCell(row,  col);
+        	if (cell != null && cell.isDerived()) continue;
+        	
             Token t = m_pfe.evaluate(row, col, dc);
             if (t.isNumeric() )
                 t.setValue(applyPrecision(t.getNumericValue()));
@@ -405,6 +410,12 @@ public class Derivation
         
         boolean anyModified = false;
         for (Row row : rows) {
+        	// derived rows have precident
+        	if (row.isDerived()) continue;
+        	
+        	Cell cell = tbl.getCell(row,  col);
+        	if (cell != null && cell.isDerived()) continue;
+        	
             Token t = m_pfe.evaluate(row, col, dc);
             if (t.isNumeric())
                 t.setValue(applyPrecision(t.getNumericValue()));
@@ -479,6 +490,12 @@ public class Derivation
     		m_cachedSVSEs = new HashMap<TableCellsElement, SingleVariableStatEngine>();
     	}
     	
+    	/**
+    	 * As the TableCellsElement has been modified, remove from the cache any statistics
+    	 * cached that involve the modified element
+    	 * 
+    	 * @param tse the modified TableCellsElement 
+    	 */
     	public void remove(TableCellsElement tse) 
     	{
     		if (!m_cachedAny)

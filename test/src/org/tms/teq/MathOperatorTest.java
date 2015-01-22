@@ -58,4 +58,80 @@ public class MathOperatorTest extends BaseTest
         assertThat(cR1C3, notNullValue());
         assertThat(cR1C3.isNumericValue(), is(true));
     }    
+    
+    @Test
+    public void testLargeTable()
+    {
+        Table tbl = TableFactory.createTable(12, 10);        
+        assert (tbl != null);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        Row r1 = tbl.addRow(Access.ByIndex, 1);
+        
+        // extend table to 5000 rows
+        tbl.addRow(Access.ByIndex, 50000);
+        assertThat(tbl.getNumRows(), is(50000));
+        
+        Column c1 = tbl.getColumn(Access.ByIndex, 1);
+        assertThat(c1, nullValue());
+        
+        Column c2 = tbl.addColumn(Access.ByIndex, 2);
+        c2.fill(50);
+        
+        c1 = tbl.getColumn(Access.ByIndex, 1);
+        assertThat(c1, notNullValue());
+        
+        Column c3 = tbl.addColumn(Access.ByIndex, 3);
+        c3.setDerivation("randomInt(col 2)");
+        
+        c1.fill(50);
+        c2.setDerivation("randomInt(col 1)");
+        c3.setDerivation("normalize(col 2)");
+        
+        Cell cR1C3 = tbl.getCell(r1,  c3);
+        assertThat(cR1C3, notNullValue());
+        assertThat(cR1C3.isNumericValue(), is(true));
+    }
+    
+    @Test
+    public void testDerivationPrecidence()
+    {
+        Table tbl = TableFactory.createTable(12, 10);        
+        assert (tbl != null);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        Row r1 = tbl.addRow(Access.ByIndex, 1);
+        
+        // extend table to 5000 rows
+        tbl.addRow(Access.ByIndex, 500);
+        assertThat(tbl.getNumRows(), is(500));
+        
+        Column c1 = tbl.getColumn(Access.ByIndex, 1);
+        assertThat(c1, nullValue());
+        
+        Column c2 = tbl.addColumn(Access.ByIndex, 2);      
+        c1 = tbl.getColumn(Access.ByIndex, 1);
+        assertThat(c1, notNullValue());
+        
+        Column c3 = tbl.addColumn(Access.ByIndex, 3);
+        c3.setDerivation("randomInt(col 2)");
+        
+        c1.fill(50);
+        Cell cR1C1 = tbl.getCell(r1,  c1);
+        assertThat(cR1C1, notNullValue());
+        cR1C1.setDerivation("numberOf(col 1, 50)");
+        
+        Cell cR1C2 = tbl.getCell(r1,  c2);
+        assertThat(cR1C2, notNullValue());
+        cR1C2.setDerivation("mean(col 2)");
+        
+        Cell cR1C3 = tbl.getCell(r1,  c3);
+        assertThat(cR1C3, notNullValue());
+        cR1C3.setDerivation("mean(col 3)");
+        
+        c2.setDerivation("randomInt(col 1)");
+        c3.setDerivation("normalize(col 2)");
+        
+        assertThat(cR1C1.isNumericValue(), is(true));
+    }
 }

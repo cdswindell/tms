@@ -18,7 +18,10 @@ public class SingleVariableStatEngine
     private double m_sumX2;
     private double m_min;
     private double m_max;
-    private boolean m_retainDataset;
+    private double m_mean = Double.MIN_VALUE;
+    private double m_stDevS = Double.MIN_VALUE;
+    private double m_stDevP = Double.MIN_VALUE;
+    boolean m_retainDataset;
     private List<Double> m_values;
     
     public SingleVariableStatEngine()
@@ -54,6 +57,9 @@ public class SingleVariableStatEngine
         m_sumX = m_sumX2 = 0;
         m_min = Double.POSITIVE_INFINITY;
         m_max = Double.NEGATIVE_INFINITY;
+        m_mean = Double.MIN_VALUE;
+        m_stDevS = Double.MIN_VALUE;
+        m_stDevP = Double.MIN_VALUE;
     }
 
     public int enter(Double... vals) 
@@ -76,6 +82,10 @@ public class SingleVariableStatEngine
     
     public int enter(double x) 
     {
+        m_mean = Double.MIN_VALUE;
+        m_stDevS = Double.MIN_VALUE;
+        m_stDevP = Double.MIN_VALUE;
+        
         m_sumX += x;
         m_sumX2 += x*x;
         if (x > m_max)
@@ -109,7 +119,10 @@ public class SingleVariableStatEngine
                 break;
                 
             case MeanOper:
-                value = m_sumX / m_n;
+            	if (m_mean != Double.MIN_VALUE)
+            		value = m_mean;
+            	else 
+            		m_mean = value = m_sumX / m_n;
                 break;
                 
             case MinOper:   
@@ -121,15 +134,24 @@ public class SingleVariableStatEngine
                 break;
                 
             case StDevPopulationOper:
-                tmpX = calcStatistic(BuiltinOperator.MeanOper);
-                value = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/m_n);
+            	if (m_stDevP != Double.MIN_VALUE)
+            		value = m_stDevP;
+            	else {
+	                tmpX = calcStatistic(BuiltinOperator.MeanOper);
+	                m_stDevP = value = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/m_n);
+            	}
                 break;
             
             case StDevSampleOper:
                 if (m_n == 1)
                     return Double.NaN;
-                tmpX = calcStatistic(BuiltinOperator.MeanOper);
-                value = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/(m_n-1));
+                
+            	if (m_stDevS != Double.MIN_VALUE)
+            		value = m_stDevS;
+            	else {
+	                tmpX = calcStatistic(BuiltinOperator.MeanOper);
+	                m_stDevS = value = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/(m_n-1));
+            	}
                 break;
                 
             case VarPopulationOper:
