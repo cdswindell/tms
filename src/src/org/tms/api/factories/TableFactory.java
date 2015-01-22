@@ -1,5 +1,7 @@
-package org.tms.api;
+package org.tms.api.factories;
 
+import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.tds.TableImpl;
 
 public class TableFactory 
@@ -27,5 +29,4 @@ public class TableFactory
 		Table t = TableImpl.createTable(nRows, nCols, rt);
 		return t;
     }
-
 }

@@ -14,9 +14,9 @@ import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.TableFactory;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidExpressionException;
+import org.tms.api.factories.TableFactory;
 
 public class DerivationTest
 {

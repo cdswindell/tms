@@ -2,11 +2,11 @@ package org.tms.api;
 
 import java.util.List;
 
-
 public interface TableElement extends BaseElement
 {
     public TableContext getTableContext();
     public Table getTable();
+    
     public void delete();
     public void fill(Object o);
     public void clear();

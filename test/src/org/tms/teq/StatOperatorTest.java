@@ -12,8 +12,8 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.TableFactory;
 import org.tms.api.TableProperty;
+import org.tms.api.factories.TableFactory;
 import org.tms.tds.TableImpl;
 
 public class StatOperatorTest extends BaseTest

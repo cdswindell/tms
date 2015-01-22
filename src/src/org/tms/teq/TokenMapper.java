@@ -10,8 +10,8 @@ import java.util.Set;
 import org.tms.api.Operator;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
-import org.tms.api.TableContextFactory;
 import org.tms.api.exceptions.IllegalTableStateException;
+import org.tms.api.factories.TableContextFactory;
 
 public class TokenMapper
 {

@@ -8,6 +8,7 @@ import org.tms.api.ElementType;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
 import org.tms.teq.TokenMapper;
 import org.tms.util.WeakHashSet;
@@ -30,6 +31,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     public static TableContext createContext()
     {
         return new ContextImpl(false, null);
+    }
+    
+    public static TableContext createContext(TableContext c)
+    {
+        return new ContextImpl(false, c);
     }
     
     public static TableContext createDefaultContext()
@@ -74,17 +80,20 @@ public class ContextImpl extends BaseElementImpl implements TableContext
 
     private boolean m_autoRecalculate;
     
-    private ContextImpl(boolean isDefault, ContextImpl otherContext)
+    private ContextImpl(boolean isDefault, TableContext otherContext)
     {
         super(ElementType.Context);      
         m_default = isDefault;
         m_registeredTables = new WeakHashSet<Table>();
         
         // initialize from default context, unless this the default
-        initialize(otherContext);
+        if (otherContext != null && !(otherContext instanceof ContextImpl))
+        	throw new UnsupportedImplementationException(otherContext);
+        
+        initialize((ContextImpl)otherContext);
      }
 
-    protected ContextImpl(ContextImpl otherContext)
+    protected ContextImpl(TableContext otherContext)
     {
         this(false, otherContext);
     }
