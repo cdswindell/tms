@@ -82,12 +82,7 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
                 throw new DataTypeEnforcementException(getEnforcedDataType(), value);
         }
         
-        boolean valuesDiffer = false;
-        
-//        // coerce all numbers to double
-//        if (value != null && value instanceof Number)
-//            value = ((Number)value).doubleValue();
-//        
+        boolean valuesDiffer = false;        
         if (value != m_cellValue) {
             m_cellValue = value;
             valuesDiffer = true;

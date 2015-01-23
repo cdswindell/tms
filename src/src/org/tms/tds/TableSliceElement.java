@@ -7,6 +7,7 @@ import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Range;
+import org.tms.api.Row;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.NullValueException;
@@ -260,8 +261,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         else if (o == null && !isSupportsNull())
             throw new NullValueException(this, TableProperty.CellValue);
         
-        pushCurrent();
-        
+        pushCurrent();       
         boolean setSome = false;
         try {
             // Clear derivation, since fill should override
@@ -271,6 +271,9 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             boolean nullValueExceptionEncountered = false;
             for (Cell c : cells()) {
                 if (c != null) {
+                    if (isDerived(c)) 
+                        continue;
+                    
                     try {
                         if (((CellImpl)c).setCellValue(o, true));
                             setSome = true;
@@ -299,7 +302,24 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             parent.recalculateAffected(this);
     }
 
-	@Override
+	private boolean isDerived(Cell c)
+    {
+        if (c.isDerived())
+            return true;
+        
+        Derivable d = null;
+        if (this instanceof Row) 
+            d = c.getColumn();
+        else 
+            d = c.getRow();
+        
+        if (d != null && d.isDerived())
+            return true;
+        
+        return false;
+    }
+	
+    @Override
 	public boolean isNull() 
 	{
 		return getNumCells() == 0;

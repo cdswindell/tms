@@ -157,16 +157,22 @@ public class MathUtil
         if (te != null && q != null) {
         	List<TableElement> affected = null;
             BigDecimal bdQ = toBigDecimal(q);
-            for (Cell c : te.cells()) {
-            	if (c.isDerived()) {
-            		affected = c.getAffectedBy();
-            		if (affected != null && affected.contains(te))
-            			continue;
-            	}
-                Object cellValue = c.getCellValue();
-                if (q.equals(c.getCellValue()) ||
-                    (bdQ != null && bdQ.compareTo(toBigDecimal(cellValue)) == 0))
-                    count++;
+            Iterable<Cell> cellIter = te.cells();
+            if (cellIter != null) {
+                for (Cell c : cellIter) {
+                	if (c.isDerived()) {
+                		affected = c.getAffectedBy();
+                		if (affected != null && affected.contains(te))
+                			continue;
+                	}
+                	
+                    Object cellValue = c.getCellValue();
+                    if (q.equals(cellValue) ||
+                        (bdQ != null && cellValue != null && 
+                            (cellValue instanceof Number) && 
+                            bdQ.compareTo(toBigDecimal(cellValue)) == 0))
+                        count++;
+                }
             }
         }
         

@@ -115,10 +115,27 @@ public class MathOperatorTest extends BaseTest
         
         Column c3 = tbl.addColumn(Access.ByIndex, 3);
         
-        c1.fill(50);
         Cell cR1C1 = tbl.getCell(r1,  c1);
         assertThat(cR1C1, notNullValue());
+        
         cR1C1.setDerivation("numberOf(col 1, 50)");
+        c1.fill(100);
+        assertThat(cR1C1.getCellValue(), is (0.0));
+        
+        c1.fill(500);
+        assertThat(cR1C1.getCellValue(), is (0.0));
+        
+        c1.fill(10);
+        assertThat(cR1C1.getCellValue(), is (0.0));
+        
+        c1.fill(22);
+        assertThat(cR1C1.getCellValue(), is (0.0));
+        
+        c1.fill("abc");
+        assertThat(cR1C1.getCellValue(), is (0.0));
+        
+        c1.fill(50);
+        assertThat(cR1C1.getCellValue(), is (499.0));
         
         Cell cR1C2 = tbl.getCell(r1,  c2);
         assertThat(cR1C2, notNullValue());

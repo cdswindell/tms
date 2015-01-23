@@ -8,8 +8,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.tms.api.Cell;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Range;
+import org.tms.api.Row;
 import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -370,10 +372,17 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 	{
 		if (!isNull()) {
 		    TableImpl tbl = getTable();
+		    if (tbl == null)
+		        throw new IllegalTableStateException("Invalid Range: Table Reqired");
+		    
+		    clearComponentDerivations();
 		    
 		    tbl.pushCurrent();
 		    try {
 		        for (Cell cell : cells()) {
+		            if (isDerived(cell))
+		                continue;
+		            
 		            ((CellImpl)cell).setCellValue(o, true);
 		        }		        
 		    }
@@ -385,7 +394,44 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 		}
 	}
 	
-	@Override
+	/*
+	 * If the range contains only-rows and/or only columns, clear
+	 * any derivations in those elements
+	 */
+	private void clearComponentDerivations()
+    {
+	    int numRows = getNumRows();
+	    int numCols = getNumColumns();
+	    
+        if (numRows > 0 && numCols == 0) {
+            for (Row row : rows()) {
+                row.clearDerivation();
+            }
+        }
+        else if (numCols > 0 && numRows == 0) {
+            for (Column col : columns()) {
+                col.clearDerivation();
+            }
+        }       
+    }
+
+    private boolean isDerived(Cell cell)
+    {
+        if (cell.isDerived())
+            return true;
+        
+        Row row = cell.getRow();
+        if (row != null && row.isDerived())
+            return true;
+        
+        Column col = cell.getColumn();
+        if (col != null && col.isDerived())
+            return true;
+        
+        return false;
+    }
+
+    @Override
 	public void clear()
 	{
 	    fill(null);
