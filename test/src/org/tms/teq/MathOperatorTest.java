@@ -132,6 +132,10 @@ public class MathOperatorTest extends BaseTest
         assertThat(cR1C1.getCellValue(), is (0.0));
         
         c1.fill("abc");
+        cR1C1.setDerivation("numberOf(col 1, 'abc')");
+        assertThat(cR1C1.getCellValue(), is (499.0));
+        
+        cR1C1.setDerivation("numberOf(col 1, 50)");
         assertThat(cR1C1.getCellValue(), is (0.0));
         
         c1.fill(50);
