@@ -153,5 +153,18 @@ public class MathOperatorTest extends BaseTest
         c3.setDerivation("normalize(col 2)");
         
         assertThat(cR1C1.isNumericValue(), is(true));
+        assertThat(cR1C1.getCellValue(), is (499.0));
+        assertThat(cR1C2.getCellValue(), is (499.0));
+        assertThat(closeTo(cR1C3.getCellValue(), 0, 0.000000000001), is (true));
+        
+        Column c4 = tbl.addColumn(Access.ByIndex, 4);
+        c4.setDerivation("ridx");
+        
+        Column c5 = tbl.addColumn(Access.Next);
+        assertThat(c5.getIndex(), is(5));
+        c5.setDerivation("numberOf(col 2, col 4)");
+        
+        Cell cR1C5 = tbl.getCell(r1,  c5);
+        assertThat(cR1C5, notNullValue());
     }
 }

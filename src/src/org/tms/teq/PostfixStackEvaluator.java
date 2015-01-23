@@ -197,7 +197,7 @@ public class PostfixStackEvaluator
             return t;        
         else if (t.isOperand())
             return t;        
-        else if (requiredArgType != null && t.isA(requiredArgType))
+        else if (requiredArgType != null && requiredArgType != Object.class && t.isA(requiredArgType))
             return t;        
         else if (t.isReference()) {
             boolean haveRef = false;
