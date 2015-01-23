@@ -8,6 +8,7 @@ import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Range;
+import org.tms.api.TableCellsElement;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
@@ -17,7 +18,7 @@ import org.tms.teq.Derivation;
 import org.tms.teq.ErrorCode;
 import org.tms.teq.Token;
 
-public class CellImpl extends TableCellsElementImpl implements Cell
+public class CellImpl extends TableElementImpl implements Cell, TableCellsElement
 {
     private Object m_cellValue;
     private ColumnImpl m_col;

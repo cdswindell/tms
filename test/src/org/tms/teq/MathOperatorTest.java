@@ -102,7 +102,7 @@ public class MathOperatorTest extends BaseTest
         
         Row r1 = tbl.addRow(Access.ByIndex, 1);
         
-        // extend table to 5000 rows
+        // extend table to 500 rows
         tbl.addRow(Access.ByIndex, 500);
         assertThat(tbl.getNumRows(), is(500));
         
@@ -114,7 +114,6 @@ public class MathOperatorTest extends BaseTest
         assertThat(c1, notNullValue());
         
         Column c3 = tbl.addColumn(Access.ByIndex, 3);
-        c3.setDerivation("randomInt(col 2)");
         
         c1.fill(50);
         Cell cR1C1 = tbl.getCell(r1,  c1);
@@ -123,7 +122,7 @@ public class MathOperatorTest extends BaseTest
         
         Cell cR1C2 = tbl.getCell(r1,  c2);
         assertThat(cR1C2, notNullValue());
-        cR1C2.setDerivation("mean(col 2)");
+        cR1C2.setDerivation("count(col 2)");
         
         Cell cR1C3 = tbl.getCell(r1,  c3);
         assertThat(cR1C3, notNullValue());

@@ -1,6 +1,7 @@
 package org.tms.teq;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.tms.api.Cell;
 import org.tms.api.Column;
@@ -8,6 +9,7 @@ import org.tms.api.Operator;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableCellsElement;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
@@ -252,10 +254,17 @@ public class PostfixStackEvaluator
         }
         
         if (svse == null) {
+        	List<TableElement> affectedBy = null;
         	svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                	
             for (Cell c : ref.cells()) {
-                if (c.isNumericValue())
+                if (c.isNumericValue()) {
+                	if (c.isDerived()) {
+                		affectedBy = c.getAffectedBy();
+                		if (affectedBy !=null && affectedBy.contains(ref))
+                				continue;
+                	}
                     svse.enter((Number)c.getCellValue());
+                }
             }
             
             if (dc != null)

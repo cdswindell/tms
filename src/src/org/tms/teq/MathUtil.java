@@ -1,9 +1,11 @@
 package org.tms.teq;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.tms.api.Cell;
 import org.tms.api.TableCellsElement;
+import org.tms.api.TableElement;
 
 public class MathUtil
 {
@@ -153,8 +155,14 @@ public class MathUtil
     {
         int count = 0;
         if (te != null && q != null) {
+        	List<TableElement> affected = null;
             BigDecimal bdQ = toBigDecimal(q);
             for (Cell c : te.cells()) {
+            	if (c.isDerived()) {
+            		affected = c.getAffectedBy();
+            		if (affected != null && affected.contains(te))
+            			continue;
+            	}
                 Object cellValue = c.getCellValue();
                 if (q.equals(c.getCellValue()) ||
                     (bdQ != null && bdQ.compareTo(toBigDecimal(cellValue)) == 0))

@@ -1312,6 +1312,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
         if (row != null)
             affects.addAll(row.getAffects());
         
+        // remove this element to avoid cycles
+        affects.remove(cell);
+        
         return new ArrayList<Derivable>(affects);
     }
     
