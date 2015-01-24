@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.tms.api.Cell;
@@ -10,12 +11,14 @@ import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.TableRowColumnElement;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
 
-abstract class TableSliceElement extends TableCellsElementImpl implements Derivable
+abstract class TableSliceElement extends TableCellsElementImpl implements Derivable, TableRowColumnElement
 {
     abstract protected TableSliceElement insertSlice(int idx);
     abstract protected TableSliceElement setCurrent();
@@ -128,6 +131,37 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         }
     }
        
+    @Override
+    public void sort() 
+    {
+        TableImpl parent = getTable();
+        if (parent == null)
+            throw new IllegalTableStateException("Table Required");
+        
+        parent.sort(this);
+    }
+
+    @Override
+    public void sort(Comparator<Cell> cellSorter) 
+    {
+        TableImpl parent = getTable();
+        if (parent == null)
+            throw new IllegalTableStateException("Table Required");
+        
+        parent.sort(this, cellSorter);
+    }
+    
+    
+    protected CellImpl getCell(TableSliceElement tse)
+    {
+        if (this instanceof RowImpl)
+            return ((RowImpl)this).getCell((ColumnImpl)tse);
+        else if (this instanceof ColumnImpl)
+            return ((ColumnImpl)this).getCell((RowImpl)tse);
+        else
+            throw new IllegalTableStateException("Table Slice ELement Required");
+    }
+    
     void compactIfNeeded(ArrayList<? extends TableSliceElement> cols, int capacity) 
     {
 		// TODO Auto-generated method stub

@@ -1,7 +1,6 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -10,7 +9,6 @@ import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
-import org.tms.api.exceptions.IllegalTableStateException;
 
 public class RowImpl extends TableSliceElement implements Row
 {
@@ -39,8 +37,7 @@ public class RowImpl extends TableSliceElement implements Row
     
     /*
      * Class-specific methods
-     */
-    
+     */   
     protected CellImpl getCell(ColumnImpl col)
     {
         return getCellInternal(col, true);
@@ -257,26 +254,6 @@ public class RowImpl extends TableSliceElement implements Row
         return numCells;
     }
    
-	@Override
-	public void sort() 
-	{
-		TableImpl parent = getTable();
-		if (parent == null)
-			throw new IllegalTableStateException("Table Required");
-		
-		parent.sort(this);
-	}
-
-	@Override
-	public void sort(Comparator<Cell> cellSorter) 
-	{
-		TableImpl parent = getTable();
-		if (parent == null)
-			throw new IllegalTableStateException("Table Required");
-		
-		parent.sort(this, cellSorter);
-	}
-	
     @Override
     public Iterable<Cell> cells()
     {

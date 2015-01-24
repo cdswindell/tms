@@ -560,6 +560,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_rows;
     }
 
+    public RowImpl addRow()
+    {
+        return addRow(Access.Last);
+    }
+    
     protected RowImpl addRow(Access mode)
     {
         return addRow(mode, (Object [])null);
@@ -777,6 +782,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
         
         return prevCurrent;
     }  
+    
+    public ColumnImpl addColumn()
+    {
+        return addColumn(Access.Last);
+    }
     
     protected ColumnImpl addColumn(Access mode)
     {
@@ -1337,37 +1347,34 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return null;
     }
     
-	protected void sort(RowImpl rowImpl) 
+	protected void sort(TableSliceElement tse) 
 	{
-		// TODO Auto-generated method stub
-		
+	    if (tse instanceof ColumnImpl) {
+	        TableSliceElementComparator rowSorter = new TableSliceElementComparator((ColumnImpl)tse);
+    		Collections.sort(m_rows, rowSorter);
+            reindex(m_rows);
+	    }
+	    else if (tse instanceof RowImpl) {
+	        TableSliceElementComparator colSorter = new TableSliceElementComparator((RowImpl)tse);
+            Collections.sort(m_cols, colSorter);
+            reindex(m_cols);
+	    }
 	}
 
-	protected void sort(RowImpl rowImpl, Comparator<Cell> cellSorter) 
+	protected void sort(TableSliceElement tse, Comparator<Cell> cellSorter)
 	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	protected void sort(ColumnImpl sortCol) 
-	{
-		RowComparator rowSorter = new RowComparator(sortCol);
-		Collections.sort(m_rows, rowSorter);
-		reindexRows();
-	}
-
-	protected void sort(ColumnImpl sortCol, Comparator<Cell> cellSorter)
-	{
-		RowComparator rowSorter = new RowComparator(sortCol, cellSorter);
-		Collections.sort(m_rows, rowSorter);		
-		reindexRows();
+        if (tse instanceof ColumnImpl) {
+            TableSliceElementComparator rowSorter = new TableSliceElementComparator((ColumnImpl)tse);
+            Collections.sort(m_rows, rowSorter);
+            reindex(m_rows);
+        }
 	}
 	
-	private void reindexRows() 
+	private void reindex(ArrayList<? extends TableSliceElement> slices) 
 	{
-		if (m_rows != null) {
-		int idx = 1;
-			for (RowImpl r : m_rows) {
+		if (slices != null) {
+		    int idx = 1;
+			for (TableSliceElement r : slices) {
 				if (r != null) r.setIndex(idx);
 				idx++;
 			}
@@ -1458,38 +1465,57 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return c;
         }	    
 	}
-	
-	protected class RowComparator implements Comparator<RowImpl>
-	{
-		private ColumnImpl m_sortCol;
-		
-		public RowComparator(ColumnImpl sortCol) 
-		{
-			m_sortCol = sortCol;
-		}
+    
+    protected class TableSliceElementComparator implements Comparator<TableSliceElement>
+    {
+        private TableSliceElement m_sortSlice;
+        private Comparator<Cell> m_cellSorter;
+        
+        protected TableSliceElementComparator(TableSliceElement sortSlice) 
+        {
+            m_sortSlice = sortSlice;
+        }
 
-		public RowComparator(ColumnImpl sortCol, Comparator<Cell> cellSorter) 
-		{
-			// TODO Auto-generated constructor stub
-		}
+        protected TableSliceElementComparator(TableSliceElement sortSlice, Comparator<Cell> cellSorter) 
+        {
+            this(sortSlice);
+            m_cellSorter = cellSorter;
+        }
 
-		@Override
-		public int compare(RowImpl r1, RowImpl r2) 
-		{
-			if (r1 == r2) return 0;
-			
-			// nulls sort to end, so return 1
-			if (r1 == null) return 1;  // we know r2 can't be null because of above
-			if (r2 == null) return -1; // we know r1 can't be null because of above
-			
-			// now get cells, go through similar initial null check
-			CellImpl c1 = m_sortCol.getCell(r1);
-			CellImpl c2 = m_sortCol.getCell(r2);
-			
-			return CellImpl.compare(c1, c2);
-		}
-		
-	}
+        @Override
+        public int compare(TableSliceElement tse1, TableSliceElement tse2) 
+        {
+            if (tse1 == tse2) return 0;
+            
+            // as tables are sparse, we consider a null tse the same as a
+            // null cell, in other words, they are not reordered
+            CellImpl c1 = tse1 != null ? m_sortSlice.getCell(tse1) : null;
+            CellImpl c2 = tse2 != null ? m_sortSlice.getCell(tse2) : null;
+            
+            // if both cells are null, return equal
+            if ((c1 == null || c1.isNull()) && (c2 == null || c2.isNull())) return 0;
+            if (c1 == null || c1.isNull()) return 1;
+            if (c2 == null || c2.isNull()) return -1;
+            
+            if (m_cellSorter != null)
+                return m_cellSorter.compare(c1, c2);
+            else {
+                // simple stuff is done; since cells can be of any type,
+                // we will impose the rule that numeric cells are "less than"
+                // other cells, and other cells will be compared as strings                
+                if (c1.isNumericValue() && c2.isNumericValue()) {
+                    double d1 = ((Number)c1.getCellValue()).doubleValue();
+                    double d2 = ((Number)c2.getCellValue()).doubleValue();
+                    
+                    if (d1 < d2) return -1;
+                    if (d1 > d2) return 1;
+                    return 0;
+                }
+                
+                return c1.getCellValue().toString().compareTo(c2.getCellValue().toString());
+            }
+        }        
+    }
 	
     private class CellReference 
     {

@@ -1,7 +1,6 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -420,24 +419,4 @@ public class ColumnImpl extends TableSliceElement implements Column
             return c;
         }       
     }
-
-	@Override
-	public void sort() 
-	{
-		TableImpl parent = getTable();
-		if (parent == null)
-			throw new IllegalTableStateException("Table Required");
-		
-		parent.sort(this);
-	}
-
-	@Override
-	public void sort(Comparator<Cell> cellSorter) 
-	{
-		TableImpl parent = getTable();
-		if (parent == null)
-			throw new IllegalTableStateException("Table Required");
-		
-		parent.sort(this, cellSorter);
-	}
 }
