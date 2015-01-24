@@ -62,5 +62,21 @@ public class SortTableTest
         r5000.sort();
         assertThat(c1.getIndex(), is(1));
         assertThat(c2.getIndex(), is(2));
+        
+        // add a text cell to c1
+        RowImpl r1 = t.addRow(Access.First);
+        assertThat(r1, notNullValue());
+        assertThat(r1.getIndex(), is(1));
+        assertThat(r10.getIndex(), is(2));
+        assertThat(r5000.getIndex(), is(3));
+        
+        CellImpl cR1C1 = t.getCell(r1, c1);
+        assertThat(cR1C1, notNullValue());
+        
+        cR1C1.setCellValue("abc");
+        c1.sort();
+        assertThat(r1.getIndex(), is(3));
+        assertThat(r10.getIndex(), is(1));
+        assertThat(r5000.getIndex(), is(2));      
     } 
 }
