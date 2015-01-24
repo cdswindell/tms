@@ -1489,8 +1489,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
             
             // as tables are sparse, we consider a null tse the same as a
             // null cell, in other words, they are not reordered
-            CellImpl c1 = tse1 != null ? m_sortSlice.getCell(tse1) : null;
-            CellImpl c2 = tse2 != null ? m_sortSlice.getCell(tse2) : null;
+            CellImpl c1 = tse1 != null ? m_sortSlice.getCellInternal(tse1) : null;
+            CellImpl c2 = tse2 != null ? m_sortSlice.getCellInternal(tse2) : null;
             
             // if both cells are null, return equal
             if ((c1 == null || c1.isNull()) && (c2 == null || c2.isNull())) return 0;

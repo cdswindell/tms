@@ -51,6 +51,16 @@ public class SortTableTest
         c1.sort();
         assertThat(r5000.getIndex(), is(2)); // r5000 should be the 2nd
         assertThat(r10.getIndex(), is(1));  // r10 should be the 1st
-    }
-    
+        
+        // add a new column, sort row, and verify original column is back to idx 1
+        ColumnImpl c2 = t.addColumn(Access.First);
+        assertThat(c2, notNullValue());
+        assertThat(c1.getIndex(), is(2));
+        assertThat(c2.getIndex(), is(1));
+        
+        // resort
+        r5000.sort();
+        assertThat(c1.getIndex(), is(1));
+        assertThat(c2.getIndex(), is(2));
+    } 
 }

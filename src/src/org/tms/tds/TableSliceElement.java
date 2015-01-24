@@ -152,12 +152,12 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }
     
     
-    protected CellImpl getCell(TableSliceElement tse)
+    CellImpl getCellInternal(TableSliceElement tse)
     {
         if (this instanceof RowImpl)
-            return ((RowImpl)this).getCell((ColumnImpl)tse);
+            return ((RowImpl)this).getCellInternal((ColumnImpl)tse, false);
         else if (this instanceof ColumnImpl)
-            return ((ColumnImpl)this).getCell((RowImpl)tse);
+            return ((ColumnImpl)this).getCellInternal((RowImpl)tse, false);
         else
             throw new IllegalTableStateException("Table Slice ELement Required");
     }
