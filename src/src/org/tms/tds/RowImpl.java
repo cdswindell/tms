@@ -10,7 +10,7 @@ import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
 
-public class RowImpl extends TableSliceElement implements Row
+public class RowImpl extends TableSliceElementImpl implements Row
 {
     private int m_cellOffset;
     
@@ -196,7 +196,7 @@ public class RowImpl extends TableSliceElement implements Row
             int idx = getIndex() - 1;
             assert idx >= 0 : "Invalid row index";
             
-            TableSliceElement rc = rows.remove(idx);
+            TableSliceElementImpl rc = rows.remove(idx);
             assert rc == this : "Removed row mismatch";
             
             // reindex remaining rows

@@ -218,7 +218,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         if (r != null) {
             /*
              *  if the range doesn't contain the range, use the range method to do all the work
-             *  TableSliceElement.add will be called recursively to finish up
+             *  TableSliceElementImpl.add will be called recursively to finish up
              */
             if (!r.contains(this))
                 return r.add(new TableCellsElement[] {this});
@@ -235,7 +235,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         if (r != null) {
             /*
              * if the range contains the element, use the range method to do all the work
-             * TableSliceElement.remove will be called again to finish up
+             * TableSliceElementImpl.remove will be called again to finish up
              */
             if (r.contains(this))
                 r.remove(new TableCellsElement[] {this});

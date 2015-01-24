@@ -12,7 +12,7 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 
-public class ColumnImpl extends TableSliceElement implements Column
+public class ColumnImpl extends TableSliceElementImpl implements Column
 {
     private Object m_cells;
     private Class<? extends Object> m_dataType;
@@ -344,7 +344,7 @@ public class ColumnImpl extends TableSliceElement implements Column
             int idx = getIndex() - 1;
             assert idx >= 0 : "Invalid column index";
             
-            TableSliceElement rc = cols.remove(idx);
+            TableSliceElementImpl rc = cols.remove(idx);
             assert rc == this : "Removed column mismatch";
             
             // reindex remaining columns

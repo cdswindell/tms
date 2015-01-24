@@ -843,7 +843,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_precision = precision;
     }
     
-    synchronized protected TableSliceElement add(TableSliceElement r, Access mode, Object... md)
+    synchronized protected TableSliceElementImpl add(TableSliceElementImpl r, Access mode, Object... md)
     {
         // calculate the index where the row will go
         ElementType sliceType = r.getElementType();
@@ -871,8 +871,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     protected int calcIndex(ElementType et, Access mode, boolean isAdding, Object... mda)
     {
         int numSlices = -1;
-        TableSliceElement curSlice = null;
-        ArrayList<? extends TableSliceElement> slices;
+        TableSliceElementImpl curSlice = null;
+        ArrayList<? extends TableSliceElementImpl> slices;
         
         if (et == ElementType.Row) {
             numSlices = getNumRows();
@@ -974,11 +974,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
             case ByReference:
             {
                 Object md = mda != null && mda.length > 0 ? mda[0] : null;
-                if (isAdding || md == null || !(md instanceof TableSliceElement) || (((TableSliceElement)md).getElementType() != et))
+                if (isAdding || md == null || !(md instanceof TableSliceElementImpl) || (((TableSliceElementImpl)md).getElementType() != et))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));               
                 // indexes are 1-based; element arrays are 0-based
-                return ((TableSliceElement)md).getIndex() - 1;
+                return ((TableSliceElementImpl)md).getIndex() - 1;
             }
                 
             case ByLabel:
@@ -987,7 +987,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableSliceElement target = (TableSliceElement)find(slices, TableProperty.Label, md);
+                TableSliceElementImpl target = (TableSliceElementImpl)find(slices, TableProperty.Label, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -1000,7 +1000,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableSliceElement target = (TableSliceElement)find(slices, TableProperty.Description, md);
+                TableSliceElementImpl target = (TableSliceElementImpl)find(slices, TableProperty.Description, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -1016,11 +1016,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
                             String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString()))); 
                 
                 // key must either be a table property or a string
-                TableSliceElement target;
+                TableSliceElementImpl target;
                 if (key instanceof TableProperty) 
-                    target = (TableSliceElement)find(slices, (TableProperty)key, value);
+                    target = (TableSliceElementImpl)find(slices, (TableProperty)key, value);
                 else if (key instanceof String) 
-                    target = (TableSliceElement)find(slices, (String)key, value);
+                    target = (TableSliceElementImpl)find(slices, (String)key, value);
                 else
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (key == null ? "<null>" : key.toString()))); 
@@ -1046,8 +1046,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 if (tes != null) {
                     Object p = tes.getProperty(key);
                     if (p != null && p.equals(value)) {
-                        if (tes instanceof TableSliceElement)
-                            ((TableSliceElement)tes).setCurrent();
+                        if (tes instanceof TableSliceElementImpl)
+                            ((TableSliceElementImpl)tes).setCurrent();
                         return tes;
                     }
                 }
@@ -1067,8 +1067,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 if (tes != null) {
                     Object p = tes.getProperty(key);
                     if (p != null && p.equals(value)) {
-                        if (tes instanceof TableSliceElement)
-                            ((TableSliceElement)tes).setCurrent();
+                        if (tes instanceof TableSliceElementImpl)
+                            ((TableSliceElementImpl)tes).setCurrent();
                         return tes;
                     }
                 }
@@ -1347,7 +1347,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return null;
     }
     
-	protected void sort(TableSliceElement tse) 
+	protected void sort(TableSliceElementImpl tse) 
 	{
 	    if (tse instanceof ColumnImpl) {
 	        TableSliceElementComparator rowSorter = new TableSliceElementComparator((ColumnImpl)tse);
@@ -1361,7 +1361,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	    }
 	}
 
-	protected void sort(TableSliceElement tse, Comparator<Cell> cellSorter)
+	protected void sort(TableSliceElementImpl tse, Comparator<Cell> cellSorter)
 	{
         if (tse instanceof ColumnImpl) {
             TableSliceElementComparator rowSorter = new TableSliceElementComparator((ColumnImpl)tse);
@@ -1370,11 +1370,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
 	}
 	
-	private void reindex(ArrayList<? extends TableSliceElement> slices) 
+	private void reindex(ArrayList<? extends TableSliceElementImpl> slices) 
 	{
 		if (slices != null) {
 		    int idx = 1;
-			for (TableSliceElement r : slices) {
+			for (TableSliceElementImpl r : slices) {
 				if (r != null) r.setIndex(idx);
 				idx++;
 			}
@@ -1466,24 +1466,24 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }	    
 	}
     
-    protected class TableSliceElementComparator implements Comparator<TableSliceElement>
+    protected class TableSliceElementComparator implements Comparator<TableSliceElementImpl>
     {
-        private TableSliceElement m_sortSlice;
+        private TableSliceElementImpl m_sortSlice;
         private Comparator<Cell> m_cellSorter;
         
-        protected TableSliceElementComparator(TableSliceElement sortSlice) 
+        protected TableSliceElementComparator(TableSliceElementImpl sortSlice) 
         {
             m_sortSlice = sortSlice;
         }
 
-        protected TableSliceElementComparator(TableSliceElement sortSlice, Comparator<Cell> cellSorter) 
+        protected TableSliceElementComparator(TableSliceElementImpl sortSlice, Comparator<Cell> cellSorter) 
         {
             this(sortSlice);
             m_cellSorter = cellSorter;
         }
 
         @Override
-        public int compare(TableSliceElement tse1, TableSliceElement tse2) 
+        public int compare(TableSliceElementImpl tse1, TableSliceElementImpl tse2) 
         {
             if (tse1 == tse2) return 0;
             

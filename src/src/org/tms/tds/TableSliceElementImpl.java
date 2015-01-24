@@ -18,16 +18,16 @@ import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
 
-abstract class TableSliceElement extends TableCellsElementImpl implements Derivable, TableRowColumnElement
+abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TableRowColumnElement
 {
-    abstract protected TableSliceElement insertSlice(int idx);
-    abstract protected TableSliceElement setCurrent();
+    abstract protected TableSliceElementImpl insertSlice(int idx);
+    abstract protected TableSliceElementImpl setCurrent();
     
     private JustInTimeSet<RangeImpl> m_ranges;
     private boolean m_inUse;
     private Derivation m_deriv;
 
-    public TableSliceElement(ElementType eType, TableElementImpl e)
+    public TableSliceElementImpl(ElementType eType, TableElementImpl e)
     {
         super(eType, e);
     }
@@ -152,7 +152,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
     }
     
     
-    CellImpl getCellInternal(TableSliceElement tse)
+    CellImpl getCellInternal(TableSliceElementImpl tse)
     {
         if (this instanceof RowImpl)
             return ((RowImpl)this).getCellInternal((ColumnImpl)tse, false);
@@ -162,7 +162,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
             throw new IllegalTableStateException("Table Slice ELement Required");
     }
     
-    void compactIfNeeded(ArrayList<? extends TableSliceElement> cols, int capacity) 
+    void compactIfNeeded(ArrayList<? extends TableSliceElementImpl> cols, int capacity) 
     {
 		// TODO Auto-generated method stub
 		
@@ -173,7 +173,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         if (r != null) {
             /*
              *  if the range doesn't contain the row, use the range method to do all the work
-             *  TableSliceElement.add will be called recursively to finish up
+             *  TableSliceElementImpl.add will be called recursively to finish up
              */
             if (!r.contains(this))
                 return r.add(this);
@@ -189,7 +189,7 @@ abstract class TableSliceElement extends TableCellsElementImpl implements Deriva
         if (r != null) {
             /*
              * if the range contains the element, use the range method to do all the work
-             * TableSliceElement.remove will be called again to finish up
+             * TableSliceElementImpl.remove will be called again to finish up
              */
         	if (r.contains(this))
         		r.remove(this);
