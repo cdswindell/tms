@@ -20,6 +20,35 @@ import org.tms.teq.Token;
 
 public class CellImpl extends TableElementImpl implements Cell, TableCellsElement
 {
+	protected static int compare(CellImpl c1, CellImpl c2) 
+	{
+		
+		// if both cells are null, return equal
+		if (c1 == null && c2 == null) return 0;
+		if (c1 == null) return 1;
+		if (c2 == null) return -1;
+		
+		// one more null check is needed
+		if (c1.isNull() && c2.isNull()) return 0;
+		if (c1.isNull() ) return 1;
+		if (c2.isNull()) return -1;
+		
+		// simple stuff is done; since cells can be of any type,
+		// we will impose the rule that numeric cells are "less than"
+		// other cells, and other cells will be compared as strings
+		
+		if (c1.isNumericValue() && c2.isNumericValue()) {
+			double d1 = ((Number)c1.getCellValue()).doubleValue();
+			double d2 = ((Number)c2.getCellValue()).doubleValue();
+			
+			if (d1 < d2) return -1;
+			if (d1 > d2) return 1;
+			return 0;
+		}
+		
+		return c1.getCellValue().toString().compareTo(c2.getCellValue().toString());
+	}
+	
     private Object m_cellValue;
     private ColumnImpl m_col;
     private int m_cellOffset;

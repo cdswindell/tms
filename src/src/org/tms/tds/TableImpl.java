@@ -3,6 +3,8 @@ package org.tms.tds;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1335,6 +1337,43 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return null;
     }
     
+	protected void sort(RowImpl rowImpl) 
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void sort(RowImpl rowImpl, Comparator<Cell> cellSorter) 
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void sort(ColumnImpl sortCol) 
+	{
+		RowComparator rowSorter = new RowComparator(sortCol);
+		Collections.sort(m_rows, rowSorter);
+		reindexRows();
+	}
+
+	protected void sort(ColumnImpl sortCol, Comparator<Cell> cellSorter)
+	{
+		RowComparator rowSorter = new RowComparator(sortCol, cellSorter);
+		Collections.sort(m_rows, rowSorter);		
+		reindexRows();
+	}
+	
+	private void reindexRows() 
+	{
+		if (m_rows != null) {
+		int idx = 1;
+			for (RowImpl r : m_rows) {
+				if (r != null) r.setIndex(idx);
+				idx++;
+			}
+		}
+	}
+
 	public Iterable<Row> rows()
     {
 	    ensureRowsExist();
@@ -1418,6 +1457,38 @@ public class TableImpl extends TableCellsElementImpl implements Table
             // return the target cell
             return c;
         }	    
+	}
+	
+	protected class RowComparator implements Comparator<RowImpl>
+	{
+		private ColumnImpl m_sortCol;
+		
+		public RowComparator(ColumnImpl sortCol) 
+		{
+			m_sortCol = sortCol;
+		}
+
+		public RowComparator(ColumnImpl sortCol, Comparator<Cell> cellSorter) 
+		{
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public int compare(RowImpl r1, RowImpl r2) 
+		{
+			if (r1 == r2) return 0;
+			
+			// nulls sort to end, so return 1
+			if (r1 == null) return 1;  // we know r2 can't be null because of above
+			if (r2 == null) return -1; // we know r1 can't be null because of above
+			
+			// now get cells, go through similar initial null check
+			CellImpl c1 = m_sortCol.getCell(r1);
+			CellImpl c2 = m_sortCol.getCell(r2);
+			
+			return CellImpl.compare(c1, c2);
+		}
+		
 	}
 	
     private class CellReference 

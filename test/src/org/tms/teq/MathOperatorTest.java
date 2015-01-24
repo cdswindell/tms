@@ -166,5 +166,8 @@ public class MathOperatorTest extends BaseTest
         
         Cell cR1C5 = tbl.getCell(r1,  c5);
         assertThat(cR1C5, notNullValue());
+        
+        c2.sort();
+        assertThat(cR1C5, notNullValue());       
     }
 }
