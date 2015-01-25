@@ -224,10 +224,12 @@ public class RowImpl extends TableSliceElementImpl implements Row
                 // this also clears any derived cells in the row
                 parent.cacheCellOffset(this.getCellOffset(), true);
                 
+                // clear this element from the current cell stack
+                parent.purgeCurrentStack(this);
+                
+                // if this element is current, clear it
                 if (parent.getCurrentRow() == this)
                     parent.setCurrentRow(null);
-                
-                parent.purgeCurrentStack(this);
     	    }
     	}
     	

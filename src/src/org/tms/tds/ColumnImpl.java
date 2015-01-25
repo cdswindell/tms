@@ -373,10 +373,12 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             nCols = nCols--;
             assert nCols == cols.size() : "Column array size mismatch";
             
+            // clear this element from the current cell stack
+            parent.purgeCurrentStack(this);
+            
+            // if this element is current, clear it
             if (parent.getCurrentColumn() == this)
                 parent.setCurrentColumn(null);
-            
-            parent.purgeCurrentStack(this);
     	}   	
 
     	// Mark the column not in in use
