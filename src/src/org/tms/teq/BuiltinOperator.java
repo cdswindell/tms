@@ -118,8 +118,8 @@ public enum BuiltinOperator implements Labeled, Operator
     
     SplineOper,
     MeanCenterOper(TokenType.TransformOp, 5, "meanCenter"),
-    NormalizeOper(TokenType.TransformOp, 5, "normalize", "standardize"),
-    ScaleOper(TokenType.TransformOp, 5),
+    NormalizeOper(TokenType.TransformOp, 5, "normalize", "standardize"),    
+    ScaleOper("scale", TokenType.TransformOp, 5, MathUtil.class, "scale", TableCellsElement.class, double.class, double.class),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.RangeRef, TokenType.CellRef),
@@ -327,11 +327,6 @@ public enum BuiltinOperator implements Labeled, Operator
                         
                     case TransformOp:
                         m_methodArgs[0] = TableRowColumnElement.class;
-                        break;
-                        
-                    case TrinaryTransformOp:
-                        m_methodArgs[0] = TableRowColumnElement.class;
-                        m_methodArgs[1] = m_methodArgs[2] = double.class;
                         break;
                         
                     default:

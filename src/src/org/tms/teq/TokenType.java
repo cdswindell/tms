@@ -25,7 +25,6 @@ public enum TokenType implements Labeled
     StatOp(true, 1),
     BinaryStatOp(true, 2),
     TransformOp(true, 1),
-    TrinaryTransformOp(true, 3),
     BinaryOp(true, 2),
     BinaryFunc(true, 2),
     UnaryOp(false, 1),
@@ -74,7 +73,6 @@ public enum TokenType implements Labeled
             case StatOp:
             case BinaryStatOp:
             case TransformOp:
-            case TrinaryTransformOp:
             case BinaryFunc:
             case UnaryFunc: 
                 return true;
@@ -88,7 +86,6 @@ public enum TokenType implements Labeled
     {
         switch (this) {
             case TransformOp:
-            case TrinaryTransformOp:
                 return true;
              
             default:

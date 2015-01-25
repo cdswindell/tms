@@ -14,4 +14,9 @@ public class InvalidOperandsException extends TableException
 		super(String.format("Operator %s requires %d arg(s) of type: %s", 
 				oper.toString(), oper.numArgs(), "???"));
 	}
+	
+    public InvalidOperandsException(String msg)
+    {
+        super(msg);
+    }
 }

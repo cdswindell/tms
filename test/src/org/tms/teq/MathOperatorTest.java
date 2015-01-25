@@ -168,6 +168,27 @@ public class MathOperatorTest extends BaseTest
         assertThat(cR1C5, notNullValue());
         
         c2.sort();
-        assertThat(cR1C5, notNullValue());       
+        assertThat(cR1C5, notNullValue());
+        
+        // test Scale operation
+        Column c6 = tbl.addColumn(Access.Last);
+        assertThat(c6.getIndex(), is(6));
+        c6.setDerivation("scale(col 2, 10, 20)");
+        
+        Column c7 = tbl.addColumn(Access.Next);
+        assertThat(c7.getIndex(), is(7));
+        
+        Cell cR1C7 = tbl.getCell(r1,  c7);
+        assertThat(cR1C7, notNullValue());
+        cR1C7.setDerivation("min(col 6)");
+        assertThat(cR1C7.getCellValue(), is (10.0));
+        
+        Row r2 = tbl.getRow(Access.ByIndex, 2);
+        assertThat(r2, notNullValue());
+        
+        Cell cR2C7 = tbl.getCell(r2,  c7);
+        assertThat(cR2C7, notNullValue());
+        cR2C7.setDerivation("max(col 6)");
+        assertThat(cR2C7.getCellValue(), is (20.0));
     }
 }

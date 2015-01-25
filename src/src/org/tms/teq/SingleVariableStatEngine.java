@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.tms.api.Cell;
+import org.tms.api.Column;
+import org.tms.api.Row;
+import org.tms.api.TableRowColumnElement;
 import org.tms.api.exceptions.UnimplementedException;
 
 public class SingleVariableStatEngine
@@ -23,6 +27,9 @@ public class SingleVariableStatEngine
     private double m_stDevP = Double.MIN_VALUE;
     boolean m_retainDataset;
     private List<Double> m_values;
+    private Set<Cell> m_excludedCells;
+    private Set<Row> m_excludedRows;
+    private Set<Column> m_excludedColumns;
     
     public SingleVariableStatEngine()
     {
@@ -60,6 +67,10 @@ public class SingleVariableStatEngine
         m_mean = Double.MIN_VALUE;
         m_stDevS = Double.MIN_VALUE;
         m_stDevP = Double.MIN_VALUE;
+        
+        m_excludedCells = new HashSet<Cell>();
+        m_excludedRows = new HashSet<Row>();
+        m_excludedColumns = new HashSet<Column>();
     }
 
     public int enter(Double... vals) 
@@ -97,6 +108,57 @@ public class SingleVariableStatEngine
             m_values.add(x);
         
         return ++m_n;
+    }
+    
+    public void exclude(Cell cell)
+    {
+        if (cell != null) {
+            m_excludedCells.add(cell);
+            
+            Row row = cell.getRow();
+            if (row != null)
+                m_excludedRows.add(row);
+            
+            Column col = cell.getColumn();
+            if (col != null)
+                m_excludedColumns.add(col);
+        }
+    }
+    
+    public boolean isExcluded(Cell cell) 
+    {
+        if (cell == null)
+            return false;
+        else
+            return m_excludedCells.contains(cell);
+    }
+    
+    public boolean isExcluded(Row row) 
+    {
+        if (row == null)
+            return false;
+        else
+            return m_excludedRows.contains(row);
+    }
+    
+    public boolean isExcluded(Column col) 
+    {
+        if (col == null)
+            return false;
+        else
+            return m_excludedColumns.contains(col);
+    }
+    
+    public boolean isExcluded(TableRowColumnElement rce) 
+    {
+        if (rce != null) {
+            if (rce instanceof Row)
+                return isExcluded((Row) rce);
+            if (rce instanceof Column)
+                return isExcluded((Column) rce);
+        }
+        
+        return false;
     }
     
     public double calcStatistic(BuiltinOperator stat)

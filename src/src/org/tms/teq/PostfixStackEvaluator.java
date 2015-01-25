@@ -11,6 +11,7 @@ import org.tms.api.Table;
 import org.tms.api.TableCellsElement;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.TableRowColumnElement;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.teq.Derivation.DerivationContext;
@@ -128,10 +129,8 @@ public class PostfixStackEvaluator
                     args = null;
                     numArgs = oper.numArgs();
                     if (numArgs > 0) {
-                        Class<?> [] argTypes = oper.getArgTypes();
-                        
-                        args = new Token[numArgs];
-                        
+                        Class<?> [] argTypes = oper.getArgTypes();                        
+                        args = new Token[numArgs];                       
                         for (int i = numArgs - 1; i >= 0; i--) {
                             x = asOperand(m_opStack.pollFirst(), tbl, row, col, argTypes[i]);
                             if (x == null) // stack is in invalid state
@@ -146,6 +145,30 @@ public class PostfixStackEvaluator
                     m_opStack.push(doGenericOp(oper, args));                 
                     break;
                     
+                case TransformOp:
+                    args = null;
+                    numArgs = oper.numArgs();
+                    x = null;
+                    if (numArgs > 0) {
+                        Class<?> [] argTypes = oper.getArgTypes();                        
+                        args = new Token[numArgs];                       
+                        for (int i = numArgs - 1; i >= 0; i--) {
+                            x = asOperand(m_opStack.pollFirst(), tbl, row, col, argTypes[i]);
+                            if (x == null) // stack is in invalid state
+                                return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);  
+                            else if (!x.isA(argTypes[i]))
+                                return Token.createErrorToken(ErrorCode.OperandDataTypeMismatch);  
+                            
+                            args[i] = x;
+                        }
+                    }
+                    
+                    // last arg must be reference
+                    if (x == null || !x.isReference()) // stack is in invalid state
+                        return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.ReferenceRequired);                    
+                    m_opStack.push(doTransformOp(oper, tbl, row, col, dc, args));                 
+                    break;
+                    
                 case BuiltIn:
                     m_opStack.push(doBuiltInOp(oper, row, col));                 
                     break;
@@ -155,13 +178,6 @@ public class PostfixStackEvaluator
                     if (x == null || !x.isReference()) // stack is in invalid state
                         return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.ReferenceRequired);                    
                     m_opStack.push(doStatOp(oper, x, dc));                 
-                    break;
-                    
-                case TransformOp:
-                    x = m_opStack.pollFirst();
-                    if (x == null || !x.isReference()) // stack is in invalid state
-                        return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.ReferenceRequired);                    
-                    m_opStack.push(doTransformOp(oper, x, tbl, row, col, dc));                 
                     break;
                     
 				default:
@@ -260,9 +276,12 @@ public class PostfixStackEvaluator
                 if (c.isNumericValue()) {
                 	if (c.isDerived()) {
                 		affectedBy = c.getAffectedBy();
-                		if (affectedBy !=null && affectedBy.contains(ref))
-                				continue;
+                		if (affectedBy !=null && affectedBy.contains(ref)) {
+                		    svse.exclude(c);
+                			continue;
+                		}
                 	}
+                	
                     svse.enter((Number)c.getCellValue());
                 }
             }
@@ -299,23 +318,34 @@ public class PostfixStackEvaluator
         return result;
     }
 
-	private Token doTransformOp(Operator oper, Token x, Table tbl, Row curRow, Column curCol, DerivationContext dc)
+	private Token doTransformOp(Operator oper, Table tbl, Row curRow, Column curCol, DerivationContext dc, Token... args)
     {        
         Token result = null;
         Cell cell = null;
+
+        // error checking of args has been done in main loop        
+        Token x = args[0];
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
             TableCellsElement ref = null;
+            TableRowColumnElement excludeCheckElement = null;
             if (x.getRowValue() != null) {
                 ref = x.getRowValue();                
                 cell = tbl.getCell((Row)ref, curCol);
+                excludeCheckElement = curCol;
             }
             else if (x.getColumnValue() != null) {
                 ref = x.getColumnValue();
                 cell = tbl.getCell(curRow, (Column)ref);
+                excludeCheckElement = curRow;
             }
             
             if (ref != null) {
+                SingleVariableStatEngine svse = fetchSVSE(ref, bio, dc); 
+                
+                if (excludeCheckElement != null && svse.isExcluded(excludeCheckElement))
+                    return Token.createNullToken();
+                
                 if (cell == null || cell.isNull())
                     return Token.createNullToken();
                 else if (cell.isErrorValue())
@@ -326,8 +356,10 @@ public class PostfixStackEvaluator
                 try {
                     double mean;
                     double stDev;
+                    double min, sMin;
+                    double max, sMax;
+                    double rScale, rSource;
                     double value = ((Number)cell.getCellValue()).doubleValue();              
-                    SingleVariableStatEngine svse = fetchSVSE(ref, bio, dc); 
                     
                     switch (bio) {
                         case MeanCenterOper:
@@ -342,6 +374,21 @@ public class PostfixStackEvaluator
                             if (stDev == 0.0)
                                 return Token.createErrorToken(ErrorCode.DivideByZero);
                             value = (value - mean)/stDev;
+                            result = new Token(TokenType.Operand, value);
+                            break;
+                        
+                        case ScaleOper:
+                            sMin = args[1].getNumericValue();
+                            sMax = args[2].getNumericValue();
+                            rScale = sMax - sMin;
+                            if (rScale == 0.0)
+                                return Token.createErrorToken(ErrorCode.DivideByZero);
+                            
+                            min = svse.calcStatistic(BuiltinOperator.MinOper);
+                            max = svse.calcStatistic(BuiltinOperator.MaxOper);
+                            rSource = max - min;
+                            
+                            value = ((value - min)*rScale/rSource) + sMin;
                             result = new Token(TokenType.Operand, value);
                             break;
                             

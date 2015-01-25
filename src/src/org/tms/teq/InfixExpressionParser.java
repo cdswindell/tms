@@ -199,7 +199,7 @@ public class InfixExpressionParser
     {
         TokenType ftt = ft.getTokenType();
         Operator foper = ft.getOperator();
-        int requiredArgs = ftt.numArgs();
+        int requiredArgs = foper.numArgs();
         Class<?> [] argTypes = foper.getArgTypes();
         
         boolean foundFuncOpenParen = false;
@@ -503,7 +503,6 @@ public class InfixExpressionParser
                 case GenericFunc:
                 case BinaryFunc:
                 case BinaryStatOp:  
-                case TrinaryTransformOp:  
                     if (parenCnt == 0) {
                         foundFunc = true;
                         if (oper != null && argCnt < oper.numArgs()) 
