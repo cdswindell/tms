@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -375,6 +376,16 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     public Iterable<Cell> cells()
     {
         return new ColumnCellIterable();
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected Iterable<CellImpl> cellsInternal()
+    {
+        if (m_cells == null)
+            return Collections.emptyList();
+        else if (m_cells instanceof List)
+            return ((List<CellImpl>)m_cells);
+        return null;
     }
     
     /**

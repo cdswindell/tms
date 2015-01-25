@@ -418,6 +418,76 @@ public class TableImpl extends TableCellsElementImpl implements Table
     void markClean() { setDirty(false); };
     
     /*
+     * Cell manipulation routines
+     */
+    @Override
+    public CellImpl getCell(Access mode, Object... mda)
+    {
+        Object md = null;
+        switch (mode) {
+            case ByLabel:
+            case ByDescription:
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Cell, mode, (md == null ? "<null>" : md.toString())));
+                return (CellImpl)findCells(mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+                
+            case ByProperty:
+                Object key = mda != null && mda.length > 0 ? mda[0] : null;
+                Object value = mda != null && mda.length > 1 ? mda[1] : null;
+                if (key == null || value == null)
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Cell, mode, (key == null ? "<null>" : key.toString()))); 
+                
+                // key must either be a table property or a string
+                if (key instanceof TableProperty) 
+                    return (CellImpl)findCells((TableProperty)key, value);
+                else if (key instanceof String) 
+                    return (CellImpl)findCells((String)key, value);
+                else
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Cell, mode, (key == null ? "<null>" : key.toString())));                 
+            default:
+                throw new InvalidAccessException(ElementType.Table, ElementType.Cell, mode, false, mda);                
+        }
+    }
+    
+    private CellImpl findCells(String key, Object query)
+    {
+        for (ColumnImpl col : m_cols) {
+            if (col != null) {
+                for (CellImpl c : col.cellsInternal()) {
+                    if (c != null) {
+                        Object value = c.getProperty(key);
+                        if (query.equals(value))
+                            return c;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    private CellImpl findCells(TableProperty key,  Object query)
+    {
+        for (ColumnImpl col : m_cols) {
+            if (col != null) {
+                for (CellImpl c : col.cellsInternal()) {
+                    if (c != null) {
+                        Object value = c.getProperty(key);
+                        if (query.equals(value))
+                            return c;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /*
      * Range manipulation routines
      */
     @Override
@@ -452,7 +522,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 throw new InvalidAccessException(ElementType.Table, ElementType.Range, mode, false, mda);                
         }
     }
-    
 
     @Override
     public RangeImpl addRange(Access mode, Object... mda)

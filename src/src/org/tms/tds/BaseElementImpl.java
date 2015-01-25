@@ -295,8 +295,10 @@ abstract public class BaseElementImpl implements BaseElement
 
     public void setLabel(String label)
     {
-        setProperty(TableProperty.Label, 
-                (label != null && (label = label.trim()) .length() > 0 ? label : null));
+        if (label == null || (label = label.trim()).length() == 0)
+            clearProperty(TableProperty.Label);
+        else
+            setProperty(TableProperty.Label, label);
     }
 
     public String getDescription()

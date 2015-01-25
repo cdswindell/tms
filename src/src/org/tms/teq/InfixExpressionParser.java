@@ -197,7 +197,6 @@ public class InfixExpressionParser
 
     private void validateFunctionUsage(Token ft, Iterator<Token> tIter, ParseResult pr)
     {
-        TokenType ftt = ft.getTokenType();
         Operator foper = ft.getOperator();
         int requiredArgs = foper.numArgs();
         Class<?> [] argTypes = foper.getArgTypes();
@@ -481,6 +480,7 @@ public class InfixExpressionParser
                 case CellRef:
                 case ColumnRef:
                 case RowRef:
+                case RangeRef:
                 case Operand:
                 case BuiltIn:
                 case Constant:
@@ -705,8 +705,29 @@ public class InfixExpressionParser
                     return 0;
                 }
             }
+            else if (tt == TokenType.CellRef) {
+                additionalCharsParsed = parseCellReference(exprChars, curPos + charsParsed, table, t);
+                if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+                    charsParsed += additionalCharsParsed;
+                else {
+                    if (pr != null)
+                        pr.addIssue(ParserStatusCode.InvalidRangeReference, curPos + charsParsed);
+                    return 0;
+                }
+            }
         }
         else {
+            // look for named cell
+            if (table != null) {
+                Cell cell = table.getCell(Access.ByLabel, sb.toString());
+                if (cell != null) {
+                    value = cell;
+                    tt = TokenType.CellRef;
+                    oper = BuiltinOperator.NOP;
+                    charsParsed = sb.length();
+                }
+            }
+
         	// TODO: handle other tricks in teq_parse
         }
         
@@ -732,6 +753,30 @@ public class InfixExpressionParser
         return charsParsed;
     }
     
+    private int parseCellReference(char[] exprChars, int curPos, Table table, Token t)
+    {
+        ElementReference er = parseElementReference(exprChars, curPos);
+        if (er.foundToken()) {
+            Cell cell = null;
+            String label = er.getLabel();
+            cell = table.getCell(Access.ByLabel, label);
+            
+            int tblRefIdx = 0;
+            if (cell == null && (tblRefIdx = label.indexOf(sf_TABLE_REF)) > -1) {
+                
+            }
+            
+            // if we found a cell, save it in the token and return the consumed chars
+            if (cell != null) {
+                t.setValue(cell);
+                return er.getCharsParsed();
+            }
+        }
+        
+        // failure
+        return 0;
+    }
+
     private int parseColumnReference(char[] exprChars, int curPos, Table table, Token t) 
     {
         ElementReference er = parseElementReference(exprChars, curPos);

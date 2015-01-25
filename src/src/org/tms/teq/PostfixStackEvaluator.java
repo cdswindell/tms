@@ -100,6 +100,7 @@ public class PostfixStackEvaluator
                 case RowRef:
                 case ColumnRef:
                 case RangeRef:
+                case CellRef:
 				case Operand:
 					m_opStack.push(tt, value);
 					break;
