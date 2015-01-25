@@ -18,9 +18,12 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
     abstract protected void deregisterAffects(Derivable d);
     
     abstract protected boolean isDataTypeEnforced();
+    abstract protected boolean isEnforceDataType();
+    abstract protected void setEnforceDataType(boolean enforceDataType); 
     
-    private boolean m_enforceDataType;
-
+    abstract protected boolean isNullsSupported();
+    abstract protected boolean isWriteProtected();
+    
     protected TableElementImpl(ElementType eType, TableElementImpl e)
     {
         super(eType);
@@ -37,7 +40,7 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
     {
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
-        m_enforceDataType = false;
+        setEnforceDataType(false);
     }
     
     @Override
@@ -74,6 +77,12 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
                 setEnforceDataType((boolean)value);
                 break;
                 
+            case isSupportsNull:
+                if (!isValidPropertyValueInt(value))
+                    value = ContextImpl.sf_SUPPORTS_NULL_DEFAULT;
+                setSupportsNull((boolean)value);
+                break;
+                
             default:
                 initializedProperty = false;   
                 break;
@@ -97,16 +106,6 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
         return source;
     }
     
-    protected boolean isEnforceDataType()
-    {
-        return m_enforceDataType;
-    }
-
-    protected void setEnforceDataType(boolean enforceDataType)
-    {
-        m_enforceDataType = enforceDataType;
-    }
-
     protected boolean isDataTypeEnforced(TableElementImpl te)
     {
         return te.isDataTypeEnforced();

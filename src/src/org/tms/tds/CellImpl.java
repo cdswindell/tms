@@ -20,9 +20,14 @@ import org.tms.teq.Token;
 
 public class CellImpl extends TableElementImpl implements Cell, TableCellsElement
 {
+    static final private int sf_ENFORCE_DATATYPE_FLAG = 0x01;
+    static final private int sf_READONLY_FLAG = 0x02;
+    static final private int sf_SUPPORTS_NULL_FLAG = 0x04;
+    
     private Object m_cellValue;
     private ColumnImpl m_col;
     private int m_cellOffset;
+    private int m_flags;
     
     public CellImpl(ColumnImpl col, int cellOffset)
     {
@@ -41,9 +46,9 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     
     public boolean setCellValue(Object value)
     {
-        if (isReadOnly())
+        if (isWriteProtected())
             throw new ReadOnlyException(this, TableProperty.CellValue);
-        else if (value == null && !isSupportsNull())
+        else if (value == null && !isNullsSupported())
             throw new NullValueException(this, TableProperty.CellValue);
         
         // explicitly set cells can't be derived
@@ -206,6 +211,68 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
             return this.isEnforceDataType() && this.getDataType() != null;
     }
 
+
+    @Override
+    protected boolean isEnforceDataType()
+    {
+        return (m_flags & sf_ENFORCE_DATATYPE_FLAG) != 0;
+    }
+
+    @Override
+    protected void setEnforceDataType(boolean enforceDataType)
+    {
+        if (enforceDataType)
+            m_flags |= sf_ENFORCE_DATATYPE_FLAG;
+        else
+            m_flags &= ~sf_ENFORCE_DATATYPE_FLAG;
+    }
+    
+    @Override
+    protected boolean isSupportsNull()
+    {
+        return (m_flags & sf_SUPPORTS_NULL_FLAG) != 0;
+    }
+
+    @Override
+    protected void setSupportsNull(boolean supportsNulls)
+    {
+        if (supportsNulls)
+            m_flags |= sf_SUPPORTS_NULL_FLAG;
+        else
+            m_flags &= ~sf_SUPPORTS_NULL_FLAG;
+    }
+    
+    @Override
+    public boolean isNullsSupported()
+    {
+        return isSupportsNull() &&
+                (getColumn() != null ? getColumn().isNullsSupported() : false) &&
+                (getRow() != null ? getRow().isNullsSupported() : false);
+    }
+    
+    @Override
+    public boolean isReadOnly()
+    {
+        return (m_flags & sf_READONLY_FLAG) != 0;
+    }
+
+    @Override
+    protected void setReadOnly(boolean supportsNulls)
+    {
+        if (supportsNulls)
+            m_flags |= sf_READONLY_FLAG;
+        else
+            m_flags &= ~sf_READONLY_FLAG;
+    }
+    
+    @Override
+    protected boolean isWriteProtected()
+    {
+        return isReadOnly() ||
+                (getColumn() != null ? getColumn().isWriteProtected() : false) ||
+                (getRow() != null ? getRow().isWriteProtected() : false);
+                
+    }
     /**
      * A cell is empty if it is null
      */
@@ -246,6 +313,8 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     @Override
     protected void initialize(TableElementImpl e)
     {
+        m_flags = 0;
+        
         super.initialize(e);
         
         BaseElementImpl source = getInitializationSource(e);        
@@ -269,22 +338,6 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     public int getNumCells()
     {
         return 1;
-    }
-    
-    @Override
-    public boolean isReadOnly()
-    {
-        return (getColumn() != null ? getColumn().isReadOnly() : false) ||
-                (getRow() != null ? getRow().isReadOnly() : false) ||
-                super.isReadOnly();
-    }
-    
-    @Override
-    public boolean isSupportsNull()
-    {
-        return (getColumn() != null ? getColumn().isSupportsNull() : false) ||
-                (getRow() != null ? getRow().isSupportsNull() : false) ||
-                super.isSupportsNull();
     }
     
     @Override

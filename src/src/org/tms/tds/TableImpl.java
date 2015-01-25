@@ -87,8 +87,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private int m_colCapacityIncr;
     private int m_precision;
 
+    private boolean m_enforceDataType;
+    private boolean m_supportsNull;
+    
     private boolean m_autoRecalculate;
     private boolean m_autoRecalculateDeactivated;
+
+    private boolean m_readOnly;
     
     protected TableImpl()
     {
@@ -383,6 +388,36 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return this.isEnforceDataType();
     }
 
+    @Override
+    protected boolean isEnforceDataType()
+    {
+        return m_enforceDataType;
+    }
+    
+    @Override
+    protected void setEnforceDataType(boolean dataTypeEnforced)
+    {
+        m_enforceDataType = dataTypeEnforced;
+    }
+    
+    @Override
+    protected boolean isSupportsNull()
+    {
+        return m_supportsNull;
+    }
+    
+    @Override
+    protected void setSupportsNull(boolean supportsNull)
+    {
+        m_supportsNull = supportsNull;
+    }
+    
+    @Override
+    public boolean isNullsSupported()
+    {
+        return (getTableContext() != null ? getTableContext().isSupportsNull() : false)  && isSupportsNull();
+    }
+    
     protected boolean add(RangeImpl r)
     {
         vetParent(r);
@@ -1232,14 +1267,20 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     public boolean isReadOnly()
     {
-        return (getTableContext() != null ? getTableContext().isReadOnly() : false) || super.isReadOnly();
+        return m_readOnly;
     }
     
-
     @Override
-    public boolean isSupportsNull()
+    protected void setReadOnly(boolean readOnly)
     {
-        return (getTableContext() != null ? getTableContext().isSupportsNull() : false) || super.isSupportsNull();
+        m_readOnly = readOnly;
+    }
+      
+    @Override
+    protected boolean isWriteProtected()
+    {
+        return isReadOnly() ||
+               (getTableContext() != null ? getTableContext().isReadOnly() : false);
     }
     
     @Override

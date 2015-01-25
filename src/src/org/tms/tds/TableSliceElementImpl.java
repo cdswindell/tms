@@ -24,6 +24,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     abstract protected TableSliceElementImpl setCurrent();
     
     private JustInTimeSet<RangeImpl> m_ranges;
+    private boolean m_enforceDataType;
+    private boolean m_supportsNull;
+    private boolean m_readOnly;
     private boolean m_inUse;
     private Derivation m_deriv;
 
@@ -44,6 +47,45 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     void setInUse(boolean inUse)
     {
         m_inUse = inUse;
+    }
+    
+    @Override
+    protected boolean isEnforceDataType()
+    {
+        return m_enforceDataType;
+    }
+    
+    @Override
+    protected void setEnforceDataType(boolean dataTypeEnforced)
+    {
+        m_enforceDataType = dataTypeEnforced;
+    }
+    
+    @Override
+    protected boolean isDataTypeEnforced()
+    {
+        if (getTable() != null && getTable().isDataTypeEnforced())
+            return true;
+        else
+            return this.isEnforceDataType();
+    }
+
+    @Override
+    protected boolean isSupportsNull()
+    {
+        return m_supportsNull;
+    }
+    
+    @Override
+    protected void setSupportsNull(boolean supportsNull)
+    {
+        m_supportsNull = supportsNull;
+    }
+    
+    @Override
+    public boolean isNullsSupported()
+    {
+        return (getTable() != null ? getTable().isNullsSupported() : false) && isSupportsNull();
     }
     
     @Override
@@ -272,13 +314,21 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public boolean isReadOnly()
     {
-        return (getTable() != null ? getTable().isReadOnly() : false) || super.isReadOnly();
+        return m_readOnly;
+    }
+    
+    @Override 
+    protected void setReadOnly(boolean readOnly)
+    {
+        m_readOnly = readOnly;
     }
     
     @Override
-    public boolean isSupportsNull()
+    protected boolean isWriteProtected()
     {
-        return (getTable() != null ? getTable().isSupportsNull() : false) || super.isSupportsNull();
+        return isReadOnly() ||
+               (getTable() != null ? getTable().isWriteProtected() : false);
+                
     }
     
     @Override

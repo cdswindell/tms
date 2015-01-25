@@ -17,15 +17,17 @@ import org.tms.api.exceptions.UnimplementedException;
 abstract public class BaseElementImpl implements BaseElement
 {
     abstract protected boolean isNull();
+    abstract protected boolean isSupportsNull();
+    abstract protected void setSupportsNull(boolean enforceDataType); 
+    
+    abstract public boolean isReadOnly();
+    abstract protected void setReadOnly(boolean readOnly);   
     
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
     private ElementType m_tableElementType;
     private Map<String, Object> m_elemProperties;
 
-    private boolean m_supportsNull;
-    private boolean m_readOnly;
-    
     protected BaseElementImpl(ElementType eType)
     {
         setElementType(eType);
@@ -310,26 +312,6 @@ abstract public class BaseElementImpl implements BaseElement
     {
         setProperty(TableProperty.Description, 
                 (description != null && (description = description.trim()).length() > 0 ? description : null));
-    }
-    
-    protected boolean isSupportsNull()
-    {
-        return m_supportsNull;
-    }
-
-    protected void setSupportsNull(boolean supportsNull)
-    {
-        m_supportsNull = supportsNull;
-    }
-
-    public boolean isReadOnly()
-    {
-        return m_readOnly;
-    }
-
-    protected void setReadOnly(boolean readOnly)
-    {
-        m_readOnly = readOnly;
     }
     
     public String toString()

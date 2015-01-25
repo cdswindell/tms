@@ -77,8 +77,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     private int m_columnCapacityIncr;
     private TokenMapper m_tokenMapper;
     private int m_precision;
+    private boolean m_supportsNull;
 
     private boolean m_autoRecalculate;
+
+    private boolean m_readOnly;
     
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
@@ -202,6 +205,30 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         }        
     }
 
+    @Override
+    protected boolean isSupportsNull()
+    {
+        return m_supportsNull;
+    }
+    
+    @Override
+    protected void setSupportsNull(boolean supportsNull)
+    {
+        m_supportsNull = supportsNull;
+    }
+    
+    @Override
+    public boolean isReadOnly()
+    {
+        return m_readOnly;
+    }
+    
+    @Override
+    protected void setReadOnly(boolean readOnly)
+    {
+        m_readOnly = readOnly;
+    }
+    
     protected boolean isDefault()
     {
         return m_default;

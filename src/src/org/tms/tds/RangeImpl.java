@@ -250,15 +250,6 @@ public class RangeImpl extends TableCellsElementImpl implements Range
      * Overridden Methods
      */
     
-    @Override
-    protected boolean isDataTypeEnforced()
-    {
-        if (getTable() != null && getTable().isDataTypeEnforced())
-            return true;
-        else
-            return isEnforceDataType();
-    }
-
     @Override 
     public void delete()
     {
@@ -549,5 +540,68 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             
             throw new IllegalTableStateException("Range cell supply exhasted");
         }      
+    }
+
+    @Override
+    protected boolean isEnforceDataType()
+    {
+        return false;
+    }
+
+    @Override
+    protected void setEnforceDataType(boolean enforceDataType)
+    {
+        // noop
+    }
+    
+    @Override
+    protected boolean isDataTypeEnforced()
+    {
+        if (getTable() != null)
+            return getTable().isDataTypeEnforced();
+        else
+            return isEnforceDataType();
+    }
+
+    @Override
+    protected boolean isSupportsNull()
+    {
+        return true;
+    }
+
+    @Override
+    protected void setSupportsNull(boolean enforceDataType)
+    {
+        // noop       
+    }
+
+    @Override
+    protected boolean isNullsSupported()
+    {
+        if (getTable() != null)
+            return getTable().isNullsSupported();
+        else
+            return isEnforceDataType();
+    }
+
+    @Override
+    public boolean isReadOnly()
+    {
+        return false;
+    }
+
+    @Override
+    protected void setReadOnly(boolean readOnly)
+    {
+        // noop        
+    }
+    
+    @Override
+    protected boolean isWriteProtected()
+    {
+        if (getTable() != null)
+            return getTable().isWriteProtected();
+        else
+            return isReadOnly();
     }
 }
