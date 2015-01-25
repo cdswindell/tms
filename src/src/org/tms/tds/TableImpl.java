@@ -447,7 +447,33 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     return (CellImpl)findCells((String)key, value);
                 else
                     throw new InvalidException(this.getElementType(), 
-                            String.format("Invalid %s %s argument: %s", ElementType.Cell, mode, (key == null ? "<null>" : key.toString())));                 
+                            String.format("Invalid %s %s argument: %s", ElementType.Cell, mode, (key == null ? "<null>" : key.toString())));  
+                
+            case ByReference:
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md != null && md instanceof CellImpl && ((CellImpl)md).getTable() == this)
+                    return (CellImpl)md;
+                else
+                    return null;
+                
+            case Current:
+                if (getCurrentRow() != null && getCurrentColumn() != null)
+                    return getCell(getCurrentRow(), getCurrentColumn());
+                else
+                    return null;
+                
+            case First:
+                if (getRow(Access.First) != null && getColumn(Access.First) != null)
+                    return getCell(getRow(Access.First), getColumn(Access.First));
+                else
+                    return null;
+                
+            case Last:
+                if (getRow(Access.Last) != null && getColumn(Access.Last) != null)
+                    return getCell(getRow(Access.Last), getColumn(Access.Last));
+                else
+                    return null;
+                
             default:
                 throw new InvalidAccessException(ElementType.Table, ElementType.Cell, mode, false, mda);                
         }

@@ -25,7 +25,6 @@ public class CellReferenceTest extends BaseTest
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
         
         Row r1 = tbl.addRow(Access.ByIndex, 1);
-        Row r2 = tbl.addRow(Access.ByIndex, 2);
         
         // extend table to 5000 rows
         tbl.addRow(Access.ByIndex, 5000);
