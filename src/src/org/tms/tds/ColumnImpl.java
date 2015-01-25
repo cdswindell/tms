@@ -172,14 +172,16 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         }
     }
 
-
 	@SuppressWarnings("unchecked")
 	void clearCell(int cellOffset) 
 	{
 		if (m_cells != null) {
-			List<CellImpl> cellImpls = (ArrayList<CellImpl>)m_cells;
-			if (cellOffset < cellImpls.size()) {
-				cellImpls.set(cellOffset, null);
+			List<CellImpl> cells = (ArrayList<CellImpl>)m_cells;
+			if (cellOffset < cells.size()) {
+			    CellImpl cell = cells.get(cellOffset);
+			    if (cell != null)
+			        cell.clearDerivation();
+			    cells.set(cellOffset, null);
 			}
 		}
 	}
@@ -243,7 +245,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         assert parent != null;
         
         // sanity check, columns list must exist
-        ArrayList<ColumnImpl> cols = parent.getColumns();
+        ArrayList<ColumnImpl> cols = parent.getColumnsInternal();
         assert cols != null;
         
         /*
@@ -329,21 +331,35 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             return this.isEnforceDataType() && getDataType() != null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void delete()
     {
-    	// remove element from ranges that contain it
-    	removeFromAllRanges();
-    	
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
     	if (parent != null) {
             // sanity check, columns list must exist
-            ArrayList<ColumnImpl> cols = parent.getColumns();
-            assert cols != null;
+            ArrayList<ColumnImpl> cols = parent.getColumnsInternal();
+            if (cols == null)
+                throw new IllegalTableStateException("Parent table requires columns");
             
             int idx = getIndex() - 1;
-            assert idx >= 0 : "Invalid column index";
+            if (idx < 0 || idx >= cols.size())
+                throw new IllegalTableStateException("Column offset outside of parent table bounds: " + idx);
+        
+            // remove element from ranges that contain it
+            removeFromAllRanges();
+            
+            // clear any derivations
+            clearDerivation();
+            
+            // clear any derivations on elements affected by this row
+            if (m_affects != null) 
+                m_affects.forEach(d -> d.clearDerivation());
+            
+            // clear cell derivations
+            if (m_cells != null && m_cells instanceof ArrayList) 
+                ((ArrayList<CellImpl>)m_cells).forEach(c -> { if (c != null) c.clearDerivation();});
             
             TableSliceElementImpl rc = cols.remove(idx);
             assert rc == this : "Removed column mismatch";
@@ -357,14 +373,15 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             nCols = nCols--;
             assert nCols == cols.size() : "Column array size mismatch";
             
-            // compact memory, if there are too many free columns
-            int capacity = parent.getColumnsCapacity();
-            compactIfNeeded(cols, capacity);
+            if (parent.getCurrentColumn() == this)
+                parent.setCurrentColumn(null);
             
-            parent.setCurrentColumn(null);
+            parent.purgeCurrentStack(this);
     	}   	
 
     	// Mark the column not in in use
+    	m_table = null;
+    	m_cellsCapacity = 0;
     	setIndex(-1);
     	setInUse(false);
     	

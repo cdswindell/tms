@@ -9,6 +9,7 @@ import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.IllegalTableStateException;
 
 public class RowImpl extends TableSliceElementImpl implements Row
 {
@@ -102,7 +103,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
         assert parent != null : "Parent Table Null";
         
         // sanity check, rows list must exist
-        ArrayList<RowImpl> rows = parent.getRows();
+        ArrayList<RowImpl> rows = parent.getRowsInternal();
         assert rows != null;
         
         /*
@@ -183,42 +184,55 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     public void delete()
     {
-    	// remove element from ranges that contain it
-    	removeFromAllRanges();
-    	
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
     	if (parent != null) {
-            // sanity check, columns list must exist
-            ArrayList<RowImpl> rows = parent.getRows();
-            assert rows != null;
-            
-            int idx = getIndex() - 1;
-            assert idx >= 0 : "Invalid row index";
-            
-            TableSliceElementImpl rc = rows.remove(idx);
-            assert rc == this : "Removed row mismatch";
-            
-            // reindex remaining rows
-            int nRows = parent.getNumRows();
-            if (idx < nRows)
-            	rows.listIterator(idx).forEachRemaining(c -> {if (c != null) c.setIndex(c.getIndex() - 1);});
-            
-            // sanity check
-            nRows = nRows--;
-            assert nRows == rows.size() : "Rows array size mismatch";
-            
-            // compact memory, if there are too many free Rows
-            int capacity = parent.getColumnsCapacity();
-            compactIfNeeded(rows, capacity);    
-            
-            // cache the cell offset so it can be reused, 
-            parent.cacheCellOffset(this.getCellOffset(), true);
-            
-            parent.setCurrentRow(null);
+    	    synchronized (parent) {
+                // sanity check, rows list must exist
+                ArrayList<RowImpl> rows = parent.getRowsInternal();
+                if (rows == null)
+                    throw new IllegalTableStateException("Parent table requires rows");
+                
+                // sanity check, row index must be within array bounds
+                int idx = getIndex() - 1;
+                if (idx < 0 || idx >= rows.size())
+                    throw new IllegalTableStateException("Row offset outside of parent table bounds: " + idx);
+                
+                // remove element from ranges that contain it
+                removeFromAllRanges();
+                
+                // clear any derivations
+                clearDerivation();
+                
+                // clear any derivations on elements affected by this row
+                if (m_affects != null) 
+                    m_affects.forEach(d -> d.clearDerivation());
+                
+                TableSliceElementImpl rc = rows.remove(idx);
+                assert rc == this : "Removed row mismatch";
+                
+                // reindex remaining rows
+                int nRows = parent.getNumRows();
+                if (idx < nRows)
+                	rows.listIterator(idx).forEachRemaining(r -> {if (r != null) r.setIndex(r.getIndex() - 1);});
+                
+                // sanity check
+                nRows = nRows--;
+                assert nRows == rows.size() : "Rows array size mismatch";
+                
+                // cache the cell offset so it can be reused, 
+                // this also clears any derived cells in the row
+                parent.cacheCellOffset(this.getCellOffset(), true);
+                
+                if (parent.getCurrentRow() == this)
+                    parent.setCurrentRow(null);
+                
+                parent.purgeCurrentStack(this);
+    	    }
     	}
     	
-    	// Mark the column not in in use
+    	// Mark the row not in in use
+    	m_table = null;
     	setCellOffset(-1);
     	setIndex(-1);
     	setInUse(false);   	
@@ -239,7 +253,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
         assert parent != null : "Parent Table Null";
 
         int numCells = 0;
-        ArrayList<ColumnImpl> cols = parent.getColumns();
+        ArrayList<ColumnImpl> cols = parent.getColumnsInternal();
         if (cols != null) {
             for (ColumnImpl c : cols) {
                 if (c == null) continue;

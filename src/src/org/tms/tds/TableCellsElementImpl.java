@@ -11,15 +11,20 @@ import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidParentException;
 
+/**
+ * This is the abstract superclass for all table elements that contain cells, including TableImpl, RowImpl, ColumnImpl, RangeImpl, and CellImpl. 
+ * 
+ */
 abstract class TableCellsElementImpl extends TableElementImpl implements TableCellsElement
 {
     abstract public int getNumCells();
-    abstract protected boolean remove(RangeImpl range);
     abstract protected boolean add(RangeImpl rangeImpl);
+    abstract protected boolean remove(RangeImpl range);
     
     private int m_index = -1;
-    private TableImpl m_table;
-    private Set<Derivable> m_affects;
+    
+    protected TableImpl m_table;   
+    protected Set<Derivable> m_affects;
 
     protected TableCellsElementImpl(ElementType eType, TableElementImpl e)
     {

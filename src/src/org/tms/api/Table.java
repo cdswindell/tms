@@ -27,6 +27,8 @@ public interface Table extends TableCellsElement
     public void pushCurrent();
     public void popCurrent();
     
+    public void delete(TableElement...elements);
+    
     /**
      * Recalculate all derived elements (rows, columns and cells)
      */

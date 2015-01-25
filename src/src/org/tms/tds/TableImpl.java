@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -26,9 +27,11 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableCellsElement;
 import org.tms.api.TableContext;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
+import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
@@ -199,20 +202,40 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * Methods defined by interface Table; mostly adapters
      */
     
+    @Override synchronized public void delete(TableElement... elements)
+    {
+        if (elements != null) {
+            for (TableElement te : elements) {
+                if (te == null)
+                    continue;
+                else  if (te instanceof TableElementImpl) {
+                    if (te.getTable() == this) 
+                        ((TableElementImpl)te).delete();
+                    else 
+                        throw new InvalidParentException(te, this);
+                }
+                else
+                    throw new UnsupportedImplementationException(te, "delete");
+            }
+            
+            // TODO: compress data structures
+        }
+    }
+    
     @Override
-    public CellImpl getCell(Row row, Column col)
+    synchronized public CellImpl getCell(Row row, Column col)
     {
         return getCell((RowImpl)row, (ColumnImpl)col);
     }    
     
     @Override
-    public Object getCellValue(Row row, Column col)
+    synchronized public Object getCellValue(Row row, Column col)
     {
         return getCellValue((RowImpl)row, (ColumnImpl)col);        
     }
     
     @Override
-    public boolean setCellValue(Row row, Column col, Object o)
+    synchronized public boolean setCellValue(Row row, Column col, Object o)
     {
         return setCellValue((RowImpl)row, (ColumnImpl)col, o);        
     }
@@ -245,13 +268,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 return getNumRows(); 
                 
             case Rows:
-                return getRows(); 
+                return getRowsInternal(); 
                 
             case numColumns:
                 return getNumColumns(); 
                 
             case Columns:
-                return getColumns(); 
+                return getColumnsInternal(); 
                 
             case numCells:
                 return getNumCells(); 
@@ -371,39 +394,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
     /*
      * Delete TableElement methods
      */
-    protected void delete(RangeImpl r)
-    {
-        boolean processed = remove(r);
-        
-        if (processed) markDirty();
-    }
-    
     protected boolean remove(RangeImpl r)
     {
         vetParent(r);
         return m_ranges.remove(r);
     }
  
-    protected void delete(RowImpl r)
-    {
-        vetParent(r);
-        boolean processed = false;
-        
-        // TODO: Delete element
-        
-        if (processed) markDirty();
-    }
- 
-    protected void delete(ColumnImpl c)
-    {
-        vetParent(c);
-        boolean processed = false;
-        
-        // TODO: Delete element
-        
-        if (processed) markDirty();
-    }
-    
     protected boolean isDirty()
     {
         return m_dirty;
@@ -648,9 +644,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     /**
      * Return the raw rows arraylist. Allows Row class to insert a row into the table.
      * Note: <b>for systems use only!</b>
-     * @return ArrayList&lt;Row&gt;
+     * @return ArrayList&lt;RowImpl&gt;
      */
-    ArrayList<RowImpl> getRows()
+    ArrayList<RowImpl> getRowsInternal()
     {
         return m_rows;
     }
@@ -685,7 +681,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return r;
         
         // retrieve the row, now that we have a valid reference
-        r = getRows().get(rowIdx);
+        r = getRowsInternal().get(rowIdx);
         
         // if the row is null, create it
         if (r == null && createIfNull) {
@@ -693,7 +689,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             r.setIndex(rowIdx + 1);
             
             // add the row to the Rows array at the correct index
-            getRows().set(rowIdx,  r);
+            getRowsInternal().set(rowIdx,  r);
         }
         
         if (r != null)
@@ -715,21 +711,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
             for (int i = 1; i <= this.getNumRows(); i++) {
                 RowImpl r = this.getRowInternal(true, Access.ByIndex, i);
                 assert r != null;
-            }
-        }
-        finally {        
-            popCurrent();
-        }
-    }
-    
-    synchronized void ensureColumnsExist()
-    {
-        pushCurrent();
-
-        try {
-            for (int i = 1; i <= this.getNumColumns(); i++) {
-                ColumnImpl c = this.getColumnInternal(true, Access.ByIndex, i);
-                assert c != null;
             }
         }
         finally {        
@@ -763,18 +744,18 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * new row at a later date
      * @param cellOffset
      */
-	void cacheCellOffset(int cellOffset, boolean freeCellsNow) 
+	synchronized void cacheCellOffset(int cellOffset, boolean freeCellsNow) 
 	{
 		assert cellOffset >= 0 : "Invalid value";
 		
 		// add the cellOffset value to the queue of available/freed offset values
 		// these represent positions in the Column.m_cells array that are available
 		// for reuse
+        m_cellOffsetRowMap.remove(cellOffset);
 		m_unusedCellOffsets.offer(cellOffset);
-		m_cellOffsetRowMap.remove(cellOffset);
 		
 		// if so-requested, free the cells in the component columns array
-		for (ColumnImpl c : getColumns()) {
+		for (ColumnImpl c : getColumnsInternal()) {
 			if (c != null) 
 				c.clearCell(cellOffset);
 		}
@@ -788,7 +769,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		        return r;
 		    
 		    // as a last resort, do a sequential search
-			for (RowImpl row : getRows())
+			for (RowImpl row : getRowsInternal())
 				if (row != null && row.getCellOffset() == cellOffset) {
 				    if (m_cellOffsetRowMap != null)
 				        m_cellOffsetRowMap.put(cellOffset, row);
@@ -858,9 +839,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     /**
      * Return the raw rows arraylist. Allows Row class to insert a column into the table.
      * Note: <b>for systems use only!</b>
-     * @return ArrayList&lt;Column&gt;
+     * @return ArrayList&lt;ColumnImpl&gt;
      */
-    ArrayList<ColumnImpl> getColumns()
+    ArrayList<ColumnImpl> getColumnsInternal()
     {
         return m_cols;
     }
@@ -908,7 +889,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return r;
         
         // retrieve the column, now that we have a valid reference
-        r = getColumns().get(colIdx);
+        r = getColumnsInternal().get(colIdx);
         
         // if the column is null, create it
         if (r == null && createIfNull) {
@@ -916,7 +897,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             r.setIndex(colIdx + 1);
             
             // add the column to the Columns array at the correct index
-            getColumns().set(colIdx,  r);
+            getColumnsInternal().set(colIdx,  r);
         }
         
         if (r != null)
@@ -925,6 +906,21 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return r;
     }
 
+    synchronized void ensureColumnsExist()
+    {
+        pushCurrent();
+
+        try {
+            for (int i = 1; i <= this.getNumColumns(); i++) {
+                ColumnImpl c = this.getColumnInternal(true, Access.ByIndex, i);
+                assert c != null;
+            }
+        }
+        finally {        
+            popCurrent();
+        }
+    }
+    
     public int getPrecision()
     {
         if (m_precision == Integer.MAX_VALUE || m_precision == Integer.MIN_VALUE) 
@@ -972,12 +968,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
         if (et == ElementType.Row) {
             numSlices = getNumRows();
             curSlice = getCurrentRow();
-            slices = getRows();
+            slices = getRowsInternal();
         }
         else if (et == ElementType.Column) {
             numSlices = getNumColumns();
             curSlice = getCurrentColumn();
-            slices = getColumns();
+            slices = getColumnsInternal();
         }
         else
             throw new UnimplementedException(et, "calcIndex not supported");
@@ -1269,6 +1265,21 @@ public class TableImpl extends TableCellsElementImpl implements Table
         fill(null);
     }  
 	
+    synchronized void compactIfNeeded(ArrayList<? extends TableSliceElementImpl> slices, int capacity) 
+    {
+        int size = slices.size();
+        
+        if (capacity > (size * 3)) {
+            slices.trimToSize();
+            size = slices.size();
+            
+            if (slices == m_rows)
+                setRowsCapacity(size);
+            else if (slices == m_cols)
+                setColumnsCapacity(size);
+        }
+    }
+    
 	synchronized public void popCurrent() 
     {
 		if (m_currentCellStack != null && !m_currentCellStack.isEmpty()) {
@@ -1286,17 +1297,23 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		m_currentCellStack.push(cr);
 	}
 
+	synchronized public void purgeCurrentStack(TableSliceElementImpl slice)
+    {
+        if (m_currentCellStack  != null) 
+            m_currentCellStack.removeIf(new CellStackPurger(slice));
+    }
+    
 	@Override
 	public void recalculate()
 	{
 	    Set<Derivable> derived = new HashSet<Derivable>();
 	    
-        for (ColumnImpl col : getColumns()) {
+        for (ColumnImpl col : getColumnsInternal()) {
             if (col != null && col.isDerived())
                 derived.add(col);
         }
         
-        for (RowImpl row : getRows()) {
+        for (RowImpl row : getRowsInternal()) {
             if (row != null && row.isDerived())
                 derived.add(row);
         }
@@ -1364,8 +1381,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return m_derivedCells.remove(cell);
         else
             return null;
-    }
-    
+    }    
+
     /**
      * Registers the {@code Derivable} as being affected by changes to the
      * value of the specified cell
@@ -1479,13 +1496,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	public Iterable<Row> rows()
     {
 	    ensureRowsExist();
-        return new BaseElementIterable<Row>(getRows());
+        return new BaseElementIterable<Row>(getRowsInternal());
     }
     
 	public Iterable<Column> columns()
     {
         ensureColumnsExist();
-        return new BaseElementIterable<Column>(getColumns());
+        return new BaseElementIterable<Column>(getColumnsInternal());
     }
     
 	public Iterable<Range> ranges()
@@ -1519,10 +1536,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
             m_numCols = m_table.getNumColumns();
             
             m_table.ensureRowsExist();
-            m_rows = new ArrayList<RowImpl>(m_table.getRows());
+            m_rows = new ArrayList<RowImpl>(m_table.getRowsInternal());
             
             m_table.ensureColumnsExist();
-            m_cols = new ArrayList<ColumnImpl>(m_table.getColumns());
+            m_cols = new ArrayList<ColumnImpl>(m_table.getColumnsInternal());
         }
         
         @Override
@@ -1635,5 +1652,25 @@ public class TableImpl extends TableCellsElementImpl implements Table
     	{
     		return m_col;
     	}
+    }
+    
+    private class CellStackPurger implements Predicate<CellReference>
+    {
+        private TableSliceElementImpl m_slice;
+        
+        public CellStackPurger(TableSliceElementImpl slice)
+        {
+            m_slice = slice;
+        }
+        
+        @Override
+        public boolean test(CellReference t)
+        {
+            if (t.getColumn() == m_slice || t.getRow() == m_slice)
+                return true;
+            else
+                return false;
+        }
+        
     }
 }

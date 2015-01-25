@@ -162,12 +162,6 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             throw new IllegalTableStateException("Table Slice ELement Required");
     }
     
-    void compactIfNeeded(ArrayList<? extends TableSliceElementImpl> cols, int capacity) 
-    {
-		// TODO Auto-generated method stub
-		
-	}
-    
     protected boolean add(RangeImpl r)
     {
         if (r != null) {
@@ -184,6 +178,15 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         return false;
     }
 
+    /**
+     * Remove the reference from the specified RangeImpl to this TableSliceElementImpl, removing
+     * this TableSliceElementImple from the specified range, if it has not already been removed.
+     * 
+     * Returns true if the specified RangeImpl was successfully removed
+     * 
+     * @param r RangeImpl
+     */
+    @Override
     protected boolean remove(RangeImpl r)
     {
         if (r != null) {

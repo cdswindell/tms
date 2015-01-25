@@ -53,7 +53,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     
     public Iterable<RowImpl> rows()
     {
-        return new BaseElementIterable<RowImpl>(m_rows.isEmpty() ? getTable().getRows() : getRows());
+        return new BaseElementIterable<RowImpl>(m_rows.isEmpty() ? getTable().getRowsInternal() : getRows());
     }
     
     protected int getNumRows()
@@ -68,7 +68,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 
     public Iterable<ColumnImpl> columns()
     {
-        return new BaseElementIterable<ColumnImpl>(m_cols.isEmpty() ? getTable().getColumns() : getColumns());
+        return new BaseElementIterable<ColumnImpl>(m_cols.isEmpty() ? getTable().getColumnsInternal() : getColumns());
     }
     
     protected int getNumColumns()
@@ -262,6 +262,9 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     @Override 
     public void delete()
     {
+        // delete the range from its parent table
+        if (getTable() != null) getTable().remove(this);  
+        
     	// Remove the range from its component rows and columns
     	m_rows.forEach(r -> {if (r != null) r.remove(this);});
         m_cols.forEach(c -> {if (c != null) c.remove(this);});
@@ -274,9 +277,6 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         m_cells.clear();
         
         m_numCells = Integer.MIN_VALUE;
-    	
-    	// delete the range from its parent table
-    	if (getTable() != null) getTable().delete(this);	
     }
     
    @Override
@@ -475,7 +475,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                 m_rows = m_range.getRows();
             else {
                 m_table.ensureRowsExist();
-                m_rows = new ArrayList<RowImpl>(m_table.getRows());
+                m_rows = new ArrayList<RowImpl>(m_table.getRowsInternal());
             }
             
             m_numRows = m_rows.size();
@@ -484,7 +484,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                 m_cols = m_range.getColumns();
             else {
                 m_table.ensureColumnsExist();
-                m_cols = new ArrayList<ColumnImpl>(m_table.getColumns());
+                m_cols = new ArrayList<ColumnImpl>(m_table.getColumnsInternal());
             }
             
             m_numCols = m_cols.size();

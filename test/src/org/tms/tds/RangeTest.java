@@ -57,7 +57,7 @@ public class RangeTest
         
         assertThat(t.getPropertyInt(TableProperty.numRanges), is(1));
         
-        t.delete(r);
+        t.remove(r);
         assertThat(t.getPropertyInt(TableProperty.numRanges), is(0));
         
         // test weak reference ability
