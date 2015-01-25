@@ -208,9 +208,8 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
         else if (getColumn() != null && getColumn().isDataTypeEnforced() )
             return true;
         else
-            return this.isEnforceDataType() && this.getDataType() != null;
+            return this.isEnforceDataType();
     }
-
 
     @Override
     protected boolean isEnforceDataType()

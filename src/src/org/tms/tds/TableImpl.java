@@ -385,7 +385,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     protected boolean isDataTypeEnforced()
     {
-        return this.isEnforceDataType();
+        return this.isEnforceDataType() || 
+                (getTableContext() != null ? getTableContext().isEnforceDataType() : false);
     }
 
     @Override

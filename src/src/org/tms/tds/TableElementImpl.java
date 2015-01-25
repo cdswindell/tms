@@ -106,11 +106,6 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
         return source;
     }
     
-    protected boolean isDataTypeEnforced(TableElementImpl te)
-    {
-        return te.isDataTypeEnforced();
-    }
-    
     public String toString()
     {
         String label = (String)getProperty(TableProperty.Label);

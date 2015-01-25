@@ -322,15 +322,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return prevCurrent;
     }  
     
-    @Override
-    protected boolean isDataTypeEnforced()
-    {
-        if (getTable() != null && getTable().isDataTypeEnforced())
-            return true;
-        else
-            return this.isEnforceDataType() && getDataType() != null;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void delete()
