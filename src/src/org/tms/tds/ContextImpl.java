@@ -96,6 +96,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         initialize((ContextImpl)otherContext);
      }
 
+    protected ContextImpl()
+    {
+        this(false, null);
+    }
+    
     protected ContextImpl(TableContext otherContext)
     {
         this(false, otherContext);
