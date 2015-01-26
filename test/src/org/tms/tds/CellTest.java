@@ -108,8 +108,8 @@ public class CellTest
         c1.setEnforceDataType(true);
         assertThat(t.isDataTypeEnforced(), is(false));
         assertThat(r1.isDataTypeEnforced(), is(false));
-        assertThat(c1.isDataTypeEnforced(), is(false));
-        assertThat(cR1C1.isDataTypeEnforced(), is(false));
+        assertThat(c1.isDataTypeEnforced(), is(true));
+        assertThat(cR1C1.isDataTypeEnforced(), is(true));
         
         c1.setDataType(Integer.class);
         assertThat(t.isDataTypeEnforced(), is(false));
@@ -119,14 +119,13 @@ public class CellTest
         
         // Finally, check the cell machinery
         // setting the column property to true should set enforcement for row and cell,
-        // but only once a data value is specified
         r1.setEnforceDataType(false);
         c1.setEnforceDataType(false);
         cR1C1.setEnforceDataType(true);
         assertThat(t.isDataTypeEnforced(), is(false));
         assertThat(r1.isDataTypeEnforced(), is(false));
         assertThat(c1.isDataTypeEnforced(), is(false));
-        assertThat(cR1C1.isDataTypeEnforced(), is(false));
+        assertThat(cR1C1.isDataTypeEnforced(), is(true));
         
         cR1C1.setCellValue(42);
         assertThat(t.isDataTypeEnforced(), is(false));

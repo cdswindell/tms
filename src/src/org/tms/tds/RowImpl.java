@@ -173,15 +173,6 @@ public class RowImpl extends TableSliceElementImpl implements Row
     } 
        
     @Override
-    protected boolean isDataTypeEnforced()
-    {
-        if (getTable() != null && getTable().isDataTypeEnforced())
-            return true;
-        else
-            return this.isEnforceDataType();
-    }
-
-    @Override
     public void delete()
     {
     	// now, remove from the parent table, if it is defined
