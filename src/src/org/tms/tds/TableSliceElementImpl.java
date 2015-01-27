@@ -46,6 +46,8 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     
     void setInUse(boolean inUse)
     {
+        if (inUse)
+            vetElement();
         m_inUse = inUse;
     }
     
@@ -91,30 +93,36 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public List<Range> getRanges()
     {
+        vetElement();
         return new ArrayList<Range>(m_ranges.clone());
     } 
     
     @Override
     public Iterable<Range> ranges()
     {
+        vetElement();
         return new BaseElementIterable<Range>(m_ranges);
     }
     
     @Override
     public boolean isDerived()
     {
+        vetElement();
         return m_deriv != null;       
     }
     
     @Override
     public Derivation getDerivation()
     {
+        vetElement();
         return m_deriv;
     }
     
     @Override
     public void setDerivation(String expr)
     {
+        vetElement();
+        
         // clear out any existing derivations
         if (m_deriv != null) 
             clearDerivation();
@@ -163,6 +171,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public void recalculate()
     {
+        vetElement();
         if (isDerived()) {
             m_deriv.recalculateTarget();
             
@@ -176,6 +185,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public void sort() 
     {
+        vetElement();
         TableImpl parent = getTable();
         if (parent == null)
             throw new IllegalTableStateException("Table Required");
@@ -186,6 +196,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public void sort(Comparator<Cell> cellSorter) 
     {
+        vetElement();
         TableImpl parent = getTable();
         if (parent == null)
             throw new IllegalTableStateException("Table Required");
@@ -206,6 +217,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     
     protected boolean add(RangeImpl r)
     {
+        vetElement();
         if (r != null) {
             /*
              *  if the range doesn't contain the row, use the range method to do all the work
@@ -340,6 +352,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public void fill(Object o) 
     {
+        vetElement();
         TableImpl parent = getTable();
         assert parent != null : "Parent table required";
         

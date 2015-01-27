@@ -793,7 +793,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		// if so-requested, free the cells in the component columns array
 		for (ColumnImpl c : getColumnsInternal()) {
 			if (c != null) 
-				c.clearCell(cellOffset);
+				c.invalidateCell(cellOffset);
 		}
 	}
 

@@ -41,6 +41,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
      */   
     protected CellImpl getCell(ColumnImpl col)
     {
+        vetElement();
         return getCellInternal(col, true);
     }
     
@@ -59,6 +60,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     public Object getProperty(TableProperty key)
     {
+        vetElement();
         switch(key)
         {
             case CellOffset:
@@ -95,6 +97,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     protected RowImpl insertSlice(int insertAt)
     {
+        vetElement();
+        
         // sanity check, insertAt must be >= 0 (indexes are 0-based)
         assert insertAt >= 0 : insertAt;
         
@@ -165,6 +169,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     protected RowImpl setCurrent()
     {
+        vetElement();
+        
         RowImpl prevCurrent = null;
         if (getTable() != null) 
             prevCurrent = getTable().setCurrentRow(this);
@@ -175,6 +181,9 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     public void delete()
     {
+        // mark row as deleted
+        invalidate();
+        
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
     	if (parent != null) {
@@ -221,6 +230,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
                 // if this element is current, clear it
                 if (parent.getCurrentRow() == this)
                     parent.setCurrentRow(null);
+                
     	    }
     	}
     	
@@ -237,6 +247,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
      */
     public int getNumCells()
     {
+        vetElement();
+        
         // if the offset isn't set, there can be no cells
         int cellOffset = getCellOffset();
         if (cellOffset < 0)
@@ -264,6 +276,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     public Iterable<Cell> cells()
     {
+        vetElement();
         return new RowCellIterable();
     }
     

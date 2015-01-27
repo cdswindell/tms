@@ -10,6 +10,7 @@ import java.util.Map;
 import org.tms.api.BaseElement;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.DeletedElementException;
 import org.tms.api.exceptions.InvalidPropertyException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnimplementedException;
@@ -25,12 +26,22 @@ abstract public class BaseElementImpl implements BaseElement
     
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
+    static final protected int sf_ENFORCE_DATATYPE_FLAG = 0x01;
+    static final protected int sf_READONLY_FLAG = 0x02;
+    static final protected int sf_SUPPORTS_NULL_FLAG = 0x04;
+    
+    static final protected int sf_IS_INVALID_FLAG = 0x100;
+    
     private ElementType m_tableElementType;
     private Map<String, Object> m_elemProperties;
+    
+    protected int m_flags;
 
     protected BaseElementImpl(ElementType eType)
     {
         setElementType(eType);
+        
+        m_flags = 0;
     }
     
     public ElementType getElementType()
@@ -62,6 +73,32 @@ abstract public class BaseElementImpl implements BaseElement
             return false;
         else
             return tp.isImplementedBy(this);
+    }
+    
+    protected void invalidate()
+    {
+        m_flags |= sf_IS_INVALID_FLAG;
+    }
+    
+    protected void vetElement()
+    {
+        vetElement(this);
+    }    
+    
+    protected void vetElement(BaseElementImpl be)
+    {
+        if (be != null && be.isInvalid())
+            throw new DeletedElementException(be);
+    }
+    
+    /**
+     * Returns true if the element has been deleted, either explicitly or because 
+     * a parent element has been deleted
+     * @return true if the element has been deleted
+     */
+    protected boolean isInvalid()
+    {
+        return (m_flags & sf_IS_INVALID_FLAG) != 0;
     }
     
     protected void setProperty(TableProperty key, Object value)

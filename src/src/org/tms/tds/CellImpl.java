@@ -20,14 +20,9 @@ import org.tms.teq.Token;
 
 public class CellImpl extends TableElementImpl implements Cell, TableCellsElement
 {
-    static final private int sf_ENFORCE_DATATYPE_FLAG = 0x01;
-    static final private int sf_READONLY_FLAG = 0x02;
-    static final private int sf_SUPPORTS_NULL_FLAG = 0x04;
-    
     private Object m_cellValue;
     private ColumnImpl m_col;
     private int m_cellOffset;
-    private int m_flags;
     
     public CellImpl(ColumnImpl col, int cellOffset)
     {
@@ -46,6 +41,8 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     
     public boolean setCellValue(Object value)
     {
+        vetElement();
+        
         if (isWriteProtected())
             throw new ReadOnlyException(this, TableProperty.CellValue);
         else if (value == null && !isNullsSupported())
@@ -172,6 +169,7 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     
     public RowImpl getRow()
     {
+        vetElement();
     	if (getTable() != null)
     		return getTable().getRowByCellOffset(getCellOffset());
     	else
@@ -180,6 +178,7 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     
     protected Class<? extends Object> getDataType()
     {
+        vetElement();
     	if (m_cellValue != null)
     		return m_cellValue.getClass();
     	else
@@ -312,8 +311,6 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     @Override
     protected void initialize(TableElementImpl e)
     {
-        m_flags = 0;
-        
         super.initialize(e);
         
         BaseElementImpl source = getInitializationSource(e);        
@@ -385,6 +382,8 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     @Override
     public void setDerivation(String expr)
     {
+        vetElement();
+        
         // clear out any existing derivations
         clearDerivation();
         
@@ -452,6 +451,7 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     @Override
     public void recalculate()
     {
+        vetElement();
         Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null) {
             deriv.recalculateTarget();
@@ -554,5 +554,20 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
             m_hasNext = false;
             return CellImpl.this;
         }        
+    }
+
+    /**
+     * Invalidate a cell in response to the parent row/column being deleted
+     */
+    protected void invalidateCell()
+    {
+        // clear the cell value and cell derivation
+        clearDerivation();
+        m_cellValue = null;
+        
+        m_col = null;
+        m_cellOffset = -1;
+        
+        invalidate();
     }
 }

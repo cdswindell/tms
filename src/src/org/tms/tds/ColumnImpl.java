@@ -173,14 +173,20 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     }
 
 	@SuppressWarnings("unchecked")
-	void clearCell(int cellOffset) 
+	/**
+	 * Invalidate the specified cell in the column cell array. Called by TableImpl.cacheCellOffset
+	 * in response to row deletions
+	 * @param cellOffset
+	 */
+	void invalidateCell(int cellOffset) 
 	{
 		if (m_cells != null) {
 			List<CellImpl> cells = (ArrayList<CellImpl>)m_cells;
 			if (cellOffset < cells.size()) {
 			    CellImpl cell = cells.get(cellOffset);
 			    if (cell != null)
-			        cell.clearDerivation();
+			        cell.invalidateCell();
+			    
 			    cells.set(cellOffset, null);
 			}
 		}
@@ -348,9 +354,9 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             if (m_affects != null) 
                 m_affects.forEach(d -> d.clearDerivation());
             
-            // clear cell derivations
+            // invalidate column cells
             if (m_cells != null && m_cells instanceof ArrayList) 
-                ((ArrayList<CellImpl>)m_cells).forEach(c -> { if (c != null) c.clearDerivation();});
+                ((ArrayList<CellImpl>)m_cells).forEach(c -> { if (c != null) c.invalidateCell();});
             
             TableSliceElementImpl rc = cols.remove(idx);
             assert rc == this : "Removed column mismatch";

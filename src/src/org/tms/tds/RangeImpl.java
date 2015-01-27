@@ -189,21 +189,25 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     @Override
     public boolean add(TableCellsElement... tableCellElements)
     {
-        assert tableCellElements != null : "TableCellElements required";
-        
+        vetElement();
         boolean addedAny = false;
-        for (TableCellsElement tce : tableCellElements) {
-            if (tce instanceof RowImpl)
-                addedAny = m_rows.add((RowImpl)tce) ? true : addedAny;
-            else if (tce instanceof ColumnImpl)
-                addedAny = m_cols.add((ColumnImpl)tce) ? true : addedAny;
-            else if (tce instanceof RangeImpl)
-                addedAny = m_ranges.add((RangeImpl)tce) ? true : addedAny;
-            else if (tce instanceof CellImpl)
-                addedAny = m_cells.add((CellImpl)tce) ? true : addedAny;
-            
-            // remove the range from the corresponding object
-            ((TableCellsElementImpl)tce).add(this);
+        if (tableCellElements != null) {
+            for (TableCellsElement tce : tableCellElements) {
+                if (tce == null) continue;
+                
+                vetElement((TableCellsElementImpl)tce);
+                if (tce instanceof RowImpl)
+                    addedAny = m_rows.add((RowImpl)tce) ? true : addedAny;
+                else if (tce instanceof ColumnImpl)
+                    addedAny = m_cols.add((ColumnImpl)tce) ? true : addedAny;
+                else if (tce instanceof RangeImpl)
+                    addedAny = m_ranges.add((RangeImpl)tce) ? true : addedAny;
+                else if (tce instanceof CellImpl)
+                    addedAny = m_cells.add((CellImpl)tce) ? true : addedAny;
+                
+                // add the range from the corresponding object
+                ((TableCellsElementImpl)tce).add(this);
+            }
         }
                
         if (addedAny)
@@ -253,6 +257,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     @Override 
     public void delete()
     {
+        invalidate();
+        
         // delete the range from its parent table
         if (getTable() != null) getTable().remove(this);  
         
@@ -361,6 +367,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 	@Override
 	public void fill(Object o) 
 	{
+	    vetElement();
 		if (!isNull()) {
 		    TableImpl tbl = getTable();
 		    if (tbl == null)
