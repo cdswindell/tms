@@ -24,6 +24,9 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
     abstract protected boolean isNullsSupported();
     abstract protected boolean isWriteProtected();
     
+    abstract protected boolean add(RangeImpl rangeImpl);
+    abstract protected boolean remove(RangeImpl range);
+    
     protected TableElementImpl(ElementType eType, TableElementImpl e)
     {
         super(eType);

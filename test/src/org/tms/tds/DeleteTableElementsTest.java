@@ -40,6 +40,8 @@ public class DeleteTableElementsTest
         assertThat(c.getColumn(), is(c1));
         assertThat(c.isInvalid(), is(false));
         
+        rng.add(c);
+        
         // delete the row
         r1.delete();
         assertThat(t.getNumRows(), is(0));

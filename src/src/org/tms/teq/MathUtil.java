@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.tms.api.Cell;
-import org.tms.api.TableCellsElement;
 import org.tms.api.TableElement;
 
 public class MathUtil
@@ -151,7 +150,7 @@ public class MathUtil
             return Double.NaN;
     }   
     
-    static final public double numberOf(TableCellsElement te, Object q)
+    static final public double numberOf(TableElement te, Object q)
     {
         int count = 0;
         if (te != null && q != null) {

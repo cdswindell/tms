@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.tms.teq.Derivation;
 
-public interface Derivable extends BaseElement, TableCellsElement
+public interface Derivable extends BaseElement, TableElement
 {    
     public Derivation getDerivation();
     public void setDerivation(String expression);

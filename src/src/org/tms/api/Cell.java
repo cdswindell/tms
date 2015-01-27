@@ -2,7 +2,7 @@ package org.tms.api;
 
 import org.tms.teq.ErrorCode;
 
-public interface Cell extends TableCellsElement, Derivable
+public interface Cell extends TableElement, Derivable
 {
     public Object getCellValue();
     public boolean setCellValue(Object value);

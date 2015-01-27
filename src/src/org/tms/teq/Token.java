@@ -3,7 +3,6 @@ package org.tms.teq;
 import org.tms.api.Column;
 import org.tms.api.Operator;
 import org.tms.api.Row;
-import org.tms.api.TableCellsElement;
 import org.tms.api.TableElement;
 
 
@@ -134,10 +133,10 @@ public class Token implements Labeled
             return null;
     }
     
-    public TableCellsElement getReferenceValue()
+    public TableElement getReferenceValue()
     {
-        if (m_value != null && m_value instanceof TableCellsElement)
-            return (TableCellsElement)m_value;
+        if (m_value != null && m_value instanceof TableElement)
+            return (TableElement)m_value;
         else
             return null;
     }
@@ -281,7 +280,7 @@ public class Token implements Labeled
 
     public boolean isReference()
     {
-        return getTokenType() != null && getTokenType().isReference() && getValue() != null && getValue() instanceof TableCellsElement;
+        return getTokenType() != null && getTokenType().isReference() && getValue() != null && getValue() instanceof TableElement;
     }
     
     public boolean isNull() 

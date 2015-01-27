@@ -10,7 +10,7 @@ import org.tms.api.Operator;
 import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.TableCellsElement;
+import org.tms.api.TableElement;
 import org.tms.api.exceptions.InvalidExpressionException;
 
 public class InfixExpressionParser
@@ -308,7 +308,7 @@ public class InfixExpressionParser
         		return; // simple equality
         	else if (requiredArgType.isAssignableFrom(lastArgClass))
                 return; // argument types match/can be coerced
-            else if (requiredArgType.isPrimitive() && TableCellsElement.class.isAssignableFrom(lastArgClass))
+            else if (requiredArgType.isPrimitive() && TableElement.class.isAssignableFrom(lastArgClass))
             	return; // assume argument is table cells element
             else if (requiredArgType.isPrimitive() && !lastArgClass.isPrimitive()) {
                 if (lastArgClass == Object.class ||

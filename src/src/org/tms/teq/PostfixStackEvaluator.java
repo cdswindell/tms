@@ -8,7 +8,6 @@ import org.tms.api.Column;
 import org.tms.api.Operator;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.TableCellsElement;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
@@ -222,7 +221,7 @@ public class PostfixStackEvaluator
             Column colRef = null;
             Cell cell = null;
             
-            TableCellsElement value = t.getReferenceValue();
+            TableElement value = t.getReferenceValue();
             if (value != null && value instanceof Column) {
                 haveRef = true;
                 rowRef = row;
@@ -260,7 +259,7 @@ public class PostfixStackEvaluator
         return t;
     }
 
-    private SingleVariableStatEngine fetchSVSE(TableCellsElement ref, BuiltinOperator bio, DerivationContext dc) 
+    private SingleVariableStatEngine fetchSVSE(TableElement ref, BuiltinOperator bio, DerivationContext dc) 
     {
     	SingleVariableStatEngine svse = null;
         if (dc != null) {
@@ -299,7 +298,7 @@ public class PostfixStackEvaluator
         Token result = null;
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
-            TableCellsElement ref = x.getReferenceValue();           
+            TableElement ref = x.getReferenceValue();           
             if (ref != null) {
                 SingleVariableStatEngine svse = fetchSVSE(ref, bio, dc);
                 try {
@@ -328,7 +327,7 @@ public class PostfixStackEvaluator
         Token x = args[0];
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
-            TableCellsElement ref = null;
+            TableElement ref = null;
             TableRowColumnElement excludeCheckElement = null;
             if (x.getRowValue() != null) {
                 ref = x.getRowValue();                

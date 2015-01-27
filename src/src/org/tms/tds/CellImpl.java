@@ -8,7 +8,6 @@ import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Range;
-import org.tms.api.TableCellsElement;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
@@ -18,7 +17,7 @@ import org.tms.teq.Derivation;
 import org.tms.teq.ErrorCode;
 import org.tms.teq.Token;
 
-public class CellImpl extends TableElementImpl implements Cell, TableCellsElement
+public class CellImpl extends TableElementImpl implements Cell
 {
     private Object m_cellValue;
     private ColumnImpl m_col;
@@ -510,13 +509,6 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
         return null;
     }
 
-    @Override
-    public Iterable<Range> ranges()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
 	@Override
 	public String toString()
 	{
@@ -563,6 +555,9 @@ public class CellImpl extends TableElementImpl implements Cell, TableCellsElemen
     {
         // clear the cell value and cell derivation
         clearDerivation();
+        
+        // remove the cell from any ranges
+        getRanges();
         m_cellValue = null;
         
         m_col = null;

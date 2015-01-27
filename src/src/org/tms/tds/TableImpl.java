@@ -25,7 +25,6 @@ import org.tms.api.ElementType;
 import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.TableCellsElement;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
@@ -1163,13 +1162,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return -1;
     }
     
-    protected TableCellsElement find(Collection<? extends TableCellsElement> slices, TableProperty key, Object value)
+    protected TableElement find(Collection<? extends TableElement> slices, TableProperty key, Object value)
     {
         assert key != null : "TableProperty required (enum)";
         assert value != null : "Value required";
         
         if (slices != null && value != null) {
-            for (TableCellsElement tes : slices) {
+            for (TableElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
                     if (p != null && p.equals(value)) {
@@ -1184,13 +1183,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return null;
     }
 
-    protected TableCellsElement find(Collection<? extends TableCellsElement> slices, String key, Object value)
+    protected TableElement find(Collection<? extends TableElement> slices, String key, Object value)
     {
         assert key != null : "TableProperty required (String)";
         assert value != null : "Value required";
         
         if (slices != null && value != null) {
-            for (TableCellsElement tes : slices) {
+            for (TableElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
                     if (p != null && p.equals(value)) {

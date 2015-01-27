@@ -3,6 +3,7 @@ package org.tms.tds;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
@@ -90,19 +91,16 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         return (getTable() != null ? getTable().isNullsSupported() : false) && isSupportsNull();
     }
     
-    @Override
     public List<Range> getRanges()
     {
         vetElement();
         return new ArrayList<Range>(m_ranges.clone());
     } 
     
-    @Override
-    public Iterable<Range> ranges()
+    protected Set<RangeImpl> getRangesInternal()
     {
-        vetElement();
-        return new BaseElementIterable<Range>(m_ranges);
-    }
+        return m_ranges;
+    } 
     
     @Override
     public boolean isDerived()

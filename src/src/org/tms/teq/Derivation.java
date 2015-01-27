@@ -20,7 +20,6 @@ import org.tms.api.Derivable;
 import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.TableCellsElement;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -482,44 +481,44 @@ public class Derivation
     
     protected  static class DerivationContext 
     {
-    	private Map<TableCellsElement, SingleVariableStatEngine> m_cachedSVSEs;
+    	private Map<TableElement, SingleVariableStatEngine> m_cachedSVSEs;
     	private boolean m_cachedAny = false;
     	
     	public DerivationContext()
     	{
-    		m_cachedSVSEs = new HashMap<TableCellsElement, SingleVariableStatEngine>();
+    		m_cachedSVSEs = new HashMap<TableElement, SingleVariableStatEngine>();
     	}
     	
     	/**
-    	 * As the TableCellsElement has been modified, remove from the cache any statistics
+    	 * As the TableElement has been modified, remove from the cache any statistics
     	 * cached that involve the modified element
     	 * 
-    	 * @param tse the modified TableCellsElement 
+    	 * @param tse the modified TableElement 
     	 */
-    	public void remove(TableCellsElement tse) 
+    	public void remove(TableElement tse) 
     	{
     		if (!m_cachedAny)
     			return;
     		
-    		assert tse != null : "TableCellsElement required";
+    		assert tse != null : "TableElement required";
     		
     		m_cachedSVSEs.remove(tse);
     		for (Range r : tse.getRanges())
     		    remove(r);
 		}
 
-		public void cacheSVSE(TableCellsElement d, SingleVariableStatEngine se) 
+		public void cacheSVSE(TableElement d, SingleVariableStatEngine se) 
     	{
-    		assert d != null : "TableCellsElement required";
+    		assert d != null : "TableElement required";
     		assert se != null : "SingleVariableStatEngine required";
     		
     		m_cachedSVSEs.put(d, se);
     		m_cachedAny = true;
     	}
     	
-    	public SingleVariableStatEngine getCachedSVSE(TableCellsElement d)
+    	public SingleVariableStatEngine getCachedSVSE(TableElement d)
     	{
-    		assert d != null : "TableCellsElement required";
+    		assert d != null : "TableElement required";
     		
     		return m_cachedSVSEs.get(d);
     	}

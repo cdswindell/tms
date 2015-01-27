@@ -1,6 +1,8 @@
 package org.tms.api;
 
-public interface Table extends TableCellsElement
+import java.util.List;
+
+public interface Table extends TableElement
 {    
     public Row addRow();   
     public Row addRow(Access mode, Object... mda);   
@@ -16,8 +18,10 @@ public interface Table extends TableCellsElement
     
     public Range addRange(Access mode, Object... mda);    
     public Range getRange(Access mode, Object... mda);
+    public List<Range> getRanges();
     public Iterable<Range> ranges();
     public int getNumRanges();
+    
     
     public Cell getCell(Row row, Column col);      
     public Cell getCell(Access mode, Object... mda);

@@ -1,8 +1,8 @@
 package org.tms.api;
 
-public interface Range extends TableCellsElement
+public interface Range extends TableElement
 {
-    public boolean add(TableCellsElement... tableElements);
-    public boolean remove(TableCellsElement... tableElements);
-    public boolean contains(TableCellsElement tableElement);
+    public boolean add(TableElement... tableElements);
+    public boolean remove(TableElement... tableElements);
+    public boolean contains(TableElement tableElement);
 }

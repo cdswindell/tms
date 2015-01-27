@@ -7,7 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.tms.api.Operator;
-import org.tms.api.TableCellsElement;
+import org.tms.api.TableElement;
 import org.tms.api.TableRowColumnElement;
 
 public enum BuiltinOperator implements Labeled, Operator
@@ -83,7 +83,7 @@ public enum BuiltinOperator implements Labeled, Operator
     BiggerOper(TokenType.BinaryFunc, 5, Math.class, "max", "bigger"),
     SmallerOper(TokenType.BinaryFunc, 5, Math.class, "min", "smaller"),
     HypotOper(TokenType.BinaryFunc, 5, Math.class, "hypot"),
-    numberOfOper("numberOf", TokenType.GenericFunc, 5, MathUtil.class, "numberOf", TableCellsElement.class, Object.class),    
+    numberOfOper("numberOf", TokenType.GenericFunc, 5, MathUtil.class, "numberOf", TableElement.class, Object.class),    
 
     // Builtin functions
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
@@ -119,7 +119,7 @@ public enum BuiltinOperator implements Labeled, Operator
     SplineOper,
     MeanCenterOper(TokenType.TransformOp, 5, "meanCenter"),
     NormalizeOper(TokenType.TransformOp, 5, "normalize", "standardize"),    
-    ScaleOper("scale", TokenType.TransformOp, 5, MathUtil.class, "scale", TableCellsElement.class, double.class, double.class),
+    ScaleOper("scale", TokenType.TransformOp, 5, MathUtil.class, "scale", TableElement.class, double.class, double.class),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.RangeRef, TokenType.CellRef),
@@ -318,11 +318,11 @@ public enum BuiltinOperator implements Labeled, Operator
                 m_methodArgs = new Class<?>[numArgs];
                 switch (tt) {
                     case StatOp:
-                        m_methodArgs[0] = TableCellsElement.class;
+                        m_methodArgs[0] = TableElement.class;
                         break;
                         
                     case BinaryStatOp:
-                        m_methodArgs[0] = m_methodArgs[1] = TableCellsElement.class;
+                        m_methodArgs[0] = m_methodArgs[1] = TableElement.class;
                         break;
                         
                     case TransformOp:

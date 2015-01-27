@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
-import org.tms.api.TableCellsElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidParentException;
 
@@ -15,11 +14,9 @@ import org.tms.api.exceptions.InvalidParentException;
  * This is the abstract superclass for all table elements that contain cells, including TableImpl, RowImpl, ColumnImpl, RangeImpl, and CellImpl. 
  * 
  */
-abstract class TableCellsElementImpl extends TableElementImpl implements TableCellsElement
+abstract class TableCellsElementImpl extends TableElementImpl 
 {
     abstract public int getNumCells();
-    abstract protected boolean add(RangeImpl rangeImpl);
-    abstract protected boolean remove(RangeImpl range);
     
     private int m_index = -1;
     

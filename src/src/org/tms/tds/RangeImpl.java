@@ -12,7 +12,7 @@ import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Range;
 import org.tms.api.Row;
-import org.tms.api.TableCellsElement;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
@@ -76,18 +76,16 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return m_cols.size();
     }
 
-    @Override
     public List<Range> getRanges()
     {
         return new ArrayList<Range>(((JustInTimeSet<RangeImpl>)m_ranges).clone());
     }
-
-    @Override
-    public Iterable<Range> ranges()
-    {
-        return new BaseElementIterable<Range>(m_ranges);
-    }
     
+    protected Set<RangeImpl> getRangesInternal()
+    {
+        return m_ranges;
+    }
+
     protected int getNumRanges()
     {
         return m_ranges.size();
@@ -97,7 +95,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
      * Class-specific methods
      */
     @Override
-    public boolean contains(TableCellsElement r)
+    public boolean contains(TableElement r)
     {
         if (r != null) {
             if (r instanceof RowImpl)
@@ -109,18 +107,18 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             else if (r instanceof CellImpl)
                 return m_cells.contains(r);
             else
-                throw new UnimplementedException((TableCellsElementImpl)r, "contains");
+                throw new UnimplementedException((TableImpl)r, "contains");
         }
         else
             return false;
     }
     
-    protected boolean addAll(Collection<? extends TableCellsElement> elems)
+    protected boolean addAll(Collection<? extends TableElement> elems)
     {
         boolean addedAny = false;
         if (elems != null) {            
             // iterate over all rows, adding them to the group
-            for (TableCellsElement e : elems) 
+            for (TableElement e : elems) 
             {
                 if (this.add(e))
                     addedAny = true;
@@ -130,12 +128,12 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return addedAny;
     }
     
-    protected boolean removeAll(Collection<? extends TableCellsElement> elems)
+    protected boolean removeAll(Collection<? extends TableElement> elems)
     {
         boolean removedAny = false;
         if (elems != null) {            
             // iterate over all rows, adding them to the group
-            for (TableCellsElement e : elems) 
+            for (TableElement e : elems) 
             {
                 if (this.remove(e))
                     removedAny = true;
@@ -145,11 +143,11 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return removedAny;
     }
         
-    protected boolean containsAll(Collection<? extends TableCellsElement> elems)
+    protected boolean containsAll(Collection<? extends TableElement> elems)
     {
         if (elems != null && !elems.isEmpty()) {            
             // iterate over all elements
-            for (TableCellsElement e : elems) 
+            for (TableElement e : elems) 
             {
                 if (!this.contains(e))
                     return false;
@@ -161,11 +159,11 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return false;
     }
         
-    public boolean remove(TableCellsElement... tableCellElements)
+    public boolean remove(TableElement... tableElements)
     {
         boolean removedAny = false;
-        if (tableCellElements != null) {
-            for (TableCellsElement tce : tableCellElements) {               
+        if (tableElements != null) {
+            for (TableElement tce : tableElements) {               
                 if (tce instanceof RowImpl)
                     removedAny = m_rows.remove((RowImpl)tce) ? true : removedAny;
                 else if (tce instanceof ColumnImpl)
@@ -176,7 +174,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                     removedAny = m_cells.remove((CellImpl)tce) ? true : removedAny;
                 
                 // remove the range from the corresponding object
-                ((TableCellsElementImpl)tce).remove(this);
+                if (removedAny)
+                    ((TableElementImpl)tce).remove(this);
             }
         }
         
@@ -187,26 +186,32 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     }     
 
     @Override
-    public boolean add(TableCellsElement... tableCellElements)
+    public boolean add(TableElement... tableElements)
     {
         vetElement();
         boolean addedAny = false;
-        if (tableCellElements != null) {
-            for (TableCellsElement tce : tableCellElements) {
+        if (tableElements != null) {
+            for (TableElement tce : tableElements) {
                 if (tce == null) continue;
                 
-                vetElement((TableCellsElementImpl)tce);
-                if (tce instanceof RowImpl)
-                    addedAny = m_rows.add((RowImpl)tce) ? true : addedAny;
-                else if (tce instanceof ColumnImpl)
-                    addedAny = m_cols.add((ColumnImpl)tce) ? true : addedAny;
-                else if (tce instanceof RangeImpl)
-                    addedAny = m_ranges.add((RangeImpl)tce) ? true : addedAny;
-                else if (tce instanceof CellImpl)
+                vetElement((BaseElementImpl)tce);
+                if (tce instanceof TableCellsElementImpl){
+                    if (tce instanceof RowImpl)
+                        addedAny = m_rows.add((RowImpl)tce) ? true : addedAny;
+                    else if (tce instanceof ColumnImpl)
+                        addedAny = m_cols.add((ColumnImpl)tce) ? true : addedAny;
+                    else if (tce instanceof RangeImpl)
+                        addedAny = m_ranges.add((RangeImpl)tce) ? true : addedAny;
+                    if (tce instanceof CellImpl)
+                        addedAny = m_cells.add((CellImpl)tce) ? true : addedAny;
+                    
+                    // add the range from the corresponding object
+                    ((TableCellsElementImpl)tce).add(this);
+                }
+                else if (tce instanceof CellImpl) {
                     addedAny = m_cells.add((CellImpl)tce) ? true : addedAny;
-                
-                // add the range from the corresponding object
-                ((TableCellsElementImpl)tce).add(this);
+                    ((CellImpl)tce).add(this);
+                }
             }
         }
                
@@ -225,7 +230,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
              *  TableSliceElementImpl.add will be called recursively to finish up
              */
             if (!r.contains(this))
-                return r.add(new TableCellsElement[] {this});
+                return r.add(new TableElement[] {this});
             
             return m_ranges.add(r);
         }
@@ -242,7 +247,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
              * TableSliceElementImpl.remove will be called again to finish up
              */
             if (r.contains(this))
-                r.remove(new TableCellsElement[] {this});
+                r.remove(new TableElement[] {this});
             
             return m_ranges.remove(r);
         }
