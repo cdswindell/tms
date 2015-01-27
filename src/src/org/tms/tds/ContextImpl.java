@@ -71,18 +71,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
 
     private Set<Table> m_registeredTables;
     private boolean m_default;
-    private boolean m_enforceDataType;
     
     private int m_rowCapacityIncr;
     private int m_columnCapacityIncr;
     private TokenMapper m_tokenMapper;
     private int m_precision;
-    private boolean m_supportsNull;
 
-    private boolean m_autoRecalculate;
-
-    private boolean m_readOnly;
-    
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
         super(ElementType.Context);      
@@ -213,25 +207,25 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     @Override
     protected boolean isSupportsNull()
     {
-        return m_supportsNull;
+        return isSet(sf_SUPPORTS_NULL_FLAG);
     }
     
     @Override
     protected void setSupportsNull(boolean supportsNull)
     {
-        m_supportsNull = supportsNull;
+        set(sf_SUPPORTS_NULL_FLAG, supportsNull);
     }
     
     @Override
     public boolean isReadOnly()
     {
-        return m_readOnly;
+        return isSet(sf_READONLY_FLAG);
     }
     
     @Override
     protected void setReadOnly(boolean readOnly)
     {
-        m_readOnly = readOnly;
+        set(sf_READONLY_FLAG, readOnly);
     }
     
     protected boolean isDefault()
@@ -241,12 +235,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
 
     public boolean isAutoRecalculate()
     {
-        return m_autoRecalculate;
+        return isSet(sf_AUTO_RECALCULATE_FLAG);
     }
     
     protected void setAutoRecalculate(boolean value)
     {
-        m_autoRecalculate = value;
+        set(sf_AUTO_RECALCULATE_FLAG, value);
     }
 
     public TokenMapper getTokenMapper()
@@ -315,12 +309,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
 
     protected boolean isEnforceDataType()
     {
-        return m_enforceDataType;
+        return isSet(sf_ENFORCE_DATATYPE_FLAG);
     }
 
     protected void setEnforceDataType(boolean enforceDataType)
     {
-        m_enforceDataType = enforceDataType;
+        set(sf_ENFORCE_DATATYPE_FLAG, enforceDataType);
     }
 
     protected ContextImpl register(Table table)

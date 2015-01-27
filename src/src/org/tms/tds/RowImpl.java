@@ -181,9 +181,6 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     public void delete()
     {
-        // mark row as deleted
-        invalidate();
-        
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
     	if (parent != null) {
@@ -239,6 +236,9 @@ public class RowImpl extends TableSliceElementImpl implements Row
     	setCellOffset(-1);
     	setIndex(-1);
     	setInUse(false);   	
+    	
+        // mark row as deleted
+        invalidate();        
     }
     
     @Override

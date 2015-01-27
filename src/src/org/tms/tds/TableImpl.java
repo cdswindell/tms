@@ -68,6 +68,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private Deque<CellReference> m_currentCellStack;
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
     
+    private Map<CellImpl, Set<RangeImpl>> m_rangedCells;
     private Map<CellImpl, Derivation> m_derivedCells;
     private Map<CellImpl, Set<Derivable>> m_cellAffects;
     
@@ -86,10 +87,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private int m_colCapacityIncr;
     private int m_precision;
 
-    private boolean m_enforceDataType;
-    private boolean m_supportsNull;
-    
-    private boolean m_autoRecalculate;
     private boolean m_autoRecalculateDeactivated;
 
     private boolean m_readOnly;
@@ -152,6 +149,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_derivedCells = new HashMap<CellImpl, Derivation>(expectedNoOfDerivedCells);
         m_cellAffects = new LinkedHashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
         m_autoRecalculateDeactivated = false;
+        
+        m_rangedCells = new HashMap<CellImpl, Set<RangeImpl>>();
         
         // clear dirty flag, as table is empty
         markClean();
@@ -330,6 +329,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return this;
     }
 
+    @Override
     public List<Range>getRanges()
     {
         return new ArrayList<Range>(m_ranges.clone());
@@ -358,17 +358,17 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     public boolean isAutoRecalculateEnabled()
     {
-        return m_autoRecalculate && !m_autoRecalculateDeactivated;
+        return isAutoRecalculate() && !m_autoRecalculateDeactivated;
     }
     
     public boolean isAutoRecalculate()
     {
-        return m_autoRecalculate;
+        return isSet(sf_AUTO_RECALCULATE_FLAG);
     }
     
     protected void setAutoRecalculate(boolean value)
     {
-        m_autoRecalculate = value;
+        set(sf_AUTO_RECALCULATE_FLAG, value);
     }
 
     public void deactivateAutoRecalculate()
@@ -391,25 +391,25 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     protected boolean isEnforceDataType()
     {
-        return m_enforceDataType;
+        return isSet(sf_ENFORCE_DATATYPE_FLAG);
     }
     
     @Override
     protected void setEnforceDataType(boolean dataTypeEnforced)
     {
-        m_enforceDataType = dataTypeEnforced;
+        set(sf_ENFORCE_DATATYPE_FLAG, dataTypeEnforced);
     }
     
     @Override
     protected boolean isSupportsNull()
     {
-        return m_supportsNull;
+        return isSet(sf_SUPPORTS_NULL_FLAG);
     }
     
     @Override
     protected void setSupportsNull(boolean supportsNull)
     {
-        m_supportsNull = supportsNull;
+        set(sf_SUPPORTS_NULL_FLAG, supportsNull);
     }
     
     @Override
@@ -580,6 +580,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
     }
 
+    protected Set<RangeImpl> getRangesInternal()
+    {
+        return m_ranges;
+    }
+    
     @Override
     public RangeImpl addRange(Access mode, Object... mda)
     {
@@ -1453,8 +1458,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
         assert d != null : "Derivable required";
         
         Set<Derivable> affected = m_cellAffects.get(cell);
-        if (affected != null)
-            affected.remove(d);        
+        if (affected != null) {
+            affected.remove(d);
+            
+            if (affected.isEmpty())
+                m_cellAffects.remove(cell);
+        }
     }
     
     protected List<Derivable> getCellAffects(CellImpl cell)
@@ -1486,6 +1495,39 @@ public class TableImpl extends TableCellsElementImpl implements Table
     protected Iterable<CellImpl> derivedCells()
     {
         return new BaseElementIterableInternal<CellImpl>(m_derivedCells.keySet());
+    }
+    
+    protected boolean registerRangeCell(CellImpl cell, RangeImpl r)
+    {
+        Set<RangeImpl> ranges = m_rangedCells.get(cell);
+        if (ranges == null) {
+            ranges = new HashSet<RangeImpl>();
+            m_rangedCells.put(cell, ranges);
+        }
+        
+        return ranges.add(r);
+    }
+
+    protected boolean deregisterRangeCell(CellImpl cell, RangeImpl r)
+    {
+        Set<RangeImpl> ranges = m_rangedCells.get(cell);
+        if (ranges != null) {
+            boolean removed = ranges.remove(r);
+            
+            // purge the cell from the range set, if no ranges remain
+            // otherwise, the cell may linger once deleted
+            if (ranges.isEmpty())
+                m_rangedCells.remove(cell);
+            
+            return removed;
+        }
+        else
+            return false;
+    }
+    
+    protected Set<RangeImpl> getCellRanges(CellImpl cell)
+    {
+        return m_rangedCells.get(cell);
     }
     
     protected List<Derivable> getAffects(TableElementImpl te)
@@ -1534,18 +1576,21 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		}
 	}
 
+    @Override
 	public Iterable<Row> rows()
     {
 	    ensureRowsExist();
         return new BaseElementIterable<Row>(getRowsInternal());
     }
     
+    @Override
 	public Iterable<Column> columns()
     {
         ensureColumnsExist();
         return new BaseElementIterable<Column>(getColumnsInternal());
     }
     
+	@Override
 	public Iterable<Range> ranges()
     {
         return new BaseElementIterable<Range>(m_ranges);

@@ -262,8 +262,6 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     @Override 
     public void delete()
     {
-        invalidate();
-        
         // delete the range from its parent table
         if (getTable() != null) getTable().remove(this);  
         
@@ -279,6 +277,9 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         m_cells.clear();
         
         m_numCells = Integer.MIN_VALUE;
+        
+        // Mark the range as deleted
+        invalidate();       
     }
     
    @Override

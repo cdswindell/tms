@@ -386,6 +386,9 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     	
         // help the garbage collector
         this.m_cells = null;
+        
+        // mark row as deleted
+        invalidate();        
     }
 
     @Override

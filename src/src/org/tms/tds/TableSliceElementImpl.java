@@ -25,10 +25,6 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     abstract protected TableSliceElementImpl setCurrent();
     
     private JustInTimeSet<RangeImpl> m_ranges;
-    private boolean m_enforceDataType;
-    private boolean m_supportsNull;
-    private boolean m_readOnly;
-    private boolean m_inUse;
     private Derivation m_deriv;
 
     public TableSliceElementImpl(ElementType eType, TableElementImpl e)
@@ -42,26 +38,26 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     
     boolean isInUse()
     {
-        return m_inUse;
+        return isSet(sf_IN_USE_FLAG);
     }
     
     void setInUse(boolean inUse)
     {
         if (inUse)
             vetElement();
-        m_inUse = inUse;
+        set(sf_IN_USE_FLAG, inUse);
     }
     
     @Override
     protected boolean isEnforceDataType()
     {
-        return m_enforceDataType;
+        return isSet(sf_ENFORCE_DATATYPE_FLAG);
     }
     
     @Override
     protected void setEnforceDataType(boolean dataTypeEnforced)
     {
-        m_enforceDataType = dataTypeEnforced;
+        set(sf_ENFORCE_DATATYPE_FLAG, dataTypeEnforced);
     }
     
     @Override
@@ -76,13 +72,13 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     protected boolean isSupportsNull()
     {
-        return m_supportsNull;
+        return isSet(sf_SUPPORTS_NULL_FLAG);
     }
     
     @Override
     protected void setSupportsNull(boolean supportsNull)
     {
-        m_supportsNull = supportsNull;
+        set(sf_SUPPORTS_NULL_FLAG, supportsNull);
     }
     
     @Override
@@ -136,7 +132,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                     tse.registerAffects(elem);
                 }
                 
-                m_inUse = true;
+                setInUse(true);
                 recalculate();
             }  
         }
@@ -296,7 +292,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         
         // initialize other member fields
         m_ranges = new JustInTimeSet<RangeImpl>();
-        m_inUse = false;
+        setInUse(false);
     } 
 
     @Override
@@ -324,13 +320,13 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public boolean isReadOnly()
     {
-        return m_readOnly;
+        return isSet(sf_READONLY_FLAG);
     }
     
     @Override 
     protected void setReadOnly(boolean readOnly)
     {
-        m_readOnly = readOnly;
+        set(sf_READONLY_FLAG, readOnly);
     }
     
     @Override

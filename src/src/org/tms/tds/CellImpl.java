@@ -1,8 +1,11 @@
 package org.tms.tds;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
@@ -494,21 +497,82 @@ public class CellImpl extends TableElementImpl implements Cell
 	
     protected boolean add(RangeImpl r)
     {
+        TableImpl parent = getTable();
+        assert parent != null : "Parent table required";
+        if (parent != null)
+            return parent.registerRangeCell(this, r);
+        
         return false;
     }
     
     protected boolean remove(RangeImpl r)
     {
+        if (r != null) {
+            /*
+             * if the range contains the element, use the range method to do all the work
+             * TableSliceElementImpl.remove will be called again to finish up
+             */
+            if (r.contains(this))
+                r.remove(this);
+            
+            TableImpl parent = getTable();
+            assert parent != null : "Parent table required";
+            if (parent != null)
+                return parent.deregisterRangeCell(this, r);
+        }
+        
         return false;
     }
     
     @Override
     public List<Range> getRanges()
     {
-        // TODO Auto-generated method stub
-        return null;
+        TableImpl parent = getTable();
+        assert parent != null : "Parent table required";
+        if (parent != null) {
+            Set<RangeImpl> ranges = parent.getCellRanges(this);
+            if (ranges != null) {
+                List<Range> rangesList = new ArrayList<Range>(ranges.size());
+                rangesList.addAll(ranges);
+                return rangesList;
+            }
+        }
+        
+        return Collections.emptyList();
     }
 
+    protected Set<RangeImpl> getRangesInternal()
+    {
+        TableImpl parent = getTable();
+        assert parent != null : "Parent table required";
+        if (parent != null) 
+            return parent.getCellRanges(this);
+        else
+            return Collections.emptySet();
+    }
+    
+    /**
+     * Invalidate a cell in response to the parent row/column being deleted
+     */
+    protected void invalidateCell()
+    {
+        // clear the cell value and cell derivation
+        clearDerivation();
+        
+        // remove the cell from any ranges
+        for (RangeImpl r : getRangesInternal()) {
+            if (r != null && r.isValid())
+                r.remove(this);
+        }
+         
+        m_cellValue = null;
+        
+        m_col = null;
+        m_cellOffset = -1;
+        
+        invalidate();
+    }
+    
 	@Override
 	public String toString()
 	{
@@ -546,23 +610,5 @@ public class CellImpl extends TableElementImpl implements Cell
             m_hasNext = false;
             return CellImpl.this;
         }        
-    }
-
-    /**
-     * Invalidate a cell in response to the parent row/column being deleted
-     */
-    protected void invalidateCell()
-    {
-        // clear the cell value and cell derivation
-        clearDerivation();
-        
-        // remove the cell from any ranges
-        getRanges();
-        m_cellValue = null;
-        
-        m_col = null;
-        m_cellOffset = -1;
-        
-        invalidate();
     }
 }

@@ -50,6 +50,7 @@ public class DeleteTableElementsTest
         
         // assert that range contains no rows
         assertThat(rng.getNumRows(), is(0));
+        assertThat(rng.getNumCells(), is(0));
         
         // verify that no operations can be performed
         try {

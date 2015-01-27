@@ -1,5 +1,7 @@
 package org.tms.tds;
 
+import java.util.Set;
+
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Table;
@@ -26,6 +28,7 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
     
     abstract protected boolean add(RangeImpl rangeImpl);
     abstract protected boolean remove(RangeImpl range);
+    abstract protected Set<RangeImpl> getRangesInternal();
     
     protected TableElementImpl(ElementType eType, TableElementImpl e)
     {

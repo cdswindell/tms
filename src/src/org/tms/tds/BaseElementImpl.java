@@ -29,12 +29,16 @@ abstract public class BaseElementImpl implements BaseElement
     static final protected int sf_ENFORCE_DATATYPE_FLAG = 0x01;
     static final protected int sf_READONLY_FLAG = 0x02;
     static final protected int sf_SUPPORTS_NULL_FLAG = 0x04;
+    static final protected int sf_AUTO_RECALCULATE_FLAG = 0x08;
+    static final protected int sf_IN_USE_FLAG = 0x10;
     
     static final protected int sf_IS_INVALID_FLAG = 0x100;
     
     private ElementType m_tableElementType;
     private Map<String, Object> m_elemProperties;
     
+    // to save a little space, all flags are maintained in a 
+    // single 32 bit integer
     protected int m_flags;
 
     protected BaseElementImpl(ElementType eType)
@@ -98,7 +102,25 @@ abstract public class BaseElementImpl implements BaseElement
      */
     protected boolean isInvalid()
     {
-        return (m_flags & sf_IS_INVALID_FLAG) != 0;
+        return isSet(sf_IS_INVALID_FLAG);
+    }
+    
+    protected boolean isValid()
+    {
+        return !isInvalid();
+    }
+    
+    protected boolean isSet(int flag)
+    {
+        return (m_flags & flag) != 0;
+    }
+    
+    protected void set(int flag, boolean state)
+    {
+        if (state)
+            m_flags |= flag;
+        else
+            m_flags &= ~flag;
     }
     
     protected void setProperty(TableProperty key, Object value)
