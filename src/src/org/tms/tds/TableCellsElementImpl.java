@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.tms.api.Derivable;
-import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.InvalidParentException;
 
@@ -23,9 +22,9 @@ abstract class TableCellsElementImpl extends TableElementImpl
     protected TableImpl m_table;   
     protected Set<Derivable> m_affects;
 
-    protected TableCellsElementImpl(ElementType eType, TableElementImpl e)
+    protected TableCellsElementImpl(TableElementImpl e)
     {
-        super(eType, e);
+        super(e);
         if (e != null)
             setTable((TableImpl)e.getTable());
         

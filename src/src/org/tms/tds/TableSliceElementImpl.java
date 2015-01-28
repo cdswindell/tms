@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
-import org.tms.api.ElementType;
 import org.tms.api.Range;
 import org.tms.api.Row;
 import org.tms.api.TableElement;
@@ -27,9 +26,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     private JustInTimeSet<RangeImpl> m_ranges;
     private Derivation m_deriv;
 
-    public TableSliceElementImpl(ElementType eType, TableElementImpl e)
+    public TableSliceElementImpl(TableElementImpl e)
     {
-        super(eType, e);
+        super(e);
     }
 
     /*

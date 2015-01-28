@@ -28,7 +28,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     
     protected RangeImpl(TableImpl parentTable)
     {
-        super(ElementType.Range, parentTable);
+        super(parentTable);
         
         // associate the group with the table
         if (parentTable != null)
@@ -46,6 +46,11 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     /*
      * Field Getters/Setters
      */
+    public ElementType getElementType()
+    {
+        return ElementType.Range;
+    }
+    
     protected List<RowImpl> getRows()
     {
         return new ArrayList<RowImpl>(((JustInTimeSet<RowImpl>)m_rows).clone());

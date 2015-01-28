@@ -98,7 +98,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     protected TableImpl(int nRows, int nCols, TableContext c)
     {
-        super(ElementType.Table, null);
+        super(null);
         setTable(this);
         setContext(c);        
         
@@ -107,7 +107,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     protected TableImpl(int nRows, int nCols, Table t)
     {
-        super(ElementType.Table, null);
+        super(null);
         setTable(this);
         setContext(t != null ? t.getTableContext() : null);        
         
@@ -115,6 +115,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
         	throw new UnsupportedImplementationException(t);
         
         initialize(nRows, nCols, (TableImpl)t);
+    }
+    
+    public ElementType getElementType()
+    {
+        return ElementType.Table;
     }
     
     private void initialize(int nRows, int nCols, TableImpl t)

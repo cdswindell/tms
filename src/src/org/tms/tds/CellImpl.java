@@ -28,7 +28,7 @@ public class CellImpl extends TableElementImpl implements Cell
     
     public CellImpl(ColumnImpl col, int cellOffset)
     {
-        super(ElementType.Cell, col);
+        super(col);
         m_col = col;
         m_cellOffset = cellOffset;
     }
@@ -36,6 +36,11 @@ public class CellImpl extends TableElementImpl implements Cell
     /*
      * Field getters/setters
      */
+    public ElementType getElementType()
+    {
+        return ElementType.Cell;
+    }
+    
     public Object getCellValue()
     {
         return m_cellValue;

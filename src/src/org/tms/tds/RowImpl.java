@@ -17,13 +17,18 @@ public class RowImpl extends TableSliceElementImpl implements Row
     
     protected RowImpl(TableImpl parentTable)
     {
-        super(ElementType.Row, parentTable);
+        super(parentTable);
     }
 
     /*
      * Field getters/setters
      */
 
+    public ElementType getElementType()
+    {
+        return ElementType.Row;
+    }
+    
     protected int getCellOffset()
     {
         return m_cellOffset;

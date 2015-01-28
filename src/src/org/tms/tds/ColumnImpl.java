@@ -21,12 +21,17 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     
     public ColumnImpl(TableImpl parentTable)
     {
-        super(ElementType.Column, parentTable);
+        super(parentTable);
     }
 
     /*
      * Field getters and setters
      */
+    public ElementType getElementType()
+    {
+        return ElementType.Column;
+    }
+    
     protected Class<? extends Object> getDataType()
     {
         return m_dataType;

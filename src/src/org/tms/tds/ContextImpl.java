@@ -78,7 +78,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
 
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
-        super(ElementType.Context);      
+        super();      
         set(sf_IS_DEFAULT_FLAG, isDefault);
         m_registeredTables = new WeakHashSet<Table>();
         
@@ -97,6 +97,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     protected ContextImpl(TableContext otherContext)
     {
         this(false, otherContext);
+    }
+    
+    public ElementType getElementType()
+    {
+        return ElementType.Context;
     }
     
     protected void initialize()

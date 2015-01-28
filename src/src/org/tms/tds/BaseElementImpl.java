@@ -24,6 +24,8 @@ abstract public class BaseElementImpl implements BaseElement
     abstract public boolean isReadOnly();
     abstract protected void setReadOnly(boolean readOnly);   
     
+    public abstract ElementType getElementType();
+    
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
     static final protected int sf_ENFORCE_DATATYPE_FLAG = 0x01;
@@ -38,30 +40,17 @@ abstract public class BaseElementImpl implements BaseElement
     static final protected int sf_IS_DIRTY_FLAG = 0x8000000;
     static final protected int sf_IS_INVALID_FLAG = 0x10000000;
     
-    private ElementType m_tableElementType;
     private Map<String, Object> m_elemProperties;
     
     // to save a little space, all flags are maintained in a 
     // single 32 bit integer
     protected int m_flags;
 
-    protected BaseElementImpl(ElementType eType)
+    protected BaseElementImpl()
     {
-        setElementType(eType);
-        
         m_flags = 0;
     }
     
-    public ElementType getElementType()
-    {
-        return m_tableElementType;
-    }
-
-    protected void setElementType(ElementType tableElementType)
-    {
-        m_tableElementType = tableElementType;
-    }
-
     private synchronized Map<String, Object> getElemProperties()
     {
         return getElemProperties(false);
@@ -85,7 +74,9 @@ abstract public class BaseElementImpl implements BaseElement
     
     protected void invalidate()
     {
-        m_flags |= sf_IS_INVALID_FLAG;
+        m_flags |= sf_IS_INVALID_FLAG;        
+        if (m_elemProperties != null)
+            m_elemProperties.clear();
     }
     
     protected void vetElement()
