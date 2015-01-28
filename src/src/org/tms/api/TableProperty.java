@@ -149,11 +149,11 @@ public enum TableProperty implements Comparable<TableProperty>
         switch(this)
         {
             case Index:
+            case Precision:
             case CellOffset:
             case NextCellOffset:
             case RowCapacityIncr:
             case ColumnCapacityIncr:
-            case Precision:
                 return true;
                 
             default:

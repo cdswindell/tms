@@ -1419,6 +1419,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return null;
     }    
 
+    protected int getNumDerivedCells()
+    {
+        return m_derivedCells.size();
+    }
+    
     /**
      * Registers the {@code Derivable} as being affected by changes to the
      * value of the specified cell
@@ -1480,6 +1485,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
         affects.remove(cell);
         
         return new ArrayList<Derivable>(affects);
+    }
+    
+    protected int getNumDerivedCellsAffects()
+    {
+        return m_cellAffects.size();
     }
     
     protected Iterable<CellImpl> derivedCells()

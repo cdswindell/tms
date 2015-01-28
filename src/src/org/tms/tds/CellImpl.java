@@ -565,9 +565,11 @@ public class CellImpl extends TableElementImpl implements Cell
         clearDerivation();
         
         // remove the cell from any ranges
-        for (RangeImpl r : getRangesInternal()) {
-            if (r != null && r.isValid())
-                r.remove(this);
+        if (getRangesInternal() != null) {
+            for (RangeImpl r : getRangesInternal()) {
+                if (r != null && r.isValid())
+                    r.remove(this);
+            }
         }
          
         m_cellValue = null;
