@@ -18,7 +18,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     private Object m_cells;
     private Class<? extends Object> m_dataType;
     private int m_cellsCapacity;
-    private boolean m_stronglyTyped;
     
     public ColumnImpl(TableImpl parentTable)
     {
@@ -45,7 +44,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     
     protected boolean isStronglyTyped()
     {
-        return m_stronglyTyped;
+        return isSet(sf_STRONGLY_TYPED_FLAG);
     }
 
     protected void setStronglyTyped(boolean stronglyTyped)
@@ -53,7 +52,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         if (stronglyTyped && getDataType() == null)
             throw new IllegalTableStateException("DataType Missing"); // can't strongly type a column without a datatype
         
-        m_stronglyTyped = stronglyTyped;
+       set(sf_STRONGLY_TYPED_FLAG, stronglyTyped);
     }
 
     /*

@@ -30,9 +30,13 @@ abstract public class BaseElementImpl implements BaseElement
     static final protected int sf_READONLY_FLAG = 0x02;
     static final protected int sf_SUPPORTS_NULL_FLAG = 0x04;
     static final protected int sf_AUTO_RECALCULATE_FLAG = 0x08;
-    static final protected int sf_IN_USE_FLAG = 0x10;
+    static final protected int sf_AUTO_RECALCULATE_DISABLED_FLAG = 0x10;
+    static final protected int sf_STRONGLY_TYPED_FLAG = 0x20;
+    static final protected int sf_IN_USE_FLAG = 0x40;
     
-    static final protected int sf_IS_INVALID_FLAG = 0x100;
+    static final protected int sf_IS_DEFAULT_FLAG = 0x4000000;
+    static final protected int sf_IS_DIRTY_FLAG = 0x8000000;
+    static final protected int sf_IS_INVALID_FLAG = 0x10000000;
     
     private ElementType m_tableElementType;
     private Map<String, Object> m_elemProperties;

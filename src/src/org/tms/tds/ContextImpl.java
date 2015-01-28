@@ -63,14 +63,13 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     {
         if (sf_DEFAULT_CONTEXT == null) {
             sf_DEFAULT_CONTEXT = new ContextImpl(true, null);
-            sf_DEFAULT_CONTEXT.setLabel("Default");
+            sf_DEFAULT_CONTEXT.setLabel("Default Table Context");
         }
             
         return sf_DEFAULT_CONTEXT;
     }
 
     private Set<Table> m_registeredTables;
-    private boolean m_default;
     
     private int m_rowCapacityIncr;
     private int m_columnCapacityIncr;
@@ -80,7 +79,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
         super(ElementType.Context);      
-        m_default = isDefault;
+        set(sf_IS_DEFAULT_FLAG, isDefault);
         m_registeredTables = new WeakHashSet<Table>();
         
         // initialize from default context, unless this the default
@@ -230,7 +229,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     
     protected boolean isDefault()
     {
-        return m_default;
+        return isSet(sf_IS_DEFAULT_FLAG);
     }
 
     public boolean isAutoRecalculate()

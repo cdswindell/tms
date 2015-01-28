@@ -59,8 +59,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		return new TableImpl(nRows, nCols, t);
 	}
 	
-    private boolean m_dirty;
-    
     private ArrayList<RowImpl> m_rows;
     private ArrayList<ColumnImpl> m_cols;
     private int m_nextCellOffset;
@@ -87,10 +85,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private int m_colCapacityIncr;
     private int m_precision;
 
-    private boolean m_autoRecalculateDeactivated;
-
-    private boolean m_readOnly;
-    
     protected TableImpl()
     {
         this(ContextImpl.getPropertyInt(null, TableProperty.RowCapacityIncr),
@@ -148,7 +142,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         int expectedNoOfDerivedCells = m_rowsCapacity * m_colsCapacity / 5; // assume 20%
         m_derivedCells = new HashMap<CellImpl, Derivation>(expectedNoOfDerivedCells);
         m_cellAffects = new LinkedHashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
-        m_autoRecalculateDeactivated = false;
+        set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
         
         m_rangedCells = new HashMap<CellImpl, Set<RangeImpl>>();
         
@@ -358,7 +352,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     public boolean isAutoRecalculateEnabled()
     {
-        return isAutoRecalculate() && !m_autoRecalculateDeactivated;
+        return isAutoRecalculate() && !isSet(sf_AUTO_RECALCULATE_DISABLED_FLAG);
     }
     
     public boolean isAutoRecalculate()
@@ -373,13 +367,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     public void deactivateAutoRecalculate()
     {
-        m_autoRecalculateDeactivated = true;
+        set(sf_AUTO_RECALCULATE_DISABLED_FLAG, true);
     }
 
     public void activateAutoRecalculate()
     {
-        m_autoRecalculateDeactivated = false;
+        set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
     }
+    
     
     @Override
     protected boolean isDataTypeEnforced()
@@ -437,12 +432,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
  
     protected boolean isDirty()
     {
-        return m_dirty;
+        return isSet(sf_IS_DIRTY_FLAG);
     }
     
     void setDirty(boolean dirty)
     {
-        m_dirty = dirty;
+        set(sf_IS_DIRTY_FLAG, dirty);
     }
 
     void markDirty() { setDirty(true); }
@@ -1272,13 +1267,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     public boolean isReadOnly()
     {
-        return m_readOnly;
+        return isSet(sf_READONLY_FLAG);
     }
     
     @Override
     protected void setReadOnly(boolean readOnly)
     {
-        m_readOnly = readOnly;
+        set(sf_READONLY_FLAG, readOnly);
     }
       
     @Override
