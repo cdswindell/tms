@@ -564,6 +564,11 @@ public class CellImpl extends TableElementImpl implements Cell
         // clear the cell value and cell derivation
         clearDerivation();
         
+        // clear any derivations on elements affected by this cell
+        List<Derivable> affects = getAffects();
+        if (affects != null) 
+            affects.forEach(d -> d.clearDerivation());
+        
         // remove the cell from any ranges
         if (getRangesInternal() != null) {
             for (RangeImpl r : getRangesInternal()) {

@@ -97,9 +97,16 @@ public class DeleteTableElementsTest
         assertThat(r2.getIndex(), is(2));
         assertThat(r2.isInvalid(), is(false));        
         assertThat(t.getNumRows(), is(2));
+        
+        RowImpl r3 = t.addRow();
+        assertThat(r3, notNullValue());
+        assertThat(r3.getIndex(), is(3));
+        assertThat(r3.isInvalid(), is(false));        
+        assertThat(t.getNumRows(), is(3));
                
         // set a value, it should become invalid when the row is deleted
         CellImpl cell1 = t.getCell(r1, c1);
+        cell1.setLabel("cell1");
         cell1.setDerivation("mean(row 2)");
         assertThat(cell1, notNullValue());
         assertThat(cell1.getRow(), is(r1));
@@ -108,14 +115,23 @@ public class DeleteTableElementsTest
         
         // set a value, it should become invalid when the row is deleted
         CellImpl cell2 = t.getCell(r2, c1);
+        cell2.setLabel("cell2");
         cell2.setDerivation("count(row 1)");
         assertThat(cell2, notNullValue());
         assertThat(cell2.getRow(), is(r2));
         assertThat(cell2.getColumn(), is(c1));
         assertThat(cell2.isInvalid(), is(false));
         
-        assertThat(t.getNumDerivedCellsAffects(), is(0));
-        assertThat(t.getNumDerivedCells(), is(2));
+        // set a value, it should become invalid when the row is deleted
+        CellImpl cell3 = t.getCell(r3, c1);
+        cell3.setDerivation("cell1 + cell2");
+        assertThat(cell3, notNullValue());
+        assertThat(cell3.getRow(), is(r3));
+        assertThat(cell3.getColumn(), is(c1));
+        assertThat(cell3.isInvalid(), is(false));
+        
+        assertThat(t.getNumDerivedCellsAffects(), is(2));
+        assertThat(t.getNumDerivedCells(), is(3));
         
         // fill row 2 and set a derivation on row 1
         r2.fill(25);
@@ -142,6 +158,9 @@ public class DeleteTableElementsTest
         
         assertThat(t.getNumDerivedCellsAffects(), is(0));
         assertThat(t.getNumDerivedCells(), is(0));
+        
+        assertThat(cell3.isValid(), is(true));
+        assertThat(cell3.isDerived(), is(false));
     }
     
     @Test 
