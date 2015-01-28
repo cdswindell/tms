@@ -681,16 +681,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return prevCurrent;
     }  
     
-    /**
-     * Return the raw rows arraylist. Allows Row class to insert a row into the table.
-     * Note: <b>for systems use only!</b>
-     * @return ArrayList&lt;RowImpl&gt;
-     */
-    ArrayList<RowImpl> getRowsInternal()
-    {
-        return m_rows;
-    }
-
     public RowImpl addRow()
     {
         return addRow(Access.Last);
@@ -1577,12 +1567,29 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	}
 
     @Override
-	public Iterable<Row> rows()
+    public Iterable<Row> rows()
     {
-	    ensureRowsExist();
+        ensureRowsExist();
         return new BaseElementIterable<Row>(getRowsInternal());
     }
     
+    @Override
+    public List<Row> getRows()
+    {
+        ensureRowsExist();
+        return new ArrayList<Row>(getRowsInternal());
+    }
+    
+    /**
+     * Return the raw rows arraylist. Allows Row class to insert a row into the table.
+     * Note: <b>for systems use only!</b>
+     * @return ArrayList&lt;RowImpl&gt;
+     */
+    ArrayList<RowImpl> getRowsInternal()
+    {
+        return m_rows;
+    }
+
     @Override
 	public Iterable<Column> columns()
     {

@@ -44,6 +44,7 @@ public enum TableProperty implements Comparable<TableProperty>
     Rows(true, false, ElementType.Table, ElementType.Range),
     Columns(true, false, ElementType.Table, ElementType.Range), 
     Ranges(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
+    Cells(true, false, ElementType.Row, ElementType.Column, ElementType.Range),
     
     // CellImpl properties
     Row(true, false, ElementType.Cell),

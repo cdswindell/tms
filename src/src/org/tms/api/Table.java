@@ -7,6 +7,7 @@ public interface Table extends TableElement
     public Row addRow();   
     public Row addRow(Access mode, Object... mda);   
     public Row getRow(Access mode, Object...mda);
+    public List<Row> getRows();
     public Iterable<Row> rows();
     public int getNumRows();
     

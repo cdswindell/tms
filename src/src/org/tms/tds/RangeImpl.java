@@ -56,9 +56,9 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return new ArrayList<RowImpl>(((JustInTimeSet<RowImpl>)m_rows).clone());
     }
     
-    public Iterable<RowImpl> rows()
+    protected Iterable<RowImpl> rows()
     {
-        return new BaseElementIterable<RowImpl>(m_rows.isEmpty() ? getTable().getRowsInternal() : getRows());
+        return getRows();
     }
     
     protected int getNumRows()
@@ -73,7 +73,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 
     public Iterable<ColumnImpl> columns()
     {
-        return new BaseElementIterable<ColumnImpl>(m_cols.isEmpty() ? getTable().getColumnsInternal() : getColumns());
+        return getColumns();
     }
     
     protected int getNumColumns()
@@ -81,6 +81,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return m_cols.size();
     }
 
+    @Override
     public List<Range> getRanges()
     {
         return new ArrayList<Range>(((JustInTimeSet<RangeImpl>)m_ranges).clone());
@@ -276,6 +277,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         m_ranges.forEach(r -> {if (r != null) r.remove(this);});
         m_cells.forEach(c -> {if (c != null) c.remove(this);});
     	
+        // clear out caches
         m_rows.clear();
         m_cols.clear();
         m_ranges.clear();
@@ -312,6 +314,9 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             case numRanges:
                 return getNumRanges();
                 
+            case numCells:
+                return getNumCells();
+                
             case Rows:
                 return getRows(); 
                 
@@ -321,8 +326,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             case Ranges:
                 return getRanges(); 
                 
-            case numCells:
-                return getNumCells();
+            case Cells:
+                return getCells(); 
                 
             default:
                 return super.getProperty(key);
@@ -373,6 +378,16 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     	
     	m_numCells = numCells += m_cells.size();
         return numCells;
+    }
+
+    public List<Cell> getCells()
+    {
+        return new ArrayList<Cell>(((JustInTimeSet<CellImpl>)m_cells).clone());
+    }
+    
+    protected Set<CellImpl> getCellsInternal()
+    {
+        return m_cells;
     }
 
 	@Override
@@ -447,6 +462,69 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 	}
 	
     @Override
+    protected boolean isEnforceDataType()
+    {
+        return false;
+    }
+
+    @Override
+    protected void setEnforceDataType(boolean enforceDataType)
+    {
+        // noop
+    }
+    
+    @Override
+    protected boolean isDataTypeEnforced()
+    {
+        if (getTable() != null)
+            return getTable().isDataTypeEnforced();
+        else
+            return isEnforceDataType();
+    }
+
+    @Override
+    protected boolean isSupportsNull()
+    {
+        return true;
+    }
+
+    @Override
+    protected void setSupportsNull(boolean enforceDataType)
+    {
+        // noop       
+    }
+
+    @Override
+    protected boolean isNullsSupported()
+    {
+        if (getTable() != null)
+            return getTable().isNullsSupported();
+        else
+            return isEnforceDataType();
+    }
+
+    @Override
+    public boolean isReadOnly()
+    {
+        return false;
+    }
+
+    @Override
+    protected void setReadOnly(boolean readOnly)
+    {
+        // noop        
+    }
+    
+    @Override
+    protected boolean isWriteProtected()
+    {
+        if (getTable() != null)
+            return getTable().isWriteProtected();
+        else
+            return isReadOnly();
+    }
+    
+    @Override
     public Iterable<Cell> cells()
     {
         return new RangeCellIterable();
@@ -480,23 +558,25 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             m_rowIndex = m_colIndex = m_rangeIndex = m_cellIndex = 1;
             m_rangeIterator = null;
             
-            if (m_range.getNumRows() > 0)
-                m_rows = m_range.getRows();
-            else {
-                m_table.ensureRowsExist();
-                m_rows = new ArrayList<RowImpl>(m_table.getRowsInternal());
+            if (m_range.getNumRows() > 0 || m_range.getNumColumns() > 0) {
+                if (m_range.getNumRows() > 0)
+                    m_rows = m_range.getRows();
+                else {
+                    m_table.ensureRowsExist();
+                    m_rows = new ArrayList<RowImpl>(m_table.getRowsInternal());
+                }
+                
+                m_numRows = m_rows.size();
+                           
+                if (m_range.getNumColumns() > 0)
+                    m_cols = m_range.getColumns();
+                else {
+                    m_table.ensureColumnsExist();
+                    m_cols = new ArrayList<ColumnImpl>(m_table.getColumnsInternal());
+                }
+                
+                m_numCols = m_cols.size();
             }
-            
-            m_numRows = m_rows.size();
-                       
-            if (m_range.getNumColumns() > 0)
-                m_cols = m_range.getColumns();
-            else {
-                m_table.ensureColumnsExist();
-                m_cols = new ArrayList<ColumnImpl>(m_table.getColumnsInternal());
-            }
-            
-            m_numCols = m_cols.size();
             
             m_numRanges = m_range.m_ranges.size();
             if (m_numRanges > 0) 
@@ -560,66 +640,5 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         }      
     }
 
-    @Override
-    protected boolean isEnforceDataType()
-    {
-        return false;
-    }
 
-    @Override
-    protected void setEnforceDataType(boolean enforceDataType)
-    {
-        // noop
-    }
-    
-    @Override
-    protected boolean isDataTypeEnforced()
-    {
-        if (getTable() != null)
-            return getTable().isDataTypeEnforced();
-        else
-            return isEnforceDataType();
-    }
-
-    @Override
-    protected boolean isSupportsNull()
-    {
-        return true;
-    }
-
-    @Override
-    protected void setSupportsNull(boolean enforceDataType)
-    {
-        // noop       
-    }
-
-    @Override
-    protected boolean isNullsSupported()
-    {
-        if (getTable() != null)
-            return getTable().isNullsSupported();
-        else
-            return isEnforceDataType();
-    }
-
-    @Override
-    public boolean isReadOnly()
-    {
-        return false;
-    }
-
-    @Override
-    protected void setReadOnly(boolean readOnly)
-    {
-        // noop        
-    }
-    
-    @Override
-    protected boolean isWriteProtected()
-    {
-        if (getTable() != null)
-            return getTable().isWriteProtected();
-        else
-            return isReadOnly();
-    }
 }

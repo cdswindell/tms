@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -311,11 +312,28 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             case Derivation:
                 return getDerivation();
                 
+            case Cells:
+                return getCells();
+                
             default:
                 return super.getProperty(key);
         }
     }   
 
+    protected List<CellImpl> getCells()
+    {
+        int numCells = getNumCells();
+        if (numCells == 0)
+            return Collections.emptyList();
+        
+        List<CellImpl> cells = new ArrayList<CellImpl>(numCells);
+        for (Cell c : cells()) {
+            cells.add((CellImpl)c);
+        }
+        
+        return cells;
+    }
+    
     @Override
     public boolean isReadOnly()
     {
