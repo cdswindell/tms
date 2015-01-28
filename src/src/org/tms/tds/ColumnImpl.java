@@ -311,6 +311,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     @SuppressWarnings("unchecked")
     public int getNumCells()
     {
+        vetElement();
         if (m_cells != null) {
         	int numNonNullCells = 0;
         	for (Object o : (ArrayList<CellImpl>)m_cells)
@@ -325,6 +326,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     @Override
     protected ColumnImpl setCurrent()
     {
+        vetElement();
         ColumnImpl prevCurrent = null;
         if (getTable() != null) 
             prevCurrent = getTable().setCurrentColumn(this);
