@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -84,7 +85,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     @Override
     public List<Range> getRanges()
     {
-        return new ArrayList<Range>(((JustInTimeSet<RangeImpl>)m_ranges).clone());
+        return Collections.unmodifiableList(new ArrayList<Range>(((JustInTimeSet<RangeImpl>)m_ranges).clone()));
     }
     
     protected Set<RangeImpl> getRangesInternal()

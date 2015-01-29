@@ -14,6 +14,7 @@ public interface Table extends TableElement
     public Column addColumn();  
     public Column addColumn(Access mode, Object... mda);  
     public Column getColumn(Access mode, Object...mda);
+    public List<Column> getColumns();
     public Iterable<Column> columns();
     public int getNumColumns();
     

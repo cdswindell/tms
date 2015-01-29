@@ -41,7 +41,7 @@ public class PostfixStackEvaluator
     public PostfixStackEvaluator(Derivation deriv)
     {
         m_table = deriv.getTable();
-        m_pfs = deriv.getPostfixStack();
+        m_pfs = deriv.getPostfixStackInternal();
         
         if (m_pfs == null || m_pfs.getStackType() != StackType.Postfix)
             throw new IllegalTableStateException("Postfix stack required");

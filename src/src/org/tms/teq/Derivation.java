@@ -297,9 +297,24 @@ public class Derivation
             return null;
     }
 
-    protected EquationStack getPostfixStack()
+    protected EquationStack getInfixStackInternal()
+    {
+        return m_ifs;
+    }
+    
+    protected Collection<Token> getInfixStack()
+    {
+        return Collections.unmodifiableCollection(m_ifs);
+    }
+    
+    protected EquationStack getPostfixStackInternal()
     {
         return m_pfs;
+    }
+    
+    protected Collection<Token> getPostfixStack()
+    {
+        return Collections.unmodifiableCollection(m_pfs);
     }
     
     protected MathContext getPrecision()

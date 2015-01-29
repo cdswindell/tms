@@ -67,7 +67,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     public List<Range> getRanges()
     {
         vetElement();
-        return new ArrayList<Range>(m_ranges.clone());
+        return Collections.unmodifiableList(new ArrayList<Range>(m_ranges.clone()));
     } 
     
     protected Set<RangeImpl> getRangesInternal()
@@ -119,7 +119,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     public List<TableElement> getAffectedBy()
     {
         if (m_deriv != null)
-            return m_deriv.getAffectedBy();
+            return Collections.unmodifiableList(m_deriv.getAffectedBy());
         else
             return null;
     }

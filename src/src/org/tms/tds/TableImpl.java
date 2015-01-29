@@ -334,7 +334,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     public List<Range>getRanges()
     {
-        return new ArrayList<Range>(m_ranges.clone());
+        return Collections.unmodifiableList(new ArrayList<Range>(m_ranges.clone()));
     }
 
     @Override
@@ -867,8 +867,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_cols == null ? 0 : m_cols.size();
     }
     
+    
     /**
-     * Return the raw rows arraylist. Allows Row class to insert a column into the table.
+     * Return the raw columns arraylist. Allows Column class to insert a column into the table.
      * Note: <b>for systems use only!</b>
      * @return ArrayList&lt;ColumnImpl&gt;
      */
@@ -877,6 +878,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_cols;
     }
 
+    @Override
+    public List<Column> getColumns()
+    {
+        ensureColumnsExist();
+        return Collections.unmodifiableList(new ArrayList<Column>(getColumnsInternal()));
+    }
+    
     protected ColumnImpl getCurrentColumn()
     {
         return m_curCol;
@@ -1534,7 +1542,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     public List<Row> getRows()
     {
         ensureRowsExist();
-        return new ArrayList<Row>(getRowsInternal());
+        return Collections.unmodifiableList(new ArrayList<Row>(getRowsInternal()));
     }
     
     /**

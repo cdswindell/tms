@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -474,7 +475,7 @@ abstract public class BaseElementImpl implements BaseElement
             if (elems != null) {
                 List<BaseElement> copy = (List<BaseElement>) new ArrayList<E>(elems.size());
                 copy.addAll(elems);
-                m_iter = (Iterator<E>) (copy).iterator();
+                m_iter = (Iterator<E>) Collections.unmodifiableList(copy).iterator();
             }
             else
                 m_iter = null;

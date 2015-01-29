@@ -407,7 +407,7 @@ public class CellImpl extends TableElementImpl implements Cell
     {
         Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null)
-            return deriv.getAffectedBy();
+            return Collections.unmodifiableList(deriv.getAffectedBy());
         else
             return null;
     }
@@ -417,7 +417,7 @@ public class CellImpl extends TableElementImpl implements Cell
     {
         TableImpl table = getTable();
         if (table != null)
-            return table.getCellAffects(this);
+            return Collections.unmodifiableList(table.getCellAffects(this));
         else
             return null;
     }
@@ -504,7 +504,7 @@ public class CellImpl extends TableElementImpl implements Cell
             if (ranges != null) {
                 List<Range> rangesList = new ArrayList<Range>(ranges.size());
                 rangesList.addAll(ranges);
-                return rangesList;
+                return Collections.unmodifiableList(rangesList);
             }
         }
         

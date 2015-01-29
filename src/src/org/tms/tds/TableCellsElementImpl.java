@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -136,7 +137,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
         if (numAffects > 0)
             affects.addAll(m_affects);
         
-        return affects;
+        return Collections.unmodifiableList(affects);
     }
     
     /*
