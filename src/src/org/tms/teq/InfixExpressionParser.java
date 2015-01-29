@@ -729,7 +729,22 @@ public class InfixExpressionParser
         else {
             // look for named cell
             if (table != null) {
-                Cell cell = table.getCell(Access.ByLabel, sb.toString());
+                String label = sb.toString();
+                Cell cell = table.getCell(Access.ByLabel, label);
+                
+                int tblRefIdx = 0;
+                if (cell == null && table.getTableContext() != null && 
+                        (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
+                        (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
+                {
+                    String tableName = label.substring(0, tblRefIdx);
+                    Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
+                    if (refTable != null) {
+                        label = label.substring(tblRefIdx + sf_TABLE_REF.length());
+                        cell = refTable.getCell(Access.ByLabel, label);
+                    }
+                }
+                
                 if (cell != null) {
                     value = cell;
                     tt = TokenType.CellRef;
@@ -792,11 +807,16 @@ public class InfixExpressionParser
             cell = table.getCell(Access.ByLabel, label);
             
             int tblRefIdx = 0;
-            if (cell == null && table.getTableContext() != null && (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0) {
-                String tableName = label.substring(0, tblRefIdx -1);
+            if (cell == null && table.getTableContext() != null && 
+                    (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
+                    (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
+            {
+                String tableName = label.substring(0, tblRefIdx);
                 Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
-                if (refTable != null)
+                if (refTable != null) {
+                    label = label.substring(tblRefIdx + sf_TABLE_REF.length());
                     cell = refTable.getCell(Access.ByLabel, label);
+                }
             }
             
             // if we found a cell, save it in the token and return the consumed chars
@@ -822,11 +842,16 @@ public class InfixExpressionParser
                 col = table.getColumn(Access.ByLabel, label);
                 
                 int tblRefIdx = 0;
-                if (col == null && (tblRefIdx = label.indexOf(sf_TABLE_REF)) > -1) {
-                    String tableName = label.substring(0, tblRefIdx -1);
+                if (col == null && table.getTableContext() != null && 
+                        (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
+                        (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
+                {
+                    String tableName = label.substring(0, tblRefIdx);
                     Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
-                    if (refTable != null)
-                        col = refTable.getColumn(Access.ByLabel, label);                    
+                    if (refTable != null) {
+                        label = label.substring(tblRefIdx + sf_TABLE_REF.length());
+                        col = refTable.getColumn(Access.ByLabel, label);
+                    }
                 }
             }
             
@@ -853,11 +878,16 @@ public class InfixExpressionParser
                 row = table.getRow(Access.ByLabel, label);
                 
                 int tblRefIdx = 0;
-                if (row == null && (tblRefIdx = label.indexOf(sf_TABLE_REF)) > -1) {
-                    String tableName = label.substring(0, tblRefIdx -1);
+                if (row == null && table.getTableContext() != null && 
+                        (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
+                        (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
+                {
+                    String tableName = label.substring(0, tblRefIdx);
                     Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
-                    if (refTable != null)
-                        row = refTable.getRow(Access.ByLabel, label);                    
+                    if (refTable != null) {
+                        label = label.substring(tblRefIdx + sf_TABLE_REF.length());
+                        row = refTable.getRow(Access.ByLabel, label);
+                    }
                 }
             }
             
@@ -881,11 +911,16 @@ public class InfixExpressionParser
             range = table.getRange(Access.ByLabel, label);
             
             int tblRefIdx = 0;
-            if (range == null && (tblRefIdx = label.indexOf(sf_TABLE_REF)) > -1) {
-                String tableName = label.substring(0, tblRefIdx -1);
+            if (range == null && table.getTableContext() != null && 
+                    (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
+                    (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
+            {
+                String tableName = label.substring(0, tblRefIdx);
                 Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
-                if (refTable != null)
-                    range = refTable.getRange(Access.ByLabel, label);                    
+                if (refTable != null) {
+                    label = label.substring(tblRefIdx + sf_TABLE_REF.length());
+                    range = refTable.getRange(Access.ByLabel, label);
+                }
             }
             
             // if we found a range, save it in the token and return the consumed chars
