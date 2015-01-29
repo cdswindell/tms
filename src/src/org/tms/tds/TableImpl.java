@@ -222,7 +222,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     if (tei.isInvalid())
                         continue;
                     if (te.getTable() == this) 
-                        ((TableElementImpl)te).delete();
+                        ((TableElementImpl)te).delete(false);
                     else 
                         throw new InvalidParentException(te, this);
                 }
@@ -280,13 +280,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 return getNumRows(); 
                 
             case Rows:
-                return getRowsInternal(); 
+                return getRows(); 
                 
             case numColumns:
                 return getNumColumns(); 
                 
             case Columns:
-                return getColumnsInternal(); 
+                return getColumns(); 
                 
             case numCells:
                 return getNumCells(); 
@@ -351,7 +351,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
     @Override
-    public void delete()
+    protected void delete(boolean compress)
     {
     	this.m_subsets.clear();
     	this.m_affects.clear();

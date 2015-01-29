@@ -209,7 +209,7 @@ abstract public class BaseElementImpl implements BaseElement
         return false;
     }
     
-    protected boolean hasProperty(String key)
+    public boolean hasProperty(String key)
     {
         return hasProperty(key, true);
     }

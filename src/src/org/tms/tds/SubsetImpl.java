@@ -267,7 +267,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
      */
     
     @Override 
-    public void delete()
+    protected void delete(boolean compress)
     {
         // delete the subset from its parent table
         if (getTable() != null) getTable().remove(this);  

@@ -8,8 +8,11 @@ public interface BaseElement
     public boolean isSupportsNull();
 	
     public boolean hasProperty(TableProperty p);
-    public Object getProperty(String p);
+    public boolean hasProperty(String key);
+    
     public Object getProperty(TableProperty p);
+    public Object getProperty(String p);
+    
     public int getPropertyInt(TableProperty p);
     public boolean getPropertyBoolean(TableProperty p);
 }

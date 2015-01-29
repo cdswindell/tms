@@ -337,12 +337,12 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
-    public void delete()
+    protected void delete(boolean compress)
     {
         clear();
         invalidate();
     }
-	
+    
 	/*
 	 * Derivation-related methods
 	 */

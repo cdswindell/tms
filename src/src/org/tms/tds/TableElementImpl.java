@@ -12,7 +12,7 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
 {
 	abstract public Table getTable();
 	abstract public TableContext getTableContext();
-    abstract public void delete();
+    abstract protected void delete(boolean compress);
     abstract public void fill(Object o);
     
     abstract protected void registerAffects(Derivable d);
@@ -44,6 +44,12 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
         setEnforceDataType(false);
+    }
+    
+    @Override
+    public void delete()
+    {
+        delete(true);
     }
     
     @Override

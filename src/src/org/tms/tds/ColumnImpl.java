@@ -336,7 +336,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     
     @SuppressWarnings("unchecked")
     @Override
-    public void delete()
+    protected void delete(boolean compress)
     {
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
@@ -362,7 +362,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             
             // invalidate column cells
             if (m_cells != null && m_cells instanceof ArrayList) 
-                ((ArrayList<CellImpl>)m_cells).forEach(c -> { if (c != null) c.invalidateCell();});
+                ((List<CellImpl>)m_cells).forEach(c -> { if (c != null) c.invalidateCell(); });
             
             TableSliceElementImpl rc = cols.remove(idx);
             assert rc == this : "Removed column mismatch";

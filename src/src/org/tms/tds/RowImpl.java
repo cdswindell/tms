@@ -184,7 +184,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
     } 
        
     @Override
-    public void delete()
+    protected void delete(boolean compress)
     {
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();

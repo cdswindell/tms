@@ -26,6 +26,7 @@ public interface Table extends TableElement
        
     public Cell getCell(Row row, Column col);      
     public Cell getCell(Access mode, Object... mda);
+    
     public Object getCellValue(Row row, Column col);
     public boolean setCellValue(Row row, Column col, Object o);
   
