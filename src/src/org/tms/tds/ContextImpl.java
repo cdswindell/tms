@@ -4,10 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.InvalidAccessException;
+import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
 import org.tms.teq.TokenMapper;
@@ -231,6 +234,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     {
         set(sf_READONLY_FLAG, readOnly);
     }
+        
+    @Override
+    protected boolean isNull()
+    {
+         return m_registeredTables.isEmpty();
+    }
     
     protected boolean isDefault()
     {
@@ -328,7 +337,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         return this;
     }
     
-    protected void unregister(TableImpl table)
+    protected void deregister(TableImpl table)
     {
         if (table != null) 
             m_registeredTables.remove(table);
@@ -340,8 +349,47 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     }
 
     @Override
-    protected boolean isNull()
+    public TableImpl getTable(Access mode, Object... mda)
     {
-         return m_registeredTables.isEmpty();
+        Object md = null;
+        switch (mode) {
+            case ByLabel:
+            case ByDescription:
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (md == null ? "<null>" : md.toString())));
+                return (TableImpl)find(m_registeredTables, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+
+            case ByProperty:
+                Object key = mda != null && mda.length > 0 ? mda[0] : null;
+                Object value = mda != null && mda.length > 1 ? mda[1] : null;
+                if (key == null || value == null)
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (key == null ? "<null>" : key.toString()))); 
+                
+                // key must either be a table property or a string
+                if (key instanceof TableProperty) 
+                    return (TableImpl)find(m_registeredTables, (TableProperty)key, value);
+                else if (key instanceof String) 
+                    return (TableImpl)find(m_registeredTables, (String)key, value);
+                else
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (key == null ? "<null>" : key.toString())));                 
+
+            case ByReference:
+            {
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof TableImpl) || (((TableImpl)md).getElementType() != ElementType.Table))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (md == null ? "<null>" : md.toString())));               
+
+                vetElement((TableImpl)md);
+                return (TableImpl)md;
+            }
+            
+            default:
+                throw new InvalidAccessException(ElementType.Context, ElementType.Table, mode, false, mda);                
+        }
     }
 }

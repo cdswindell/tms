@@ -2,7 +2,6 @@ package org.tms.tds;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
@@ -309,7 +308,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             c = ContextImpl.getDefaultContext();
         
         if (c != null)
-        	c.unregister(this);
+        	c.deregister(this);
         
         m_context = c.register(this);
         
@@ -351,7 +350,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     		m_rows.clear();
     	
     	if (getTableContext() != null)
-    		getTableContext().unregister(this);;   	
+    		getTableContext().deregister(this);;   	
     }
     
     
@@ -447,6 +446,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     void markDirty() { setDirty(true); }
     void markClean() { setDirty(false); };
+    
+    protected TableImpl getTable(Access mode, Object...mda)
+    {
+        if (getTableContext() != null)
+            return getTableContext().getTable(mode, mda);
+        else
+            return null;
+    }
     
     /*
      * Cell manipulation routines
@@ -575,6 +582,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 else
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (key == null ? "<null>" : key.toString())));                 
+
+            case ByReference:
+            {
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof RangeImpl) || (((RangeImpl)md).getElementType() != ElementType.Range))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (md == null ? "<null>" : md.toString())));               
+                return (RangeImpl)md;
+            }
+
             default:
                 throw new InvalidAccessException(ElementType.Table, ElementType.Range, mode, false, mda);                
         }
@@ -1157,48 +1174,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return -1;
     }
     
-    protected TableElement find(Collection<? extends TableElement> slices, TableProperty key, Object value)
-    {
-        assert key != null : "TableProperty required (enum)";
-        assert value != null : "Value required";
-        
-        if (slices != null && value != null) {
-            for (TableElement tes : slices) {
-                if (tes != null) {
-                    Object p = tes.getProperty(key);
-                    if (p != null && p.equals(value)) {
-                        if (tes instanceof TableSliceElementImpl)
-                            ((TableSliceElementImpl)tes).setCurrent();
-                        return tes;
-                    }
-                }
-            }
-        }
-        
-        return null;
-    }
-
-    protected TableElement find(Collection<? extends TableElement> slices, String key, Object value)
-    {
-        assert key != null : "TableProperty required (String)";
-        assert value != null : "Value required";
-        
-        if (slices != null && value != null) {
-            for (TableElement tes : slices) {
-                if (tes != null) {
-                    Object p = tes.getProperty(key);
-                    if (p != null && p.equals(value)) {
-                        if (tes instanceof TableSliceElementImpl)
-                            ((TableSliceElementImpl)tes).setCurrent();
-                        return tes;
-                    }
-                }
-            }
-        }
-        
-        return null;
-    }
-
     @Override
     public int getNumCells()
     {

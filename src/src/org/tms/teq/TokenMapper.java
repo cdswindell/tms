@@ -162,7 +162,7 @@ public class TokenMapper
         m_userTokenMap.put(label.trim().toLowerCase(),  t);
     }
     
-    public boolean unRegisterOperator(Operator oper)
+    public boolean deregisterOperator(Operator oper)
     {
         if (oper == null)
             throw new IllegalTableStateException("Operator required");
@@ -175,7 +175,7 @@ public class TokenMapper
         return t != null;
     }
     
-    public void unRegisterAllOperators()
+    public void deregisterAllOperators()
     {
     	m_userTokenMap.clear();
     }

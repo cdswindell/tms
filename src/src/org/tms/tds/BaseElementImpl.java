@@ -201,7 +201,7 @@ abstract public class BaseElementImpl implements BaseElement
         return false;
     }
     
-    protected Object getProperty(TableProperty key)
+    public Object getProperty(TableProperty key)
     {
         if (!key.isImplementedBy(this))
             throw new UnimplementedException(this, key);
@@ -279,6 +279,48 @@ abstract public class BaseElementImpl implements BaseElement
             throw new InvalidPropertyException(this, key, "not int value");
     }
     
+    protected BaseElement find(Collection<? extends BaseElement> slices, TableProperty key, Object value)
+    {
+        assert key != null : "TableProperty required (enum)";
+        assert value != null : "Value required";
+        
+        if (slices != null && value != null) {
+            for (BaseElement tes : slices) {
+                if (tes != null) {
+                    Object p = tes.getProperty(key);
+                    if (p != null && p.equals(value)) {
+                        if (tes instanceof TableSliceElementImpl)
+                            ((TableSliceElementImpl)tes).setCurrent();
+                        return tes;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    protected BaseElement find(Collection<? extends BaseElement> slices, String key, Object value)
+    {
+        assert key != null : "TableProperty required (String)";
+        assert value != null : "Value required";
+        
+        if (slices != null && value != null) {
+            for (BaseElement tes : slices) {
+                if (tes != null) {
+                    Object p = tes.getProperty(key);
+                    if (p != null && p.equals(value)) {
+                        if (tes instanceof TableSliceElementImpl)
+                            ((TableSliceElementImpl)tes).setCurrent();
+                        return tes;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
     /**
      * initialize properties defined in BaseElement
      * @param tp

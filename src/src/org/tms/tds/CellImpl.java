@@ -29,6 +29,7 @@ public class CellImpl extends TableElementImpl implements Cell
     protected CellImpl(ColumnImpl col, int cellOffset)
     {
         super(col);
+        
         m_col = col;
         m_cellOffset = cellOffset;
     }
@@ -230,12 +231,6 @@ public class CellImpl extends TableElementImpl implements Cell
     protected int getCellOffset()
     {
     	return m_cellOffset;
-    }
-    
-    void setCellOffset(int offset)
-    {
-        vetElement();
-    	m_cellOffset = offset;
     }
     
     /**
