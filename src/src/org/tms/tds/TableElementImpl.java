@@ -24,7 +24,7 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
     abstract protected boolean isWriteProtected();
     
     abstract protected boolean add(SubsetImpl subsetImpl);
-    abstract protected boolean remove(SubsetImpl range);
+    abstract protected boolean remove(SubsetImpl subset);
     abstract protected Set<SubsetImpl> getSubsetsInternal();
     
     protected TableElementImpl(TableElementImpl e)

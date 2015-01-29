@@ -44,7 +44,7 @@ public class SubsetTest
     }
     
     @Test
-    public void createRangeTest() throws InterruptedException
+    public void createSubsetTest() throws InterruptedException
     {
         TableImpl t = new TableImpl(10, 10);
         assert (t != null);
@@ -100,14 +100,14 @@ public class SubsetTest
         assertThat(r.contains(r3), is(true));
         assertThat(r.containsAll(rs), is(true));
         
-        List<Subset> rowRanges = r1.getSubsets();
-        assertThat(rowRanges, notNullValue());
-        assertThat(rowRanges.isEmpty(), is(false));
-        assertThat(rowRanges.contains(r), is(true));
+        List<Subset> rowSubsets = r1.getSubsets();
+        assertThat(rowSubsets, notNullValue());
+        assertThat(rowSubsets.isEmpty(), is(false));
+        assertThat(rowSubsets.contains(r), is(true));
         
-        // make sure ranges retrieved from rows are immutable
+        // make sure subsets retrieved from rows are immutable
         try {
-            rowRanges.clear();
+            rowSubsets.clear();
             fail("Modified immutable set");
         }
         catch (UnsupportedOperationException e) {

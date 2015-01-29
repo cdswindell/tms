@@ -470,7 +470,7 @@ public class CellImpl extends TableElementImpl implements Cell
         TableImpl parent = getTable();
         assert parent != null : "Parent table required";
         if (parent != null)
-            return parent.registerRangeCell(this, r);
+            return parent.registerSubsetCell(this, r);
         
         return false;
     }
@@ -479,7 +479,7 @@ public class CellImpl extends TableElementImpl implements Cell
     {
         if (r != null) {
             /*
-             * if the range contains the element, use the range method to do all the work
+             * if the subset contains the element, use the subset method to do all the work
              * TableSliceElementImpl.remove will be called again to finish up
              */
             if (r.contains(this))
@@ -488,7 +488,7 @@ public class CellImpl extends TableElementImpl implements Cell
             TableImpl parent = getTable();
             assert parent != null : "Parent table required";
             if (parent != null)
-                return parent.deregisterRangeCell(this, r);
+                return parent.deregisterSubsetCell(this, r);
         }
         
         return false;
@@ -500,11 +500,11 @@ public class CellImpl extends TableElementImpl implements Cell
         TableImpl parent = getTable();
         assert parent != null : "Parent table required";
         if (parent != null) {
-            Set<SubsetImpl> ranges = parent.getCellRanges(this);
-            if (ranges != null) {
-                List<Subset> rangesList = new ArrayList<Subset>(ranges.size());
-                rangesList.addAll(ranges);
-                return Collections.unmodifiableList(rangesList);
+            Set<SubsetImpl> subsets = parent.getCellSubsets(this);
+            if (subsets != null) {
+                List<Subset> subsetsList = new ArrayList<Subset>(subsets.size());
+                subsetsList.addAll(subsets);
+                return Collections.unmodifiableList(subsetsList);
             }
         }
         
@@ -516,7 +516,7 @@ public class CellImpl extends TableElementImpl implements Cell
         TableImpl parent = getTable();
         assert parent != null : "Parent table required";
         if (parent != null) 
-            return parent.getCellRanges(this);
+            return parent.getCellSubsets(this);
         else
             return Collections.emptySet();
     }
@@ -534,7 +534,7 @@ public class CellImpl extends TableElementImpl implements Cell
         if (affects != null) 
             affects.forEach(d -> d.clearDerivation());
         
-        // remove the cell from any ranges
+        // remove the cell from any subsets
         if (getSubsetsInternal() != null) {
             for (SubsetImpl r : getSubsetsInternal()) {
                 if (r != null && r.isValid())

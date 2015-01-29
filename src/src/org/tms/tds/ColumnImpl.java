@@ -350,8 +350,8 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             if (idx < 0 || idx >= cols.size())
                 throw new IllegalTableStateException("Column offset outside of parent table bounds: " + idx);
         
-            // remove element from ranges that contain it
-            removeFromAllRanges();
+            // remove element from subsets that contain it
+            removeFromAllSubsets();
             
             // clear any derivations
             clearDerivation();

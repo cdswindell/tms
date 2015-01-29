@@ -200,8 +200,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
                 if (idx < 0 || idx >= rows.size())
                     throw new IllegalTableStateException("Row offset outside of parent table bounds: " + idx);
                 
-                // remove element from ranges that contain it
-                removeFromAllRanges();
+                // remove element from subsets that contain it
+                removeFromAllSubsets();
                 
                 // clear any derivations
                 clearDerivation();

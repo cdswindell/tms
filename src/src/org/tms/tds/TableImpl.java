@@ -65,14 +65,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private Deque<CellReference> m_currentCellStack;
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
     
-    private Map<CellImpl, Set<SubsetImpl>> m_rangedCells;
+    private Map<CellImpl, Set<SubsetImpl>> m_subsetedCells;
     private Map<CellImpl, Derivation> m_derivedCells;
     private Map<CellImpl, Set<Derivable>> m_cellAffects;
     
     private RowImpl m_curRow;
     private ColumnImpl m_curCol;
     
-    private JustInTimeSet<SubsetImpl> m_ranges;
+    private JustInTimeSet<SubsetImpl> m_subsets;
     
     private ContextImpl m_context;
     
@@ -145,7 +145,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_nextCellOffset = 0;
         
         // set all other arrays/sets/maps to null/JustInTime
-        m_ranges = new JustInTimeSet<SubsetImpl>();
+        m_subsets = new JustInTimeSet<SubsetImpl>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_currentCellStack = new ArrayDeque<CellReference>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
@@ -155,7 +155,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_cellAffects = new LinkedHashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
         
-        m_rangedCells = new HashMap<CellImpl, Set<SubsetImpl>>();
+        m_subsetedCells = new HashMap<CellImpl, Set<SubsetImpl>>();
         
         // clear dirty flag, as table is empty
         markClean();
@@ -341,25 +341,25 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     public List<Subset>getSubsets()
     {
-        return Collections.unmodifiableList(new ArrayList<Subset>(m_ranges.clone()));
+        return Collections.unmodifiableList(new ArrayList<Subset>(m_subsets.clone()));
     }
 
     @Override
     public int getNumSubsets()
     {
-        return m_ranges.size();
+        return m_subsets.size();
     }
     
     @Override
     public void delete()
     {
-    	this.m_ranges.clear();
+    	this.m_subsets.clear();
     	this.m_affects.clear();
     	this.m_cellAffects.clear();
     	this.m_cellOffsetRowMap.clear();
     	this.m_currentCellStack.clear();
     	this.m_derivedCells.clear();
-    	this.m_rangedCells.clear();
+    	this.m_subsetedCells.clear();
     	this.m_unusedCellOffsets.clear();
     	this.m_cols.clear();
     	this.m_rows.clear();
@@ -411,7 +411,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     protected boolean add(SubsetImpl r)
     {
         vetParent(r);
-        boolean processed = m_ranges.add(r);
+        boolean processed = m_subsets.add(r);
         if (processed) setDirty(true);
         return processed;
     }
@@ -422,7 +422,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     protected boolean remove(SubsetImpl r)
     {
         vetParent(r);
-        return m_ranges.remove(r);
+        return m_subsets.remove(r);
     }
  
     protected boolean isDirty()
@@ -556,7 +556,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 if (md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));
-                return (SubsetImpl)find(m_ranges, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+                return (SubsetImpl)find(m_subsets, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
                 
             case ByProperty:
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;
@@ -567,9 +567,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 
                 // key must either be a table property or a string
                 if (key instanceof TableProperty) 
-                    return (SubsetImpl)find(m_ranges, (TableProperty)key, value);
+                    return (SubsetImpl)find(m_subsets, (TableProperty)key, value);
                 else if (key instanceof String) 
-                    return (SubsetImpl)find(m_ranges, (String)key, value);
+                    return (SubsetImpl)find(m_subsets, (String)key, value);
                 else
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (key == null ? "<null>" : key.toString())));                 
@@ -590,7 +590,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     protected Set<SubsetImpl> getSubsetsInternal()
     {
-        return m_ranges;
+        return m_subsets;
     }
     
     @Override
@@ -600,19 +600,19 @@ public class TableImpl extends TableCellsElementImpl implements Table
         if (mda != null && mda.length > 0)
             md = mda[0];
         
-        SubsetImpl range = null;
+        SubsetImpl subset = null;
         switch (mode) {
             case ByLabel:
-                range = new SubsetImpl(this);
+                subset = new SubsetImpl(this);
                 if (md != null && md instanceof String)
-                    range.setLabel((String)md);;
+                    subset.setLabel((String)md);;
                 break;
                 
                 default:
                     throw new InvalidAccessException(ElementType.Table, ElementType.Subset, mode, true, mda);                
         }
         
-        return range;
+        return subset;
     }
     
    /*
@@ -1459,27 +1459,27 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return new BaseElementIterableInternal<CellImpl>(m_derivedCells.keySet());
     }
     
-    protected boolean registerRangeCell(CellImpl cell, SubsetImpl r)
+    protected boolean registerSubsetCell(CellImpl cell, SubsetImpl r)
     {
-        Set<SubsetImpl> ranges = m_rangedCells.get(cell);
-        if (ranges == null) {
-            ranges = new HashSet<SubsetImpl>();
-            m_rangedCells.put(cell, ranges);
+        Set<SubsetImpl> subsets = m_subsetedCells.get(cell);
+        if (subsets == null) {
+            subsets = new HashSet<SubsetImpl>();
+            m_subsetedCells.put(cell, subsets);
         }
         
-        return ranges.add(r);
+        return subsets.add(r);
     }
 
-    protected boolean deregisterRangeCell(CellImpl cell, SubsetImpl r)
+    protected boolean deregisterSubsetCell(CellImpl cell, SubsetImpl r)
     {
-        Set<SubsetImpl> ranges = m_rangedCells.get(cell);
-        if (ranges != null) {
-            boolean removed = ranges.remove(r);
+        Set<SubsetImpl> subsets = m_subsetedCells.get(cell);
+        if (subsets != null) {
+            boolean removed = subsets.remove(r);
             
-            // purge the cell from the range set, if no ranges remain
+            // purge the cell from the subset set, if no subsets remain
             // otherwise, the cell may linger once deleted
-            if (ranges.isEmpty())
-                m_rangedCells.remove(cell);
+            if (subsets.isEmpty())
+                m_subsetedCells.remove(cell);
             
             return removed;
         }
@@ -1487,9 +1487,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return false;
     }
     
-    protected Set<SubsetImpl> getCellRanges(CellImpl cell)
+    protected Set<SubsetImpl> getCellSubsets(CellImpl cell)
     {
-        return m_rangedCells.get(cell);
+        return m_subsetedCells.get(cell);
     }
     
     protected List<Derivable> getAffects(TableElementImpl te)
@@ -1572,7 +1572,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	@Override
 	public Iterable<Subset> subsets()
     {
-        return new BaseElementIterable<Subset>(m_ranges);
+        return new BaseElementIterable<Subset>(m_subsets);
     }
     
 	@Override

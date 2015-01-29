@@ -24,7 +24,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     abstract protected TableSliceElementImpl insertSlice(int idx);
     abstract protected TableSliceElementImpl setCurrent();
     
-    private JustInTimeSet<SubsetImpl> m_ranges;
+    private JustInTimeSet<SubsetImpl> m_subsets;
     private int m_index = -1;    
     private Derivation m_deriv;
 
@@ -67,12 +67,12 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     public List<Subset> getSubsets()
     {
         vetElement();
-        return Collections.unmodifiableList(new ArrayList<Subset>(m_ranges.clone()));
+        return Collections.unmodifiableList(new ArrayList<Subset>(m_subsets.clone()));
     } 
     
     protected Set<SubsetImpl> getSubsetsInternal()
     {
-        return m_ranges;
+        return m_subsets;
     } 
     
     @Override
@@ -191,13 +191,13 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         vetElement();
         if (r != null) {
             /*
-             *  if the range doesn't contain the row, use the range method to do all the work
+             *  if the subset doesn't contain the row, use the subset method to do all the work
              *  TableSliceElementImpl.add will be called recursively to finish up
              */
             if (!r.contains(this))
                 return r.add(this);
             
-            return m_ranges.add(r);
+            return m_subsets.add(r);
         }
         
         return false;
@@ -205,7 +205,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
 
     /**
      * Remove the reference from the specified SubsetImpl to this TableSliceElementImpl, removing
-     * this TableSliceElementImple from the specified range, if it has not already been removed.
+     * this TableSliceElementImple from the specified subset, if it has not already been removed.
      * 
      * Returns true if the specified SubsetImpl was successfully removed
      * 
@@ -216,22 +216,22 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     {
         if (r != null) {
             /*
-             * if the range contains the element, use the range method to do all the work
+             * if the subset contains the element, use the subset method to do all the work
              * TableSliceElementImpl.remove will be called again to finish up
              */
         	if (r.contains(this))
         		r.remove(this);
         	
-        	return m_ranges.remove(r);
+        	return m_subsets.remove(r);
         }
         
         return false;
     }
     
-    protected void removeFromAllRanges()
+    protected void removeFromAllSubsets()
     {
-    	// remove this table slice element from all ranges
-    	m_ranges.forEach(r -> {if (r != null) r.remove(this);});
+    	// remove this table slice element from all subsets
+    	m_subsets.forEach(r -> {if (r != null) r.remove(this);});
     }
     
     protected void pushCurrent()
@@ -268,7 +268,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         }
         
         // initialize other member fields
-        m_ranges = new JustInTimeSet<SubsetImpl>();
+        m_subsets = new JustInTimeSet<SubsetImpl>();
         setIndex(-1);
         setInUse(false);
     } 
@@ -279,7 +279,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         switch(key)
         {
             case numSubsets:
-                return m_ranges.size();
+                return m_subsets.size();
                 
             case Subsets:
                 return getSubsets();

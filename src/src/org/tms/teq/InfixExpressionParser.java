@@ -489,7 +489,7 @@ public class InfixExpressionParser
                         argCnt++;
                     break;
                 
-                case RangeOp: // handled as expression arg
+                case SubsetOp: // handled as expression arg
                     break;
                     
                 case Comma: // skip these elements
@@ -696,7 +696,7 @@ public class InfixExpressionParser
                 }
             }
             else if (tt == TokenType.SubsetRef) {
-                additionalCharsParsed = parseRangeReference(exprChars, curPos + charsParsed, table, t);
+                additionalCharsParsed = parseSubsetReference(exprChars, curPos + charsParsed, table, t);
                 if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
                     charsParsed += additionalCharsParsed;
                 else {
@@ -912,7 +912,7 @@ public class InfixExpressionParser
         return 0;
     }
 
-    private int parseRangeReference(char[] exprChars, int curPos, Table table, Token t) 
+    private int parseSubsetReference(char[] exprChars, int curPos, Table table, Token t) 
     {
         ElementReference er = parseElementReference(exprChars, curPos);
         if (er.foundToken()) {
@@ -933,7 +933,7 @@ public class InfixExpressionParser
                 }
             }
             
-            // if we found a range, save it in the token and return the consumed chars
+            // if we found a subset, save it in the token and return the consumed chars
             if (subset != null) {
                 t.setValue(subset);
                 return er.getCharsParsed();

@@ -184,7 +184,7 @@ public class PostfixStackGenerator
                 case LAST_TokenType:
                 case NULL_TokenType:
                 case NullOpValue:
-                case RangeOp:
+                case SubsetOp:
                 case Variable:
                 default:
                     break;

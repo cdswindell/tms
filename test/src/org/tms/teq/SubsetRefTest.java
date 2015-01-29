@@ -21,7 +21,7 @@ import org.tms.tds.TableImpl;
 public class SubsetRefTest extends BaseTest
 {
     @Test
-    public void testSingleVariableRangeStats()
+    public void testSingleVariableSubsetStats()
     {
         Table tbl = TableFactory.createTable(12, 10);        
         assert (tbl != null);
@@ -49,7 +49,7 @@ public class SubsetRefTest extends BaseTest
         c8.fill(42);
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 2));
         
-        // create range
+        // create subset
         Subset rng = tbl.addSubset(Access.ByLabel, "rng1");
         rng.add(c8);
         
@@ -142,7 +142,7 @@ public class SubsetRefTest extends BaseTest
         assertThat(c.isNumericValue(), is(true));
         assertThat(closeTo(c.getCellValue(), 1.7653, 0.0001), is(true));
         
-        // negative test; can't transform a range        
+        // negative test; can't transform a subset        
         try {
             c.setDerivation("normalize(set 'rng1')");
             fail("Derivation succeeded");

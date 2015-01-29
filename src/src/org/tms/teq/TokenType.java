@@ -21,7 +21,7 @@ public enum TokenType implements Labeled
     Variable(false),
     Operand(false),
     
-    RangeOp(true, 1),
+    SubsetOp(true, 1),
     StatOp(true, 1),
     BinaryStatOp(true, 2),
     TransformOp(true, 1),
@@ -69,7 +69,7 @@ public enum TokenType implements Labeled
     public boolean isFunction()
     {
         switch (this) {
-            case RangeOp:
+            case SubsetOp:
             case StatOp:
             case BinaryStatOp:
             case TransformOp:

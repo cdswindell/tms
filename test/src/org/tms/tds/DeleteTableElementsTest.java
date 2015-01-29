@@ -51,7 +51,7 @@ public class DeleteTableElementsTest
         assertThat(r1.isInvalid(), is(true));        
         assertThat(c.isInvalid(), is(true));  
         
-        // assert that range contains no rows
+        // assert that subset contains no rows
         assertThat(rng.getNumRows(), is(0));
         assertThat(rng.getNumCells(), is(0));
         assertThat(rng.getRows(), notNullValue());
@@ -66,10 +66,10 @@ public class DeleteTableElementsTest
             assertThat(de.getTableErrorClass(), is(TableErrorClass.Deleted));
         }
         
-        // try adding the deleted row back to the range, it should fail
+        // try adding the deleted row back to the subset, it should fail
         try {
             rng.add(r1);
-            fail("range.add succeeded");
+            fail("subset.add succeeded");
         }
         catch (DeletedElementException de) {
             assertThat(de.getTableErrorClass(), is(TableErrorClass.Deleted));
@@ -257,7 +257,7 @@ public class DeleteTableElementsTest
         assertThat(c1.isInvalid(), is(true));        
         assertThat(c.isInvalid(), is(true));  
         
-        // assert that range contains no rows
+        // assert that subset contains no rows
         assertThat(rng.getNumColumns(), is(0));
         assertThat(rng.getNumCells(), is(0));
         assertThat(rng.getColumns(), notNullValue());
@@ -275,10 +275,10 @@ public class DeleteTableElementsTest
             assertThat(de.getTableErrorClass(), is(TableErrorClass.Deleted));
         }
         
-        // try adding the deleted col back to the range, it should fail
+        // try adding the deleted col back to the subset, it should fail
         try {
             rng.add(c1);
-            fail("range.add succeeded");
+            fail("subset.add succeeded");
         }
         catch (DeletedElementException de) {
             assertThat(de.getTableErrorClass(), is(TableErrorClass.Deleted));
