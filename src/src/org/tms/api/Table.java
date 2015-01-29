@@ -18,13 +18,12 @@ public interface Table extends TableElement
     public Iterable<Column> columns();
     public int getNumColumns();
     
-    public Range addRange(Access mode, Object... mda);    
-    public Range getRange(Access mode, Object... mda);
-    public List<Range> getRanges();
-    public Iterable<Range> ranges();
-    public int getNumRanges();
-    
-    
+    public Subset addSubset(Access mode, Object... mda);    
+    public Subset getSubset(Access mode, Object... mda);
+    public List<Subset> getSubsets();
+    public Iterable<Subset> subsets();
+    public int getNumSubsets();
+       
     public Cell getCell(Row row, Column col);      
     public Cell getCell(Access mode, Object... mda);
     public Object getCellValue(Row row, Column col);

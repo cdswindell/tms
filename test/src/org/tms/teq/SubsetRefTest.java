@@ -10,7 +10,7 @@ import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
-import org.tms.api.Range;
+import org.tms.api.Subset;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
@@ -18,7 +18,7 @@ import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.api.factories.TableFactory;
 import org.tms.tds.TableImpl;
 
-public class RangeRefTest extends BaseTest
+public class SubsetRefTest extends BaseTest
 {
     @Test
     public void testSingleVariableRangeStats()
@@ -50,48 +50,48 @@ public class RangeRefTest extends BaseTest
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 2));
         
         // create range
-        Range rng = tbl.addRange(Access.ByLabel, "rng1");
+        Subset rng = tbl.addSubset(Access.ByLabel, "rng1");
         rng.add(c8);
         
         // mean oper
         Cell c = tbl.getCell(r1,  c1);
         assertThat(c, notNullValue());
-        c.setDerivation("mean(range 'rng1')");
+        c.setDerivation("mean(set 'rng1')");
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.getCellValue(), is(42.0));
         
         // max oper
         c = tbl.getCell(r2,  c1);
         assertThat(c, notNullValue());
-        c.setDerivation("max(range 'rng1')");
+        c.setDerivation("max(group 'rng1')");
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.getCellValue(), is(42.0));
         
         // min oper
         c = tbl.getCell(r3,  c1);
         assertThat(c, notNullValue());
-        c.setDerivation("min(range 'rng1')");
+        c.setDerivation("min(set 'rng1')");
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.getCellValue(), is(42.0));
         
         // stdev oper
         c = tbl.getCell(r4,  c1);
         assertThat(c, notNullValue());
-        c.setDerivation("StDevSample(range 'rng1')");
+        c.setDerivation("StDevSample(set 'rng1')");
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.getCellValue(), is(0.0));
         
         // count oper
         c = tbl.getCell(r5,  c1);
         assertThat(c, notNullValue());
-        c.setDerivation("count(range 'rng1')");
+        c.setDerivation("count(set 'rng1')");
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.getCellValue(), is(0.0d + tbl.getNumRows()));
         
         // spread oper
         c = tbl.getCell(r6,  c1);
         assertThat(c, notNullValue());
-        c.setDerivation("spread(range 'rng1')");
+        c.setDerivation("spread(set 'rng1')");
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.isErrorValue(), is(false));
         assertThat(c.getCellValue(), is(0.0));
@@ -144,7 +144,7 @@ public class RangeRefTest extends BaseTest
         
         // negative test; can't transform a range        
         try {
-            c.setDerivation("normalize(range 'rng1')");
+            c.setDerivation("normalize(set 'rng1')");
             fail("Derivation succeeded");
         }
         catch (InvalidExpressionException e) {
@@ -163,5 +163,5 @@ public class RangeRefTest extends BaseTest
             assertThat(pr, notNullValue());
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidFunctionTarget));
         }
-    }    
+    }
 }

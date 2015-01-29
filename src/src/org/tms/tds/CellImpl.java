@@ -10,7 +10,7 @@ import java.util.Set;
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
-import org.tms.api.Range;
+import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
@@ -463,9 +463,9 @@ public class CellImpl extends TableElementImpl implements Cell
     }
     
     /*
-     * Range-related methods
+     * Subset-related methods
      */
-    protected boolean add(RangeImpl r)
+    protected boolean add(SubsetImpl r)
     {
         TableImpl parent = getTable();
         assert parent != null : "Parent table required";
@@ -475,7 +475,7 @@ public class CellImpl extends TableElementImpl implements Cell
         return false;
     }
     
-    protected boolean remove(RangeImpl r)
+    protected boolean remove(SubsetImpl r)
     {
         if (r != null) {
             /*
@@ -495,14 +495,14 @@ public class CellImpl extends TableElementImpl implements Cell
     }
     
     @Override
-    public List<Range> getRanges()
+    public List<Subset> getSubsets()
     {
         TableImpl parent = getTable();
         assert parent != null : "Parent table required";
         if (parent != null) {
-            Set<RangeImpl> ranges = parent.getCellRanges(this);
+            Set<SubsetImpl> ranges = parent.getCellRanges(this);
             if (ranges != null) {
-                List<Range> rangesList = new ArrayList<Range>(ranges.size());
+                List<Subset> rangesList = new ArrayList<Subset>(ranges.size());
                 rangesList.addAll(ranges);
                 return Collections.unmodifiableList(rangesList);
             }
@@ -511,7 +511,7 @@ public class CellImpl extends TableElementImpl implements Cell
         return Collections.emptyList();
     }
 
-    protected Set<RangeImpl> getRangesInternal()
+    protected Set<SubsetImpl> getSubsetsInternal()
     {
         TableImpl parent = getTable();
         assert parent != null : "Parent table required";
@@ -535,8 +535,8 @@ public class CellImpl extends TableElementImpl implements Cell
             affects.forEach(d -> d.clearDerivation());
         
         // remove the cell from any ranges
-        if (getRangesInternal() != null) {
-            for (RangeImpl r : getRangesInternal()) {
+        if (getSubsetsInternal() != null) {
+            for (SubsetImpl r : getSubsetsInternal()) {
                 if (r != null && r.isValid())
                     r.remove(this);
             }

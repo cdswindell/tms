@@ -104,7 +104,7 @@ public enum BuiltinOperator implements Labeled, Operator
     VarSampleOper(TokenType.StatOp, 5, "varianceSample", "varianceOfSample", "var", "var.s", "variance"),
     MinOper(TokenType.StatOp, 5, "min", "minimum"),
     MaxOper(TokenType.StatOp, 5, "max", "maximum"),
-    RangeOper(TokenType.StatOp, 5, "spread"),
+    RangeOper(TokenType.StatOp, 5, "range", "spread"),
     CountOper(TokenType.StatOp, 5, "count", "cnt"),
     SkewOper(TokenType.StatOp, 5, "skewness", "skew"),
     KurtOper(TokenType.StatOp, 5),
@@ -121,7 +121,7 @@ public enum BuiltinOperator implements Labeled, Operator
     ScaleOper("scale", TokenType.TransformOp, 5, MathUtil.class, "scale", TableElement.class, double.class, double.class),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
-    NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.RangeRef, TokenType.CellRef),
+    NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.SubsetRef, TokenType.CellRef),
 
     LAST_operator;
     

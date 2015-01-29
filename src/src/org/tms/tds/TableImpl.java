@@ -21,7 +21,7 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
-import org.tms.api.Range;
+import org.tms.api.Subset;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
@@ -65,14 +65,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private Deque<CellReference> m_currentCellStack;
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
     
-    private Map<CellImpl, Set<RangeImpl>> m_rangedCells;
+    private Map<CellImpl, Set<SubsetImpl>> m_rangedCells;
     private Map<CellImpl, Derivation> m_derivedCells;
     private Map<CellImpl, Set<Derivable>> m_cellAffects;
     
     private RowImpl m_curRow;
     private ColumnImpl m_curCol;
     
-    private JustInTimeSet<RangeImpl> m_ranges;
+    private JustInTimeSet<SubsetImpl> m_ranges;
     
     private ContextImpl m_context;
     
@@ -90,6 +90,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
              ContextImpl.getPropertyInt(null, TableProperty.ColumnCapacityIncr));
     }
     
+    protected TableImpl(TableContext c)
+    {
+        this(ContextImpl.getPropertyInt(null, TableProperty.RowCapacityIncr),
+                ContextImpl.getPropertyInt(null, TableProperty.ColumnCapacityIncr),
+                c);
+   }
+
     protected TableImpl(int nRows, int nCols)
     {
         this(nRows, nCols, ContextImpl.getDefaultContext());
@@ -108,7 +115,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     {
         super(null);
         setTable(this);
-        setContext(t != null ? t.getTableContext() : null);        
+        setContext(t != null ? t.getTableContext() : ContextImpl.getDefaultContext());        
         
         if (t != null && !(t instanceof TableImpl))
         	throw new UnsupportedImplementationException(t);
@@ -138,7 +145,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_nextCellOffset = 0;
         
         // set all other arrays/sets/maps to null/JustInTime
-        m_ranges = new JustInTimeSet<RangeImpl>();
+        m_ranges = new JustInTimeSet<SubsetImpl>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_currentCellStack = new ArrayDeque<CellReference>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
@@ -148,7 +155,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_cellAffects = new LinkedHashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
         
-        m_rangedCells = new HashMap<CellImpl, Set<RangeImpl>>();
+        m_rangedCells = new HashMap<CellImpl, Set<SubsetImpl>>();
         
         // clear dirty flag, as table is empty
         markClean();
@@ -263,11 +270,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
             case numColumnsCapacity:
                 return getColumnsCapacity();
                 
-            case numRanges:
-                return getNumRanges();
+            case numSubsets:
+                return getNumSubsets();
                 
-            case Ranges:
-                return getRanges(); 
+            case Subsets:
+                return getSubsets(); 
                 
             case numRows:
                 return getNumRows(); 
@@ -332,13 +339,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
 
     @Override
-    public List<Range>getRanges()
+    public List<Subset>getSubsets()
     {
-        return Collections.unmodifiableList(new ArrayList<Range>(m_ranges.clone()));
+        return Collections.unmodifiableList(new ArrayList<Subset>(m_ranges.clone()));
     }
 
     @Override
-    public int getNumRanges()
+    public int getNumSubsets()
     {
         return m_ranges.size();
     }
@@ -401,7 +408,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return (getTableContext() != null ? getTableContext().isSupportsNull() : false)  && isSupportsNull();
     }
     
-    protected boolean add(RangeImpl r)
+    protected boolean add(SubsetImpl r)
     {
         vetParent(r);
         boolean processed = m_ranges.add(r);
@@ -412,7 +419,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     /*
      * Delete TableElement methods
      */
-    protected boolean remove(RangeImpl r)
+    protected boolean remove(SubsetImpl r)
     {
         vetParent(r);
         return m_ranges.remove(r);
@@ -536,10 +543,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
 
     /*
-     * Range manipulation routines
+     * Subset manipulation routines
      */
     @Override
-    public RangeImpl getRange(Access mode, Object... mda)
+    public SubsetImpl getSubset(Access mode, Object... mda)
     {
         Object md = null;
         switch (mode) {
@@ -548,61 +555,61 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 md = mda != null && mda.length > 0 ? mda[0] : null;
                 if (md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
-                            String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (md == null ? "<null>" : md.toString())));
-                return (RangeImpl)find(m_ranges, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+                            String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));
+                return (SubsetImpl)find(m_ranges, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
                 
             case ByProperty:
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;
                 Object value = mda != null && mda.length > 1 ? mda[1] : null;
                 if (key == null || value == null)
                     throw new InvalidException(this.getElementType(), 
-                            String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (key == null ? "<null>" : key.toString()))); 
+                            String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (key == null ? "<null>" : key.toString()))); 
                 
                 // key must either be a table property or a string
                 if (key instanceof TableProperty) 
-                    return (RangeImpl)find(m_ranges, (TableProperty)key, value);
+                    return (SubsetImpl)find(m_ranges, (TableProperty)key, value);
                 else if (key instanceof String) 
-                    return (RangeImpl)find(m_ranges, (String)key, value);
+                    return (SubsetImpl)find(m_ranges, (String)key, value);
                 else
                     throw new InvalidException(this.getElementType(), 
-                            String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (key == null ? "<null>" : key.toString())));                 
+                            String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (key == null ? "<null>" : key.toString())));                 
 
             case ByReference:
             {
                 md = mda != null && mda.length > 0 ? mda[0] : null;
-                if (md == null || !(md instanceof RangeImpl) || (((RangeImpl)md).getElementType() != ElementType.Range))
+                if (md == null || !(md instanceof SubsetImpl) || (((SubsetImpl)md).getElementType() != ElementType.Subset))
                     throw new InvalidException(this.getElementType(), 
-                            String.format("Invalid %s %s argument: %s", ElementType.Range, mode, (md == null ? "<null>" : md.toString())));               
-                return (RangeImpl)md;
+                            String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));               
+                return (SubsetImpl)md;
             }
 
             default:
-                throw new InvalidAccessException(ElementType.Table, ElementType.Range, mode, false, mda);                
+                throw new InvalidAccessException(ElementType.Table, ElementType.Subset, mode, false, mda);                
         }
     }
 
-    protected Set<RangeImpl> getRangesInternal()
+    protected Set<SubsetImpl> getSubsetsInternal()
     {
         return m_ranges;
     }
     
     @Override
-    public RangeImpl addRange(Access mode, Object... mda)
+    public SubsetImpl addSubset(Access mode, Object... mda)
     {
         Object md = null;
         if (mda != null && mda.length > 0)
             md = mda[0];
         
-        RangeImpl range = null;
+        SubsetImpl range = null;
         switch (mode) {
             case ByLabel:
-                range = new RangeImpl(this);
+                range = new SubsetImpl(this);
                 if (md != null && md instanceof String)
                     range.setLabel((String)md);;
                 break;
                 
                 default:
-                    throw new InvalidAccessException(ElementType.Table, ElementType.Range, mode, true, mda);                
+                    throw new InvalidAccessException(ElementType.Table, ElementType.Subset, mode, true, mda);                
         }
         
         return range;
@@ -1333,7 +1340,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             try {
                 switch (element.getElementType()) {
                     case Table:
-                    case Range:
+                    case Subset:
                         recalculate();
                         break;
                         
@@ -1452,20 +1459,20 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return new BaseElementIterableInternal<CellImpl>(m_derivedCells.keySet());
     }
     
-    protected boolean registerRangeCell(CellImpl cell, RangeImpl r)
+    protected boolean registerRangeCell(CellImpl cell, SubsetImpl r)
     {
-        Set<RangeImpl> ranges = m_rangedCells.get(cell);
+        Set<SubsetImpl> ranges = m_rangedCells.get(cell);
         if (ranges == null) {
-            ranges = new HashSet<RangeImpl>();
+            ranges = new HashSet<SubsetImpl>();
             m_rangedCells.put(cell, ranges);
         }
         
         return ranges.add(r);
     }
 
-    protected boolean deregisterRangeCell(CellImpl cell, RangeImpl r)
+    protected boolean deregisterRangeCell(CellImpl cell, SubsetImpl r)
     {
-        Set<RangeImpl> ranges = m_rangedCells.get(cell);
+        Set<SubsetImpl> ranges = m_rangedCells.get(cell);
         if (ranges != null) {
             boolean removed = ranges.remove(r);
             
@@ -1480,7 +1487,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return false;
     }
     
-    protected Set<RangeImpl> getCellRanges(CellImpl cell)
+    protected Set<SubsetImpl> getCellRanges(CellImpl cell)
     {
         return m_rangedCells.get(cell);
     }
@@ -1563,9 +1570,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
 	@Override
-	public Iterable<Range> ranges()
+	public Iterable<Subset> subsets()
     {
-        return new BaseElementIterable<Range>(m_ranges);
+        return new BaseElementIterable<Subset>(m_ranges);
     }
     
 	@Override

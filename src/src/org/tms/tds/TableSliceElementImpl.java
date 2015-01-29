@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
-import org.tms.api.Range;
+import org.tms.api.Subset;
 import org.tms.api.Row;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
@@ -24,7 +24,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     abstract protected TableSliceElementImpl insertSlice(int idx);
     abstract protected TableSliceElementImpl setCurrent();
     
-    private JustInTimeSet<RangeImpl> m_ranges;
+    private JustInTimeSet<SubsetImpl> m_ranges;
     private int m_index = -1;    
     private Derivation m_deriv;
 
@@ -64,13 +64,13 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         return (getTable() != null ? getTable().isNullsSupported() : false) && isSupportsNull();
     }
     
-    public List<Range> getRanges()
+    public List<Subset> getSubsets()
     {
         vetElement();
-        return Collections.unmodifiableList(new ArrayList<Range>(m_ranges.clone()));
+        return Collections.unmodifiableList(new ArrayList<Subset>(m_ranges.clone()));
     } 
     
-    protected Set<RangeImpl> getRangesInternal()
+    protected Set<SubsetImpl> getSubsetsInternal()
     {
         return m_ranges;
     } 
@@ -186,7 +186,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             throw new IllegalTableStateException("Table Slice ELement Required");
     }
     
-    protected boolean add(RangeImpl r)
+    protected boolean add(SubsetImpl r)
     {
         vetElement();
         if (r != null) {
@@ -204,15 +204,15 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     }
 
     /**
-     * Remove the reference from the specified RangeImpl to this TableSliceElementImpl, removing
+     * Remove the reference from the specified SubsetImpl to this TableSliceElementImpl, removing
      * this TableSliceElementImple from the specified range, if it has not already been removed.
      * 
-     * Returns true if the specified RangeImpl was successfully removed
+     * Returns true if the specified SubsetImpl was successfully removed
      * 
-     * @param r RangeImpl
+     * @param r SubsetImpl
      */
     @Override
-    protected boolean remove(RangeImpl r)
+    protected boolean remove(SubsetImpl r)
     {
         if (r != null) {
             /*
@@ -268,7 +268,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         }
         
         // initialize other member fields
-        m_ranges = new JustInTimeSet<RangeImpl>();
+        m_ranges = new JustInTimeSet<SubsetImpl>();
         setIndex(-1);
         setInUse(false);
     } 
@@ -278,11 +278,11 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     {
         switch(key)
         {
-            case numRanges:
+            case numSubsets:
                 return m_ranges.size();
                 
-            case Ranges:
-                return getRanges();
+            case Subsets:
+                return getSubsets();
                 
             case isInUse:
                 return isInUse();

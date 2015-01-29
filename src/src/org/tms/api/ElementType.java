@@ -13,9 +13,8 @@ public enum ElementType
     Row,
     Column,
     Cell,
-    Range,
-    Derivation;
-    
+    Subset,
+    Derivation;  
     
     public List<TableProperty> getProperties()
     {

@@ -17,7 +17,7 @@ import org.tms.api.BaseElement;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
-import org.tms.api.Range;
+import org.tms.api.Subset;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
@@ -85,7 +85,7 @@ public class Derivation
                     case RowRef:
                     case ColumnRef:
                     case CellRef:
-                    case RangeRef:
+                    case SubsetRef:
                     case TableRef:
                         if (tk.getTableElementValue() != null) 
                             deriv.m_affectedBy.add(tk.getTableElementValue());
@@ -518,7 +518,7 @@ public class Derivation
     		assert tse != null : "TableElement required";
     		
     		m_cachedSVSEs.remove(tse);
-    		for (Range r : tse.getRanges())
+    		for (Subset r : tse.getSubsets())
     		    remove(r);
 		}
 

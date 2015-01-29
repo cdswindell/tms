@@ -12,7 +12,9 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
+import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 
 public class CellReferenceTest extends BaseTest
@@ -68,7 +70,8 @@ public class CellReferenceTest extends BaseTest
     @Test
     public void testForiegnCellReferences()
     {
-        Table t1 = TableFactory.createTable(12, 10);        
+        TableContext tc = TableContextFactory.createTableContext();
+        Table t1 = TableFactory.createTable(12, 10, tc);        
         assert (t1 != null);
         t1.setLabel("t1");
         assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
@@ -105,7 +108,7 @@ public class CellReferenceTest extends BaseTest
         assertThat(t1.getCell(Access.ByLabel, "cR1C2").getLabel(), is("cR1C2"));
         
         // create a new table and try to reference cells in t1
-        Table t2 = TableFactory.createTable(12, 10);        
+        Table t2 = TableFactory.createTable(12, 10, tc);        
         assert (t2 != null);
 
         Row t2R1 = t2.addRow();

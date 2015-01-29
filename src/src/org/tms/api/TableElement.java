@@ -26,5 +26,5 @@ public interface TableElement extends BaseElement
      */
     public List<Derivable> getAffects();
     
-    public List<Range> getRanges();
+    public List<Subset> getSubsets();
 }

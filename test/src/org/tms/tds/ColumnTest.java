@@ -170,7 +170,7 @@ public class ColumnTest
         TableImpl t = new TableImpl(10, 10);
         assertThat(t, notNullValue());
         
-        RangeImpl r = new RangeImpl(t);
+        SubsetImpl r = new SubsetImpl(t);
         assertThat(r, notNullValue());
             
         assertThat(t.getNumColumns(), is(0));

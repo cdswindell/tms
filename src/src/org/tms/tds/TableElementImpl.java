@@ -23,9 +23,9 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
     abstract protected boolean isNullsSupported();
     abstract protected boolean isWriteProtected();
     
-    abstract protected boolean add(RangeImpl rangeImpl);
-    abstract protected boolean remove(RangeImpl range);
-    abstract protected Set<RangeImpl> getRangesInternal();
+    abstract protected boolean add(SubsetImpl subsetImpl);
+    abstract protected boolean remove(SubsetImpl range);
+    abstract protected Set<SubsetImpl> getSubsetsInternal();
     
     protected TableElementImpl(TableElementImpl e)
     {
@@ -99,7 +99,7 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
     
     public String toString()
     {
-        String label = (String)getProperty(TableProperty.Label);
+        String label = getLabel();
         if (label != null)
             label = ": " + label;
         else

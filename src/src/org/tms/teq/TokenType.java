@@ -14,7 +14,7 @@ public enum TokenType implements Labeled
     ColumnRef(false, "Column", "Col", "C"),
     RowRef(false, "Row","R"),
     CellRef(false, "Cell"),
-    RangeRef(false, "Range", "Rng"),
+    SubsetRef(false, "subset", "set", "group"),
     
     Constant(false),
     BuiltIn(false),
@@ -140,7 +140,7 @@ public enum TokenType implements Labeled
 
     public boolean isReference()
     {
-        return this == ColumnRef || this == RowRef || this == CellRef || this == RangeRef || this == TableRef;
+        return this == ColumnRef || this == RowRef || this == CellRef || this == SubsetRef || this == TableRef;
     }
 
     public boolean isNull()

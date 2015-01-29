@@ -11,7 +11,7 @@ import java.util.Set;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
-import org.tms.api.Range;
+import org.tms.api.Subset;
 import org.tms.api.Row;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
@@ -19,15 +19,15 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
-public class RangeImpl extends TableCellsElementImpl implements Range
+public class SubsetImpl extends TableCellsElementImpl implements Subset
 {
     private Set<RowImpl> m_rows;
     private Set<ColumnImpl> m_cols;
-    private Set<RangeImpl> m_ranges;
+    private Set<SubsetImpl> m_subsets;
     private Set<CellImpl> m_cells;
     private int m_numCells = Integer.MIN_VALUE;
     
-    protected RangeImpl(TableImpl parentTable)
+    protected SubsetImpl(TableImpl parentTable)
     {
         super(parentTable);
         
@@ -36,7 +36,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             parentTable.add(this);
     }
 
-    protected RangeImpl(TableImpl parentTable, String label)
+    protected SubsetImpl(TableImpl parentTable, String label)
     {
         this(parentTable);
         
@@ -49,7 +49,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
      */
     public ElementType getElementType()
     {
-        return ElementType.Range;
+        return ElementType.Subset;
     }
     
     protected List<RowImpl> getRows()
@@ -83,19 +83,19 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     }
 
     @Override
-    public List<Range> getRanges()
+    public List<Subset> getSubsets()
     {
-        return Collections.unmodifiableList(new ArrayList<Range>(((JustInTimeSet<RangeImpl>)m_ranges).clone()));
+        return Collections.unmodifiableList(new ArrayList<Subset>(((JustInTimeSet<SubsetImpl>)m_subsets).clone()));
     }
     
-    protected Set<RangeImpl> getRangesInternal()
+    protected Set<SubsetImpl> getSubsetsInternal()
     {
-        return m_ranges;
+        return m_subsets;
     }
 
-    protected int getNumRanges()
+    protected int getNumSubsets()
     {
-        return m_ranges.size();
+        return m_subsets.size();
     }
 
     /*
@@ -109,8 +109,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                 return m_rows.contains(r);
             else if (r instanceof ColumnImpl)
                 return m_cols.contains(r);
-            else if (r instanceof RangeImpl)
-                return m_ranges.contains(r);
+            else if (r instanceof SubsetImpl)
+                return m_subsets.contains(r);
             else if (r instanceof CellImpl)
                 return m_cells.contains(r);
             else
@@ -175,12 +175,12 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                     removedAny = m_rows.remove((RowImpl)tce) ? true : removedAny;
                 else if (tce instanceof ColumnImpl)
                     removedAny = m_cols.remove((ColumnImpl)tce) ? true : removedAny;
-                else if (tce instanceof RangeImpl)
-                    removedAny = m_ranges.remove((RangeImpl)tce) ? true : removedAny;
+                else if (tce instanceof SubsetImpl)
+                    removedAny = m_subsets.remove((SubsetImpl)tce) ? true : removedAny;
                 else if (tce instanceof CellImpl)
                     removedAny = m_cells.remove((CellImpl)tce) ? true : removedAny;
                 
-                // remove the range from the corresponding object
+                // remove the  from the corresponding object
                 if (removedAny)
                     ((TableElementImpl)tce).remove(this);
             }
@@ -207,12 +207,12 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                         addedAny = m_rows.add((RowImpl)tce) ? true : addedAny;
                     else if (tce instanceof ColumnImpl)
                         addedAny = m_cols.add((ColumnImpl)tce) ? true : addedAny;
-                    else if (tce instanceof RangeImpl)
-                        addedAny = m_ranges.add((RangeImpl)tce) ? true : addedAny;
+                    else if (tce instanceof SubsetImpl)
+                        addedAny = m_subsets.add((SubsetImpl)tce) ? true : addedAny;
                     if (tce instanceof CellImpl)
                         addedAny = m_cells.add((CellImpl)tce) ? true : addedAny;
                     
-                    // add the range from the corresponding object
+                    // add the subset from the corresponding object
                     ((TableCellsElementImpl)tce).add(this);
                 }
                 else if (tce instanceof CellImpl) {
@@ -229,34 +229,34 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     }   
 
     @Override
-    protected boolean add(RangeImpl r)
+    protected boolean add(SubsetImpl r)
     {
         if (r != null) {
             /*
-             *  if the range doesn't contain the range, use the range method to do all the work
+             *  if the subset doesn't contain the subset, use the subset method to do all the work
              *  TableSliceElementImpl.add will be called recursively to finish up
              */
             if (!r.contains(this))
                 return r.add(new TableElement[] {this});
             
-            return m_ranges.add(r);
+            return m_subsets.add(r);
         }
         
         return false;
     }
 
     @Override
-    protected boolean remove(RangeImpl r)
+    protected boolean remove(SubsetImpl r)
     {
         if (r != null) {
             /*
-             * if the range contains the element, use the range method to do all the work
+             * if the subset contains the element, use the subset method to do all the work
              * TableSliceElementImpl.remove will be called again to finish up
              */
             if (r.contains(this))
                 r.remove(new TableElement[] {this});
             
-            return m_ranges.remove(r);
+            return m_subsets.remove(r);
         }
         
         return false;
@@ -269,36 +269,46 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     @Override 
     public void delete()
     {
-        // delete the range from its parent table
+        // delete the subset from its parent table
         if (getTable() != null) getTable().remove(this);  
         
-    	// Remove the range from its component rows and columns
+    	// Remove the subset from its component rows and columns
     	m_rows.forEach(r -> {if (r != null) r.remove(this);});
         m_cols.forEach(c -> {if (c != null) c.remove(this);});
-        m_ranges.forEach(r -> {if (r != null) r.remove(this);});
+        m_subsets.forEach(r -> {if (r != null) r.remove(this);});
         m_cells.forEach(c -> {if (c != null) c.remove(this);});
     	
         // clear out caches
         m_rows.clear();
         m_cols.clear();
-        m_ranges.clear();
+        m_subsets.clear();
         m_cells.clear();
         
         m_numCells = Integer.MIN_VALUE;
         
-        // Mark the range as deleted
+        // Mark the subset as deleted
         invalidate();       
     }
     
-   @Override
+    /**
+     * Call TableElementImpl.delete() when object is cleaned up
+     */
+    @Override
+    public void finalize()
+    {
+        if (isValid())
+            delete();
+    }
+    
+    @Override
     public boolean isNull()
     {
         boolean hasRows = (m_rows != null && !m_rows.isEmpty());
         boolean hasCols = (m_cols != null && !m_cols.isEmpty());
-        boolean hasRanges = (m_ranges != null && !m_ranges.isEmpty());
+        boolean hasSubsets = (m_subsets != null && !m_subsets.isEmpty());
         boolean hasCells = (m_cells != null && !m_cells.isEmpty());
         
-        return !(hasRows || hasCols || hasRanges || hasCells);
+        return !(hasRows || hasCols || hasSubsets || hasCells);
     }
 
     @Override
@@ -312,8 +322,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             case numColumns:
                 return getNumColumns();
                 
-            case numRanges:
-                return getNumRanges();
+            case numSubsets:
+                return getNumSubsets();
                 
             case numCells:
                 return getNumCells();
@@ -324,8 +334,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             case Columns:
                 return getColumns(); 
                 
-            case Ranges:
-                return getRanges(); 
+            case Subsets:
+                return getSubsets(); 
                 
             case Cells:
                 return getCells(); 
@@ -348,13 +358,13 @@ public class RangeImpl extends TableCellsElementImpl implements Range
             
             switch (tp) {
                 default:
-                    throw new IllegalStateException("No initialization available for Range Property: " + tp);                       
+                    throw new IllegalStateException("No initialization available for Subset Property: " + tp);                       
             }
         }
         
         m_rows = new JustInTimeSet<RowImpl>();
         m_cols = new JustInTimeSet<ColumnImpl>();
-        m_ranges = new JustInTimeSet<RangeImpl>();
+        m_subsets = new JustInTimeSet<SubsetImpl>();
         m_cells = new JustInTimeSet<CellImpl>();
     }
         
@@ -374,8 +384,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         
         int numCells = numRows * numCols;
     	
-    	for (RangeImpl range : m_ranges) 
-    	    numCells += range.getNumCells();
+    	for (SubsetImpl subset : m_subsets) 
+    	    numCells += subset.getNumCells();
     	
     	m_numCells = numCells += m_cells.size();
         return numCells;
@@ -398,7 +408,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 		if (!isNull()) {
 		    TableImpl tbl = getTable();
 		    if (tbl == null)
-		        throw new IllegalTableStateException("Invalid Range: Table Reqired");
+		        throw new IllegalTableStateException("Invalid Subset: Table Reqired");
 		    
 		    clearComponentDerivations();
 		    
@@ -420,7 +430,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 	}
 	
 	/*
-	 * If the range contains only-rows and/or only columns, clear
+	 * If the subset contains only-rows and/or only columns, clear
 	 * any derivations in those elements
 	 */
 	private void clearComponentDerivations()
@@ -510,40 +520,40 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     @Override
     public Iterable<Cell> cells()
     {
-        return new RangeCellIterable();
+        return new SubsetCellIterable();
     }
     
-    protected class RangeCellIterable implements Iterator<Cell>, Iterable<Cell>
+    protected class SubsetCellIterable implements Iterator<Cell>, Iterable<Cell>
     {
-        private RangeImpl m_range;
+        private SubsetImpl m_subset;
         private TableImpl m_table;
         private int m_rowIndex;
         private int m_colIndex;
-        private int m_rangeIndex;
+        private int m_subsetIndex;
         private int m_cellIndex;
         private int m_numRows;
         private int m_numCols;
-        private int m_numRanges;
+        private int m_numSubsets;
         private int m_numCells;
         
         private List<RowImpl> m_rows;
         private List<ColumnImpl> m_cols;
-        private List<RangeImpl> m_ranges;
+        private List<SubsetImpl> m_subsets;
         private List<CellImpl> m_cells;
         
-        private Iterator<Cell> m_rangeIterator;
+        private Iterator<Cell> m_subsetIterator;
 
-        public RangeCellIterable()
+        public SubsetCellIterable()
         {
-            m_range = RangeImpl.this;
-            m_table = m_range.getTable();
+            m_subset = SubsetImpl.this;
+            m_table = m_subset.getTable();
             
-            m_rowIndex = m_colIndex = m_rangeIndex = m_cellIndex = 1;
-            m_rangeIterator = null;
+            m_rowIndex = m_colIndex = m_subsetIndex = m_cellIndex = 1;
+            m_subsetIterator = null;
             
-            if (m_range.getNumRows() > 0 || m_range.getNumColumns() > 0) {
-                if (m_range.getNumRows() > 0)
-                    m_rows = m_range.getRows();
+            if (m_subset.getNumRows() > 0 || m_subset.getNumColumns() > 0) {
+                if (m_subset.getNumRows() > 0)
+                    m_rows = m_subset.getRows();
                 else {
                     m_table.ensureRowsExist();
                     m_rows = new ArrayList<RowImpl>(m_table.getRowsInternal());
@@ -551,8 +561,8 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                 
                 m_numRows = m_rows.size();
                            
-                if (m_range.getNumColumns() > 0)
-                    m_cols = m_range.getColumns();
+                if (m_subset.getNumColumns() > 0)
+                    m_cols = m_subset.getColumns();
                 else {
                     m_table.ensureColumnsExist();
                     m_cols = new ArrayList<ColumnImpl>(m_table.getColumnsInternal());
@@ -561,13 +571,13 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                 m_numCols = m_cols.size();
             }
             
-            m_numRanges = m_range.m_ranges.size();
-            if (m_numRanges > 0) 
-                m_ranges = new ArrayList<RangeImpl>(m_range.m_ranges);
+            m_numSubsets = m_subset.m_subsets.size();
+            if (m_numSubsets > 0) 
+                m_subsets = new ArrayList<SubsetImpl>(m_subset.m_subsets);
             
-            m_numCells = m_range.m_cells.size();
+            m_numCells = m_subset.m_cells.size();
             if (m_numCells > 0)
-                m_cells = new ArrayList<CellImpl>(m_range.m_cells);
+                m_cells = new ArrayList<CellImpl>(m_subset.m_cells);
         }
 
         @Override
@@ -580,7 +590,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         public boolean hasNext()
         {
             return m_rowIndex <= m_numRows && m_colIndex <= m_numCols || 
-                   (m_rangeIndex <= m_numRanges || (m_rangeIterator != null && m_rangeIterator.hasNext())) || 
+                   (m_subsetIndex <= m_numSubsets || (m_subsetIterator != null && m_subsetIterator.hasNext())) || 
                    m_cellIndex <= m_numCells;
         }
 
@@ -607,21 +617,19 @@ public class RangeImpl extends TableCellsElementImpl implements Range
                 // return the target cell
                 return c;
             }
-            else if ((m_rangeIndex <= m_numRanges) || (m_rangeIterator != null && m_rangeIterator.hasNext())) {
-                if (m_rangeIterator != null && m_rangeIterator.hasNext())
-                    return m_rangeIterator.next();
+            else if ((m_subsetIndex <= m_numSubsets) || (m_subsetIterator != null && m_subsetIterator.hasNext())) {
+                if (m_subsetIterator != null && m_subsetIterator.hasNext())
+                    return m_subsetIterator.next();
                 
-                RangeImpl range = m_ranges.get(m_rangeIndex++);
-                m_rangeIterator = range.cells().iterator();                
+                SubsetImpl subset = m_subsets.get(m_subsetIndex++);
+                m_subsetIterator = subset.cells().iterator();                
             }
             else if (m_cellIndex <= m_numCells) {
                 Cell c = m_cells.get(m_cellIndex++);
                 return c;
             }
             
-            throw new IllegalTableStateException("Range cell supply exhasted");
+            throw new IllegalTableStateException("Subset cell supply exhasted");
         }      
     }
-
-
 }

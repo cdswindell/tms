@@ -117,7 +117,7 @@ public class PostfixStackGenerator
                 case Constant:
                 case ColumnRef:
                 case RowRef:
-                case RangeRef:
+                case SubsetRef:
                 case CellRef:
                 case TableRef:
                 case BuiltIn:

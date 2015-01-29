@@ -71,20 +71,20 @@ public class ContextTest
     @Test
     public void getTablesTest()
     {
-        TableImpl t1 = new TableImpl();
+        ContextImpl c = new ContextImpl();
+        assertThat(c, notNullValue());
+        
+        TableImpl t1 = new TableImpl(c);
         assertThat(t1, notNullValue());
         t1.setLabel("t1");
         
-        TableImpl t2 = new TableImpl();
+        TableImpl t2 = new TableImpl(c);
         assertThat(t2, notNullValue());        
         t2.setLabel("t2");
-        
-        // get the default context
-        ContextImpl c = ContextImpl.getDefaultContext();
-        assertThat(c, notNullValue());
-        
+               
         // get the labeled tables from the context
         TableImpl t = c.getTable(Access.ByLabel, "t1");
+        assertThat(t, notNullValue());
         assertThat(t, is(t1));
         
         t = c.getTable(Access.ByReference, t1);
@@ -96,6 +96,8 @@ public class ContextTest
         // delete a table and make sure we don't retrieve it
         t2.delete();
         t = c.getTable(Access.ByLabel, "t2");
-        assertThat(t, nullValue());        
+        assertThat(t, nullValue());   
+        
+        t1.delete();
     }
 }

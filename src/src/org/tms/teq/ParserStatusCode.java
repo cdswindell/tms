@@ -12,7 +12,7 @@ public enum ParserStatusCode
     IncompleteExpresion,
     InvalidCellReference,
     InvalidColumnReference,
-    InvalidRangeReference,
+    InvalidSubsetReference,
     InvalidRowReference, 
     InvalidTableReference,
     InvalidExpression,

@@ -7,7 +7,7 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.Operator;
-import org.tms.api.Range;
+import org.tms.api.Subset;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
@@ -255,8 +255,8 @@ public class InfixExpressionParser
                     lastArgClass = Cell.class;
                     break;
                     
-                case RangeRef:
-                    lastArgClass = Range.class;
+                case SubsetRef:
+                    lastArgClass = Subset.class;
                     break;
                     
                 case Operand:
@@ -480,7 +480,7 @@ public class InfixExpressionParser
                 case CellRef:
                 case ColumnRef:
                 case RowRef:
-                case RangeRef:
+                case SubsetRef:
                 case Operand:
                 case BuiltIn:
                 case Constant:
@@ -674,7 +674,7 @@ public class InfixExpressionParser
         	oper = t.getOperator();
         	int additionalCharsParsed = 0;
         	
-        	// handle Row/Column/Range references
+        	// handle Row/Column/Subset references
             if (tt == TokenType.ColumnRef) {
                 additionalCharsParsed = parseColumnReference(exprChars, curPos + charsParsed, table, t);
                 if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
@@ -695,13 +695,13 @@ public class InfixExpressionParser
                     return 0;
                 }
             }
-            else if (tt == TokenType.RangeRef) {
+            else if (tt == TokenType.SubsetRef) {
                 additionalCharsParsed = parseRangeReference(exprChars, curPos + charsParsed, table, t);
                 if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
-                        pr.addIssue(ParserStatusCode.InvalidRangeReference, curPos + charsParsed);
+                        pr.addIssue(ParserStatusCode.InvalidSubsetReference, curPos + charsParsed);
                     return 0;
                 }
             }
@@ -916,12 +916,12 @@ public class InfixExpressionParser
     {
         ElementReference er = parseElementReference(exprChars, curPos);
         if (er.foundToken()) {
-            Range range = null;
+            Subset subset = null;
             String label = er.getLabel();
-            range = table.getRange(Access.ByLabel, label);
+            subset = table.getSubset(Access.ByLabel, label);
             
             int tblRefIdx = 0;
-            if (range == null && table.getTableContext() != null && 
+            if (subset == null && table.getTableContext() != null && 
                     (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
                     (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
             {
@@ -929,13 +929,13 @@ public class InfixExpressionParser
                 Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
                 if (refTable != null) {
                     label = label.substring(tblRefIdx + sf_TABLE_REF.length());
-                    range = refTable.getRange(Access.ByLabel, label);
+                    subset = refTable.getSubset(Access.ByLabel, label);
                 }
             }
             
             // if we found a range, save it in the token and return the consumed chars
-            if (range != null) {
-                t.setValue(range);
+            if (subset != null) {
+                t.setValue(subset);
                 return er.getCharsParsed();
             }
         }

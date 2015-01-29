@@ -12,13 +12,13 @@ public enum TableProperty implements Comparable<TableProperty>
     // Base Element Properties
     Label,
     Description,   
-    isNull(true, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    isNull(true, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
     isReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column),
     isSupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     // Table Element Properties (Context implements initializable ones)
-    Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
-    Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
+    Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
+    Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
     Precision(false, true, ElementType.Context, ElementType.Table),
     isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     isInUse(true, false, ElementType.Row, ElementType.Column),
@@ -29,23 +29,23 @@ public enum TableProperty implements Comparable<TableProperty>
     ColumnCapacityIncr(false, true, ElementType.Context, ElementType.Table),
     isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
     
-    // Table Properties (some shared with Ranges)
-    numRanges(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
-    numRows(true, false, ElementType.Table, ElementType.Range),
-    numColumns(true, false, ElementType.Table, ElementType.Range),
-    numCells(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
+    // Table Properties (some shared with Subsets)
+    numSubsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    numRows(true, false, ElementType.Table, ElementType.Subset),
+    numColumns(true, false, ElementType.Table, ElementType.Subset),
+    numCells(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     numRowsCapacity(true, false, ElementType.Table),
     numColumnsCapacity(true, false, ElementType.Table),
     numCellsCapacity(true, false, ElementType.Column),
     NextCellOffset(true, false, ElementType.Table),
     Derivation(false, false, ElementType.Column, ElementType.Row, ElementType.Cell),
-    Affects(true, false, ElementType.Table, ElementType.Range, ElementType.Column, ElementType.Row, ElementType.Cell),
+    Affects(true, false, ElementType.Table, ElementType.Subset, ElementType.Column, ElementType.Row, ElementType.Cell),
     Index(true, false, ElementType.Row, ElementType.Column),
     
-    Rows(true, false, ElementType.Table, ElementType.Range),
-    Columns(true, false, ElementType.Table, ElementType.Range), 
-    Ranges(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
-    Cells(true, false, ElementType.Row, ElementType.Column, ElementType.Range),
+    Rows(true, false, ElementType.Table, ElementType.Subset),
+    Columns(true, false, ElementType.Table, ElementType.Subset), 
+    Subsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    Cells(true, false, ElementType.Row, ElementType.Column, ElementType.Subset),
     
     // CellImpl properties
     Row(true, false, ElementType.Cell),
@@ -73,7 +73,7 @@ public enum TableProperty implements Comparable<TableProperty>
              ElementType.Row,
              ElementType.Column,
              ElementType.Cell,
-             ElementType.Range,
+             ElementType.Subset,
              ElementType.Context);
     }
     
@@ -90,7 +90,7 @@ public enum TableProperty implements Comparable<TableProperty>
              ElementType.Row,
              ElementType.Column,
              ElementType.Cell,
-             ElementType.Range);
+             ElementType.Subset);
     }
     
     /**

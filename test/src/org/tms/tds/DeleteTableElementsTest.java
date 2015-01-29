@@ -28,7 +28,7 @@ public class DeleteTableElementsTest
         assertThat(r1.isInvalid(), is(false));        
         assertThat(t.getNumRows(), is(1));
         
-        RangeImpl rng = new RangeImpl(t);
+        SubsetImpl rng = new SubsetImpl(t);
         assertThat(rng, notNullValue());
         
         rng.add(r1);
@@ -231,7 +231,7 @@ public class DeleteTableElementsTest
         assertThat(r1.isInvalid(), is(false));        
         assertThat(t.getNumRows(), is(1));
         
-        RangeImpl rng = new RangeImpl(t);
+        SubsetImpl rng = new SubsetImpl(t);
         assertThat(rng, notNullValue());
         
         rng.add(c1);

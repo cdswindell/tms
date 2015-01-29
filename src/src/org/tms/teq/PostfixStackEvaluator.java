@@ -98,7 +98,7 @@ public class PostfixStackEvaluator
 			switch (tt) {
                 case RowRef:
                 case ColumnRef:
-                case RangeRef:
+                case SubsetRef:
                 case TableRef:
                 case CellRef:
 				case Operand:
