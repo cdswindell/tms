@@ -230,8 +230,21 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     throw new UnsupportedImplementationException(te, "delete");
             }
             
-            // TODO: compress data structures
+            // compress data structures
+            compressColumns();
+            compressRows();
         }
+    }
+    
+    protected void compressColumns()
+    {
+        // TODO Auto-generated method stub 
+        //m_cols.trimToSize();
+    }
+    
+    protected void compressRows()
+    {
+        // TODO Auto-generated method stub        
     }
     
     @Override

@@ -341,47 +341,52 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
     	if (parent != null) {
-            // sanity check, columns list must exist
-            ArrayList<ColumnImpl> cols = parent.getColumnsInternal();
-            if (cols == null)
-                throw new IllegalTableStateException("Parent table requires columns");
+    	    synchronized (parent) {
+                // sanity check, columns list must exist
+                ArrayList<ColumnImpl> cols = parent.getColumnsInternal();
+                if (cols == null)
+                    throw new IllegalTableStateException("Parent table requires columns");
+                
+                int idx = getIndex() - 1;
+                if (idx < 0 || idx >= cols.size())
+                    throw new IllegalTableStateException("Column offset outside of parent table bounds: " + idx);
             
-            int idx = getIndex() - 1;
-            if (idx < 0 || idx >= cols.size())
-                throw new IllegalTableStateException("Column offset outside of parent table bounds: " + idx);
-        
-            // remove element from subsets that contain it
-            removeFromAllSubsets();
-            
-            // clear any derivations
-            clearDerivation();
-            
-            // clear any derivations on elements affected by this row
-            if (m_affects != null) 
-                m_affects.forEach(d -> d.clearDerivation());
-            
-            // invalidate column cells
-            if (m_cells != null && m_cells instanceof ArrayList) 
-                ((List<CellImpl>)m_cells).forEach(c -> { if (c != null) c.invalidateCell(); });
-            
-            TableSliceElementImpl rc = cols.remove(idx);
-            assert rc == this : "Removed column mismatch";
-            
-            // reindex remaining columns
-            int nCols = parent.getNumColumns();
-            if (idx < nCols)
-            	cols.listIterator(idx).forEachRemaining(c -> {if (c != null) c.setIndex(c.getIndex() - 1);});
-            
-            // sanity check
-            nCols = nCols--;
-            assert nCols == cols.size() : "Column array size mismatch";
-            
-            // clear this element from the current cell stack
-            parent.purgeCurrentStack(this);
-            
-            // if this element is current, clear it
-            if (parent.getCurrentColumn() == this)
-                parent.setCurrentColumn(null);
+                // remove element from subsets that contain it
+                removeFromAllSubsets();
+                
+                // clear any derivations
+                clearDerivation();
+                
+                // clear any derivations on elements affected by this row
+                if (m_affects != null) 
+                    m_affects.forEach(d -> d.clearDerivation());
+                
+                // invalidate column cells
+                if (m_cells != null && m_cells instanceof ArrayList) 
+                    ((List<CellImpl>)m_cells).forEach(c -> { if (c != null) c.invalidateCell(); });
+                
+                TableSliceElementImpl rc = cols.remove(idx);
+                assert rc == this : "Removed column mismatch";
+                
+                // reindex remaining columns
+                int nCols = parent.getNumColumns();
+                if (idx < nCols)
+                	cols.listIterator(idx).forEachRemaining(c -> {if (c != null) c.setIndex(c.getIndex() - 1);});
+                
+                // sanity check
+                nCols = nCols--;
+                assert nCols == cols.size() : "Column array size mismatch";
+                
+                // clear this element from the current cell stack
+                parent.purgeCurrentStack(this);
+                
+                // if this element is current, clear it
+                if (parent.getCurrentColumn() == this)
+                    parent.setCurrentColumn(null);
+                
+                if (compress)
+                    parent.compressColumns();
+    	    }
     	}   	
 
     	// Mark the column not in in use

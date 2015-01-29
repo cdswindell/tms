@@ -233,6 +233,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
                 if (parent.getCurrentRow() == this)
                     parent.setCurrentRow(null);
                 
+                if (compress)
+                    parent.compressRows();
     	    }
     	}
     	
