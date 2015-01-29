@@ -6,11 +6,11 @@ import org.tms.teq.TokenType;
 
 public interface Operator
 {
+    public String getLabel();
+
     public TokenType getTokenType();
     
     public int getPriority();
-
-    public String getLabel();
 
     public int numArgs();
     

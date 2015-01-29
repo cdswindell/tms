@@ -477,7 +477,7 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     }
 
     @Override
-    protected boolean isSupportsNull()
+    public boolean isSupportsNull()
     {
         return true;
     }

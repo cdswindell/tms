@@ -2,11 +2,12 @@ package org.tms.api;
 
 import java.util.Comparator;
 
-/**
- * Marker interface used to denote table elements that are either rows or columns
- */
 public interface TableRowColumnElement
 {
+    /**
+     * Return the 1-based ordinal index of this Row/Column.
+     * @return The 1-based ordinal index of this Row/Column
+     */
     public int getIndex();
     
     /**

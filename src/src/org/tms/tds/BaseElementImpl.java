@@ -113,7 +113,7 @@ abstract public class BaseElementImpl implements BaseElement
             m_flags &= ~flag;
     }
     
-    protected boolean isSupportsNull()
+    public boolean isSupportsNull()
     {
         return isSet(sf_SUPPORTS_NULL_FLAG);
     }

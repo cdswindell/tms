@@ -711,7 +711,7 @@ public class InfixExpressionParser
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
-                        pr.addIssue(ParserStatusCode.InvalidRangeReference, curPos + charsParsed);
+                        pr.addIssue(ParserStatusCode.InvalidTableReference, curPos + charsParsed);
                     return 0;
                 }
             }
@@ -721,13 +721,18 @@ public class InfixExpressionParser
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
-                        pr.addIssue(ParserStatusCode.InvalidRangeReference, curPos + charsParsed);
+                        pr.addIssue(ParserStatusCode.InvalidCellReference, curPos + charsParsed);
                     return 0;
                 }
             }
         }
         else {
-            // look for named cell
+            /*
+             * token not found, do a few more tricks to decode the label string
+             */
+            
+            // look for named cell, in this table or in
+            // a referenced table
             if (table != null) {
                 String label = sb.toString();
                 Cell cell = table.getCell(Access.ByLabel, label);
@@ -753,6 +758,11 @@ public class InfixExpressionParser
                 }
             }
 
+            // if still no luck, assume a term in the constants table
+            if (tt == null && value == null) {
+                
+            }
+            
         	// TODO: handle other tricks in teq_parse
         }
         
