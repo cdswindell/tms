@@ -153,7 +153,6 @@ public class DeleteTableElementsTest
         assertThat(r2.isInvalid(), is(false));
         
         assertThat(cell1.isInvalid(), is(true));
-        assertThat(cell1.isDerived(), is(false));
         assertThat(t.getCellDerivation(cell1), nullValue());
         
         assertThat(r2.getAffects().size(), is(0));
@@ -363,7 +362,6 @@ public class DeleteTableElementsTest
         assertThat(c2.isInvalid(), is(false));
         
         assertThat(cell1.isInvalid(), is(true));
-        assertThat(cell1.isDerived(), is(false));
         assertThat(t.getCellDerivation(cell1), nullValue());
         
         assertThat(c2.getAffects().size(), is(0));

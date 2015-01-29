@@ -36,20 +36,22 @@ public class CellImpl extends TableElementImpl implements Cell
     /*
      * Field getters/setters
      */
+    @Override
     public ElementType getElementType()
     {
         return ElementType.Cell;
     }
     
+    @Override
     public Object getCellValue()
     {
         return m_cellValue;
     }
     
+    @Override
     public boolean setCellValue(Object value)
     {
-        vetElement();
-        
+        vetElement();        
         if (isWriteProtected())
             throw new ReadOnlyException(this, TableProperty.CellValue);
         else if (value == null && !isNullsSupported())
@@ -67,6 +69,45 @@ public class CellImpl extends TableElementImpl implements Cell
             parentTable.recalculateAffected(this);
         
         return valuesDiffer;
+    }
+    
+    @Override
+    public boolean isNumericValue()
+    {
+        vetElement();
+        return m_cellValue != null && (m_cellValue instanceof Number);
+    }
+    
+    @Override
+    public boolean isStringValue()
+    {
+        vetElement();
+        return m_cellValue != null && (m_cellValue instanceof String);
+    }
+    
+    @Override
+    public boolean isErrorValue()
+    {
+        vetElement();
+        return getErrorCode() != ErrorCode.NoError;
+    }
+    
+    @Override
+    public ErrorCode getErrorCode()
+    {
+        vetElement();
+        if (getDataType() == Double.class) {
+            if ((double) getCellValue() == Double.NaN)
+                return ErrorCode.NaN;
+            else if ((double)getCellValue() == Double.POSITIVE_INFINITY)
+                return ErrorCode.Infinity;
+            else if ((double)getCellValue() == Double.NEGATIVE_INFINITY)
+                return ErrorCode.Infinity;
+        }
+        else if (getCellValue() != null && getCellValue() instanceof ErrorCode)
+            return (ErrorCode)getCellValue();
+        
+        return ErrorCode.NoError;
     }
     
     protected boolean setDerivedCellValue(Token t)
@@ -120,7 +161,7 @@ public class CellImpl extends TableElementImpl implements Cell
         return false;
     }
     
-    Class<? extends Object> getEnforcedDataType()
+    protected Class<? extends Object> getEnforcedDataType()
     {
         if (getColumn() != null && getColumn().getDataType() != null)
             return getColumn().getDataType();
@@ -128,39 +169,62 @@ public class CellImpl extends TableElementImpl implements Cell
             return getDataType();
     }
     
-    public boolean isNumericValue()
+    @Override
+    public TableImpl getTable() 
+    {
+        if (m_col != null)
+            return m_col.getTable();
+        else
+            return null;
+    }
+
+    @Override
+    public ContextImpl getTableContext() 
     {
         vetElement();
-        return m_cellValue != null && (m_cellValue instanceof Number);
+        if (getTable() != null)
+            return getTable().getTableContext();
+        else
+            return null;
     }
     
-    public boolean isStringValue()
+    @Override
+    public ColumnImpl getColumn()
     {
         vetElement();
-        return m_cellValue != null && (m_cellValue instanceof String);
+        return m_col;
     }
     
-    public boolean isErrorValue()
+    @Override
+    public RowImpl getRow()
     {
         vetElement();
-        return getErrorCode() != ErrorCode.NoError;
+        if (getTable() != null)
+            return getTable().getRowByCellOffset(getCellOffset());
+        else
+            return null;
     }
     
-    public ErrorCode getErrorCode()
+    @Override
+    public Class<? extends Object> getDataType()
+    {
+        if (m_cellValue != null)
+            return m_cellValue.getClass();
+        else
+            return null;
+    }
+
+    @Override
+    protected boolean isEnforceDataType()
+    {
+        return isSet(sf_ENFORCE_DATATYPE_FLAG);
+    }
+
+    @Override
+    protected void setEnforceDataType(boolean enforceDataType)
     {
         vetElement();
-        if (getDataType() == Double.class) {
-            if ((double) getCellValue() == Double.NaN)
-                return ErrorCode.NaN;
-            else if ((double)getCellValue() == Double.POSITIVE_INFINITY)
-                return ErrorCode.Infinity;
-            else if ((double)getCellValue() == Double.NEGATIVE_INFINITY)
-                return ErrorCode.Infinity;
-        }
-        else if (getCellValue() != null && getCellValue() instanceof ErrorCode)
-            return (ErrorCode)getCellValue();
-        
-        return ErrorCode.NoError;
+        set(sf_ENFORCE_DATATYPE_FLAG, enforceDataType);
     }
     
     protected int getCellOffset()
@@ -170,35 +234,9 @@ public class CellImpl extends TableElementImpl implements Cell
     
     void setCellOffset(int offset)
     {
+        vetElement();
     	m_cellOffset = offset;
     }
-    
-    public ColumnImpl getColumn()
-    {
-        vetElement();
-    	return m_col;
-    }
-    
-    public RowImpl getRow()
-    {
-        vetElement();
-    	if (getTable() != null)
-    		return getTable().getRowByCellOffset(getCellOffset());
-    	else
-    		return null;
-    }
-    
-    protected Class<? extends Object> getDataType()
-    {
-        vetElement();
-    	if (m_cellValue != null)
-    		return m_cellValue.getClass();
-    	else
-    		return null;
-    }
-    /*
-     * Overridden methods
-     */
     
     /**
      * A cell's data type will be enforced if:
@@ -223,39 +261,20 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
-    protected boolean isEnforceDataType()
-    {
-        return (m_flags & sf_ENFORCE_DATATYPE_FLAG) != 0;
-    }
-
-    @Override
-    protected void setEnforceDataType(boolean enforceDataType)
-    {
-        if (enforceDataType)
-            m_flags |= sf_ENFORCE_DATATYPE_FLAG;
-        else
-            m_flags &= ~sf_ENFORCE_DATATYPE_FLAG;
-    }
-    
-    @Override
     protected boolean isSupportsNull()
     {
-        return (m_flags & sf_SUPPORTS_NULL_FLAG) != 0;
+        return isSet(sf_SUPPORTS_NULL_FLAG);
     }
 
     @Override
     protected void setSupportsNull(boolean supportsNulls)
     {
-        if (supportsNulls)
-            m_flags |= sf_SUPPORTS_NULL_FLAG;
-        else
-            m_flags &= ~sf_SUPPORTS_NULL_FLAG;
+        set(sf_SUPPORTS_NULL_FLAG, supportsNulls);
     }
     
     @Override
     public boolean isNullsSupported()
     {
-        vetElement();
         return isSupportsNull() &&
                 (getColumn() != null ? getColumn().isNullsSupported() : false) &&
                 (getRow() != null ? getRow().isNullsSupported() : false);
@@ -264,17 +283,13 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean isReadOnly()
     {
-        vetElement();
-        return (m_flags & sf_READONLY_FLAG) != 0;
+        return isSet(sf_READONLY_FLAG);
     }
 
     @Override
     protected void setReadOnly(boolean supportsNulls)
     {
-        if (supportsNulls)
-            m_flags |= sf_READONLY_FLAG;
-        else
-            m_flags &= ~sf_READONLY_FLAG;
+        set(sf_READONLY_FLAG, supportsNulls);
     }
     
     @Override
@@ -291,7 +306,6 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean isNull()
     {
-        vetElement();
         return m_cellValue == null;
     }
 
@@ -349,7 +363,6 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public int getNumCells()
     {
-        vetElement();
         return 1;
     }
     
@@ -371,30 +384,13 @@ public class CellImpl extends TableElementImpl implements Cell
         clear();
         invalidate();
     }
-
-	@Override
-	public TableImpl getTable() 
-	{
-		if (m_col != null)
-			return m_col.getTable();
-		else
-			return null;
-	}
-
-	@Override
-	public ContextImpl getTableContext() 
-	{
-        vetElement();
-		if (getTable() != null)
-			return getTable().getTableContext();
-		else
-			return null;
-	}
 	
-    @Override
+	/*
+	 * Derivation-related methods
+	 */
+	@Override
     public Derivation getDerivation()
     {
-        vetElement();
         Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         return deriv;
     }
@@ -508,13 +504,9 @@ public class CellImpl extends TableElementImpl implements Cell
             table.deregisterAffects(this, d);
     }
     
-	@Override
-	public Iterable<Cell> cells()
-	{
-        vetElement();
-        return new CellIterable();
-	}
-	
+    /*
+     * Range-related methods
+     */
     protected boolean add(RangeImpl r)
     {
         TableImpl parent = getTable();
@@ -612,6 +604,16 @@ public class CellImpl extends TableElementImpl implements Cell
         return String.format("[%s%s <%s>]", getElementType(), label, isNull() ? "null" : getCellValue().toString());
 	}
 	
+	/*
+	 * Methods to get cells iterable
+	 */
+    @Override
+    public Iterable<Cell> cells()
+    {
+        vetElement();
+        return new CellIterable();
+    }
+    
     protected class CellIterable implements Iterator<Cell>, Iterable<Cell>
     {
         private boolean m_hasNext = true;

@@ -10,6 +10,7 @@ public interface Cell extends TableElement, Derivable
     public boolean isNumericValue();
     public boolean isStringValue();
     public boolean isErrorValue();
+    public Class<? extends Object> getDataType();
     
     public Row getRow();
     public Column getColumn();
