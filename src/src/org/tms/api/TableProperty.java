@@ -17,7 +17,6 @@ public enum TableProperty implements Comparable<TableProperty>
     isSupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     // Table Element Properties (Context implements initializable ones)
-    Index(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Range),
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Range),
     Precision(false, true, ElementType.Context, ElementType.Table),
@@ -40,6 +39,8 @@ public enum TableProperty implements Comparable<TableProperty>
     numCellsCapacity(true, false, ElementType.Column),
     NextCellOffset(true, false, ElementType.Table),
     Derivation(false, false, ElementType.Column, ElementType.Row, ElementType.Cell),
+    Affects(true, false, ElementType.Table, ElementType.Range, ElementType.Column, ElementType.Row, ElementType.Cell),
+    Index(true, false, ElementType.Row, ElementType.Column),
     
     Rows(true, false, ElementType.Table, ElementType.Range),
     Columns(true, false, ElementType.Table, ElementType.Range), 

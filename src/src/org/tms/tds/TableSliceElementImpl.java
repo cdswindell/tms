@@ -25,6 +25,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     abstract protected TableSliceElementImpl setCurrent();
     
     private JustInTimeSet<RangeImpl> m_ranges;
+    private int m_index = -1;    
     private Derivation m_deriv;
 
     public TableSliceElementImpl(TableElementImpl e)
@@ -283,7 +284,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             
             if (super.initializeProperty(tp, value)) continue;
             
-            switch (tp) {
+            switch (tp) {                    
                 default:
                     throw new IllegalStateException("No initialization available for " + 
                                                     this.getClass().getSimpleName() +" Property: " + tp);                       
@@ -292,6 +293,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         
         // initialize other member fields
         m_ranges = new JustInTimeSet<RangeImpl>();
+        setIndex(-1);
         setInUse(false);
     } 
 
@@ -315,11 +317,24 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             case Cells:
                 return getCells();
                 
+            case Index:
+                return getIndex();
+                
             default:
                 return super.getProperty(key);
         }
     }   
 
+    public int getIndex()
+    {
+        return m_index ;
+    }
+    
+    void setIndex(int idx)
+    {
+        m_index = idx;
+    }
+    
     protected List<CellImpl> getCells()
     {
         int numCells = getNumCells();
@@ -435,4 +450,20 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
 	{
 		return getNumCells() == 0;
 	}   
+    
+    public String toString()
+    {
+        String label = (String)getProperty(TableProperty.Label);
+        if (label != null)
+            label = ": " + label;
+        else
+            label = "";
+        
+        int idx = getIndex();
+        
+        if (idx > 0)
+            return String.format("[%s %d%s]", getElementType(), idx, label);
+        else
+            return String.format("[%s%s]", getElementType(), label);
+    }
 }

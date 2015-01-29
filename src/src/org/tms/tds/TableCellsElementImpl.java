@@ -17,8 +17,6 @@ abstract class TableCellsElementImpl extends TableElementImpl
 {
     abstract public int getNumCells();
     
-    private int m_index = -1;
-    
     protected TableImpl m_table;   
     protected Set<Derivable> m_affects;
 
@@ -56,7 +54,6 @@ abstract class TableCellsElementImpl extends TableElementImpl
         
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
-        setIndex(-1);
         
         m_affects = new LinkedHashSet<Derivable>();
     }
@@ -67,9 +64,6 @@ abstract class TableCellsElementImpl extends TableElementImpl
         // Some properties are built into the base Table Element object
         switch (key)
         {
-            case Index:
-                return getIndex();
-                
             default:
                 return super.getProperty(key);
         }
@@ -104,16 +98,6 @@ abstract class TableCellsElementImpl extends TableElementImpl
             source = ContextImpl.getDefaultContext();
 
         return source;
-    }
-    
-    public int getIndex()
-    {
-        return m_index ;
-    }
-    
-    void setIndex(int idx)
-    {
-        m_index = idx;
     }
     
     /**
@@ -167,21 +151,5 @@ abstract class TableCellsElementImpl extends TableElementImpl
     public void deregisterAffects(Derivable elem)
     {
         m_affects.remove(elem);
-    }
-    
-    public String toString()
-    {
-        String label = (String)getProperty(TableProperty.Label);
-        if (label != null)
-            label = ": " + label;
-        else
-            label = "";
-        
-        int idx = getIndex();
-        
-        if (idx > 0)
-            return String.format("[%s %d%s]", getElementType(), idx, label);
-        else
-            return String.format("[%s%s]", getElementType(), label);
     }
 }

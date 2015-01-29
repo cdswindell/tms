@@ -63,6 +63,9 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
             case isEnforceDataType:
                 return isEnforceDataType();
                                 
+            case Affects:
+                return getAffects();
+                                
             default:
                 return super.getProperty(key);
         }

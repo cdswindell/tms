@@ -26,7 +26,7 @@ public class CellImpl extends TableElementImpl implements Cell
     private ColumnImpl m_col;
     private int m_cellOffset;
     
-    public CellImpl(ColumnImpl col, int cellOffset)
+    protected CellImpl(ColumnImpl col, int cellOffset)
     {
         super(col);
         m_col = col;
@@ -130,21 +130,25 @@ public class CellImpl extends TableElementImpl implements Cell
     
     public boolean isNumericValue()
     {
+        vetElement();
         return m_cellValue != null && (m_cellValue instanceof Number);
     }
     
     public boolean isStringValue()
     {
+        vetElement();
         return m_cellValue != null && (m_cellValue instanceof String);
     }
     
     public boolean isErrorValue()
     {
+        vetElement();
         return getErrorCode() != ErrorCode.NoError;
     }
     
     public ErrorCode getErrorCode()
     {
+        vetElement();
         if (getDataType() == Double.class) {
             if ((double) getCellValue() == Double.NaN)
                 return ErrorCode.NaN;
@@ -171,6 +175,7 @@ public class CellImpl extends TableElementImpl implements Cell
     
     public ColumnImpl getColumn()
     {
+        vetElement();
     	return m_col;
     }
     
@@ -250,6 +255,7 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean isNullsSupported()
     {
+        vetElement();
         return isSupportsNull() &&
                 (getColumn() != null ? getColumn().isNullsSupported() : false) &&
                 (getRow() != null ? getRow().isNullsSupported() : false);
@@ -258,6 +264,7 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean isReadOnly()
     {
+        vetElement();
         return (m_flags & sf_READONLY_FLAG) != 0;
     }
 
@@ -284,6 +291,7 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean isNull()
     {
+        vetElement();
         return m_cellValue == null;
     }
 
@@ -315,6 +323,7 @@ public class CellImpl extends TableElementImpl implements Cell
                 return super.getProperty(key);
         }
     }
+    
     @Override
     protected void initialize(TableElementImpl e)
     {
@@ -340,6 +349,7 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public int getNumCells()
     {
+        vetElement();
         return 1;
     }
     
@@ -359,6 +369,7 @@ public class CellImpl extends TableElementImpl implements Cell
     public void delete()
     {
         clear();
+        invalidate();
     }
 
 	@Override
@@ -373,6 +384,7 @@ public class CellImpl extends TableElementImpl implements Cell
 	@Override
 	public ContextImpl getTableContext() 
 	{
+        vetElement();
 		if (getTable() != null)
 			return getTable().getTableContext();
 		else
@@ -382,6 +394,7 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public Derivation getDerivation()
     {
+        vetElement();
         Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         return deriv;
     }
@@ -477,6 +490,7 @@ public class CellImpl extends TableElementImpl implements Cell
          * To minimize cell footprint, the set of elements
          * this cell affects is maintained in the parent table
          */
+        vetElement();
         TableImpl table = getTable();
         if (table != null)
             table.registerAffects(this, d);
@@ -497,6 +511,7 @@ public class CellImpl extends TableElementImpl implements Cell
 	@Override
 	public Iterable<Cell> cells()
 	{
+        vetElement();
         return new CellIterable();
 	}
 	

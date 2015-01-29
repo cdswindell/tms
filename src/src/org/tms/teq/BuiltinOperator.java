@@ -92,10 +92,7 @@ public enum BuiltinOperator implements Labeled, Operator
     ColumnIndex(TokenType.BuiltIn, 5, "ColumnIndex", "cidx"),
     RowIndex(TokenType.BuiltIn, 5, "RowIndex", "ridx"),
 
-    Column(TokenType.ColumnRef, 6, "Column", "Col", "C"),
-    Row(TokenType.RowRef, 6, "Row", "R"),
-    Cell(TokenType.BuiltIn, 6),
-
+    // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 5, "sum"),
     Sum2Oper(TokenType.StatOp, 5, "sumOfSquares"),
     MeanOper(TokenType.StatOp, 5, "mean", "ave", "average"),
@@ -112,10 +109,12 @@ public enum BuiltinOperator implements Labeled, Operator
     SkewOper(TokenType.StatOp, 5, "skewness", "skew"),
     KurtOper(TokenType.StatOp, 5),
     
+    // Two Variable Stat Functions
     LinearSlopeOper(TokenType.BinaryStatOp, 5),
     LinearInterceptOper(TokenType.BinaryStatOp, 5),
     LinearCorrelationOper(TokenType.BinaryStatOp, 5),
     
+    // Transformation Functions
     SplineOper,
     MeanCenterOper(TokenType.TransformOp, 5, "meanCenter"),
     NormalizeOper(TokenType.TransformOp, 5, "normalize", "standardize"),    
