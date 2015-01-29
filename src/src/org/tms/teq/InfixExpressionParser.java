@@ -705,6 +705,16 @@ public class InfixExpressionParser
                     return 0;
                 }
             }
+            else if (tt == TokenType.TableRef) {
+                additionalCharsParsed = parseTableReference(exprChars, curPos + charsParsed, table, t);
+                if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+                    charsParsed += additionalCharsParsed;
+                else {
+                    if (pr != null)
+                        pr.addIssue(ParserStatusCode.InvalidRangeReference, curPos + charsParsed);
+                    return 0;
+                }
+            }
             else if (tt == TokenType.CellRef) {
                 additionalCharsParsed = parseCellReference(exprChars, curPos + charsParsed, table, t);
                 if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
@@ -753,6 +763,26 @@ public class InfixExpressionParser
         return charsParsed;
     }
     
+    private int parseTableReference(char[] exprChars, int curPos, Table table, Token t)
+    {
+        ElementReference er = parseElementReference(exprChars, curPos);
+        if (er.foundToken()) {
+            Table refTable = null;
+            String label = er.getLabel();
+            if (table.getTableContext() != null)
+                refTable = table.getTableContext().getTable(Access.ByLabel, label);
+            
+            // if we found a table, save it in the token and return the consumed chars
+            if (refTable != null) {
+                t.setValue(refTable);
+                return er.getCharsParsed();
+            }
+        }
+        
+        // failure
+        return 0;
+    }
+
     private int parseCellReference(char[] exprChars, int curPos, Table table, Token t)
     {
         ElementReference er = parseElementReference(exprChars, curPos);

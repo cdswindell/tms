@@ -119,6 +119,7 @@ public class PostfixStackGenerator
                 case RowRef:
                 case RangeRef:
                 case CellRef:
+                case TableRef:
                 case BuiltIn:
                     pfs.push(tt, ift.getOperator(), ift.getValue());
                     break;
@@ -184,7 +185,6 @@ public class PostfixStackGenerator
                 case NULL_TokenType:
                 case NullOpValue:
                 case RangeOp:
-                case TableRef:
                 case Variable:
                 default:
                     break;
