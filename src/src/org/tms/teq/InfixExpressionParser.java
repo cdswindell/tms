@@ -259,6 +259,10 @@ public class InfixExpressionParser
                     lastArgClass = Subset.class;
                     break;
                     
+                case TableRef:
+                    lastArgClass = Table.class;
+                    break;
+                    
                 case Operand:
                     lastArgClass = t.getDataType();
                     break;

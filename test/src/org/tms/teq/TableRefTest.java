@@ -15,10 +15,10 @@ import org.tms.api.TableProperty;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 
-public class ColumnRefTest extends BaseTest
+public class TableRefTest extends BaseTest
 {
     @Test
-    public void testColumnReference()
+    public void testTableReference()
     {
         TableContext c = TableContextFactory.fetchDefaultTableContext();
         
@@ -32,13 +32,14 @@ public class ColumnRefTest extends BaseTest
         assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
         
         Column c2 = t1.addColumn(Access.ByIndex, 2);
-        assertThat(c2, notNullValue());
+        assertThat(c2, notNullValue());        
+        c2.setLabel("c2");  
         
-        c2.setLabel("c2");        
-        c2.fill(30);
-        assertThat(t1.getPropertyInt(TableProperty.numCells), is (t1.getNumRows()));
+        // fill all the table cells
+        t1.fill(30);
+        assertThat(t1.getPropertyInt(TableProperty.numCells), is (t1.getNumRows() * t1.getNumColumns()));
         
-        // create new table and reference r1 in stat calculations
+        // create new table and reference the table in stat calculations
         Table t2 = TableFactory.createTable(10, 12, c);
         assertThat(t2, notNullValue());
         
@@ -47,17 +48,17 @@ public class ColumnRefTest extends BaseTest
         
         Cell cR1C1 = t2.getCell(t2.addRow(), c1);
         assertThat(cR1C1, notNullValue());
-        cR1C1.setDerivation("mean(Column t1::c2)");
+        cR1C1.setDerivation("mean(table t1)");
         assertThat(cR1C1.getCellValue(), is(30.0));
         
         Cell cR2C1 = t2.getCell(t2.addRow(), c1);
         assertThat(cR2C1, notNullValue());
-        cR2C1.setDerivation("count(Col 't1::c2')");
-        assertThat(cR2C1.getCellValue(), is(10.0));
+        cR2C1.setDerivation("count(tbl 't1')");
+        assertThat(cR2C1.getCellValue(), is(20.0));
         
         Cell cR3C1 = t2.getCell(t2.addRow(), c1);
         assertThat(cR3C1, notNullValue());
-        cR3C1.setDerivation("range(C \"t1::c2\")");
+        cR3C1.setDerivation("range(t \"t1\")");
         assertThat(cR3C1.getCellValue(), is(0.0));
     }
 }

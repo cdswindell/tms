@@ -10,7 +10,7 @@ public enum TokenType implements Labeled
     NullValue(false, "Null", "Empty"),
     EvaluationError(false, "Error"),
     
-    TableRef(false, "Table", "Tbl"),
+    TableRef(false, "Table", "Tbl", "T"),
     ColumnRef(false, "Column", "Col", "C"),
     RowRef(false, "Row","R"),
     CellRef(false, "Cell"),

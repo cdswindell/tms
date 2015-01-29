@@ -121,7 +121,7 @@ public enum BuiltinOperator implements Labeled, Operator
     ScaleOper("scale", TokenType.TransformOp, 5, MathUtil.class, "scale", TableElement.class, double.class, double.class),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
-    NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.SubsetRef, TokenType.CellRef),
+    NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.SubsetRef, TokenType.CellRef, TokenType.TableRef),
 
     LAST_operator;
     
