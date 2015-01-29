@@ -50,18 +50,6 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     }
     
     @Override
-    protected boolean isEnforceDataType()
-    {
-        return isSet(sf_ENFORCE_DATATYPE_FLAG);
-    }
-    
-    @Override
-    protected void setEnforceDataType(boolean dataTypeEnforced)
-    {
-        set(sf_ENFORCE_DATATYPE_FLAG, dataTypeEnforced);
-    }
-    
-    @Override
     protected boolean isDataTypeEnforced()
     {
         if (getTable() != null && getTable().isDataTypeEnforced())
@@ -70,18 +58,6 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             return this.isEnforceDataType();
     }
 
-    @Override
-    protected boolean isSupportsNull()
-    {
-        return isSet(sf_SUPPORTS_NULL_FLAG);
-    }
-    
-    @Override
-    protected void setSupportsNull(boolean supportsNull)
-    {
-        set(sf_SUPPORTS_NULL_FLAG, supportsNull);
-    }
-    
     @Override
     public boolean isNullsSupported()
     {
@@ -347,18 +323,6 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         }
         
         return cells;
-    }
-    
-    @Override
-    public boolean isReadOnly()
-    {
-        return isSet(sf_READONLY_FLAG);
-    }
-    
-    @Override 
-    protected void setReadOnly(boolean readOnly)
-    {
-        set(sf_READONLY_FLAG, readOnly);
     }
     
     @Override

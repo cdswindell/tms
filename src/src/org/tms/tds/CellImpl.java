@@ -215,19 +215,6 @@ public class CellImpl extends TableElementImpl implements Cell
             return null;
     }
 
-    @Override
-    protected boolean isEnforceDataType()
-    {
-        return isSet(sf_ENFORCE_DATATYPE_FLAG);
-    }
-
-    @Override
-    protected void setEnforceDataType(boolean enforceDataType)
-    {
-        vetElement();
-        set(sf_ENFORCE_DATATYPE_FLAG, enforceDataType);
-    }
-    
     protected int getCellOffset()
     {
     	return m_cellOffset;
@@ -256,35 +243,11 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
-    protected boolean isSupportsNull()
-    {
-        return isSet(sf_SUPPORTS_NULL_FLAG);
-    }
-
-    @Override
-    protected void setSupportsNull(boolean supportsNulls)
-    {
-        set(sf_SUPPORTS_NULL_FLAG, supportsNulls);
-    }
-    
-    @Override
     public boolean isNullsSupported()
     {
         return isSupportsNull() &&
                 (getColumn() != null ? getColumn().isNullsSupported() : false) &&
                 (getRow() != null ? getRow().isNullsSupported() : false);
-    }
-    
-    @Override
-    public boolean isReadOnly()
-    {
-        return isSet(sf_READONLY_FLAG);
-    }
-
-    @Override
-    protected void setReadOnly(boolean supportsNulls)
-    {
-        set(sf_READONLY_FLAG, supportsNulls);
     }
     
     @Override

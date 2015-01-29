@@ -462,17 +462,11 @@ public class RangeImpl extends TableCellsElementImpl implements Range
 	}
 	
     @Override
-    protected boolean isEnforceDataType()
+    public boolean isEnforceDataType()
     {
         return false;
     }
 
-    @Override
-    protected void setEnforceDataType(boolean enforceDataType)
-    {
-        // noop
-    }
-    
     @Override
     protected boolean isDataTypeEnforced()
     {
@@ -486,12 +480,6 @@ public class RangeImpl extends TableCellsElementImpl implements Range
     protected boolean isSupportsNull()
     {
         return true;
-    }
-
-    @Override
-    protected void setSupportsNull(boolean enforceDataType)
-    {
-        // noop       
     }
 
     @Override
@@ -509,12 +497,6 @@ public class RangeImpl extends TableCellsElementImpl implements Range
         return false;
     }
 
-    @Override
-    protected void setReadOnly(boolean readOnly)
-    {
-        // noop        
-    }
-    
     @Override
     protected boolean isWriteProtected()
     {

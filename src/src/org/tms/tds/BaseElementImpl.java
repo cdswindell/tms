@@ -18,11 +18,6 @@ import org.tms.api.exceptions.UnimplementedException;
 abstract public class BaseElementImpl implements BaseElement
 {
     abstract protected boolean isNull();
-    abstract protected boolean isSupportsNull();
-    abstract protected void setSupportsNull(boolean enforceDataType); 
-    
-    abstract public boolean isReadOnly();
-    abstract protected void setReadOnly(boolean readOnly);   
     
     public abstract ElementType getElementType();
     
@@ -116,6 +111,37 @@ abstract public class BaseElementImpl implements BaseElement
             m_flags |= flag;
         else
             m_flags &= ~flag;
+    }
+    
+    protected boolean isSupportsNull()
+    {
+        return isSet(sf_SUPPORTS_NULL_FLAG);
+    }
+
+    protected void setSupportsNull(boolean supportsNulls)
+    {
+        set(sf_SUPPORTS_NULL_FLAG, supportsNulls);
+    }
+    
+    @Override
+    public boolean isReadOnly()
+    {
+        return isSet(sf_READONLY_FLAG);
+    }
+
+    protected void setReadOnly(boolean supportsNulls)
+    {
+        set(sf_READONLY_FLAG, supportsNulls);
+    }
+    
+    public boolean isEnforceDataType()
+    {
+        return isSet(sf_ENFORCE_DATATYPE_FLAG);
+    }
+    
+    protected void setEnforceDataType(boolean dataTypeEnforced)
+    {
+        set(sf_ENFORCE_DATATYPE_FLAG, dataTypeEnforced);
     }
     
     protected void setProperty(TableProperty key, Object value)
@@ -218,6 +244,9 @@ abstract public class BaseElementImpl implements BaseElement
             case isNull:
                 return isNull();
                 
+            case isEnforceDataType:
+                return isEnforceDataType();
+                                
             default:
                 if (key.isOptional())
                     return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
@@ -341,6 +370,12 @@ abstract public class BaseElementImpl implements BaseElement
                 if (!isValidPropertyValueBoolean(value))
                     value = ContextImpl.sf_SUPPORTS_NULL_DEFAULT;
                 setSupportsNull((boolean)value);
+                break;
+                
+            case isEnforceDataType:
+                if (!isValidPropertyValueInt(value))
+                    value = ContextImpl.sf_ENFORCE_DATA_TYPE_DEFAULT;
+                setEnforceDataType((boolean)value);
                 break;
                 
             default:

@@ -102,11 +102,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         this(false, otherContext);
     }
     
-    public ElementType getElementType()
-    {
-        return ElementType.Context;
-    }
-    
     protected void initialize()
     {
         initialize(ContextImpl.getDefaultContext());
@@ -148,12 +143,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                     setPrecision((int)value);
                     break;
                     
-                case isEnforceDataType:
-                    if (!isValidPropertyValueBoolean(value))
-                        value = sf_ENFORCE_DATA_TYPE_DEFAULT;
-                    setEnforceDataType((boolean)value);
-                    break;
-                    
                 case isAutoRecalculate:
                     if (!isValidPropertyValueBoolean(value))
                         value = sf_AUTO_RECALCULATE_DEFAULT;
@@ -184,6 +173,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     }
 
     @Override
+    public ElementType getElementType()
+    {
+        return ElementType.Context;
+    }
+    
+    @Override
     public Object getProperty(TableProperty key)
     {
         switch(key)
@@ -197,9 +192,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext
             case Precision:
                 return getPrecision();
                 
-            case isEnforceDataType:
-                return isEnforceDataType();
-                
             case isAutoRecalculate:
                 return isAutoRecalculate();
                 
@@ -211,30 +203,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         }        
     }
 
-    @Override
-    protected boolean isSupportsNull()
-    {
-        return isSet(sf_SUPPORTS_NULL_FLAG);
-    }
-    
-    @Override
-    protected void setSupportsNull(boolean supportsNull)
-    {
-        set(sf_SUPPORTS_NULL_FLAG, supportsNull);
-    }
-    
-    @Override
-    public boolean isReadOnly()
-    {
-        return isSet(sf_READONLY_FLAG);
-    }
-    
-    @Override
-    protected void setReadOnly(boolean readOnly)
-    {
-        set(sf_READONLY_FLAG, readOnly);
-    }
-        
     @Override
     protected boolean isNull()
     {
@@ -318,16 +286,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         }
         else
             m_precision = precision;
-    }
-
-    protected boolean isEnforceDataType()
-    {
-        return isSet(sf_ENFORCE_DATATYPE_FLAG);
-    }
-
-    protected void setEnforceDataType(boolean enforceDataType)
-    {
-        set(sf_ENFORCE_DATATYPE_FLAG, enforceDataType);
     }
 
     protected ContextImpl register(Table table)
