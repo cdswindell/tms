@@ -1,8 +1,14 @@
 package org.tms.tds;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
+
 import java.util.List;
 
 import org.junit.Test;
+import org.tms.api.Access;
 import org.tms.api.TableProperty;
 
 public class ContextTest
@@ -61,5 +67,35 @@ public class ContextTest
             System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
     }
-  
+
+    @Test
+    public void getTablesTest()
+    {
+        TableImpl t1 = new TableImpl();
+        assertThat(t1, notNullValue());
+        t1.setLabel("t1");
+        
+        TableImpl t2 = new TableImpl();
+        assertThat(t2, notNullValue());        
+        t2.setLabel("t2");
+        
+        // get the default context
+        ContextImpl c = ContextImpl.getDefaultContext();
+        assertThat(c, notNullValue());
+        
+        // get the labeled tables from the context
+        TableImpl t = c.getTable(Access.ByLabel, "t1");
+        assertThat(t, is(t1));
+        
+        t = c.getTable(Access.ByReference, t1);
+        assertThat(t, is(t1));
+        
+        t = c.getTable(Access.ByLabel, "t2");
+        assertThat(t, is(t2));
+        
+        // delete a table and make sure we don't retrieve it
+        t2.delete();
+        t = c.getTable(Access.ByLabel, "t2");
+        assertThat(t, nullValue());        
+    }
 }

@@ -157,7 +157,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     protected void initialize(TableElementImpl e) 
     {
-        // noop for tables, initialization happens slightly differently
+        super.initialize(e);
     }
     
     protected void initializeProperties(TableImpl e)
@@ -210,6 +210,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 if (te == null)
                     continue;
                 else  if (te instanceof TableElementImpl) {
+                    TableElementImpl tei = (TableElementImpl)te;
+                    // don't redelete deleted items
+                    if (tei.isInvalid())
+                        continue;
                     if (te.getTable() == this) 
                         ((TableElementImpl)te).delete();
                     else 
@@ -342,17 +346,22 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     public void delete()
     {
-    	m_ranges.clear();
-    	if (m_cols != null)
-    		m_cols.clear();
-    	
-    	if (m_rows != null)
-    		m_rows.clear();
+    	this.m_ranges.clear();
+    	this.m_affects.clear();
+    	this.m_cellAffects.clear();
+    	this.m_cellOffsetRowMap.clear();
+    	this.m_currentCellStack.clear();
+    	this.m_derivedCells.clear();
+    	this.m_rangedCells.clear();
+    	this.m_unusedCellOffsets.clear();
+    	this.m_cols.clear();
+    	this.m_rows.clear();
     	
     	if (getTableContext() != null)
-    		getTableContext().deregister(this);;   	
-    }
-    
+    		getTableContext().deregister(this);
+    	
+    	invalidate();
+    }    
     
     public boolean isAutoRecalculateEnabled()
     {
@@ -378,8 +387,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     {
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
     }
-    
-    
+       
     @Override
     protected boolean isDataTypeEnforced()
     {
