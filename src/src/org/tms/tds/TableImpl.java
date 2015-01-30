@@ -256,9 +256,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
      */
     synchronized protected void reclaimColumnSpace()
     {
-        int numCols = m_cols.size();
-        
-        // if the column count is 0, reset all rows
+        // if the column count is 0, reset all row cell offsets
+        int numCols = m_cols.size();       
         if (numCols == 0) {
             m_cellOffsetRowMap.clear();
             m_unusedCellOffsets.clear();
@@ -304,13 +303,22 @@ public class TableImpl extends TableCellsElementImpl implements Table
      */
     synchronized protected void reclaimRowSpace()
     {
+        int numRows = m_rows.size();
+        if (numRows == 0) {
+            m_cellOffsetRowMap.clear();
+            m_unusedCellOffsets.clear();
+            m_nextCellOffset = 0;
+            
+            if (m_nextCellOffset > 0)
+                m_cols.forEach(c-> { if (c != null) c.reclaimCellSpace(m_rows, 0); });            
+        }
+        
         // if the threshold is 0, don't reclaim space
         double threshold = this.getFreeSpaceThreshold();        
         if (threshold <= 0.0) 
             return;
         
         // we want room for at least ColumnCapacityIncr columns
-        int numRows = m_rows.size();
         int capacity = this.getRowsCapacity();     
         int freeRows = capacity - numRows;      
         
@@ -321,14 +329,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
         double ratio = (double)freeRows/(double)incr;
         
         if (ratio >= threshold || numRows == 0) {
+            // reclaim the cell space in each column
+            reclaimCellSpace(numRows);
+            
             // free the unused space in the cells array
             m_rows.trimToSize();
             if (numRows == 0)
                 numRows = incr;
-            setRowsCapacity(numRows);
-            
-            // reclaim the cell space in each column
-            reclaimCellSpace(numRows);
+            setRowsCapacity(numRows);           
         }
     }
     
@@ -342,21 +350,26 @@ public class TableImpl extends TableCellsElementImpl implements Table
     {
         assert numRows == m_rows.size() : "Table rows inconsistent";       
         
-        // if there are no columns, there is no work to do
+        // if there are columns, and if the next cell offset > numRows, 
+        // reclaim the unused space in the column cell arrays. If 
+        // m_nextCellOffset > numRows, then we know that there are holes
+        // in the cells array that can be compressed
         int numCols = m_cols.size();
-        if (numCols > 0) {
+        if (numCols > 0) {           
             m_cols.forEach(c -> { if (c != null) c.reclaimCellSpace(m_rows, numRows); } );
-            int cellOffset = 0;
-            m_cellOffsetRowMap.clear();
-            if (numRows > 0) {
-                for (RowImpl row : m_rows) {
-                    if (row != null && row.getCellOffset() >= 0)
-                        row.setCellOffset(numCols > 0 ? cellOffset++ : -1);
+            if (m_nextCellOffset > numRows) {
+                m_cellOffsetRowMap.clear();
+                int cellOffset = 0;
+                if (numRows > 0) {
+                    for (RowImpl row : m_rows) {
+                        if (row != null && row.getCellOffset() >= 0)
+                            row.setCellOffset(numCols > 0 ? cellOffset++ : -1);
+                    }
                 }
+        
+                m_unusedCellOffsets.clear();
+                m_nextCellOffset = cellOffset;
             }
-    
-            m_unusedCellOffsets.clear();
-            m_nextCellOffset = cellOffset;
         }
     }
 

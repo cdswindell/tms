@@ -47,15 +47,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     }
 
     /**
-     * 
-     */
-    void reinitialize()
-    {
-        m_cells = null;
-        m_cellsCapacity = 0;
-    }
-    
-    /**
      * Compress the cells array as the result of row deletions. This method builds a new cells
      * array where the cells are ordered in row order.
      * @param rows
@@ -64,17 +55,27 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     void reclaimCellSpace(List<RowImpl> rows, int numRows)
     {
         // create a new cells array, ordered the same as the table rows
-        if (numRows > 0) {
+        if (numRows > 0 && m_cells != null) {
             assert m_cells != null && numRows <= m_cells.size() && numRows <= m_cellsCapacity : "Column cell array in inconsistent state";
             
-            ArrayList<CellImpl> cells = new ArrayList<CellImpl>(numRows);
-            rows.forEach(r -> { if (r != null && r.getCellOffset() >= 0) cells.add(m_cells.get(r.getCellOffset())); });    
+            int numCells = m_cells.size();
+            if (numCells > numRows) {
+                ArrayList<CellImpl> cells = new ArrayList<CellImpl>(numRows);
+                rows.forEach(r -> { if (r != null && r.getCellOffset() >= 0) cells.add(m_cells.get(r.getCellOffset())); });    
+                
+                m_cells = cells;
+                numCells = m_cells.size();
+                assert numCells == numRows : "Cell count doesn't match row count";
+            }
+            else if (m_cellsCapacity > numCells)
+                m_cells.trimToSize();
             
-            m_cells = cells;
-            m_cellsCapacity = numRows;
+            m_cellsCapacity = numCells;
         }
-        else 
-            reinitialize();            
+        else {
+            m_cells = null;
+            m_cellsCapacity = 0;
+        }
     }
     
     /*
