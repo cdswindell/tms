@@ -217,7 +217,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * Methods defined by interface Table; mostly adapters
      */
     
-    @Override synchronized public void delete(TableElement... elements)
+    @Override 
+    synchronized public void delete(TableElement... elements)
     {
         if (elements != null) {
             for (TableElement te : elements) {
@@ -238,18 +239,39 @@ public class TableImpl extends TableCellsElementImpl implements Table
             }
             
             // compress data structures
-            compressColumns();
+            reclaimColumnSpace();
             compressRows();
         }
     }
     
-    protected void compressColumns()
+    void reclaimColumnSpace()
     {
-        // TODO Auto-generated method stub 
-        //m_cols.trimToSize();
+        // if the threshold is 0, don't reclaim space
+        double threshold = this.getFreeSpaceThreshold();        
+        if (threshold <= 0.0) 
+            return;
+        
+        // we want room for at least ColumnCapacityIncr columns
+        int numCols = m_cols.size();
+        int capacity = this.getColumnsCapacity();     
+        int freeCols = capacity - numCols;      
+        
+        // Compute the ratio of total free columns to the
+        // column capacity increment unit
+        // if it is above the free space threshold, compress
+        int incr = getColumnCapacityIncr();
+        double ratio = (double)freeCols/(double)incr;
+        
+        if (ratio >= threshold || numCols == 0) {
+            // free the unused space in the cells array
+            m_cols.trimToSize();
+            if (numCols == 0)
+                numCols = incr;
+            setColumnsCapacity(numCols);
+        }
     }
     
-    protected void compressRows()
+    void compressRows()
     {
         // TODO Auto-generated method stub        
     }
@@ -1304,21 +1326,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
         fill(null);
     }  
 	
-    synchronized void compactIfNeeded(ArrayList<? extends TableSliceElementImpl> slices, int capacity) 
-    {
-        int size = slices.size();
-        
-        if (capacity > (size * 3)) {
-            slices.trimToSize();
-            size = slices.size();
-            
-            if (slices == m_rows)
-                setRowsCapacity(size);
-            else if (slices == m_cols)
-                setColumnsCapacity(size);
-        }
-    }
-    
 	synchronized public void popCurrent() 
     {
 		if (m_currentCellStack != null && !m_currentCellStack.isEmpty()) {

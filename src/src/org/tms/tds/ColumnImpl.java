@@ -388,7 +388,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     parent.setCurrentColumn(null);
                 
                 if (compress)
-                    parent.compressColumns();
+                    parent.reclaimColumnSpace();
     	    }
     	}   	
 
