@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.factories.TableContextFactory;
@@ -94,5 +95,44 @@ public class TableFreeSpaceTest extends BaseTest
         assertThat(t1.getNumColumns(), is(0));
         assertThat(t1.getPropertyInt(TableProperty.ColumnCapacityIncr), is(2));
         assertThat(t1.getPropertyInt(TableProperty.numColumnsCapacity), is(2));
-    }    
+    } 
+    
+    @Test
+    public void testRowFreeSpaceReclamation()
+    {
+        ContextImpl c = (ContextImpl)TableContextFactory.createTableContext();
+        c.setRowCapacityIncr(2);
+        
+        Table t1 = TableFactory.createTable(1, 2, c);        
+        assertThat(t1, notNullValue());
+        assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
+        assertThat(t1.getPropertyInt(TableProperty.RowCapacityIncr), is(2));
+        assertThat(t1.getPropertyInt(TableProperty.numRowsCapacity), is(2));
+        
+        Row r2 = t1.addRow(Access.ByIndex, 2);
+        assertThat(r2, notNullValue());
+        assertThat(t1.getPropertyInt(TableProperty.RowCapacityIncr), is(2));
+        assertThat(t1.getPropertyInt(TableProperty.numRowsCapacity), is(2));
+        
+        Row r21 = t1.addRow(Access.ByIndex, 21);
+        assertThat(r21, notNullValue());
+        assertThat(t1.getPropertyInt(TableProperty.RowCapacityIncr), is(2));
+        assertThat(t1.getPropertyInt(TableProperty.numRowsCapacity), is(22));
+        
+        // delete the first 10 rows and retest
+        for (int i = 0; i < 10; i++)
+            t1.getRow(Access.First).delete();
+        
+        assertThat(t1.getNumRows(), is(11));
+        assertThat(t1.getPropertyInt(TableProperty.numRowsCapacity), is(14));
+        
+        // delete all of the rows, at this point, the capacity should be the incr, which is 2
+        Row row = null;
+        while ((row = t1.getRow(Access.First)) != null)
+            row.delete();
+        
+        assertThat(t1.getNumRows(), is(0));
+        assertThat(t1.getPropertyInt(TableProperty.RowCapacityIncr), is(2));
+        assertThat(t1.getPropertyInt(TableProperty.numRowsCapacity), is(2));
+    }
 }

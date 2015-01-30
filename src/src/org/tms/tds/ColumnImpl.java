@@ -15,7 +15,7 @@ import org.tms.api.exceptions.IllegalTableStateException;
 
 public class ColumnImpl extends TableSliceElementImpl implements Column
 {
-    private Object m_cells;
+    private ArrayList<CellImpl> m_cells;
     private Class<? extends Object> m_dataType;
     private int m_cellsCapacity;
     
@@ -46,6 +46,37 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         m_dataType = null;
     }
 
+    /**
+     * 
+     */
+    void reinitialize()
+    {
+        m_cells = null;
+        m_cellsCapacity = 0;
+    }
+    
+    /**
+     * Compress the cells array as the result of row deletions. This method builds a new cells
+     * array where the cells are ordered in row order.
+     * @param rows
+     * @param numRows 
+     */
+    void reclaimCellSpace(List<RowImpl> rows, int numRows)
+    {
+        // create a new cells array, ordered the same as the table rows
+        if (numRows > 0) {
+            assert m_cells != null && numRows <= m_cells.size() && numRows <= m_cellsCapacity : "Column cell array in inconsistent state";
+            
+            ArrayList<CellImpl> cells = new ArrayList<CellImpl>(numRows);
+            rows.forEach(r -> { if (r != null) cells.add(m_cells.get(r.getCellOffset())); });    
+            
+            m_cells = cells;
+            m_cellsCapacity = numRows;
+        }
+        else 
+            reinitialize();            
+    }
+    
     /*
      * Field getters and setters
      */
@@ -91,7 +122,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return getCellInternal(row, true);
     }
     
-    @SuppressWarnings("unchecked")
     CellImpl getCellInternal(RowImpl row, boolean createIfSparse)
     {
         assert row != null : "Row required";
@@ -118,17 +148,14 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     row.setCellOffset(cellOffset);
                 } // of assign cell offset to row
                 
-                // get a type-safe reference to the cells array
-                List<CellImpl> cells = (ArrayList<CellImpl>)m_cells;
-                
                 // if offset is equal or greater than numCells, we haven't referenced this
                 // cell yet, create it and add it to the array, if createIfSparse is true
                 if (cellOffset < numCells) {
-                    c = cells.get(cellOffset);
+                    c = m_cells.get(cellOffset);
                     
                     if (c == null && createIfSparse) {
                         c = new CellImpl(this, cellOffset);
-                        cells.set(cellOffset, c);
+                        m_cells.set(cellOffset, c);
                     }
                 }
                 else {
@@ -140,11 +167,11 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     assert cellOffset >= numCells;
                     
                     // make sure sufficient capacity exists
-                    cells = ensureCellCapacity(); // reget the cells array, in case it was null
+                    ensureCellCapacity(); // reget the cells array, in case it was null
                     
                     // if cellOffset is equal to or beyond num cells, add slots to cell array
                     while (cellOffset > numCells) {
-                    	cells.add(null);
+                    	m_cells.add(null);
                     	numCells++;
                     }
                     
@@ -153,7 +180,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     
                     // create a new cell structure and add it to the array              
                     c = new CellImpl(this, cellOffset);
-                    cells.add(c);
+                    m_cells.add(c);
                 }
             } // of synchronized
         } // of table not null
@@ -169,7 +196,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return c;
     }
     
-    @SuppressWarnings("unchecked")
     List<CellImpl> ensureCellCapacity()
     {
         TableImpl table = getTable();
@@ -183,7 +209,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                 m_cellsCapacity = reqCapacity;
             }
             else if (reqCapacity > m_cellsCapacity) {
-                ((ArrayList<CellImpl>)m_cells).ensureCapacity(reqCapacity);
+                m_cells.ensureCapacity(reqCapacity);
                 m_cellsCapacity = reqCapacity;
             }
         }
@@ -191,17 +217,15 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return (List<CellImpl>) m_cells;
     }
 
-    @SuppressWarnings("unchecked")
 	int getCellsSize()
     {
         if (m_cells != null) 
-        	return ((List<CellImpl>)m_cells).size();
+        	return m_cells.size();
         else 
             return 0;
     }
     
 
-	@SuppressWarnings("unchecked")
 	/**
 	 * Invalidate the specified cell in the column cell array. Called by TableImpl.cacheCellOffset
 	 * in response to row deletions
@@ -210,13 +234,12 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
 	void invalidateCell(int cellOffset) 
 	{
 		if (m_cells != null) {
-			List<CellImpl> cells = (ArrayList<CellImpl>)m_cells;
-			if (cellOffset < cells.size()) {
-			    CellImpl cell = cells.get(cellOffset);
+			if (cellOffset < m_cells.size()) {
+			    CellImpl cell = m_cells.get(cellOffset);
 			    if (cell != null)
 			        cell.invalidateCell();
 			    
-			    cells.set(cellOffset, null);
+			    m_cells.set(cellOffset, null);
 			}
 		}
 	}
@@ -311,13 +334,12 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     }
     
     @Override 
-    @SuppressWarnings("unchecked")
     public int getNumCells()
     {
         vetElement();
         if (m_cells != null) {
         	int numNonNullCells = 0;
-        	for (Object o : (ArrayList<CellImpl>)m_cells)
+        	for (Object o : m_cells)
         		if (o != null) numNonNullCells++;
         	
         	return numNonNullCells;
@@ -337,7 +359,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return prevCurrent;
     }  
     
-    @SuppressWarnings("unchecked")
     @Override
     protected void delete(boolean compress)
     {
@@ -365,8 +386,8 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     m_affects.forEach(d -> d.clearDerivation());
                 
                 // invalidate column cells
-                if (m_cells != null && m_cells instanceof ArrayList) 
-                    ((List<CellImpl>)m_cells).forEach(c -> { if (c != null) c.invalidateCell(); });
+                if (m_cells != null) 
+                    m_cells.forEach(c -> { if (c != null) c.invalidateCell(); });
                 
                 TableSliceElementImpl rc = cols.remove(idx);
                 assert rc == this : "Removed column mismatch";
@@ -411,14 +432,14 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return new ColumnCellIterable();
     }
     
-    @SuppressWarnings("unchecked")
     protected Iterable<CellImpl> cellsInternal()
     {
         if (m_cells == null)
             return Collections.emptyList();
         else if (m_cells instanceof List)
-            return ((List<CellImpl>)m_cells);
-        return null;
+            return m_cells;
+        else
+            return null;
     }
     
     /**

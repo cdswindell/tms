@@ -60,10 +60,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	
     private ArrayList<RowImpl> m_rows;
     private ArrayList<ColumnImpl> m_cols;
+    
     private int m_nextCellOffset;
     private Queue<Integer> m_unusedCellOffsets;
-    private Deque<CellReference> m_currentCellStack;
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
+    
+    private Deque<CellReference> m_currentCellStack;
     
     private Map<CellImpl, Set<SubsetImpl>> m_subsetedCells;
     private Map<CellImpl, Derivation> m_derivedCells;
@@ -240,19 +242,38 @@ public class TableImpl extends TableCellsElementImpl implements Table
             
             // compress data structures
             reclaimColumnSpace();
-            compressRows();
+            reclaimRowSpace();
         }
     }
     
-    void reclaimColumnSpace()
+    /**
+     * Reclaim free space in columns list. Free space is calculated as the total array 
+     * capacity - the number of active columns. When this value divided by the column
+     * expansion increment (ColumnCapacityIncr) equals or exceeds the limit specified
+     * by FreeSpaceThreshold, free space is removed and returned to the system heap.
+     * <p/>
+     * If FreeSpaceThreshold is set to 0, free space is not removed. 
+     */
+    synchronized protected void reclaimColumnSpace()
     {
+        int numCols = m_cols.size();
+        
+        // if the column count is 0, reset all rows
+        if (numCols == 0) {
+            m_cellOffsetRowMap.clear();
+            m_unusedCellOffsets.clear();
+            
+            if (m_nextCellOffset > 0)
+                m_rows.forEach(r-> { if (r != null) r.setCellOffset(-1); });
+            m_nextCellOffset = 0;
+        }
+        
         // if the threshold is 0, don't reclaim space
         double threshold = this.getFreeSpaceThreshold();        
         if (threshold <= 0.0) 
             return;
         
         // we want room for at least ColumnCapacityIncr columns
-        int numCols = m_cols.size();
         int capacity = this.getColumnsCapacity();     
         int freeCols = capacity - numCols;      
         
@@ -265,17 +286,80 @@ public class TableImpl extends TableCellsElementImpl implements Table
         if (ratio >= threshold || numCols == 0) {
             // free the unused space in the cells array
             m_cols.trimToSize();
-            if (numCols == 0)
+            if (numCols == 0) {
                 numCols = incr;
+            }
+            
             setColumnsCapacity(numCols);
         }
     }
     
-    void compressRows()
+    /**
+     * Reclaim free space in rows list. Free space is calculated as the total array 
+     * capacity - the number of active rows. When this value divided by the row
+     * expansion increment (RowCapacityIncr) equals or exceeds the limit specified
+     * by FreeSpaceThreshold, free space is removed and returned to the system heap.
+     * <p/>
+     * If FreeSpaceThreshold is set to 0, free space is not removed. 
+     */
+    synchronized protected void reclaimRowSpace()
     {
-        // TODO Auto-generated method stub        
+        // if the threshold is 0, don't reclaim space
+        double threshold = this.getFreeSpaceThreshold();        
+        if (threshold <= 0.0) 
+            return;
+        
+        // we want room for at least ColumnCapacityIncr columns
+        int numRows = m_rows.size();
+        int capacity = this.getRowsCapacity();     
+        int freeRows = capacity - numRows;      
+        
+        // Compute the ratio of total free rows to the
+        // row capacity increment unit
+        // if it is above the free space threshold, compress
+        int incr = getRowCapacityIncr();
+        double ratio = (double)freeRows/(double)incr;
+        
+        if (ratio >= threshold || numRows == 0) {
+            // free the unused space in the cells array
+            m_rows.trimToSize();
+            if (numRows == 0)
+                numRows = incr;
+            setRowsCapacity(numRows);
+            
+            // reclaim the cell space in each column
+            reclaimCellSpace(numRows);
+        }
     }
     
+    /**
+     * Reclaim free space in each column cell array, and reset all cell offsets in each row.
+     * As a result of calling this method, the column cell arrays are all reordered in strict 
+     * row order.
+     * @param numRows
+     */
+    synchronized private void reclaimCellSpace(int numRows)
+    {
+        assert numRows == m_rows.size() : "Table rows inconsistent";       
+        
+        // if there are no columns, there is no work to do
+        int numCols = m_cols.size();
+        if (numCols > 0) {
+            m_cols.forEach(c -> { if (c != null) c.reclaimCellSpace(m_rows, numRows); } );
+            int cellOffset = 0;
+            m_cellOffsetRowMap.clear();
+            if (numRows > 0) {
+                for (RowImpl row : m_rows) {
+                    if (row != null)
+                        row.setCellOffset(numCols > 0 ? cellOffset++ : -1);
+                }
+            }
+    
+            m_unusedCellOffsets.clear();
+            m_nextCellOffset = cellOffset;
+        }
+    }
+
     @Override
     synchronized public CellImpl getCell(Row row, Column col)
     {
@@ -847,6 +931,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
      */
 	synchronized void cacheCellOffset(int cellOffset, boolean freeCellsNow) 
 	{
+	    if (cellOffset < 0)
+	        return;
+	    
 		assert cellOffset >= 0 : "Invalid value";
 		
 		// add the cellOffset value to the queue of available/freed offset values
@@ -886,6 +973,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         if (row != null && offset >= 0)
             m_cellOffsetRowMap.put(offset, row);
     }
+    
     /*
      * Column manipulation methods
      */

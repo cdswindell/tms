@@ -234,7 +234,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
                     parent.setCurrentRow(null);
                 
                 if (compress)
-                    parent.compressRows();
+                    parent.reclaimRowSpace();
     	    }
     	}
     	
