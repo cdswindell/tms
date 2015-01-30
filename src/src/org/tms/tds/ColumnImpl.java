@@ -68,7 +68,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             assert m_cells != null && numRows <= m_cells.size() && numRows <= m_cellsCapacity : "Column cell array in inconsistent state";
             
             ArrayList<CellImpl> cells = new ArrayList<CellImpl>(numRows);
-            rows.forEach(r -> { if (r != null) cells.add(m_cells.get(r.getCellOffset())); });    
+            rows.forEach(r -> { if (r != null && r.getCellOffset() >= 0) cells.add(m_cells.get(r.getCellOffset())); });    
             
             m_cells = cells;
             m_cellsCapacity = numRows;

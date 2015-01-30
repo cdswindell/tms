@@ -350,7 +350,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             m_cellOffsetRowMap.clear();
             if (numRows > 0) {
                 for (RowImpl row : m_rows) {
-                    if (row != null)
+                    if (row != null && row.getCellOffset() >= 0)
                         row.setCellOffset(numCols > 0 ? cellOffset++ : -1);
                 }
             }
