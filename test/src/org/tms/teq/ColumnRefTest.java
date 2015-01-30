@@ -20,7 +20,7 @@ public class ColumnRefTest extends BaseTest
     @Test
     public void testColumnReference()
     {
-        TableContext c = TableContextFactory.fetchDefaultTableContext();
+        TableContext c = TableContextFactory.createTableContext();
         
         Table t1 = TableFactory.createTable(10, 12, c);        
         assertThat(t1, notNullValue());

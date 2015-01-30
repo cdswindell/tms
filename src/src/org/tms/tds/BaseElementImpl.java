@@ -309,6 +309,19 @@ abstract public class BaseElementImpl implements BaseElement
             throw new InvalidPropertyException(this, key, "not int value");
     }
     
+    public double getPropertyDouble(TableProperty key)
+    {
+        if (key.isDoubleValue()) {
+            Object value = getProperty(key);
+            if (value != null && value instanceof Double)
+                return (double)value;
+            else
+                throw new UnimplementedException(this, key, "double");
+        }
+        else
+            throw new InvalidPropertyException(this, key, "not double value");
+    }
+    
     protected BaseElement find(Collection<? extends BaseElement> slices, TableProperty key, Object value)
     {
         assert key != null : "TableProperty required (enum)";
@@ -414,7 +427,12 @@ abstract public class BaseElementImpl implements BaseElement
     
     protected boolean isValidPropertyValueInt(Object value)
     {
-        return value != null && value instanceof Integer && ((int)value) > 0;    
+        return value != null && value instanceof Integer && ((int)value) >= 0;    
+    }
+    
+    protected boolean isValidPropertyValueDouble(Object value)
+    {
+        return value != null && value instanceof Double && ((double)value) >= 0;    
     }
     
     protected boolean isValidPropertyValueBoolean(Object value)

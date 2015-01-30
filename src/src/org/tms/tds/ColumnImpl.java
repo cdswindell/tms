@@ -19,9 +19,31 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     private Class<? extends Object> m_dataType;
     private int m_cellsCapacity;
     
-    public ColumnImpl(TableImpl parentTable)
+    protected ColumnImpl(TableImpl parentTable)
     {
         super(parentTable);
+    }
+
+    @Override
+    protected void initialize(TableElementImpl e)
+    {
+        super.initialize(e);
+        
+        BaseElementImpl source = getInitializationSource(e);        
+        for (TableProperty tp : this.getInitializableProperties()) 
+        {
+            Object value = source.getProperty(tp);            
+            if (super.initializeProperty(tp, value)) continue;            
+            switch (tp) {
+                default:
+                    throw new IllegalStateException("No initialization available for Column Property: " + tp);                       
+            }
+        }
+        
+        setStronglyTyped(false);
+        m_cells = null;
+        m_cellsCapacity = 0;
+        m_dataType = null;
     }
 
     /*
@@ -77,63 +99,64 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         assert this.getTable() == row.getTable() : "Row not in same table";
         
         CellImpl c = null;
-        int numCells = getCellsSize();
         TableImpl table = getTable();
-        synchronized(getTable()) {
-            int cellOffset = row.getCellOffset();
-            if (cellOffset < 0) {
-                // if the cell offset is not defined, no cells have been created
-                if (!createIfSparse ) return c;
+        if (table != null) {
+            synchronized(table) {
+                int numCells = getCellsSize();
+                int cellOffset = row.getCellOffset();
+                if (cellOffset < 0) {
+                    // if the cell offset is not defined, no cells have been created
+                    if (!createIfSparse ) return c;
+                    
+                    /*
+                     *  consult the table for an available cell offset; this value is stored in
+                     *  the row structure, and is used as an offset into the column cell array
+                     */
+                    cellOffset = table.calcNextAvailableCellOffset();
+                    assert cellOffset >= 0 : "Invalid cell offset returned";
+                    
+                    row.setCellOffset(cellOffset);
+                } // of assign cell offset to row
                 
-                /*
-                 *  consult the table for an available cell offset; this value is stored in
-                 *  the row structure, and is used as an offset into the column cell array
-                 */
-                cellOffset = table.calcNextAvailableCellOffset();
-                assert cellOffset >= 0 : "Invalid cell offset returned";
+                // get a type-safe reference to the cells array
+                List<CellImpl> cells = (ArrayList<CellImpl>)m_cells;
                 
-                row.setCellOffset(cellOffset);
-            } // of assign cell offset to row
-            
-            // get a type-safe reference to the cells array
-            ArrayList<CellImpl> cells = (ArrayList<CellImpl>)m_cells;
-            
-            // if offset is equal or greater than numCells, we haven't referenced this
-            // cell yet, create it and add it to the array, if createIfSparse is true
-            if (cellOffset < numCells) {
-                c = cells.get(cellOffset);
-                
-                if (c == null && createIfSparse) {
+                // if offset is equal or greater than numCells, we haven't referenced this
+                // cell yet, create it and add it to the array, if createIfSparse is true
+                if (cellOffset < numCells) {
+                    c = cells.get(cellOffset);
+                    
+                    if (c == null && createIfSparse) {
+                        c = new CellImpl(this, cellOffset);
+                        cells.set(cellOffset, c);
+                    }
+                }
+                else {
+                    if (!createIfSparse)
+                        return c;
+                    
+                    // if cellOffset is equal to or > numCells, this should be a new slot
+                    // in which case, cellOffset should equal numCells
+                    assert cellOffset >= numCells;
+                    
+                    // make sure sufficient capacity exists
+                    cells = ensureCellCapacity(); // reget the cells array, in case it was null
+                    
+                    // if cellOffset is equal to or beyond num cells, add slots to cell array
+                    while (cellOffset > numCells) {
+                    	cells.add(null);
+                    	numCells++;
+                    }
+                    
+                    // at this point, cellOffset should equal numCells
+                    assert cellOffset == numCells : "cellOffset != numCells";
+                    
+                    // create a new cell structure and add it to the array              
                     c = new CellImpl(this, cellOffset);
-                    cells.set(cellOffset, c);
+                    cells.add(c);
                 }
-            }
-            else {
-                if (!createIfSparse)
-                    return c;
-                
-                // if cellOffset is equal to or > numCells, this should be a new slot
-                // in which case, cellOffset should equal numCells
-                assert cellOffset >= numCells;
-                
-                // make sure sufficient capacity exists
-                ensureCellCapacity();
-                cells = (ArrayList<CellImpl>)m_cells; // reget the cells array, in case it was null
-                
-                // if cellOffset is equal to or beyond num cells, add slots to cell array
-                while (cellOffset > numCells) {
-                	cells.add(null);
-                	numCells++;
-                }
-                
-                // at this point, cellOffset should equal numCells
-                assert cellOffset == numCells : "cellOffset != numCells";
-                
-                // create a new cell structure and add it to the array              
-                c = new CellImpl(this, cellOffset);
-                cells.add(c);
-            }
-        } // of synchronized
+            } // of synchronized
+        } // of table not null
         
         // if the cell is non-null, mark the row and column as in use
         if (c != null) {
@@ -147,17 +170,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     }
     
     @SuppressWarnings("unchecked")
-	int getCellsSize()
-    {
-        if (m_cells != null) 
-        	return ((ArrayList<CellImpl>)m_cells).size();
-        else 
-            return 0;
-    }
-    
-
-    @SuppressWarnings("unchecked")
-    void ensureCellCapacity()
+    List<CellImpl> ensureCellCapacity()
     {
         TableImpl table = getTable();
         assert table != null : "Parent table required";
@@ -174,7 +187,19 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                 m_cellsCapacity = reqCapacity;
             }
         }
+        
+        return (List<CellImpl>) m_cells;
     }
+
+    @SuppressWarnings("unchecked")
+	int getCellsSize()
+    {
+        if (m_cells != null) 
+        	return ((List<CellImpl>)m_cells).size();
+        else 
+            return 0;
+    }
+    
 
 	@SuppressWarnings("unchecked")
 	/**
@@ -200,28 +225,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
      * Overridden methods
      */
     
-    @Override
-    protected void initialize(TableElementImpl e)
-    {
-        super.initialize(e);
-        
-        BaseElementImpl source = getInitializationSource(e);        
-        for (TableProperty tp : this.getInitializableProperties()) 
-        {
-            Object value = source.getProperty(tp);            
-            if (super.initializeProperty(tp, value)) continue;            
-            switch (tp) {
-                default:
-                    throw new IllegalStateException("No initialization available for Column Property: " + tp);                       
-            }
-        }
-        
-        setStronglyTyped(false);
-        m_cells = null;
-        m_cellsCapacity = 0;
-        m_dataType = null;
-    }
-
     @Override
     public Object getProperty(TableProperty key)
     {

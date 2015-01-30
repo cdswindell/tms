@@ -27,6 +27,7 @@ public enum TableProperty implements Comparable<TableProperty>
     TokenMapper(true, true, ElementType.Context),
     RowCapacityIncr(false, true, ElementType.Context, ElementType.Table),
     ColumnCapacityIncr(false, true, ElementType.Context, ElementType.Table),
+    FreeSpaceThreshold(false, true, ElementType.Context, ElementType.Table),
     isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
     
     // Table Properties (some shared with Subsets)
@@ -155,6 +156,18 @@ public enum TableProperty implements Comparable<TableProperty>
             case NextCellOffset:
             case RowCapacityIncr:
             case ColumnCapacityIncr:
+                return true;
+                
+            default:
+                return false;
+        }
+    }
+    
+    public boolean isDoubleValue()
+    {
+        switch(this)
+        {
+            case FreeSpaceThreshold:
                 return true;
                 
             default:

@@ -22,6 +22,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     
     static final int sf_ROW_CAPACITY_INCR_DEFAULT = 1024;
     static final int sf_COLUMN_CAPACITY_INCR_DEFAULT = 32;
+    static final double sf_FREE_SPACE_THRESHOLD_DEFAULT = 2.0;
     
     static final boolean sf_READ_ONLY_DEFAULT = false;
     static final boolean sf_SUPPORTS_NULL_DEFAULT = true;
@@ -46,6 +47,14 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         return getDefaultContext();
     }
     
+    protected static double getPropertyDouble(ContextImpl c, TableProperty key)
+    {
+        if (c != null)
+            return c.getPropertyDouble(key);
+        else
+            return getDefaultContext().getPropertyDouble(key);
+    }
+
     protected static int getPropertyInt(ContextImpl c, TableProperty key)
     {
         if (c != null)
@@ -78,6 +87,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     private int m_columnCapacityIncr;
     private TokenMapper m_tokenMapper;
     private int m_precision;
+    private double m_freeSpaceThreshold;
 
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
@@ -137,6 +147,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                     setColumnCapacityIncr((int)value);
                     break;
                     
+                case FreeSpaceThreshold:
+                    if (!isValidPropertyValueDouble(value))
+                        value = sf_FREE_SPACE_THRESHOLD_DEFAULT;
+                    setFreeSpaceThreshold((double)value);
+                    break;
+                    
                 case Precision:
                     if (!isValidPropertyValueInt(value))
                         value = Derivation.sf_DEFAULT_PRECISION;
@@ -166,6 +182,23 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         clearProperty(TableProperty.Description);
     }
 
+    protected double getFreeSpaceThreshold()
+    {
+        return m_freeSpaceThreshold;
+    }
+    
+    protected void setFreeSpaceThreshold(double value)
+    {
+        if (value < 0.0) {
+            if (this.isDefault()) 
+                m_freeSpaceThreshold = sf_FREE_SPACE_THRESHOLD_DEFAULT;
+            else
+                m_freeSpaceThreshold = ContextImpl.getDefaultContext().getFreeSpaceThreshold();
+        }
+        else 
+            m_freeSpaceThreshold = value;
+    }
+
     private Object getPropertyDefault(TableProperty tp)
     {
         // TODO Auto-generated method stub
@@ -188,6 +221,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                 
             case ColumnCapacityIncr:
                 return getColumnCapacityIncr();
+                
+            case FreeSpaceThreshold:
+                return getFreeSpaceThreshold();
                 
             case Precision:
                 return getPrecision();

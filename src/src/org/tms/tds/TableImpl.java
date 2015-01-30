@@ -83,6 +83,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private int m_rowCapacityIncr;
     private int m_colCapacityIncr;
     private int m_precision;
+    private double m_freeSpaceThreshold;
 
     protected TableImpl()
     {
@@ -188,6 +189,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     setColumnCapacityIncr((int)value);
                     break;
 
+                case FreeSpaceThreshold:
+                    if (!isValidPropertyValueDouble(value))
+                        value = ContextImpl.sf_FREE_SPACE_THRESHOLD_DEFAULT;
+                    setFreeSpaceThreshold((double)value);
+                    break;
+                    
                 case Precision:
                     if (!isValidPropertyValueInt(value))
                         value = Derivation.sf_DEFAULT_PRECISION;
@@ -282,6 +289,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 
             case numColumnsCapacity:
                 return getColumnsCapacity();
+                
+            case FreeSpaceThreshold:
+                return getFreeSpaceThreshold();
                 
             case numSubsets:
                 return getNumSubsets();
@@ -628,7 +638,25 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return subset;
     }
     
-   /*
+    protected double getFreeSpaceThreshold()
+    {
+        if (m_freeSpaceThreshold < 0)
+            m_freeSpaceThreshold = ContextImpl.getPropertyDouble(getTableContext(), TableProperty.FreeSpaceThreshold);
+
+        return m_freeSpaceThreshold;
+    }
+    
+    protected void setFreeSpaceThreshold(double value)
+    {
+        if (value < 0.0) {
+            m_rowCapacityIncr = -1;
+            getFreeSpaceThreshold();
+        }
+        else
+            m_freeSpaceThreshold = value;
+    }
+
+    /*
      * Row manipulation methods
      */
     

@@ -336,13 +336,6 @@ public class CellImpl extends TableElementImpl implements Cell
         fill(null);
     }
 
-    @Override
-    protected void delete(boolean compress)
-    {
-        clear();
-        invalidate();
-    }
-    
 	/*
 	 * Derivation-related methods
 	 */
@@ -548,6 +541,12 @@ public class CellImpl extends TableElementImpl implements Cell
         m_cellOffset = -1;
         
         invalidate();
+    }
+    
+    @Override
+    protected void delete(boolean compress)
+    {
+        invalidateCell();
     }
     
 	@Override

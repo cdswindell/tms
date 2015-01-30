@@ -20,6 +20,26 @@ public class RowImpl extends TableSliceElementImpl implements Row
         super(parentTable);
     }
 
+    @Override
+    protected void initialize(TableElementImpl e)
+    {
+        super.initialize(e);
+        
+        BaseElementImpl source = getInitializationSource(e);        
+        for (TableProperty tp : this.getInitializableProperties()) {
+            Object value = source.getProperty(tp);
+            
+            if (super.initializeProperty(tp, value)) continue;
+            
+            switch (tp) {
+                default:
+                    throw new IllegalStateException("No initialization available for Row Property: " + tp);                       
+            }
+        }
+        
+        m_cellOffset = -1;
+    }
+    
     /*
      * Field getters/setters
      */
@@ -77,26 +97,6 @@ public class RowImpl extends TableSliceElementImpl implements Row
             default:
                 return super.getProperty(key);
         }
-    }
-    
-    @Override
-    protected void initialize(TableElementImpl e)
-    {
-        super.initialize(e);
-        
-        BaseElementImpl source = getInitializationSource(e);        
-        for (TableProperty tp : this.getInitializableProperties()) {
-            Object value = source.getProperty(tp);
-            
-            if (super.initializeProperty(tp, value)) continue;
-            
-            switch (tp) {
-                default:
-                    throw new IllegalStateException("No initialization available for Row Property: " + tp);                       
-            }
-        }
-        
-        m_cellOffset = -1;
     }
     
     @Override
