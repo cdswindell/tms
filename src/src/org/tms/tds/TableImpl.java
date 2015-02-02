@@ -282,7 +282,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         int incr = getColumnCapacityIncr();
         double ratio = (double)freeCols/(double)incr;
         
-        if (ratio >= threshold || numCols == 0) {
+        if (ratio > threshold || numCols == 0) {
             // free the unused space in the cells array
             m_cols.trimToSize();
             if (numCols == 0) {
@@ -495,6 +495,31 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     protected void delete(boolean compress)
     {
+        // delete all rows and columns, explicitly
+        // we have to iterate over the indexes as iterating
+        // over the ArrayLists themselves throws a 
+        // ConcurrentModificaton exception when items are deleted
+        int numCols = m_cols.size();
+        for (int i = numCols - 1; i >= 0; i--) {
+            ColumnImpl col = m_cols.get(i);
+            if (col != null)
+                col.delete();
+        }
+        
+        int numRows = m_rows.size();
+        for (int i = numRows - 1; i >= 0; i--) {
+            RowImpl row = m_rows.get(i);
+            if (row != null)
+                row.delete();
+        }
+
+        // getSubsets returns a copy of m_subsets, so it is safe to delete individual elements
+        getSubsets().forEach(s -> { if (s != null) ((SubsetImpl)s).delete(false); } );
+        
+        // compress data structures
+        reclaimColumnSpace();
+        reclaimRowSpace();
+        
     	this.m_subsets.clear();
     	this.m_affects.clear();
     	this.m_cellAffects.clear();

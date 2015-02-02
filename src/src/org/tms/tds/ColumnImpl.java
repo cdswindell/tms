@@ -55,9 +55,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     void reclaimCellSpace(List<RowImpl> rows, int numRows)
     {
         // create a new cells array, ordered the same as the table rows
-        if (numRows > 0 && m_cells != null) {
-            assert m_cells != null && numRows <= m_cells.size() && numRows <= m_cellsCapacity : "Column cell array in inconsistent state";
-            
+        if (numRows > 0 && m_cells != null) {            
             int numCells = m_cells.size();
             if (numCells > numRows) {
                 ArrayList<CellImpl> cells = new ArrayList<CellImpl>(numRows);
@@ -65,7 +63,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                 
                 m_cells = cells;
                 numCells = m_cells.size();
-                assert numCells == numRows : "Cell count doesn't match row count";
             }
             else if (m_cellsCapacity > numCells)
                 m_cells.trimToSize();
