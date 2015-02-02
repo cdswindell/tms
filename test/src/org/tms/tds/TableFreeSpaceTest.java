@@ -324,5 +324,60 @@ public class TableFreeSpaceTest extends BaseTest
         assertThat(t1.isNull(), is(false));
         assertThat(t1.getNumRows(), is(26));
         assertThat(t1.getNextCellOffset(), is(26));
+        
+        // repeat one last time, only delete 7 rows, and add back 10, making sure we reuse
+        // freed cells and allocate new ones
+        t1.delete();
+        assertThat(c1.isInvalid(), is(true));
+
+        t1 = (TableImpl)TableFactory.createTable(1, 2, c);        
+        assertThat(t1, notNullValue());
+        assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
+        assertThat(t1.getPropertyInt(TableProperty.RowCapacityIncr), is(2));
+        assertThat(t1.getPropertyInt(TableProperty.numRowsCapacity), is(2));
+        
+        c1 = (ColumnImpl)t1.addColumn();
+        
+        // initialize column with alphabet, in reverse order
+        t1.addRow(Access.ByIndex, 26);
+        value = 'Z';
+        for (int i = 0; i < 26; i++) 
+            t1.setCellValue(t1.getRow(Access.ByIndex, 26 - i), c1, value--);
+        
+        assertThat(t1.getNextCellOffset(), is(26));
+        assertThat(t1.getNumRows(), is(26));
+        
+        // delete first row, make sure other cells are as expected
+        r = null;
+        iter = 0;
+        idx = 26;
+        while (idx > 19) {
+            r = t1.getRow(Access.ByIndex, idx--);
+            r.delete();
+            
+            int offset =  ++iter;
+            for (int i = 1; i < (26 - offset); i++) {
+                Row remaining = t1.getRow(Access.ByIndex, i + 1);
+                assertThat(remaining, notNullValue());
+                
+                Cell cell = t1.getCell(remaining,  c1);
+                assertThat(cell, notNullValue());
+                assertThat(cell.isNull(), is(false));
+                
+                value = (char)('A' + i);
+                assertThat(cell.getCellValue(), is(value));
+            }         
+        }
+        
+        assertThat(t1.isNull(), is(false));
+        assertThat(t1.getNumRows(), is(19));
+        assertThat(t1.getNextCellOffset(), is(22));
+        
+        // now add 10 rows, make sure next cell offset is bumped up
+        for (int i = 0; i < 10; i++)
+            t1.setCellValue(t1.addRow(Access.Last), c1, i);
+        
+        assertThat(t1.getNumRows(), is(29));
+        assertThat(t1.getNextCellOffset(), is(29));
     }
 }
