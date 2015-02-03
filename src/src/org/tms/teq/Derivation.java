@@ -390,6 +390,9 @@ public class Derivation
         
         boolean anyModified = false;
         for (Column col : cols) {
+            if (col == null)
+                continue;
+            
         	// derived cells have president over derived rows
         	Cell cell = tbl.getCell(row,  col);
         	if (cell != null && cell.isDerived()) continue;
@@ -397,6 +400,7 @@ public class Derivation
             Token t = m_pfe.evaluate(row, col, dc);
             if (t.isNumeric() )
                 t.setValue(applyPrecision(t.getNumericValue()));
+            
             boolean modified = tbl.setCellValue(row, col, t);
             if (modified && dc != null) {
             	dc.remove(col);
@@ -424,7 +428,10 @@ public class Derivation
         
         boolean anyModified = false;
         for (Row row : rows) {
-        	// derived rows have precident
+            if (row == null)
+                continue;
+            
+        	// derived rows have precedent
         	if (row.isDerived()) continue;
         	
         	Cell cell = tbl.getCell(row,  col);

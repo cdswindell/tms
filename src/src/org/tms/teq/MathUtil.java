@@ -159,6 +159,9 @@ public class MathUtil
             Iterable<Cell> cellIter = te.cells();
             if (cellIter != null) {
                 for (Cell c : cellIter) {
+                    if (c == null)
+                        continue;
+                    
                 	if (c.isDerived()) {
                 		affected = c.getAffectedBy();
                 		if (affected != null && affected.contains(te))

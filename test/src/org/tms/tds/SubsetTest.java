@@ -12,6 +12,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.tms.api.Subset;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.InvalidParentException;
 
 public class SubsetTest
 {
@@ -114,6 +115,18 @@ public class SubsetTest
             assertThat(e, notNullValue());
         }
         
+        // make sure we can't add rows from another table
+        TableImpl t2 = new TableImpl(100, 100);
+        RowImpl rf = t2.addRow();
+        try {
+            r.add(rf);
+            fail("added foriegn");
+        }
+        catch (InvalidParentException e) {
+            assertThat(e, notNullValue());
+        }
+        
+        // test range removal methods
         r.remove(r1, r2, r3);
         assertThat(r.getNumRows(), is(0));
         

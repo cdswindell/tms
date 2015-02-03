@@ -119,12 +119,12 @@ abstract class TableCellsElementImpl extends TableElementImpl
     {
         if (elems != null) {
             for (TableCellsElementImpl e : elems) {
-                if (e == this)
+                if (e == this || e == null)
                     continue;               
                 else if (e.getTable() == null)
                     e.setTable(this.getTable());              
                 else if (e.getTable() != getTable())
-                    throw new InvalidParentException(e.getElementType(), this.getElementType());
+                    throw new InvalidParentException(e, this);
             }
         }       
     }

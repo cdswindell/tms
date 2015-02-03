@@ -223,16 +223,19 @@ public class TableImpl extends TableCellsElementImpl implements Table
     synchronized public void delete(TableElement... elements)
     {
         if (elements != null) {
+            boolean deletedAny = false;
             for (TableElement te : elements) {
                 if (te == null)
                     continue;
-                else  if (te instanceof TableElementImpl) {
+                else if (te instanceof TableElementImpl) {
                     TableElementImpl tei = (TableElementImpl)te;
                     // don't redelete deleted items
                     if (tei.isInvalid())
                         continue;
-                    if (te.getTable() == this) 
+                    if (te.getTable() == this) {
                         ((TableElementImpl)te).delete(false);
+                        deletedAny = true;
+                    }
                     else 
                         throw new InvalidParentException(te, this);
                 }
@@ -241,8 +244,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
             }
             
             // compress data structures
-            reclaimColumnSpace();
-            reclaimRowSpace();
+            if (deletedAny) {
+                reclaimColumnSpace();
+                reclaimRowSpace();
+            }
         }
     }
     
@@ -254,7 +259,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * <p/>
      * If FreeSpaceThreshold is set to 0, free space is not removed. 
      */
-    synchronized protected void reclaimColumnSpace()
+    protected void reclaimColumnSpace()
     {
         // if the column count is 0, reset all row cell offsets
         int numCols = m_cols.size();       
@@ -301,7 +306,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * <p/>
      * If FreeSpaceThreshold is set to 0, free space is not removed. 
      */
-    synchronized protected void reclaimRowSpace()
+    protected void reclaimRowSpace()
     {
         int numRows = m_rows.size();
         if (numRows == 0) {
@@ -346,7 +351,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * row order.
      * @param numRows
      */
-    synchronized private void reclaimCellSpace(int numRows)
+    private void reclaimCellSpace(int numRows)
     {
         assert numRows == m_rows.size() : "Table rows inconsistent";       
         
@@ -374,19 +379,19 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
 
     @Override
-    synchronized public CellImpl getCell(Row row, Column col)
+    public CellImpl getCell(Row row, Column col)
     {
         return getCell((RowImpl)row, (ColumnImpl)col);
     }    
     
     @Override
-    synchronized public Object getCellValue(Row row, Column col)
+    public Object getCellValue(Row row, Column col)
     {
         return getCellValue((RowImpl)row, (ColumnImpl)col);        
     }
     
     @Override
-    synchronized public boolean setCellValue(Row row, Column col, Object o)
+    public boolean setCellValue(Row row, Column col, Object o)
     {
         return setCellValue((RowImpl)row, (ColumnImpl)col, o);        
     }
@@ -481,8 +486,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
 
     @Override
-    public List<Subset>getSubsets()
+    synchronized public List<Subset>getSubsets()
     {
+        vetElement();
         return Collections.unmodifiableList(new ArrayList<Subset>(m_subsets.clone()));
     }
 
@@ -493,7 +499,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
     @Override
-    protected void delete(boolean compress)
+    synchronized protected void delete(boolean compress)
     {
         // delete all rows and columns, explicitly
         // we have to iterate over the indexes as iterating
@@ -575,8 +581,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return (getTableContext() != null ? getTableContext().isSupportsNull() : false)  && isSupportsNull();
     }
     
-    protected boolean add(SubsetImpl r)
+    synchronized protected boolean add(SubsetImpl r)
     {
+        vetElement();
+        vetElement(r);
         vetParent(r);
         boolean processed = m_subsets.add(r);
         if (processed) setDirty(true);
@@ -586,7 +594,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     /*
      * Delete TableElement methods
      */
-    protected boolean remove(SubsetImpl r)
+    synchronized protected boolean remove(SubsetImpl r)
     {
         vetParent(r);
         return m_subsets.remove(r);
@@ -617,8 +625,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * Cell manipulation routines
      */
     @Override
-    public CellImpl getCell(Access mode, Object... mda)
+    synchronized public CellImpl getCell(Access mode, Object... mda)
     {
+        vetElement();
+        
         Object md = null;
         switch (mode) {
             case ByLabel:
@@ -713,8 +723,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * Subset manipulation routines
      */
     @Override
-    public SubsetImpl getSubset(Access mode, Object... mda)
+    synchronized public SubsetImpl getSubset(Access mode, Object... mda)
     {
+        vetElement();
+        
         Object md = null;
         switch (mode) {
             case ByLabel:
@@ -766,8 +778,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
     @Override
-    public SubsetImpl addSubset(Access mode, Object... mda)
+    synchronized public SubsetImpl addSubset(Access mode, Object... mda)
     {
+        vetElement();
+        
         Object md = null;
         Object md2 = null;
         if (mda != null && mda.length > 0) {
@@ -902,6 +916,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     protected RowImpl setCurrentRow(RowImpl row)
     {
+        vetParent(row);
         RowImpl prevCurrent = getCurrentRow();
         m_curRow = row;
         
@@ -918,13 +933,15 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return addRow(mode, (Object [])null);
     }
     
-    public RowImpl addRow(Access mode, Object... mda)
+    synchronized public RowImpl addRow(Access mode, Object... mda)
     {
+        vetElement();
         return (RowImpl)add(new RowImpl(this), mode, mda);
     }
     
-    public RowImpl getRow(Access mode, Object...mda)
+    synchronized public RowImpl getRow(Access mode, Object...mda)
     {
+        vetElement();
         return getRowInternal(true, mode, mda);
     }
     
@@ -960,10 +977,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * only when accessed, this method is needed to build out all rows when
      * in the case where they are to be iterated over
      */
-    synchronized void ensureRowsExist()
+    void ensureRowsExist()
     {
         pushCurrent();
-
         try {
             for (int i = 1; i <= this.getNumRows(); i++) {
                 RowImpl r = this.getRowInternal(true, Access.ByIndex, i);
@@ -1109,8 +1125,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
 
     @Override
-    public List<Column> getColumns()
+    synchronized public List<Column> getColumns()
     {
+        vetElement();
         ensureColumnsExist();
         return Collections.unmodifiableList(new ArrayList<Column>(getColumnsInternal()));
     }
@@ -1120,8 +1137,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_curCol;
     }
     
-    protected ColumnImpl setCurrentColumn(ColumnImpl col)
+    synchronized protected ColumnImpl setCurrentColumn(ColumnImpl col)
     {
+        vetParent(col);
         ColumnImpl prevCurrent = getCurrentColumn();
         m_curCol = col;
         
@@ -1138,13 +1156,15 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return addColumn(mode, (Object [])null);
     }
     
-    public ColumnImpl addColumn(Access mode, Object... md)
+    synchronized public ColumnImpl addColumn(Access mode, Object... md)
     {
+        vetElement();
         return (ColumnImpl)add(new ColumnImpl(this), mode, md);
     }
     
-    public ColumnImpl getColumn(Access mode, Object...mda)
+    synchronized public ColumnImpl getColumn(Access mode, Object...mda)
     {
+        vetElement();
         return getColumnInternal(true, mode, mda);
     }
     
@@ -1175,10 +1195,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return r;
     }
 
-    synchronized void ensureColumnsExist()
+    void ensureColumnsExist()
     {
         pushCurrent();
-
         try {
             for (int i = 1; i <= this.getNumColumns(); i++) {
                 ColumnImpl c = this.getColumnInternal(true, Access.ByIndex, i);
@@ -1205,6 +1224,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     synchronized protected TableSliceElementImpl add(TableSliceElementImpl r, Access mode, Object... md)
     {
+        vetElement();
+
         // calculate the index where the row will go
         ElementType sliceType = r.getElementType();
         int idx = calcIndex(sliceType, mode, true, md);
@@ -1397,8 +1418,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
     @Override
-    public int getNumCells()
+    synchronized public int getNumCells()
     {
+        vetElement();
         int numCells = 0;
         for (Column c : columns()) {
             if (c != null) {
@@ -1410,19 +1432,24 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return numCells;
     }
     
-    protected CellImpl getCell(RowImpl row, ColumnImpl col)
+    synchronized protected CellImpl getCell(RowImpl row, ColumnImpl col)
     {
+        vetElement();
         if (row == null || col == null)
             return null;
         
-        assert this == row.getTable() && this == col.getTable(): "Row/Column table mismatch";
+        if (this != row.getTable())
+            throw new InvalidParentException(row, this);        
+        if (this != col.getTable())
+            throw new InvalidParentException(col, this);
         
         row.setCurrent();
         col.setCurrent();
+        
         return col.getCell(row);
     }
     
-    protected boolean setCellValue(RowImpl row, ColumnImpl col, Object o) 
+    synchronized protected boolean setCellValue(RowImpl row, ColumnImpl col, Object o) 
     {
         CellImpl cell = getCell(row, col);
         if (cell != null) {
@@ -1435,14 +1462,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
         	return false;
     }
     
-    protected Object getCellValue(RowImpl row, ColumnImpl col) 
+    synchronized protected Object getCellValue(RowImpl row, ColumnImpl col) 
     {
         CellImpl cell = getCell(row, col);
-        if (cell != null) {
-            row.setCurrent();
-            col.setCurrent();
+        if (cell != null) 
             return cell.getCellValue();
-        }
         else
             return null;
     }
@@ -1464,10 +1488,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
     @Override
-    public void fill(Object o) 
+    synchronized public void fill(Object o) 
     {
+        vetElement();
         pushCurrent();
-
+        deactivateAutoRecalculate();
         try {
             ColumnImpl c = getColumn(Access.First);
             while (c != null) {
@@ -1475,7 +1500,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 c = getColumn(Access.Next);
             }
         }
-        finally {        
+        finally {  
+            activateAutoRecalculate();
             popCurrent();
         }
     }  
@@ -1510,8 +1536,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
     
 	@Override
-	public void recalculate()
+	synchronized public void recalculate()
 	{
+        vetElement();
 	    Set<Derivable> derived = new HashSet<Derivable>();
 	    
         for (ColumnImpl col : getColumnsInternal()) {
@@ -1528,6 +1555,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	        derived.add(cell);
 	    
 	    boolean autoRecalc = this.isAutoRecalculate();
+	    setAutoRecalculate(false);
 	    pushCurrent();
 	    try {
     	    List<Derivable> orderedDerivables = Derivation.calculateDependencies(derived);
@@ -1747,15 +1775,17 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	}
 
     @Override
-    public Iterable<Row> rows()
+    synchronized public Iterable<Row> rows()
     {
+        vetElement();
         ensureRowsExist();
         return new BaseElementIterable<Row>(getRowsInternal());
     }
     
     @Override
-    public List<Row> getRows()
+    synchronized public List<Row> getRows()
     {
+        vetElement();
         ensureRowsExist();
         return Collections.unmodifiableList(new ArrayList<Row>(getRowsInternal()));
     }
@@ -1771,21 +1801,24 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }
 
     @Override
-	public Iterable<Column> columns()
+    synchronized public Iterable<Column> columns()
     {
+        vetElement();
         ensureColumnsExist();
         return new BaseElementIterable<Column>(getColumnsInternal());
     }
     
 	@Override
-	public Iterable<Subset> subsets()
+	synchronized public Iterable<Subset> subsets()
     {
+	    vetElement();
         return new BaseElementIterable<Subset>(m_subsets);
     }
     
 	@Override
-	public Iterable<Cell> cells()
+	synchronized public Iterable<Cell> cells()
 	{
+	    vetElement();
 	    return new TableCellIterable();
 	}
 	
@@ -1818,12 +1851,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
         @Override
         public Iterator<Cell> iterator()
         {
+            vetElement(m_table);
             return this;
         }
 
         @Override
         public boolean hasNext()
         {
+            vetElement(m_table);
             return m_rowIndex <= m_numRows && m_colIndex <= m_numCols;
         }
 
@@ -1943,7 +1978,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 return true;
             else
                 return false;
-        }
-        
+        }       
     }
 }

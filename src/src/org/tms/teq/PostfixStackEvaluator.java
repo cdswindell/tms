@@ -274,6 +274,9 @@ public class PostfixStackEvaluator
         	List<TableElement> affectedBy = null;
         	svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                	
             for (Cell c : ref.cells()) {
+                if (c == null)
+                    continue;
+                
                 if (c.isNumericValue()) {
                 	if (c.isDerived()) {
                 		affectedBy = c.getAffectedBy();
