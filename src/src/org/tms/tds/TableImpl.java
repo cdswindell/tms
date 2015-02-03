@@ -760,19 +760,53 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_subsets;
     }
     
+    public SubsetImpl addSubset()
+    {
+        return addSubset(Access.First);
+    }
+    
     @Override
     public SubsetImpl addSubset(Access mode, Object... mda)
     {
         Object md = null;
-        if (mda != null && mda.length > 0)
+        Object md2 = null;
+        if (mda != null && mda.length > 0) {
             md = mda[0];
+            
+            if (mda.length > 1)
+                md2 = mda[1];
+        }
         
         SubsetImpl subset = null;
         switch (mode) {
             case ByLabel:
                 subset = new SubsetImpl(this);
                 if (md != null && md instanceof String)
-                    subset.setLabel((String)md);;
+                    subset.setLabel((String)md);
+                break;
+                
+            case ByDescription:
+                subset = new SubsetImpl(this);
+                if (md != null && md instanceof String)
+                    subset.setDescription((String)md);
+                break;
+                
+            case ByProperty:
+                subset = new SubsetImpl(this);
+                if (md != null && md2 != null) {
+                    if (md instanceof TableProperty)
+                        subset.setProperty((TableProperty)md, md2);
+                    else if (md instanceof String)
+                        subset.setProperty((String)md, md2);
+                }
+                break;
+                
+            case First:
+            case Last:
+            case Next:
+            case Previous:
+            case Current:
+                subset = new SubsetImpl(this);
                 break;
                 
                 default:

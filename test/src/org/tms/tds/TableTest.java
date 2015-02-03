@@ -221,5 +221,13 @@ public class TableTest
         assertThat(t.getNumCells(), is (16 * 8));
         assertThat(t.getNumCells(), is (r1.getIndex() * c1.getIndex()));
         assertThat(t.getNumCells(), is (t.getNumRows() * t.getNumColumns()));
+        
+        SubsetImpl rng = t.addSubset();
+        rng.add(r1);
+        
+        t.delete();
+        assertThat(t.isInvalid(), is(true));
+        assertThat(r1.isInvalid(), is(true));
+        assertThat(rng.isInvalid(), is(true));        
     }
 }

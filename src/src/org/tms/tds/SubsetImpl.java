@@ -16,6 +16,7 @@ import org.tms.api.Row;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
+import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.util.JustInTimeSet;
 
@@ -202,13 +203,20 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
                 if (tce == null) continue;
                 
                 vetElement((BaseElementImpl)tce);
+                
+                if (tce.getTable() != this.getTable())
+                    throw new InvalidParentException(tce, this);
+                
                 if (tce instanceof TableCellsElementImpl){
                     if (tce instanceof RowImpl)
                         addedAny = m_rows.add((RowImpl)tce) ? true : addedAny;
                     else if (tce instanceof ColumnImpl)
                         addedAny = m_cols.add((ColumnImpl)tce) ? true : addedAny;
-                    else if (tce instanceof SubsetImpl)
+                    else if (tce instanceof SubsetImpl) {
+                        if (tce == this)
+                            throw new IllegalTableStateException("Cannot add subset to itself");
                         addedAny = m_subsets.add((SubsetImpl)tce) ? true : addedAny;
+                    }
                     if (tce instanceof CellImpl)
                         addedAny = m_cells.add((CellImpl)tce) ? true : addedAny;
                     

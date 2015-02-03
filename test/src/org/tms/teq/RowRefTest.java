@@ -21,7 +21,7 @@ public class RowRefTest extends BaseTest
     @Test
     public void rowReferenceTest()
     {
-        TableContext c = TableContextFactory.fetchDefaultTableContext();
+        TableContext c = TableContextFactory.createTableContext();
         
         Table t1 = TableFactory.createTable(10, 12, c);        
         assertThat(t1, notNullValue());
@@ -59,5 +59,10 @@ public class RowRefTest extends BaseTest
         assertThat(cR3C1, notNullValue());
         cR3C1.setDerivation("range(Row \"t1::r1\")");
         assertThat(cR3C1.getCellValue(), is(0.0));
+        
+        t1.delete();
+        assertThat(cR1C1.isDerived(), is(false));
+        assertThat(cR2C1.isDerived(), is(false));
+        assertThat(cR3C1.isDerived(), is(false));
     }
 }
