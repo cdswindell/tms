@@ -91,12 +91,12 @@ abstract public class BaseElementImpl implements BaseElement
      * a parent element has been deleted
      * @return true if the element has been deleted
      */
-    protected boolean isInvalid()
+    public boolean isInvalid()
     {
         return isSet(sf_IS_INVALID_FLAG);
     }
     
-    protected boolean isValid()
+    public boolean isValid()
     {
         return !isInvalid();
     }

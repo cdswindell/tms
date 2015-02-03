@@ -347,7 +347,7 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
-    public void setDerivation(String expr)
+    public Derivable setDerivation(String expr)
     {
         vetElement();
         
@@ -370,10 +370,12 @@ public class CellImpl extends TableElementImpl implements Cell
                 recalculate();
             }  
         }
+        
+        return this;
     }
 
     @Override
-    public void clearDerivation()
+    public Derivable clearDerivation()
     {
         Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null) {
@@ -385,7 +387,9 @@ public class CellImpl extends TableElementImpl implements Cell
             
             getTable().deregisterDerivedCell(this);            
             deriv.destroy();
-        }        
+        }  
+        
+        return this;
     }
 
     @Override
@@ -525,7 +529,7 @@ public class CellImpl extends TableElementImpl implements Cell
         // clear any derivations on elements affected by this cell
         List<Derivable> affects = getAffects();
         if (affects != null) 
-            affects.forEach(d -> d.clearDerivation());
+            (new ArrayList<Derivable>(affects)).forEach(d -> d.clearDerivation());
         
         // remove the cell from any subsets
         if (getSubsetsInternal() != null) {

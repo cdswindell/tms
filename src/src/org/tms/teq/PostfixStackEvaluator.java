@@ -1,5 +1,7 @@
 package org.tms.teq;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -325,7 +327,7 @@ public class PostfixStackEvaluator
             tvse = new TwoVariableStatEngine();  
             
             Cell ref1Cell = ref1.getCell(Access.First);
-            Cell ref2Cell = ref2.getCell(Access.First);
+            Cell ref2Cell = ref2.getCell(Access.Current);
             
             while (ref1Cell != null && ref2Cell != null) {               
                 Number x = (Number)ref1Cell.getCellValue();
@@ -334,7 +336,7 @@ public class PostfixStackEvaluator
                 tvse.enter(x, y);
                 
                 ref1Cell = ref1.getCell(Access.Next);
-                ref2Cell = ref2.getCell(Access.Next);
+                ref2Cell = ref2.getCell(Access.Current);
             }
                         
             if (dc != null)
@@ -349,8 +351,26 @@ public class PostfixStackEvaluator
         Token result = null;
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
+            Token [] params = null;
             TableElement ref1 = args[0].getReferenceValue();           
-            if (args.length == 1) {
+            if (args.length >= 2 && args[0].isReference() && args[1].isReference()) {
+                TableElement ref2 = args[1].getReferenceValue();           
+                if (ref1 != null && ref2 != null) {
+                    TwoVariableStatEngine tvse = fetchTVSE((TableRowColumnElement)ref1, (TableRowColumnElement)ref2, bio, dc);
+                    try {
+                        if (args.length > 2)
+                            params = Arrays.copyOfRange(args, 2, args.length);
+                        double value = tvse.calcStatistic(bio, params);
+                        result = new Token(TokenType.Operand, value);
+                    }
+                    catch (UnimplementedException ue) {
+                        result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
+                    }
+                }
+                else
+                    result = Token.createNullToken();                
+            }
+            else if (args.length >= 1 && args[0].isReference()) {
                 if (ref1 != null) {
                     SingleVariableStatEngine svse = fetchSVSE(ref1, bio, dc);
                     try {
@@ -363,22 +383,6 @@ public class PostfixStackEvaluator
                 }
                 else
                     result = Token.createNullToken();
-            }
-            else if (args.length == 2) {
-                TableElement ref2 = args[1].getReferenceValue();           
-                if (ref1 != null && ref2 != null) {
-                    TwoVariableStatEngine tvse = fetchTVSE((TableRowColumnElement)ref1, (TableRowColumnElement)ref2, bio, dc);
-                    try {
-                        double value = tvse.calcStatistic(bio);
-                        result = new Token(TokenType.Operand, value);
-                    }
-                    catch (UnimplementedException ue) {
-                        result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
-                    }
-                }
-                else
-                    result = Token.createNullToken();
-                
             }
         }
         else
@@ -394,21 +398,21 @@ public class PostfixStackEvaluator
 
         // error checking of args has been done in main loop        
         Token x = args[0];
+        TableElement ref = null;
+        TableRowColumnElement excludeCheckElement = null;
+        if (x.getRowValue() != null) {
+            ref = x.getRowValue();                
+            cell = tbl.getCell((Row)ref, curCol);
+            excludeCheckElement = curCol;
+        }
+        else if (x.getColumnValue() != null) {
+            ref = x.getColumnValue();
+            cell = tbl.getCell(curRow, (Column)ref);
+            excludeCheckElement = curRow;
+        }
+        
         BuiltinOperator bio = oper.getBuiltinOperator();
-        if (bio != null) {
-            TableElement ref = null;
-            TableRowColumnElement excludeCheckElement = null;
-            if (x.getRowValue() != null) {
-                ref = x.getRowValue();                
-                cell = tbl.getCell((Row)ref, curCol);
-                excludeCheckElement = curCol;
-            }
-            else if (x.getColumnValue() != null) {
-                ref = x.getColumnValue();
-                cell = tbl.getCell(curRow, (Column)ref);
-                excludeCheckElement = curRow;
-            }
-            
+        if (bio != null) {   
             if (ref != null) {
                 SingleVariableStatEngine svse = fetchSVSE(ref, bio, dc); 
                 
@@ -467,16 +471,19 @@ public class PostfixStackEvaluator
                 }
                 catch (UnimplementedException ue) {
                     result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
-                }
-                
-                // if we do
-                if (result == null) {
-                	Token y = new Token(TokenType.CellRef, cell);
-                	result = oper.evaluate(x, y);
-                }
+                }                
             }
             else
                 result = Token.createNullToken();            
+        }
+        
+        // if result is null, call evaluate method on operation
+        if (result == null) {
+            List<Token> params = new ArrayList<Token>(Arrays.asList(args));
+            Token y = new Token(TokenType.CellRef, cell);
+            params.add(y);
+            
+            result = oper.evaluate(params.toArray(new Token[] {}));
         }
         
         return result;

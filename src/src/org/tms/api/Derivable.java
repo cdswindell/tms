@@ -7,8 +7,8 @@ import org.tms.teq.Derivation;
 public interface Derivable extends BaseElement, TableElement
 {    
     public Derivation getDerivation();
-    public void setDerivation(String expression);
-    public void clearDerivation();
+    public Derivable setDerivation(String expression);
+    public Derivable clearDerivation();
     
     /**
      * Returns {@code true} if this element is derived

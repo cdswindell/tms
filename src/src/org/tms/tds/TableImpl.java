@@ -909,7 +909,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_rows == null ? 0 : m_rows.size();
     }
     
-    protected RowImpl getCurrentRow()
+    public RowImpl getCurrentRow()
     {
         return m_curRow;
     }
@@ -933,16 +933,24 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return addRow(mode, (Object [])null);
     }
     
+    @Override
     synchronized public RowImpl addRow(Access mode, Object... mda)
     {
         vetElement();
         return (RowImpl)add(new RowImpl(this), mode, mda);
     }
     
+    @Override
     synchronized public RowImpl getRow(Access mode, Object...mda)
     {
         vetElement();
         return getRowInternal(true, mode, mda);
+    }
+    
+    @Override
+    public RowImpl getRow()
+    {
+        return getRow(Access.Current);
     }
     
     private RowImpl getRowInternal(boolean createIfNull, Access mode, Object...mda)
@@ -1132,7 +1140,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return Collections.unmodifiableList(new ArrayList<Column>(getColumnsInternal()));
     }
     
-    protected ColumnImpl getCurrentColumn()
+    public ColumnImpl getCurrentColumn()
     {
         return m_curCol;
     }
@@ -1156,16 +1164,24 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return addColumn(mode, (Object [])null);
     }
     
+    @Override
     synchronized public ColumnImpl addColumn(Access mode, Object... md)
     {
         vetElement();
         return (ColumnImpl)add(new ColumnImpl(this), mode, md);
     }
     
+    @Override
     synchronized public ColumnImpl getColumn(Access mode, Object...mda)
     {
         vetElement();
         return getColumnInternal(true, mode, mda);
+    }
+        
+    @Override
+    public ColumnImpl getColumn()
+    {
+        return getColumn(Access.Current);
     }
     
     private ColumnImpl getColumnInternal(boolean createIfNull, Access mode, Object...mda)

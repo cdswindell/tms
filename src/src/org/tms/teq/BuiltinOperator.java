@@ -112,7 +112,9 @@ public enum BuiltinOperator implements Labeled, Operator
     // Two Variable Stat Functions
     LinearSlopeOper("slope", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
     LinearInterceptOper("intercept", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
-    LinearCorrelationOper(TokenType.StatOp, 5),
+    LinearCorrelationOper("r2", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
+    ComputeXOper("computeX", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class, double.class),
+    ComputeYOper("computeY", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class, double.class),
     
     // Transformation Functions
     SplineOper,

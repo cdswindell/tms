@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -380,8 +381,8 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                 clearDerivation();
                 
                 // clear any derivations on elements affected by this row
-                if (m_affects != null) 
-                    m_affects.forEach(d -> d.clearDerivation());
+                if (m_affects != null)
+                    (new ArrayList<Derivable>(m_affects)).forEach(d -> d.clearDerivation());
                 
                 // invalidate column cells
                 if (m_cells != null) 

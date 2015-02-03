@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
+import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
@@ -208,7 +209,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
                 
                 // clear any derivations on elements affected by this row
                 if (m_affects != null) 
-                    m_affects.forEach(d -> d.clearDerivation());
+                    (new ArrayList<Derivable>(m_affects)).forEach(d -> d.clearDerivation());
                 
                 TableSliceElementImpl rc = rows.remove(idx);
                 assert rc == this : "Removed row mismatch";

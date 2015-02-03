@@ -46,6 +46,11 @@ public class Token implements Labeled
             setTokenType(TokenType.EvaluationError);
             setValue(ErrorCode.NaN);
         }
+        else if (value.equals(Double.MIN_VALUE)) {
+            setTokenType(TokenType.NullValue);
+            setOperator(BuiltinOperator.NULL_operator);
+            setValue(null);
+        }
         else {
             setTokenType(tt);
             setValue(value);

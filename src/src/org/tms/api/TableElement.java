@@ -15,6 +15,8 @@ public interface TableElement extends BaseElement
     public Iterable<Cell> cells();
     
     public boolean isNull();
+    public boolean isInvalid();
+    public boolean isValid();
     
     public String getLabel();
     public void setLabel(String label);

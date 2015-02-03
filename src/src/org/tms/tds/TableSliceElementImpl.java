@@ -91,7 +91,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     }
     
     @Override
-    public void setDerivation(String expr)
+    public Derivable setDerivation(String expr)
     {
         vetElement();
         
@@ -114,6 +114,8 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                 recalculate();
             }  
         }
+        
+        return this;
     }
     
     @Override
@@ -126,7 +128,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     }
     
     @Override
-    public void clearDerivation()
+    public Derivable clearDerivation()
     {
         if (m_deriv != null) {
             Derivable elem = m_deriv.getTarget();
@@ -137,7 +139,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             
             m_deriv.destroy();
             m_deriv = null;
-        }        
+        }   
+        
+        return this;
     }
     
     @Override
@@ -316,7 +320,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                 }
                 else if (this instanceof ColumnImpl) {
                     row = parent.getRow(mode, mda);
-                    col = (ColumnImpl) col;
+                    col = (ColumnImpl) this;
                 }
             }
         }     
