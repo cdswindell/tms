@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.Subset;
@@ -301,6 +302,28 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         }
     }   
 
+    public Cell getCell(Access mode, Object... mda)
+    {
+        RowImpl row = null;
+        ColumnImpl col = null;
+        
+        TableImpl parent = this.getTable();
+        if (parent != null) {    
+            synchronized(parent) {
+                if (this instanceof RowImpl) {
+                    row = (RowImpl)this;
+                    col = this.getTable().getColumn(mode, mda);
+                }
+                else if (this instanceof ColumnImpl) {
+                    row = parent.getRow(mode, mda);
+                    col = (ColumnImpl) col;
+                }
+            }
+        }     
+        
+        return parent.getCell(row,  col);
+    }
+    
     public int getIndex()
     {
         return m_index ;

@@ -9,6 +9,7 @@ public enum TokenType implements Labeled
     
     NullValue(false, "Null", "Empty"),
     EvaluationError(false, "Error"),
+    Pending(false),
     
     TableRef(false, "Table", "Tbl", "T"),
     ColumnRef(false, "Column", "Col", "C"),
@@ -21,9 +22,7 @@ public enum TokenType implements Labeled
     Variable(false),
     Operand(false),
     
-    SubsetOp(true, 1),
     StatOp(true, 1),
-    BinaryStatOp(true, 2),
     TransformOp(true, 1),
     BinaryOp(true, 2),
     BinaryFunc(true, 2),
@@ -69,9 +68,7 @@ public enum TokenType implements Labeled
     public boolean isFunction()
     {
         switch (this) {
-            case SubsetOp:
             case StatOp:
-            case BinaryStatOp:
             case TransformOp:
             case BinaryFunc:
             case UnaryFunc: 

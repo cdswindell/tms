@@ -25,6 +25,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.util.Tuple;
 
 public class Derivation  
 {
@@ -501,14 +502,16 @@ public class Derivation
                 isParsed() ? "parsed" : "", isConverted() ? "converted" : "");
     }
     
-    protected  static class DerivationContext 
+    protected static class DerivationContext 
     {
-    	private Map<TableElement, SingleVariableStatEngine> m_cachedSVSEs;
+        private Map<TableElement, SingleVariableStatEngine> m_cachedSVSEs;
+        private Map<Tuple<TableElement>, TwoVariableStatEngine> m_cachedTVSEs;
     	private boolean m_cachedAny = false;
     	
     	public DerivationContext()
     	{
-    		m_cachedSVSEs = new HashMap<TableElement, SingleVariableStatEngine>();
+            m_cachedSVSEs = new HashMap<TableElement, SingleVariableStatEngine>();
+            m_cachedTVSEs = new HashMap<Tuple<TableElement>, TwoVariableStatEngine>();
     	}
     	
     	/**
@@ -525,24 +528,55 @@ public class Derivation
     		assert tse != null : "TableElement required";
     		
     		m_cachedSVSEs.remove(tse);
+    		removeStaleTVSEs(tse);
+    		
+    		// remove all subsets
     		for (Subset r : tse.getSubsets())
     		    remove(r);
 		}
 
-		public void cacheSVSE(TableElement d, SingleVariableStatEngine se) 
-    	{
-    		assert d != null : "TableElement required";
-    		assert se != null : "SingleVariableStatEngine required";
-    		
-    		m_cachedSVSEs.put(d, se);
-    		m_cachedAny = true;
-    	}
-    	
-    	public SingleVariableStatEngine getCachedSVSE(TableElement d)
-    	{
-    		assert d != null : "TableElement required";
-    		
-    		return m_cachedSVSEs.get(d);
-    	}
-    }
+        private void removeStaleTVSEs(TableElement tse)
+        {
+            Set<Tuple<TableElement>> toRemove = new HashSet<Tuple<TableElement>>();
+            for (Map.Entry<Tuple<TableElement>, TwoVariableStatEngine> e : m_cachedTVSEs.entrySet()) {
+                Tuple<TableElement> key = e.getKey();
+                if (tse == key.getFirstElement() || tse == key.getSecondElement())
+                    toRemove.add(key);
+            }
+            
+            m_cachedTVSEs.keySet().removeAll(toRemove);
+        }
+
+        public void cacheSVSE(TableElement d, SingleVariableStatEngine se) 
+        {
+            assert d != null : "TableElement required";
+            assert se != null : "SingleVariableStatEngine required";
+            
+            m_cachedSVSEs.put(d, se);
+            m_cachedAny = true;
+        }
+        
+        public void cacheTVSE(TableElement e1, TableElement e2, TwoVariableStatEngine se) 
+        {
+            assert e1 != null && e2 != null: "TableElement required";
+            assert se != null : "TwoVariableStatEngine required";
+            
+            m_cachedTVSEs.put(new Tuple<TableElement>(e1, e2), se);
+            m_cachedAny = true;
+        }
+        
+        public SingleVariableStatEngine getCachedSVSE(TableElement d)
+        {
+            assert d != null : "TableElement required";
+            
+            return m_cachedSVSEs.get(d);
+        }
+        
+        public TwoVariableStatEngine getCachedTVSE(TableElement e1, TableElement e2)
+        {
+            assert e1 != null && e2 != null: "TableElement required";
+            
+            return m_cachedTVSEs.get(new Tuple<TableElement>(e1, e2));
+        }       
+    }   
 }

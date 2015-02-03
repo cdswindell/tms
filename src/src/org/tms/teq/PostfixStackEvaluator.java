@@ -3,6 +3,7 @@ package org.tms.teq;
 import java.util.Iterator;
 import java.util.List;
 
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Operator;
@@ -175,10 +176,27 @@ public class PostfixStackEvaluator
                     break;
                     
                 case StatOp:
-                    x = m_opStack.pollFirst();
+                    args = null;
+                    numArgs = oper.numArgs();
+                    x = null;
+                    if (numArgs > 0) {
+                        Class<?> [] argTypes = oper.getArgTypes();                        
+                        args = new Token[numArgs];                       
+                        for (int i = numArgs - 1; i >= 0; i--) {
+                            x = asOperand(m_opStack.pollFirst(), tbl, row, col, argTypes[i]);
+                            if (x == null) // stack is in invalid state
+                                return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);  
+                            else if (!x.isA(argTypes[i]))
+                                return Token.createErrorToken(ErrorCode.OperandDataTypeMismatch);  
+                            
+                            args[i] = x;
+                        }
+                    }
+                    
+                    // last arg must be a reference
                     if (x == null || !x.isReference()) // stack is in invalid state
                         return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.ReferenceRequired);                    
-                    m_opStack.push(doStatOp(oper, x, dc));                 
+                    m_opStack.push(doStatOp(oper, dc, args));                 
                     break;
                     
 				default:
@@ -262,62 +280,109 @@ public class PostfixStackEvaluator
 
     private SingleVariableStatEngine fetchSVSE(TableElement ref, BuiltinOperator bio, DerivationContext dc) 
     {
-    	SingleVariableStatEngine svse = null;
+        SingleVariableStatEngine svse = null;
         if (dc != null) {
-        	svse = dc.getCachedSVSE(ref);
-        	
-        	if (svse != null && bio.isRequiresRetainedDataset()  && !svse.isRetainDataset())
-        		svse = null;
+            svse = dc.getCachedSVSE(ref);
+            
+            if (svse != null && bio.isRequiresRetainedDataset()  && !svse.isRetainDataset())
+                svse = null;
         }
         
         if (svse == null) {
-        	List<TableElement> affectedBy = null;
-        	svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                	
+            List<TableElement> affectedBy = null;
+            svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                   
             for (Cell c : ref.cells()) {
                 if (c == null)
                     continue;
                 
                 if (c.isNumericValue()) {
-                	if (c.isDerived()) {
-                		affectedBy = c.getAffectedBy();
-                		if (affectedBy !=null && affectedBy.contains(ref)) {
-                		    svse.exclude(c);
-                			continue;
-                		}
-                	}
-                	
+                    if (c.isDerived()) {
+                        affectedBy = c.getAffectedBy();
+                        if (affectedBy !=null && affectedBy.contains(ref)) {
+                            svse.exclude(c);
+                            continue;
+                        }
+                    }
+                    
                     svse.enter((Number)c.getCellValue());
                 }
             }
             
             if (dc != null)
-            	dc.cacheSVSE(ref, svse);
+                dc.cacheSVSE(ref, svse);
         }
         
         return svse;
-	}
+    }
 
-    private Token doStatOp(Operator oper, Token x, DerivationContext dc)
+    private TwoVariableStatEngine fetchTVSE(TableRowColumnElement ref1, TableRowColumnElement ref2, BuiltinOperator bio, DerivationContext dc) 
+    {
+        TwoVariableStatEngine tvse = null;
+        if (dc != null)
+            tvse = dc.getCachedTVSE(ref1, ref2);
+        
+        if (tvse == null) {
+            tvse = new TwoVariableStatEngine();  
+            
+            Cell ref1Cell = ref1.getCell(Access.First);
+            Cell ref2Cell = ref2.getCell(Access.First);
+            
+            while (ref1Cell != null && ref2Cell != null) {               
+                Number x = (Number)ref1Cell.getCellValue();
+                Number y = (Number)ref2Cell.getCellValue();
+                
+                tvse.enter(x, y);
+                
+                ref1Cell = ref1.getCell(Access.Next);
+                ref2Cell = ref2.getCell(Access.Next);
+            }
+                        
+            if (dc != null)
+                dc.cacheTVSE(ref1, ref2, tvse);
+        }
+        
+        return tvse;
+    }
+    
+    private Token doStatOp(Operator oper, DerivationContext dc, Token... args)
     {
         Token result = null;
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
-            TableElement ref = x.getReferenceValue();           
-            if (ref != null) {
-                SingleVariableStatEngine svse = fetchSVSE(ref, bio, dc);
-                try {
-                    double value = svse.calcStatistic(bio);
-                    result = new Token(TokenType.Operand, value);
+            TableElement ref1 = args[0].getReferenceValue();           
+            if (args.length == 1) {
+                if (ref1 != null) {
+                    SingleVariableStatEngine svse = fetchSVSE(ref1, bio, dc);
+                    try {
+                        double value = svse.calcStatistic(bio);
+                        result = new Token(TokenType.Operand, value);
+                    }
+                    catch (UnimplementedException ue) {
+                        result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
+                    }
                 }
-                catch (UnimplementedException ue) {
-                    result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
-                }
+                else
+                    result = Token.createNullToken();
             }
-            else
-                result = Token.createNullToken();            
+            else if (args.length == 2) {
+                TableElement ref2 = args[1].getReferenceValue();           
+                if (ref1 != null && ref2 != null) {
+                    TwoVariableStatEngine tvse = fetchTVSE((TableRowColumnElement)ref1, (TableRowColumnElement)ref2, bio, dc);
+                    try {
+                        double value = tvse.calcStatistic(bio);
+                        result = new Token(TokenType.Operand, value);
+                    }
+                    catch (UnimplementedException ue) {
+                        result = Token.createErrorToken(ErrorCode.UnimplementedStatistic);
+                    }
+                }
+                else
+                    result = Token.createNullToken();
+                
+            }
         }
         else
-        	result = oper.evaluate(x);
+        	result = oper.evaluate(args);
         
         return result;
     }

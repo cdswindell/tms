@@ -35,6 +35,12 @@ public class TwoVariableStatEngine
         return m_n;
     }
 
+
+    public void enter(Number x, Number y)
+    {
+        enter(x.doubleValue(), y.doubleValue());
+    }
+    
     public double calcStatistic(BuiltinOperator stat)
     {        
         if (stat == BuiltinOperator.CountOper)

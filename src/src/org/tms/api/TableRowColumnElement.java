@@ -2,7 +2,7 @@ package org.tms.api;
 
 import java.util.Comparator;
 
-public interface TableRowColumnElement
+public interface TableRowColumnElement extends TableElement
 {
     /**
      * Return the 1-based ordinal index of this Row/Column.
@@ -25,4 +25,6 @@ public interface TableRowColumnElement
      * @param cellSorter An instance of {@link Comparator<Cell>} that is used to sort non-null row/column cells.
      */
     public void sort(Comparator<Cell> cellSorter);
+
+    public Cell getCell(Access mode, Object... mda);
 }

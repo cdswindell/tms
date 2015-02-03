@@ -156,6 +156,8 @@ public class SingleVariableStatEngine
                 return isExcluded((Row) rce);
             if (rce instanceof Column)
                 return isExcluded((Column) rce);
+            if (rce instanceof Cell)
+                return isExcluded((Cell) rce);
         }
         
         return false;

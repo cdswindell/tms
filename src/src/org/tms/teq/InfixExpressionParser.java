@@ -493,9 +493,6 @@ public class InfixExpressionParser
                         argCnt++;
                     break;
                 
-                case SubsetOp: // handled as expression arg
-                    break;
-                    
                 case Comma: // skip these elements
                     if (!processedFirstToken)
                         commaIsOk = false;
@@ -506,7 +503,6 @@ public class InfixExpressionParser
                 case TransformOp:
                 case GenericFunc:
                 case BinaryFunc:
-                case BinaryStatOp:  
                     if (parenCnt == 0) {
                         foundFunc = true;
                         if (oper != null && argCnt < oper.numArgs()) 

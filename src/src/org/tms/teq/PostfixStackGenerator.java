@@ -148,7 +148,6 @@ public class PostfixStackGenerator
                 case BinaryOp:
                 case GenericFunc:
                 case StatOp:
-                case BinaryStatOp:
                 case TransformOp:
                     oper = ift.getOperator();
                     do {
@@ -184,7 +183,6 @@ public class PostfixStackGenerator
                 case LAST_TokenType:
                 case NULL_TokenType:
                 case NullOpValue:
-                case SubsetOp:
                 case Variable:
                 default:
                     break;

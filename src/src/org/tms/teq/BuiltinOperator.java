@@ -110,9 +110,9 @@ public enum BuiltinOperator implements Labeled, Operator
     KurtOper(TokenType.StatOp, 5),
     
     // Two Variable Stat Functions
-    LinearSlopeOper(TokenType.BinaryStatOp, 5),
-    LinearInterceptOper(TokenType.BinaryStatOp, 5),
-    LinearCorrelationOper(TokenType.BinaryStatOp, 5),
+    LinearSlopeOper("slope", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
+    LinearInterceptOper("intercept", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
+    LinearCorrelationOper(TokenType.StatOp, 5),
     
     // Transformation Functions
     SplineOper,
@@ -318,10 +318,6 @@ public enum BuiltinOperator implements Labeled, Operator
                 switch (tt) {
                     case StatOp:
                         m_methodArgs[0] = TableElement.class;
-                        break;
-                        
-                    case BinaryStatOp:
-                        m_methodArgs[0] = m_methodArgs[1] = TableElement.class;
                         break;
                         
                     case TransformOp:
