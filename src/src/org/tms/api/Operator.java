@@ -10,14 +10,22 @@ public interface Operator
 
     public TokenType getTokenType();
     
-    public int getPriority();
-
-    public int numArgs();
-    
     public Class<?> [] getArgTypes();
 
     public Token evaluate(Token... args);
     
+    default public int numArgs()
+    {
+        Class<?> [] args = getArgTypes();
+        
+        return args != null ? args.length : 0;
+    }
+    
+    default public int getPriority()
+    {
+        return 5;
+    }
+
     default BuiltinOperator getBuiltinOperator() 
     {
         return BuiltinOperator.NULL_operator;

@@ -144,4 +144,9 @@ public enum TokenType implements Labeled
     {
         return this == NullValue;
     }
+
+    public boolean isPending()
+    {
+        return this == Pending;
+    }
 }

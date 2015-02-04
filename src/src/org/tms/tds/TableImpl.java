@@ -48,16 +48,21 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		return new TableImpl(nRows, nCols);
 	}
 	
-	public static final Table createTable(int nRows, int nCols, TableContext c) 
-	{
-		return new TableImpl(nRows, nCols, c);
-	}
-	
-	public static final Table createTable(int nRows, int nCols, Table t) 
-	{
-		return new TableImpl(nRows, nCols, t);
-	}
-	
+    public static final Table createTable(TableContext c) 
+    {
+        return new TableImpl(c);
+    }
+    
+    public static final Table createTable(int nRows, int nCols, TableContext c) 
+    {
+        return new TableImpl(nRows, nCols, c);
+    }
+    
+    public static final Table createTable(int nRows, int nCols, Table t) 
+    {
+        return new TableImpl(nRows, nCols, t);
+    }
+    
     private ArrayList<RowImpl> m_rows;
     private ArrayList<ColumnImpl> m_cols;
     

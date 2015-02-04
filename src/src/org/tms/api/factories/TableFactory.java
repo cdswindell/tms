@@ -20,8 +20,14 @@ public class TableFactory
 
     static public Table createTable(int nRows, int nCols, TableContext c)
     {
-		Table t = TableImpl.createTable(nRows, nCols, c);
-		return t;
+        Table t = TableImpl.createTable(nRows, nCols, c);
+        return t;
+    }
+
+    static public Table createTable(TableContext c)
+    {
+        Table t = TableImpl.createTable(c);
+        return t;
     }
 
     static public Table createTable(int nRows, int nCols, Table rt)

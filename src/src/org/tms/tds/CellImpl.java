@@ -113,10 +113,15 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected boolean setDerivedCellValue(Token t)
     {
+        setPending(false);
         if (t.isError()) 
             return this.setCellValueNoDataTypeCheck(t.getErrorCode());
         else if (t.isNull())
-        	return setCellValue(null, true);
+            return setCellValue(null, true);
+        else if (t.isPending()) {
+            setPending(true);
+            return true;
+        }
         else
         	return setCellValue(t.getValue(), true);
     }
@@ -128,6 +133,7 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected boolean setCellValue(Object value, boolean typeSafeCheck)
     {
+        setPending(false);
         if (typeSafeCheck && value != null && this.isDataTypeEnforced()) {
             if (isDatatypeMismatch(value))
                 throw new DataTypeEnforcementException(getEnforcedDataType(), value);
@@ -267,6 +273,16 @@ public class CellImpl extends TableElementImpl implements Cell
         return m_cellValue == null;
     }
 
+    public boolean isPending()
+    {
+        return isSet(sf_IS_PENDING_FLAG);
+    }
+
+    private void setPending(boolean pending)
+    {
+        set(sf_IS_PENDING_FLAG, pending);
+    }
+    
     @Override
     public Object getProperty(TableProperty key)
     {
@@ -562,7 +578,7 @@ public class CellImpl extends TableElementImpl implements Cell
         else
             label = "";
         
-        return String.format("[%s%s <%s>]", getElementType(), label, isNull() ? "null" : getCellValue().toString());
+        return String.format("[%s%s <%s>]", getElementType(), label, isPending() ? "pending" : isNull() ? "null" :getCellValue().toString());
 	}
 	
 	/*

@@ -6,6 +6,7 @@ public enum ErrorCode
     NaN,
     Infinity,
     InvalidOperand, 
+    InvalidPendingOperator, 
     InvalidTableOperand, 
     ReferenceRequired, 
     SeeErrorMessage, 

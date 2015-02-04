@@ -2,8 +2,10 @@ package org.tms.teq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -20,6 +22,8 @@ import org.tms.teq.Derivation.DerivationContext;
 
 public class PostfixStackEvaluator 
 {
+    private static final Map<Thread, PendingState> m_pendingEvaluators = new HashMap<Thread, PendingState>();
+    
 	private EquationStack m_pfs;
 	private Table m_table;
 	private EquationStack m_opStack;
@@ -203,6 +207,20 @@ public class PostfixStackEvaluator
                     
 				default:
 					throw new UnimplementedException(String.format("Unsupported token type: %s (%s)", tt, t));
+			}
+			
+			// check if the last token is pending, and if so, halt calculation
+			Token pendingToken = m_opStack.peekFirst();
+			if (pendingToken != null && pendingToken.isPending()) {
+                Object pendingThread = pendingToken.getValue();
+                if (pendingThread instanceof Runnable) {
+                    Thread thread = new Thread((Runnable)pendingThread);
+                    m_pendingEvaluators.put(thread, new PendingState(this, row, col, dc));
+                    thread.start();
+                    return pendingToken;                   
+                }
+                else 
+                    return Token.createErrorToken(ErrorCode.InvalidPendingOperator);
 			}
 		}
 		
@@ -668,4 +686,15 @@ public class PostfixStackEvaluator
 		
 		return val;
 	}
+    
+    protected static class PendingState
+    {
+
+        public PendingState(PostfixStackEvaluator postfixStackEvaluator, Row row, Column col,
+                DerivationContext dc)
+        {
+            // TODO Auto-generated constructor stub
+        }
+        
+    }
 }

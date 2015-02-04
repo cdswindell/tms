@@ -25,6 +25,12 @@ public class Token implements Labeled
         return new Token(TokenType.EvaluationError, msg);
     }
     
+
+    public static Token createPendingToken(Runnable runnable)
+    {
+        return new Token(TokenType.Pending, runnable);
+    }
+    
     private String m_label;
     private TokenType m_tokenType;
     private Operator m_oper;
@@ -275,6 +281,15 @@ public class Token implements Labeled
         return false;
     }
     
+
+    public boolean isPending()
+    {
+        if (this.getTokenType() != null) 
+            return this.getTokenType().isPending();
+        
+        return false;
+    }
+    
     public boolean isFunction()
     {
         if (this.getTokenType() != null) 
@@ -310,5 +325,11 @@ public class Token implements Labeled
         }
         else
             return ErrorCode.NoError;
+    }
+
+    public void postResult(Object value)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }
