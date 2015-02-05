@@ -19,7 +19,7 @@ import org.tms.api.BaseElement;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
-import org.tms.api.PendingThreadPool;
+import org.tms.api.DerivableThreadPool;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
@@ -33,14 +33,14 @@ import org.tms.api.factories.TableContextFactory;
 import org.tms.teq.PostfixStackEvaluator.PendingState;
 import org.tms.util.Tuple;
 
-public class Derivation implements PendingThreadPool
+public class Derivation implements DerivableThreadPool
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
     private static final ThreadLocal<UUID> sf_GUID_CACHE = new ThreadLocal<UUID>();
     private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
-    private static PendingCalculationExecutor sf_PENDING_EXECUTOR = null;
+    private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
     
     public static final UUID getTransactionID()
     {
@@ -80,7 +80,7 @@ public class Derivation implements PendingThreadPool
                 Token rt = ps.reevaluate(dc);
                 assert rt != null;
             }
-            catch (PendingCalculationException pc)
+            catch (PendingDerivationException pc)
             {
                 ps.getDerivation().cacheDeferredCalculation(pc.getPendingState());
             }
@@ -442,7 +442,7 @@ public class Derivation implements PendingThreadPool
             	dc.remove(col);
             }
         }
-        catch (PendingCalculationException pc) {
+        catch (PendingDerivationException pc) {
             cacheDeferredCalculation(pc.getPendingState());
         }
     }
@@ -482,7 +482,7 @@ public class Derivation implements PendingThreadPool
                 	anyModified = true;
                 }
             }
-            catch (PendingCalculationException pc) {
+            catch (PendingDerivationException pc) {
                 cacheDeferredCalculation(pc.getPendingState());
             }
         }        
@@ -527,7 +527,7 @@ public class Derivation implements PendingThreadPool
                 	anyModified = true;
                 }
             }
-            catch (PendingCalculationException pc) {
+            catch (PendingDerivationException pc) {
                 cacheDeferredCalculation(pc.getPendingState());
             }
         }  
@@ -541,8 +541,8 @@ public class Derivation implements PendingThreadPool
         sf_UUID_PENDING_STATE_MAP.put(pendingState.getTransactionID(), pendingState);
         if (pendingState.isRunnable()) {
             TableContext tc = getTableContext();
-            if (tc instanceof PendingThreadPool)
-                ((PendingThreadPool)tc).submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
+            if (tc instanceof DerivableThreadPool)
+                ((DerivableThreadPool)tc).submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
             else
                 submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
         }        
@@ -680,7 +680,7 @@ public class Derivation implements PendingThreadPool
     {
         synchronized(Derivation.class) {
             if (sf_PENDING_EXECUTOR == null)
-                sf_PENDING_EXECUTOR = new PendingCalculationExecutor();
+                sf_PENDING_EXECUTOR = new PendingDerivationExecutor();
         }
         
         sf_PENDING_EXECUTOR.execute(transactionID, pendingRunnable);       

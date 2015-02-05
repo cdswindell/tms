@@ -4,6 +4,8 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.UUID;
+
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
@@ -29,10 +31,10 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        t.addRow(Access.ByIndex, 1000);
+        t.addRow(Access.ByIndex, 5000);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
-        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 1000)");
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 100)");
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
@@ -47,8 +49,10 @@ public class PendingOperatorTest extends BaseTest
             
             Cell c = t.getCell(r, c2);
             assertThat(c, notNullValue());
-            assertThat(c.getCellValue(), is(v1));
+            assertThat(c.getCellValue(), is(v1*2.0));
         }
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
     }
     
     public class PendingOperator implements Operator, Runnable
@@ -78,7 +82,7 @@ public class PendingOperatorTest extends BaseTest
                 // noop;
             }
             
-            m_args[0].postResult(m_args[0].getValue());
+            m_args[0].postResult(2.0 * (Double)m_args[0].getValue());
         }
 
         @Override

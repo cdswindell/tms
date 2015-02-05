@@ -11,26 +11,24 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class PendingCalculationExecutor extends ThreadPoolExecutor implements Runnable
+public class PendingDerivationExecutor extends ThreadPoolExecutor implements Runnable
 {
-    private static final ThreadLocal<UUID> sf_GUID_CACHE = new ThreadLocal<UUID>();
-    
     private Map<Runnable, UUID> m_runnableUuidMap;
     private BlockingQueue<Runnable> m_queuedRunnables;
     private boolean m_continueDraining;
     private Thread m_drainThread = null;
     
-    public PendingCalculationExecutor()
+    public PendingDerivationExecutor()
     {
         this(5, 100, 30, TimeUnit.SECONDS);
     }
     
-    public PendingCalculationExecutor(int corePoolSize, int maximumPoolSize)
+    public PendingDerivationExecutor(int corePoolSize, int maximumPoolSize)
     {
         this(corePoolSize, maximumPoolSize, 30, TimeUnit.SECONDS);
     }
     
-    public PendingCalculationExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit)
+    public PendingDerivationExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit)
     {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, 
               new SynchronousQueue<Runnable>(), 
@@ -93,16 +91,12 @@ public class PendingCalculationExecutor extends ThreadPoolExecutor implements Ru
         
         UUID transactId = m_runnableUuidMap.remove(r);
         Derivation.associateTransactionID(t.getId(), transactId);
-        sf_GUID_CACHE.set(transactId);
     }
 
     @Override
     protected void afterExecute(Runnable r, Throwable t) 
     {
         super.afterExecute(r, t);
-        
-        if (t != null)
-            System.out.println(t.getMessage());
     }
     
     @Override

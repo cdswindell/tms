@@ -50,19 +50,19 @@ public class PostfixStackEvaluator
     }
     
     public Token evaluate() 
-    throws PendingCalculationException
+    throws PendingDerivationException
     {
         return evaluate(null, null);
     }
     
     public Token evaluate(Row row, Column col) 
-    throws PendingCalculationException
+    throws PendingDerivationException
     {
         return evaluate(row, col, null);
     }
     
     protected Token evaluate(Row row, Column col, DerivationContext dc) 
-    throws PendingCalculationException
+    throws PendingDerivationException
     {
         m_opStack = new EquationStack(StackType.Op);
         m_pfsIter = m_pfs.descendingIterator();
@@ -71,13 +71,13 @@ public class PostfixStackEvaluator
     }
     
 	public Token reevaluate(Row row, Column col) 
-	throws PendingCalculationException
+	throws PendingDerivationException
 	{
 		return reevaluate(row, col, null);
 	}
 	
 	protected Token reevaluate(Row row, Column col, DerivationContext dc) 
-	throws PendingCalculationException
+	throws PendingDerivationException
 	{
 		assert m_pfs != null : "Requires Postfix Stack";
 		
@@ -219,7 +219,7 @@ public class PostfixStackEvaluator
 			    PendingState pendingState = new PendingState(this, row, col, pendingToken);
 			    pendingToken.setValue(pendingState);
                 if (tbl != null) tbl.setCellValue(row,  col, pendingToken);
-			    throw new PendingCalculationException(pendingState);
+			    throw new PendingDerivationException(pendingState);
 			}
 		}
 		
@@ -726,7 +726,7 @@ public class PostfixStackEvaluator
         }
         
         public Token reevaluate(DerivationContext dc) 
-        throws PendingCalculationException
+        throws PendingDerivationException
         {
             Token t = m_pse.reevaluate(m_curRow, m_curCol, dc);
             if (t.isNumeric() )

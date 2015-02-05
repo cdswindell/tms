@@ -11,7 +11,7 @@ public class BuiltinOperatorTest
 
     @Test
     public final void testStringFunctions() 
-    throws PendingCalculationException
+    throws PendingDerivationException
     {
         PostfixStackEvaluator pse = new PostfixStackEvaluator("reverse('abcdefghi')", null);
         assertThat(pse, notNullValue());
