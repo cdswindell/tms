@@ -113,17 +113,47 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected boolean setDerivedCellValue(Token t)
     {
-        setPending(false);
+        decrementPendings();
         if (t.isError()) 
             return this.setCellValueNoDataTypeCheck(t.getErrorCode());
         else if (t.isNull())
             return setCellValue(null, true);
         else if (t.isPending()) {
-            setPending(true);
+            incrementPendings();
             return true;
         }
         else
         	return setCellValue(t.getValue(), true);
+    }
+
+    private void incrementPendings()
+    {
+        if (!isPending()) {
+            setPending(true);                
+            TableImpl table = m_col != null ? m_col.getTable() : null;
+            if (table != null)
+                table.incrementPendings();
+            if (m_col != null)
+                m_col.incrementPendings();
+            RowImpl row = getRow();
+            if (row != null)
+                row.incrementPendings();
+        }
+    }
+    
+    private void decrementPendings()
+    {
+        if (isPending()) {
+            setPending(false);                
+            TableImpl table = m_col != null ? m_col.getTable() : null;
+            if (table != null)
+                table.decrementPendings();
+            if (m_col != null)
+                m_col.decrementPendings();
+            RowImpl row = getRow();
+            if (row != null)
+                row.decrementPendings();
+        }
     }
     
     boolean setCellValueNoDataTypeCheck(Object value)
@@ -133,7 +163,7 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected boolean setCellValue(Object value, boolean typeSafeCheck)
     {
-        setPending(false);
+        decrementPendings();
         if (typeSafeCheck && value != null && this.isDataTypeEnforced()) {
             if (isDatatypeMismatch(value))
                 throw new DataTypeEnforcementException(getEnforcedDataType(), value);

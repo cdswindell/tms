@@ -2,10 +2,9 @@ package org.tms.teq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -22,12 +21,11 @@ import org.tms.teq.Derivation.DerivationContext;
 
 public class PostfixStackEvaluator 
 {
-    private static final Map<Thread, PendingState> m_pendingEvaluators = new HashMap<Thread, PendingState>();
-    
 	private EquationStack m_pfs;
 	private Table m_table;
 	private EquationStack m_opStack;
 	private Iterator<Token> m_pfsIter;
+    private Derivation m_derivation;
 	
     public PostfixStackEvaluator(String expr, Table table)
     {
@@ -36,17 +34,9 @@ public class PostfixStackEvaluator
         m_pfs = psg.getPostfixStack();
     }
     
-    public PostfixStackEvaluator(EquationStack pfs, Table table)
-    {
-        if (pfs == null || pfs.getStackType() != StackType.Postfix)
-            throw new IllegalTableStateException("Postfix stack required");
-        
-        m_table = table;
-        m_pfs = pfs;
-    }
-    
     public PostfixStackEvaluator(Derivation deriv)
     {
+        m_derivation = deriv;
         m_table = deriv.getTable();
         m_pfs = deriv.getPostfixStackInternal();
         
@@ -54,17 +44,25 @@ public class PostfixStackEvaluator
             throw new IllegalTableStateException("Postfix stack required");
     }
 
-    public Token evaluate()
+    protected Derivation getDerivation()
+    {
+        return m_derivation;
+    }
+    
+    public Token evaluate() 
+    throws PendingCalculationException
     {
         return evaluate(null, null);
     }
     
-    public Token evaluate(Row row, Column col)
+    public Token evaluate(Row row, Column col) 
+    throws PendingCalculationException
     {
         return evaluate(row, col, null);
     }
     
-    protected Token evaluate(Row row, Column col, DerivationContext dc)
+    protected Token evaluate(Row row, Column col, DerivationContext dc) 
+    throws PendingCalculationException
     {
         m_opStack = new EquationStack(StackType.Op);
         m_pfsIter = m_pfs.descendingIterator();
@@ -72,12 +70,14 @@ public class PostfixStackEvaluator
         return reevaluate(row, col, dc);
     }
     
-	public Token reevaluate(Row row, Column col)
+	public Token reevaluate(Row row, Column col) 
+	throws PendingCalculationException
 	{
 		return reevaluate(row, col, null);
 	}
 	
-	protected Token reevaluate(Row row, Column col, DerivationContext dc)
+	protected Token reevaluate(Row row, Column col, DerivationContext dc) 
+	throws PendingCalculationException
 	{
 		assert m_pfs != null : "Requires Postfix Stack";
 		
@@ -93,6 +93,10 @@ public class PostfixStackEvaluator
 		Token y;
 		int numArgs;
 		Token [] args;
+		
+		// Assign a unique transaction ID to this calculation; 
+		// the transaction id is stored in ThreadLocal storage
+		Derivation.assignTransactionID();
 		
 		// walk through postfix stack from tail to head
 		while(m_pfsIter.hasNext()) {
@@ -209,18 +213,13 @@ public class PostfixStackEvaluator
 					throw new UnimplementedException(String.format("Unsupported token type: %s (%s)", tt, t));
 			}
 			
-			// check if the last token is pending, and if so, halt calculation
+			// check if the last token is pending, and if so, suspend calculation
 			Token pendingToken = m_opStack.peekFirst();
 			if (pendingToken != null && pendingToken.isPending()) {
-                Object pendingThread = pendingToken.getValue();
-                if (pendingThread instanceof Runnable) {
-                    Thread thread = new Thread((Runnable)pendingThread);
-                    m_pendingEvaluators.put(thread, new PendingState(this, row, col, dc));
-                    thread.start();
-                    return pendingToken;                   
-                }
-                else 
-                    return Token.createErrorToken(ErrorCode.InvalidPendingOperator);
+			    PendingState pendingState = new PendingState(this, row, col, pendingToken);
+			    pendingToken.setValue(pendingState);
+                if (tbl != null) tbl.setCellValue(row,  col, pendingToken);
+			    throw new PendingCalculationException(pendingState);
 			}
 		}
 		
@@ -689,12 +688,66 @@ public class PostfixStackEvaluator
     
     protected static class PendingState
     {
-
-        public PendingState(PostfixStackEvaluator postfixStackEvaluator, Row row, Column col,
-                DerivationContext dc)
+        private UUID m_uuid;
+        private PostfixStackEvaluator m_pse;
+        private Row m_curRow;
+        private Column m_curCol;
+        private Token m_pendingToken;
+        private Object m_pendingIntermediate;
+        
+        public PendingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
         {
-            // TODO Auto-generated constructor stub
+            m_uuid = Derivation.getTransactionID();
+            m_pse = pse;
+            m_curRow = row;
+            m_curCol = col;
+            m_pendingToken = tk;  
+            m_pendingIntermediate = tk.getValue();
+        }
+
+        public UUID getTransactionID()
+        {
+            return m_uuid;
         }
         
+        public Token getPendingToken()
+        {
+            return m_pendingToken;
+        }
+        
+        public Object getPendingIntermediate()
+        {
+            return m_pendingIntermediate;
+        }
+        
+        public Derivation getDerivation()
+        {
+            return m_pse.getDerivation();
+        }
+        
+        public Token reevaluate(DerivationContext dc) 
+        throws PendingCalculationException
+        {
+            Token t = m_pse.reevaluate(m_curRow, m_curCol, dc);
+            if (t.isNumeric() )
+                t.setValue(getDerivation().applyPrecision(t.getNumericValue()));
+            
+            m_curCol.getTable().setCellValue(m_curRow, m_curCol, t);
+
+            return t;
+        }
+
+        public boolean isRunnable()
+        {
+            return m_pendingIntermediate != null && m_pendingIntermediate instanceof Runnable;
+        }
+        
+        public Runnable getPendingRunnable()
+        {
+            if (isRunnable())
+                return (Runnable)m_pendingIntermediate;
+            else
+                return null;
+        }
     }
 }

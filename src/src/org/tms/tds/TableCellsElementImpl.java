@@ -20,6 +20,8 @@ abstract class TableCellsElementImpl extends TableElementImpl
     
     protected TableImpl m_table;   
     protected Set<Derivable> m_affects;
+    
+    private int m_pendings;
 
     protected TableCellsElementImpl(TableElementImpl e)
     {
@@ -57,6 +59,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
         clearProperty(TableProperty.Description);
         
         m_affects = new LinkedHashSet<Derivable>();
+        m_pendings = 0;
     }
     
     @Override
@@ -142,8 +145,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
     
     /*
      * Class-specific methods
-     */
-    
+     */   
     public void registerAffects(Derivable elem)
     {
         m_affects.add(elem);
@@ -152,5 +154,22 @@ abstract class TableCellsElementImpl extends TableElementImpl
     public void deregisterAffects(Derivable elem)
     {
         m_affects.remove(elem);
+    }
+    
+    protected void incrementPendings()
+    {
+        m_pendings++;
+    }
+    
+    protected void decrementPendings()
+    {
+        m_pendings--;
+        if (m_pendings < 0)
+            m_pendings = 0;
+    }
+    
+    public boolean isPendings()
+    {
+        return m_pendings > 0;
     }
 }

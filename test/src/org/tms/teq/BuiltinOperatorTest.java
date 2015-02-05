@@ -10,7 +10,8 @@ public class BuiltinOperatorTest
 {
 
     @Test
-    public final void testStringFunctions()
+    public final void testStringFunctions() 
+    throws PendingCalculationException
     {
         PostfixStackEvaluator pse = new PostfixStackEvaluator("reverse('abcdefghi')", null);
         assertThat(pse, notNullValue());

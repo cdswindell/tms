@@ -1,5 +1,6 @@
 package org.tms.teq;
 
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -14,12 +15,13 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
+import org.tms.tds.TableImpl;
 
 public class PendingOperatorTest extends BaseTest
 {
 
     @Test
-    public final void testPendingColumnOperator()
+    public final void testPendingColumnOperator() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
         Table t = TableFactory.createTable(tc);
@@ -27,16 +29,25 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        t.addRow(Access.ByIndex, 100);
+        t.addRow(Access.ByIndex, 1000);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
-        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 2500)");
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 1000)");
+        
+        assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        while (((TableImpl)t).isPendings()) {
+            Thread.sleep(1000);
+        }
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
         
         for (Row r : t.rows()) {
             double v1 = (double)t.getCellValue(r,  c1);
             
             Cell c = t.getCell(r, c2);
             assertThat(c, notNullValue());
+            assertThat(c.getCellValue(), is(v1));
         }
     }
     
@@ -44,6 +55,16 @@ public class PendingOperatorTest extends BaseTest
     {
         private Token[] m_args;
         
+        public PendingOperator(Token[] args)
+        {
+            m_args = args;
+        }
+
+        public PendingOperator()
+        {
+            m_args = null;
+        }
+
         @Override
         public void run()
         {
@@ -81,8 +102,8 @@ public class PendingOperatorTest extends BaseTest
         @Override
         public Token evaluate(Token... args)
         {   
-            m_args = args;        
-            return Token.createPendingToken(this);
+            PendingOperator po = new PendingOperator(args);
+            return Token.createPendingToken(po);
         }       
     }
 }

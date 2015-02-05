@@ -12,24 +12,85 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.tms.api.BaseElement;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
-import org.tms.api.Subset;
+import org.tms.api.PendingThreadPool;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.factories.TableContextFactory;
+import org.tms.teq.PostfixStackEvaluator.PendingState;
 import org.tms.util.Tuple;
 
-public class Derivation  
+public class Derivation implements PendingThreadPool
 {
     public static final int sf_DEFAULT_PRECISION = 15;
+    
+    private static final ThreadLocal<UUID> sf_GUID_CACHE = new ThreadLocal<UUID>();
+    private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
+    private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
+    private static PendingCalculationExecutor sf_PENDING_EXECUTOR = null;
+    
+    public static final UUID getTransactionID()
+    {
+        return sf_GUID_CACHE.get();
+    }
+    
+    public static final UUID assignTransactionID()
+    {
+        // assign a unique GUID to the recalculation session
+        // pending calculations will use it to connect back to
+        // the correct derivation state
+        UUID transId = UUID.randomUUID();
+        sf_GUID_CACHE.set(transId);
+        return transId;
+    }
+    
+
+    public static void postResult(Object value)
+    {
+        UUID transactId = sf_PROCESS_ID_UUID_MAP.remove(Thread.currentThread().getId());
+        if (transactId != null)
+            postResult(transactId, value);
+    }
+
+    public static void postResult(UUID transactId, Object value)
+    {
+        PendingState ps = sf_UUID_PENDING_STATE_MAP.remove(transactId);
+        if (ps != null) {
+            Token t = ps.getPendingToken();
+            t.setValue(value);
+            t.setTokenType(TokenType.Operand);
+            t.setOperator(BuiltinOperator.NOP);
+            
+            DerivationContext dc = new DerivationContext();
+            try
+            {
+                Token rt = ps.reevaluate(dc);
+                assert rt != null;
+            }
+            catch (PendingCalculationException pc)
+            {
+                ps.getDerivation().cacheDeferredCalculation(pc.getPendingState());
+            }
+        }
+    }
+
+    public static void associateTransactionID(long id, UUID transactId)
+    {
+        sf_PROCESS_ID_UUID_MAP.put(id, transactId);        
+    }  
     
     public static Derivation create(String expr, Derivable elem)
     {
@@ -71,10 +132,6 @@ public class Derivation
             // harvest the postfix stack
             deriv.m_pfs = pfg.getPostfixStack();
             deriv.m_converted = true;
-            
-            // create an evaluator
-            PostfixStackEvaluator pfe = new PostfixStackEvaluator(deriv);
-            deriv.m_pfe = pfe;
             
             // note cols/rows that affect this derivation
             Iterator<Token> iter = deriv.m_pfs.iterator();
@@ -241,7 +298,6 @@ public class Derivation
     private String m_asEntered;
     private EquationStack m_ifs;
     private EquationStack m_pfs;
-    private PostfixStackEvaluator m_pfe;
     private Set<TableElement> m_affectedBy;
     private boolean m_parsed;
     private boolean m_converted;
@@ -260,6 +316,16 @@ public class Derivation
             return m_target.getTable();
         else
             return null;
+    }
+    
+    public TableContext getTableContext()
+    {
+        Table parentTable = getTable();
+        TableContext tc = null;
+        if (parentTable != null)
+            tc = parentTable.getTableContext();
+        
+        return tc != null ? tc : TableContextFactory.fetchDefaultTableContext();
     }
     
     public boolean isParsed()
@@ -352,7 +418,7 @@ public class Derivation
         }
     }
     
-    private void recalculateTargetCell(TableElement modifiedElement, DerivationContext dc)
+    private void recalculateTargetCell(TableElement modifiedElement, DerivationContext dc) 
     {
         Cell cell = (Cell)m_target;
         Row row = cell.getRow();
@@ -365,17 +431,23 @@ public class Derivation
         if (tbl == null)
             throw new IllegalTableStateException("Table required");
         
-        Token t = m_pfe.evaluate(row, col, dc);
-        if (t.isNumeric()) 
-            t.setValue(applyPrecision(t.getNumericValue()));
-        boolean modified = tbl.setCellValue(row, col, t);
-        if (modified && dc != null) {
-        	dc.remove(row);
-        	dc.remove(col);
+        try {
+            PostfixStackEvaluator pfe = new PostfixStackEvaluator(this);        
+            Token t = pfe.evaluate(row, col, dc);
+            if (t.isNumeric()) 
+                t.setValue(applyPrecision(t.getNumericValue()));
+            boolean modified = tbl.setCellValue(row, col, t);
+            if (modified && dc != null) {
+            	dc.remove(row);
+            	dc.remove(col);
+            }
+        }
+        catch (PendingCalculationException pc) {
+            cacheDeferredCalculation(pc.getPendingState());
         }
     }
 
-    private void recalculateTargetRow(TableElement modifiedElement, DerivationContext dc)
+    private void recalculateTargetRow(TableElement modifiedElement, DerivationContext dc) 
     {
         Row row = (Row)m_target;
         Table tbl = row.getTable();
@@ -398,14 +470,20 @@ public class Derivation
         	Cell cell = tbl.getCell(row,  col);
         	if (cell != null && cell.isDerived()) continue;
         	
-            Token t = m_pfe.evaluate(row, col, dc);
-            if (t.isNumeric() )
-                t.setValue(applyPrecision(t.getNumericValue()));
-            
-            boolean modified = tbl.setCellValue(row, col, t);
-            if (modified && dc != null) {
-            	dc.remove(col);
-            	anyModified = true;
+        	try {
+                PostfixStackEvaluator pfe = new PostfixStackEvaluator(this);        
+                Token t = pfe.evaluate(row, col, dc);
+                if (t.isNumeric() )
+                    t.setValue(applyPrecision(t.getNumericValue()));
+                
+                boolean modified = tbl.setCellValue(row, col, t);
+                if (modified && dc != null) {
+                	dc.remove(col);
+                	anyModified = true;
+                }
+            }
+            catch (PendingCalculationException pc) {
+                cacheDeferredCalculation(pc.getPendingState());
             }
         }        
         
@@ -413,7 +491,7 @@ public class Derivation
         	dc.remove(row);
     }
 
-    private void recalculateTargetColumn(TableElement modifiedElement, DerivationContext dc)
+    private void recalculateTargetColumn(TableElement modifiedElement, DerivationContext dc) 
     {
         Column col = (Column)m_target;        
         Table tbl = col.getTable();
@@ -438,18 +516,36 @@ public class Derivation
         	Cell cell = tbl.getCell(row,  col);
         	if (cell != null && cell.isDerived()) continue;
         	
-            Token t = m_pfe.evaluate(row, col, dc);
-            if (t.isNumeric())
-                t.setValue(applyPrecision(t.getNumericValue()));
-            boolean modified = tbl.setCellValue(row, col, t);
-            if (modified && dc != null) {
-            	dc.remove(row);
-            	anyModified = true;
+        	try {
+                PostfixStackEvaluator pfe = new PostfixStackEvaluator(this);        
+                Token t = pfe.evaluate(row, col, dc);
+                if (t.isNumeric())
+                    t.setValue(applyPrecision(t.getNumericValue()));
+                boolean modified = tbl.setCellValue(row, col, t);
+                if (modified && dc != null) {
+                	dc.remove(row);
+                	anyModified = true;
+                }
+            }
+            catch (PendingCalculationException pc) {
+                cacheDeferredCalculation(pc.getPendingState());
             }
         }  
         
         if (anyModified && dc != null)
         	dc.remove(col);
+    }
+
+    private void cacheDeferredCalculation(PendingState pendingState)
+    {
+        sf_UUID_PENDING_STATE_MAP.put(pendingState.getTransactionID(), pendingState);
+        if (pendingState.isRunnable()) {
+            TableContext tc = getTableContext();
+            if (tc instanceof PendingThreadPool)
+                ((PendingThreadPool)tc).submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
+            else
+                submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
+        }        
     }
 
     public List<TableElement> getAffectedBy()
@@ -578,5 +674,16 @@ public class Derivation
             
             return m_cachedTVSEs.get(new Tuple<TableElement>(e1, e2));
         }       
-    }   
+    }
+    
+    public void submitCalculation(UUID transactionID, Runnable pendingRunnable)
+    {
+        synchronized(Derivation.class) {
+            if (sf_PENDING_EXECUTOR == null)
+                sf_PENDING_EXECUTOR = new PendingCalculationExecutor();
+        }
+        
+        sf_PENDING_EXECUTOR.execute(transactionID, pendingRunnable);       
+    }
+
 }

@@ -23,12 +23,16 @@ public class Token implements Labeled
     public static Token createErrorToken(String msg)
     {
         return new Token(TokenType.EvaluationError, msg);
-    }
-    
+    }   
 
     public static Token createPendingToken(Runnable runnable)
     {
         return new Token(TokenType.Pending, runnable);
+    }
+    
+    public static Token createPendingToken()
+    {
+        return new Token(TokenType.Pending, null);
     }
     
     private String m_label;
@@ -329,7 +333,6 @@ public class Token implements Labeled
 
     public void postResult(Object value)
     {
-        // TODO Auto-generated method stub
-        
+        Derivation.postResult(value);        
     }
 }

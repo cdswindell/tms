@@ -42,6 +42,7 @@ public class TokenMapperTest
 
     @Test
     public final void testRegisterOperator()
+    throws PendingCalculationException
     {
         TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
         assertThat(tm, notNullValue());
@@ -87,6 +88,7 @@ public class TokenMapperTest
     
     @Test
     public final void testOverloadOperator()
+    throws PendingCalculationException
     {
         TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
         assertThat(tm, notNullValue());
@@ -115,21 +117,9 @@ public class TokenMapperTest
         }
 
         @Override
-        public int getPriority()
-        {
-            return 5;
-        }
-
-        @Override
         public String getLabel()
         {
             return "square";
-        }
-
-        @Override
-        public int numArgs()
-        {
-            return 1;
         }
 
         @Override
@@ -163,21 +153,9 @@ public class TokenMapperTest
         }
 
         @Override
-        public int getPriority()
-        {
-            return 5;
-        }
-
-        @Override
         public String getLabel()
         {
             return "add3";
-        }
-
-        @Override
-        public int numArgs()
-        {
-            return 3;
         }
 
         @Override
@@ -213,21 +191,9 @@ public class TokenMapperTest
         }
 
         @Override
-        public int getPriority()
-        {
-            return 2;
-        }
-
-        @Override
         public String getLabel()
         {
             return "+";
-        }
-
-        @Override
-        public int numArgs()
-        {
-            return 2;
         }
 
         @Override
