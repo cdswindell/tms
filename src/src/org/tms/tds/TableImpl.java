@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -21,8 +22,8 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
-import org.tms.api.Subset;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
@@ -1525,6 +1526,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
             activateAutoRecalculate();
             popCurrent();
         }
+        
+        // no need to recalc table, as filling all cells
+        // clears all derivations
     }  
     
     @Override
@@ -1560,63 +1564,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	synchronized public void recalculate()
 	{
         vetElement();
-	    Set<Derivable> derived = new HashSet<Derivable>();
-	    
-        for (ColumnImpl col : getColumnsInternal()) {
-            if (col != null && col.isDerived())
-                derived.add(col);
-        }
         
-        for (RowImpl row : getRowsInternal()) {
-            if (row != null && row.isDerived())
-                derived.add(row);
+        pushCurrent();        
+        try {
+            Derivation.recalculateAffected(this);
         }
-        
-	    for (CellImpl cell : derivedCells())
-	        derived.add(cell);
-	    
-	    boolean autoRecalc = this.isAutoRecalculate();
-	    setAutoRecalculate(false);
-	    pushCurrent();
-	    try {
-    	    List<Derivable> orderedDerivables = Derivation.calculateDependencies(derived);
-    	    for (Derivable d : orderedDerivables) {
-    	        d.recalculate();
-    	    }
-	    }
-	    finally {
-	        popCurrent();
-	        setAutoRecalculate(autoRecalc);	        
-	    }	    
+        finally {
+            popCurrent();
+        }
 	}
 	
-    protected void recalculateAffected(TableElementImpl element)
-    {
-        if (isAutoRecalculateEnabled()) {
-            deactivateAutoRecalculate();
-            try {
-                switch (element.getElementType()) {
-                    case Table:
-                    case Subset:
-                        recalculate();
-                        break;
-                        
-                    case Row:
-                    case Column:
-                    case Cell:
-                        Derivation.recalculateAffected(element);
-                        break;
-                        
-                    default:
-                        break;
-                }
-            }
-            finally {
-                activateAutoRecalculate();
-            }
-        }
-    }
-    
     protected Derivation getCellDerivation(CellImpl cell)
     {
         return m_derivedCells.get(cell);
@@ -1641,6 +1598,34 @@ public class TableImpl extends TableCellsElementImpl implements Table
     protected int getNumDerivedCells()
     {
         return m_derivedCells.size();
+    }
+    
+    @Override
+    public List<Derivable> getDerivedElements()
+    {
+        vetElement();
+        Set<Derivable> derived = new LinkedHashSet<Derivable>();
+        
+        pushCurrent();
+        try {
+            for (ColumnImpl col : getColumnsInternal()) {
+                if (col != null && col.isDerived())
+                    derived.add(col);
+            }
+            
+            for (RowImpl row : getRowsInternal()) {
+                if (row != null && row.isDerived())
+                    derived.add(row);
+            }
+            
+            for (CellImpl cell : derivedCells())
+                derived.add(cell);
+        
+            return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
+        }
+        finally {
+            popCurrent();
+        }       
     }
     
     /**

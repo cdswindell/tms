@@ -168,6 +168,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
             m_pendings = 0;
     }
     
+    @Override
     public boolean isPendings()
     {
         return m_pendings > 0;

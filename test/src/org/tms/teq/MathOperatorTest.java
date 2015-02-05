@@ -5,11 +5,14 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.Derivable;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
@@ -190,5 +193,16 @@ public class MathOperatorTest extends BaseTest
         assertThat(cR2C7, notNullValue());
         cR2C7.setDerivation("max(col 6)");
         assertThat(cR2C7.getCellValue(), is (20.0));
+        
+        List<Derivable> c1Affects = c1.getAffects();
+        assertThat(c1Affects, notNullValue());
+        
+        tbl.setCellValue(r1, c7, Token.createPendingToken());
+        assertThat(cR1C7.isPendings(), is(true));
+        
+        c1.fill(100);
+        assertThat(cR1C7.isPendings(), is(false));             
+        assertThat(cR1C7, notNullValue());
+        assertThat(cR1C7.getCellValue(), is (10.0));
     }
 }

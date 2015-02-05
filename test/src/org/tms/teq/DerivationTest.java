@@ -160,6 +160,7 @@ public class DerivationTest
         c1.setDerivation("col 4 + col 5");
         c2.setDerivation("col 3 + col 4");
         c3.setDerivation("col 1 + col 5 ");
+        
         plan = Derivation.calculateDependencies(c4);
         assertThat(plan, notNullValue());
         assertThat(plan.size(), is(3));
@@ -168,6 +169,7 @@ public class DerivationTest
         assertThat(plan.get(2).getPropertyInt(TableProperty.Index), is(2));
         
         Cell r1c5 = tbl.getCell(r1, c5);
+        
         plan = Derivation.calculateDependencies(r1c5);
         assertThat(plan, notNullValue());
         assertThat(plan.size(), is(3));

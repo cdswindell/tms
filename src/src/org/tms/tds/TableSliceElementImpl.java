@@ -3,14 +3,15 @@ package org.tms.tds;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Derivable;
-import org.tms.api.Subset;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
@@ -150,14 +151,37 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         vetElement();
         if (isDerived()) {
             m_deriv.recalculateTarget();
-            
-            // recalculate dependent columns
-            TableImpl table = getTable();
-            if (table != null) 
-                table.recalculateAffected(this);
         }
     }
        
+    @Override
+    public List<Derivable> getDerivedElements()
+    {
+        vetElement();
+        Set<Derivable> derived = new LinkedHashSet<Derivable>();
+        
+        pushCurrent();
+        try {
+            // if the element itself is derived, add it to the list
+            if (isDerived())
+                derived.add(this);
+            
+            // get any derived cells associated to the parent table in this slice
+            TableImpl parent = getTable();
+            if (parent != null) {
+                for (Cell c : parent.derivedCells()) {
+                    if (c.getColumn() == this || c.getRow() == this)
+                        derived.add(c);
+                }
+            }
+            
+            return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
+        }
+        finally {
+            popCurrent();
+        }       
+    }
+    
     @Override
     public void sort() 
     {
@@ -378,7 +402,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         else if (o == null && !isSupportsNull())
             throw new NullValueException(this, TableProperty.CellValue);
         
-        pushCurrent();       
+        pushCurrent();
+        if (parent != null)
+            parent.deactivateAutoRecalculate();
         boolean setSome = false;
         try {
             // Clear derivation, since fill should override
@@ -412,11 +438,13 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                 throw new NullValueException(this, TableProperty.CellValue);
         }
         finally { 
+            if (parent != null)
+                parent.activateAutoRecalculate();
             popCurrent();
         }
         
-        if (setSome && parent != null)
-            parent.recalculateAffected(this);
+        if (setSome && parent != null && parent.isAutoRecalculateEnabled())
+            Derivation.recalculateAffected(this);
     }
 
 	private boolean isDerived(Cell c)

@@ -66,8 +66,9 @@ public class CellImpl extends TableElementImpl implements Cell
         
         // recalculate affected table elements
         TableImpl parentTable = getTable();
-        if (valuesDiffer && parentTable != null) 
-            parentTable.recalculateAffected(this);
+        if (valuesDiffer && parentTable != null && 
+                parentTable.isAutoRecalculateEnabled()) 
+            Derivation.recalculateAffected(this);
         
         return valuesDiffer;
     }
@@ -128,7 +129,7 @@ public class CellImpl extends TableElementImpl implements Cell
 
     private void incrementPendings()
     {
-        if (!isPending()) {
+        if (!isPendings()) {
             setPending(true);                
             TableImpl table = m_col != null ? m_col.getTable() : null;
             if (table != null)
@@ -143,7 +144,7 @@ public class CellImpl extends TableElementImpl implements Cell
     
     private void decrementPendings()
     {
-        if (isPending()) {
+        if (isPendings()) {
             setPending(false);                
             TableImpl table = m_col != null ? m_col.getTable() : null;
             if (table != null)
@@ -304,6 +305,12 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     public boolean isPending()
+    {
+        return isPendings();
+    }
+    
+    @Override()
+    public boolean isPendings()
     {
         return isSet(sf_IS_PENDING_FLAG);
     }
@@ -466,17 +473,22 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
+    public List<Derivable> getDerivedElements()
+    {
+        vetElement();
+        if (isDerived())
+            return Collections.singletonList(this);
+        else
+            return Collections.emptyList();
+    }
+    
+    @Override
     public void recalculate()
     {
         vetElement();
         Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null) {
             deriv.recalculateTarget();
-            
-            // recalculate dependent columns
-            TableImpl parentTable = getTable();
-            if (parentTable != null) 
-                parentTable.recalculateAffected(this);
         }
     }    
 
@@ -608,7 +620,7 @@ public class CellImpl extends TableElementImpl implements Cell
         else
             label = "";
         
-        return String.format("[%s%s <%s>]", getElementType(), label, isPending() ? "pending" : isNull() ? "null" :getCellValue().toString());
+        return String.format("[%s%s <%s>]", getElementType(), label, isPendings() ? "pending" : isNull() ? "null" :getCellValue().toString());
 	}
 	
 	/*

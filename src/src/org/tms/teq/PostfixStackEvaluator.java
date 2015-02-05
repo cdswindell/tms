@@ -749,5 +749,11 @@ public class PostfixStackEvaluator
             else
                 return null;
         }
+        
+        public void submitCalculation()
+        {
+            if (getDerivation() != null)
+                getDerivation().submitCalculation(this);
+        }
     }
 }

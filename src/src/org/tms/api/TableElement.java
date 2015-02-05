@@ -17,6 +17,7 @@ public interface TableElement extends BaseElement
     public boolean isNull();
     public boolean isInvalid();
     public boolean isValid();
+    public boolean isPendings();
     
     public String getLabel();
     public void setLabel(String label);
@@ -27,6 +28,8 @@ public interface TableElement extends BaseElement
      * @return a List of the Derivable elements that this element affects
      */
     public List<Derivable> getAffects();
+       
+    public List<Derivable> getDerivedElements();
     
     public List<Subset> getSubsets();
 }

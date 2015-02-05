@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Subset;
 import org.tms.api.Row;
@@ -18,6 +20,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
 
 public class SubsetImpl extends TableCellsElementImpl implements Subset
@@ -56,6 +59,34 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     protected List<RowImpl> getRows()
     {
         return new ArrayList<RowImpl>(((JustInTimeSet<RowImpl>)m_rows).clone());
+    }
+    
+    protected Collection<RowImpl> getEffectiveRows()
+    {
+        if (this.getNumRows() > 0)
+            return m_rows;
+        
+        TableImpl parent = getTable();
+        if (parent != null) {
+            if (this.getNumColumns() > 0)
+                return parent.getRowsInternal();
+        }
+        
+        return Collections.emptyList();
+    }
+    
+    protected Collection<ColumnImpl> getEffectiveColumns()
+    {
+        if (this.getNumColumns() > 0)
+            return m_cols;
+        
+        TableImpl parent = getTable();
+        if (parent != null) {
+            if (this.getNumRows() > 0)
+                return parent.getColumnsInternal();
+        }
+        
+        return Collections.emptyList();
     }
     
     protected Iterable<RowImpl> rows()
@@ -421,6 +452,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		    clearComponentDerivations();
 		    
 		    tbl.pushCurrent();
+		    tbl.deactivateAutoRecalculate();
 		    try {
 		        for (Cell cell : cells()) {
 		            if (isDerived(cell))
@@ -429,11 +461,13 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		            ((CellImpl)cell).setCellValue(o, true);
 		        }		        
 		    }
-		    finally {	            
+		    finally {	            	            
+	            tbl.activateAutoRecalculate();
 	            tbl.popCurrent();
 		    }
 		    
-		    tbl.recalculateAffected(this);
+		    if (tbl.isAutoRecalculateEnabled())
+		        Derivation.recalculateAffected(this);
 		}
 	}
 	
@@ -474,6 +508,31 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return false;
     }
 
+    @Override
+    public List<Derivable> getDerivedElements()
+    {
+        vetElement();
+        Set<Derivable> derived = new LinkedHashSet<Derivable>();
+        
+        for (RowImpl row : getEffectiveRows())
+            if (row != null && row.isDerived())
+                derived.add(row);
+        
+        for (ColumnImpl col : getEffectiveColumns())
+            if (col != null && col.isDerived())
+                derived.add(col);
+        
+        for (SubsetImpl s : m_subsets)
+            if (s != null)
+                derived.addAll(s.getDerivedElements());
+        
+        for (CellImpl c : m_cells)
+            if (c != null && c.isDerived())
+                derived.add(c);
+        
+        return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
+    }
+    
     @Override
 	public void clear()
 	{

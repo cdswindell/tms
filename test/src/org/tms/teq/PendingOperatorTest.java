@@ -4,8 +4,6 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import java.util.UUID;
-
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
@@ -31,10 +29,11 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        t.addRow(Access.ByIndex, 5000);
+        t.addRow(Access.ByIndex, 2000);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
         Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 100)");
+        //Column c3 = (Column)t.addColumn().setDerivation("col 2 / 2");
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
@@ -50,6 +49,19 @@ public class PendingOperatorTest extends BaseTest
             Cell c = t.getCell(r, c2);
             assertThat(c, notNullValue());
             assertThat(c.getCellValue(), is(v1*2.0));
+            
+//            c = t.getCell(r, c3);
+//            assertThat(c, notNullValue());
+//            assertThat(c.getCellValue(), is(v1));
+        }
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        t.recalculate();
+        assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        while (((TableImpl)t).isPendings()) {
+            Thread.sleep(1000);
         }
         
         assertThat(((TableImpl)t).isPendings(), is(false));

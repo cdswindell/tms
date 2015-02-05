@@ -29,6 +29,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.teq.PostfixStackEvaluator.PendingState;
 import org.tms.util.Tuple;
@@ -41,56 +42,6 @@ public class Derivation implements DerivableThreadPool
     private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
     private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
-    
-    public static final UUID getTransactionID()
-    {
-        return sf_GUID_CACHE.get();
-    }
-    
-    public static final UUID assignTransactionID()
-    {
-        // assign a unique GUID to the recalculation session
-        // pending calculations will use it to connect back to
-        // the correct derivation state
-        UUID transId = UUID.randomUUID();
-        sf_GUID_CACHE.set(transId);
-        return transId;
-    }
-    
-
-    public static void postResult(Object value)
-    {
-        UUID transactId = sf_PROCESS_ID_UUID_MAP.remove(Thread.currentThread().getId());
-        if (transactId != null)
-            postResult(transactId, value);
-    }
-
-    public static void postResult(UUID transactId, Object value)
-    {
-        PendingState ps = sf_UUID_PENDING_STATE_MAP.remove(transactId);
-        if (ps != null) {
-            Token t = ps.getPendingToken();
-            t.setValue(value);
-            t.setTokenType(TokenType.Operand);
-            t.setOperator(BuiltinOperator.NOP);
-            
-            DerivationContext dc = new DerivationContext();
-            try
-            {
-                Token rt = ps.reevaluate(dc);
-                assert rt != null;
-            }
-            catch (PendingDerivationException pc)
-            {
-                ps.getDerivation().cacheDeferredCalculation(pc.getPendingState());
-            }
-        }
-    }
-
-    public static void associateTransactionID(long id, UUID transactId)
-    {
-        sf_PROCESS_ID_UUID_MAP.put(id, transactId);        
-    }  
     
     public static Derivation create(String expr, Derivable elem)
     {
@@ -169,33 +120,66 @@ public class Derivation implements DerivableThreadPool
         }
     }
     
+    private static boolean checkCircularReference(Derivable target, List<TableElement> affectedBy)
+    {
+        if (affectedBy == null)
+            return false;
+        
+        for (TableElement d : affectedBy) {
+            if (target == d || (d instanceof Derivable && checkCircularReference(target, ((Derivable)d).getAffectedBy())))
+                return true;
+        }
+        
+        return false;
+    }
+
     public static void recalculateAffected(TableElement element)
     {
-        List<Derivable> derivedElements = calculateDependencies(element);
-        if (derivedElements == null || derivedElements.isEmpty()) return;
+        if (element == null || element.isInvalid())
+            return;
         
-        // remove current element from recalc plan
-        derivedElements.remove(element);
+        Table parent = element.getTable();
+        List<Derivable> orderedDerivables = null;        
+        switch (element.getElementType()) {
+            case Row:
+            case Column:
+            case Cell:
+                orderedDerivables = calculateDependencies(element);
+                break;
+                
+            case Table:
+            case Subset:
+                orderedDerivables = calculateDependencies(element.getDerivedElements());
+                break;
+                
+            default:
+                throw new UnsupportedImplementationException(element, "recalculateAffected");
+        }
         
-        // recalculate impacted elements
-        Table parentTable = element.getTable();
-        if (parentTable != null)
-            parentTable.pushCurrent();
+        if (orderedDerivables == null || orderedDerivables.isEmpty())
+            return;
+        
+        // iterate over ordered list and recalculate 
+        DerivationContext dc = new DerivationContext();
+        dc.setRecalculateAffected(false);
+        
+        if (parent != null) parent.pushCurrent();
         try {
-        	DerivationContext dc = new DerivationContext();
-        	
-            for (Derivable d : derivedElements) {
-                Derivation deriv = d.getDerivation();
-                deriv.recalculateTarget(element, dc);
+            for (Derivable derivable : orderedDerivables) {
+                if (derivable == null) continue;
+                Derivation d = derivable.getDerivation();
+                d.recalculateTarget(element, dc);
             }
+            
+            // start background threads
+            dc.processPendings();
         }
         finally {
-            if (parentTable != null)
-                parentTable.popCurrent();
-        }       
+            if (parent != null) parent.pushCurrent();
+        }
     }
-    
-    public static List<Derivable> calculateDependencies(TableElement modifiedElement)
+
+   static List<Derivable> calculateDependencies(TableElement modifiedElement)
     {
         assert modifiedElement != null : "TableElement required";
         
@@ -213,35 +197,38 @@ public class Derivation implements DerivableThreadPool
         Set<Derivable> resolved = new LinkedHashSet<Derivable>(numAffected);
         Set<Derivable> unresolved = new HashSet<Derivable>(numAffected);
         
+        Derivable med = modifiedElement instanceof Derivable ? (Derivable)modifiedElement : null;
         for (Derivable d : globalAffected) {
             if (!resolved.contains(d))
-                resolveDependencies(d, resolved, unresolved);
+                resolveDependencies(d, resolved, unresolved, med);
         }
-               
+        
+        // remove specified element from set, as it has already been changed
+        resolved.remove(modifiedElement);
+        
         List<Derivable> orderedDerivables = new ArrayList<Derivable>(resolved);        
         return orderedDerivables;
     }
 
-
-    public static List<Derivable> calculateDependencies(Collection<Derivable> derived)
+    private static List<Derivable> calculateDependencies(Collection<Derivable> derived)
     {
         assert derived != null : "Set<Derived> required";
-        
+
         int numAffected = derived.size();
 
         Set<Derivable> resolved = new LinkedHashSet<Derivable>(numAffected);
         Set<Derivable> unresolved = new HashSet<Derivable>(numAffected);
-        
+
         for (Derivable d : derived) {
-            if (!resolved.contains(d))
-                resolveDependencies(d, resolved, unresolved);
+           if (!resolved.contains(d))
+               resolveDependencies(d, resolved, unresolved, null);
         }
-               
+
         List<Derivable> orderedDerivables = new ArrayList<Derivable>(resolved);        
         return orderedDerivables;
     }
-    
-    private static void resolveDependencies(Derivable d, Set<Derivable> resolved, Set<Derivable> unresolved)
+   
+    private static void resolveDependencies(Derivable d, Set<Derivable> resolved, Set<Derivable> unresolved, Derivable omit)
     {
         List<TableElement> affectedBy = d.getAffectedBy();
         if (affectedBy != null) {
@@ -251,16 +238,16 @@ public class Derivation implements DerivableThreadPool
                 
                 Derivable ted = (Derivable)te;
                 if (!ted.isDerived()) continue;
+                if (ted == omit) continue;
                 
                 if (!resolved.contains(ted))
-                    resolveDependencies(ted, resolved, unresolved);
+                    resolveDependencies(ted, resolved, unresolved, omit);
             }
             
             unresolved.remove(d); 
         }
         
         resolved.add(d);
-
     }
 
     /**
@@ -282,19 +269,59 @@ public class Derivation implements DerivableThreadPool
         }        
     }
 
-    private static boolean checkCircularReference(Derivable target, List<TableElement> affectedBy)
+    public static final UUID getTransactionID()
     {
-        if (affectedBy == null)
-            return false;
-        
-        for (TableElement d : affectedBy) {
-            if (target == d || (d instanceof Derivable && checkCircularReference(target, ((Derivable)d).getAffectedBy())))
-                return true;
-        }
-        
-        return false;
+        return sf_GUID_CACHE.get();
+    }
+    
+    public static final UUID assignTransactionID()
+    {
+        // assign a unique GUID to the recalculation session
+        // pending calculations will use it to connect back to
+        // the correct derivation state
+        UUID transId = UUID.randomUUID();
+        sf_GUID_CACHE.set(transId);
+        return transId;
+    }
+    
+    public static void postResult(Object value)
+    {
+        UUID transactId = sf_PROCESS_ID_UUID_MAP.remove(Thread.currentThread().getId());
+        if (transactId != null)
+            postResult(transactId, value);
     }
 
+    public static void postResult(UUID transactId, Object value)
+    {
+        PendingState ps = sf_UUID_PENDING_STATE_MAP.remove(transactId);
+        if (ps != null) {
+            Token t = ps.getPendingToken();
+            t.setValue(value);
+            t.setTokenType(TokenType.Operand);
+            t.setOperator(BuiltinOperator.NOP);
+            
+            DerivationContext dc = new DerivationContext();
+            try
+            {
+                Token rt = ps.reevaluate(dc);
+                assert rt != null;
+            }
+            catch (PendingDerivationException pc)
+            {
+                ps.getDerivation().cacheDeferredCalculation(pc.getPendingState(), dc);
+                dc.processPendings();
+            }
+        }
+    }
+
+    public static void associateTransactionID(long id, UUID transactId)
+    {
+        sf_PROCESS_ID_UUID_MAP.put(id, transactId);        
+    }  
+    
+    /*
+     * Instance fields
+     */
     private String m_asEntered;
     private EquationStack m_ifs;
     private EquationStack m_pfs;
@@ -304,7 +331,7 @@ public class Derivation implements DerivableThreadPool
     private Derivable m_target;
     private MathContext m_precision;
     
-    private Derivation()
+    protected Derivation()
     {
         m_affectedBy = new LinkedHashSet<TableElement>();
         m_precision = new MathContext(sf_DEFAULT_PRECISION);
@@ -393,9 +420,10 @@ public class Derivation implements DerivableThreadPool
     {
     	DerivationContext dc = new DerivationContext();
         recalculateTarget(null, dc);
+        dc.processPendings();
     }
     
-    private void recalculateTarget(TableElement modifiedElement, DerivationContext dc)
+    private void recalculateTarget(TableElement element, DerivationContext dc)
     {
         if (m_target.isReadOnly())
             throw new ReadOnlyException((BaseElement)m_target, TableProperty.Derivation);
@@ -407,15 +435,46 @@ public class Derivation implements DerivableThreadPool
             // currently support derived rows, columns, and cells, 
             // dispatch to correct handler
             if (m_target instanceof Column)
-                recalculateTargetColumn(modifiedElement, dc);
+                recalculateTargetColumn(element, dc);
             else if (m_target instanceof Row)
-                recalculateTargetRow(modifiedElement, dc);
+                recalculateTargetRow(element, dc);
             else if (m_target instanceof Cell)
-                recalculateTargetCell(modifiedElement, dc);
+                recalculateTargetCell(element, dc);
+            
+            if (dc.isRecalculateAffected()) {
+                dc.setRecalculateAffected(false);
+                recalculateAffectedElements(dc);
+                dc.setRecalculateAffected(true);
+            }
         }
         finally {      
             t.popCurrent();  
         }
+    }
+    
+    private void recalculateAffectedElements(DerivationContext dc)
+    {
+        List<Derivable> affected = calculateDependencies(m_target);
+        if (affected == null ) return;
+        
+        // remove current element from recalc plan
+        affected.remove(m_target);
+        if (affected.isEmpty()) return;
+        
+        // recalculate impacted elements
+        Table parentTable = m_target.getTable();
+        if (parentTable != null)
+            parentTable.pushCurrent();
+        try {
+            for (Derivable d : affected) {
+                Derivation deriv = d.getDerivation();
+                deriv.recalculateTarget(m_target, dc);
+            }
+        }
+        finally {
+            if (parentTable != null)
+                parentTable.popCurrent();
+        }       
     }
     
     private void recalculateTargetCell(TableElement modifiedElement, DerivationContext dc) 
@@ -443,7 +502,7 @@ public class Derivation implements DerivableThreadPool
             }
         }
         catch (PendingDerivationException pc) {
-            cacheDeferredCalculation(pc.getPendingState());
+            cacheDeferredCalculation(pc.getPendingState(), dc);
         }
     }
 
@@ -483,7 +542,7 @@ public class Derivation implements DerivableThreadPool
                 }
             }
             catch (PendingDerivationException pc) {
-                cacheDeferredCalculation(pc.getPendingState());
+                cacheDeferredCalculation(pc.getPendingState(), dc);
             }
         }        
         
@@ -528,7 +587,7 @@ public class Derivation implements DerivableThreadPool
                 }
             }
             catch (PendingDerivationException pc) {
-                cacheDeferredCalculation(pc.getPendingState());
+                cacheDeferredCalculation(pc.getPendingState(), dc);
             }
         }  
         
@@ -536,16 +595,24 @@ public class Derivation implements DerivableThreadPool
         	dc.remove(col);
     }
 
-    private void cacheDeferredCalculation(PendingState pendingState)
+    private void cacheDeferredCalculation(PendingState pendingState, DerivationContext dc)
     {
         sf_UUID_PENDING_STATE_MAP.put(pendingState.getTransactionID(), pendingState);
         if (pendingState.isRunnable()) {
-            TableContext tc = getTableContext();
-            if (tc instanceof DerivableThreadPool)
-                ((DerivableThreadPool)tc).submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
-            else
-                submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
+            if (dc != null)
+                dc.cachePending(pendingState);
+            else 
+                submitCalculation(pendingState);
         }        
+    }
+
+    void submitCalculation(PendingState pendingState)
+    {
+        TableContext tc = getTableContext();
+        if (tc instanceof DerivableThreadPool)
+            ((DerivableThreadPool)tc).submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
+        else
+            submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
     }
 
     public List<TableElement> getAffectedBy()
@@ -572,8 +639,7 @@ public class Derivation implements DerivableThreadPool
 
     public void destroy()
     {
-        // TODO Auto-generated method stub
-        
+        // TODO Auto-generated method stub        
     }
       
     protected double applyPrecision(double value)
@@ -590,7 +656,23 @@ public class Derivation implements DerivableThreadPool
         
         return value;
     }
+      
+    public void submitCalculation(UUID transactionID, Runnable pendingRunnable)
+    {
+        synchronized(Derivation.class) {
+            if (sf_PENDING_EXECUTOR == null)
+                sf_PENDING_EXECUTOR = new PendingDerivationExecutor();
+        }
+        
+        sf_PENDING_EXECUTOR.execute(transactionID, pendingRunnable);       
+    }
     
+    public void shutdown()
+    {
+        if (sf_PENDING_EXECUTOR != null)
+            sf_PENDING_EXECUTOR.shutdown();
+    }
+
     public String toString()
     {
         return String.format("%s [%s %s]", 
@@ -603,13 +685,38 @@ public class Derivation implements DerivableThreadPool
         private Map<TableElement, SingleVariableStatEngine> m_cachedSVSEs;
         private Map<Tuple<TableElement>, TwoVariableStatEngine> m_cachedTVSEs;
     	private boolean m_cachedAny = false;
+    	private List<PendingState> m_pendings;
+    	private boolean m_isRecalculateAffected;
     	
     	public DerivationContext()
     	{
             m_cachedSVSEs = new HashMap<TableElement, SingleVariableStatEngine>();
             m_cachedTVSEs = new HashMap<Tuple<TableElement>, TwoVariableStatEngine>();
+            m_pendings = new ArrayList<PendingState>();
+            m_isRecalculateAffected = true;
     	}
     	
+    	public void cachePending(PendingState ps)
+    	{
+    	    m_pendings.add(ps);
+    	}
+    	
+    	public void processPendings()
+    	{
+    	    m_pendings.forEach(p -> p.submitCalculation());
+    	    m_pendings.clear();
+    	}
+    	
+        public boolean isRecalculateAffected()
+        {
+            return m_isRecalculateAffected;
+        }
+        
+        public void setRecalculateAffected(boolean recalc)
+        {
+            m_isRecalculateAffected = recalc;
+        }
+        
     	/**
     	 * As the TableElement has been modified, remove from the cache any statistics
     	 * cached that involve the modified element
@@ -675,21 +782,4 @@ public class Derivation implements DerivableThreadPool
             return m_cachedTVSEs.get(new Tuple<TableElement>(e1, e2));
         }       
     }
-    
-    public void submitCalculation(UUID transactionID, Runnable pendingRunnable)
-    {
-        synchronized(Derivation.class) {
-            if (sf_PENDING_EXECUTOR == null)
-                sf_PENDING_EXECUTOR = new PendingDerivationExecutor();
-        }
-        
-        sf_PENDING_EXECUTOR.execute(transactionID, pendingRunnable);       
-    }
-    
-    public void shutdown()
-    {
-        if (sf_PENDING_EXECUTOR != null)
-            sf_PENDING_EXECUTOR.shutdown();
-    }
-
 }
