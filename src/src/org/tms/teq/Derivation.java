@@ -441,10 +441,11 @@ public class Derivation implements DerivableThreadPool
             else if (m_target instanceof Cell)
                 recalculateTargetCell(element, dc);
             
+            // we only want to process affected cells up to 1 time,
+            // as in so doing, we recalculate all children
             if (dc.isRecalculateAffected()) {
                 dc.setRecalculateAffected(false);
                 recalculateAffectedElements(dc);
-                dc.setRecalculateAffected(true);
             }
         }
         finally {      
