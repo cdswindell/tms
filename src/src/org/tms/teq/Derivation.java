@@ -685,5 +685,11 @@ public class Derivation implements PendingThreadPool
         
         sf_PENDING_EXECUTOR.execute(transactionID, pendingRunnable);       
     }
+    
+    public void shutdown()
+    {
+        if (sf_PENDING_EXECUTOR != null)
+            sf_PENDING_EXECUTOR.shutdown();
+    }
 
 }

@@ -6,5 +6,6 @@ public interface PendingThreadPool
 {
 
     void submitCalculation(UUID transactionId, Runnable r);
+    void shutdown();
 
 }
