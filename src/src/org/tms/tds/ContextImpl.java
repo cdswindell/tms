@@ -3,8 +3,11 @@ package org.tms.tds;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.tms.api.Access;
+import org.tms.api.DerivableThreadPool;
 import org.tms.api.ElementType;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
@@ -13,24 +16,29 @@ import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
+import org.tms.teq.PendingDerivationExecutor;
 import org.tms.teq.TokenMapper;
 import org.tms.util.WeakHashSet;
 
-public class ContextImpl extends BaseElementImpl implements TableContext
+public class ContextImpl extends BaseElementImpl implements TableContext, DerivableThreadPool
 {
     private static ContextImpl sf_DEFAULT_CONTEXT;
     
     static final int sf_ROW_CAPACITY_INCR_DEFAULT = 1024;
     static final int sf_COLUMN_CAPACITY_INCR_DEFAULT = 32;
     static final double sf_FREE_SPACE_THRESHOLD_DEFAULT = 2.0;
+
+    static final int sf_CORE_POOL_SIZE_DEFAULT = 10;
+    static final int sf_MAX_POOL_SIZE_DEFAULT = 100;
+    static final int sf_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT = 15;
+    static final boolean sf_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT = true;
     
     static final boolean sf_READ_ONLY_DEFAULT = false;
     static final boolean sf_SUPPORTS_NULL_DEFAULT = true;
     static final boolean sf_ENFORCE_DATA_TYPE_DEFAULT = false;
     static final boolean sf_AUTO_RECALCULATE_DEFAULT = true;
     
-    static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();
-    
+    static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();    
 
     public static TableContext createContext()
     {
@@ -89,6 +97,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext
     private int m_precision;
     private double m_freeSpaceThreshold;
 
+    private int m_corePoolThreads;
+    private int m_maxPoolThreads;
+    private int m_keepAliveTimeout;
+    private boolean m_allowCoreThreadTimeout;
+    private PendingDerivationExecutor m_pendingThreadPool;
+    
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
         super();      
@@ -173,6 +187,30 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                     setTokenMapper((TokenMapper)value);
                     break;
                     
+                case isAllowCoreThreadTimeout:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT;
+                    setAllowCoreThreadTimeout((boolean)value);
+                    break;                   
+                    
+                case numCorePoolThreads:
+                    if (!isValidPropertyValueInt(value))
+                        value = sf_CORE_POOL_SIZE_DEFAULT;
+                    setNumCorePoolThreads((int)value);
+                    break;
+                    
+                case numMaxPoolThreads:
+                    if (!isValidPropertyValueInt(value))
+                        value = sf_MAX_POOL_SIZE_DEFAULT;
+                    setNumMaxPoolThreads((int)value);
+                    break;
+                    
+                case ThreadKeepAliveTimeout:
+                    if (!isValidPropertyValueInt(value))
+                        value = sf_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
+                    setThreadKeepAliveTimeout((int)value);
+                    break;
+                    
                 default:
                     throw new IllegalStateException("No initialization available for Context Property: " + tp);                       
             }
@@ -180,6 +218,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext
         
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
+        m_pendingThreadPool = null;
     }
 
     protected double getFreeSpaceThreshold()
@@ -233,6 +272,18 @@ public class ContextImpl extends BaseElementImpl implements TableContext
                 
             case TokenMapper:
                 return getTokenMapper();
+                
+            case isAllowCoreThreadTimeout:
+                return isAllowCoreThreadTimeout();
+                
+            case numCorePoolThreads:
+                return getNumCorePoolThreads();
+                
+            case numMaxPoolThreads:
+                return getNumMaxPoolThreads();
+                
+            case ThreadKeepAliveTimeout:
+                return getThreadKeepAliveTimeout();
                 
             default:
                 return super.getProperty(key);
@@ -324,6 +375,110 @@ public class ContextImpl extends BaseElementImpl implements TableContext
             m_precision = precision;
     }
 
+    @Override
+    public int getNumCorePoolThreads()
+    {
+        return m_corePoolThreads;
+    }
+
+    @Override
+    public void setNumCorePoolThreads(int corePoolSize)
+    {
+        if (corePoolSize <= 0) {
+            if (this.isDefault()) 
+                m_corePoolThreads = sf_CORE_POOL_SIZE_DEFAULT;
+            else
+                m_corePoolThreads = ContextImpl.getDefaultContext().getNumCorePoolThreads();
+        }
+        else
+            m_corePoolThreads = corePoolSize;        
+        
+        if (m_pendingThreadPool != null && m_corePoolThreads <= m_maxPoolThreads)
+            m_pendingThreadPool.setCorePoolSize(m_corePoolThreads);
+    }
+
+    @Override
+    public int getNumMaxPoolThreads()
+    {
+        return m_maxPoolThreads;
+    }
+
+    @Override
+    public void setNumMaxPoolThreads(int maxPoolSize)
+    {
+        if (maxPoolSize <= 0) {
+            if (this.isDefault()) 
+                m_maxPoolThreads = sf_MAX_POOL_SIZE_DEFAULT;
+            else
+                m_maxPoolThreads = ContextImpl.getDefaultContext().getNumMaxPoolThreads();
+        }
+        else
+            m_maxPoolThreads = maxPoolSize;
+        
+        if (m_pendingThreadPool != null && m_maxPoolThreads >= m_corePoolThreads)
+            m_pendingThreadPool.setMaximumPoolSize(m_maxPoolThreads);
+    }
+
+    
+    @Override
+    public int getThreadKeepAliveTimeout()
+    {
+        return m_keepAliveTimeout;
+    }
+
+    @Override
+    public void setThreadKeepAliveTimeout(int keepAliveTimeout)
+    {
+        if (keepAliveTimeout <= 0) {
+            if (this.isDefault()) 
+                m_keepAliveTimeout = sf_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
+            else
+                m_keepAliveTimeout = ContextImpl.getDefaultContext().getThreadKeepAliveTimeout();
+        }
+        else
+            m_keepAliveTimeout = keepAliveTimeout;
+        
+        if (m_pendingThreadPool != null)
+            m_pendingThreadPool.setKeepAliveTime(m_keepAliveTimeout, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean isAllowCoreThreadTimeout()
+    {
+        return m_allowCoreThreadTimeout;
+    }
+
+    @Override
+    public void setAllowCoreThreadTimeout(boolean allowCoreThreadTimeout)
+    {
+        m_allowCoreThreadTimeout = allowCoreThreadTimeout;
+    }
+
+
+    @Override
+    public void submitCalculation(UUID transactionId, Runnable r)
+    {
+        synchronized(this) {
+            if (m_pendingThreadPool == null) {
+                int maxPoolSize = Math.max(getNumMaxPoolThreads(), getNumCorePoolThreads());
+                m_pendingThreadPool = new PendingDerivationExecutor(getNumCorePoolThreads(),
+                                                                    maxPoolSize,
+                                                                    getThreadKeepAliveTimeout(),
+                                                                    TimeUnit.SECONDS,
+                                                                    this.isAllowCoreThreadTimeout());  
+            }
+        }
+        
+        m_pendingThreadPool.execute(transactionId, r);       
+    }
+
+    @Override
+    public void shutdown()
+    {
+        if (m_pendingThreadPool != null)
+            m_pendingThreadPool.shutdown();
+    }
+    
     protected ContextImpl register(Table table)
     {
         // register the table with this context

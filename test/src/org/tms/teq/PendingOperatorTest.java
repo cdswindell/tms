@@ -9,6 +9,7 @@ import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.DerivableThreadPool;
 import org.tms.api.Operator;
 import org.tms.api.Row;
 import org.tms.api.Table;
@@ -39,10 +40,10 @@ public class PendingOperatorTest extends BaseTest
         
         while (((TableImpl)t).isPendings()) {
             Thread.sleep(1000);
-        }
+        }        
         
         assertThat(((TableImpl)t).isPendings(), is(false));
-        
+                
         for (Row r : t.rows()) {
             double v1 = (double)t.getCellValue(r,  c1);
             
@@ -54,6 +55,10 @@ public class PendingOperatorTest extends BaseTest
             //assertThat(c, notNullValue());
             //assertThat(c.getCellValue(), is(v1));
         }
+        
+        // try again, with more threads
+        if (tc instanceof DerivableThreadPool)
+            ((DerivableThreadPool)tc).setNumMaxPoolThreads(500);
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         

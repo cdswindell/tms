@@ -30,6 +30,12 @@ public enum TableProperty implements Comparable<TableProperty>
     FreeSpaceThreshold(false, true, ElementType.Context, ElementType.Table),
     isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
     
+    // DerivableThreadPool Properties
+    isAllowCoreThreadTimeout(false, true, ElementType.Context),
+    numCorePoolThreads(false, true, ElementType.Context),
+    numMaxPoolThreads(false, true, ElementType.Context),
+    ThreadKeepAliveTimeout(false, true, ElementType.Context),    
+
     // Table Properties (some shared with Subsets)
     numSubsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     numRows(true, false, ElementType.Table, ElementType.Subset),
@@ -156,6 +162,7 @@ public enum TableProperty implements Comparable<TableProperty>
             case NextCellOffset:
             case RowCapacityIncr:
             case ColumnCapacityIncr:
+            case ThreadKeepAliveTimeout:
                 return true;
                 
             default:

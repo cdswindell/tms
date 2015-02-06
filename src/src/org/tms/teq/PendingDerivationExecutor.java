@@ -30,6 +30,12 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     
     public PendingDerivationExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit)
     {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, true);
+    }
+    
+    public PendingDerivationExecutor(int corePoolSize, int maximumPoolSize, 
+                                     long keepAliveTime, TimeUnit unit, boolean timeOutCores)
+    {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, 
               new SynchronousQueue<Runnable>(), 
               new PendingThreadFactory(),
@@ -39,7 +45,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         m_runnableUuidMap = new ConcurrentHashMap<Runnable, UUID>();
         m_continueDraining = true;       
         
-        allowCoreThreadTimeOut(true);
+        allowCoreThreadTimeOut(timeOutCores);
         setRejectedExecutionHandler(new RejectedExecutionHandler() {
             public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
                // this will block if the queue is full

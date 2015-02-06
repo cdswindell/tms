@@ -34,7 +34,7 @@ import org.tms.api.factories.TableContextFactory;
 import org.tms.teq.PostfixStackEvaluator.PendingState;
 import org.tms.util.Tuple;
 
-public class Derivation implements DerivableThreadPool
+public class Derivation
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
