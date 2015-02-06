@@ -2,7 +2,6 @@ package org.tms.teq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,7 +23,8 @@ public class PostfixStackEvaluator
 	private EquationStack m_pfs;
 	private Table m_table;
 	private EquationStack m_opStack;
-	private Iterator<Token> m_pfsIter;
+	private Token[] m_pfsArray;
+	private int m_pfsIdx;
     private Derivation m_derivation;
 	
     public PostfixStackEvaluator(String expr, Table table)
@@ -36,12 +36,12 @@ public class PostfixStackEvaluator
     
     public PostfixStackEvaluator(Derivation deriv)
     {
-        m_derivation = deriv;
-        m_table = deriv.getTable();
-        m_pfs = deriv.getPostfixStackInternal();
-        
+        m_pfs = deriv.getPostfixStackInternal();        
         if (m_pfs == null || m_pfs.getStackType() != StackType.Postfix)
             throw new IllegalTableStateException("Postfix stack required");
+        
+        m_derivation = deriv;
+        m_table = deriv.getTable();
     }
 
     protected Derivation getDerivation()
@@ -64,8 +64,8 @@ public class PostfixStackEvaluator
     protected Token evaluate(Row row, Column col, DerivationContext dc) 
     throws PendingDerivationException
     {
-        m_opStack = new EquationStack(StackType.Op);
-        m_pfsIter = m_pfs.descendingIterator();
+        m_opStack = null;
+        m_pfsArray = null;
         
         return reevaluate(row, col, dc);
     }
@@ -84,8 +84,10 @@ public class PostfixStackEvaluator
 		if (m_opStack == null)
 			m_opStack = new EquationStack(StackType.Op);
 		
-		if (m_pfsIter == null)
-			m_pfsIter = m_pfs.descendingIterator();
+		if (m_pfsArray == null) {
+		    m_pfsArray = m_pfs.toArray(new Token [] {});
+		    m_pfsIdx = m_pfs.size() - 1;
+		}
 		
 		Table tbl = (col != null && row != null) ? col.getTable() : null;
 		
@@ -99,9 +101,9 @@ public class PostfixStackEvaluator
 		Derivation.assignTransactionID();
 		
 		// walk through postfix stack from tail to head
-		while(m_pfsIter.hasNext()) {
-			Token t = m_pfsIter.next();
-			
+		while(m_pfsIdx >= 0/*m_pfsIter.hasNext()*/) {
+            Token t = m_pfsArray[m_pfsIdx--];         
+            //Token t = m_pfsIter.next();         
 			TokenType tt = t.getTokenType();
 			Operator oper = t.getOperator();
 			Object value = t.getValue();
@@ -277,6 +279,8 @@ public class PostfixStackEvaluator
                 cell = tbl.getCell(rowRef, colRef);
             
             if (cell != null) {
+                if (cell.isPendings())
+                    return Token.createNullToken();
                 if (cell.isNull())
                     return Token.createNullToken();
                 if (cell.isErrorValue())
@@ -508,7 +512,8 @@ public class PostfixStackEvaluator
 
 	private Token doBuiltInOp(Operator oper, Row row, Column col)
     {
-	    assert oper.numArgs() == 0 : "Too many arguments";
+	    if (oper.numArgs() != 0)
+            return Token.createErrorToken(ErrorCode.StackOverflow);
 	    
 	    Token result = null;
         BuiltinOperator bio = oper.getBuiltinOperator();
@@ -537,9 +542,7 @@ public class PostfixStackEvaluator
             return result;
         
         // evaluate the result
-        result = oper.evaluate();
-        
-        return result;
+        return oper.evaluate();
     }
 
     private Token doBinaryOp(Operator oper, Token x, Token y) 
