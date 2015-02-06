@@ -29,7 +29,7 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        t.addRow(Access.ByIndex, 2000);
+        t.addRow(Access.ByIndex, 2500);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
         Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + pending(col 1, 50)/2");
