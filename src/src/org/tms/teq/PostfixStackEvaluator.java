@@ -52,7 +52,7 @@ public class PostfixStackEvaluator
     public Token evaluate() 
     throws PendingDerivationException
     {
-        return evaluate(null, null);
+        return evaluate(null, null, null);
     }
     
     public Token evaluate(Row row, Column col) 
@@ -64,8 +64,12 @@ public class PostfixStackEvaluator
     protected Token evaluate(Row row, Column col, DerivationContext dc) 
     throws PendingDerivationException
     {
-        m_opStack = null;
-        m_pfsArray = null;
+        // reset state variables to allow evaluation from stack tail
+        if (m_opStack != null)
+            m_opStack.clear();
+        
+        if (m_pfsArray != null)
+            m_pfsIdx = m_pfsArray.length - 1;
         
         return reevaluate(row, col, dc);
     }
