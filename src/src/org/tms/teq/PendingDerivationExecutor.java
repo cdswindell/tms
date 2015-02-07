@@ -75,8 +75,6 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
             try
             {
                 Runnable r = m_queuedRunnables.take();
-                //int qSize = m_queuedRunnables.size();
-                //if (qSize % 100 == 0) System.out.println("Consumer: " + qSize);
                 
                 // offer the runnable to the Executor, 
                 // blocking if necessary

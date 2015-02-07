@@ -144,6 +144,10 @@ public class PendingOperatorTest extends BaseTest
             {
                 System.out.println(Thread.currentThread().getName() + " interrupted...");
             }
+            catch (Exception e)
+            {
+                System.out.println(Thread.currentThread().getName() + " exception...");
+            }
             
             m_args[0].postResult(2.0 * (Double)m_args[0].getValue());
         }
