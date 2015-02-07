@@ -399,6 +399,10 @@ public class Derivation
         m_beingDestroyed = true;        
         m_cachedPendingStates.removeAll(m_pendingStatesProcessed);
         for (PendingState ps : m_cachedPendingStates) {
+            // don't reprocess invalidated pending states
+            if (!ps.isValid())
+                continue;
+            
             // we need exclusive access
             ps.lock();
             try {
@@ -409,8 +413,13 @@ public class Derivation
                     m_threadPool.remove(ps.getPendingRunnable());
                 
                 Cell cell = ps.getPendingCell();
-                if (cell != null)
-                    sf_CELL_PENDING_STATE_MAP.remove(cell);
+                if (cell != null) {
+                    PendingState curPs = sf_CELL_PENDING_STATE_MAP.remove(cell);
+                    if (curPs != null && curPs != ps) {
+                        System.out.println(ps);
+                        // TODO
+                    }
+                }
                 
                 ps.resetPendingState();
             }
