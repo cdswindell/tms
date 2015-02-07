@@ -56,6 +56,21 @@ public class ContextTest
     }
 
     @Test
+    public void getLongPropertiesTest()
+    {
+        ContextImpl r = new ContextImpl(null);
+        List<TableProperty> props = r.getProperties();
+        for (TableProperty p : props) { 
+            if (!p.isLongValue()) continue;
+            
+            // will fail if property getter not implemented
+            System.out.print("Context long property: " + p);
+            Object value = r.getPropertyLong(p);
+            System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
+        }
+    }
+
+    @Test
     public void getInitializablePropertiesTest()
     {
         ContextImpl r = new ContextImpl(null);

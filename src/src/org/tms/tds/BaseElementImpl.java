@@ -310,6 +310,19 @@ abstract public class BaseElementImpl implements BaseElement
             throw new InvalidPropertyException(this, key, "not int value");
     }
     
+    public long getPropertyLong(TableProperty key)
+    {
+        if (key.isLongValue()) {
+            Object value = getProperty(key);
+            if (value != null && value instanceof Long)
+                return (long)value;
+            else
+                throw new UnimplementedException(this, key, "long");
+        }
+        else
+            throw new InvalidPropertyException(this, key, "not long value");
+    }
+    
     public double getPropertyDouble(TableProperty key)
     {
         if (key.isDoubleValue()) {

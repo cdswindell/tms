@@ -1460,6 +1460,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
         if (row == null || col == null)
             return null;
         
+        vetElement(row);
+        vetElement(col);
+        
         if (this != row.getTable())
             throw new InvalidParentException(row, this);        
         if (this != col.getTable())

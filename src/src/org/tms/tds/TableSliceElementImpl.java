@@ -132,14 +132,16 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     public Derivable clearDerivation()
     {
         if (m_deriv != null) {
-            Derivable elem = m_deriv.getTarget();
-            for (TableElement d : m_deriv.getAffectedBy()) {
+            Derivation deriv = m_deriv;
+            m_deriv = null;
+            
+            Derivable elem = deriv.getTarget();
+            for (TableElement d : deriv.getAffectedBy()) {
                 TableElementImpl tse = (TableElementImpl)d;
                 tse.deregisterAffects(elem);
             }
             
-            m_deriv.destroy();
-            m_deriv = null;
+            deriv.destroy();
         }   
         
         return this;

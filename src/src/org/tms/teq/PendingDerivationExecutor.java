@@ -11,7 +11,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class PendingDerivationExecutor extends ThreadPoolExecutor implements Runnable
+import org.tms.api.DerivableThreadPool;
+
+public class PendingDerivationExecutor extends ThreadPoolExecutor implements Runnable, DerivableThreadPool
 {
     private Map<Runnable, UUID> m_runnableUuidMap;
     private BlockingQueue<Runnable> m_queuedRunnables;
@@ -44,7 +46,6 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         m_queuedRunnables = new LinkedBlockingQueue<Runnable>();
         m_runnableUuidMap = new ConcurrentHashMap<Runnable, UUID>();
         m_continueDraining = true;       
-        
         allowCoreThreadTimeOut(timeOutCores);
         setRejectedExecutionHandler(new RejectedExecutionHandler() {
             public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
@@ -93,10 +94,13 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     @Override
     protected void beforeExecute(Thread t, Runnable r)
     {
-        super.beforeExecute(t, r);  
-        
+        // if the UUID is not found, the backing derivation is
+        // in the process of being cleared
         UUID transactId = m_runnableUuidMap.remove(r);
-        Derivation.associateTransactionID(t.getId(), transactId);
+        if (transactId != null)
+            Derivation.associateTransactionID(t.getId(), transactId);
+        
+        super.beforeExecute(t, r);  
     }
 
     @Override
@@ -114,14 +118,6 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         m_queuedRunnables.clear();       
     }
     
-    public void execute(UUID transactId, Runnable r)
-    {
-        m_runnableUuidMap.put(r,  transactId);
-        m_queuedRunnables.add(r);
-        //int qSize = m_queuedRunnables.size();
-        //if (qSize % 100 == 0) System.out.println("Producer: " + qSize);
-    }
-    
     protected static class PendingThreadFactory implements ThreadFactory
     {
         static private int m_threadNo = 0;
@@ -134,5 +130,27 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
             t.setName("PendingCalculationThread-" + (m_threadNo++));
             return t;
         }        
+    }
+
+    @Override
+    public void submitCalculation(UUID transactionId, Runnable r)
+    {
+        m_runnableUuidMap.put(r,  transactionId);
+        m_queuedRunnables.add(r);
+    }
+
+    @Override
+    public boolean remove(Runnable r)
+    {
+        if (r == null)
+            return false;
+        
+        // backing derivation is being cleared, we don't 
+        // want running threads to report back a result
+        m_runnableUuidMap.remove(r);
+        
+        // runnable could be in the executors queue, the unbounded queue, or already running
+        return getQueue().remove(r) ||
+               m_queuedRunnables.remove(r);
     }
 }

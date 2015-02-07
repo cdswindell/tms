@@ -31,7 +31,6 @@ import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.factories.TableContextFactory;
-import org.tms.teq.PostfixStackEvaluator.PendingState;
 import org.tms.util.Tuple;
 
 public class Derivation
@@ -40,6 +39,7 @@ public class Derivation
     
     private static final ThreadLocal<UUID> sf_GUID_CACHE = new ThreadLocal<UUID>();
     private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
+    private static final Map<Cell, PendingState> sf_CELL_PENDING_STATE_MAP = new ConcurrentHashMap<Cell, PendingState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
     private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
     
@@ -289,31 +289,79 @@ public class Derivation
         UUID transactId = sf_PROCESS_ID_UUID_MAP.remove(Thread.currentThread().getId());
         if (transactId != null)
             postResult(transactId, value);
+        else
+            System.out.println("Orphan pending thread: " + Thread.currentThread().getId());
     }
 
     public static void postResult(UUID transactId, Object value)
     {
+        // could be null if derivation is being cleared while pending 
+        // calculations are being processed
+        if (transactId == null) 
+            return;
+        
         PendingState ps = sf_UUID_PENDING_STATE_MAP.remove(transactId);
-        if (ps != null) {
-            Token t = ps.getPendingToken();
-            t.setValue(value);
-            t.setTokenType(TokenType.Operand);
-            t.setOperator(BuiltinOperator.NOP);
+        if (ps != null) { 
+            Derivation psDeriv = null;
+            
+            // need exclusive access to this process state, otherwise,
+            // token could become null
+            ps.lock();
+            try {
+                // could be null if derivation is being cleared while pending 
+                // calculations are being processed
+                psDeriv = ps.getDerivation();
+                Token t = ps.getPendingToken();
+                if (!ps.isValid() || t == null || psDeriv == null) {
+                    ps.resetPendingState();
+                    return;
+                }
+                
+                t.setValue(value);
+                t.setTokenType(TokenType.Operand);
+                t.setOperator(BuiltinOperator.NOP);
+            }
+            finally {
+                ps.unlock();
+            }
             
             DerivationContext dc = new DerivationContext();
             try
             {
-                Token rt = ps.reevaluate(dc);
-                assert rt != null;
+                // blocks on access to ps
+                ps.reevaluate(dc);
             }
             catch (PendingDerivationException pc)
             {
-                ps.getDerivation().cacheDeferredCalculation(pc.getPendingState(), dc);
+                // if derivation is being cleared, it could go away,
+                // get exclusive access while we perform cache
+                ps.lock();
+                try {
+                    if (ps.isValid())
+                        psDeriv.cacheDeferredCalculation(pc.getPendingState(), dc);
+                    else {
+                        ps.resetPendingState();
+                        dc.clearPendings();
+                    }
+                }
+                finally {
+                    ps.unlock();
+                }
+                
                 dc.processPendings();
+            }
+            finally {
+                psDeriv.pendingStateProcessed(ps);
             }
         }
     }
 
+    protected static void removePendingCellFromCache(Cell cell)
+    {
+        if (cell != null)
+            sf_CELL_PENDING_STATE_MAP.remove(cell);
+    }
+    
     public static void associateTransactionID(long id, UUID transactId)
     {
         sf_PROCESS_ID_UUID_MAP.put(id, transactId);        
@@ -330,11 +378,79 @@ public class Derivation
     private boolean m_converted;
     private Derivable m_target;
     private MathContext m_precision;
+    private DerivableThreadPool m_threadPool;
+    private Set<PendingState> m_cachedPendingStates;
+    private Set<PendingState> m_pendingStatesProcessed;
+    
+    public boolean m_beingDestroyed;
     
     protected Derivation()
     {
+        m_beingDestroyed = false;
+        
         m_affectedBy = new LinkedHashSet<TableElement>();
         m_precision = new MathContext(sf_DEFAULT_PRECISION);
+        m_cachedPendingStates = Collections.synchronizedSet(new HashSet<PendingState>());
+        m_pendingStatesProcessed = Collections.synchronizedSet(new HashSet<PendingState>());
+    }
+    
+    synchronized public void destroy()
+    {
+        m_beingDestroyed = true;        
+        m_cachedPendingStates.removeAll(m_pendingStatesProcessed);
+        for (PendingState ps : m_cachedPendingStates) {
+            // we need exclusive access
+            ps.lock();
+            try {
+                if (ps.getTransactionID() != null)
+                    sf_UUID_PENDING_STATE_MAP.remove(ps.getTransactionID());
+                
+                if (m_threadPool != null)
+                    m_threadPool.remove(ps.getPendingRunnable());
+                
+                Cell cell = ps.getPendingCell();
+                if (cell != null)
+                    sf_CELL_PENDING_STATE_MAP.remove(cell);
+                
+                ps.resetPendingState();
+            }
+            finally {
+                ps.unlock();
+            }
+        }
+        
+        // release all pending states
+        m_cachedPendingStates.clear();
+        m_pendingStatesProcessed.clear();
+    }
+    
+    public void delete()
+    {
+        if (this.getTarget() != null)
+            getTarget().clearDerivation();
+        else {
+            destroy();
+        }
+    }
+    
+    synchronized protected void registerPendingState(PendingState ps)
+    {
+        if (ps != null) { 
+            if (ps.getDerivation() != this)
+                throw new IllegalTableStateException("PendingState must be associated with this Derivation");
+            
+            // there is a chance that a different thread may be clearing the derivation
+            // while another is still caching pending states; the check below throws away
+            // such caches if the derivation is being destroyed
+            if (m_beingDestroyed) 
+                return;
+            
+            m_cachedPendingStates.add(ps);
+            
+            Cell cell = ps.getPendingCell();
+            if (cell != null)
+                sf_CELL_PENDING_STATE_MAP.put(cell, ps);
+        }
     }
     
     public Table getTable()
@@ -610,10 +726,16 @@ public class Derivation
     void submitCalculation(PendingState pendingState)
     {
         TableContext tc = getTableContext();
-        if (tc instanceof DerivableThreadPool)
+        if (tc instanceof DerivableThreadPool) {
             ((DerivableThreadPool)tc).submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
-        else
+            if (m_threadPool != null)
+                m_threadPool = (DerivableThreadPool)tc;
+        }
+        else {
             submitCalculation(pendingState.getTransactionID(), pendingState.getPendingRunnable());
+            if (m_threadPool != null)
+                m_threadPool = sf_PENDING_EXECUTOR;
+        }
     }
 
     public List<TableElement> getAffectedBy()
@@ -638,11 +760,18 @@ public class Derivation
         return checkCircularReference(getTarget(), getAffectedBy());
     }
 
-    public void destroy()
+    synchronized private void pendingStateProcessed(PendingState ps)
     {
-        // TODO Auto-generated method stub        
+        try {
+            if (!m_beingDestroyed && ps != null && ps.isValid() && m_pendingStatesProcessed != null)
+                m_pendingStatesProcessed.add(ps);     
+        }
+        catch (NullPointerException npe) {
+            // NPE could happen in race condition if 
+            System.out.println(npe);
+        }
     }
-      
+
     protected double applyPrecision(double value)
     {
         if (m_precision != null) {
@@ -665,7 +794,7 @@ public class Derivation
                 sf_PENDING_EXECUTOR = new PendingDerivationExecutor();
         }
         
-        sf_PENDING_EXECUTOR.execute(transactionID, pendingRunnable);       
+        sf_PENDING_EXECUTOR.submitCalculation(transactionID, pendingRunnable);       
     }
     
     public void shutdown()
@@ -697,7 +826,12 @@ public class Derivation
             m_isRecalculateAffected = true;
     	}
     	
-    	public void cachePending(PendingState ps)
+    	public void clearPendings()
+        {
+    	    m_pendings.clear();
+        }
+
+        public void cachePending(PendingState ps)
     	{
     	    m_pendings.add(ps);
     	}

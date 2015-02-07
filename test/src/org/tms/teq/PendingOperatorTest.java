@@ -4,6 +4,8 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
@@ -20,7 +22,6 @@ import org.tms.tds.TableImpl;
 
 public class PendingOperatorTest extends BaseTest
 {
-
     @Test
     public final void testPendingColumnOperator() throws InterruptedException
     {
@@ -58,7 +59,7 @@ public class PendingOperatorTest extends BaseTest
         
         // try again, with more threads
         if (tc instanceof DerivableThreadPool)
-            ((DerivableThreadPool)tc).setNumMaxPoolThreads(500);
+            ((DerivableThreadPool)tc).setMaximumPoolSize(500);
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
@@ -70,6 +71,51 @@ public class PendingOperatorTest extends BaseTest
         }
         
         assertThat(((TableImpl)t).isPendings(), is(false));
+    }
+    
+    @Test
+    public final void testClearDerivationWhilePending() 
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((DerivableThreadPool)tc).setKeepAliveTime(1, TimeUnit.SECONDS);
+        Table t = TableFactory.createTable(tc);
+        
+        TokenMapper tm = tc.getTokenMapper();
+        tm.registerOperator(new PendingOperator());
+        
+        t.addRow(Access.ByIndex, 10000);
+        
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");
+        
+        assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        // clear derivation
+        c2.clearDerivation();
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
+                
+        for (Row r : t.rows()) {
+            double v1 = (double)t.getCellValue(r,  c1);
+            
+            Cell c = t.getCell(r, c2);
+            assertThat(c, notNullValue());
+            assertThat((c.isNull() || c.getCellValue().equals(7.0*5.0*2.0 + v1*2.0/2.0)), is(true));
+        }
+        
+        // repeat test, only use fill rather than clear
+        c2.setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");
+        assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        c2.fill(50);
+        assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        for (Row r : t.rows()) {
+            Cell c = t.getCell(r, c2);
+            assertThat(c, notNullValue());
+            assertThat(c.getCellValue(), is(50));
+        }
     }
     
     public class PendingOperator implements Operator, Runnable
@@ -96,7 +142,7 @@ public class PendingOperatorTest extends BaseTest
             }
             catch (InterruptedException e)
             {
-                // noop;
+                System.out.println(Thread.currentThread().getName() + " interrupted...");
             }
             
             m_args[0].postResult(2.0 * (Double)m_args[0].getValue());

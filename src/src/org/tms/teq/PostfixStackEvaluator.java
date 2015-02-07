@@ -3,7 +3,6 @@ package org.tms.teq;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -691,76 +690,5 @@ public class PostfixStackEvaluator
 		Token val = oper.evaluate(x);
 		
 		return val;
-	}
-    
-    protected static class PendingState
-    {
-        private UUID m_uuid;
-        private PostfixStackEvaluator m_pse;
-        private Row m_curRow;
-        private Column m_curCol;
-        private Token m_pendingToken;
-        private Object m_pendingIntermediate;
-        
-        public PendingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
-        {
-            m_uuid = Derivation.getTransactionID();
-            m_pse = pse;
-            m_curRow = row;
-            m_curCol = col;
-            m_pendingToken = tk;  
-            m_pendingIntermediate = tk.getValue();
-        }
-
-        public UUID getTransactionID()
-        {
-            return m_uuid;
-        }
-        
-        public Token getPendingToken()
-        {
-            return m_pendingToken;
-        }
-        
-        public Object getPendingIntermediate()
-        {
-            return m_pendingIntermediate;
-        }
-        
-        public Derivation getDerivation()
-        {
-            return m_pse.getDerivation();
-        }
-        
-        public Token reevaluate(DerivationContext dc) 
-        throws PendingDerivationException
-        {
-            Token t = m_pse.reevaluate(m_curRow, m_curCol, dc);
-            if (t.isNumeric() )
-                t.setValue(getDerivation().applyPrecision(t.getNumericValue()));
-            
-            m_curCol.getTable().setCellValue(m_curRow, m_curCol, t);
-
-            return t;
-        }
-
-        public boolean isRunnable()
-        {
-            return m_pendingIntermediate != null && m_pendingIntermediate instanceof Runnable;
-        }
-        
-        public Runnable getPendingRunnable()
-        {
-            if (isRunnable())
-                return (Runnable)m_pendingIntermediate;
-            else
-                return null;
-        }
-        
-        public void submitCalculation()
-        {
-            if (getDerivation() != null)
-                getDerivation().submitCalculation(this);
-        }
-    }
+	}   
 }

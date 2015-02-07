@@ -149,6 +149,19 @@ public enum TableProperty implements Comparable<TableProperty>
         }
     }
     
+
+    public boolean isLongValue()
+    {
+        switch(this)
+        {
+            case ThreadKeepAliveTimeout:
+                return true;
+                
+            default:
+                return false;
+        }
+    }
+    
     public boolean isIntValue()
     {
         if (this.name().startsWith("num"))
@@ -162,7 +175,6 @@ public enum TableProperty implements Comparable<TableProperty>
             case NextCellOffset:
             case RowCapacityIncr:
             case ColumnCapacityIncr:
-            case ThreadKeepAliveTimeout:
                 return true;
                 
             default:
