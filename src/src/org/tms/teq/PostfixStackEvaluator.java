@@ -31,6 +31,7 @@ public class PostfixStackEvaluator
         PostfixStackGenerator psg = new PostfixStackGenerator(expr, table);
         m_table = table;
         m_pfs = psg.getPostfixStack();
+        m_pfsIdx = -1;
     }
     
     public PostfixStackEvaluator(Derivation deriv)
@@ -41,6 +42,7 @@ public class PostfixStackEvaluator
         
         m_derivation = deriv;
         m_table = deriv.getTable();
+        m_pfsIdx = -1;
     }
 
     protected Derivation getDerivation()
@@ -49,19 +51,19 @@ public class PostfixStackEvaluator
     }
     
     public Token evaluate() 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         return evaluate(null, null, null);
     }
     
     public Token evaluate(Row row, Column col) 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         return evaluate(row, col, null);
     }
     
     protected Token evaluate(Row row, Column col, DerivationContext dc) 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // reset state variables to allow evaluation from stack tail
         if (m_opStack != null)
@@ -74,23 +76,24 @@ public class PostfixStackEvaluator
     }
     
 	public Token reevaluate(Row row, Column col) 
-	throws PendingDerivationException
+	throws PendingDerivationException, BlockedDerivationException
 	{
 		return reevaluate(row, col, null);
 	}
 	
 	protected Token reevaluate(Row row, Column col, DerivationContext dc) 
-	throws PendingDerivationException
+	throws PendingDerivationException, BlockedDerivationException
 	{
 		assert m_pfs != null : "Requires Postfix Stack";
 		
 		if (m_opStack == null)
 			m_opStack = new EquationStack(StackType.Op);
 		
-		if (m_pfsArray == null) {
+		if (m_pfsArray == null) 
 		    m_pfsArray = m_pfs.toArray(new Token [] {});
-		    m_pfsIdx = m_pfs.size() - 1;
-		}
+		
+		if (m_pfsIdx < 0 || m_pfsIdx >= m_pfsArray.length)
+	        m_pfsIdx = m_pfsArray.length - 1;
 		
 		Table tbl = (col != null && row != null) ? col.getTable() : null;
 		
@@ -110,7 +113,8 @@ public class PostfixStackEvaluator
 			TokenType tt = t.getTokenType();
 			Operator oper = t.getOperator();
 			Object value = t.getValue();
-			
+            Class<?> [] argTypes = oper != null ? oper.getArgTypes() : null;                        
+
 			switch (tt) {
                 case RowRef:
                 case ColumnRef:
@@ -131,11 +135,11 @@ public class PostfixStackEvaluator
 					
 				case BinaryOp:
 				case BinaryFunc:
-					y = asOperand(m_opStack.pollFirst(), tbl, row, col);
+					y = asOperand(tbl, row, col, null);
 					if (y == null || !y.isOperand()) // stack is in invalid state
                         return Token.createErrorToken(y == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);                    
 					
-					x = asOperand(m_opStack.pollFirst(), tbl, row, col);
+					x = asOperand(tbl, row, col, null, y);
 					if (x == null || !x.isOperand()) // stack is in invalid state
                         return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);                    
 
@@ -146,7 +150,6 @@ public class PostfixStackEvaluator
                     args = null;
                     numArgs = oper.numArgs();
                     if (numArgs > 0) {
-                        Class<?> [] argTypes = oper.getArgTypes();                        
                         args = new Token[numArgs];                       
                         for (int i = numArgs - 1; i >= 0; i--) {
                             x = asOperand(m_opStack.pollFirst(), tbl, row, col, argTypes[i]);
@@ -167,7 +170,6 @@ public class PostfixStackEvaluator
                     numArgs = oper.numArgs();
                     x = null;
                     if (numArgs > 0) {
-                        Class<?> [] argTypes = oper.getArgTypes();                        
                         args = new Token[numArgs];                       
                         for (int i = numArgs - 1; i >= 0; i--) {
                             x = asOperand(m_opStack.pollFirst(), tbl, row, col, argTypes[i]);
@@ -195,7 +197,6 @@ public class PostfixStackEvaluator
                     numArgs = oper.numArgs();
                     x = null;
                     if (numArgs > 0) {
-                        Class<?> [] argTypes = oper.getArgTypes();                        
                         args = new Token[numArgs];                       
                         for (int i = numArgs - 1; i >= 0; i--) {
                             x = asOperand(m_opStack.pollFirst(), tbl, row, col, argTypes[i]);
@@ -221,9 +222,11 @@ public class PostfixStackEvaluator
 			// check if the last token is pending, and if so, suspend calculation
 			Token pendingToken = m_opStack.peekFirst();
 			if (pendingToken != null && pendingToken.isPending()) {
+			    m_pfsArray = null; // conserve a bit of memory
 			    PendingState pendingState = new PendingState(this, row, col, pendingToken);
 			    pendingToken.setValue(pendingState);
-                if (tbl != null) tbl.setCellValue(row,  col, pendingToken);
+                if (tbl != null) 
+                    tbl.setCellValue(row,  col, pendingToken);
 			    throw new PendingDerivationException(pendingState);
 			}
 		}
@@ -237,6 +240,11 @@ public class PostfixStackEvaluator
         
         Token stackVal = m_opStack.pollFirst();
 		Token retVal = asOperand(stackVal, tbl, row, col);
+		
+		// free some memory 
+		m_pfsArray = null;
+		
+		// return value
 		return retVal;
 	}
 
@@ -245,6 +253,79 @@ public class PostfixStackEvaluator
 	    return m_table;
 	}
 	
+    private Token asOperand(Table tbl, Row row, Column col, Class<?> requiredArgType, Token... args) 
+    throws BlockedDerivationException
+    {
+        Token t = m_opStack.pollFirst();
+        if (t == null)
+            return t;        
+        else if (t.isOperand())
+            return t;        
+        else if (requiredArgType != null && requiredArgType != Object.class && t.isA(requiredArgType))
+            return t;        
+        else if (t.isReference()) {
+            boolean haveRef = false;
+            Row rowRef = null;
+            Column colRef = null;
+            Cell cell = null;
+            
+            TableElement value = t.getReferenceValue();
+            if (value != null && value instanceof Column) {
+                haveRef = true;
+                rowRef = row;
+                colRef = (Column) value;
+            }
+            else if (value != null && value instanceof Row) {
+                haveRef = true;
+                rowRef = (Row) value;
+                colRef = col;
+            }
+            else if (value != null && value instanceof Cell) 
+                cell = (Cell)value;
+            
+            if (haveRef) 
+                cell = tbl.getCell(rowRef, colRef);
+            
+            if (cell != null) {
+                if (cell.isPendings()) {
+                    PendingState ps = (PendingState)cell.getCellValue();
+                    ps.lock();
+                    try {
+                        if (!cell.isPendings())
+                            return asOperand(tbl, row, col, requiredArgType,  args);
+                        m_opStack.push(t);
+                        if (args != null)
+                            m_opStack.push(args[0]);
+                        m_pfsArray = null; // conserve a bit of memory
+                        m_pfsIdx++; // reset index to reevaluate this token
+                        PendingState pendingState = new PendingState(this, row, col, Token.createNullToken());
+                        ps.registerBlockedDerivation(pendingState);
+                        if (tbl != null) {
+                            Token pt = Token.createPendingToken();
+                            pt.setValue(pendingState);
+                            tbl.setCellValue(row,  col, Token.createPendingToken());
+                        }
+                        
+                        throw new BlockedDerivationException(pendingState);
+                    }
+                    finally {
+                        ps.unlock();
+                    }
+                }
+                if (cell.isNull())
+                    return Token.createNullToken();
+                if (cell.isErrorValue())
+                    return Token.createErrorToken(cell.getErrorCode());
+                else
+                    return new Token(TokenType.Operand, cell.getCellValue());
+            }
+            else
+                return t;
+        }
+        else
+            return t;
+    }
+
     private Token asOperand(Token t, Table tbl, Row row, Column col)
     {
         return asOperand(t, tbl, row, col, null);

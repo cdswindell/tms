@@ -1,5 +1,8 @@
 package org.tms.teq;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
@@ -18,6 +21,7 @@ class PendingState
     private Object m_pendingIntermediate;
     private Semaphore m_lock;
     private boolean m_valid;
+    private Set<PendingState> m_blockedCells;
     
     protected PendingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
     {
@@ -31,6 +35,8 @@ class PendingState
         
         if (pse.getDerivation() != null)
             getDerivation().registerPendingState(this);
+        
+        m_blockedCells = Collections.synchronizedSet(new LinkedHashSet<PendingState>());
         
         m_lock = new Semaphore(1, true);
     }
@@ -67,7 +73,7 @@ class PendingState
     }
     
     protected Token reevaluate(DerivationContext dc) 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // if the target cell is no longer pending, just return, don't override value
         Cell cell = m_curCol.getTable().getCell(m_curRow, m_curCol);
@@ -101,7 +107,11 @@ class PendingState
             
             // set the cell value with the computed result
             m_curCol.getTable().setCellValue(m_curRow, m_curCol, t);
+            
+            //unblock the cells that were blocked on this pending
+            unblockDerivations();
     
+            // return the new token
             return t;
         }
         finally {
@@ -160,7 +170,11 @@ class PendingState
         Cell cell = getPendingCell();
         if (cell != null)
             m_curCol.getTable().setCellValue(m_curRow, m_curCol, Token.createNullToken());
-            
+        
+        // clear all pending cells
+        m_blockedCells.forEach(p -> p.resetPendingState());
+        m_blockedCells.clear();
+        
         m_uuid = null;
         m_pse = null;
         m_pendingToken = null;  
@@ -175,5 +189,82 @@ class PendingState
     private void markInvalid()
     {
         m_valid = false;
+    }
+    
+    protected void registerBlockedDerivation(PendingState ps)
+    {
+        if (isValid() && ps != null)
+            m_blockedCells.add(ps);
+    }
+    
+
+    /**
+     * Called wile lock is held on specified pending state and
+     * before this pending state's threads are started
+     * @param ps
+     */
+    void registerBlockedDerivations(PendingState ps)
+    {
+        if (ps != null && ps.isValid()) {
+            m_blockedCells.addAll(ps.m_blockedCells);
+            ps.m_blockedCells.clear();
+        }
+    }
+    
+    /**
+     * Unblock derivations blocked on the completion of a pending calculation
+     */
+    private void unblockDerivations()
+    {
+        // called while access to this pending state is locked
+        if (!isValid())
+            return;
+        
+        DerivationContext dc = new DerivationContext(); 
+        for (PendingState ps : m_blockedCells) {
+            if (!ps.isValid())
+                continue;
+            
+            Derivation psDeriv = ps.getDerivation();
+            if (psDeriv == null || psDeriv.isBeingDestroyed())
+                continue;
+            
+            try
+            {
+                // reevaluate blocked cell, could run into  
+                // another pending or blocked derivation
+                ps.reevaluate(dc);
+            }
+            catch (PendingDerivationException pc)
+            {
+                // if derivation is being cleared, it could go away,
+                // get exclusive access while we perform cache
+                ps.lock();
+                try {
+                    if (ps.isValid())
+                        psDeriv.cacheDeferredCalculation(pc.getPendingState(), dc);
+                    else {
+                        ps.resetPendingState();
+                        dc.remove(ps);
+                    }
+                }
+                finally {
+                    ps.unlock();
+                }
+            }
+            catch (BlockedDerivationException e)
+            {
+                // noop;
+            }
+            finally {
+                psDeriv.pendingStateProcessed(ps);
+            }
+        }
+        
+        // start any threads requested while unblocking
+        dc.processPendings();
+        
+        // clear this list so nothing is reprocessed
+        m_blockedCells.clear();
     }
 }

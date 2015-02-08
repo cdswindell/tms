@@ -337,8 +337,11 @@ public class Derivation
                 // get exclusive access while we perform cache
                 ps.lock();
                 try {
-                    if (ps.isValid())
-                        psDeriv.cacheDeferredCalculation(pc.getPendingState(), dc);
+                    if (ps.isValid()) {
+                        PendingState newPs = pc.getPendingState();
+                        newPs.registerBlockedDerivations(ps);
+                        psDeriv.cacheDeferredCalculation(newPs, dc);
+                    }
                     else {
                         ps.resetPendingState();
                         dc.clearPendings();
@@ -349,6 +352,10 @@ public class Derivation
                 }
                 
                 dc.processPendings();
+            }
+            catch (BlockedDerivationException e)
+            {
+                // noop;
             }
             finally {
                 psDeriv.pendingStateProcessed(ps);
@@ -431,6 +438,11 @@ public class Derivation
         // release all pending states
         m_cachedPendingStates.clear();
         m_pendingStatesProcessed.clear();
+    }
+    
+    boolean isBeingDestroyed()
+    {
+        return m_beingDestroyed;
     }
     
     public void delete()
@@ -630,6 +642,10 @@ public class Derivation
         catch (PendingDerivationException pc) {
             cacheDeferredCalculation(pc.getPendingState(), dc);
         }
+        catch (BlockedDerivationException e)
+        {
+            // noop;
+        }
     }
 
     private void recalculateTargetRow(TableElement modifiedElement, DerivationContext dc) 
@@ -669,6 +685,10 @@ public class Derivation
             }
             catch (PendingDerivationException pc) {
                 cacheDeferredCalculation(pc.getPendingState(), dc);
+            }
+            catch (BlockedDerivationException e)
+            {
+                // noop;
             }
         }        
         
@@ -715,13 +735,17 @@ public class Derivation
             catch (PendingDerivationException pc) {
                 cacheDeferredCalculation(pc.getPendingState(), dc);
             }
+            catch (BlockedDerivationException e)
+            {
+                // noop;
+            }
         }  
         
         if (anyModified && dc != null)
         	dc.remove(col);
     }
 
-    private void cacheDeferredCalculation(PendingState pendingState, DerivationContext dc)
+    void cacheDeferredCalculation(PendingState pendingState, DerivationContext dc)
     {
         sf_UUID_PENDING_STATE_MAP.put(pendingState.getTransactionID(), pendingState);
         if (pendingState.isRunnable()) {
@@ -769,7 +793,7 @@ public class Derivation
         return checkCircularReference(getTarget(), getAffectedBy());
     }
 
-    synchronized private void pendingStateProcessed(PendingState ps)
+    synchronized void pendingStateProcessed(PendingState ps)
     {
         try {
             if (!m_beingDestroyed && ps != null && ps.isValid() && m_pendingStatesProcessed != null)
@@ -827,7 +851,7 @@ public class Derivation
     	private List<PendingState> m_pendings;
     	private boolean m_isRecalculateAffected;
     	
-    	public DerivationContext()
+    	DerivationContext()
     	{
             m_cachedSVSEs = new HashMap<TableElement, SingleVariableStatEngine>();
             m_cachedTVSEs = new HashMap<Tuple<TableElement>, TwoVariableStatEngine>();
@@ -835,28 +859,33 @@ public class Derivation
             m_isRecalculateAffected = true;
     	}
     	
-    	public void clearPendings()
+    	void clearPendings()
         {
     	    m_pendings.clear();
         }
 
-        public void cachePending(PendingState ps)
-    	{
-    	    m_pendings.add(ps);
-    	}
-    	
-    	public void processPendings()
+        void cachePending(PendingState ps)
+        {
+            m_pendings.add(ps);
+        }
+        
+        void remove(PendingState ps)
+        {
+            m_pendings.remove(ps);
+        }
+        
+    	void processPendings()
     	{
     	    m_pendings.forEach(p -> p.submitCalculation());
     	    m_pendings.clear();
     	}
     	
-        public boolean isRecalculateAffected()
+        boolean isRecalculateAffected()
         {
             return m_isRecalculateAffected;
         }
         
-        public void setRecalculateAffected(boolean recalc)
+        void setRecalculateAffected(boolean recalc)
         {
             m_isRecalculateAffected = recalc;
         }
@@ -867,7 +896,7 @@ public class Derivation
     	 * 
     	 * @param tse the modified TableElement 
     	 */
-    	public void remove(TableElement tse) 
+    	void remove(TableElement tse) 
     	{
     		if (!m_cachedAny)
     			return;

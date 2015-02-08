@@ -35,7 +35,7 @@ public class PendingOperatorTest extends BaseTest
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
         Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + pending(col 1, 50)/2");
-        //Column c3 = (Column)t.addColumn().setDerivation("col 2 / 2");
+        Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70");
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
@@ -52,9 +52,9 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c, notNullValue());
             assertThat(c.getCellValue(), is(7.0*5.0*2.0 + v1*2.0/2.0));
             
-            //c = t.getCell(r, c3);
-            //assertThat(c, notNullValue());
-            //assertThat(c.getCellValue(), is(v1));
+            c = t.getCell(r, c3);
+            assertThat(c, notNullValue());
+            assertThat(c.getCellValue(), is(v1));
         }
         
         // try again, with more threads

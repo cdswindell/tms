@@ -120,6 +120,7 @@ public class CellImpl extends TableElementImpl implements Cell
         else if (t.isNull())
             return setCellValue(null, true);
         else if (t.isPending()) {
+            m_cellValue = t.getValue();
             incrementPendings();
             return true;
         }

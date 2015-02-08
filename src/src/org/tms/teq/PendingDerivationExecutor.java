@@ -54,10 +54,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
                 {
                     executor.getQueue().put(r);
                 }
-                catch (InterruptedException e)
-                {
-                    // noop;
-                }
+                catch (InterruptedException e) { }// noop
             }
          });  
         

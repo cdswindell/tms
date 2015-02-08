@@ -42,7 +42,7 @@ public class TokenMapperTest
 
     @Test
     public final void testRegisterOperator()
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
         assertThat(tm, notNullValue());
@@ -88,7 +88,7 @@ public class TokenMapperTest
     
     @Test
     public final void testOverloadOperator()
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
         assertThat(tm, notNullValue());

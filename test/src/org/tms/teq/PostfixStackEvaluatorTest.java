@@ -17,7 +17,7 @@ public class PostfixStackEvaluatorTest
 
     @Test
     public final void testPostfixStackEvaluator() 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         PostfixStackEvaluator pse = new PostfixStackEvaluator("abs(-6)", null);
         assertThat(pse, notNullValue());
@@ -30,7 +30,7 @@ public class PostfixStackEvaluatorTest
 
     @Test
     public final void testEvaluate() 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         PostfixStackEvaluator pse = new PostfixStackEvaluator("abs(-6)", null);
         assertThat(pse, notNullValue());
@@ -53,7 +53,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public final void testFactorials() 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         PostfixStackEvaluator pse = new PostfixStackEvaluator("6!", null);
         assertThat(pse, notNullValue());
@@ -130,7 +130,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public final void testBuiltIns() 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // Factorial edge cases
         PostfixStackEvaluator pse = new PostfixStackEvaluator("Random", null);
@@ -144,7 +144,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public final void testRandom() 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // Factorial edge cases
         PostfixStackEvaluator pse = new PostfixStackEvaluator("RandInt(10)", null);
@@ -199,7 +199,7 @@ public class PostfixStackEvaluatorTest
     } 
     
     @Test
-    public final void testDivideByZero() throws PendingDerivationException
+    public final void testDivideByZero() throws PendingDerivationException, BlockedDerivationException
     {
         // Factorial edge cases
         PostfixStackEvaluator pse = new PostfixStackEvaluator("5/0", null);
@@ -214,7 +214,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public final void testTrig() 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // sin (radians arg)
         PostfixStackEvaluator pse = new PostfixStackEvaluator("sin(toRadians(30))", null);
@@ -307,7 +307,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public final void testConstants() 
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // hypot operator
         PostfixStackEvaluator pse = new PostfixStackEvaluator("pi", null);
@@ -345,7 +345,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public final void testHypot()
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // hypot operator
         PostfixStackEvaluator pse = new PostfixStackEvaluator("hypot((1 + 2), 4)", null);
@@ -361,7 +361,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public final void testBinaryFunc()
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // bigger operator
         PostfixStackEvaluator pse = new PostfixStackEvaluator("bigger((1 + 2), 4)", null);
@@ -421,7 +421,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public void testComplexExpression()
-   throws PendingDerivationException
+   throws PendingDerivationException, BlockedDerivationException
     {
         // smaller operator
         PostfixStackEvaluator pse = new PostfixStackEvaluator("smaller(bigger(1, smaller((1 + 1), 3)), 4)", null);
@@ -437,7 +437,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public void testTextExpression()
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // plus operator
         PostfixStackEvaluator pse = new PostfixStackEvaluator("'abc' + 'def'", null);
@@ -514,7 +514,7 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public void testTableBuiltinExpression()
-    throws PendingDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         Table tbl = TableFactory.createTable(12, 10);        
         assert (tbl != null);
