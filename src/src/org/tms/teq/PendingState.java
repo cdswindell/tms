@@ -201,8 +201,6 @@ class PendingState
     
     protected void registerBlockedDerivation(PendingState ps)
     {
-        if (isBlocked())
-            System.out.println("Blocks magically appeared...");
         if (isValid() && ps != null)
             m_blockedCells.add(ps);
     }
