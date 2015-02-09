@@ -31,11 +31,24 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        t.addRow(Access.ByIndex, 2500);
+        int numRows = 2500;
+        t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + pending(col 1, 50)/2");
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 100) + pending(col 1, 50)/2");
         Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70");
+        Column c4 = (Column)t.addColumn(); // cell derivations column
+        
+        t.addColumn().setDerivation("normalize(col 2)"); // c5
+        
+        Cell cR1C4 = t.getCell(t.getRow(Access.First), c4);
+        cR1C4.setDerivation("mean(Col 5)");
+        
+        Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR2C4.setDerivation("max(Col 2)");
+        
+        Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR3C4.setDerivation("count(Col 2)");
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
@@ -44,6 +57,10 @@ public class PendingOperatorTest extends BaseTest
         }        
         
         assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(closeTo(cR1C4.getCellValue(), 0.0, 0.00000000001), is(true));
+        assertThat(cR2C4.getCellValue(), is(120.0));
+        assertThat(cR3C4.getCellValue(), is(numRows * 1.0));
                 
         for (Row r : t.rows()) {
             double v1 = (double)t.getCellValue(r,  c1);
@@ -88,6 +105,19 @@ public class PendingOperatorTest extends BaseTest
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
         Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");
+        t.addColumn().setDerivation("col 2 - 70");
+        Column c4 = (Column)t.addColumn(); // cell derivations column
+        
+        t.addColumn().setDerivation("normalize(col 2)"); // c5
+        
+        Cell cR1C4 = t.getCell(t.getRow(Access.First), c4);
+        cR1C4.setDerivation("mean(Col 5)");
+        
+        Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR2C4.setDerivation("max(Col 2)");
+        
+        Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR3C4.setDerivation("count(Col 2)");
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
@@ -95,6 +125,10 @@ public class PendingOperatorTest extends BaseTest
         c2.clearDerivation();
         
         assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(cR1C4.isNull(), is(true));
+        assertThat(cR2C4.isNull(), is(true));
+        assertThat(cR3C4.isNull(), is(true));
                 
         for (Row r : t.rows()) {
             double v1 = (double)t.getCellValue(r,  c1);
@@ -116,6 +150,98 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c, notNullValue());
             assertThat(c.getCellValue(), is(50));
         }
+    }
+    
+    @Test
+    public final void testDeleteColumnWhilePending() 
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((DerivableThreadPool)tc).setKeepAliveTime(1, TimeUnit.SECONDS);
+        Table t = TableFactory.createTable(tc);
+        
+        TokenMapper tm = tc.getTokenMapper();
+        tm.registerOperator(new PendingOperator());
+        
+        t.addRow(Access.ByIndex, 10000);
+        
+        t.addColumn().setDerivation("randInt(50)");
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");
+        Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70");
+        Column c4 = (Column)t.addColumn(); // cell derivations column
+        
+        t.addColumn().setDerivation("normalize(col 2)"); // c5
+        
+        Cell cR1C4 = t.getCell(t.getRow(Access.First), c4);
+        cR1C4.setDerivation("mean(Col 5)");
+        
+        Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR2C4.setDerivation("max(Col 2)");
+        
+        Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR3C4.setDerivation("count(Col 2)");
+        
+        assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        // delete column
+        c2.delete();
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(cR1C4.isNull(), is(true));
+        assertThat(cR2C4.isNull(), is(true));
+        assertThat(cR3C4.isNull(), is(true));
+                
+        for (Row r : t.rows()) {
+            Cell c = t.getCell(r, c3);
+            assertThat(c, notNullValue());
+            assertThat(c.isNull(), is(true));
+        }
+    }
+    
+    @Test
+    public final void testDeleteTableWhilePending() 
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((DerivableThreadPool)tc).setKeepAliveTime(1, TimeUnit.SECONDS);
+        Table t = TableFactory.createTable(tc);
+        
+        TokenMapper tm = tc.getTokenMapper();
+        tm.registerOperator(new PendingOperator());
+        
+        t.addRow(Access.ByIndex, 10000);
+        
+        t.addColumn().setDerivation("randInt(50)");
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");
+        Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70");
+        Column c4 = (Column)t.addColumn(); // cell derivations column
+        
+        t.addColumn().setDerivation("normalize(col 2)"); // c5
+        
+        Cell cR1C4 = t.getCell(t.getRow(Access.First), c4);
+        cR1C4.setDerivation("mean(Col 5)");
+        
+        Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR2C4.setDerivation("max(Col 2)");
+        
+        Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR3C4.setDerivation("count(Col 2)");
+        
+        assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        // delete column
+        t.delete();
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(t.isInvalid(), is(true));
+        assertThat(c2.isInvalid(), is(true));
+        assertThat(c3.isInvalid(), is(true));
+        assertThat(c4.isInvalid(), is(true));
+        assertThat(cR1C4.isInvalid(), is(true));
+        assertThat(cR2C4.isInvalid(), is(true));
+        assertThat(cR3C4.isInvalid(), is(true));
     }
     
     public class PendingOperator implements Operator, Runnable

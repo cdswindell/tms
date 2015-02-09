@@ -163,6 +163,14 @@ class PendingState
             m_lock.release();
     }
 
+    protected boolean isLocked()
+    {
+        if (m_lock != null && m_lock.availablePermits() == 0)
+            return true;
+        else
+            return false;
+    }
+    
     public void resetPendingState()
     {
         markInvalid();
@@ -193,13 +201,15 @@ class PendingState
     
     protected void registerBlockedDerivation(PendingState ps)
     {
+        if (isBlocked())
+            System.out.println("Blocks magically appeared...");
         if (isValid() && ps != null)
             m_blockedCells.add(ps);
     }
     
 
     /**
-     * Called wile lock is held on specified pending state and
+     * Called while lock is held on specified pending state and
      * before this pending state's threads are started
      * @param ps
      */
@@ -228,12 +238,15 @@ class PendingState
             Derivation psDeriv = ps.getDerivation();
             if (psDeriv == null || psDeriv.isBeingDestroyed())
                 continue;
-            
             try
             {
                 // reevaluate blocked cell, could run into  
                 // another pending or blocked derivation
                 ps.reevaluate(dc);
+                
+                // unblock derivations blocked on this one
+                if (ps.isBlockedDerivations())
+                    ps.unblockDerivations();
             }
             catch (PendingDerivationException pc)
             {
@@ -241,7 +254,7 @@ class PendingState
                 // get exclusive access while we perform cache
                 ps.lock();
                 try {
-                    if (ps.isValid())
+                    if (ps.isValid()) 
                         psDeriv.cacheDeferredCalculation(pc.getPendingState(), dc);
                     else {
                         ps.resetPendingState();
@@ -252,11 +265,10 @@ class PendingState
                     ps.unlock();
                 }
             }
-            catch (BlockedDerivationException e)
-            {
-                // noop;
-            }
+            catch (BlockedDerivationException e) { } // noop;
             finally {
+                if (ps.isBlockedDerivations()) 
+                    ps.unblockDerivations();
                 psDeriv.pendingStateProcessed(ps);
             }
         }
@@ -266,5 +278,57 @@ class PendingState
         
         // clear this list so nothing is reprocessed
         m_blockedCells.clear();
+    }
+    
+    private boolean isBlockedDerivations()
+    {
+        return m_blockedCells != null ? !m_blockedCells.isEmpty() : false;
+    }   
+    
+    protected boolean isBlocked()
+    {
+        return false;
+    }
+    
+    public PendingState getRootPendingState()
+    {
+        return this;
+    }
+    
+    protected static class BlockedState extends PendingState
+    {
+        protected BlockedState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
+        {
+            super(pse, row, col, tk);
+        }
+        
+        @Override
+        protected boolean isBlocked()
+        {
+            return true;
+        }
+        
+        @Override
+        public PendingState getRootPendingState()
+        {
+            Token  t = getPendingToken();
+            if (t != null && t.isPending()) {
+                PendingState ps = t.getPendingState();
+                if (ps != null) {
+                    ps.lock();
+                    try {
+                        if (ps.isBlocked())
+                            return ps.getRootPendingState();
+                        else
+                            return ps;
+                    }
+                    finally {
+                        ps.unlock();
+                    }
+                }                
+            }            
+            
+            return null;
+        }        
     }
 }

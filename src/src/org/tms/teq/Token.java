@@ -30,9 +30,9 @@ public class Token implements Labeled
         return new Token(TokenType.Pending, runnable);
     }
     
-    public static Token createPendingToken()
+    public static Token createPendingToken(PendingState ps)
     {
-        return new Token(TokenType.Pending, null);
+        return new Token(TokenType.Pending, ps);
     }
     
     private String m_label;
@@ -52,7 +52,11 @@ public class Token implements Labeled
 
     public Token(TokenType tt, Object value)
     {
-        if (value.equals(Double.NaN)) {
+        if (value == null) {
+            setTokenType(TokenType.NullValue);
+            setValue(null);
+        }   
+        else if (value.equals(Double.NaN)) {
             setTokenType(TokenType.EvaluationError);
             setValue(ErrorCode.NaN);
         }
@@ -152,6 +156,14 @@ public class Token implements Labeled
     {
         if (m_value != null && m_value instanceof TableElement)
             return (TableElement)m_value;
+        else
+            return null;
+    }
+    
+    public PendingState getPendingState()
+    {
+        if (m_value != null && m_value instanceof PendingState)
+            return (PendingState)m_value;
         else
             return null;
     }

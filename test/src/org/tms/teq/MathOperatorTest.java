@@ -197,9 +197,6 @@ public class MathOperatorTest extends BaseTest
         List<Derivable> c1Affects = c1.getAffects();
         assertThat(c1Affects, notNullValue());
         
-        tbl.setCellValue(r1, c7, Token.createPendingToken());
-        assertThat(cR1C7.isPendings(), is(true));
-        
         c1.fill(100);
         assertThat(cR1C7.isPendings(), is(false));             
         assertThat(cR1C7, notNullValue());

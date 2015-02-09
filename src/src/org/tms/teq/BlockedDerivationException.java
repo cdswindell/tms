@@ -6,6 +6,11 @@ public class BlockedDerivationException extends Exception
     
     private PendingState m_pendingState;
     
+    public BlockedDerivationException()
+    {
+        m_pendingState = null;
+    }
+    
     public BlockedDerivationException(PendingState ps)
     {
         m_pendingState = ps;
