@@ -29,7 +29,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     static final double sf_FREE_SPACE_THRESHOLD_DEFAULT = 2.0;
 
     static final int sf_CORE_POOL_SIZE_DEFAULT = 10;
-    static final int sf_MAX_POOL_SIZE_DEFAULT = 100;
+    static final int sf_MAX_POOL_SIZE_DEFAULT = 190;
     static final int sf_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT = 15;
     static final boolean sf_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT = true;
     

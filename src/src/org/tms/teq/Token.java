@@ -52,15 +52,15 @@ public class Token implements Labeled
 
     public Token(TokenType tt, Object value)
     {
-        if (value == null) {
+        if (value == null && tt != TokenType.Pending) {
             setTokenType(TokenType.NullValue);
             setValue(null);
         }   
-        else if (value.equals(Double.NaN)) {
+        else if (value != null && value.equals(Double.NaN)) {
             setTokenType(TokenType.EvaluationError);
             setValue(ErrorCode.NaN);
         }
-        else if (value.equals(Double.MIN_VALUE)) {
+        else if (value != null && value.equals(Double.MIN_VALUE)) {
             setTokenType(TokenType.NullValue);
             setOperator(BuiltinOperator.NULL_operator);
             setValue(null);

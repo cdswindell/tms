@@ -2,7 +2,9 @@ package org.tms.teq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -87,14 +89,21 @@ public class PostfixStackEvaluator
 	{
 		assert m_pfs != null : "Requires Postfix Stack";
 		
-		if (m_opStack == null)
+        if (m_pfsArray == null) 
+            m_pfsArray = m_pfs.toArray(new Token [] {});
+        
+        if (m_pfsIdx >= m_pfsArray.length)
+            m_pfsIdx = m_pfsArray.length - 1;
+        
+		if (m_opStack == null) 
 			m_opStack = new EquationStack(StackType.Op);
 		
-		if (m_pfsArray == null) 
-		    m_pfsArray = m_pfs.toArray(new Token [] {});
-		
-		if (m_pfsIdx < 0 || m_pfsIdx >= m_pfsArray.length)
-	        m_pfsIdx = m_pfsArray.length - 1;
+		// another edge case, where the pending operation was the
+		// first operation
+	    if (m_pfsIdx < 0) {
+	        if (m_opStack.isEmpty())
+	            m_pfsIdx = m_pfsArray.length - 1;
+	    }
 		
 		Table tbl = (col != null && row != null) ? col.getTable() : null;
 		
@@ -109,7 +118,7 @@ public class PostfixStackEvaluator
 		Derivation.assignTransactionID();
 		
 		// walk through postfix stack from tail to head
-		while(m_pfsIdx >= 0/*m_pfsIter.hasNext()*/) {
+		while(m_pfsIdx >= 0) {
             Token t = m_pfsArray[m_pfsIdx--];         
             //Token t = m_pfsIter.next();         
 			TokenType tt = t.getTokenType();
@@ -197,10 +206,16 @@ public class PostfixStackEvaluator
                     try {
                         m_opStack.push(doTransformOp(oper, tbl, row, col, dc, args));                 
                     }
+                    catch (BlockingSetDerivationException e) {
+                        signalBlockedDerivation(rewind, tbl, row, col, oper, e); 
+                        
+                        // if signalBlockedDerivation doesn't rethrow calculation, retry
+                        continue;
+                    }
                     catch (BlockedDerivationException e) {
                         // pendingCellState should be locked at this point
                         PendingState pendingCellState = e.getPendingState();
-                        assert pendingCellState.isLocked() : "Pending State must be locked";
+                        pendingCellState.lock();
                         try {
                             signalBlockedDerivation(rewind, tbl, row, col, pendingCellState);
                         }
@@ -233,6 +248,12 @@ public class PostfixStackEvaluator
                     
                     try {
                         m_opStack.push(doStatOp(oper, dc, args));
+                    }
+                    catch (BlockingSetDerivationException e) {
+                        signalBlockedDerivation(rewind, tbl, row, col, oper, e);                        
+                        
+                        // if signalBlockedDerivation doesn't rethrow calculation, retry
+                        continue;
                     }
                     catch (BlockedDerivationException e) {
                         // pendingCellState should be locked at this point
@@ -392,7 +413,7 @@ public class PostfixStackEvaluator
     private void signalBlockedDerivation(EquationStack rewind, Table tbl, Row row, Column col, PendingState ps) 
     throws BlockedDerivationException
     {
-        assert ps != null && ps.isLocked() : "PendingState must be locked";
+        assert ps != null && ps.isLocked();
         
         // reset opstack queue
         while (!rewind.isEmpty())
@@ -400,19 +421,57 @@ public class PostfixStackEvaluator
             
         m_pfsArray = null; // conserve a bit of memory
         m_pfsIdx++; // reset index to reevaluate this token
+        
         Token sourcePending = Token.createPendingToken(ps);
         PendingState pendingState = new BlockedState(this, row, col, sourcePending);
+        
         ps.registerBlockedDerivation(pendingState);
         if (tbl != null) {
             Token pt = Token.createPendingToken(pendingState);
             tbl.setCellValue(row,  col, pt);
         }
-        
+
         throw new BlockedDerivationException(pendingState);
     }
 
-    private SingleVariableStatEngine fetchSVSE(TableElement ref, BuiltinOperator bio, DerivationContext dc) 
+    private void signalBlockedDerivation(EquationStack rewind, Table tbl, Row row, Column col, 
+                                         Operator oper, BlockingSetDerivationException e) 
     throws BlockedDerivationException
+    {
+        PendingStatistic pendingStat = e.getPendingStatistic();
+        if (pendingStat == null) 
+            pendingStat = new PendingStatistic(getDerivation(), oper, e.getReferenceElement(), e.getBlockingSet());        
+
+        pendingStat.lock();
+        try {
+            // reset opstack queue
+            while (!rewind.isEmpty())
+                m_opStack.push(rewind.pollFirst());
+                
+            m_pfsIdx++; // reset index to reevaluate this token
+            
+            Token t = Token.createPendingToken((PendingState)null);
+            BlockedState bs = new BlockedState(this, row, col, t);
+            t.setValue(bs);
+            if (tbl != null) 
+                tbl.setCellValue(row,  col, t);
+                
+            pendingStat.registerBlockedDerivation(bs);
+            
+            if (pendingStat.isValid()) {
+                m_pfsArray = null; // conserve a bit of memory
+                throw new BlockingSetDerivationException(pendingStat);
+            }
+            
+            // otherwise, just return and resubmit calculation
+        }
+        finally {
+            pendingStat.unlock();
+        }
+    }
+
+    private SingleVariableStatEngine fetchSVSE(TableElement ref, BuiltinOperator bio, DerivationContext dc) 
+    throws BlockingSetDerivationException
     {
         SingleVariableStatEngine svse = null;
         if (dc != null) {
@@ -424,43 +483,48 @@ public class PostfixStackEvaluator
         
         if (svse == null) {
             List<TableElement> affectedBy = null;
-            svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());                   
+            svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());   
+            
+            boolean arePendings = false;
+            Set<PendingState> blockingSet = new LinkedHashSet<PendingState>();
+            Derivation d = getDerivation();
+            if (d == null)
+                throw new IllegalTableStateException("Derivation is required");
+            
             for (Cell c : ref.cells()) {
                 if (c == null)
                     continue;
                 
-                // check for pendings
-                if (c.isPendings()) {
-                    /*
-                     * note that if the cell is still pending after the lock is acquired,
-                     * the exception is thrown with the lock still held; this is because
-                     * we must maintain the lock until the blocked cell can be recorded
-                     * on the pending cell, which has to happen in the caller
-                     */
-                    PendingState ps = getPendingState(c);
-                    if (ps != null) {
-                        ps.lock();
-                        
-                        if (c.isPendings())
-                            throw new BlockedDerivationException(ps);
-                        
-                        // if the cell became unblocked, just continue processing
-                        ps.unlock();
+                // pass over cells dependent on this calculation
+                if (c.isDerived()) {
+                    affectedBy = c.getAffectedBy();
+                    if (affectedBy !=null && affectedBy.contains(ref)) {
+                        svse.exclude(c);
+                        continue;
                     }
                 }
                 
-                if (c.isNumericValue()) {
-                    if (c.isDerived()) {
-                        affectedBy = c.getAffectedBy();
-                        if (affectedBy !=null && affectedBy.contains(ref)) {
-                            svse.exclude(c);
-                            continue;
-                        }
-                    }
+                // check for pendings
+                if (c.isPendings()) {
+                    // if we've already recorded this statistic, don't reprocess
+                    PendingStatistic pendingStat = d.getPendingStatistic(ref);
+                    if (pendingStat != null)
+                        throw new BlockingSetDerivationException(pendingStat);
                     
+                    PendingState ps = getPendingState(c);
+                    if (ps != null) {
+                        arePendings = true;
+                        blockingSet.add(ps);
+                        continue;
+                    }
+                }
+                else if (c.isNumericValue()) {                 
                     svse.enter((Number)c.getCellValue());
                 }
             }
+            
+            if (arePendings)
+                throw new BlockingSetDerivationException(blockingSet, ref);
             
             if (dc != null)
                 dc.cacheSVSE(ref, svse);

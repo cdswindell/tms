@@ -8,9 +8,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -313,7 +315,7 @@ public class Derivation
                 psDeriv = ps.getDerivation();
                 Token t = ps.getPendingToken();
                 if (!ps.isValid() || t == null || psDeriv == null) {
-                    ps.resetPendingState();
+                    ps.delete();
                     return;
                 }
                 
@@ -343,7 +345,7 @@ public class Derivation
                         psDeriv.cacheDeferredCalculation(newPs, dc);
                     }
                     else {
-                        ps.resetPendingState();
+                        ps.delete();
                         dc.clearPendings();
                     }
                 }
@@ -387,7 +389,7 @@ public class Derivation
     private MathContext m_precision;
     private DerivableThreadPool m_threadPool;
     private Set<PendingState> m_cachedPendingStates;
-    private Set<PendingState> m_pendingStatesProcessed;
+    private Map<TableElement, PendingStatistic> m_cachedPendingStats;
     
     public boolean m_beingDestroyed;
     
@@ -397,14 +399,13 @@ public class Derivation
         
         m_affectedBy = new LinkedHashSet<TableElement>();
         m_precision = new MathContext(sf_DEFAULT_PRECISION);
-        m_cachedPendingStates = Collections.synchronizedSet(new HashSet<PendingState>());
-        m_pendingStatesProcessed = Collections.synchronizedSet(new HashSet<PendingState>());
+        m_cachedPendingStates = Collections.synchronizedSet(new LinkedHashSet<PendingState>());
+        m_cachedPendingStats = Collections.synchronizedMap(new LinkedHashMap<TableElement, PendingStatistic>());
     }
     
     synchronized public void destroy()
     {
         m_beingDestroyed = true;        
-        m_cachedPendingStates.removeAll(m_pendingStatesProcessed);
         for (PendingState ps : m_cachedPendingStates) {
             // don't reprocess invalidated pending states
             if (!ps.isValid())
@@ -420,15 +421,10 @@ public class Derivation
                     m_threadPool.remove(ps.getPendingRunnable());
                 
                 Cell cell = ps.getPendingCell();
-                if (cell != null) {
-                    PendingState curPs = sf_CELL_PENDING_STATE_MAP.remove(cell);
-                    if (curPs != null && curPs != ps) {
-                        System.out.println(ps);
-                        // TODO
-                    }
-                }
+                if (cell != null) 
+                    sf_CELL_PENDING_STATE_MAP.remove(cell);
                 
-                ps.resetPendingState();
+                ps.delete();
             }
             finally {
                 ps.unlock();
@@ -437,7 +433,26 @@ public class Derivation
         
         // release all pending states
         m_cachedPendingStates.clear();
-        m_pendingStatesProcessed.clear();
+        
+        // clear out all pending stats
+        for (Entry<TableElement, PendingStatistic> e : m_cachedPendingStats.entrySet()) {
+            PendingStatistic ps = e.getValue();
+            
+            // don't reprocess invalidated pending states
+            if (ps == null || !ps.isValid())
+                continue;
+            
+            // we need exclusive access
+            ps.lock();
+            try {
+                ps.delete();
+            }
+            finally {
+                ps.unlock();
+            }
+        }
+        
+        m_cachedPendingStats.clear();
     }
     
     boolean isBeingDestroyed()
@@ -452,6 +467,14 @@ public class Derivation
         else {
             destroy();
         }
+    }   
+
+    synchronized PendingStatistic getPendingStatistic(TableElement ref)
+    {
+        if (!isBeingDestroyed() && ref != null && ref.isValid())
+            return m_cachedPendingStats.get(ref);
+        else
+            return null;
     }
     
     synchronized protected void registerPendingState(PendingState ps)
@@ -471,6 +494,38 @@ public class Derivation
             Cell cell = ps.getPendingCell();
             if (cell != null)
                 sf_CELL_PENDING_STATE_MAP.put(cell, ps);
+        }
+    }
+    
+    synchronized protected void registerPendingStatistic(PendingStatistic pendingStat)
+    {
+        if (pendingStat != null) { 
+            if (pendingStat.getDerivation() != this)
+                throw new IllegalTableStateException("PendingStatistic must be associated with this Derivation");
+            
+            // there is a chance that a different thread may be clearing the derivation
+            // while another is still caching pending stat; the check below throws away
+            // such caches if the derivation is being destroyed
+            if (m_beingDestroyed) 
+                return;
+            
+            m_cachedPendingStats.put(pendingStat.getReferencedElement(), pendingStat);  
+        }
+    }
+    
+    synchronized protected void deregisterPendingStatistic(PendingStatistic pendingStat)
+    {
+        if (pendingStat != null) { 
+            if (pendingStat.getDerivation() != this)
+                throw new IllegalTableStateException("PendingStatistic must be associated with this Derivation");
+            
+            // there is a chance that a different thread may be clearing the derivation
+            // while another is still caching pending stat; the check below throws away
+            // such caches if the derivation is being destroyed
+            if (m_beingDestroyed) 
+                return;
+            
+            m_cachedPendingStats.remove(pendingStat.getReferencedElement());  
         }
     }
     
@@ -796,8 +851,10 @@ public class Derivation
     synchronized void pendingStateProcessed(PendingState ps)
     {
         try {
-            if (!m_beingDestroyed && ps != null && ps.isValid() && m_pendingStatesProcessed != null)
-                m_pendingStatesProcessed.add(ps);     
+            if (!m_beingDestroyed && ps != null && ps.isValid() && m_cachedPendingStates != null) {
+                m_cachedPendingStates.remove(ps);
+                //ps.delete();
+            }
         }
         catch (NullPointerException npe) {
             // NPE could happen in race condition if 
@@ -848,14 +905,14 @@ public class Derivation
         private Map<TableElement, SingleVariableStatEngine> m_cachedSVSEs;
         private Map<Tuple<TableElement>, TwoVariableStatEngine> m_cachedTVSEs;
     	private boolean m_cachedAny = false;
-    	private List<PendingState> m_pendings;
+    	private Set<PendingState> m_pendings;
     	private boolean m_isRecalculateAffected;
     	
     	DerivationContext()
     	{
             m_cachedSVSEs = new HashMap<TableElement, SingleVariableStatEngine>();
             m_cachedTVSEs = new HashMap<Tuple<TableElement>, TwoVariableStatEngine>();
-            m_pendings = new ArrayList<PendingState>();
+            m_pendings = new LinkedHashSet<PendingState>();
             m_isRecalculateAffected = true;
     	}
     	

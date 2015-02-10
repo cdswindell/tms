@@ -15,13 +15,14 @@ class PendingState
 {
     private UUID m_uuid;
     private PostfixStackEvaluator m_pse;
-    private Row m_curRow;
-    private Column m_curCol;
     private Token m_pendingToken;
     private Object m_pendingIntermediate;
     private Semaphore m_lock;
-    private boolean m_valid;
     private Set<PendingState> m_blockedCells;
+    
+    protected Row m_curRow;
+    protected Column m_curCol;
+    protected boolean m_valid;
     
     protected PendingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
     {
@@ -39,6 +40,10 @@ class PendingState
         m_blockedCells = Collections.synchronizedSet(new LinkedHashSet<PendingState>());
         
         m_lock = new Semaphore(1, true);
+    }
+
+    protected PendingState()
+    {
     }
 
     protected UUID getTransactionID()
@@ -64,7 +69,7 @@ class PendingState
             return null;
     }
     
-    public Cell getPendingCell()
+    protected Cell getPendingCell()
     {
         if (m_curCol != null && m_curCol.getTable() != null)
             return m_curCol.getTable().getCell(m_curRow, m_curCol);
@@ -87,7 +92,7 @@ class PendingState
         // we want exclusive access
         lock();
         try {
-            // in the event this state has been invalidated (by clering the derivation
+            // in the event this state has been invalidated (by clearing the derivation
             // just return a null token and don't set cell
             if (!isValid())
                 return Token.createNullToken();
@@ -171,17 +176,19 @@ class PendingState
             return false;
     }
     
-    public void resetPendingState()
+    protected void delete()
     {
         markInvalid();
         
         Cell cell = getPendingCell();
-        if (cell != null)
+        if (cell != null && cell.isPendings())
             m_curCol.getTable().setCellValue(m_curRow, m_curCol, Token.createNullToken());
         
         // clear all pending cells
-        m_blockedCells.forEach(p -> p.resetPendingState());
-        m_blockedCells.clear();
+        if (m_blockedCells != null) {
+            m_blockedCells.forEach(p -> p.delete());
+            m_blockedCells.clear();
+        }
         
         m_uuid = null;
         m_pse = null;
@@ -189,6 +196,17 @@ class PendingState
         m_pendingIntermediate = null;     
     }
 
+    protected boolean isStillPending()
+    {
+        if (!isValid())
+            return false;
+        
+        Cell c = getPendingCell();
+        if (c != null)
+            return c.isPendings();
+        else
+            return false;
+    }
     public boolean isValid()
     {
         return m_valid;
@@ -199,13 +217,14 @@ class PendingState
         m_valid = false;
     }
     
-    protected void registerBlockedDerivation(PendingState ps)
+    protected boolean registerBlockedDerivation(PendingState ps)
     {
-        if (isValid() && ps != null)
-            m_blockedCells.add(ps);
+        if (isStillPending() && ps != null)
+            return m_blockedCells.add(ps);
+        
+        return false;
     }
     
-
     /**
      * Called while lock is held on specified pending state and
      * before this pending state's threads are started
@@ -214,6 +233,18 @@ class PendingState
     void registerBlockedDerivations(PendingState ps)
     {
         if (ps != null && ps.isValid()) {
+            if (ps.isBlockedStatistic()) {
+                BlockedStatisticState bss = (BlockedStatisticState)ps;
+                bss.lock();
+                try {
+                    if (bss.isValid())
+                        bss.updateRootPending(ps, this);
+                }
+                finally {
+                    bss.unlock();
+                }
+            }
+            
             m_blockedCells.addAll(ps.m_blockedCells);
             ps.m_blockedCells.clear();
         }
@@ -232,6 +263,11 @@ class PendingState
         for (PendingState ps : m_blockedCells) {
             if (!ps.isValid())
                 continue;
+            
+            if (ps.isBlockedStatistic()) {
+                ((BlockedStatisticState)ps).unblockStatistic(this);
+                continue;
+            }
             
             Derivation psDeriv = ps.getDerivation();
             if (psDeriv == null || psDeriv.isBeingDestroyed())
@@ -255,7 +291,7 @@ class PendingState
                     if (ps.isValid()) 
                         psDeriv.cacheDeferredCalculation(pc.getPendingState(), dc);
                     else {
-                        ps.resetPendingState();
+                        ps.delete();
                         dc.remove(ps);
                     }
                 }
@@ -288,9 +324,20 @@ class PendingState
         return false;
     }
     
-    public PendingState getRootPendingState()
+    protected boolean isBlockedStatistic()
+    {
+        return false;
+    }
+    
+    protected PendingState getRootPendingState()
     {
         return this;
+    }
+    
+    public String toString()
+    {
+        return String.format("Pending: Row %d Col %d (%s)", m_curRow.getIndex(), m_curCol.getIndex(),
+                isValid() ? "OK" : "Expired");
     }
     
     protected static class BlockedState extends PendingState
@@ -307,11 +354,19 @@ class PendingState
         }
         
         @Override
-        public PendingState getRootPendingState()
+        protected boolean isBlockedStatistic()
+        {
+            return false;
+        }
+        
+        @Override
+        protected PendingState getRootPendingState()
         {
             Token  t = getPendingToken();
             if (t != null && t.isPending()) {
                 PendingState ps = t.getPendingState();
+                if (ps == this)
+                    return this;
                 if (ps != null) {
                     ps.lock();
                     try {
@@ -327,6 +382,76 @@ class PendingState
             }            
             
             return null;
+        }   
+        
+        public String toString()
+        {
+            return String.format("Blocked: Row %d Col %d (%s)", m_curRow.getIndex(), m_curCol.getIndex(),
+                    isValid() ? "OK" : "Expired");
         }        
+    }
+    
+    protected static class BlockedStatisticState extends PendingState
+    {
+        private PendingStatistic m_pendingStat;
+        private Derivation m_derivation;
+        
+        protected BlockedStatisticState(PendingStatistic pendingStat, Derivation deriv)
+        {
+            m_pendingStat = pendingStat;
+            m_derivation = deriv;
+            m_valid = true;
+        }
+        
+        @Override
+        protected boolean isBlocked()
+        {
+            return false;
+        }
+        
+        @Override
+        protected boolean isBlockedStatistic()
+        {
+            return true;
+        }
+        
+        @Override
+        protected Derivation getDerivation()
+        {
+            return m_derivation;
+        }
+        
+        @Override
+        protected PendingState getRootPendingState()
+        {
+            return this;
+        }
+        
+        @Override 
+        protected Cell getPendingCell()
+        {
+            return null;
+        }
+        
+        protected void updateRootPending(PendingState ps, PendingState newPs)
+        {
+            m_pendingStat.updateRootPending(ps, newPs);
+        }
+
+        protected void unblockStatistic(PendingState ps)
+        {
+            m_pendingStat.unblockStatistic(ps);
+        }
+
+        protected void delete()
+        {
+            super.delete();
+            unblockStatistic(this);
+        }
+        
+        public String toString()
+        {
+            return String.format("Blocked  %s (%s)", m_pendingStat, isValid() ? "OK" : "Expired");
+        }                
     }
 }

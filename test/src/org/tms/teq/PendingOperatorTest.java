@@ -26,6 +26,8 @@ public class PendingOperatorTest extends BaseTest
     public final void testPendingColumnOperator() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
+        if (tc instanceof DerivableThreadPool)
+            ((DerivableThreadPool)tc).setMaximumPoolSize(500);
         Table t = TableFactory.createTable(tc);
         
         TokenMapper tm = tc.getTokenMapper();
@@ -34,21 +36,75 @@ public class PendingOperatorTest extends BaseTest
         int numRows = 2500;
         t.addRow(Access.ByIndex, numRows);
         
-        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 100) + pending(col 1, 50)/2");
-        Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70");
-        Column c4 = (Column)t.addColumn(); // cell derivations column
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2
+        Column c3 = (Column)t.addColumn(); // cell derivations column, c3        
+        Column c4 = (Column)t.addColumn().setDerivation("normalize(col 2)"); // c4       
         
-        t.addColumn().setDerivation("normalize(col 2)"); // c5
+        Cell cR1C3 = t.getCell(t.getRow(Access.First), c3);
+        cR1C3.setDerivation("mean(Col 4)");
+        
+        Cell cR2C3 = t.getCell(t.getRow(Access.ByIndex, 2), c3);
+        cR2C3.setDerivation("max(Col 2)");
+        
+        Cell cR3C3 = t.getCell(t.getRow(Access.ByIndex, 3), c3);
+        cR3C3.setDerivation("count(Col 2)");
+        
+        //assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        while (((TableImpl)t).isPendings()) {
+            Thread.sleep(1000);
+        }        
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(closeTo(cR1C3.getCellValue(), 0.0, 0.00000000001), is(true));
+        assertThat(cR2C3.getCellValue(), is(100.0));
+        assertThat(cR3C3.getCellValue(), is(numRows * 1.0));
+                
+        for (Row r : t.rows()) {
+            double v1 = (double)t.getCellValue(r,  c1);
+            
+            Cell c = t.getCell(r, c2);
+            assertThat(c, notNullValue());
+            assertThat(c.getCellValue(), is(v1*2));
+            
+            c = t.getCell(r, c4);
+            assertThat(c, notNullValue());
+        }       
+    }
+        
+   @Test
+    public final void testPendingColumnOperatorComplex() throws InterruptedException
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        Table t = TableFactory.createTable(tc);
+        
+        TokenMapper tm = tc.getTokenMapper();
+        tm.registerOperator(new PendingOperator());
+        
+        int numRows = 200;
+        t.addRow(Access.ByIndex, numRows);
+        
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50)/2"); // c3
+        Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
+        Column c4 = (Column)t.addColumn(); // cell derivations column, c5
+        
+        Column c5 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c6
+        
+        assertThat(c1a, notNullValue());
+        assertThat(c5, notNullValue());
         
         Cell cR1C4 = t.getCell(t.getRow(Access.First), c4);
-        cR1C4.setDerivation("mean(Col 5)");
+        cR1C4.setDerivation("mean(Col 6)");
         
         Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
-        cR2C4.setDerivation("max(Col 2)");
+        cR2C4.setDerivation("max(Col 3)");
         
         Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
-        cR3C4.setDerivation("count(Col 2)");
+        cR3C4.setDerivation("count(Col 3)");
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
@@ -59,7 +115,7 @@ public class PendingOperatorTest extends BaseTest
         assertThat(((TableImpl)t).isPendings(), is(false));
         
         assertThat(closeTo(cR1C4.getCellValue(), 0.0, 0.00000000001), is(true));
-        assertThat(cR2C4.getCellValue(), is(120.0));
+        assertThat(cR2C4.getCellValue(), is(220.0));
         assertThat(cR3C4.getCellValue(), is(numRows * 1.0));
                 
         for (Row r : t.rows()) {
@@ -67,7 +123,7 @@ public class PendingOperatorTest extends BaseTest
             
             Cell c = t.getCell(r, c2);
             assertThat(c, notNullValue());
-            assertThat(c.getCellValue(), is(7.0*5.0*2.0 + v1*2.0/2.0));
+            assertThat(c.getCellValue(), is(7.0*5.0*2.0 + v1*2 + v1*2.0/2.0));
             
             c = t.getCell(r, c3);
             assertThat(c, notNullValue());
@@ -275,7 +331,8 @@ public class PendingOperatorTest extends BaseTest
                 System.out.println(Thread.currentThread().getName() + " exception...");
             }
             
-            m_args[0].postResult(2.0 * (Double)m_args[0].getValue());
+            double rslt = 2.0 * (Double)m_args[0].getValue();
+            m_args[0].postResult(rslt);
         }
 
         @Override
