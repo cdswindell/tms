@@ -146,14 +146,15 @@ abstract class PendingState
         markInvalid();
         
         Cell cell = getPendingCell();
-        if (cell != null ) {
-            if (cell.isPendings() )
+        if (cell != null ) {            
+            if (cell.isPendings() && cell.getCellValue() == this)
                 m_curCol.getTable().setCellValue(m_curRow, m_curCol, Token.createNullToken());
             
             Derivation d = getDerivation();
-            if (d != null)
-                d.resetPendingCellDependents(cell);
+            if (d != null) 
+                d.resetPendingCell(cell);
         }
+        
         
         m_pse = null;
         m_pendingToken = null;  
@@ -268,7 +269,7 @@ abstract class PendingState
             return m_pendingIntermediate != null && m_pendingIntermediate instanceof Runnable;
         }
         
-        protected Runnable getPendingRunnable()
+        protected Runnable getRunnable()
         {
             if (isRunnable())
                 return (Runnable)m_pendingIntermediate;
@@ -326,9 +327,7 @@ abstract class PendingState
                     // blocks on access to ps
                     reevaluate(dc);
                     
-                    this.unblockDerivations();
-                    
-                    return true;
+                    this.unblockDerivations();                    
                 }
                 catch (PendingDerivationException pc)
                 {
@@ -354,6 +353,8 @@ abstract class PendingState
                 catch (BlockedDerivationException e)
                 {
                 }
+                
+                return true;
             }
             
             return false;

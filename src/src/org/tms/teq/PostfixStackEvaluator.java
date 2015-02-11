@@ -29,6 +29,7 @@ public class PostfixStackEvaluator
 	private Token[] m_pfsArray;
 	private int m_pfsIdx;
     private Derivation m_derivation;
+int cnt = 0;        
 	
     public PostfixStackEvaluator(String expr, Table table)
     {
@@ -211,7 +212,6 @@ public class PostfixStackEvaluator
                         signalBlockedDerivation(rewind, tbl, row, col, oper, e); 
                         
                         // if signalBlockedDerivation doesn't rethrow calculation, retry
-                        continue;
                     }
                     catch (BlockedDerivationException e) {
                         // pendingCellState should be locked at this point
@@ -254,7 +254,6 @@ public class PostfixStackEvaluator
                         signalBlockedDerivation(rewind, tbl, row, col, oper, e);                        
                         
                         // if signalBlockedDerivation doesn't rethrow calculation, retry
-                        continue;
                     }
                     catch (BlockedDerivationException e) {
                         // pendingCellState should be locked at this point

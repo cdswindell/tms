@@ -94,7 +94,7 @@ public class PendingOperatorTest extends BaseTest
         
         int factor = 2;
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c1
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 500)"); // c1
         Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 50) + col 2"); // c3
         Column c3 = (Column)t.addColumn(); // cell derivations column, c4        
         Column c4 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c45    
@@ -147,11 +147,11 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        int numRows = 100;
+        int numRows = 500;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2, will block c3
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 500)"); // c2, will block c3
         Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50)/2"); // c3
         Column c4 = (Column)t.addColumn(); // cell derivations column, c5
         
@@ -200,7 +200,7 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        int numRows = 2500;
+        int numRows = 2000;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
@@ -215,7 +215,7 @@ public class PendingOperatorTest extends BaseTest
         assertThat(c5, notNullValue());
         
         Cell cR1C4 = t.getCell(t.getRow(Access.First), c4);
-        cR1C4.setDerivation("mean(Col 6)");
+        cR1C4.setDerivation("mean(col 2) + mean(Col 6) - mean(col 2)");
         
         Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
         cR2C4.setDerivation("max(Col 3)");
