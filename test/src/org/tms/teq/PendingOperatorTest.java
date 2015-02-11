@@ -95,14 +95,14 @@ public class PendingOperatorTest extends BaseTest
         int factor = 2;
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
         Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 500)"); // c1
-        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 50) + col 2"); // c3
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 25) + col 2"); // c3
         Column c3 = (Column)t.addColumn(); // cell derivations column, c4        
         Column c4 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c45    
         
         assertThat(c1a.isValid(), is(true));
         
         Cell cR1C3 = t.getCell(t.getRow(Access.First), c3);
-        cR1C3.setDerivation("mean(Col 5)");
+        cR1C3.setDerivation("median(col 2) + mean(Col 5) + 0 - median(col 2)");
         
         Cell cR2C3 = t.getCell(t.getRow(Access.ByIndex, 2), c3);
         cR2C3.setDerivation("max(Col 3)");
