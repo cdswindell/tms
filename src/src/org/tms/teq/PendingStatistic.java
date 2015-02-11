@@ -10,6 +10,7 @@ import org.tms.api.Cell;
 import org.tms.api.Operator;
 import org.tms.api.TableElement;
 import org.tms.teq.Derivation.DerivationContext;
+import org.tms.teq.PendingState.AwaitingState;
 import org.tms.teq.PendingState.BlockedStatisticState;
 
 public class PendingStatistic
@@ -223,8 +224,7 @@ public class PendingStatistic
                         ps.lock();
                         try {
                             if (ps.isValid()) {
-                                PendingState newPs = pc.getPendingState();
-//                                newPs.registerBlockedDerivations(ps);
+                                AwaitingState newPs = pc.getAwaitingState();
                                 psDeriv.cacheDeferredCalculation(newPs, dc);
                             }
                             else {

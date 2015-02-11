@@ -33,6 +33,7 @@ import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.teq.PendingState.AwaitingState;
 import org.tms.util.Tuple;
 
 public class Derivation
@@ -339,8 +340,7 @@ public class Derivation
                 ps.lock();
                 try {
                     if (ps.isValid()) {
-                        PendingState newPs = pc.getPendingState();
-//                        newPs.registerBlockedDerivations(ps);
+                        AwaitingState newPs = pc.getAwaitingState();
                         psDeriv.cacheDeferredCalculation(newPs, dc);
                     }
                     else {
@@ -380,7 +380,7 @@ public class Derivation
     private Derivable m_target;
     private MathContext m_precision;
     private DerivableThreadPool m_threadPool;
-    private Set<PendingState> m_cachedPendingStates;
+    private Set<AwaitingState> m_cachedPendingStates;
     private Map<TableElement, PendingStatistic> m_cachedPendingStats;
     private Map<Cell, Set<PendingState>> m_cellBlockedPendingStatesMap;
     
@@ -392,7 +392,7 @@ public class Derivation
         
         m_affectedBy = new LinkedHashSet<TableElement>();
         m_precision = new MathContext(sf_DEFAULT_PRECISION);
-        m_cachedPendingStates = Collections.synchronizedSet(new LinkedHashSet<PendingState>());
+        m_cachedPendingStates = Collections.synchronizedSet(new LinkedHashSet<AwaitingState>());
         m_cachedPendingStats = Collections.synchronizedMap(new LinkedHashMap<TableElement, PendingStatistic>());
         
         m_cellBlockedPendingStatesMap = Collections.synchronizedMap(new LinkedHashMap<Cell, Set<PendingState>>());       
@@ -473,7 +473,7 @@ public class Derivation
     public void destroy()
     {
         m_beingDestroyed = true;        
-        for (PendingState ps : m_cachedPendingStates) {
+        for (AwaitingState ps : m_cachedPendingStates) {
             // don't reprocess invalidated pending states
             if (!ps.isValid())
                 continue;
@@ -585,7 +585,7 @@ public class Derivation
         }
     }
     
-    protected void registerPendingState(PendingState ps)
+    protected void registerAwaitingState(AwaitingState ps)
     {
         if (ps != null) { 
             if (ps.getDerivation() != this)
@@ -779,7 +779,7 @@ public class Derivation
             }
         }
         catch (PendingDerivationException pc) {
-            cacheDeferredCalculation(pc.getPendingState(), dc);
+            cacheDeferredCalculation(pc.getAwaitingState(), dc);
         }
         catch (BlockedDerivationException e)
         {
@@ -823,7 +823,7 @@ public class Derivation
                 }
             }
             catch (PendingDerivationException pc) {
-                cacheDeferredCalculation(pc.getPendingState(), dc);
+                cacheDeferredCalculation(pc.getAwaitingState(), dc);
             }
             catch (BlockedDerivationException e)
             {
@@ -872,7 +872,7 @@ public class Derivation
                 }
             }
             catch (PendingDerivationException pc) {
-                cacheDeferredCalculation(pc.getPendingState(), dc);
+                cacheDeferredCalculation(pc.getAwaitingState(), dc);
             }
             catch (BlockedDerivationException e)
             {
@@ -884,7 +884,7 @@ public class Derivation
         	dc.remove(col);
     }
 
-    void cacheDeferredCalculation(PendingState pendingState, DerivationContext dc)
+    void cacheDeferredCalculation(AwaitingState pendingState, DerivationContext dc)
     {
         sf_UUID_PENDING_STATE_MAP.put(pendingState.getTransactionID(), pendingState);
         if (pendingState.isRunnable()) {
@@ -895,7 +895,7 @@ public class Derivation
         }        
     }
 
-    void submitCalculation(PendingState pendingState)
+    void submitCalculation(AwaitingState pendingState)
     {
         TableContext tc = getTableContext();
         if (tc instanceof DerivableThreadPool) {
@@ -975,14 +975,14 @@ public class Derivation
         private Map<TableElement, SingleVariableStatEngine> m_cachedSVSEs;
         private Map<Tuple<TableElement>, TwoVariableStatEngine> m_cachedTVSEs;
     	private boolean m_cachedAny = false;
-    	private Set<PendingState> m_pendings;
+    	private Set<AwaitingState> m_pendings;
     	private boolean m_isRecalculateAffected;
     	
     	DerivationContext()
     	{
             m_cachedSVSEs = new HashMap<TableElement, SingleVariableStatEngine>();
             m_cachedTVSEs = new HashMap<Tuple<TableElement>, TwoVariableStatEngine>();
-            m_pendings = new LinkedHashSet<PendingState>();
+            m_pendings = new LinkedHashSet<AwaitingState>();
             m_isRecalculateAffected = true;
     	}
     	
@@ -991,7 +991,7 @@ public class Derivation
     	    m_pendings.clear();
         }
 
-        void cachePending(PendingState ps)
+        void cachePending(AwaitingState ps)
         {
             m_pendings.add(ps);
         }

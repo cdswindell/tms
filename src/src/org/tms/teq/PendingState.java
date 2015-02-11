@@ -8,12 +8,27 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.teq.Derivation.DerivationContext;
 
-class PendingState
+/**
+ * The PendingState abstract class encapsulates derivation state for derivations where operators
+ * perform asynchronous calculations, leaving table cells in the "Pending" state while
+ * the calculations are performed.
+ * <p/>
+ * There are three possible pending states:
+ * <p/>
+ * <ul>
+ * <li><b>AwaitingState</b>: The calculation is awaiting the completion of an asynchronous Operator 
+ *     and will continue when the calculation results are posted.</li>
+ * <li><b>BlockedState</b>: The calculation is blocked on a cell in <b>AwaitingState</b> and will
+ *     resume the calculation once the <b>AwaitingState</b> cell receives a value.</li>
+ * <li><b>BlockedStatisticState</b>: The calculation is dependent on a Statistics or Transform operator
+ *        that has encountered <b>AwaitingState</b>, <b>BlockedState</b> or other <b>BlockedStatisticState</b> cells. </li>
+ * </ul>
+ * <p/>
+ */
+abstract class PendingState
 {
-    private UUID m_uuid;
     private PostfixStackEvaluator m_pse;
     private Token m_pendingToken;
-    private Object m_pendingIntermediate;
     private Semaphore m_lock;
     
     protected Row m_curRow;
@@ -22,16 +37,11 @@ class PendingState
     
     protected PendingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
     {
-        m_uuid = Derivation.getTransactionID();
         m_pse = pse;
         m_curRow = row;
         m_curCol = col;
         m_pendingToken = tk;  
-        m_pendingIntermediate = tk.getValue();
         m_valid = true;
-        
-        if (pse.getDerivation() != null && isRegisterWithParentDerivation())
-            getDerivation().registerPendingState(this);
         
         m_lock = new Semaphore(1, true);
     }
@@ -40,19 +50,9 @@ class PendingState
     {
     }
 
-    protected UUID getTransactionID()
-    {
-        return m_uuid;
-    }
-    
     protected Token getPendingToken()
     {
         return m_pendingToken;
-    }
-    
-    protected Object getPendingIntermediate()
-    {
-        return m_pendingIntermediate;
     }
     
     protected Derivation getDerivation()
@@ -114,31 +114,6 @@ class PendingState
         }
     }
 
-    protected boolean isRunnable()
-    {
-        return m_pendingIntermediate != null && m_pendingIntermediate instanceof Runnable;
-    }
-    
-    protected Runnable getPendingRunnable()
-    {
-        if (isRunnable())
-            return (Runnable)m_pendingIntermediate;
-        else
-            return null;
-    }
-    
-    protected void submitCalculation()
-    {
-        lock();
-        try {
-            if (getDerivation() != null)
-                getDerivation().submitCalculation(this);
-        }
-        finally {
-            unlock();
-        }
-    }
-    
     protected void lock()
     {
         try
@@ -180,10 +155,8 @@ class PendingState
                 d.resetPendingCellDependents(cell);
         }
         
-        m_uuid = null;
         m_pse = null;
         m_pendingToken = null;  
-        m_pendingIntermediate = null;     
     }
 
     protected boolean isStillPending()
@@ -255,16 +228,72 @@ class PendingState
         return this;
     }
     
-    protected boolean isRegisterWithParentDerivation()
+    protected static class AwaitingState extends PendingState
     {
-        return true;
-    }
-    
-    public String toString()
-    {
-        return String.format("Pending: Row %d Col %d (%s : %s)", m_curRow.getIndex(), m_curCol.getIndex(),
-                isValid() ? "OK" : "Expired",
-                isStillPending() ? "Pending" : "Not Pending");
+        private UUID m_uuid;
+        private Object m_pendingIntermediate;
+        
+        protected AwaitingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
+        {
+            super(pse, row, col, tk);
+            
+            if (pse.getDerivation() != null)
+                getDerivation().registerAwaitingState(this);
+            
+            m_pendingIntermediate = tk.getValue();
+            m_uuid = Derivation.getTransactionID();
+        }
+        
+        @Override
+        protected void delete()
+        {
+            super.delete();
+            
+            m_uuid = null;
+            m_pendingIntermediate = null;     
+        }
+        
+        protected Object getPendingIntermediate()
+        {
+            return m_pendingIntermediate;
+        }
+        
+        protected UUID getTransactionID()
+        {
+            return m_uuid;
+        }
+        
+        protected boolean isRunnable()
+        {
+            return m_pendingIntermediate != null && m_pendingIntermediate instanceof Runnable;
+        }
+        
+        protected Runnable getPendingRunnable()
+        {
+            if (isRunnable())
+                return (Runnable)m_pendingIntermediate;
+            else
+                return null;
+        }
+        
+        protected void submitCalculation()
+        {
+            lock();
+            try {
+                if (getDerivation() != null)
+                    getDerivation().submitCalculation(this);
+            }
+            finally {
+                unlock();
+            }
+        }       
+        
+        public String toString()
+        {
+            return String.format("Pending: Row %d Col %d (%s : %s)", m_curRow.getIndex(), m_curCol.getIndex(),
+                    isValid() ? "OK" : "Expired",
+                    isStillPending() ? "Pending" : "Not Pending");
+        }
     }
     
     protected static class BlockedState extends PendingState
@@ -308,7 +337,7 @@ class PendingState
                     lock();
                     try {
                         if (isValid()) {
-                            PendingState newPs = pc.getPendingState();
+                            AwaitingState newPs = pc.getAwaitingState();
                             psDeriv.cacheDeferredCalculation(newPs, dc);
                         }
                         else {
@@ -354,12 +383,6 @@ class PendingState
             
             return null;
         }   
-        
-        @Override
-        protected boolean isRegisterWithParentDerivation()
-        {
-            return false;
-        }
         
         public String toString()
         {
@@ -432,12 +455,6 @@ class PendingState
                 return false;
             
             return m_pendingStat.isBlockedOnAny();
-        }
-        
-        @Override
-        protected boolean isRegisterWithParentDerivation()
-        {
-            return false;
         }
         
         public String toString()

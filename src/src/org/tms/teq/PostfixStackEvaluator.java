@@ -18,6 +18,7 @@ import org.tms.api.TableRowColumnElement;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.teq.Derivation.DerivationContext;
+import org.tms.teq.PendingState.AwaitingState;
 import org.tms.teq.PendingState.BlockedState;
 
 public class PostfixStackEvaluator 
@@ -276,7 +277,7 @@ public class PostfixStackEvaluator
 			Token pendingToken = m_opStack.peekFirst();
 			if (pendingToken != null && pendingToken.isPending()) {
 			    m_pfsArray = null; // conserve a bit of memory
-			    PendingState pendingState = new PendingState(this, row, col, pendingToken);
+			    AwaitingState pendingState = new AwaitingState(this, row, col, pendingToken);
 			    pendingToken.setValue(pendingState);
                 if (tbl != null) 
                     tbl.setCellValue(row,  col, pendingToken);
