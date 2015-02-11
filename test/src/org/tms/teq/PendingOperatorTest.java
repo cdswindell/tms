@@ -23,17 +23,18 @@ import org.tms.tds.TableImpl;
 public class PendingOperatorTest extends BaseTest
 {
     @Test
-    public final void testPendingColumnOperator() throws InterruptedException
+    public final void testPendingColumnOperatorSimple() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        if (tc instanceof DerivableThreadPool)
-            ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        
         Table t = TableFactory.createTable(tc);
         
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        int numRows = 2500;
+        int numRows = 250;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
@@ -71,23 +72,139 @@ public class PendingOperatorTest extends BaseTest
             
             c = t.getCell(r, c4);
             assertThat(c, notNullValue());
-        }       
+        }  
+        
+        ((DerivableThreadPool)tc).shutdown();
     }
         
-   @Test
-    public final void testPendingColumnOperatorComplex() throws InterruptedException
+    @Test
+    public final void testPendingColumnOperator() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
+        ((DerivableThreadPool)tc).setMaximumPoolSize(1000);
+        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        
         Table t = TableFactory.createTable(tc);
         
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        int numRows = 200;
+        int numRows = 250;
+        t.addRow(Access.ByIndex, numRows);
+        
+        int factor = 2;
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c1
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 50) + col 2"); // c3
+        Column c3 = (Column)t.addColumn(); // cell derivations column, c4        
+        Column c4 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c45    
+        
+        assertThat(c1a.isValid(), is(true));
+        
+        Cell cR1C3 = t.getCell(t.getRow(Access.First), c3);
+        cR1C3.setDerivation("mean(Col 5)");
+        
+        Cell cR2C3 = t.getCell(t.getRow(Access.ByIndex, 2), c3);
+        cR2C3.setDerivation("max(Col 3)");
+        
+        Cell cR3C3 = t.getCell(t.getRow(Access.ByIndex, 3), c3);
+        cR3C3.setDerivation("count(Col 3)");
+        
+        //assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        while (((TableImpl)t).isPendings()) {
+            Thread.sleep(1000);
+        }        
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(closeTo(cR1C3.getCellValue(), 0.0, 0.00000000001), is(true));
+        assertThat(((double)cR2C3.getCellValue()>=.95 * 100.0 * factor), is(true));
+        assertThat(cR3C3.getCellValue(), is(numRows * 1.0));
+                
+        for (Row r : t.rows()) {
+            double v1 = (double)t.getCellValue(r,  c1);
+            
+            Cell c = t.getCell(r, c2);
+            assertThat(c, notNullValue());
+            assertThat(c.getCellValue(), is(v1*2 * factor));
+            
+            c = t.getCell(r, c4);
+            assertThat(c, notNullValue());
+        }       
+        
+        ((DerivableThreadPool)tc).shutdown();
+    }
+        
+    @Test
+    public final void testPendingBlockedPendingOperator() throws InterruptedException
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        
+        Table t = TableFactory.createTable(tc);
+        
+        TokenMapper tm = tc.getTokenMapper();
+        tm.registerOperator(new PendingOperator());
+        
+        int numRows = 100;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2, will block c3
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50)/2"); // c3
+        Column c4 = (Column)t.addColumn(); // cell derivations column, c5
+        
+        assertThat(c1a, notNullValue());
+        
+        Cell cR1C4 = t.getCell(t.getRow(Access.First), c4);
+        cR1C4.setDerivation("mean(Col 3)");
+        
+        Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR2C4.setDerivation("max(Col 3)");
+        
+        Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
+        cR3C4.setDerivation("count(Col 3)");
+        
+        //assertThat(((TableImpl)t).isPendings(), is(true));
+        
+        while (((TableImpl)t).isPendings()) {
+            Thread.sleep(1000);
+        }        
+        
+        assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(closeTo(cR1C4.getCellValue(), 145, 10.0), is(true));
+        assertThat(cR2C4.getCellValue(), is(220.0));
+        assertThat(cR3C4.getCellValue(), is(numRows * 1.0));
+                
+        for (Row r : t.rows()) {
+            double v1 = (double)t.getCellValue(r,  c1);
+            
+            Cell c = t.getCell(r, c2);
+            assertThat(c, notNullValue());
+            assertThat(c.getCellValue(), is(7.0*5.0*2.0 + v1*2 + v1*2.0/2.0));
+        }
+        
+        ((DerivableThreadPool)tc).shutdown();       
+    }
+    
+    @Test
+    public final void testPendingColumnOperatorComplex() throws InterruptedException
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        
+        Table t = TableFactory.createTable(tc);
+        
+        TokenMapper tm = tc.getTokenMapper();
+        tm.registerOperator(new PendingOperator());
+        
+        int numRows = 2500;
+        t.addRow(Access.ByIndex, numRows);
+        
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2, will block c3
         Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50)/2"); // c3
         Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
         Column c4 = (Column)t.addColumn(); // cell derivations column, c5
@@ -106,7 +223,7 @@ public class PendingOperatorTest extends BaseTest
         Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
         cR3C4.setDerivation("count(Col 3)");
         
-        assertThat(((TableImpl)t).isPendings(), is(true));
+        //assertThat(((TableImpl)t).isPendings(), is(true));
         
         while (((TableImpl)t).isPendings()) {
             Thread.sleep(1000);
@@ -131,8 +248,7 @@ public class PendingOperatorTest extends BaseTest
         }
         
         // try again, with more threads
-        if (tc instanceof DerivableThreadPool)
-            ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
@@ -144,6 +260,8 @@ public class PendingOperatorTest extends BaseTest
         }
         
         assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        ((DerivableThreadPool)tc).shutdown();
     }
     
     @Test
@@ -151,7 +269,7 @@ public class PendingOperatorTest extends BaseTest
     {
         TableContext tc = TableContextFactory.createTableContext();
         ((DerivableThreadPool)tc).setMaximumPoolSize(500);
-        ((DerivableThreadPool)tc).setKeepAliveTime(1, TimeUnit.SECONDS);
+        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
         Table t = TableFactory.createTable(tc);
         
         TokenMapper tm = tc.getTokenMapper();
@@ -206,6 +324,8 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c, notNullValue());
             assertThat(c.getCellValue(), is(50));
         }
+        
+        ((DerivableThreadPool)tc).shutdown();
     }
     
     @Test
@@ -213,7 +333,8 @@ public class PendingOperatorTest extends BaseTest
     {
         TableContext tc = TableContextFactory.createTableContext();
         ((DerivableThreadPool)tc).setMaximumPoolSize(500);
-        ((DerivableThreadPool)tc).setKeepAliveTime(1, TimeUnit.SECONDS);
+        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        
         Table t = TableFactory.createTable(tc);
         
         TokenMapper tm = tc.getTokenMapper();
@@ -253,6 +374,8 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c, notNullValue());
             assertThat(c.isNull(), is(true));
         }
+        
+        ((DerivableThreadPool)tc).shutdown();
     }
     
     @Test
@@ -260,7 +383,8 @@ public class PendingOperatorTest extends BaseTest
     {
         TableContext tc = TableContextFactory.createTableContext();
         ((DerivableThreadPool)tc).setMaximumPoolSize(500);
-        ((DerivableThreadPool)tc).setKeepAliveTime(1, TimeUnit.SECONDS);
+        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        
         Table t = TableFactory.createTable(tc);
         
         TokenMapper tm = tc.getTokenMapper();
@@ -298,6 +422,8 @@ public class PendingOperatorTest extends BaseTest
         assertThat(cR1C4.isInvalid(), is(true));
         assertThat(cR2C4.isInvalid(), is(true));
         assertThat(cR3C4.isInvalid(), is(true));
+        
+        ((DerivableThreadPool)tc).shutdown();
     }
     
     public class PendingOperator implements Operator, Runnable

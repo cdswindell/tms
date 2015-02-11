@@ -597,7 +597,8 @@ public class CellImpl extends TableElementImpl implements Cell
                     r.remove(this);
             }
         }
-         
+        
+        decrementPendings(); 
         m_cellValue = null;
         
         m_col = null;

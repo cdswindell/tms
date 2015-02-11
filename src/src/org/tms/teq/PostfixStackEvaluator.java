@@ -425,7 +425,8 @@ public class PostfixStackEvaluator
         Token sourcePending = Token.createPendingToken(ps);
         PendingState pendingState = new BlockedState(this, row, col, sourcePending);
         
-        ps.registerBlockedDerivation(pendingState);
+        ps.getDerivation().registerBlockingCell(ps.getPendingCell(), pendingState);
+        //ps.registerBlockedDerivation(pendingState);
         if (tbl != null) {
             Token pt = Token.createPendingToken(pendingState);
             tbl.setCellValue(row,  col, pt);

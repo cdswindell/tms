@@ -16,7 +16,7 @@ public class PendingStatistic
 {
     private TableElement m_refElement;
     private Set<PendingState> m_blockedCells;
-    private Set<PendingState> m_blockingCells;
+    private Set<Cell> m_blockedOnCells;
     private Semaphore m_lock;
     private boolean m_valid;
     private Derivation m_derivation;
@@ -25,46 +25,77 @@ public class PendingStatistic
     protected PendingStatistic(Derivation deriv, Operator oper, TableElement ref, Set<PendingState> blockedOnSet)
     {
         m_blockedCells = new LinkedHashSet<PendingState>();
-        m_blockingCells = new LinkedHashSet<PendingState>();
+        m_blockedOnCells = new LinkedHashSet<Cell>();
         m_refElement = ref;
         m_derivation = deriv;
         m_lock = new Semaphore(1);
         m_oper = oper;
         m_valid = true;
         
-        deriv.registerPendingStatistic(this);
-        
-        lock();
-        try {
-            // register this PendingStatistic with each dependent calculation
-            boolean blockedOnAny = false;
-            for (PendingState ps : blockedOnSet) {
-                if (ps != null) {
-                    ps.lock();
-                    try {                      
-                        if (ps.registerBlockedDerivation(new BlockedStatisticState(this, deriv))) {
-                            m_blockingCells.add(ps);
-                            blockedOnAny = true;
-                        }
-                    }
-                    finally {
-                        ps.unlock();
+        // register this PendingStatistic with each dependent calculation
+        boolean blockedOnAny = false;
+        for (PendingState ps : blockedOnSet) {
+            if (ps != null) {
+                ps.lock();
+                try {                      
+                    if (ps.isStillPending()) {
+                        Derivation d = ps.getDerivation();
+                        assert d != null : "Derivation Required";
+                        
+                        Cell blockingCell  = ps.getPendingCell();
+                        assert blockingCell != null : "Blocked Cell Required";
+                        
+                        m_blockedOnCells.add(blockingCell);
+                        d.registerBlockingCell(blockingCell, new BlockedStatisticState(this, deriv));
+                        blockedOnAny = true;
                     }
                 }
+                finally {
+                    ps.unlock();
+                }
             }
-            
-            // register with parent derivation, so we don't have to 
-            if (!blockedOnAny)
-                delete();
         }
-        finally {
-            unlock();
-        }
+        
+        // register with parent derivation, so we don't have to 
+        if (blockedOnAny)
+            deriv.registerPendingStatistic(this);
+        else
+            delete();
     }
     
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((m_derivation == null) ? 0 : m_derivation.hashCode());
+        result = prime * result + ((m_refElement == null) ? 0 : m_refElement.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        PendingStatistic other = (PendingStatistic) obj;
+        if (m_derivation == null)
+        {
+            if (other.m_derivation != null) return false;
+        }
+        else if (!m_derivation.equals(other.m_derivation)) return false;
+        if (m_refElement == null)
+        {
+            if (other.m_refElement != null) return false;
+        }
+        else if (!m_refElement.equals(other.m_refElement)) return false;
+        return true;
+    }
+
     protected boolean isBlockedOnAny()
     {
-        return !m_blockingCells.isEmpty();
+        return !m_blockedOnCells.isEmpty();
     }
     
     public boolean isValid()
@@ -140,17 +171,11 @@ public class PendingStatistic
         }  
         
         m_blockedCells.clear();
+        m_blockedOnCells.clear();
         m_derivation.deregisterPendingStatistic(this);
     }
 
-    protected void updateRootPending(PendingState ps, PendingState newPs)
-    {
-        m_blockingCells.remove(ps);
-        m_blockingCells.add(newPs);
-        
-    }
-    
-    protected void unblockStatistic(PendingState tps)
+    protected boolean unblockStatistic(Cell unblockedCell)
     {
         Set<PendingState> toRemove = new HashSet<PendingState>();
         
@@ -160,18 +185,24 @@ public class PendingStatistic
             // on every iteration           
             if (m_refElement.isInvalid()) {
                 delete();
-                return;
+                return false;
             }
-                            
+                  
+            if (unblockedCell != null) {
+                boolean removedCell = m_blockedOnCells.remove(unblockedCell);
+                if (!m_blockedOnCells.isEmpty())
+                    return removedCell;
+            }
+
             // see if any of the cells in the reference are still pending, 
             // if so, continue waiting
             for (Cell c: m_refElement.cells()) {
                 if (isBlockingCell(c))
-                        return; 
+                        return false ; 
                 
                 if (m_refElement.isInvalid()) {
                     delete();
-                    return;
+                    return false;
                 }
             } 
             
@@ -181,7 +212,9 @@ public class PendingStatistic
                 if (ps != null && ps.isValid() && (psDeriv = ps.getDerivation()) != null) {
                     try {
                         // blocks on access to ps
-                        ps.reevaluate(dc);                        
+                        ps.reevaluate(dc);  
+                        
+                        ps.unblockDerivations();
                     }
                     catch (PendingDerivationException pc)
                     {
@@ -191,7 +224,7 @@ public class PendingStatistic
                         try {
                             if (ps.isValid()) {
                                 PendingState newPs = pc.getPendingState();
-                                newPs.registerBlockedDerivations(ps);
+//                                newPs.registerBlockedDerivations(ps);
                                 psDeriv.cacheDeferredCalculation(newPs, dc);
                             }
                             else {
@@ -211,17 +244,19 @@ public class PendingStatistic
             dc.processPendings();
             
             // remove the cells we processed so they are not cleared by delete
-            m_blockingCells.removeAll(toRemove);   
+            m_blockedOnCells.removeAll(toRemove);   
             toRemove.clear();
             
             // we're all done. delete ourselves
-            if (m_blockingCells.isEmpty())
+            if (m_blockedOnCells.isEmpty())
                 delete();
+            
+            return true;
         }
         finally { 
-            m_blockingCells.removeAll(toRemove);           
+            m_blockedOnCells.removeAll(toRemove);           
             unlock();
-        }
+        }       
     }
 
     private boolean isBlockingCell(Cell c)

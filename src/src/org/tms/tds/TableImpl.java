@@ -515,14 +515,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
         for (int i = numCols - 1; i >= 0; i--) {
             ColumnImpl col = m_cols.get(i);
             if (col != null)
-                col.delete();
+                col.delete(false);
         }
         
         int numRows = m_rows.size();
         for (int i = numRows - 1; i >= 0; i--) {
             RowImpl row = m_rows.get(i);
             if (row != null)
-                row.delete();
+                row.delete(false);
         }
 
         // getSubsets returns a copy of m_subsets, so it is safe to delete individual elements
