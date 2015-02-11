@@ -168,9 +168,10 @@ public class StatOperatorTest extends BaseTest
         assertThat(closeTo(c.getCellValue(), 1.7653, 0.0001), is(true));
         
         // do some more positive testing
-        c7.setDerivation("12 + normalize(col 8)");
         c = tbl.getCell(r9,  c1);
         assertThat(c, notNullValue());
+        
+        c7.setDerivation("12 + normalize(col 8)");
         
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.isErrorValue(), is(false));

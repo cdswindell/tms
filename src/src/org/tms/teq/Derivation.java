@@ -436,6 +436,40 @@ public class Derivation
         }
     }
     
+
+    protected void resetPendingCellDependents(Cell cell)
+    {
+        if (cell != null) {
+            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.remove(cell);
+            if (blockedStates != null) {
+                for (PendingState ps : blockedStates) {
+                    if (ps != null && ps.isValid()) {
+                        ps.lock();
+                        try {
+                            ps.delete();
+                        }
+                        finally {
+                            ps.unlock();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    protected boolean isBlockedDerivations(Cell cell)
+    {
+        if (cell != null) {
+            synchronized(m_cellBlockedPendingStatesMap) {
+                Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(cell);
+                if (blockedStates != null)
+                    return !blockedStates.isEmpty();
+            }
+        }
+        
+        return false;
+    }
+    
     public void destroy()
     {
         m_beingDestroyed = true;        
@@ -494,13 +528,7 @@ public class Derivation
             }
         }
         
-        m_cachedPendingStats.clear();
-        
-        // clear affected derivations
-        List<Derivable> affects = m_target.getAffects();
-        if (affects != null) {
-            affects.forEach(d->d.clearDerivation());
-        }
+        m_cachedPendingStats.clear();        
     }
     
     boolean isBeingDestroyed()
