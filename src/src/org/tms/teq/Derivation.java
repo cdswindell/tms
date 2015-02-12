@@ -40,10 +40,17 @@ public class Derivation
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
-    private static final ThreadLocal<UUID> sf_GUID_CACHE = new  ThreadLocal<UUID>();
     private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
     private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
+    private static final ThreadLocal<UUID> sf_GUID_CACHE = new  ThreadLocal<UUID>() {
+        @Override protected UUID initialValue() {
+            Thread ct = Thread.currentThread();
+            long pid = ct.getId();
+            UUID transId = sf_PROCESS_ID_UUID_MAP.get(pid);
+            return transId;
+        }
+    };
     
     /**
      * Creates a Derivation from the provided expression and assigns it to the specified TableElement.
@@ -318,6 +325,17 @@ public class Derivation
     public static final UUID getTransactionID()
     {
         return sf_GUID_CACHE.get();
+    }   
+
+    public static void removeTransactionId()
+    {
+        sf_GUID_CACHE.remove();
+    }
+    
+    public static final void assignTransactionID(UUID transId)
+    {
+        if (transId != null)
+            sf_GUID_CACHE.set(transId);
     }
     
     public static final UUID assignTransactionID()

@@ -29,7 +29,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
             threadLocalsField = Thread.class.getDeclaredField("threadLocals");
             threadLocalMapClass = Class.forName("java.lang.ThreadLocal$ThreadLocalMap");
             tableField = threadLocalMapClass.getDeclaredField("table");
-            referentField = Reference.class.getDeclaredField("referent");           
+            referentField = Reference.class.getDeclaredField("referent");   
         }
         catch (NoSuchFieldException | SecurityException | ClassNotFoundException e)
         {
@@ -37,7 +37,8 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         }       
     }
     
-    private Map<Runnable, UUID> m_runnableUuidMap;
+    static private Map<Runnable, UUID> sf_runnableUuidMap = new ConcurrentHashMap<Runnable, UUID>(1024);
+    
     private BlockingQueue<Runnable> m_queuedRunnables;
     private boolean m_continueDraining;
     private Thread m_drainThread = null;
@@ -66,7 +67,6 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
               new ThreadPoolExecutor.AbortPolicy());
         
         m_queuedRunnables = new LinkedBlockingQueue<Runnable>();
-        m_runnableUuidMap = new ConcurrentHashMap<Runnable, UUID>(1024);
         m_continueDraining = true;      
         
         allowCoreThreadTimeOut(timeOutCores);
@@ -92,7 +92,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     public void submitCalculation(UUID transactionId, Runnable r)
     {
         if (transactionId != null && r != null) {
-            m_runnableUuidMap.put(r,  transactionId);
+            sf_runnableUuidMap.put(r,  transactionId);
             m_queuedRunnables.add(r);
         }
         else
@@ -107,7 +107,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         
         // backing derivation is being cleared, we don't 
         // want running threads to report back a result
-        m_runnableUuidMap.remove(r);
+        sf_runnableUuidMap.remove(r);
         
         // runnable could be in the executors queue, the unbounded queue, or already running
         return getQueue().remove(r) ||
@@ -140,7 +140,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     {
         // if the UUID is not found, the backing derivation is
         // in the process of being cleared
-        UUID transactId = m_runnableUuidMap.remove(r);
+        UUID transactId = sf_runnableUuidMap.remove(r);
         if (transactId != null)
             Derivation.associateTransactionID(t.getId(), transactId);    
         
@@ -151,6 +151,8 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     protected void afterExecute(Runnable r, Throwable t) 
     {
         super.afterExecute(r, t);
+        
+        sf_runnableUuidMap.remove(r);
         resetThreadLocal();
     }
 
@@ -216,6 +218,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         public Thread newThread(Runnable r)
         {
             Thread t = new Thread(r);
+            
             t.setDaemon(true);
             t.setName("PendingCalculationThread-" + (m_threadNo++));
             return t;
