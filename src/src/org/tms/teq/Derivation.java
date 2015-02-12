@@ -40,7 +40,7 @@ public class Derivation
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
-    private static final ThreadLocal<UUID> sf_GUID_CACHE = new ThreadLocal<UUID>();
+    private static final ThreadLocal<UUID> sf_GUID_CACHE = new  ThreadLocal<UUID>();
     private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
     private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
@@ -348,6 +348,9 @@ public class Derivation
 
     public static void postResult(UUID transactId, Object value)
     {
+        // remove runnable, in case this method was called directly
+        sf_PROCESS_ID_UUID_MAP.remove(Thread.currentThread().getId());
+        
         // could be null if derivation is being cleared while pending 
         // calculations are being processed
         if (transactId == null) 

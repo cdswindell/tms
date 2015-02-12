@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
@@ -33,12 +34,13 @@ public class PendingOperatorTest extends BaseTest
         
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
+        tm.registerOperator(new PendingOperator2());
         
         int numRows = 25000;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 10)"); // c2
+        Column c2 = (Column)t.addColumn().setDerivation("pending2(col 1, 10)"); // c2
         Column c3 = (Column)t.addColumn(); // cell derivations column, c3   
         
         assertThat(((TableImpl)t).isPendings(), is(true));
@@ -83,7 +85,7 @@ public class PendingOperatorTest extends BaseTest
     public final void testPendingColumnOperatorSimple() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((DerivableThreadPool)tc).setMaximumPoolSize(10);
         ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
@@ -256,13 +258,14 @@ public class PendingOperatorTest extends BaseTest
         
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
+        tm.registerOperator(new PendingOperator2());
         
         int numRows = 2000;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
         Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2, will block c3
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50)/2"); // c3
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending2(col 1, 50)/2"); // c3
         Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
         Column c4 = (Column)t.addColumn(); // cell derivations column, c5
         
@@ -566,10 +569,12 @@ public class PendingOperatorTest extends BaseTest
     public class PendingOperator implements Operator, Runnable
     {
         private Token[] m_args;
+        private UUID m_transId;
         
-        public PendingOperator(Token[] args)
+        public PendingOperator(UUID transId, Token[] args)
         {
             m_args = args;
+            m_transId = transId;
         }
 
         public PendingOperator()
@@ -619,8 +624,81 @@ public class PendingOperatorTest extends BaseTest
         @Override
         public Token evaluate(Token... args)
         {   
-            PendingOperator po = new PendingOperator(args);
+            PendingOperator po = new PendingOperator(Derivation.getTransactionID(), args);
             return Token.createPendingToken(po);
-        }       
+        }  
+        
+        public UUID getTransactionId()
+        {
+            return this.m_transId;
+        }
+    }
+    
+    public class PendingOperator2 implements Operator, Runnable
+    {
+        private Token[] m_args;
+        private UUID m_transId;
+        
+        public PendingOperator2(UUID transId, Token[] args)
+        {
+            m_args = args;
+            m_transId = transId;
+        }
+
+        public PendingOperator2()
+        {
+            m_args = null;
+        }
+
+        @Override
+        public void run()
+        {
+            int sleepTime = m_args[1].getNumericValue().intValue();
+            try
+            {
+                Thread.sleep(sleepTime);
+            }
+            catch (InterruptedException e)
+            {
+                System.out.println(Thread.currentThread().getName() + " interrupted...");
+            }
+            catch (Exception e)
+            {
+                System.out.println(Thread.currentThread().getName() + " exception...");
+            }
+            
+            double rslt = 2.0 * (Double)m_args[0].getValue();
+            Derivation.postResult(getTransactionId(), rslt);
+        }
+
+        @Override
+        public String getLabel()
+        {
+            return "pending2";
+        }
+
+        @Override
+        public TokenType getTokenType()
+        {
+            return TokenType.BinaryFunc;
+        }
+
+        @Override
+        public Class<?>[] getArgTypes()
+        {
+             return new Class<?>[] {double.class, double.class};
+        }
+
+        @Override
+        public Token evaluate(Token... args)
+        {   
+            PendingOperator2 po = new PendingOperator2(Derivation.getTransactionID(), args);
+            return Token.createPendingToken(po);
+        }  
+        
+        public UUID getTransactionId()
+        {
+            return this.m_transId;
+        }
     }
 }
