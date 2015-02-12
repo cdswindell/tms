@@ -21,19 +21,7 @@ public class PostfixExpressionParserTest
         assertThat(ifs.size(), is(3));
     }
 
-/*    @Test
-    public final void testPostfixExpressionParserInfixExpressionParser()
-    {
-        fail("Not yet implemented"); // TODO
-    }
-
     @Test
-    public final void testGetTable()
-    {
-        fail("Not yet implemented"); // TODO
-    }
-
-*/    @Test
     public final void testGetInfixStack()
     {
         PostfixStackGenerator pep = new PostfixStackGenerator("3 + 5*7", null); 

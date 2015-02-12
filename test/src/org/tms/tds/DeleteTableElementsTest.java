@@ -369,7 +369,7 @@ public class DeleteTableElementsTest
         assertThat(c2.getAffects().contains(cell1), is(false));
         
         assertThat(t.getNumDerivedCellsAffects(), is(0));
-        assertThat(t.getNumDerivedCells(), is(0));
+        assertThat(t.getNumDerivedCells(), is(1));
         
         assertThat(cell3.isValid(), is(true));
         assertThat(cell3.isDerived(), is(false));
