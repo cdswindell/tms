@@ -264,7 +264,7 @@ public class PendingOperatorTest extends BaseTest
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2, will block c3
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, randInt(50) + 50)"); // c2, will block c3
         Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending2(col 1, 50)/2"); // c3
         Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
         Column c4 = (Column)t.addColumn(); // cell derivations column, c5
@@ -340,7 +340,7 @@ public class PendingOperatorTest extends BaseTest
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
         Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2, will block c3
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50)/2"); // c3
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50 + col 2)/2"); // c3
         Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
         Column c4 = (Column)t.addColumn(); // cell derivations column, c5
         
