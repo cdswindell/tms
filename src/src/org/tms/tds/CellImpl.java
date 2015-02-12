@@ -150,8 +150,10 @@ public class CellImpl extends TableElementImpl implements Cell
             TableImpl table = m_col != null ? m_col.getTable() : null;
             if (table != null)
                 table.decrementPendings();
+            
             if (m_col != null)
                 m_col.decrementPendings();
+            
             RowImpl row = getRow();
             if (row != null)
                 row.decrementPendings();

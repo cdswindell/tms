@@ -218,7 +218,7 @@ int cnt = 0;
                         PendingState pendingCellState = e.getPendingState();
                         pendingCellState.lock();
                         try {
-                            signalBlockedDerivation(rewind, tbl, row, col, pendingCellState);
+                            signalBlockedDerivation(rewind, tbl, row, col, pendingCellState, false);
                         }
                         finally {
                             pendingCellState.unlock();
@@ -251,16 +251,14 @@ int cnt = 0;
                         m_opStack.push(doStatOp(oper, dc, args));
                     }
                     catch (BlockingSetDerivationException e) {
-                        signalBlockedDerivation(rewind, tbl, row, col, oper, e);                        
-                        
-                        // if signalBlockedDerivation doesn't rethrow calculation, retry
+                        signalBlockedDerivation(rewind, tbl, row, col, oper, e);                                               
+                        // if signalBlockedDerivation doesn't rethrow exception, retry
                     }
                     catch (BlockedDerivationException e) {
-                        // pendingCellState should be locked at this point
                         PendingState pendingCellState = e.getPendingState();
-                        assert pendingCellState.isLocked() : "Pending State must be locked";
+                        pendingCellState.lock();
                         try {
-                            signalBlockedDerivation(rewind, tbl, row, col, pendingCellState);
+                            signalBlockedDerivation(rewind, tbl, row, col, pendingCellState, false);
                         }
                         finally {
                             pendingCellState.unlock();
@@ -356,7 +354,7 @@ int cnt = 0;
                                 return asOperand(rewind, tbl, row, col, requiredArgType);
                             }
                             
-                            signalBlockedDerivation(rewind, tbl, row, col, ps);
+                            signalBlockedDerivation(rewind, tbl, row, col, ps, true);
                         }
                         finally {
                             ps.unlock();
@@ -410,29 +408,32 @@ int cnt = 0;
             return null;
     }
 
-    private void signalBlockedDerivation(EquationStack rewind, Table tbl, Row row, Column col, PendingState ps) 
+    private void signalBlockedDerivation(EquationStack rewind, Table tbl, Row row, Column col, PendingState ps, boolean doForce) 
     throws BlockedDerivationException
     {
-        assert ps != null && ps.isLocked();
-        
         // reset opstack queue
         while (!rewind.isEmpty())
             m_opStack.push(rewind.pollFirst());
-            
-        m_pfsArray = null; // conserve a bit of memory
+        
         m_pfsIdx++; // reset index to reevaluate this token
         
-        Token sourcePending = Token.createPendingToken(ps);
-        PendingState pendingState = new BlockedState(this, row, col, sourcePending);
-        
-        ps.getDerivation().registerBlockingCell(ps.getPendingCell(), pendingState);
-        //ps.registerBlockedDerivation(pendingState);
-        if (tbl != null) {
-            Token pt = Token.createPendingToken(pendingState);
-            tbl.setCellValue(row,  col, pt);
+        if (doForce || ps.isStillPending()) {
+            m_pfsArray = null; // conserve a bit of memory
+            
+            Token sourcePending = Token.createPendingToken(ps);
+            PendingState pendingState = new BlockedState(this, row, col, sourcePending);
+            
+            ps.getDerivation().registerBlockingCell(ps.getPendingCell(), pendingState);
+            if (tbl != null) {
+                Token pt = Token.createPendingToken(pendingState);
+                tbl.setCellValue(row,  col, pt);
+            }
+    
+            throw new BlockedDerivationException(pendingState);
         }
-
-        throw new BlockedDerivationException(pendingState);
+        
+        // if the state isn't pending any longer, the calculation will continue
+System.out.println("No longer pending: " + ps);
     }
 
     private void signalBlockedDerivation(EquationStack rewind, Table tbl, Row row, Column col, 
@@ -451,20 +452,22 @@ int cnt = 0;
                 
             m_pfsIdx++; // reset index to reevaluate this token
             
-            Token t = Token.createPendingToken((PendingState)null);
-            BlockedState bs = new BlockedState(this, row, col, t);
-            t.setValue(bs);
-            if (tbl != null) 
-                tbl.setCellValue(row,  col, t);
-                
-            pendingStat.registerBlockedDerivation(bs);
-            
             if (pendingStat.isValid()) {
                 m_pfsArray = null; // conserve a bit of memory
+                Token t = Token.createPendingToken((PendingState)null);
+                BlockedState bs = new BlockedState(this, row, col, t);
+                t.setValue(bs);
+                
+                if (tbl != null) 
+                    tbl.setCellValue(row,  col, t);
+                    
+                pendingStat.registerBlockedDerivation(bs);
+                
                 throw new BlockingSetDerivationException(pendingStat);
             }
             
-            // otherwise, just return and resubmit calculation
+            // if the state isn't pending any longer, the calculation will continue
+System.out.println("No longer pending: " + pendingStat);
         }
         finally {
             pendingStat.unlock();
