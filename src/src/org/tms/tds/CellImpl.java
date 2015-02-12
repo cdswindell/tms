@@ -470,7 +470,7 @@ public class CellImpl extends TableElementImpl implements Cell
     {
         TableImpl table = getTable();
         if (table != null)
-            return Collections.unmodifiableList(table.getCellAffects(this));
+            return Collections.unmodifiableList(table.getCellAffects(this, true));
         else
             return null;
     }
@@ -588,7 +588,8 @@ public class CellImpl extends TableElementImpl implements Cell
         clearDerivation();
         
         // clear any derivations on elements affected by this cell
-        List<Derivable> affects = getAffects();
+        TableImpl parentTable = getTable();
+        List<Derivable> affects = parentTable != null ? parentTable.getCellAffects(this, false) : getAffects();
         if (affects != null) 
             (new ArrayList<Derivable>(affects)).forEach(d -> d.clearDerivation());
         
@@ -624,7 +625,12 @@ public class CellImpl extends TableElementImpl implements Cell
         else
             label = "";
         
-        return String.format("[%s%s <%s>]", getElementType(), label, isPendings() ? "pending" : isNull() ? "null" :getCellValue().toString());
+        RowImpl r = getRow();
+        ColumnImpl c = getColumn();
+        return String.format("[%s%s <%s> R%dC%d]", getElementType(), label, 
+                isPendings() ? "pending" : isNull() ? "null" :getCellValue().toString(),
+                r != null ? r.getIndex() : 0,
+                c != null ? c.getIndex() : 0);
 	}
 	
 	/*

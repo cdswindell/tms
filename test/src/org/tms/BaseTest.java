@@ -10,6 +10,9 @@ public class BaseTest
 
     public boolean closeTo(Object x, double y, double withIn) 
     {
+        if (x == null)
+            return false;
+        
         return withIn > Math.abs((Double)x - y);
     }
 

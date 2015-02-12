@@ -6,6 +6,7 @@ import java.util.concurrent.Semaphore;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.exceptions.DeletedElementException;
 import org.tms.teq.Derivation.DerivationContext;
 
 /**
@@ -30,6 +31,7 @@ abstract class PendingState
     private PostfixStackEvaluator m_pse;
     private Token m_pendingToken;
     private Semaphore m_lock;
+    private Cell m_pendingCell;
     
     protected Row m_curRow;
     protected Column m_curCol;
@@ -43,6 +45,11 @@ abstract class PendingState
         m_pendingToken = tk;  
         m_valid = true;
         
+        if (m_curCol != null && m_curCol.getTable() != null)
+            m_pendingCell = m_curCol.getTable().getCell(m_curRow, m_curCol);
+        else
+            m_pendingCell = null;
+         
         m_lock = new Semaphore(1, true);
     }
 
@@ -65,10 +72,7 @@ abstract class PendingState
     
     protected Cell getPendingCell()
     {
-        if (m_curCol != null && m_curCol.getTable() != null)
-            return m_curCol.getTable().getCell(m_curRow, m_curCol);
-        else
-            return null;
+        return m_pendingCell;
     }
     
     protected Token reevaluate(DerivationContext dc) 
@@ -76,14 +80,17 @@ abstract class PendingState
     {
         // if the target cell is no longer pending, just return, don't override value
         Cell cell = getPendingCell();
-        if (cell == null || !cell.isPendings())
+        if (cell == null || !cell.isPendings()) {
+            unblockDerivations();
             return Token.createNullToken();
+        }
         
         // calculate the new value, this could throw an exception if a pending
         // calculation or a blocked cell is encountered
         Token t = m_pse.reevaluate(m_curRow, m_curCol, dc);
         
         // we want exclusive access
+        boolean doUnblockDerivations = false;
         lock();
         try {            
             // in the event this state has been invalidated (by clearing the derivation
@@ -102,16 +109,21 @@ abstract class PendingState
             
             // set the cell value with the computed result
             m_curCol.getTable().setCellValue(m_curRow, m_curCol, t);
-            
-            //unblock the cells that were blocked on this pending
-            unblockDerivations();
-    
-            // return the new token
-            return t;
+            doUnblockDerivations = true;
+        }
+        catch (DeletedElementException de) {
+            doUnblockDerivations = true;
         }
         finally {
             unlock();
         }
+        
+        //unblock the cells that were blocked on this pending
+        if (doUnblockDerivations)
+            unblockDerivations();
+
+        // return the new token
+        return t;
     }
 
     protected void lock()

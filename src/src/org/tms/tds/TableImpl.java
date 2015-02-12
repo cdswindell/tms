@@ -1668,7 +1668,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
     }
     
-    protected List<Derivable> getCellAffects(CellImpl cell)
+    protected List<Derivable> getCellAffects(CellImpl cell, boolean includeIndirects)
     {
         assert cell != null : "Cell required";
         
@@ -1679,14 +1679,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
         if (numAffects > 0)
             affects.addAll(affected);
         
-        // also add parent column and row affects
-        ColumnImpl col = cell.getColumn();
-        if (col != null)
-            affects.addAll(col.getAffects());
-        
-        RowImpl row = cell.getRow();
-        if (row != null)
-            affects.addAll(row.getAffects());
+        if (includeIndirects) {
+            // also add parent column and row affects
+            ColumnImpl col = cell.getColumn();
+            if (col != null)
+                affects.addAll(col.getAffects());
+            
+            RowImpl row = cell.getRow();
+            if (row != null)
+                affects.addAll(row.getAffects());
+        }
         
         // remove this element to avoid cycles
         affects.remove(cell);
@@ -1743,7 +1745,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         else if (te instanceof TableCellsElementImpl)
             return ((TableCellsElementImpl)te).getAffects();
         else if (te instanceof CellImpl) {
-            return getCellAffects((CellImpl)te);
+            return getCellAffects((CellImpl)te, true);
         }
             
         return null;

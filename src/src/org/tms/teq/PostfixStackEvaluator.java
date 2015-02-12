@@ -209,8 +209,7 @@ int cnt = 0;
                         m_opStack.push(doTransformOp(oper, tbl, row, col, dc, args));                 
                     }
                     catch (BlockingSetDerivationException e) {
-                        signalBlockedDerivation(rewind, tbl, row, col, oper, e); 
-                        
+                        signalBlockedDerivation(rewind, tbl, row, col, oper, e);                        
                         // if signalBlockedDerivation doesn't rethrow calculation, retry
                     }
                     catch (BlockedDerivationException e) {
@@ -433,7 +432,6 @@ int cnt = 0;
         }
         
         // if the state isn't pending any longer, the calculation will continue
-System.out.println("No longer pending: " + ps);
     }
 
     private void signalBlockedDerivation(EquationStack rewind, Table tbl, Row row, Column col, 
@@ -467,7 +465,6 @@ System.out.println("No longer pending: " + ps);
             }
             
             // if the state isn't pending any longer, the calculation will continue
-System.out.println("No longer pending: " + pendingStat);
         }
         finally {
             pendingStat.unlock();
@@ -537,7 +534,9 @@ System.out.println("No longer pending: " + pendingStat);
         return svse;
     }
 
-    private TwoVariableStatEngine fetchTVSE(TableRowColumnElement ref1, TableRowColumnElement ref2, BuiltinOperator bio, DerivationContext dc) 
+    private TwoVariableStatEngine fetchTVSE(TableRowColumnElement ref1, TableRowColumnElement ref2, 
+            BuiltinOperator bio, DerivationContext dc)
+    throws BlockingSetDerivationException 
     {
         TwoVariableStatEngine tvse = null;
         if (dc != null)
@@ -547,18 +546,71 @@ System.out.println("No longer pending: " + pendingStat);
             tvse = new TwoVariableStatEngine();  
             
             Cell ref1Cell = ref1.getCell(Access.First);
-            Cell ref2Cell = ref2.getCell(Access.Current);
+            Cell ref2Cell = ref2.getCell(Access.First);
             
-            while (ref1Cell != null && ref2Cell != null) {               
-                Number x = (Number)ref1Cell.getCellValue();
-                Number y = (Number)ref2Cell.getCellValue();
+            // we only track pendings in one or the other ref at a time
+            // future development goal would be to handle both at the same time 
+            TableRowColumnElement pendingsIn = null;
+            boolean arePendings = false;
+            Set<PendingState> blockingSet = new LinkedHashSet<PendingState>();
+            Derivation d = getDerivation();
+            if (d == null)
+                throw new IllegalTableStateException("Derivation is required");
+            
+            int idx = 1;
+            while (ref1Cell != null && ref2Cell != null) {  
+                // want to force one iteration of loop, allowing several escapes
+                do {
+                    if (ref1Cell.isPendings() && (pendingsIn == null || pendingsIn == ref1)) {
+                        if (pendingsIn == null)
+                            pendingsIn = ref1;
+                        
+                        // if we've already recorded this statistic, don't reprocess
+                        PendingStatistic pendingStat = d.getPendingStatistic(pendingsIn);
+                        if (pendingStat != null)
+                            throw new BlockingSetDerivationException(pendingStat);
+                        
+                        PendingState ps = getPendingState(ref1Cell);
+                        if (ps != null) {
+                            arePendings = true;
+                            blockingSet.add(ps);
+                            continue;
+                        }
+                    }                    
+                    else if (ref2Cell.isPendings() && (pendingsIn == null || pendingsIn == ref2)) {
+                        if (pendingsIn == null)
+                            pendingsIn = ref2;
+                        
+                        // if we've already recorded this statistic, don't reprocess
+                        PendingStatistic pendingStat = d.getPendingStatistic(pendingsIn);
+                        if (pendingStat != null)
+                            throw new BlockingSetDerivationException(pendingStat);
+                        
+                        PendingState ps = getPendingState(ref2Cell);
+                        if (ps != null) {
+                            arePendings = true;
+                            blockingSet.add(ps);
+                            continue;
+                        }
+                    }
+                    
+                    Number x = (Number)ref1Cell.getCellValue();
+                    Number y = (Number)ref2Cell.getCellValue();
+                    
+                    tvse.enter(x, y);
+                } while (false);
                 
-                tvse.enter(x, y);
-                
-                ref1Cell = ref1.getCell(Access.Next);
-                ref2Cell = ref2.getCell(Access.Current);
+                // set up to process the cells in the next row/column
+                idx++;
+                ref1Cell = ref1.getCell(Access.ByIndex, idx);
+                ref2Cell = ref2.getCell(Access.ByIndex, idx);
             }
                         
+            if (arePendings && pendingsIn != null) {
+                //System.out.println(String.format("fetchTVSE: %s %s %s %d", bio, ref1, ref2, blockingSet.size()));
+                throw new BlockingSetDerivationException(blockingSet, pendingsIn);
+            }
+            
             if (dc != null)
                 dc.cacheTVSE(ref1, ref2, tvse);
         }

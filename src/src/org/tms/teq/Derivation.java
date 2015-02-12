@@ -366,6 +366,7 @@ public class Derivation
                 psDeriv = ps.getDerivation();
                 Token t = ps.getPendingToken();
                 if (!ps.isStillPending() || t == null || psDeriv == null) {
+                    ps.unblockDerivations();
                     ps.delete();
                     return;
                 }
@@ -450,39 +451,36 @@ public class Derivation
     
     protected void registerBlockingCell(Cell blockingCell, PendingState ps)
     {
-        synchronized(m_cellBlockedPendingStatesMap) {
-            if (blockingCell != null && ps != null) {
-                Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(blockingCell);
-                if (blockedStates == null) {
-                    blockedStates = new LinkedHashSet<PendingState>();
-                    m_cellBlockedPendingStatesMap.put(blockingCell, blockedStates);
-                }
-                
-                blockedStates.add(ps);
-            }    
-        }
+        if (blockingCell != null && ps != null && blockingCell.isPendings()) {
+            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(blockingCell);
+            if (blockedStates == null) {
+                blockedStates = new LinkedHashSet<PendingState>();
+                m_cellBlockedPendingStatesMap.put(blockingCell, blockedStates);
+            }
+            
+            blockedStates.add(ps);
+        }    
     }
     
     protected void unblockDerivations(Cell nonPendingCell)
     {
         assert nonPendingCell.isPendings() == false : "Cell cannot be pending";
         
-        synchronized(m_cellBlockedPendingStatesMap) {
-            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(nonPendingCell);
-            if (blockedStates != null) {
-                Set<PendingState> unblocked = new HashSet<PendingState>();
-                
-                for (PendingState ps : blockedStates) {
-                    if (ps != null && ps.isStillPending()) {
-                        if (ps.unblockDerivations(nonPendingCell))
-                            unblocked.add(ps);
-                    }             
-                }
-    
-                blockedStates.removeAll(unblocked);
-                if (blockedStates.isEmpty())
-                    m_cellBlockedPendingStatesMap.remove(nonPendingCell);
+        Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(nonPendingCell);
+        if (blockedStates != null) {
+            Set<PendingState> unblocked = new HashSet<PendingState>();
+            
+            for (PendingState ps : blockedStates) {
+                if (ps != null && ps.isStillPending()) {
+                    boolean removed = ps.unblockDerivations(nonPendingCell);
+                    if (removed)
+                        unblocked.add(ps);
+                }   
             }
+
+            blockedStates.removeAll(unblocked);
+            if (blockedStates.isEmpty())
+                m_cellBlockedPendingStatesMap.remove(nonPendingCell);
         }
     }   
 
@@ -509,11 +507,9 @@ public class Derivation
     protected boolean isBlockedDerivations(Cell cell)
     {
         if (cell != null) {
-            synchronized(m_cellBlockedPendingStatesMap) {
-                Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(cell);
-                if (blockedStates != null)
-                    return !blockedStates.isEmpty();
-            }
+            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(cell);
+            if (blockedStates != null)
+                return !blockedStates.isEmpty();
         }
         
         return false;

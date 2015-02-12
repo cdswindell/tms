@@ -22,6 +22,7 @@ public class PendingStatistic
     private boolean m_valid;
     private Derivation m_derivation;
     private Operator m_oper;
+    private boolean m_useAccelerator;
     
     protected PendingStatistic(Derivation deriv, Operator oper, TableElement ref, Set<PendingState> blockedOnSet)
     {
@@ -31,37 +32,44 @@ public class PendingStatistic
         m_derivation = deriv;
         m_lock = new Semaphore(1);
         m_oper = oper;
+        m_useAccelerator = true;
         m_valid = true;
         
-        // register this PendingStatistic with each dependent calculation
-        boolean blockedOnAny = false;
-        for (PendingState ps : blockedOnSet) {
-            if (ps != null) {
-                ps.lock();
-                try {                      
-                    if (ps.isStillPending()) {
-                        Derivation d = ps.getDerivation();
-                        assert d != null : "Derivation Required";
-                        
-                        Cell blockingCell  = ps.getPendingCell();
-                        assert blockingCell != null : "Blocked Cell Required";
-                        
-                        m_blockedOnCells.add(blockingCell);
-                        d.registerBlockingCell(blockingCell, new BlockedStatisticState(this, deriv));
-                        blockedOnAny = true;
+        // register with parent derivation, so we don't have to 
+        deriv.registerPendingStatistic(this);
+
+        lock();
+        try {
+            boolean blockedOnAny = false;
+            for (PendingState ps : blockedOnSet) {
+                if (ps != null) {
+                    ps.lock();
+                    try {                      
+                        if (ps.isStillPending()) {
+                            Derivation d = ps.getDerivation();
+                            assert d != null : "Derivation Required";
+                            
+                            Cell blockingCell  = ps.getPendingCell();
+                            assert blockingCell != null : "Blocked Cell Required";
+                            
+                            // register this PendingStatistic with each dependent cell
+                            m_blockedOnCells.add(blockingCell);
+                            d.registerBlockingCell(blockingCell, new BlockedStatisticState(this, deriv));
+                            blockedOnAny = true;
+                        }
+                    }
+                    finally {
+                        ps.unlock();
                     }
                 }
-                finally {
-                    ps.unlock();
-                }
             }
+            
+            if (!blockedOnAny) 
+                delete();
         }
-        
-        // register with parent derivation, so we don't have to 
-        if (blockedOnAny)
-            deriv.registerPendingStatistic(this);
-        else
-            delete();
+        finally {
+            unlock();
+        }
     }
     
     @Override
@@ -96,7 +104,7 @@ public class PendingStatistic
 
     protected boolean isBlockedOnAny()
     {
-        return !m_blockedOnCells.isEmpty();
+        return isValid() || !m_blockedOnCells.isEmpty();
     }
     
     public boolean isValid()
@@ -188,18 +196,33 @@ public class PendingStatistic
                 delete();
                 return false;
             }
-                  
+            
+            /*
+             * If threading support is working properly, all unblocked cells passed into
+             * this method *should* also be in the m_blockedOnCells set. If this set is not
+             * empty, the PendingStatistic is still blocked.
+             * 
+             * As a safeguard to catch thread syncing errors, if we encounter an unblocked 
+             * cell that is *not* in m_blockedOnCells, disable the use of the accelerator
+             * and rely on brute force check
+             */
+            boolean removedCell = false;
             if (unblockedCell != null) {
-                boolean removedCell = m_blockedOnCells.remove(unblockedCell);
-                if (!m_blockedOnCells.isEmpty())
+                removedCell = m_blockedOnCells.remove(unblockedCell);
+                if (m_useAccelerator && removedCell && !m_blockedOnCells.isEmpty())
                     return removedCell;
             }
 
+            if (m_useAccelerator && unblockedCell != null && !removedCell) 
+                m_useAccelerator = false;
+
             // see if any of the cells in the reference are still pending, 
             // if so, continue waiting
+            // if threading synchronization is working correctly, this final check 
+            // shouldn't be needed...
             for (Cell c: m_refElement.cells()) {
-                if (isBlockingCell(c))
-                        return false ; 
+                if (isBlockingCell(c)) 
+                    return removedCell ;
                 
                 if (m_refElement.isInvalid()) {
                     delete();
@@ -238,14 +261,16 @@ public class PendingStatistic
                     }
                     catch (BlockedDerivationException e) {} // noop
                 }
+                else
+                    System.out.println("Encountered condition that deletes stat without evaluation");
             }
-            
-            // process any spawned calculations
-            dc.processPendings();
             
             // remove the cells we processed so they are not cleared by delete
             m_blockedOnCells.removeAll(toRemove);   
             toRemove.clear();
+            
+            // process any spawned calculations
+            dc.processPendings();
             
             // we're all done. delete ourselves
             if (m_blockedOnCells.isEmpty())
@@ -266,9 +291,8 @@ public class PendingStatistic
         
         if (c.isDerived()) {
             List<TableElement> affectedBy = c.getAffectedBy();
-            if (affectedBy !=null && affectedBy.contains(m_refElement)) {
+            if (affectedBy !=null && affectedBy.contains(m_refElement)) 
                 return false;
-            }
         }
         
         return c.isPendings();
