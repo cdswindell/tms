@@ -264,51 +264,49 @@ public class PendingOperatorTest extends BaseTest
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, randInt(50) + 50)"); // c2, will block c3
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending2(col 1, 50)/2"); // c3
-        Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
-        Column c4 = (Column)t.addColumn(); // cell derivations column, c5
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, randInt(50) + 1)"); // c2, will block c3
+        Column c3 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending2(col 1, randInt(100) + 1)/2"); // c3
+        Column c4 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
+        Column c5 = (Column)t.addColumn(); // cell derivations column, c5        
+        Column c6 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c6
         
-        Column c5 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c6
+        assertThat(c2, notNullValue());
+        assertThat(c6, notNullValue());
         
-        assertThat(c1a, notNullValue());
-        assertThat(c5, notNullValue());
+        Cell cR1C5 = t.getCell(t.getRow(Access.First), c5);
+        cR1C5.setDerivation("mean(col 2) + mean(Col 6) - mean(col 2)");
         
-        Cell cR1C4 = t.getCell(t.getRow(Access.First), c4);
-        cR1C4.setDerivation("mean(col 2) + mean(Col 6) - mean(col 2)");
+        Cell cR2C5 = t.getCell(t.getRow(Access.Next), c5);
+        cR2C5.setDerivation("max(Col 3)");
         
-        Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
-        cR2C4.setDerivation("max(Col 3)");
+        Cell cR3C5 = t.getCell(t.getRow(Access.Next), c5);
+        cR3C5.setDerivation("count(Col 3)");
         
-        Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
-        cR3C4.setDerivation("count(Col 3)");
-        
-        //assertThat(((TableImpl)t).isPendings(), is(true));
-        
+        assertThat(((TableImpl)t).isPendings(), is(true));        
         while (((TableImpl)t).isPendings()) {
             Thread.sleep(1000);
         }        
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
-        assertThat(closeTo(cR1C4.getCellValue(), 0.0, 0.00000000001), is(true));
-        assertThat(cR2C4.getCellValue(), is(220.0));
-        assertThat(cR3C4.getCellValue(), is(numRows * 1.0));
+        assertThat(cR1C5.getCellValue(), is(0.0));
+        assertThat(cR2C5.getCellValue(), is(220.0));
+        assertThat(cR3C5.getCellValue(), is(numRows * 1.0));
                 
         for (Row r : t.rows()) {
             double v1 = (double)t.getCellValue(r,  c1);
             
-            Cell c = t.getCell(r, c2);
+            Cell c = t.getCell(r, c3);
             assertThat(c, notNullValue());
             assertThat(c.getCellValue(), is(7.0*5.0*2.0 + v1*2 + v1*2.0/2.0));
             
-            c = t.getCell(r, c3);
+            c = t.getCell(r, c4);
             assertThat(c, notNullValue());
             assertThat(c.getCellValue(), is(v1));
         }
         
         // try again, with more threads
-        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((DerivableThreadPool)tc).setMaximumPoolSize(1000);
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
