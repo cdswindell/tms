@@ -277,15 +277,20 @@ public class PendingOperatorTest extends BaseTest
         cR1C5.setDerivation("mean(col 2) + mean(Col 6) - mean(col 2)");
         
         Cell cR2C5 = t.getCell(t.getRow(Access.Next), c5);
+        assertThat(cR2C5, notNullValue());
+        assertThat(cR2C5.getRow().getIndex(), is(2));
         cR2C5.setDerivation("max(Col 3)");
         
         Cell cR3C5 = t.getCell(t.getRow(Access.Next), c5);
+        assertThat(cR3C5, notNullValue());
+        assertThat(cR3C5.getRow().getIndex(), is(3));
         cR3C5.setDerivation("count(Col 3)");
         
         Row curRow = t.getCurrentRow();
-        Column curCol = t.getCurrentColumn();
+        Column curCol = t.getCurrentColumn();        
+        assertThat(curRow.getIndex(), is(3));
         
-        assertThat(((TableImpl)t).isPendings(), is(true));        
+        assertThat(((TableImpl)t).isPendings(), is(true));          
         while (((TableImpl)t).isPendings()) {
             Thread.sleep(1000);
         }        
@@ -363,9 +368,13 @@ public class PendingOperatorTest extends BaseTest
         cR1C4.setDerivation("mean(col 2) + mean(Col 6) - mean(col 2)");
         
         Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
+        assertThat(cR2C4, notNullValue());
+        assertThat(cR2C4.getRow().getIndex(), is(2));
         cR2C4.setDerivation("max(Col 3)");
         
         Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
+        assertThat(cR3C4, notNullValue());
+        assertThat(cR3C4.getRow().getIndex(), is(3));
         cR3C4.setDerivation("count(Col 3)");
               
         Row curRow = t.getCurrentRow();

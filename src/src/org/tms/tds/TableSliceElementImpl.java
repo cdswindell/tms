@@ -18,13 +18,14 @@ import org.tms.api.TableRowColumnElement;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.tds.TableImpl.CellReference;
 import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
 
 abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TableRowColumnElement
 {
     abstract protected TableSliceElementImpl insertSlice(int idx);
-    abstract protected TableSliceElementImpl setCurrent();
+    abstract public TableSliceElementImpl setCurrent();
     
     private JustInTimeSet<SubsetImpl> m_subsets;
     private int m_index = -1;    
@@ -162,7 +163,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         vetElement();
         Set<Derivable> derived = new LinkedHashSet<Derivable>();
         
-        pushCurrent();
+        CellReference cr = getCurrent();
         try {
             // if the element itself is derived, add it to the list
             if (isDerived())
@@ -180,7 +181,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
         }
         finally {
-            popCurrent();
+            if (cr != null) cr.setCurrent();
         }       
     }
     
@@ -265,16 +266,12 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     	m_subsets.forEach(r -> {if (r != null) r.remove(this);});
     }
     
-    protected void pushCurrent()
+    protected CellReference getCurrent()
     {
         if (getTable() != null)
-            getTable().pushCurrent();
-    }
-    
-    protected void popCurrent()
-    {
-        if (getTable() != null)
-            getTable().popCurrent();
+            return getTable().getCurrent();
+        else
+            return null;
     }
     
     /*
@@ -404,7 +401,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         else if (o == null && !isSupportsNull())
             throw new NullValueException(this, TableProperty.CellValue);
         
-        pushCurrent();
+        CellReference cr = getCurrent();
         if (parent != null)
             parent.deactivateAutoRecalculate();
         boolean setSome = false;
@@ -442,7 +439,8 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         finally { 
             if (parent != null)
                 parent.activateAutoRecalculate();
-            popCurrent();
+            if (cr != null) 
+                cr.setCurrent();
         }
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())

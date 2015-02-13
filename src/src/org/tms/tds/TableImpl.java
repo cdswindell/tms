@@ -993,7 +993,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
      */
     void ensureRowsExist()
     {
-        pushCurrent();
+        CellReference cr = getCurrent();
         try {
             for (int i = 1; i <= this.getNumRows(); i++) {
                 RowImpl r = this.getRowInternal(true, Access.ByIndex, i);
@@ -1001,7 +1001,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             }
         }
         finally {        
-            popCurrent();
+            cr.setCurrent();
         }
     }
     
@@ -1219,7 +1219,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     void ensureColumnsExist()
     {
-        pushCurrent();
+        CellReference cr = getCurrent();
         try {
             for (int i = 1; i <= this.getNumColumns(); i++) {
                 ColumnImpl c = this.getColumnInternal(true, Access.ByIndex, i);
@@ -1227,7 +1227,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             }
         }
         finally {        
-            popCurrent();
+            cr.setCurrent();
         }
     }
     
@@ -1244,21 +1244,21 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_precision = precision;
     }
     
-    synchronized protected TableSliceElementImpl add(TableSliceElementImpl r, Access mode, Object... md)
+    synchronized protected TableSliceElementImpl add(TableSliceElementImpl tse, Access mode, Object... md)
     {
         vetElement();
 
         // calculate the index where the row will go
-        ElementType sliceType = r.getElementType();
+        ElementType sliceType = tse.getElementType();
         int idx = calcIndex(sliceType, mode, true, md);
         if (idx <= -1)
             throw new InvalidAccessException(ElementType.Table, sliceType, mode, true, md);
         
         // insert row into data structure at correct index
-        if (r.insertSlice(idx) != null)
-            r.setCurrent();
+        if (tse.insertSlice(idx) != null)
+            tse.setCurrent();
         
-        return r;
+        return tse;
     }
     
     protected int calcIndex(ElementType et, Access mode)
@@ -1516,7 +1516,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     synchronized public void fill(Object o) 
     {
         vetElement();
-        pushCurrent();
+        CellReference cr = getCurrent();
         deactivateAutoRecalculate();
         try {
             ColumnImpl c = getColumn(Access.First);
@@ -1527,7 +1527,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
         finally {  
             activateAutoRecalculate();
-            popCurrent();
+            cr.setCurrent();
         }
         
         // no need to recalc table, as filling all cells
@@ -1553,27 +1553,33 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
 	synchronized public void pushCurrent() 
 	{
-		CellReference cr = new CellReference(getCurrentRow(), getCurrentColumn());
-		m_currentCellStack.push(cr);
+	    CellReference cr = new CellReference(getCurrentRow(), getCurrentColumn());
+	    m_currentCellStack.push(cr);
 	}
 
 	synchronized public void purgeCurrentStack(TableSliceElementImpl slice)
-    {
-        if (m_currentCellStack  != null) 
-            m_currentCellStack.removeIf(new CellStackPurger(slice));
-    }
-    
+	{
+	    if (m_currentCellStack  != null) 
+	        m_currentCellStack.removeIf(new CellStackPurger(slice));
+	}
+
+	synchronized public CellReference getCurrent() 
+	{
+	    CellReference cr = new CellReference(this);
+	    return cr;
+	}
+	
 	@Override
 	synchronized public void recalculate()
 	{
         vetElement();
         
-        pushCurrent();        
+        CellReference cr = getCurrent();
         try {
             Derivation.recalculateAffected(this);
         }
         finally {
-            popCurrent();
+            cr.setCurrent();
         }
 	}
 	
@@ -1609,7 +1615,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         vetElement();
         Set<Derivable> derived = new LinkedHashSet<Derivable>();
         
-        pushCurrent();
+        CellReference cr = getCurrent();
         try {
             for (ColumnImpl col : getColumnsInternal()) {
                 if (col != null && col.isDerived())
@@ -1627,7 +1633,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
         }
         finally {
-            popCurrent();
+            cr.setCurrent();
         }       
     }
     
@@ -1948,10 +1954,11 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }        
     }
 	
-    private class CellReference 
+    protected static class CellReference 
     {
     	private RowImpl m_row;
     	private ColumnImpl m_col;
+    	private TableImpl m_table;
     	
     	public CellReference(RowImpl r, ColumnImpl c)
     	{
@@ -1960,9 +1967,34 @@ public class TableImpl extends TableCellsElementImpl implements Table
     			
     		m_row = r;
     		m_col = c;
+    		m_table = r.getTable();
     	}
     	
-    	public RowImpl getRow()
+    	public CellReference(TableImpl t)
+        {
+    	    if (t != null) {
+    	        synchronized(t) {
+        	        m_row = t.getCurrentRow();
+        	        m_col = t.getCurrentColumn();
+        	        m_table = t;
+    	        }
+    	    }
+        }
+    	
+    	public void setCurrent() 
+    	{
+    	    if (m_table != null) {
+    	        synchronized(m_table) {
+                    if (m_row != null && m_row.isValid())
+                        m_row.setCurrent();
+                    
+                    if (m_col != null && m_col.isValid())
+                        m_col.setCurrent();
+    	        }
+    	    }
+    	}
+
+        public RowImpl getRow()
     	{
     		return m_row;
     	}

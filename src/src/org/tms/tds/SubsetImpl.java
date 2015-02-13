@@ -13,13 +13,14 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
-import org.tms.api.Subset;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.tds.TableImpl.CellReference;
 import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
 
@@ -451,7 +452,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		    
 		    clearComponentDerivations();
 		    
-		    tbl.pushCurrent();
+	        CellReference cr = tbl.getCurrent();
 		    tbl.deactivateAutoRecalculate();
 		    try {
 		        for (Cell cell : cells()) {
@@ -463,7 +464,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		    }
 		    finally {	            	            
 	            tbl.activateAutoRecalculate();
-	            tbl.popCurrent();
+	            cr.setCurrent();
 		    }
 		    
 		    if (tbl.isAutoRecalculateEnabled())

@@ -70,9 +70,9 @@ public class Derivation
         
         // parse the expression
         Table t = elem.getTable();
-        if (t != null) {
-            t.pushCurrent();
-            
+        CellReference cr = getCurrent(t);
+
+        if (t != null) {            
             if (t.hasProperty(TableProperty.Precision)) {
                 int precision = t.getPropertyInt(TableProperty.Precision);
                 if (precision < 0)
@@ -133,8 +133,7 @@ public class Derivation
             return deriv;
         }
         finally {
-            if (t != null)
-                t.popCurrent();
+            cr.setCurrent();            
         }
     }
     
@@ -191,7 +190,7 @@ public class Derivation
         DerivationContext dc = new DerivationContext();
         dc.setRecalculateAffected(false);
         
-        if (parent != null) parent.pushCurrent();
+        CellReference cr = getCurrent(parent);
         try {
             for (Derivable derivable : orderedDerivables) {
                 if (derivable == null) continue;
@@ -203,7 +202,7 @@ public class Derivation
             dc.processPendings();
         }
         finally {
-            if (parent != null) parent.pushCurrent();
+            cr.setCurrent();
         }
     }
 
@@ -438,6 +437,24 @@ public class Derivation
     {
         sf_PROCESS_ID_UUID_MAP.put(processId, transactId);        
     }  
+    
+    private static CellReference getCurrent(Table t) 
+    {
+        if (t != null) {
+            synchronized(t) {
+                CellReference cr = new CellReference(t);
+                return cr;
+            }
+        }
+        else
+            return null;
+    }
+    
+    private static CellReference getCurrent(Derivation d) 
+    {
+        Table parent = d.getTable();
+        return getCurrent(parent);
+    }
     
     /*
      * Instance fields
@@ -773,9 +790,7 @@ public class Derivation
         if (m_target.isReadOnly())
             throw new ReadOnlyException((BaseElement)m_target, TableProperty.Derivation);
         
-        Table t = m_target.getTable();
-        t.pushCurrent();
-        
+        CellReference cr = getCurrent(this);        
         try {
             // currently support derived rows, columns, and cells, 
             // dispatch to correct handler
@@ -794,7 +809,7 @@ public class Derivation
             }
         }
         finally {      
-            t.popCurrent();  
+            cr.setCurrent();  
         }
     }
     
@@ -808,9 +823,7 @@ public class Derivation
         if (affected.isEmpty()) return;
         
         // recalculate impacted elements
-        Table parentTable = m_target.getTable();
-        if (parentTable != null)
-            parentTable.pushCurrent();
+        CellReference cr = getCurrent(this);
         try {
             for (Derivable d : affected) {
                 Derivation deriv = d.getDerivation();
@@ -818,8 +831,7 @@ public class Derivation
             }
         }
         finally {
-            if (parentTable != null)
-                parentTable.popCurrent();
+            cr.setCurrent();
         }       
     }
     
@@ -1141,5 +1153,44 @@ public class Derivation
             
             return m_cachedTVSEs.get(new Tuple<TableElement>(e1, e2));
         }       
+    }
+    
+    protected static class CellReference 
+    {
+        private Row m_row;
+        private Column m_col;
+        private Table m_table;
+        
+        public CellReference(Table t)
+        {
+            if (t != null) {
+                m_row = t.getCurrentRow();
+                m_col = t.getColumn();
+                m_table = t;
+            }    
+        }
+
+        public Row getRow()
+        {
+            return m_row;
+        }
+        
+        public Column getColumn()
+        {
+            return m_col;
+        }
+        
+        public void setCurrent() 
+        {
+            if (m_table != null) {
+                synchronized(m_table) {
+                    if (m_row != null && m_row.isValid())
+                        m_row.setCurrent();
+                    
+                    if (m_col != null && m_col.isValid())
+                        m_col.setCurrent();
+                }
+            }
+        }
     }
 }

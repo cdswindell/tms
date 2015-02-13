@@ -27,4 +27,6 @@ public interface TableRowColumnElement extends TableElement
     public void sort(Comparator<Cell> cellSorter);
 
     public Cell getCell(Access mode, Object... mda);
+    
+    public TableRowColumnElement setCurrent();
 }
