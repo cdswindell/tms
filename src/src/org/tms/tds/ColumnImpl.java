@@ -348,7 +348,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     }
     
     @Override
-    protected ColumnImpl setCurrent()
+    public ColumnImpl setCurrent()
     {
         vetElement();
         ColumnImpl prevCurrent = null;

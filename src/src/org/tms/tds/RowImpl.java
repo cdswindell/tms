@@ -173,7 +173,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
     }
 
     @Override
-    protected RowImpl setCurrent()
+    public RowImpl setCurrent()
     {
         vetElement();
         

@@ -563,7 +563,7 @@ public class Derivation
         for (Map.Entry<Cell, Set<PendingState>> e : m_cellBlockedPendingStatesMap.entrySet()) {
             Cell c = e.getKey();
             if (c != null) 
-                c.getColumn().getTable().setCellValue(c.getRow(), c.getColumn(), Token.createNullToken());
+                c.setCellValue(Token.createNullToken());
             
             // Cannot call resetPendingCellDependents, as it will modify m_cellBlockedPendingStatesMap
             for (PendingState ps : e.getValue()) {
@@ -841,7 +841,7 @@ public class Derivation
             Token t = pfe.evaluate(row, col, dc);
             if (t.isNumeric()) 
                 t.setValue(applyPrecision(t.getNumericValue()));
-            boolean modified = tbl.setCellValue(row, col, t);
+            boolean modified = cell.setCellValue(t);
             if (modified && dc != null) {
             	dc.remove(row);
             	dc.remove(col);
@@ -885,7 +885,7 @@ public class Derivation
                 if (t.isNumeric() )
                     t.setValue(applyPrecision(t.getNumericValue()));
                 
-                boolean modified = tbl.setCellValue(row, col, t);
+                boolean modified = cell.setCellValue( t);
                 if (modified && dc != null) {
                 	dc.remove(col);
                 	anyModified = true;
@@ -934,7 +934,7 @@ public class Derivation
                 Token t = pfe.evaluate(row, col, dc);
                 if (t.isNumeric())
                     t.setValue(applyPrecision(t.getNumericValue()));
-                boolean modified = tbl.setCellValue(row, col, t);
+                boolean modified = cell.setCellValue(t);
                 if (modified && dc != null) {
                 	dc.remove(row);
                 	anyModified = true;

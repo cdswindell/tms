@@ -1479,7 +1479,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         CellImpl cell = getCell(row, col);
         if (cell != null) {
             if (o instanceof Token)
-                return cell.setDerivedCellValue((Token)o);
+                return cell.postResult((Token)o);
             else
                 return cell.setCellValue(o);
         }

@@ -282,12 +282,18 @@ public class PendingOperatorTest extends BaseTest
         Cell cR3C5 = t.getCell(t.getRow(Access.Next), c5);
         cR3C5.setDerivation("count(Col 3)");
         
+        Row curRow = t.getCurrentRow();
+        Column curCol = t.getCurrentColumn();
+        
         assertThat(((TableImpl)t).isPendings(), is(true));        
         while (((TableImpl)t).isPendings()) {
             Thread.sleep(1000);
         }        
         
         assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(t.getCurrentRow(), is(curRow));
+        assertThat(t.getCurrentColumn(), is(curCol));
         
         assertThat(cR1C5.getCellValue(), is(0.0));
         assertThat(cR2C5.getCellValue(), is(220.0));
@@ -362,11 +368,17 @@ public class PendingOperatorTest extends BaseTest
         Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
         cR3C4.setDerivation("count(Col 3)");
               
+        Row curRow = t.getCurrentRow();
+        Column curCol = t.getCurrentColumn();
+        
         while (((TableImpl)t).isPendings()) {
             Thread.sleep(1000);
         }        
         
         assertThat(((TableImpl)t).isPendings(), is(false));
+        
+        assertThat(t.getCurrentRow(), is(curRow));
+        assertThat(t.getCurrentColumn(), is(curCol));
         
         numRows = t.getNumRows();
         assertThat(closeTo(cR1C4.getCellValue(), 0.0, 0.00000000001), is(true));
@@ -433,11 +445,17 @@ public class PendingOperatorTest extends BaseTest
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
+        Row curRow = t.getCurrentRow();
+        Column curCol = t.getCurrentColumn();
+        
         // clear derivation
         c2.clearDerivation();
-        
+  
         assertThat(((TableImpl)t).isPendings(), is(false));
         
+        assertThat(t.getCurrentRow(), is(curRow));
+        assertThat(t.getCurrentColumn(), is(curCol));
+              
         assertThat(cR1C4.isNull(), is(true));
         assertThat(cR2C4.isNull(), is(true));
         assertThat(cR3C4.isNull(), is(true));

@@ -6,6 +6,7 @@ import java.util.concurrent.Semaphore;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Table;
 import org.tms.api.exceptions.DeletedElementException;
 import org.tms.teq.Derivation.DerivationContext;
 
@@ -35,6 +36,7 @@ abstract class PendingState
     
     protected Row m_curRow;
     protected Column m_curCol;
+    protected Table m_parentTable;
     protected boolean m_valid;
     
     protected PendingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
@@ -42,6 +44,7 @@ abstract class PendingState
         m_pse = pse;
         m_curRow = row;
         m_curCol = col;
+        m_parentTable = col != null ? col.getTable() : null;
         m_pendingToken = tk;  
         m_valid = true;
         
@@ -84,46 +87,69 @@ abstract class PendingState
             unblockDerivations();
             return Token.createNullToken();
         }
-        
-        // calculate the new value, this could throw an exception if a pending
-        // calculation or a blocked cell is encountered
-        Token t = m_pse.reevaluate(m_curRow, m_curCol, dc);
-        
-        // we want exclusive access
-        boolean doUnblockDerivations = false;
-        lock();
-        try {            
-            // in the event this state has been invalidated (by clearing the derivation
-            // just return a null token and don't set cell
-            if (!isValid())
-                return Token.createNullToken();
             
-            // apply numeric precision/rounding
-            if (t.isNumeric() )
-                t.setValue(getDerivation().applyPrecision(t.getNumericValue()));
+        pushCurrent();
+        try {
+            // calculate the new value, this could throw an exception if a pending
+            // calculation or a blocked cell is encountered
+            Token t = m_pse.reevaluate(m_curRow, m_curCol, dc);
             
-            // check one more time for pending, just in case someone came and
-            // cleared the pending state by clearing the parent derivation           
-            if (!cell.isPendings())
-                return Token.createNullToken();
+            // we want exclusive access
+            boolean doUnblockDerivations = false;
+            lock();
+            try {            
+                // in the event this state has been invalidated (by clearing the derivation
+                // just return a null token and don't set cell
+                if (!isValid())
+                    return Token.createNullToken();
+                
+                // apply numeric precision/rounding
+                if (t.isNumeric() )
+                    t.setValue(getDerivation().applyPrecision(t.getNumericValue()));
+                
+                // check one more time for pending, just in case someone came and
+                // cleared the pending state by clearing the parent derivation           
+                if (!cell.isPendings())
+                    return Token.createNullToken();
+                
+                setCellValue(t);
+                doUnblockDerivations = true;
+            }
+            catch (DeletedElementException de) {
+                doUnblockDerivations = true;
+            }
+            finally {
+                unlock();
+            }
             
-            // set the cell value with the computed result
-            m_curCol.getTable().setCellValue(m_curRow, m_curCol, t);
-            doUnblockDerivations = true;
-        }
-        catch (DeletedElementException de) {
-            doUnblockDerivations = true;
+            //unblock the cells that were blocked on this pending
+            if (doUnblockDerivations)
+                unblockDerivations();
+    
+            // return the new token
+            return t;
         }
         finally {
-            unlock();
+            popCurrent();
         }
-        
-        //unblock the cells that were blocked on this pending
-        if (doUnblockDerivations)
-            unblockDerivations();
+    }
 
-        // return the new token
-        return t;
+    private void pushCurrent()
+    {
+        if (m_parentTable != null)
+            m_parentTable.pushCurrent();
+    }
+
+    private void popCurrent()
+    {
+        if (m_parentTable != null)
+            m_parentTable.popCurrent();
+    }
+
+    private void setCellValue(Token t)
+    {
+        if (m_pendingCell != null)
+            m_pendingCell.setCellValue(t);
     }
 
     protected void lock()
@@ -160,7 +186,7 @@ abstract class PendingState
         Cell cell = getPendingCell();
         if (cell != null ) {            
             if (cell.isPendings() && cell.getCellValue() == this)
-                m_curCol.getTable().setCellValue(m_curRow, m_curCol, Token.createNullToken());
+                setCellValue(Token.createNullToken());
             
             Derivation d = getDerivation();
             if (d != null) 

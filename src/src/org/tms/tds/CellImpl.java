@@ -52,7 +52,24 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean setCellValue(Object value)
     {
-        vetElement();        
+        vetElement();   
+        
+        TableImpl parentTable = getTable();
+        if (parentTable != null) {
+            synchronized(parentTable)
+            {
+                return setCellValueInternal(value);
+            }
+        }
+        else
+            return setCellValueInternal(value);
+    }
+    
+    private boolean setCellValueInternal(Object value)
+    {        
+        if (value != null && value instanceof Token)
+            return postResult((Token)value);
+        
         if (isWriteProtected())
             throw new ReadOnlyException(this, TableProperty.CellValue);
         else if (value == null && !isNullsSupported())
@@ -112,7 +129,7 @@ public class CellImpl extends TableElementImpl implements Cell
         return ErrorCode.NoError;
     }
     
-    protected boolean setDerivedCellValue(Token t)
+    protected boolean postResult(Token t)
     {
         decrementPendings();
         if (t.isError()) 
@@ -135,8 +152,10 @@ public class CellImpl extends TableElementImpl implements Cell
             TableImpl table = m_col != null ? m_col.getTable() : null;
             if (table != null)
                 table.incrementPendings();
+            
             if (m_col != null)
                 m_col.incrementPendings();
+            
             RowImpl row = getRow();
             if (row != null)
                 row.incrementPendings();
@@ -150,9 +169,13 @@ public class CellImpl extends TableElementImpl implements Cell
             TableImpl table = m_col != null ? m_col.getTable() : null;
             if (table != null)
                 table.decrementPendings();
+            else
+                System.out.println("Failed to decrement tbl pendings");
             
             if (m_col != null)
                 m_col.decrementPendings();
+            else
+                System.out.println("Failed to decrement col pendings");
             
             RowImpl row = getRow();
             if (row != null)
