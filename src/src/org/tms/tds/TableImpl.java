@@ -984,7 +984,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return getRow(Access.Current);
     }
     
-    synchronized private RowImpl getRowInternal(boolean createIfNull, Access mode, Object...mda)
+    private RowImpl getRowInternal(boolean createIfNull, Access mode, Object...mda)
     {
         RowImpl r = null;
         
@@ -1016,7 +1016,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
      * only when accessed, this method is needed to build out all rows when
      * in the case where they are to be iterated over
      */
-    void ensureRowsExist()
+    synchronized void ensureRowsExist()
     {
         CellReference cr = getCurrent();
         try {
@@ -1217,7 +1217,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return getColumn(Access.Current);
     }
     
-    synchronized private ColumnImpl getColumnInternal(boolean createIfNull, Access mode, Object...mda)
+    private ColumnImpl getColumnInternal(boolean createIfNull, Access mode, Object...mda)
     {
         ColumnImpl r = null;
         
@@ -1244,7 +1244,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return r;
     }
 
-    void ensureColumnsExist()
+    synchronized void ensureColumnsExist()
     {
         CellReference cr = getCurrent();
         try {
@@ -1568,7 +1568,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }  
 	
     @Override
-    synchronized public void popCurrent() 
+    public void popCurrent() 
     {
         Deque<CellReference> currentCellStack = getCurrentCellStack();
 		if (currentCellStack != null && !currentCellStack.isEmpty()) {
@@ -1579,21 +1579,21 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	}
 
     @Override
-    synchronized public void pushCurrent() 
+    public void pushCurrent() 
     {
         Deque<CellReference> currentCellStack = getCurrentCellStack();
         CellReference cr = getCurrent();
         currentCellStack.push(cr);
     }
 
-    synchronized public void purgeCurrentStack(TableSliceElementImpl slice)
+    public void purgeCurrentStack(TableSliceElementImpl slice)
     {
         Deque<CellReference> currentCellStack = getCurrentCellStack();
         if (currentCellStack  != null) 
             currentCellStack.removeIf(new CellStackPurger(slice));
     }
 
-    synchronized private CellReference getCurrentCellReference()
+    private CellReference getCurrentCellReference()
     {
         Map<TableImpl,CellReference> currentCellMap = sf_CURRENT_CELL.get();
         CellReference cr = currentCellMap.get(this);
@@ -1605,7 +1605,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return cr;
     }
     
-    synchronized private Deque<CellReference> getCurrentCellStack()
+    private Deque<CellReference> getCurrentCellStack()
     {
         Map<TableImpl, Deque<CellReference>> currentCellStackMap = sf_CURRENT_CELL_STACK.get();
         Deque<CellReference> currentCellStack = currentCellStackMap.get(this);
@@ -2037,20 +2037,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
         public void setCurrentCellReference() 
     	{
-    	    if (m_table != null ) {
-    	        synchronized(m_table) {
-    	            CellReference cr = m_table.getCurrentCellReference();
-                    if (m_row != null && m_row.isValid())
-                        cr.setCurrentRow(m_row);
-                    else
-                        cr.setCurrentRow(null);
-                    
-                    if (m_col != null && m_col.isValid())
-                        cr.setCurrentColumn(m_col);
-                    else
-                        cr.setCurrentColumn(null);
-    	        }
-    	    }
+            CellReference cr = m_table.getCurrentCellReference();
+            if (m_row != null && m_row.isValid())
+                cr.setCurrentRow(m_row);
+            else
+                cr.setCurrentRow(null);
+            
+            if (m_col != null && m_col.isValid())
+                cr.setCurrentColumn(m_col);
+            else
+                cr.setCurrentColumn(null);
     	}
 
         public RowImpl getCurrentRow()
