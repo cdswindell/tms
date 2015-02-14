@@ -287,8 +287,10 @@ public class PendingOperatorTest extends BaseTest
         cR3C5.setDerivation("count(Col 3)");
         
         Row curRow = t.getCurrentRow();
-        Column curCol = t.getCurrentColumn();        
         assertThat(curRow.getIndex(), is(3));
+        
+        Column curCol = t.getCurrentColumn();        
+        assertThat(curCol.getIndex(), is(5));
         
         assertThat(((TableImpl)t).isPendings(), is(true));          
         while (((TableImpl)t).isPendings()) {
@@ -297,8 +299,8 @@ public class PendingOperatorTest extends BaseTest
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
-        assertThat(t.getCurrentRow(), is(curRow));
         assertThat(t.getCurrentColumn(), is(curCol));
+        assertThat(t.getCurrentRow(), is(curRow));
         
         assertThat(cR1C5.getCellValue(), is(0.0));
         assertThat(cR2C5.getCellValue(), is(220.0));

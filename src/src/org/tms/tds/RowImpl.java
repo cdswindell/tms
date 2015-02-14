@@ -65,19 +65,19 @@ public class RowImpl extends TableSliceElementImpl implements Row
     /*
      * Class-specific methods
      */   
-    protected CellImpl getCell(ColumnImpl col)
+    protected CellImpl getCell(ColumnImpl col, boolean setCurrent)
     {
         vetElement();
-        return getCellInternal(col, true);
+        return getCellInternal(col, true, setCurrent);
     }
     
-    CellImpl getCellInternal(ColumnImpl col, boolean createIfSparse)
+    CellImpl getCellInternal(ColumnImpl col, boolean createIfSparse, boolean setCurrent)
     {
         assert col != null : "Column required";
         assert this.getTable() != null: "Table required";
         assert this.getTable() == col.getTable() : "Column not in same table";
         
-        return col.getCellInternal(this, createIfSparse);
+        return col.getCellInternal(this, createIfSparse, setCurrent);
     }
 
     /*
@@ -156,14 +156,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
             
             // reindex from insertAt + 1 to the end of the array
             // use the new-fangled JDK 1.8 lambda functionality to reindex
-            rows.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});
-            
-// uncomment the following lines to compile in JDK 1.7 and earlier
-//            for (int i = insertAt + 1; i < nRows; i++) {
-//                Row r = rows.get(i);
-//                if (r != null)
-//                    r.setIndex(i + 1);
-//            }
+            rows.listIterator(insertAt + 1).forEachRemaining(e -> {if (e != null) e.setIndex(e.getIndex()+1);});            
         }
         
         // mark this row as current
@@ -272,7 +265,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
                 if (c == null) continue;
                 int numColCells = c.getCellsSize();
                 if (cellOffset < numColCells) {
-                    if (c.getCellInternal(this, false) != null)
+                    if (c.getCellInternal(this, false, false) != null)
                         numCells++;
                 }
             }
@@ -326,7 +319,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
                 throw new NoSuchElementException();
             
             ColumnImpl col = m_table.getColumn(Access.ByIndex, m_index++);
-            CellImpl c = m_row.getCell(col);
+            CellImpl c = m_row.getCell(col, false);
             return c;
         }       
     }

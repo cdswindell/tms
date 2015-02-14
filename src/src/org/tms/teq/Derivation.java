@@ -70,9 +70,9 @@ public class Derivation
         
         // parse the expression
         Table t = elem.getTable();
-        CellReference cr = getCurrent(t);
-
-        if (t != null) {            
+        if (t != null) {
+            t.pushCurrent();
+            
             if (t.hasProperty(TableProperty.Precision)) {
                 int precision = t.getPropertyInt(TableProperty.Precision);
                 if (precision < 0)
@@ -133,7 +133,8 @@ public class Derivation
             return deriv;
         }
         finally {
-            cr.setCurrent();            
+            if (t != null)
+                t.popCurrent();
         }
     }
     
@@ -190,7 +191,7 @@ public class Derivation
         DerivationContext dc = new DerivationContext();
         dc.setRecalculateAffected(false);
         
-        CellReference cr = getCurrent(parent);
+        if (parent != null) parent.pushCurrent();
         try {
             for (Derivable derivable : orderedDerivables) {
                 if (derivable == null) continue;
@@ -202,7 +203,7 @@ public class Derivation
             dc.processPendings();
         }
         finally {
-            cr.setCurrent();
+            if (parent != null) parent.pushCurrent();
         }
     }
 
@@ -438,24 +439,6 @@ public class Derivation
         sf_PROCESS_ID_UUID_MAP.put(processId, transactId);        
     }  
     
-    private static CellReference getCurrent(Table t) 
-    {
-        if (t != null) {
-            synchronized(t) {
-                CellReference cr = new CellReference(t);
-                return cr;
-            }
-        }
-        else
-            return null;
-    }
-    
-    private static CellReference getCurrent(Derivation d) 
-    {
-        Table parent = d.getTable();
-        return getCurrent(parent);
-    }
-    
     /*
      * Instance fields
      */
@@ -580,7 +563,7 @@ public class Derivation
         for (Map.Entry<Cell, Set<PendingState>> e : m_cellBlockedPendingStatesMap.entrySet()) {
             Cell c = e.getKey();
             if (c != null) 
-                c.setCellValue(Token.createNullToken());
+                c.getColumn().getTable().setCellValue(c.getRow(), c.getColumn(), Token.createNullToken());
             
             // Cannot call resetPendingCellDependents, as it will modify m_cellBlockedPendingStatesMap
             for (PendingState ps : e.getValue()) {
@@ -790,7 +773,9 @@ public class Derivation
         if (m_target.isReadOnly())
             throw new ReadOnlyException((BaseElement)m_target, TableProperty.Derivation);
         
-        CellReference cr = getCurrent(this);        
+        Table t = m_target.getTable();
+        t.pushCurrent();
+        
         try {
             // currently support derived rows, columns, and cells, 
             // dispatch to correct handler
@@ -809,7 +794,7 @@ public class Derivation
             }
         }
         finally {      
-            cr.setCurrent();  
+            t.popCurrent();  
         }
     }
     
@@ -823,7 +808,9 @@ public class Derivation
         if (affected.isEmpty()) return;
         
         // recalculate impacted elements
-        CellReference cr = getCurrent(this);
+        Table parentTable = m_target.getTable();
+        if (parentTable != null)
+            parentTable.pushCurrent();
         try {
             for (Derivable d : affected) {
                 Derivation deriv = d.getDerivation();
@@ -831,7 +818,8 @@ public class Derivation
             }
         }
         finally {
-            cr.setCurrent();
+            if (parentTable != null)
+                parentTable.popCurrent();
         }       
     }
     
@@ -853,7 +841,7 @@ public class Derivation
             Token t = pfe.evaluate(row, col, dc);
             if (t.isNumeric()) 
                 t.setValue(applyPrecision(t.getNumericValue()));
-            boolean modified = cell.setCellValue(t);
+            boolean modified = tbl.setCellValue(row, col, t);
             if (modified && dc != null) {
             	dc.remove(row);
             	dc.remove(col);
@@ -897,7 +885,7 @@ public class Derivation
                 if (t.isNumeric() )
                     t.setValue(applyPrecision(t.getNumericValue()));
                 
-                boolean modified = cell.setCellValue( t);
+                boolean modified = tbl.setCellValue(row, col, t);
                 if (modified && dc != null) {
                 	dc.remove(col);
                 	anyModified = true;
@@ -946,7 +934,7 @@ public class Derivation
                 Token t = pfe.evaluate(row, col, dc);
                 if (t.isNumeric())
                     t.setValue(applyPrecision(t.getNumericValue()));
-                boolean modified = cell.setCellValue(t);
+                boolean modified = tbl.setCellValue(row, col, t);
                 if (modified && dc != null) {
                 	dc.remove(row);
                 	anyModified = true;
@@ -1153,44 +1141,5 @@ public class Derivation
             
             return m_cachedTVSEs.get(new Tuple<TableElement>(e1, e2));
         }       
-    }
-    
-    protected static class CellReference 
-    {
-        private Row m_row;
-        private Column m_col;
-        private Table m_table;
-        
-        public CellReference(Table t)
-        {
-            if (t != null) {
-                m_row = t.getCurrentRow();
-                m_col = t.getColumn();
-                m_table = t;
-            }    
-        }
-
-        public Row getRow()
-        {
-            return m_row;
-        }
-        
-        public Column getColumn()
-        {
-            return m_col;
-        }
-        
-        public void setCurrent() 
-        {
-            if (m_table != null) {
-                synchronized(m_table) {
-                    if (m_row != null && m_row.isValid())
-                        m_row.setCurrent();
-                    
-                    if (m_col != null && m_col.isValid())
-                        m_col.setCurrent();
-                }
-            }
-        }
     }
 }

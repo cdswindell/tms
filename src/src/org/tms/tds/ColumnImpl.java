@@ -116,12 +116,12 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
      * Class-specific methods
      */    
 
-    protected CellImpl getCell(RowImpl row)
+    protected CellImpl getCell(RowImpl row, boolean setCurrent)
     {
-        return getCellInternal(row, true);
+        return getCellInternal(row, true, setCurrent);
     }
     
-    CellImpl getCellInternal(RowImpl row, boolean createIfSparse)
+    CellImpl getCellInternal(RowImpl row, boolean createIfSparse, boolean setCurrent)
     {
         assert row != null : "Row required";
         assert this.getTable() != null: "Table required";
@@ -186,8 +186,11 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         
         // if the cell is non-null, mark the row and column as in use
         if (c != null) {
-        	this.setCurrent();
-        	row.setCurrent();
+            if (setCurrent) {
+            	this.setCurrent();
+            	row.setCurrent();
+            }
+            
             this.setInUse(true);  
             row.setInUse(true);
         }
@@ -478,8 +481,11 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             if (!hasNext())
                 throw new NoSuchElementException();
             
+            RowImpl curRow = m_table.getCurrentRow();
             RowImpl row = m_table.getRow(Access.ByIndex, m_index++);
-            CellImpl c = m_col.getCell(row);
+            CellImpl c = m_col.getCell(row, false);
+            if (curRow != null && curRow.isValid())
+                curRow.setCurrent();
             return c;
         }       
     }

@@ -1471,7 +1471,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         row.setCurrent();
         col.setCurrent();
         
-        return col.getCell(row);
+        return col.getCell(row, true);
     }
     
     synchronized protected boolean setCellValue(RowImpl row, ColumnImpl col, Object o) 
@@ -1540,6 +1540,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         fill(null);
     }  
 	
+    @Override
 	synchronized public void popCurrent() 
     {
 		if (m_currentCellStack != null && !m_currentCellStack.isEmpty()) {
@@ -1551,6 +1552,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 		}		
 	}
 
+	@Override
 	synchronized public void pushCurrent() 
 	{
 	    CellReference cr = new CellReference(getCurrentRow(), getCurrentColumn());
@@ -1572,8 +1574,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	@Override
 	synchronized public void recalculate()
 	{
-        vetElement();
-        
+        vetElement();        
         CellReference cr = getCurrent();
         try {
             Derivation.recalculateAffected(this);
@@ -1888,7 +1889,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             ColumnImpl col = m_cols.get(m_colIndex - 1);
             RowImpl row = m_rows.get(m_rowIndex - 1); 
             
-            Cell c = col.getCell(row);
+            Cell c = col.getCell(row, false);
             
             // Iterate over cells one column at a time; once
             // all rows are visited, reset row index and
@@ -1965,9 +1966,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     		if (r != null && c != null)
     			assert r.getTable() == c.getTable() : "Parent tables must match";
     			
+            m_table = r != null ? r.getTable() : c != null ? c.getTable() : null;
     		m_row = r;
     		m_col = c;
-    		m_table = r.getTable();
     	}
     	
     	public CellReference(TableImpl t)
@@ -1983,7 +1984,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     	
     	public void setCurrent() 
     	{
-    	    if (m_table != null) {
+    	    if (m_table != null ) {
     	        synchronized(m_table) {
                     if (m_row != null && m_row.isValid())
                         m_row.setCurrent();

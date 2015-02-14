@@ -211,9 +211,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     CellImpl getCellInternal(TableSliceElementImpl tse)
     {
         if (this instanceof RowImpl)
-            return ((RowImpl)this).getCellInternal((ColumnImpl)tse, false);
+            return ((RowImpl)this).getCellInternal((ColumnImpl)tse, false, false);
         else if (this instanceof ColumnImpl)
-            return ((ColumnImpl)this).getCellInternal((RowImpl)tse, false);
+            return ((ColumnImpl)this).getCellInternal((RowImpl)tse, false, false);
         else
             throw new IllegalTableStateException("Table Slice ELement Required");
     }
@@ -441,7 +441,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                 parent.activateAutoRecalculate();
             if (cr != null) 
                 cr.setCurrent();
-        }
+        }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
             Derivation.recalculateAffected(this);

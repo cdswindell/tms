@@ -672,7 +672,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
                 ColumnImpl col = m_cols.get(m_colIndex - 1);
                 RowImpl row = m_rows.get(m_rowIndex - 1); 
                 
-                Cell c = col.getCell(row);
+                Cell c = col.getCell(row, false);
                 
                 // Iterate over cells one column at a time; once
                 // all rows are visited, reset row index and
