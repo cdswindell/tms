@@ -214,6 +214,15 @@ public class Token implements Labeled
         return false;
     }
 
+
+    public boolean isA(Token y)
+    {
+        if (!isNull() && y != null && !y.isNull())
+            return isA(y.getDataType());
+        else
+            return false;
+    }
+    
     public boolean isLeading()
     {
         if (getTokenType() != null)
@@ -297,6 +306,17 @@ public class Token implements Labeled
         return false;
     }
     
+
+    public boolean isBoolean()
+    {
+        if (isOperand()) {
+            Object val = getValue();
+            if (val != null)
+                return Boolean.class.isAssignableFrom(val.getClass());
+        }
+        
+        return false;
+    }
 
     public boolean isPending()
     {

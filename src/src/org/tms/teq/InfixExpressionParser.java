@@ -130,7 +130,7 @@ public class InfixExpressionParser
             }
             
             prevPos = curPos;
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || c == '<' || c == '>' || c == '!') {
                 parsingLabel = true;
                 curPos += parseLabel(exprChars, curPos, ifs, tm, table, pr);    
             }
@@ -653,11 +653,42 @@ public class InfixExpressionParser
         // find a "word", as defined by letters, digits, #'s, _'s, and :'s     	
     	StringBuffer sb = new StringBuffer();
     	int maxPos = exprChars.length;
+    	boolean foundLabel = false;
+    	int labelCharsParsed = 0;
+    	boolean firstCharLetterOrDigit = false;
         for (int i = curPos; i < maxPos; i++) {
         	char c = exprChars[i];
+        	// need to allow for !=, <>, <=, & >=
         	if (Character.isLetterOrDigit(c) || c == '#' || c == '_' || c == ':') {
         		sb.append(c);
+        		
+                if (labelCharsParsed == 0)
+                    firstCharLetterOrDigit = true;
+                
+        		labelCharsParsed++;        		
         		continue;
+        	}
+        	else if ((labelCharsParsed == 0 && (c == '<' || c == '>' || c == '!')) ||
+        	         (labelCharsParsed == 1 && !firstCharLetterOrDigit && c == '=')) 
+        	{
+                sb.append(c);
+                labelCharsParsed++;
+                
+                // special case a few comparison operators              
+                switch (sb.toString()) {
+                    case "!=":
+                    case "<>":
+                    case "<=":
+                    case ">=":
+                        foundLabel = true;
+                        break;
+                    
+                    default:
+                        break;
+                }
+                if (foundLabel)
+                    break;
+                continue;
         	}
         	else
         		break;
@@ -776,7 +807,7 @@ public class InfixExpressionParser
         	ifs.push(tt, oper, value);
         }
         else {
-        	if (tt != TokenType.BinaryOp) {
+        	if (!(tt == TokenType.BinaryOp || (tt == TokenType.UnaryOp && oper == BuiltinOperator.FactOper)) ) {
         		if (pr != null)
         			pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos, tt.toString());
         		return 0;
@@ -959,6 +990,7 @@ public class InfixExpressionParser
     	char quoteChar = 0;
     	boolean foundToken = false;
     	boolean foundNonDigit = false;
+    	boolean foundDigit = false;
     	for (int i = curPos; i < maxPos; i++) {
     		char c = exprChars[i];
     		charsParsed++;
@@ -984,6 +1016,13 @@ public class InfixExpressionParser
     		    break;
     		}
     		
+    		// handle parsing of comparitor operators, so we can do things like
+    		// col 12!=col 6
+    		if (foundDigit && !foundNonDigit && (c == '=' || c == '!' || c == '<' || c == '>')) {
+                charsParsed--;
+                break;
+    		}
+    		
     		// found leading quote?
     		if (!foundToken && quoteChar == 0 && (c == '"' || c == '\'')) {
     			quoteChar = c;
@@ -992,6 +1031,8 @@ public class InfixExpressionParser
     		
     		if (!Character.isDigit(c))
     			foundNonDigit = true;
+    		else 
+    		    foundDigit = true;
     		
     		// add the token character to the buffer
     		foundToken = true;

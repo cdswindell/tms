@@ -449,9 +449,11 @@ public class PendingOperatorTest extends BaseTest
         cR1C4.setDerivation("mean(Col 5)");
         
         Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
+        assertThat(cR2C4.getRow().getIndex(), is(2));
         cR2C4.setDerivation("max(Col 2)");
         
         Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
+        assertThat(cR3C4.getRow().getIndex(), is(3));
         cR3C4.setDerivation("count(Col 2)");
         
         assertThat(((TableImpl)t).isPendings(), is(true));
@@ -520,10 +522,13 @@ public class PendingOperatorTest extends BaseTest
         cR1C4.setDerivation("mean(Col 5)");
         
         Cell cR2C4 = t.getCell(t.getRow(Access.Next), c4);
+        assertThat(cR2C4.getRow().getIndex(), is(2));
         cR2C4.setDerivation("max(Col 2)");
-        
+        assertThat(cR2C4.getRow().getIndex(), is(2));
+       
         Cell cR3C4 = t.getCell(t.getRow(Access.Next), c4);
         cR3C4.setDerivation("count(Col 2)");
+        assertThat(cR3C4.getRow().getIndex(), is(3));
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         

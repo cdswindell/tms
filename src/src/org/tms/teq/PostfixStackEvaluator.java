@@ -29,7 +29,6 @@ public class PostfixStackEvaluator
 	private Token[] m_pfsArray;
 	private int m_pfsIdx;
     private Derivation m_derivation;
-int cnt = 0;        
 	
     public PostfixStackEvaluator(String expr, Table table)
     {
@@ -800,7 +799,12 @@ int cnt = 0;
 
     private Token doBinaryOp(Operator oper, Token x, Token y) 
 	{
-        if (x.isNull() || y.isNull())
+        // special case equals
+        if (oper == BuiltinOperator.EqOper)
+            return isEqual(x, y);
+        else if (oper == BuiltinOperator.NEqOper)
+            return isNotEqual(x, y);
+        else if (x.isNull() || y.isNull())
             return Token.createNullToken();
         
 		Token result = null;	
@@ -811,6 +815,10 @@ int cnt = 0;
                 case MinusOper:
                 case MultOper:
                 case DivOper:
+                case GtOper:
+                case LtOper:
+                case GtEOper:
+                case LtEOper:
                     result = doBuiltInOp(bio, x, y);
                     break;
                     
@@ -828,29 +836,138 @@ int cnt = 0;
 		return result;
 	}
 
-	private Token doBuiltInOp(BuiltinOperator bio, Token x, Token y)
+    /**
+     * Implements EqOper
+     * @param x
+     * @param y
+     * @return Token containing True or False
+     */
+    private Token isEqual(Token x, Token y)
     {
-        if (x.isNumeric() && y.isNumeric())
-            return doBuiltInOp(bio, x.getNumericValue(), y.getNumericValue());        
-        else if (x.isString() && y.isString())
-            return doBuiltInOp(bio, x.getStringValue(), y.getStringValue());
-        else if (x.isString() && y.isNumeric())
-            return doBuiltInOp(bio, x.getStringValue(), y.getNumericValue());
+        boolean isEqual = false;
+        Object xV = x.getValue();
+        Object yV = y.getValue();
         
-        // if a token mapper exists, look for a supporting overload
-        TokenMapper tm = m_pfs.getTokenMapper();
-        if (tm != null) {
-        	Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
-        	if (oper != null) {
-        		Token t = oper.evaluate(x, y);
-        		return t;
-        	}
+        // object equality and both values are null
+        if (xV == yV)
+            isEqual = true;
+        else if (xV != null)
+            isEqual = xV.equals(yV);
+        else
+            isEqual = yV.equals(xV); // yV can't be null at this point!
+        
+        if (!isEqual && (x.isString() || y.isString()) && (x.isNumeric() || y.isNumeric())) {
+            // x is a number and y is a string or visa versa
+            if (x.isNumeric()) {
+                try {
+                    isEqual = xV.equals(Double.parseDouble(y.getStringValue()));
+                }
+                catch (NumberFormatException nfe) { } // noop
+            }
+            else if (y.isNumeric()) {
+                try {
+                    isEqual = yV.equals(Double.parseDouble(x.getStringValue()));
+                }
+                catch (NumberFormatException nfe) { } // noop
+            }
+        }       
+        else if (!isEqual && (x.isString() || y.isString()) && (x.isBoolean() || y.isBoolean())) {
+            // x is a number and y is a string or visa versa
+            if (x.isBoolean()) {
+                try {
+                    isEqual = xV.equals(Boolean.parseBoolean(y.getStringValue()));
+                }
+                catch (NumberFormatException nfe) { } // noop
+            }
+            else if (y.isBoolean()) {
+                try {
+                    isEqual = yV.equals(Boolean.parseBoolean(x.getStringValue()));
+                }
+                catch (NumberFormatException nfe) { } // noop
+            }
         }
         
-        throw new UnimplementedException(String.format("Unimplemented built in operator: %s (%s, %s)", 
-                bio, 
-                x.getDataType() != null ? x.getDataType().getSimpleName() : "null",
-                y.getDataType() != null ? y.getDataType().getSimpleName() : "null"));    
+        return new Token(isEqual);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Token doCompareTo(BuiltinOperator bio, Token x, Token y)
+    {
+        Comparable<Object> xC = (Comparable<Object>)x.getValue();
+        Comparable<Object> yC = (Comparable<Object>)y.getValue();
+        
+        int compareResult = xC.compareTo(yC);
+        boolean result = false;
+        
+        switch(bio) {
+            case GtOper:
+                result = compareResult > 0;
+                break;
+                
+            case LtOper:
+                result = compareResult < 0;
+                break;
+                
+            case GtEOper:
+                result = compareResult >= 0;
+                break;
+                
+            case LtEOper:
+                result = compareResult <= 0;
+                break;
+                
+            default:
+                break;
+        }
+        
+        return new Token(result);
+    }
+
+    private Token isNotEqual(Token x, Token y)
+    {
+        Token t = isEqual(x, y);
+        if (!t.isNull())
+            t.setValue(!(Boolean)t.getValue());
+        
+        return t;
+    }
+    
+	private Token doBuiltInOp(BuiltinOperator bio, Token x, Token y)
+    {
+	    switch (bio) {
+	        case GtOper:
+	        case LtOper:
+	        case GtEOper:
+	        case LtEOper:
+	            if ((x.isA(y) || y.isA(x)) && x.isA(Comparable.class)) 
+	                return doCompareTo(bio, x, y);
+	            
+	            // Note: there is no "break" stmt here, as we want to fall through to see if there is a
+	            // custom operator registered if the tokens are not comparators
+	            
+	        default:
+	            if (x.isNumeric() && y.isNumeric())
+	                return doBuiltInOp(bio, x.getNumericValue(), y.getNumericValue());        
+	            else if (x.isString() && y.isString())
+	                return doBuiltInOp(bio, x.getStringValue(), y.getStringValue());       
+	            else if (x.isString() && y.isNumeric())
+	                return doBuiltInOp(bio, x.getStringValue(), y.getNumericValue());
+	            
+	            // if a token mapper exists, look for a supporting overload
+	            TokenMapper tm = m_pfs.getTokenMapper();
+	            if (tm != null) {
+	                Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
+	                if (oper != null) {
+	                    Token t = oper.evaluate(x, y);
+	                    return t;
+	                }
+	            }
+	            
+	            throw new UnimplementedException(String.format("Unimplemented built in operator: %s (%s, %s)", 
+	                    bio, 
+	                    x.getDataType() != null ? x.getDataType().getSimpleName() : "null",
+	                    y.getDataType() != null ? y.getDataType().getSimpleName() : "null"));    
+	    }
     }
 
     private Token doBuiltInOp(BuiltinOperator bio, String s1, Double n2)
@@ -934,6 +1051,14 @@ int cnt = 0;
 
     private Token doUnaryOp(Operator oper, Token x) 
 	{
+        // special case IsNullOper
+        if (oper == BuiltinOperator.IsNullOper) {
+            if (x.isNull())
+                return new Token(true);
+            else
+                return new Token(false);
+        }
+        
 		if (x.isNull())
 			return Token.createNullToken();
 		

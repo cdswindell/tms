@@ -20,9 +20,21 @@ public enum BuiltinOperator implements Labeled, Operator
     MultOper("*", TokenType.BinaryOp, 4),
     DivOper("/", TokenType.BinaryOp, 4),
     
+    // boolean comparison operators
+    EqOper("=", TokenType.BinaryOp, 4),
+    NEqOper(TokenType.BinaryOp, 4, "!=", "<>"),
+    GtOper(">", TokenType.BinaryOp, 4),
+    LtOper("<", TokenType.BinaryOp, 4),
+    GtEOper(">=", TokenType.BinaryOp, 4),
+    LtEOper("<=", TokenType.BinaryOp, 4),
+    
+    // special isNull operator, which is somewhat out of bounds
+    IsNullOper("isNull", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
+    IfOper("if", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
+    
     // Special math operators, implemented in Java Math class
     ModOper(TokenType.BinaryOp, 5, Math.class, "IEEEremainder", "%"),  
-    PowerOper(TokenType.BinaryOp, 5, Math.class, "pow", "^"),
+    PowerOper(TokenType.BinaryOp, 4, Math.class, "pow", "^"),
     
     // Factorial operator, implemented in code
     FactOper(TokenType.UnaryOp, 5, MathUtil.class, "fact", "!"),
