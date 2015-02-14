@@ -28,6 +28,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.InvalidParentException;
@@ -39,6 +40,29 @@ import org.tms.util.JustInTimeSet;
 
 public class TableImpl extends TableCellsElementImpl implements Table
 {
+    /**
+     * We allow each thread to maintain it's own current row/current column state for every table, this 
+     * prevents pending calculations, that will iterate over table cells, to modify the current table state
+     * for the "primary" thread.
+     * 
+     * We use ThreadLocal storage for this
+     */
+    static private ThreadLocal<Map<TableImpl,CellReference>> sf_CURRENT_CELL = new ThreadLocal<Map<TableImpl,CellReference>>() {
+        @Override
+        protected Map<TableImpl, CellReference> initialValue ()
+        {
+            return new HashMap<TableImpl, CellReference>();
+        }
+    };
+    
+    static private ThreadLocal<Map<TableImpl,Deque<CellReference>>> sf_CURRENT_CELL_STACK = new ThreadLocal<Map<TableImpl, Deque<CellReference>>>() {
+        @Override
+        protected Map<TableImpl, Deque<CellReference>> initialValue ()
+        {
+            return new HashMap<TableImpl, Deque<CellReference>>();
+        }
+    };
+    
 	public static final Table createTable() 
 	{
 		return new TableImpl();
@@ -71,14 +95,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private Queue<Integer> m_unusedCellOffsets;
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
     
-    private Deque<CellReference> m_currentCellStack;
-    
     private Map<CellImpl, Set<SubsetImpl>> m_subsetedCells;
     private Map<CellImpl, Derivation> m_derivedCells;
     private Map<CellImpl, Set<Derivable>> m_cellAffects;
-    
-    private RowImpl m_curRow;
-    private ColumnImpl m_curCol;
     
     private JustInTimeSet<SubsetImpl> m_subsets;
     
@@ -148,15 +167,15 @@ public class TableImpl extends TableCellsElementImpl implements Table
         setRowsCapacity(calcRowsCapacity(nRows));
         setColumnsCapacity(calcColumnsCapacity(nCols));
         
-        m_curRow = null;
-        m_curCol = null;
+        // make sure a current cell is created for this table
+        getCurrentCellReference();
+        getCurrentCellStack();
         
         m_nextCellOffset = 0;
         
         // set all other arrays/sets/maps to null/JustInTime
         m_subsets = new JustInTimeSet<SubsetImpl>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
-        m_currentCellStack = new ArrayDeque<CellReference>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
         
         int expectedNoOfDerivedCells = m_rowsCapacity * m_colsCapacity / 5; // assume 20%
@@ -507,46 +526,50 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     synchronized protected void delete(boolean compress)
     {
-        // delete all rows and columns, explicitly
-        // we have to iterate over the indexes as iterating
-        // over the ArrayLists themselves throws a 
-        // ConcurrentModificaton exception when items are deleted
-        int numCols = m_cols.size();
-        for (int i = numCols - 1; i >= 0; i--) {
-            ColumnImpl col = m_cols.get(i);
-            if (col != null)
-                col.delete(false);
+        try {
+            // delete all rows and columns, explicitly
+            // we have to iterate over the indexes as iterating
+            // over the ArrayLists themselves throws a 
+            // ConcurrentModificaton exception when items are deleted
+            int numCols = m_cols.size();
+            for (int i = numCols - 1; i >= 0; i--) {
+                ColumnImpl col = m_cols.get(i);
+                if (col != null)
+                    col.delete(false);
+            }
+            
+            int numRows = m_rows.size();
+            for (int i = numRows - 1; i >= 0; i--) {
+                RowImpl row = m_rows.get(i);
+                if (row != null)
+                    row.delete(false);
+            }
+    
+            // getSubsets returns a copy of m_subsets, so it is safe to delete individual elements
+            getSubsets().forEach(s -> { if (s != null) ((SubsetImpl)s).delete(false); } );
+            
+            // compress data structures
+            reclaimColumnSpace();
+            reclaimRowSpace();
+            
+        	this.m_subsets.clear();
+        	this.m_affects.clear();
+        	this.m_cellAffects.clear();
+        	this.m_cellOffsetRowMap.clear();
+        	this.m_derivedCells.clear();
+        	this.m_subsetedCells.clear();
+        	this.m_unusedCellOffsets.clear();
+        	this.m_cols.clear();
+        	this.m_rows.clear();
+        	
+        	if (getTableContext() != null)
+        		getTableContext().deregister(this);
         }
-        
-        int numRows = m_rows.size();
-        for (int i = numRows - 1; i >= 0; i--) {
-            RowImpl row = m_rows.get(i);
-            if (row != null)
-                row.delete(false);
+        finally {
+            invalidate();
+            sf_CURRENT_CELL.get().remove(this);
+            sf_CURRENT_CELL_STACK.get().remove(this);
         }
-
-        // getSubsets returns a copy of m_subsets, so it is safe to delete individual elements
-        getSubsets().forEach(s -> { if (s != null) ((SubsetImpl)s).delete(false); } );
-        
-        // compress data structures
-        reclaimColumnSpace();
-        reclaimRowSpace();
-        
-    	this.m_subsets.clear();
-    	this.m_affects.clear();
-    	this.m_cellAffects.clear();
-    	this.m_cellOffsetRowMap.clear();
-    	this.m_currentCellStack.clear();
-    	this.m_derivedCells.clear();
-    	this.m_subsetedCells.clear();
-    	this.m_unusedCellOffsets.clear();
-    	this.m_cols.clear();
-    	this.m_rows.clear();
-    	
-    	if (getTableContext() != null)
-    		getTableContext().deregister(this);
-    	
-    	invalidate();
     }    
     
     public boolean isAutoRecalculateEnabled()
@@ -917,14 +940,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     public RowImpl getCurrentRow()
     {
-        return m_curRow;
+        CellReference cr = getCurrentCellReference();
+        return cr.getCurrentRow();
     }
     
     protected RowImpl setCurrentRow(RowImpl row)
     {
         vetParent(row);
-        RowImpl prevCurrent = getCurrentRow();
-        m_curRow = row;
+        CellReference cr = getCurrentCellReference();
+        RowImpl prevCurrent = cr.getCurrentRow();
+        cr.setCurrentRow(row);
         
         return prevCurrent;
     }  
@@ -959,7 +984,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return getRow(Access.Current);
     }
     
-    private RowImpl getRowInternal(boolean createIfNull, Access mode, Object...mda)
+    synchronized private RowImpl getRowInternal(boolean createIfNull, Access mode, Object...mda)
     {
         RowImpl r = null;
         
@@ -1001,7 +1026,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             }
         }
         finally {        
-            cr.setCurrent();
+            cr.setCurrentCellReference();
         }
     }
     
@@ -1148,14 +1173,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     public ColumnImpl getCurrentColumn()
     {
-        return m_curCol;
+        CellReference cr = getCurrentCellReference();
+        return cr.getCurrentColumn();
     }
     
     synchronized protected ColumnImpl setCurrentColumn(ColumnImpl col)
     {
         vetParent(col);
-        ColumnImpl prevCurrent = getCurrentColumn();
-        m_curCol = col;
+        CellReference cr = getCurrentCellReference();
+        ColumnImpl prevCurrent = cr.getCurrentColumn();
+        cr.setCurrentColumn(col);
         
         return prevCurrent;
     }  
@@ -1190,7 +1217,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return getColumn(Access.Current);
     }
     
-    private ColumnImpl getColumnInternal(boolean createIfNull, Access mode, Object...mda)
+    synchronized private ColumnImpl getColumnInternal(boolean createIfNull, Access mode, Object...mda)
     {
         ColumnImpl r = null;
         
@@ -1227,7 +1254,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             }
         }
         finally {        
-            cr.setCurrent();
+            cr.setCurrentCellReference();
         }
     }
     
@@ -1527,7 +1554,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
         finally {  
             activateAutoRecalculate();
-            cr.setCurrent();
+            cr.setCurrentCellReference();
         }
         
         // no need to recalc table, as filling all cells
@@ -1541,36 +1568,61 @@ public class TableImpl extends TableCellsElementImpl implements Table
     }  
 	
     @Override
-	synchronized public void popCurrent() 
+    synchronized public void popCurrent() 
     {
-		if (m_currentCellStack != null && !m_currentCellStack.isEmpty()) {
-			CellReference cr = m_currentCellStack.pollFirst();
-			if (cr != null) {
-				setCurrentRow(cr.getRow());
-				setCurrentColumn(cr.getColumn());
-			}
+        Deque<CellReference> currentCellStack = getCurrentCellStack();
+		if (currentCellStack != null && !currentCellStack.isEmpty()) {
+			CellReference cr = currentCellStack.pollFirst();
+			if (cr != null) 
+			    cr.setCurrentCellReference();
 		}		
 	}
 
-	@Override
-	synchronized public void pushCurrent() 
-	{
-	    CellReference cr = new CellReference(getCurrentRow(), getCurrentColumn());
-	    m_currentCellStack.push(cr);
-	}
+    @Override
+    synchronized public void pushCurrent() 
+    {
+        Deque<CellReference> currentCellStack = getCurrentCellStack();
+        CellReference cr = getCurrent();
+        currentCellStack.push(cr);
+    }
 
-	synchronized public void purgeCurrentStack(TableSliceElementImpl slice)
-	{
-	    if (m_currentCellStack  != null) 
-	        m_currentCellStack.removeIf(new CellStackPurger(slice));
-	}
+    synchronized public void purgeCurrentStack(TableSliceElementImpl slice)
+    {
+        Deque<CellReference> currentCellStack = getCurrentCellStack();
+        if (currentCellStack  != null) 
+            currentCellStack.removeIf(new CellStackPurger(slice));
+    }
 
-	synchronized public CellReference getCurrent() 
-	{
-	    CellReference cr = new CellReference(this);
-	    return cr;
-	}
-	
+    synchronized private CellReference getCurrentCellReference()
+    {
+        Map<TableImpl,CellReference> currentCellMap = sf_CURRENT_CELL.get();
+        CellReference cr = currentCellMap.get(this);
+        if (cr == null) {
+            cr = new CellReference();
+            currentCellMap.put(this, cr);
+        }
+        
+        return cr;
+    }
+    
+    synchronized private Deque<CellReference> getCurrentCellStack()
+    {
+        Map<TableImpl, Deque<CellReference>> currentCellStackMap = sf_CURRENT_CELL_STACK.get();
+        Deque<CellReference> currentCellStack = currentCellStackMap.get(this);
+        if (currentCellStack == null) {
+            currentCellStack = new ArrayDeque<CellReference>();
+            currentCellStackMap.put(this, currentCellStack);
+        }
+
+        return currentCellStack;
+    }
+    
+    CellReference getCurrent() 
+    {
+        CellReference cr = new CellReference(getCurrentCellReference());
+        return cr;
+    }
+    
 	@Override
 	synchronized public void recalculate()
 	{
@@ -1580,7 +1632,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             Derivation.recalculateAffected(this);
         }
         finally {
-            cr.setCurrent();
+            cr.setCurrentCellReference();
         }
 	}
 	
@@ -1634,7 +1686,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
         }
         finally {
-            cr.setCurrent();
+            cr.setCurrentCellReference();
         }       
     }
     
@@ -1955,54 +2007,75 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }        
     }
 	
-    protected static class CellReference 
+    /**
+     * Class to maintain the current row/column in a given table
+     */
+    protected class CellReference 
     {
     	private RowImpl m_row;
     	private ColumnImpl m_col;
     	private TableImpl m_table;
     	
-    	public CellReference(RowImpl r, ColumnImpl c)
-    	{
-    		if (r != null && c != null)
-    			assert r.getTable() == c.getTable() : "Parent tables must match";
-    			
-            m_table = r != null ? r.getTable() : c != null ? c.getTable() : null;
-    		m_row = r;
-    		m_col = c;
-    	}
-    	
-    	public CellReference(TableImpl t)
+    	protected CellReference()
         {
-    	    if (t != null) {
-    	        synchronized(t) {
-        	        m_row = t.getCurrentRow();
-        	        m_col = t.getCurrentColumn();
-        	        m_table = t;
-    	        }
-    	    }
+            m_row = null;
+            m_col = null;
+            m_table = TableImpl.this;
         }
-    	
-    	public void setCurrent() 
+
+        protected CellReference(CellReference cr)
+        {
+            this();
+            if (cr != null) {
+                if (cr.getTable() != this.m_table)
+                    throw new IllegalTableStateException("CellReference not of the body");
+                
+                m_row = cr.getCurrentRow();
+                m_col = cr.getCurrentColumn();
+            }
+        }
+
+        public void setCurrentCellReference() 
     	{
     	    if (m_table != null ) {
     	        synchronized(m_table) {
+    	            CellReference cr = m_table.getCurrentCellReference();
                     if (m_row != null && m_row.isValid())
-                        m_row.setCurrent();
+                        cr.setCurrentRow(m_row);
+                    else
+                        cr.setCurrentRow(null);
                     
                     if (m_col != null && m_col.isValid())
-                        m_col.setCurrent();
+                        cr.setCurrentColumn(m_col);
+                    else
+                        cr.setCurrentColumn(null);
     	        }
     	    }
     	}
 
-        public RowImpl getRow()
+        public RowImpl getCurrentRow()
     	{
     		return m_row;
     	}
     	
-    	public ColumnImpl getColumn()
+        protected void setCurrentRow(RowImpl row) 
+        {
+            m_row = row;
+        }
+        
+        public ColumnImpl getCurrentColumn()
+        {
+            return m_col;
+        }
+        
+        protected void setCurrentColumn(ColumnImpl col)
+        {
+            m_col = col;
+        }
+
+    	public TableImpl getTable()
     	{
-    		return m_col;
+    	    return m_table;
     	}
     }
     
@@ -2018,7 +2091,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         @Override
         public boolean test(CellReference t)
         {
-            if (t.getColumn() == m_slice || t.getRow() == m_slice)
+            if (t.getCurrentColumn() == m_slice || t.getCurrentRow() == m_slice)
                 return true;
             else
                 return false;

@@ -48,8 +48,8 @@ abstract class PendingState
         m_pendingToken = tk;  
         m_valid = true;
         
-        if (m_curCol != null && m_curCol.getTable() != null)
-            m_pendingCell = m_curCol.getTable().getCell(m_curRow, m_curCol);
+        if (m_parentTable != null)
+            m_pendingCell = m_parentTable.getCell(m_curRow, m_curCol);
         else
             m_pendingCell = null;
          

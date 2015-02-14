@@ -181,7 +181,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
         }
         finally {
-            if (cr != null) cr.setCurrent();
+            if (cr != null) cr.setCurrentCellReference();
         }       
     }
     
@@ -440,7 +440,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             if (parent != null)
                 parent.activateAutoRecalculate();
             if (cr != null) 
-                cr.setCurrent();
+                cr.setCurrentCellReference();
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())

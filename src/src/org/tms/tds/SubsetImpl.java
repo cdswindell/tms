@@ -464,7 +464,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		    }
 		    finally {	            	            
 	            tbl.activateAutoRecalculate();
-	            cr.setCurrent();
+	            cr.setCurrentCellReference();
 		    }
 		    
 		    if (tbl.isAutoRecalculateEnabled())
