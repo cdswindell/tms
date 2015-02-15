@@ -26,8 +26,9 @@ public enum TokenType implements Labeled
     TransformOp(true, 1),
     BinaryOp(true, 2),
     BinaryFunc(true, 2),
-    UnaryOp(false, 1),
+    UnaryOp(true, 1),
     UnaryFunc(true, 1), 
+    UnaryTrailingOp(false, 1),
     
     Comma(true, ","),
     LeftParen(true, "("),

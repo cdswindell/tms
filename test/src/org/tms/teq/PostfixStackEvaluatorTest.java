@@ -55,10 +55,10 @@ public class PostfixStackEvaluatorTest
     public final void testFactorials() 
     throws PendingDerivationException, BlockedDerivationException
     {
+        // simple unary function
         PostfixStackEvaluator pse = new PostfixStackEvaluator("6!", null);
         assertThat(pse, notNullValue());
         
-        // simple unary function
         Token t = pse.evaluate();
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));

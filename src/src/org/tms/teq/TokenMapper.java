@@ -246,7 +246,7 @@ public class TokenMapper
     		throw new IllegalTableStateException("+, -, *, or / required");
 
     	theOp = theOp.trim();
-    	if (theOp != "+" && theOp != "-" && theOp != "*" && theOp != "/")
+    	if (!BuiltinOperator.isValidBinaryOp(theOp))
     		throw new IllegalTableStateException("+, -, *, or / required");
 
     	if (paramTypes == null)
@@ -254,7 +254,6 @@ public class TokenMapper
 
     	if (paramTypes.length != 2)
     		throw new IllegalTableStateException("Must specify 2 parameter types");
-
 
     	OverloadKey key = new OverloadKey(theOp, paramTypes);
     	Token t = m_userOverloadedOps.get(key);

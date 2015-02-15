@@ -144,6 +144,7 @@ public class PostfixStackGenerator
                     
                 case UnaryOp:
                 case UnaryFunc:
+                case UnaryTrailingOp:
                 case BinaryFunc:
                 case BinaryOp:
                 case GenericFunc:

@@ -3,6 +3,7 @@ package org.tms.teq;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -28,6 +29,11 @@ public enum BuiltinOperator implements Labeled, Operator
     GtEOper(TokenType.BinaryOp, 4, ">=", "GE"),
     LtEOper(TokenType.BinaryOp, 4,"<=", "LE"),
     
+    AndOper(TokenType.BinaryOp, 4,"&&", "and"),
+    OrOper(TokenType.BinaryOp, 4,"||", "or"),
+    XorOper(TokenType.BinaryOp, 4,"^", "xor"),
+    NotOper(TokenType.UnaryOp, 4,"~", "not"),
+    
     // special isNull operator, which is somewhat out of bounds
     IsNullOper("isNull", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
     IfOper("if", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
@@ -37,7 +43,7 @@ public enum BuiltinOperator implements Labeled, Operator
     PowerOper(TokenType.BinaryOp, 4, Math.class, "pow", "^"),
     
     // Factorial operator, implemented in code
-    FactOper(TokenType.UnaryOp, 5, MathUtil.class, "fact", "!"),
+    FactOper(TokenType.UnaryTrailingOp, 5, MathUtil.class, "fact", "!"),
     
     // Unary functions, mostly supported in Java Math
     FracOper("frac", TokenType.UnaryFunc, 5, MathUtil.class),
@@ -315,8 +321,12 @@ public enum BuiltinOperator implements Labeled, Operator
 	    if (m_methodArgs != null)
 	        return m_methodArgs.length;
 	    else {
-    		TokenType tt = getPrimaryTokenType();
-    		return tt != null ? tt.numArgs() : 0;
+	        // handle special cases and default
+	        switch (this) {
+	            default:
+	                TokenType tt = getPrimaryTokenType();
+	                return tt != null ? tt.numArgs() : 0;
+	        }
 	    }
 	}	
 
@@ -325,24 +335,40 @@ public enum BuiltinOperator implements Labeled, Operator
     {
         // allocate array and set all elements to Double
         if (m_methodArgs == null) {
-            int numArgs = numArgs();
-            TokenType tt = getPrimaryTokenType();
-            if (numArgs > 0 && tt != null) {
-                m_methodArgs = new Class<?>[numArgs];
-                switch (tt) {
-                    case StatOp:
-                        m_methodArgs[0] = TableElement.class;
-                        break;
-                        
-                    case TransformOp:
-                        m_methodArgs[0] = TableRowColumnElement.class;
-                        break;
-                        
-                    default:
-                        Arrays.fill(m_methodArgs, double.class);
-                        break;
-                }
-            }
+            // handle special case operators first, then
+            // use primary token type to resolve
+            switch (this) {
+                case AndOper:
+                case OrOper:
+                case XorOper:
+                    m_methodArgs = new Class<?>[]{Object.class, Object.class};
+                    break;
+                    
+                case NotOper:
+                    m_methodArgs = new Class<?>[]{Object.class};
+                    break;
+                    
+                default:
+                    int numArgs = numArgs();
+                    TokenType tt = getPrimaryTokenType();
+                    if (numArgs > 0 && tt != null) {
+                        m_methodArgs = new Class<?>[numArgs];
+                        switch (tt) {
+                            case StatOp:
+                                m_methodArgs[0] = TableElement.class;
+                                break;
+                                
+                            case TransformOp:
+                                m_methodArgs[0] = TableRowColumnElement.class;
+                                break;
+                                
+                            default:
+                                Arrays.fill(m_methodArgs, double.class);
+                                break;
+                        }
+                    }
+                    break;
+            }           
         }
         
         return m_methodArgs;
@@ -401,5 +427,28 @@ public enum BuiltinOperator implements Labeled, Operator
         }
         
         return retVal;
+    }
+    
+    static public final Set<String> binaryOpLabels()
+    {
+        Set<String> labels = new HashSet<String>();
+        
+        for (BuiltinOperator o : BuiltinOperator.values()) {
+            if (o.getTokenType() == TokenType.BinaryOp) {
+                for (String s : o.getAliases()) {
+                    labels.add(s.toLowerCase());
+                }
+            }
+        }
+        
+        return labels;
+    }
+    
+    static public final boolean isValidBinaryOp(String label) 
+    {
+        if (label != null)
+            return binaryOpLabels().contains(label.trim().toLowerCase());
+        else
+            return false;
     }
 }

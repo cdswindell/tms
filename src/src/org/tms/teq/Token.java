@@ -120,6 +120,14 @@ public class Token implements Labeled
             return null;
     }
 
+    public Boolean getBooleanValue()
+    {
+        if (m_value != null && m_value instanceof Boolean)
+            return (Boolean)m_value;
+        else
+            return null;
+    }
+
     public String getStringValue()
     {
         if (m_value != null && m_value instanceof String)

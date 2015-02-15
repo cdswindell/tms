@@ -130,7 +130,10 @@ public class InfixExpressionParser
             }
             
             prevPos = curPos;
-            if (Character.isLetter(c) || c == '<' || c == '>' || c == '!') {
+            if (Character.isLetter(c) || c == '<' || c == '>' || c == '!' || 
+                                         c == '&' || c == '|' || 
+                                         (c == '=' && ((curPos+1) < exprLen) && exprChars[curPos+1] == '=')) 
+            {
                 parsingLabel = true;
                 curPos += parseLabel(exprChars, curPos, ifs, tm, table, pr);    
             }
@@ -401,7 +404,7 @@ public class InfixExpressionParser
                     }
                     break;
                     
-                case UnaryOp:
+                case UnaryTrailingOp:
                     ifs.push(tType, oper);
                     break;
                     
@@ -669,18 +672,22 @@ public class InfixExpressionParser
         		labelCharsParsed++;        		
         		continue;
         	}
-        	else if ((labelCharsParsed == 0 && (c == '<' || c == '>' || c == '!')) ||
-        	         (labelCharsParsed == 1 && !firstCharLetterOrDigit && c == '=')) 
+        	// logical & comparison operators support, =, ==,  >, <, >=, <=, &&, ||
+        	else if ((labelCharsParsed == 0 && (c == '<' || c == '>' || c == '!' || c == '&') || c == '|' || c == '=') ||
+        	         (labelCharsParsed == 1 && ((!firstCharLetterOrDigit && c == '=') || c == '&' || c == '|'))) 
         	{
                 sb.append(c);
                 labelCharsParsed++;
                 
                 // special case a few comparison operators              
                 switch (sb.toString()) {
+                    case "==":
                     case "!=":
                     case "<>":
                     case "<=":
                     case ">=":
+                    case "&&":
+                    case "||":
                         foundLabel = true;
                         break;
                     
@@ -808,7 +815,7 @@ public class InfixExpressionParser
         	ifs.push(tt, oper, value);
         }
         else {
-        	if (!(tt == TokenType.BinaryOp || (tt == TokenType.UnaryOp && oper == BuiltinOperator.FactOper)) ) {
+        	if (!(tt == TokenType.BinaryOp || (tt == TokenType.UnaryTrailingOp && oper == BuiltinOperator.FactOper)) ) {
         		if (pr != null)
         			pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos, tt.toString());
         		return 0;
