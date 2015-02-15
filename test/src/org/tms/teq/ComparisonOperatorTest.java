@@ -159,4 +159,38 @@ public class ComparisonOperatorTest extends BaseTest
         }
     }
 
+    @Test
+    public void testIfOperator()
+    {
+        Table tbl = TableFactory.createTable();        
+        assert (tbl != null);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        Row r1 = tbl.addRow(Access.First);
+        Row r2 = tbl.addRow(Access.Next);
+        
+        Column c1 = tbl.addColumn(Access.First);
+        assertThat(c1, notNullValue());
+        c1.setDerivation("ridx");
+        
+        Column c2 = tbl.addColumn(Access.Next);
+        assertThat(c2, notNullValue());
+        c2.fill("ABC");
+        
+        Column c3 = tbl.addColumn(Access.Next);
+        assertThat(c3, notNullValue());  
+        c3.fill("DEF");
+        
+        Column c4 = tbl.addColumn(Access.Next);
+        assertThat(c4, notNullValue());
+        
+        Column c5 = tbl.addColumn(Access.Next);
+        assertThat(c5, notNullValue());
+        c5.setDerivation("(col 1 = 1)");
+
+        c4.setDerivation("(if(col 1, col 2, col 3)");
+        assertThat(tbl.getCellValue(r1, c4), is("ABC"));
+        assertThat(tbl.getCellValue(r2, c4), is("DEF"));
+    }
+        
 }

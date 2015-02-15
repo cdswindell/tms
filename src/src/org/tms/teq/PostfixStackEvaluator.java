@@ -376,6 +376,14 @@ public class PostfixStackEvaluator
 
     private Token doGenericOp(Operator oper, Token... args)
     {
+        // process builtins first
+        if (oper == BuiltinOperator.IfOper) {
+            if ((Boolean)args[0].getValue())
+                return args[1];
+            else
+                return args[2];
+        }
+        
         Token t = oper.evaluate(args);
         return t;
     }

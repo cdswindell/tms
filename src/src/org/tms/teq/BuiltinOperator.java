@@ -21,16 +21,16 @@ public enum BuiltinOperator implements Labeled, Operator
     DivOper("/", TokenType.BinaryOp, 4),
     
     // boolean comparison operators
-    EqOper("=", TokenType.BinaryOp, 4),
-    NEqOper(TokenType.BinaryOp, 4, "!=", "<>"),
-    GtOper(">", TokenType.BinaryOp, 4),
-    LtOper("<", TokenType.BinaryOp, 4),
-    GtEOper(">=", TokenType.BinaryOp, 4),
-    LtEOper("<=", TokenType.BinaryOp, 4),
+    EqOper(TokenType.BinaryOp, 4, "=", "==", "EQ"),
+    NEqOper(TokenType.BinaryOp, 4, "!=", "<>", "NE"),
+    GtOper(TokenType.BinaryOp, 4, ">", "GT"),
+    LtOper(TokenType.BinaryOp, 4, "<", "LT"),
+    GtEOper(TokenType.BinaryOp, 4, ">=", "GE"),
+    LtEOper(TokenType.BinaryOp, 4,"<=", "LE"),
     
     // special isNull operator, which is somewhat out of bounds
     IsNullOper("isNull", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
-    IfOper("if", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
+    IfOper("if", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
     
     // Special math operators, implemented in Java Math class
     ModOper(TokenType.BinaryOp, 5, Math.class, "IEEEremainder", "%"),  
