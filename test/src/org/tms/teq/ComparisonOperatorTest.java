@@ -186,11 +186,10 @@ public class ComparisonOperatorTest extends BaseTest
         
         Column c5 = tbl.addColumn(Access.Next);
         assertThat(c5, notNullValue());
-        c5.setDerivation("(col 1 = 1)");
+        c5.setDerivation("col 1 = 1");
 
-        c4.setDerivation("(if(col 1, col 2, col 3)");
+        c4.setDerivation("if(col 1 = 1, col 2, col 3)");
         assertThat(tbl.getCellValue(r1, c4), is("ABC"));
         assertThat(tbl.getCellValue(r2, c4), is("DEF"));
-    }
-        
+    }       
 }

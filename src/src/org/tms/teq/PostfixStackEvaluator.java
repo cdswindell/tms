@@ -151,7 +151,7 @@ public class PostfixStackEvaluator
 					m_opStack.push(doUnaryOp(oper, x));					
 					break;
 					
-				case BinaryOp:
+                case BinaryOp:
 				case BinaryFunc:
 					y = asOperand(rewind, tbl, row, col, null);
 					if (y == null || !y.isOperand()) // stack is in invalid state

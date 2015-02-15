@@ -503,6 +503,7 @@ public class InfixExpressionParser
                 case TransformOp:
                 case GenericFunc:
                 case BinaryFunc:
+                case BinaryOp:
                     if (parenCnt == 0) {
                         foundFunc = true;
                         if (oper != null && argCnt < oper.numArgs()) 
@@ -798,7 +799,7 @@ public class InfixExpressionParser
         }
         
         if (ifs.isLeading()) {
-        	if (tt == TokenType.BinaryOp) {
+        	if (tt == TokenType.BinaryOp ) {
         		if (pr != null)
         			pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos, tt.toString());
         		return 0;

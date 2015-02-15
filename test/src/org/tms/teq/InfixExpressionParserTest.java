@@ -257,7 +257,7 @@ public class InfixExpressionParserTest
     public final void testCommaParsing()
     {
         // hypot operator
-        InfixExpressionParser iep = new InfixExpressionParser("hypot((1 + 2), 4)");
+        InfixExpressionParser iep = new InfixExpressionParser("hypot(1 + 2 + 3, 4)");
         assertThat(iep, notNullValue());
 
         ParseResult pr = iep.validateExpression();
