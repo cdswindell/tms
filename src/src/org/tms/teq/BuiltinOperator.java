@@ -2,9 +2,11 @@ package org.tms.teq;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.tms.api.Operator;
@@ -102,6 +104,8 @@ public enum BuiltinOperator implements Labeled, Operator
     SmallerOper(TokenType.BinaryFunc, 5, Math.class, "min", "smaller"),
     HypotOper(TokenType.BinaryFunc, 5, Math.class, "hypot"),
     NumberOfOper("numberOf", TokenType.GenericFunc, 5, MathUtil.class, "numberOf", TableElement.class, Object.class),    
+    PermOper("perm", TokenType.BinaryFunc, 5, MathUtil.class, "numPermutations"),    
+    CombOper("comb", TokenType.BinaryFunc, 5, MathUtil.class, "numCombinations"),    
 
     // Builtin functions
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
@@ -427,6 +431,34 @@ public enum BuiltinOperator implements Labeled, Operator
         }
         
         return retVal;
+    }
+    
+    static public final List<Operator> listBuiltinOperators()
+    {
+        return listBuiltinOperators(null);
+    }
+    
+    static public final List<Operator> listBuiltinOperators(TokenType tt)
+    {
+        List<Operator> ops = new ArrayList<Operator>(BuiltinOperator.values().length);
+        
+        for (BuiltinOperator o : BuiltinOperator.values()) {
+            if (tt == null || o.getTokenType() == tt) {
+                switch (o) {
+                    case NOP:
+                    case Paren:
+                    case LAST_operator:
+                    case NULL_operator:
+                        break;
+                        
+                    default:
+                        ops.add(o);
+                        break;
+                }
+            }
+        }
+        
+        return ops;
     }
     
     static public final Set<String> binaryOpLabels()

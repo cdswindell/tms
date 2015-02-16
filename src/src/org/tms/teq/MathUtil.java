@@ -8,6 +8,55 @@ import org.tms.api.TableElement;
 
 public class MathUtil
 {
+    /**
+     * A formula for the number of possible combinations of r objects from a set of n objects where order is not important. 
+     * From probability theory, this is the calculation of nCr or n Choose r, or n!/r!(n-r)!.
+     * @param popSize
+     * @param subSetSize
+     * @return nCr
+     */
+    static final public double numCombinations(double popSize, double subSetSize)
+    {
+        long n = (long)popSize;
+        long r = (long)subSetSize;
+        
+        if (n < 1 || r < 1 || n < r)
+            return Double.NaN;
+        
+        // handle edge case
+        long result = 1;
+        if (n == r)
+            return result;
+                
+        for (long i = n; i > (n-r); i--) {
+            result *= i;
+        }
+                    
+        result = result/(long)fact((double)r);
+        
+        return result;
+    }
+    
+    static final public double numPermutations(double popSize, double subSetSize)
+    {
+        long n = (long)popSize;
+        long k = (long)subSetSize;
+        
+        if (n < 1 || k < 1 || n < k)
+            return Double.NaN;
+        
+        // handle edge case
+        long result = 1;
+        if (n == 1)
+            return result;
+                
+        for (long i = n; i > (n - k); i--) {
+            result *= i;
+        }
+                    
+        return result;
+    }
+    
     static final public double neg(double arg)
     {
         return -arg;
