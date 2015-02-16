@@ -119,6 +119,8 @@ public enum BuiltinOperator implements Labeled, Operator
     Sum2Oper(TokenType.StatOp, 5, "sumOfSquares"),
     MeanOper(TokenType.StatOp, 5, "mean", "ave", "average"),
     MedianOper(TokenType.StatOp, 5, "median"),
+    FirstQuartileOper(TokenType.StatOp, 5, "firstQuartile", "firstQ"),
+    ThirdQuartileOper(TokenType.StatOp, 5, "thirdQuartile", "thirdQ"),
     ModeOper(TokenType.StatOp, 5, "mode"),
     StDevPopulationOper(TokenType.StatOp, 5, "stDevPopulation", "stDevOfPopulation", "stDev.p"),
     StDevSampleOper(TokenType.StatOp, 5, "stDevSample", "stDevOfSample", "stDev", "stDev.s"),
@@ -129,17 +131,23 @@ public enum BuiltinOperator implements Labeled, Operator
     RangeOper(TokenType.StatOp, 5, "range", "spread"),
     CountOper(TokenType.StatOp, 5, "count", "cnt"),
     SkewOper(TokenType.StatOp, 5, "skewness", "skew"),
-    KurtOper(TokenType.StatOp, 5),
+    KurtosisOper(TokenType.StatOp, 5, "kurtosis", "kurt"),
     
+    // Normal Distribution Single Variable Stat Functions 
+    NormSampleOper(TokenType.BinaryFunc, 5, MathUtil.class, "normalSample", "normalSample", "normS", "normalS"),
+    NormDensityOper(TokenType.GenericFunc, 5, MathUtil.class, "normalDensity", "normalDensity", "normD", "normalD", "normPDF"),
+    NormCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalCumProb", "normalCumProb", "normCP", "normalCP", "normCDF"),
+    NormProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbabiltiy", "normalProbabiltiy", "normalProb", "normP", "normalP", "normPMF"),
+    NormInRangeProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbInRange", "normalProbInRange", 
+                                                                  "normalProbabilityInRange","normPIR", "normalPIR"),    
     // Two Variable Stat Functions
     LinearSlopeOper("slope", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
     LinearInterceptOper("intercept", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
     LinearCorrelationOper("r2", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
-    ComputeXOper("computeX", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class, double.class),
-    ComputeYOper("computeY", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class, double.class),
+    LinearComputeXOper(TokenType.GenericFunc, 5, MathUtil.class, "lrComputeX", "computeX", "lrComputeX"),
+    LinearComputeYOper(TokenType.GenericFunc, 5, MathUtil.class, "lrComputeY", "computeY", "lrComputeY"),
     
     // Transformation Functions
-    SplineOper,
     MeanCenterOper(TokenType.TransformOp, 5, "meanCenter"),
     NormalizeOper(TokenType.TransformOp, 5, "normalize", "standardize"),    
     ScaleOper("scale", TokenType.TransformOp, 5, MathUtil.class, "scale", TableElement.class, double.class, double.class),
@@ -262,8 +270,9 @@ public enum BuiltinOperator implements Labeled, Operator
     {
         switch(this) {
             case ModeOper:
-            case SkewOper:
             case MedianOper:
+            case FirstQuartileOper:
+            case ThirdQuartileOper:
                 return true;
                 
             default:
@@ -352,6 +361,21 @@ public enum BuiltinOperator implements Labeled, Operator
                     m_methodArgs = new Class<?>[]{Object.class};
                     break;
                     
+                case LinearComputeXOper:
+                case LinearComputeYOper:
+                    m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
+                    break;
+                
+                case NormDensityOper:
+                case NormCumProbOper:
+                case NormProbOper:
+                    m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
+                    break;
+                
+                case NormInRangeProbOper:
+                    m_methodArgs = new Class<?>[]{double.class, double.class, double.class, double.class};
+                    break;
+                
                 default:
                     int numArgs = numArgs();
                     TokenType tt = getPrimaryTokenType();

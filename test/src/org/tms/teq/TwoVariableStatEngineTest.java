@@ -36,14 +36,16 @@ public class TwoVariableStatEngineTest extends BaseTest
         n = te.enter(0, 1);
         assertThat(n, is(2));
         
-        assertThat(te.calcStatistic(BuiltinOperator.LinearInterceptOper), is(1.0));
-        assertThat(te.calcStatistic(BuiltinOperator.LinearSlopeOper), is(0.5));
+        double m = te.calcStatistic(BuiltinOperator.LinearSlopeOper);
+        double b = te.calcStatistic(BuiltinOperator.LinearInterceptOper);
+        assertThat(b, is(1.0));
+        assertThat(m, is(0.5));
         
-        assertThat(te.calculateY(0), is(1.0));
-        assertThat(te.calculateY(2), is(2.0));
-        assertThat(te.calculateY(4), is(3.0));
-        assertThat(te.calculateY(6), is(4.0));
-        assertThat(te.calculateY(100), is(51.0));
+        assertThat(MathUtil.lrComputeY(m, b, 0), is(1.0));
+        assertThat(MathUtil.lrComputeY(m, b, 2), is(2.0));
+        assertThat(MathUtil.lrComputeY(m, b, 4), is(3.0));
+        assertThat(MathUtil.lrComputeY(m, b, 6), is(4.0));
+        assertThat(MathUtil.lrComputeY(m, b, 100), is(51.0));
         
         te.reset();
         assertThat(te.calcStatistic(BuiltinOperator.CountOper), is(0.0));
@@ -100,7 +102,8 @@ public class TwoVariableStatEngineTest extends BaseTest
         cR4C1.setCellValue(0.0);
         cR4C1.setLabel("xVal");
         
-        Cell cR5C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn()).setDerivation("computeY(col Data::X, col Data::Y, cell xVal)");
+        Cell cR5C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn());
+        cR5C1.setDerivation("computeY(slope(col Data::X, col Data::Y), intercept(col Data::X, col Data::Y), cell xVal)");
         assertThat(closeTo(cR5C1.getCellValue(), (Double)cR2C1.getCellValue(), 0.000001), is(true));
         
         cR4C1.setCellValue(1.0);

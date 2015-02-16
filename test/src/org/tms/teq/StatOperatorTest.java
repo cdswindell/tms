@@ -251,5 +251,109 @@ public class StatOperatorTest extends BaseTest
         assertThat(c.isNumericValue(), is(true));
         assertThat(c.isErrorValue(), is(false));
         assertThat(c.getCellValue(), is(1.0));        
-    }    
+    }   
+    
+    @Test
+    public void testFiveNumberSummaryStats()
+    {
+        Table t = TableFactory.createTable(12, 10);        
+        assert (t != null);
+        assertThat(t.getPropertyInt(TableProperty.numCells), is (0));
+        
+        Row r1 = t.addRow();
+        Row r2 = t.addRow();
+        Row r3 = t.addRow();
+        Row r4 = t.addRow();
+        Row r5 = t.addRow();
+        
+        assertThat(r1.getIndex(), is(1));
+        assertThat(r5.getIndex(), is(5));        
+        
+        Column c1 = t.addColumn();
+        
+        t.setCellValue(r1, c1, 12);
+        t.setCellValue(r2, c1, 2);
+        t.setCellValue(r3, c1, 9);
+        t.setCellValue(r4, c1, 6);
+        t.setCellValue(r5, c1, 5);
+        
+        Column c2 = t.addColumn();
+        
+        t.getCell(r1, c2).setDerivation("min(col 1)");
+        t.getCell(r2, c2).setDerivation("firstQ(col 1)");
+        t.getCell(r3, c2).setDerivation("median(col 1)");
+        t.getCell(r4, c2).setDerivation("thirdQ(col 1)");
+        t.getCell(r5, c2).setDerivation("max(col 1)");
+        
+        assertThat(t.getCellValue(r1, c2), is(2.0));
+        assertThat(t.getCellValue(r2, c2), is(3.5));
+        assertThat(t.getCellValue(r3, c2), is(6.0));
+        assertThat(t.getCellValue(r4, c2), is(10.5));
+        assertThat(t.getCellValue(r5, c2), is(12.0));
+    }
+
+    @Test
+    public void testSkewnessKurtosisStats()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        Row r1 = t.addRow();
+        Row r2 = t.addRow();
+        Row r3 = t.addRow();
+        Row r4 = t.addRow();
+        Row r5 = t.addRow();
+        Row r100 = t.addRow(Access.ByIndex, 100);
+        
+        assertThat(r1.getIndex(), is(1));
+        assertThat(r5.getIndex(), is(5));
+        assertThat(r100.getIndex(), is(100));      
+        
+        Column c1 = t.addColumn();
+        c1.fill(61, 5, Access.First);
+        c1.fill(64, 18, Access.Next);
+        c1.fill(67, 42, Access.Next);
+        c1.fill(70, 27, Access.Next);
+        c1.fill(73, 8, Access.Next);
+        
+        // set statistics derivations
+        Column c2 = t.addColumn();
+        Cell c = t.getCell(r1, c2);
+        c.setDerivation("count(col 1)");
+        assertThat(c.getCellValue(), is(100.0));
+        
+        c = t.getCell(r2, c2);
+        c.setDerivation("mean(col 1)");
+        assertThat(c.getCellValue(), is(67.45));
+        
+        c = t.getCell(r3, c2);
+        c.setDerivation("skew(col 1)");
+        assertThat(closeTo(c.getCellValue(), -0.1098, 0.00001), is(true));
+        
+        c = t.getCell(r4, c2);
+        c.setDerivation("kurt(col 1)");
+        assertThat(closeTo(c.getCellValue(), -0.2091, 0.0001), is(true));
+    }
+    
+    @Test
+    public void testNormalDistributionStats()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        t.addRow(Access.ByIndex, 25000);
+        
+        Column c1 = t.addColumn();
+        c1.setDerivation("normS(0, 1)");
+        
+        Column c2 = t.addColumn();
+        
+        Cell c = t.getCell(t.getRow(Access.First), c2);
+        c.setDerivation("mean(col 1)");
+        assertThat(closeTo(c.getCellValue(), 0.0, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c2);
+        c.setDerivation("stDev(col 1)");
+        assertThat(closeTo(c.getCellValue(), 1.0, 0.01), is(true));
+    }
 }

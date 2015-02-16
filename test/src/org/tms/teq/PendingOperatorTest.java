@@ -36,7 +36,7 @@ public class PendingOperatorTest extends BaseTest
         tm.registerOperator(new PendingOperator());
         tm.registerOperator(new PendingOperator2());
         
-        int numRows = 25000;
+        int numRows = 2500;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
@@ -260,7 +260,7 @@ public class PendingOperatorTest extends BaseTest
         tm.registerOperator(new PendingOperator());
         tm.registerOperator(new PendingOperator2());
         
-        int numRows = 2000;
+        int numRows = 1000;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
@@ -346,7 +346,7 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        int numRows = 2000;
+        int numRows = 1000;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
@@ -358,8 +358,8 @@ public class PendingOperatorTest extends BaseTest
         Column c5 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c6
         
         // delete some rows
-        t.getRow(Access.ByIndex, 1800).delete();
-        t.getRow(Access.ByIndex, 1832).delete();
+        t.getRow(Access.ByIndex, 800).delete();
+        t.getRow(Access.ByIndex, 832).delete();
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
@@ -436,7 +436,7 @@ public class PendingOperatorTest extends BaseTest
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        t.addRow(Access.ByIndex, 10000);
+        t.addRow(Access.ByIndex, 1000);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
         Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");

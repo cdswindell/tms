@@ -17,6 +17,8 @@ public interface TableRowColumnElement extends TableElement
      */
     public void sort();
     
+    public void fill(Object o, int n, Access access, Object... mda);
+    
     /**
      * Sort the table by a row/column. Null elements are sorted to the end of the row/column.
      * Numeric cells are given sort order priority. All other cells are sorted by the natural

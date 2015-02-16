@@ -3,6 +3,9 @@ package org.tms.teq;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937a;
 import org.tms.api.Cell;
 import org.tms.api.TableElement;
 
@@ -252,5 +255,58 @@ public class MathUtil
             return null;
         else
             return arg.toString().trim();
-    }   
+    }  
+    
+    static private RandomGenerator sf_NORMAL_DISTRIBUTION_RANDOM_GENERATOR = null;
+    static private final Object sf_LOCK = new Object();
+    
+    static final public double normalSample(double mean, double stDev) 
+    {
+        synchronized(sf_LOCK) {
+            if (sf_NORMAL_DISTRIBUTION_RANDOM_GENERATOR == null)
+                sf_NORMAL_DISTRIBUTION_RANDOM_GENERATOR = new Well19937a(System.currentTimeMillis());
+        }
+        
+        NormalDistribution nd = new NormalDistribution(sf_NORMAL_DISTRIBUTION_RANDOM_GENERATOR, mean, stDev);
+        
+        return nd.sample();
+    }
+    
+    static final public double normalDensity(double mean, double stDev, double x) 
+    {
+        NormalDistribution nd = new NormalDistribution(null, mean, stDev);
+        
+        return nd.density(x);
+    }
+    
+    static final public double normalCumProb(double mean, double stDev, double x) 
+    {
+        NormalDistribution nd = new NormalDistribution(null, mean, stDev);
+        
+        return nd.cumulativeProbability(x);
+    }
+    
+    static final public double normalProbability(double mean, double stDev, double x) 
+    {
+        NormalDistribution nd = new NormalDistribution(null, mean, stDev);
+        
+        return nd.probability(x);
+    }
+    
+    static final public double normalProbInRange(double mean, double stDev, double x0, double x1) 
+    {
+        NormalDistribution nd = new NormalDistribution(null, mean, stDev);
+        
+        return nd.probability(x0, x1);
+    }
+    
+    static final public double lrComputeX(double m, double b, double y) 
+    {
+        return (y - b)/m ;
+    }
+    
+    static final public double lrComputeY(double m, double b, double x) 
+    {
+        return m*x + b;
+    }
 }

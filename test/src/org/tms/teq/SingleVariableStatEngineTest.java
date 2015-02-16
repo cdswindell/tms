@@ -28,6 +28,8 @@ public class SingleVariableStatEngineTest extends BaseTest
         assertThat(se.calcStatistic(BuiltinOperator.MaxOper), is(5725983.0));
         assertThat(se.calcStatistic(BuiltinOperator.RangeOper), is(5725983.0 - 511297.0));
         assertThat(se.calcStatistic(BuiltinOperator.MedianOper), is(1034660.5));
+        assertThat(se.calcStatistic(BuiltinOperator.FirstQuartileOper), is(918959.0));
+        assertThat(se.calcStatistic(BuiltinOperator.ThirdQuartileOper), is(3096951.0));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.ModeOper), 2053751.8, 0.1), is(true));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.SkewOper), 1.586183, 0.000001), is(true));
     }

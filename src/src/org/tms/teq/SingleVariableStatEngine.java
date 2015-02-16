@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
+import org.apache.commons.math3.stat.descriptive.moment.Skewness;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
@@ -25,24 +28,34 @@ public class SingleVariableStatEngine
     private double m_mean = Double.MIN_VALUE;
     private double m_stDevS = Double.MIN_VALUE;
     private double m_stDevP = Double.MIN_VALUE;
+    private double m_median = Double.MIN_VALUE;
+    private double m_1stQ = Double.MIN_VALUE;
+    private double m_3rdQ = Double.MIN_VALUE;
     boolean m_retainDataset;
     private List<Double> m_values;
     private Set<Cell> m_excludedCells;
     private Set<Row> m_excludedRows;
     private Set<Column> m_excludedColumns;
+    private SummaryStatistics m_sStats;
+    private Skewness m_skewness;
+    private Kurtosis m_kurtosis;
     
     public SingleVariableStatEngine()
     {
-        reset();
         m_retainDataset = false;
+        m_sStats = new SummaryStatistics();
+        m_skewness = new Skewness();
+        m_kurtosis = new Kurtosis();
+        
+        reset();
     }
     
     public SingleVariableStatEngine(boolean retainDataset)
     {
-        reset();
+        this();
         m_retainDataset = retainDataset;
         
-        if (m_retainDataset)
+        if (m_retainDataset) 
             m_values = new ArrayList<Double>();
     }
     
@@ -51,7 +64,6 @@ public class SingleVariableStatEngine
         this();
         enter(values);
     }
-
 
 	public boolean isRetainDataset() 
 	{
@@ -64,13 +76,28 @@ public class SingleVariableStatEngine
         m_sumX = m_sumX2 = 0;
         m_min = Double.POSITIVE_INFINITY;
         m_max = Double.NEGATIVE_INFINITY;
-        m_mean = Double.MIN_VALUE;
-        m_stDevS = Double.MIN_VALUE;
-        m_stDevP = Double.MIN_VALUE;
+        
+        resetCalcCache();
         
         m_excludedCells = new HashSet<Cell>();
         m_excludedRows = new HashSet<Row>();
         m_excludedColumns = new HashSet<Column>();
+        
+        m_sStats.clear();
+        m_skewness.clear();
+        m_kurtosis.clear();
+        if (m_retainDataset) 
+            m_values.clear();
+    }
+
+    private void resetCalcCache()
+    {
+        m_mean = Double.MIN_VALUE;
+        m_stDevS = Double.MIN_VALUE;
+        m_stDevP = Double.MIN_VALUE;
+        m_median = Double.MIN_VALUE;
+        m_1stQ = Double.MIN_VALUE;
+        m_3rdQ = Double.MIN_VALUE;
     }
 
     public int enter(Double... vals) 
@@ -93,9 +120,7 @@ public class SingleVariableStatEngine
     
     public int enter(double x) 
     {
-        m_mean = Double.MIN_VALUE;
-        m_stDevS = Double.MIN_VALUE;
-        m_stDevP = Double.MIN_VALUE;
+        resetCalcCache();
         
         m_sumX += x;
         m_sumX2 += x*x;
@@ -104,7 +129,11 @@ public class SingleVariableStatEngine
         if (x < m_min)
             m_min = x;
         
-        if (m_retainDataset)
+        m_sStats.addValue(x);
+        m_skewness.increment(x);
+        m_kurtosis.increment(x);
+        
+        if (m_retainDataset) 
             m_values.add(x);
         
         return ++m_n;
@@ -232,16 +261,28 @@ public class SingleVariableStatEngine
                 value = Math.abs(m_max - m_min);
                 break;
                 
-            case MedianOper:
-                value = calcMedian();
-                break;
-            
             case ModeOper:
                 value = calcMode();
                 break;
             
+            case MedianOper:
+                value = calcMedian();
+                break;
+            
+            case FirstQuartileOper:
+                value = calcFirstQuartile();
+                break;
+                
+            case ThirdQuartileOper:
+                value = calcThirdQuartile();
+                break;
+                
             case SkewOper:
-                value = calcSkew();
+                value = m_skewness.getResult();
+                break;
+            
+            case KurtosisOper:
+                value = m_kurtosis.getResult();
                 break;
             
             default:
@@ -249,20 +290,6 @@ public class SingleVariableStatEngine
         }
         
         return value;
-    }
-
-    private double calcSkew()
-    {
-        double mean = calcStatistic(BuiltinOperator.MeanOper);
-        double stDev = calcStatistic(BuiltinOperator.StDevSampleOper);
-        double sum3 = 0;
-        
-        for (double d : m_values) {
-            sum3 += Math.pow((d - mean)/stDev, 3);
-        }
-        
-        double skew = (m_n/((m_n-1.0)*(m_n-2.0))) * sum3;
-        return skew;
     }
 
     private double calcMode()
@@ -319,6 +346,9 @@ public class SingleVariableStatEngine
     
     private double calcMedian()
     {
+        if (m_median != Double.MIN_VALUE)
+            return m_median;
+        
         // special cases
         if (m_n == 0 || !m_retainDataset)
             return Double.NaN;
@@ -334,8 +364,48 @@ public class SingleVariableStatEngine
         
         int half = m_n/2;
         if (half * 2 == m_n) // even number
-            return (m_values.get(half - 1) + m_values.get(half))/2.0;
+            return (m_median = (m_values.get(half - 1) + m_values.get(half))/2.0);
         else
-            return m_values.get(half);
+            return (m_median = m_values.get(half));
     }
+    
+    private double calcFirstQuartile()
+    {
+        if (m_1stQ != Double.MIN_VALUE)
+            return m_1stQ;
+        
+        // calculate median of all values < median
+        double median = calcMedian();
+        if (median == Double.NaN)
+            return median;
+        
+        SingleVariableStatEngine svse = new SingleVariableStatEngine(true);
+        for (double x : m_values) {
+            if (x < median)
+                svse.enter(x);
+            else
+                break; // we know m_values must be sorted at this point, since calc of median does this
+        }
+        
+        return (m_1stQ = svse.calcMedian());
+    }
+    
+    private double calcThirdQuartile()
+    {
+        if (m_3rdQ != Double.MIN_VALUE)
+            return m_1stQ;
+        
+        // calculate median of all values > median
+        double median = calcMedian();
+        if (median == Double.NaN)
+            return median;
+        
+        SingleVariableStatEngine svse = new SingleVariableStatEngine(true);
+        for (double x : m_values) {
+            if (x > median)
+                svse.enter(x);
+        }
+        
+        return (m_3rdQ = svse.calcMedian());
+    }    
 }

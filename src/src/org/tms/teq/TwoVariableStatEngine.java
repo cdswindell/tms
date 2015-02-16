@@ -65,12 +65,6 @@ public class TwoVariableStatEngine
             case LinearCorrelationOper:
                 return calculateCorrelation();
                 
-            case ComputeXOper:
-                return this.calculateX(params);
-                           
-            case ComputeYOper:
-                return this.calculateY(params);
-                           
             default:
                 throw new UnimplementedException("Unsupported binary statistic: " + stat);            
         }
@@ -122,41 +116,5 @@ public class TwoVariableStatEngine
         double sumX2 = m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
         
         return (m_sumXY - m_n*meanX*meanY)/(sumX2 - m_n*meanX*meanX);
-    }
-
-    public double calculateY(double x) 
-    {
-        return calculateSlope() * x + calculateIntercept();
-    }
-    
-    private double calculateY(Token[] params)
-    {
-        if (params.length == 1) {
-            Token t = params[0];
-            if (t.isNumeric())
-                return calculateY(t.getNumericValue());
-            else if (t.isNull())
-                return Double.MIN_VALUE;
-        }
-        
-        return Double.NaN;
-    }
-
-    private double calculateX(Token[] params)
-    {
-        if (params.length == 1) {
-            Token t = params[0];
-            if (t.isNumeric())
-                return calculateX(t.getNumericValue());
-            else if (t.isNull())
-                return Double.MIN_VALUE;
-        }
-        
-        return Double.NaN;
-    }
-
-    public double calculateX(double y) 
-    {
-        return (y - calculateIntercept())/calculateSlope();
     }
 }
