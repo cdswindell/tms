@@ -31,7 +31,7 @@ public enum BuiltinOperator implements Labeled, Operator
     
     AndOper(TokenType.BinaryOp, 4,"&&", "and"),
     OrOper(TokenType.BinaryOp, 4,"||", "or"),
-    XorOper(TokenType.BinaryOp, 4,"^", "xor"),
+    XorOper(TokenType.BinaryOp, 4, "xor"),
     NotOper(TokenType.UnaryOp, 4,"~", "not"),
     
     // special isNull operator, which is somewhat out of bounds
@@ -101,7 +101,7 @@ public enum BuiltinOperator implements Labeled, Operator
     BiggerOper(TokenType.BinaryFunc, 5, Math.class, "max", "bigger"),
     SmallerOper(TokenType.BinaryFunc, 5, Math.class, "min", "smaller"),
     HypotOper(TokenType.BinaryFunc, 5, Math.class, "hypot"),
-    numberOfOper("numberOf", TokenType.GenericFunc, 5, MathUtil.class, "numberOf", TableElement.class, Object.class),    
+    NumberOfOper("numberOf", TokenType.GenericFunc, 5, MathUtil.class, "numberOf", TableElement.class, Object.class),    
 
     // Builtin functions
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
