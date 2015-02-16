@@ -1127,8 +1127,72 @@ public class PostfixStackEvaluator
 		if (x.isNull())
 			return Token.createNullToken();
 		
+        Token result = null;    
+        BuiltinOperator bio = oper.getBuiltinOperator();
+        if (bio != null) {
+            switch (bio) {
+                case NotOper:
+                    result = doBuiltInOp(bio, x);
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            if (result != null)
+                return result;
+        }
+        
 		Token val = oper.evaluate(x);
 		
 		return val;
-	}   
+	}
+
+    private Token doBuiltInOp(BuiltinOperator bio, Token x)
+    {
+        if (x.isNumeric())
+            return doBuiltInOp(bio, x.getNumericValue());        
+        else if (x.isBoolean())
+            return doBuiltInOp(bio, x.getBooleanValue());
+        
+        // if a token mapper exists, look for a supporting overload
+        TokenMapper tm = m_pfs.getTokenMapper();
+        if (tm != null) {
+            Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType()});
+            if (oper != null) {
+                Token t = oper.evaluate(x);
+                return t;
+            }
+        }
+        switch (bio) {
+            case NotOper:
+                return Token.createNullToken();
+                
+            default:                        
+                throw new UnimplementedException(
+                    String.format("Unimplemented built in operator: %s (%s)", 
+                    bio, 
+                    x.getDataType() != null ? x.getDataType().getSimpleName() : "null"));    
+        }
+    }
+
+    private Token doBuiltInOp(BuiltinOperator bio, double dv)
+    {
+        switch(bio) {
+            case NotOper:
+                return new Token(~(int)dv);
+            default:
+                throw new UnimplementedException("Unimplemented built in operator: " + bio);                
+        }
+    }   
+
+    private Token doBuiltInOp(BuiltinOperator bio, Boolean bv)
+    {
+        switch(bio) {
+            case NotOper:
+                return new Token(!bv);
+            default:
+                throw new UnimplementedException("Unimplemented built in operator: " + bio);                
+        }
+    }   
 }

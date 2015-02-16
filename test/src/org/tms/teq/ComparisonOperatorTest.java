@@ -250,7 +250,12 @@ public class ComparisonOperatorTest extends BaseTest
         assertThat(t.getCellValue(r1, c5), is(false));
         assertThat(t.getCellValue(r2, c5), is(true));
         assertThat(t.getCellValue(r3, c5), is(true));
-        assertThat(t.getCellValue(r4, c5), is(false));
+        assertThat(t.getCellValue(r4, c5), is(false));        
+        
+        assertThat(t.getCellValue(r1, c6), is(false));
+        assertThat(t.getCellValue(r2, c6), is(false));
+        assertThat(t.getCellValue(r3, c6), is(true));
+        assertThat(t.getCellValue(r4, c6), is(true));
         
         // try again with int
         t.setCellValue(r1,  c1,  7);        
@@ -259,5 +264,6 @@ public class ComparisonOperatorTest extends BaseTest
         assertThat(t.getCellValue(r1, c3), is(6.0));
         assertThat(t.getCellValue(r1, c4), is(7.0));
         assertThat(t.getCellValue(r1, c5), is(1.0));
+        assertThat(t.getCellValue(r1, c6), is((double)(~7)));
     }       
 }
