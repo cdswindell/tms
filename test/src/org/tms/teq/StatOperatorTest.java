@@ -497,11 +497,11 @@ public class StatOperatorTest extends BaseTest
         assertThat(closeTo(c.getCellValue(), 3.4615, 0.0001), is(true));
         
         c = t.getCell(t.getRow(Access.Next), c2);
-        c.setDerivation("pValue(col 1, 10)");
+        c.setDerivation("tValue(col 1, 10)");
         assertThat(closeTo(c.getCellValue(), -3.261351, 0.00001), is(true));
         
         c = t.getCell(t.getRow(Access.Next), c2);
-        c.setDerivation("tValue(col 1, 10)");
+        c.setDerivation("pValue(col 1, 10)");
         assertThat(closeTo(c.getCellValue(), 0.009818, 0.00001), is(true));
         
         c = t.getCell(t.getRow(Access.Next), c2);

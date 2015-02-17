@@ -293,7 +293,7 @@ public class SingleVariableStatEngine
                 else {
                     double mu = params[0].getNumericValue();
                     tTest = new TTest();
-                    value = tTest.t(mu, m_sStats);
+                    value = tTest.tTest(mu, m_sStats);
                 }
                 break;
                 
@@ -303,7 +303,7 @@ public class SingleVariableStatEngine
                 else {
                     double mu = params[0].getNumericValue();
                     tTest = new TTest();
-                    value = tTest.tTest(mu, m_sStats);
+                    value = tTest.t(mu, m_sStats);
                 }
                 break;
                 
