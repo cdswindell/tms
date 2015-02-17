@@ -1,4 +1,4 @@
-package org.tms.api;
+package org.tms.api.event;
 
 public interface TableElementListener
 {

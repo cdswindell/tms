@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.tms.api.Derivable;
 import org.tms.api.TableProperty;
+import org.tms.api.event.TableElementEventType;
+import org.tms.api.event.TableElementListener;
 import org.tms.api.exceptions.InvalidParentException;
 
 /**
@@ -20,6 +22,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
     
     protected TableImpl m_table;   
     protected Set<Derivable> m_affects;
+    protected Set<TableElementListener> m_listeners;
     
     private int m_pendings;
 
@@ -59,6 +62,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
         clearProperty(TableProperty.Description);
         
         m_affects = new LinkedHashSet<Derivable>();
+        m_listeners = new LinkedHashSet<TableElementListener>();
         m_pendings = 0;
     }
     
@@ -172,5 +176,53 @@ abstract class TableCellsElementImpl extends TableElementImpl
     public boolean isPendings()
     {
         return m_pendings > 0;
+    }
+
+    @Override
+    public boolean addListener(TableElementEventType evT, TableElementListener... tels)
+    {
+        super.addListener(evT, tels);
+        
+        if (tels != null) {
+            boolean addedAny = false;
+            for (TableElementListener tel : tels) {
+                if (m_listeners.add(tel))
+                    addedAny = true;
+            }
+            
+            return addedAny;
+        }
+        else 
+            return false;
+    }
+
+    @Override
+    public boolean removeListener(TableElementEventType evT, TableElementListener... tels)
+    {
+        if (tels != null) {
+            boolean removedAny = false;
+            for (TableElementListener tel : tels) {
+                if (m_listeners.remove(tel))
+                    removedAny = true;
+            }
+            
+            return removedAny;
+        }
+        else 
+            return false;
+    }
+
+    @Override
+    public List<TableElementListener> getListeners(TableElementEventType... evTs)
+    {
+        return new ArrayList<TableElementListener>(m_listeners);
+    }
+
+    @Override
+    public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
+    {
+        List<TableElementListener> listeners = getListeners();
+        m_listeners.clear();
+        return listeners;
     }
 }

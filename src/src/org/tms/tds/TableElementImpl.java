@@ -7,8 +7,13 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.event.Observable;
+import org.tms.api.event.TableElementEventType;
+import org.tms.api.event.TableElementListener;
+import org.tms.api.exceptions.InvalidException;
+import org.tms.api.exceptions.UnimplementedException;
 
-abstract class TableElementImpl extends BaseElementImpl implements TableElement
+abstract class TableElementImpl extends BaseElementImpl implements TableElement, Observable
 {
 	abstract public Table getTable();
 	abstract public TableContext getTableContext();
@@ -44,6 +49,19 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
         setEnforceDataType(false);
+    }
+    
+    @Override
+    public boolean addListener(TableElementEventType evT, TableElementListener... tels)
+    {
+        if (evT == null)
+            throw new InvalidException("TableElementEventType required.");
+        if (tels != null) {
+            if (!evT.isImplementedBy(this))
+                throw new UnimplementedException(String.format("%s not supported by %s", evT, this.getElementType()));
+        }
+        
+        return false;
     }
     
     @Override

@@ -28,6 +28,8 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.event.TableElementEventType;
+import org.tms.api.event.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
@@ -2092,5 +2094,29 @@ public class TableImpl extends TableCellsElementImpl implements Table
             else
                 return false;
         }       
+    }
+
+    public boolean addCellListener(CellImpl cellImpl, TableElementEventType evT, TableElementListener[] tels)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean removeCellListener(CellImpl cellImpl, TableElementEventType evT, TableElementListener[] tels)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public List<TableElementListener> getCellListeners(CellImpl cellImpl, TableElementEventType[] evTs)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public List<TableElementListener> removeAllCellListeners(CellImpl cellImpl, TableElementEventType[] evTs)
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

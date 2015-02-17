@@ -13,6 +13,8 @@ import org.tms.api.ElementType;
 import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.event.TableElementEventType;
+import org.tms.api.event.TableElementListener;
 import org.tms.api.exceptions.DataTypeEnforcementException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
@@ -638,8 +640,46 @@ public class CellImpl extends TableElementImpl implements Cell
     {
         invalidateCell();
     }
-    
-	@Override
+        
+    @Override
+    public boolean addListener(TableElementEventType evT, TableElementListener... tels)
+    {
+        super.addListener(evT, tels);
+        
+        if (getTable() != null)
+            return getTable().addCellListener(this, evT, tels);
+        else
+            return false;
+    }
+
+    @Override
+    public boolean removeListener(TableElementEventType evT, TableElementListener... tels)
+    {
+        if (getTable() != null)
+            return getTable().removeCellListener(this, evT, tels);
+        else
+            return false;
+    }
+
+    @Override
+    public List<TableElementListener> getListeners(TableElementEventType... evTs)
+    {
+        if (getTable() != null)
+            return getTable().getCellListeners(this, evTs);
+        else
+            return Collections.emptyList();
+    }
+
+    @Override
+    public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
+    {
+        if (getTable() != null)
+            return getTable().removeAllCellListeners(this, evTs);
+        else
+            return Collections.emptyList();
+    }
+
+    @Override
 	public String toString()
 	{
         String label = (String)getProperty(TableProperty.Label);
