@@ -350,7 +350,18 @@ public class MathUtil
     
     static final public double tScore(double meanPop, double meanSamp, double stDevSamp, double nSamples) 
     {
+        if (nSamples < 1 || stDevSamp <= 0)
+            return Double.NaN;
+        
         return (meanSamp - meanPop)/(stDevSamp/Math.sqrt(nSamples));
+    }
+    
+    static final public double popMean(double cumProb, double meanSamp, double stDevSamp, double nSamples) 
+    {
+        if (nSamples < 2)
+            return Double.NaN;
+        
+        return meanSamp - tInvCumProb(nSamples-1, cumProb)*(stDevSamp/Math.sqrt(nSamples));
     }
     
     static final public double lrComputeX(double m, double b, double y) 

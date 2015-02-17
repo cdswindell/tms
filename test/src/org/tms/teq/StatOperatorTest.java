@@ -533,6 +533,44 @@ public class StatOperatorTest extends BaseTest
     }
     
     @Test
+    public void testPopulationMean()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        Row r1 = t.addRow(Access.First);
+        
+        Column c1 = t.addColumn();
+        c1.setLabel("Inv Prob");
+        c1.fill(0.90);
+        
+        Column c2 = t.addColumn();
+        c2.setLabel("Sample Mean");
+        c2.fill(115);
+        
+        Column c3 = t.addColumn();
+        c3.setLabel("Sample StDev");
+        c3.fill(11);
+        
+        Column c4 = t.addColumn();
+        c4.setLabel("Samples");
+        c4.fill(25);
+        
+        Column c5 = t.addColumn();
+        c5.setLabel("Pop Mean");
+        c5.setDerivation("popMean(col 1, col 2, col 3, col 4)");
+        Cell c = t.getCell(r1, c5);
+        assertThat(closeTo(c.getCellValue(), 112.1, 0.01), is(true));
+        
+        Row r2 = t.addRow(Access.Next);
+        t.setCellValue(r2, c1, .95);
+        t.setCellValue(r2, c2, 130.5);
+        t.setCellValue(r2, c3, 32.4);
+        t.setCellValue(r2, c4, 30);
+        assertThat(closeTo(t.getCellValue(r2, c5), 120.449, 0.001), is(true));
+    }
+    
+    @Test
     public void testSingleTTest()
     {
         Table t = TableFactory.createTable();        

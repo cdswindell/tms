@@ -152,7 +152,9 @@ public enum BuiltinOperator implements Labeled, Operator
     TInvCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "tInvCumProb", "tInvCumProb", "tICP", "tInvCDF"),
     TProbOper(TokenType.GenericFunc, 5, MathUtil.class, "tProbability", "tProbability", "tProb", "tP", "tPMF"),
     TProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "tProbInRange", "tProbInRange", "tProbabilityInRange","tPIR"),    
+
     TScoreOper("tScore", TokenType.GenericFunc, 5, MathUtil.class, "tScore", double.class, double.class, double.class, double.class),    
+    PopMeanOper("popMean", TokenType.GenericFunc, 5, MathUtil.class, "popMean", double.class, double.class, double.class, double.class),    
     
     // Two Variable Stat Functions
     LinearSlopeOper("slope", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
