@@ -350,7 +350,7 @@ public class StatOperatorTest extends BaseTest
         
         Cell c = t.getCell(t.getRow(Access.First), c2);
         c.setDerivation("mean(col 1)");
-        assertThat(closeTo(c.getCellValue(), 0.0, 0.01), is(true));
+        assertThat(closeTo(c.getCellValue(), 0.0, 0.05), is(true));
         
         c = t.getCell(t.getRow(Access.Next), c2);
         c.setDerivation("stDev(col 1)");
@@ -455,5 +455,57 @@ public class StatOperatorTest extends BaseTest
         t.setCellValue(t.getRow(Access.Current), c3, 15);
         t.setCellValue(t.getRow(Access.Current), c4, 22);
         assertThat(closeTo(t.getCellValue(t.getRow(Access.Current), c5), 0.5859, 0.0001), is(true));
+        
+        t.setCellValue(t.addRow(), c1, 50);
+        t.setCellValue(t.getRow(Access.Current), c2, 0.05);
+        t.setCellValue(t.getRow(Access.Current), c3, 49.9);
+        t.setCellValue(t.getRow(Access.Current), c4, 50.1);
+        assertThat(closeTo(t.getCellValue(t.getRow(Access.Current), c5), 0.9544, 0.0001), is(true));
+    }
+    
+    @Test
+    public void testSingleTTest()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        Column c1 = t.addColumn();
+        c1.setLabel("Data");        
+        
+        t.setCellValue(t.addRow(), c1, 7);
+        t.setCellValue(t.addRow(), c1, 11);
+        t.setCellValue(t.addRow(), c1, 2.3);
+        t.setCellValue(t.addRow(), c1, 5);
+        t.setCellValue(t.addRow(), c1, 9);
+        t.setCellValue(t.addRow(), c1, 3);
+        t.setCellValue(t.addRow(), c1, 11);
+        t.setCellValue(t.addRow(), c1, 2);
+        t.setCellValue(t.addRow(), c1, 5);
+        t.setCellValue(t.addRow(), c1, 9);
+        
+        Column c2 = t.addColumn();    
+        Cell c = t.getCell(t.getRow(Access.First), c2);
+        c.setDerivation("count(col 1)");
+        assertThat(c.getCellValue(), is(10.0));
+        
+        c = t.getCell(t.getRow(Access.Next), c2);
+        c.setDerivation("mean(col 1)");
+        assertThat(c.getCellValue(), is(6.43));
+        
+        c = t.getCell(t.getRow(Access.Next), c2);
+        c.setDerivation("stDev(col 1)");
+        assertThat(closeTo(c.getCellValue(), 3.4615, 0.0001), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c2);
+        c.setDerivation("pValue(col 1, 10)");
+        assertThat(closeTo(c.getCellValue(), -3.261351, 0.00001), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c2);
+        c.setDerivation("tValue(col 1, 10)");
+        assertThat(closeTo(c.getCellValue(), 0.009818, 0.00001), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c2);
+        c.setDerivation("tTest(col 1, 10, 0.05)");
+        assertThat(c.getCellValue(), is(true));
     }
 }

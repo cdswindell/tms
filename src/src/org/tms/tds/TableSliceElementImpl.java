@@ -488,7 +488,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                     }
                     finally {
                         n--;
-                        if (n < 1) break;
+                        if (n < 1) break; // leave the table at the last row/col modified
                         c = (CellImpl) getCell(Access.Next);
                     }
                 }

@@ -655,7 +655,9 @@ public class PostfixStackEvaluator
                 if (ref1 != null) {
                     SingleVariableStatEngine svse = fetchSVSE(ref1, bio, dc);
                     try {
-                        double value = svse.calcStatistic(bio);
+                        if (args.length > 1)
+                            params = Arrays.copyOfRange(args, 1, args.length);
+                        Object value = svse.calcStatistic(bio, params);
                         result = new Token(TokenType.Operand, value);
                     }
                     catch (UnimplementedException ue) {
@@ -718,14 +720,14 @@ public class PostfixStackEvaluator
                     
                     switch (bio) {
                         case MeanCenterOper:
-                            mean = svse.calcStatistic(BuiltinOperator.MeanOper);
+                            mean = (double)svse.calcStatistic(BuiltinOperator.MeanOper);
                             value = value - mean;
                             result = new Token(TokenType.Operand, value);
                             break;
                             
                         case NormalizeOper:
-                            mean = svse.calcStatistic(BuiltinOperator.MeanOper);
-                            stDev = svse.calcStatistic(BuiltinOperator.StDevSampleOper);
+                            mean = (double)svse.calcStatistic(BuiltinOperator.MeanOper);
+                            stDev = (double)svse.calcStatistic(BuiltinOperator.StDevSampleOper);
                             if (stDev == 0.0)
                                 return Token.createErrorToken(ErrorCode.DivideByZero);
                             value = (value - mean)/stDev;
@@ -739,8 +741,8 @@ public class PostfixStackEvaluator
                             if (rScale == 0.0)
                                 return Token.createErrorToken(ErrorCode.DivideByZero);
                             
-                            min = svse.calcStatistic(BuiltinOperator.MinOper);
-                            max = svse.calcStatistic(BuiltinOperator.MaxOper);
+                            min = (double)svse.calcStatistic(BuiltinOperator.MinOper);
+                            max = (double)svse.calcStatistic(BuiltinOperator.MaxOper);
                             rSource = max - min;
                             
                             value = ((value - min)*rScale/rSource) + sMin;

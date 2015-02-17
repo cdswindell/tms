@@ -133,6 +133,10 @@ public enum BuiltinOperator implements Labeled, Operator
     SkewOper(TokenType.StatOp, 5, "skewness", "skew"),
     KurtosisOper(TokenType.StatOp, 5, "kurtosis", "kurt"),
     
+    PValueOper(TokenType.StatOp, 5, "tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"),
+    TValueOper(TokenType.StatOp, 5, "tStatistic", "tValue", "tScore", "oneSampleTwoTailTTestTValue"),
+    TTestOper(TokenType.StatOp, 5, "tTest"),
+    
     // Normal Distribution Single Variable Stat Functions 
     NormSampleOper(TokenType.BinaryFunc, 5, MathUtil.class, "normalSample", "normalSample", "normS", "normalS"),
     NormDensityOper(TokenType.GenericFunc, 5, MathUtil.class, "normalDensity", "normalDensity", "normD", "normalD", "normPDF"),
@@ -360,6 +364,15 @@ public enum BuiltinOperator implements Labeled, Operator
                     
                 case NotOper:
                     m_methodArgs = new Class<?>[]{Object.class};
+                    break;
+                
+                case PValueOper:
+                case TValueOper:
+                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, double.class};
+                    break;
+                    
+                case TTestOper:
+                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, double.class, double.class};
                     break;
                     
                 case LinearComputeXOper:

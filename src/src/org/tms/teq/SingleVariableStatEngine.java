@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
 import org.apache.commons.math3.stat.descriptive.moment.Skewness;
+import org.apache.commons.math3.stat.inference.TTest;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
@@ -192,7 +193,7 @@ public class SingleVariableStatEngine
         return false;
     }
     
-    public double calcStatistic(BuiltinOperator stat)
+    public Object calcStatistic(BuiltinOperator stat, Token... params)
     {        
         if (stat == BuiltinOperator.CountOper)
             return m_n;
@@ -201,7 +202,8 @@ public class SingleVariableStatEngine
             return Double.NaN;
         
         double tmpX = 0.0;
-        double value = 0.0;
+        Object value = 0.0;
+        TTest tTest = null;
         switch (stat) {
             case SumOper:
                 value = m_sumX;
@@ -215,7 +217,7 @@ public class SingleVariableStatEngine
             	if (m_mean != Double.MIN_VALUE)
             		value = m_mean;
             	else 
-            		m_mean = value = m_sumX / m_n;
+            	    value = m_mean = m_sumX / m_n;
                 break;
                 
             case MinOper:   
@@ -230,8 +232,8 @@ public class SingleVariableStatEngine
             	if (m_stDevP != Double.MIN_VALUE)
             		value = m_stDevP;
             	else {
-	                tmpX = calcStatistic(BuiltinOperator.MeanOper);
-	                m_stDevP = value = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/m_n);
+	                tmpX = (double)calcStatistic(BuiltinOperator.MeanOper);
+	                value = m_stDevP = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/m_n);
             	}
                 break;
             
@@ -242,18 +244,18 @@ public class SingleVariableStatEngine
             	if (m_stDevS != Double.MIN_VALUE)
             		value = m_stDevS;
             	else {
-	                tmpX = calcStatistic(BuiltinOperator.MeanOper);
-	                m_stDevS = value = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/(m_n-1));
+	                tmpX = (double)calcStatistic(BuiltinOperator.MeanOper);
+	                value = m_stDevS = Math.sqrt((m_sumX2 - m_n * tmpX * tmpX)/(m_n-1));
             	}
                 break;
                 
             case VarPopulationOper:
-                tmpX = calcStatistic(BuiltinOperator.StDevPopulationOper);
+                tmpX = (double)calcStatistic(BuiltinOperator.StDevPopulationOper);
                 value = tmpX * tmpX;
                 break;
             
             case VarSampleOper:
-                tmpX = calcStatistic(BuiltinOperator.StDevSampleOper);
+                tmpX = (double)calcStatistic(BuiltinOperator.StDevSampleOper);
                 value = tmpX * tmpX;
                 break;
                 
@@ -285,6 +287,37 @@ public class SingleVariableStatEngine
                 value = m_kurtosis.getResult();
                 break;
             
+            case PValueOper:
+                if (m_n < 2 || params == null || params.length < 1 || params[0].isNull() || !params[0].isNumeric())
+                    value = Double.NaN;
+                else {
+                    double mu = params[0].getNumericValue();
+                    tTest = new TTest();
+                    value = tTest.t(mu, m_sStats);
+                }
+                break;
+                
+            case TValueOper:
+                if (m_n < 2 || params == null || params.length < 1 || params[0].isNull() || !params[0].isNumeric())
+                    value = Double.NaN;
+                else {
+                    double mu = params[0].getNumericValue();
+                    tTest = new TTest();
+                    value = tTest.tTest(mu, m_sStats);
+                }
+                break;
+                
+            case TTestOper:
+                if (m_n < 2 || params == null || params.length < 2 || !params[0].isNumeric() || !params[1].isNumeric())
+                    value = Double.NaN;
+                else {
+                    double mu = params[0].getNumericValue();
+                    double alpha = params[1].getNumericValue();
+                    tTest = new TTest();
+                    value = tTest.tTest(mu, m_sStats, alpha);
+                }
+                break;
+                
             default:
                 throw new UnimplementedException("Unsupported statistic: " + stat);            
         }
@@ -338,7 +371,7 @@ public class SingleVariableStatEngine
         if (modeValues.size() > 1) {
             // return the mean value
             SingleVariableStatEngine svse = new SingleVariableStatEngine(modeValuesArray);
-            return svse.calcStatistic(BuiltinOperator.MeanOper);
+            return (double)svse.calcStatistic(BuiltinOperator.MeanOper);
         }
         else
             return modeValuesArray[0];

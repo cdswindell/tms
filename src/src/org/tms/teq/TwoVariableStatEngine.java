@@ -73,10 +73,10 @@ public class TwoVariableStatEngine
     private double calculateCorrelation()
     {
         if (m_r2 == Double.MIN_VALUE) {
-            double sumX = m_statX.calcStatistic(BuiltinOperator.SumOper);
-            double sumY = m_statY.calcStatistic(BuiltinOperator.SumOper);
-            double sumX2 = m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
-            double sumY2 = m_statY.calcStatistic(BuiltinOperator.Sum2Oper);
+            double sumX = (double)m_statX.calcStatistic(BuiltinOperator.SumOper);
+            double sumY = (double)m_statY.calcStatistic(BuiltinOperator.SumOper);
+            double sumX2 = (double)m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
+            double sumY2 = (double)m_statY.calcStatistic(BuiltinOperator.Sum2Oper);
             return m_r2 = (m_sumXY - sumX*sumY/m_n)/
                     Math.sqrt((sumX2 - sumX*sumX/m_n)*(sumY2 - sumY*sumY/m_n));
         }
@@ -87,8 +87,8 @@ public class TwoVariableStatEngine
     private double calculateIntercept()
     {
         if (m_intercept == Double.MIN_VALUE) {
-            double meanX = m_statX.calcStatistic(BuiltinOperator.MeanOper);
-            double meanY = m_statY.calcStatistic(BuiltinOperator.MeanOper);
+            double meanX = (double)m_statX.calcStatistic(BuiltinOperator.MeanOper);
+            double meanY = (double)m_statY.calcStatistic(BuiltinOperator.MeanOper);
             
             return m_intercept = meanY - calculateSlope() * meanX;
         }
@@ -99,9 +99,9 @@ public class TwoVariableStatEngine
     protected double calculateSlope()
     {
         if (m_slope == Double.MIN_VALUE) {
-            double sumX = m_statX.calcStatistic(BuiltinOperator.SumOper);
-            double sumY = m_statY.calcStatistic(BuiltinOperator.SumOper);
-            double sumX2 = m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
+            double sumX = (double)m_statX.calcStatistic(BuiltinOperator.SumOper);
+            double sumY = (double)m_statY.calcStatistic(BuiltinOperator.SumOper);
+            double sumX2 = (double)m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
              
             return m_slope = ((sumX*sumY/m_n) - m_sumXY)/((sumX*sumX/m_n) - sumX2);
         }
@@ -111,9 +111,9 @@ public class TwoVariableStatEngine
     
     protected double calculateSlope2()
     {
-        double meanX = m_statX.calcStatistic(BuiltinOperator.MeanOper);
-        double meanY = m_statY.calcStatistic(BuiltinOperator.MeanOper);
-        double sumX2 = m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
+        double meanX = (double)m_statX.calcStatistic(BuiltinOperator.MeanOper);
+        double meanY = (double)m_statY.calcStatistic(BuiltinOperator.MeanOper);
+        double sumX2 = (double)m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
         
         return (m_sumXY - m_n*meanX*meanY)/(sumX2 - m_n*meanX*meanX);
     }

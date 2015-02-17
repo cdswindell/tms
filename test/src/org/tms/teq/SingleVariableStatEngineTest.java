@@ -19,7 +19,7 @@ public class SingleVariableStatEngineTest extends BaseTest
         int n = se.enter(3096951.0, 1123560.0,5725983.0,918959.0,945761.0, 511297.0);
         assertThat(n, is(6));
     
-        assertThat(se.calcStatistic(BuiltinOperator.CountOper), is(6.0));
+        assertThat(se.calcStatistic(BuiltinOperator.CountOper), is(6));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.MeanOper), 2053751.8, 0.1), is(true));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.StDevPopulationOper), 1840895.1, 0.1), is(true));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.StDevSampleOper), 2016599.5, 0.1), is(true));
@@ -32,5 +32,6 @@ public class SingleVariableStatEngineTest extends BaseTest
         assertThat(se.calcStatistic(BuiltinOperator.ThirdQuartileOper), is(3096951.0));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.ModeOper), 2053751.8, 0.1), is(true));
         assertThat(closeTo(se.calcStatistic(BuiltinOperator.SkewOper), 1.586183, 0.000001), is(true));
+        assertThat(closeTo(se.calcStatistic(BuiltinOperator.KurtosisOper), 1.90271, 0.00001), is(true));
     }
 }
