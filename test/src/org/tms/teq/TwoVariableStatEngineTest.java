@@ -124,7 +124,6 @@ public class TwoVariableStatEngineTest extends BaseTest
     public void testTwoSampleTTest()
     {
         Table t = TableFactory.createTable();
-        t.setLabel("Data");
         Column c1 = t.addColumn();
         c1.setLabel("X");
         t.setCellValue(t.addRow(), c1, 26);
