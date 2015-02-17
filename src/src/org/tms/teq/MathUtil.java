@@ -286,10 +286,16 @@ public class MathUtil
         return nd.cumulativeProbability(x);
     }
     
-    static final public double normalProbability(double mean, double stDev, double x) 
+    static final public double normalInvCumProb(double mean, double stDev, double x) 
     {
         NormalDistribution nd = new NormalDistribution(null, mean, stDev);
         
+        return nd.inverseCumulativeProbability(x);
+    }
+    
+    static final public double normalProbability(double mean, double stDev, double x) 
+    {
+        NormalDistribution nd = new NormalDistribution(null, mean, stDev);
         return nd.probability(x);
     }
     

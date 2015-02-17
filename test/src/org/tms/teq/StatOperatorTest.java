@@ -356,4 +356,57 @@ public class StatOperatorTest extends BaseTest
         c.setDerivation("stDev(col 1)");
         assertThat(closeTo(c.getCellValue(), 1.0, 0.01), is(true));
     }
+    
+    @Test
+    public void testNDProbability()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        Row r1 = t.addRow(Access.First);
+        
+        Column c1 = t.addColumn();
+        c1.setLabel("Mean");
+        c1.fill(1000);
+        
+        Column c2 = t.addColumn();
+        c2.setLabel("StDev");
+        c2.fill(100);
+        
+        Column c3 = t.addColumn();
+        c3.setLabel("NRV");
+        c3.fill(1200);
+        
+        Column c4 = t.addColumn();
+        c4.setLabel("Random CDF");
+        c4.fill(.97725);
+        
+        Column c5 = t.addColumn();
+        c5.setLabel("CDF");
+        c5.setDerivation("normCDF(col 1, col 2, col 3)");
+        Cell c = t.getCell(r1, c5);
+        assertThat(closeTo(c.getCellValue(), 0.977, 0.001), is(true));
+        
+        Column c6 = t.addColumn();
+        c6.setLabel("NV");
+        c6.setDerivation("normInvCDF(col 1, col 2, col 4)");
+        c = t.getCell(r1, c6);
+        assertThat(closeTo(c.getCellValue(), 1200, 0.1), is(true));
+        
+        Row r2 = t.addRow(Access.Next);
+        t.setCellValue(r2, c1, 50);
+        t.setCellValue(r2, c2, 10);
+        t.setCellValue(r2, c3, 63);
+        t.setCellValue(r2, c4, 0.9030);
+        assertThat(closeTo(t.getCellValue(r2, c5), 0.903, 0.001), is(true));
+        assertThat(closeTo(t.getCellValue(r2, c6), 63, 0.1), is(true));
+        
+        Row r3 = t.addRow(Access.Next);
+        t.setCellValue(r3, c1, 0);
+        t.setCellValue(r3, c2, 1);
+        t.setCellValue(r3, c3, 1.96);
+        t.setCellValue(r3, c4, 0.975);
+        assertThat(closeTo(t.getCellValue(r3, c5), 0.975, 0.001), is(true));
+        assertThat(closeTo(t.getCellValue(r3, c6), 1.96, 0.01), is(true));
+    }
 }

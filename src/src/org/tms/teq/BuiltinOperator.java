@@ -137,7 +137,8 @@ public enum BuiltinOperator implements Labeled, Operator
     NormSampleOper(TokenType.BinaryFunc, 5, MathUtil.class, "normalSample", "normalSample", "normS", "normalS"),
     NormDensityOper(TokenType.GenericFunc, 5, MathUtil.class, "normalDensity", "normalDensity", "normD", "normalD", "normPDF"),
     NormCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalCumProb", "normalCumProb", "normCP", "normalCP", "normCDF"),
-    NormProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbabiltiy", "normalProbabiltiy", "normalProb", "normP", "normalP", "normPMF"),
+    NormInvCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalInvCumProb", "normalInvCumProb", "normICP", "normalICP", "normInvCDF"),
+    NormProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbability", "normalProbability", "normalProb", "normP", "normalP", "normPMF"),
     NormInRangeProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbInRange", "normalProbInRange", 
                                                                   "normalProbabilityInRange","normPIR", "normalPIR"),    
     // Two Variable Stat Functions
@@ -331,7 +332,7 @@ public enum BuiltinOperator implements Labeled, Operator
 	@Override
     public int numArgs() 
 	{
-	    if (m_methodArgs != null)
+	    if (getArgTypes() != null)
 	        return m_methodArgs.length;
 	    else {
 	        // handle special cases and default
@@ -368,6 +369,7 @@ public enum BuiltinOperator implements Labeled, Operator
                 
                 case NormDensityOper:
                 case NormCumProbOper:
+                case NormInvCumProbOper:
                 case NormProbOper:
                     m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
                     break;
@@ -377,8 +379,8 @@ public enum BuiltinOperator implements Labeled, Operator
                     break;
                 
                 default:
-                    int numArgs = numArgs();
                     TokenType tt = getPrimaryTokenType();
+                    int numArgs = tt != null ? tt.numArgs() : 0;
                     if (numArgs > 0 && tt != null) {
                         m_methodArgs = new Class<?>[numArgs];
                         switch (tt) {
