@@ -123,6 +123,9 @@ public class SingleVariableStatEngine
     {
         resetCalcCache();
         
+        if (x == Double.MIN_VALUE) // skip null values
+            return m_n; 
+        
         m_sumX += x;
         m_sumX2 += x*x;
         if (x > m_max)
@@ -193,6 +196,11 @@ public class SingleVariableStatEngine
         return false;
     }
     
+    protected SummaryStatistics getSummaryStatistics()
+    {
+        return m_sStats;
+    }
+    
     public Object calcStatistic(BuiltinOperator stat, Token... params)
     {        
         if (stat == BuiltinOperator.CountOper)
@@ -211,6 +219,10 @@ public class SingleVariableStatEngine
                 
             case Sum2Oper:
                 value = m_sumX2;
+                break;
+                
+            case SumSqD2Oper:
+                value = m_sumX2 - m_sumX*m_sumX/m_n;
                 break;
                 
             case MeanOper:

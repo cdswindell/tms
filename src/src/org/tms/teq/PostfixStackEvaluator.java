@@ -565,6 +565,7 @@ public class PostfixStackEvaluator
             if (d == null)
                 throw new IllegalTableStateException("Derivation is required");
             
+            List<TableElement> affectedBy = null;
             int idx = 1;
             while (ref1Cell != null && ref2Cell != null) {  
                 // want to force one iteration of loop, allowing several escapes
@@ -605,7 +606,20 @@ public class PostfixStackEvaluator
                     Number x = (Number)ref1Cell.getCellValue();
                     Number y = (Number)ref2Cell.getCellValue();
                     
-                    tvse.enter(x, y);
+                    // exclude cells that contain derivations that effect the reference
+                    if (ref1Cell.isDerived()) {
+                        affectedBy = ref1Cell.getAffectedBy();
+                        if (affectedBy !=null && affectedBy.contains(ref1))
+                            x = null;
+                    }
+                    
+                    if (ref2Cell.isDerived()) {
+                        affectedBy = ref2Cell.getAffectedBy();
+                        if (affectedBy !=null && affectedBy.contains(ref2))
+                            y = null;
+                    }
+                    
+                    tvse.enter(x != null ? x : Double.MIN_VALUE, y != null ? y : Double.MIN_VALUE);
                 } while (false);
                 
                 // set up to process the cells in the next row/column
@@ -641,7 +655,7 @@ public class PostfixStackEvaluator
                     try {
                         if (args.length > 2)
                             params = Arrays.copyOfRange(args, 2, args.length);
-                        double value = tvse.calcStatistic(bio, params);
+                        Object value = tvse.calcStatistic(bio, params);
                         result = new Token(TokenType.Operand, value);
                     }
                     catch (UnimplementedException ue) {

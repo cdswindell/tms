@@ -116,8 +116,9 @@ public enum BuiltinOperator implements Labeled, Operator
 
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 5, "sum"),
-    Sum2Oper(TokenType.StatOp, 5, "sumOfSquares"),
-    MeanOper(TokenType.StatOp, 5, "mean", "ave", "average"),
+    Sum2Oper(TokenType.StatOp, 5, "sumOfSquares", "sumSqs", "ss"),
+    SumSqD2Oper(TokenType.StatOp, 5, "sumOfSquaredDeviates", "ss", "ssd"),
+    MeanOper(TokenType.StatOp, 5, "mean", "average", "avg"),
     MedianOper(TokenType.StatOp, 5, "median"),
     FirstQuartileOper(TokenType.StatOp, 5, "firstQuartile", "firstQ"),
     ThirdQuartileOper(TokenType.StatOp, 5, "thirdQuartile", "thirdQ"),
@@ -136,6 +137,10 @@ public enum BuiltinOperator implements Labeled, Operator
     PValueOper(TokenType.StatOp, 5, "tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"),
     TValueOper(TokenType.StatOp, 5, "tStatistic", "tValue", "oneSampleTwoTailTTestTValue"),
     TTestOper(TokenType.StatOp, 5, "tTest"),
+    
+    TwoSamplePValueOper(TokenType.StatOp, 5, "twoSampleTSigLevel",  "tsPValue",  "twoSamplePValue", "twoSampleTwoTailTTestPValue"),
+    TwoSampleTValueOper(TokenType.StatOp, 5, "twoSampleTStatistic", "tsTValue",  "twoSampleTValue", "twoSampleTwoTailTTestTValue"),
+    TwoSampleTTestOper(TokenType.StatOp, 5, "twoSampleTTest", "tsTTest"),
     
     // Normal Distribution Single Variable Stat Functions 
     NormSampleOper(TokenType.BinaryFunc, 5, MathUtil.class, "normalSample", "normalSample", "normS", "normalS"),
@@ -384,6 +389,15 @@ public enum BuiltinOperator implements Labeled, Operator
                     
                 case TTestOper:
                     m_methodArgs = new Class<?>[]{TableRowColumnElement.class, double.class, double.class};
+                    break;
+                    
+                case TwoSamplePValueOper:
+                case TwoSampleTValueOper:
+                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, TableRowColumnElement.class};
+                    break;
+                    
+                case TwoSampleTTestOper:
+                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, TableRowColumnElement.class, double.class};
                     break;
                     
                 case LinearComputeXOper:

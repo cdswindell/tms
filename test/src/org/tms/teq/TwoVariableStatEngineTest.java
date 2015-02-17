@@ -30,14 +30,14 @@ public class TwoVariableStatEngineTest extends BaseTest
         assertThat(te.calcStatistic(BuiltinOperator.LinearSlopeOper), is(1.0));
         
         te.reset();
-        assertThat(te.calcStatistic(BuiltinOperator.CountOper), is(0.0));
+        assertThat(te.calcStatistic(BuiltinOperator.CountOper), is(0));
         
         te.enter(-2, 0);
         n = te.enter(0, 1);
         assertThat(n, is(2));
         
-        double m = te.calcStatistic(BuiltinOperator.LinearSlopeOper);
-        double b = te.calcStatistic(BuiltinOperator.LinearInterceptOper);
+        double m = (double)te.calcStatistic(BuiltinOperator.LinearSlopeOper);
+        double b = (double)te.calcStatistic(BuiltinOperator.LinearInterceptOper);
         assertThat(b, is(1.0));
         assertThat(m, is(0.5));
         
@@ -48,7 +48,7 @@ public class TwoVariableStatEngineTest extends BaseTest
         assertThat(MathUtil.lrComputeY(m, b, 100), is(51.0));
         
         te.reset();
-        assertThat(te.calcStatistic(BuiltinOperator.CountOper), is(0.0));
+        assertThat(te.calcStatistic(BuiltinOperator.CountOper), is(0));
         
         te.enter(0, 0);
         te.enter(2, 2);
@@ -119,4 +119,66 @@ public class TwoVariableStatEngineTest extends BaseTest
         
         t2.delete();        
     }
+    
+    @Test
+    public void testTwoSampleTTest()
+    {
+        Table t = TableFactory.createTable();
+        t.setLabel("Data");
+        Column c1 = t.addColumn();
+        c1.setLabel("X");
+        t.setCellValue(t.addRow(), c1, 26);
+        t.setCellValue(t.addRow(), c1, 21);
+        t.setCellValue(t.addRow(), c1, 22);
+        t.setCellValue(t.addRow(), c1, 26);
+        t.setCellValue(t.addRow(), c1, 19);
+        t.setCellValue(t.addRow(), c1, 22);
+        t.setCellValue(t.addRow(), c1, 26); 
+        t.setCellValue(t.addRow(), c1, 25); 
+        t.setCellValue(t.addRow(), c1, 24); 
+        t.setCellValue(t.addRow(), c1, 21); 
+        t.setCellValue(t.addRow(), c1, 23); 
+        t.setCellValue(t.addRow(), c1, 23); 
+        t.setCellValue(t.addRow(), c1, 18); 
+        t.setCellValue(t.addRow(), c1, 29); 
+        t.setCellValue(t.addRow(), c1, 22); 
+        t.pushCurrent();
+        t.getCell(t.addRow(), c1).setDerivation("mean(col 1)");
+        t.getCell(t.addRow(), c1).setDerivation("stDev(col 1)");
+        t.getCell(t.addRow(), c1).setDerivation("ss(col 1)");
+        t.getCell(t.addRow(), c1).setDerivation("count(col 1)");
+        
+        Column c2 = t.addColumn();
+        c2.setLabel("Y");
+        t.setCellValue(t.getRow(Access.First), c2, 18);
+        t.setCellValue(t.getRow(Access.Next), c2, 23);
+        t.setCellValue(t.getRow(Access.Next), c2, 21);
+        t.setCellValue(t.getRow(Access.Next), c2, 20);
+        t.setCellValue(t.getRow(Access.Next), c2, 20);
+        t.setCellValue(t.getRow(Access.Next), c2, 29);
+        t.setCellValue(t.getRow(Access.Next), c2, 20);
+        t.setCellValue(t.getRow(Access.Next), c2, 16);
+        t.setCellValue(t.getRow(Access.Next), c2, 20);
+        t.setCellValue(t.getRow(Access.Next), c2, 26);
+        t.setCellValue(t.getRow(Access.Next), c2, 21);
+        t.setCellValue(t.getRow(Access.Next), c2, 25);
+        t.setCellValue(t.getRow(Access.Next), c2, 17);
+        t.setCellValue(t.getRow(Access.Next), c2, 18);
+        t.setCellValue(t.getRow(Access.Next), c2, 19);
+        
+        t.popCurrent();
+        t.getCell(t.getRow(Access.Next), c2).setDerivation("mean(col 2)");
+        t.getCell(t.getRow(Access.Next), c2).setDerivation("stDev(col 2)");
+        t.getCell(t.getRow(Access.Next), c2).setDerivation("ss(col 2)");
+        t.getCell(t.getRow(Access.Next), c2).setDerivation("count(col 2)");
+        
+        Column c3 = t.addColumn();
+        Cell c = (Cell) t.getCell(t.getRow(Access.First), c3).setDerivation("tsPValue(col 1, col 2)");
+        
+        c = (Cell) t.getCell(t.getRow(Access.Next), c3).setDerivation("tsTValue(col 1, col 2)");
+        assertThat(closeTo(c.getCellValue(), 1.91, 0.01), is(true));
+        
+        c = (Cell) t.getCell(t.getRow(Access.Next), c3).setDerivation("tsTTest(col 1, col 2, 0.10)");
+        assertThat(c.getCellValue(), is(true));
+    }      
 }
