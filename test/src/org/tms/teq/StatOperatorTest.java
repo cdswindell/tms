@@ -409,4 +409,51 @@ public class StatOperatorTest extends BaseTest
         assertThat(closeTo(t.getCellValue(r3, c5), 0.975, 0.001), is(true));
         assertThat(closeTo(t.getCellValue(r3, c6), 1.96, 0.01), is(true));
     }
+    
+    @Test
+    public void testNDProbabilityInRange()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        Column c1 = t.addColumn();
+        c1.setLabel("Mean");
+        
+        Column c2 = t.addColumn();
+        c2.setLabel("StDev");
+        
+        Column c3 = t.addColumn();
+        c3.setLabel("X0");
+        
+        Column c4 = t.addColumn();
+        c4.setLabel("X1");
+        
+        Column c5 = t.addColumn();
+        c5.setLabel("PIR");
+        c5.setDerivation("normPIR(col 1, col 2, col 3, col 4)");
+        
+        t.setCellValue(t.addRow(), c1, 0);
+        t.setCellValue(t.getRow(Access.Current), c2, 1);
+        t.setCellValue(t.getRow(Access.Current), c3, -0.25);
+        t.setCellValue(t.getRow(Access.Current), c4, 0.25);
+        assertThat(closeTo(t.getCellValue(t.getRow(Access.Current), c5), 0.1974, 0.0001), is(true));
+        
+        t.setCellValue(t.addRow(), c1, 0);
+        t.setCellValue(t.getRow(Access.Current), c2, 1);
+        t.setCellValue(t.getRow(Access.Current), c3, 0.25);
+        t.setCellValue(t.getRow(Access.Current), c4, 0.50);
+        assertThat(closeTo(t.getCellValue(t.getRow(Access.Current), c5), 0.0928, 0.0001), is(true));
+        
+        t.setCellValue(t.addRow(), c1, 0);
+        t.setCellValue(t.getRow(Access.Current), c2, 1);
+        t.setCellValue(t.getRow(Access.Current), c3, 1.0);
+        t.setCellValue(t.getRow(Access.Current), c4, 1.1);
+        assertThat(closeTo(t.getCellValue(t.getRow(Access.Current), c5), 0.023, 0.0001), is(true));
+        
+        t.setCellValue(t.addRow(), c1, 20);
+        t.setCellValue(t.getRow(Access.Current), c2, 4);
+        t.setCellValue(t.getRow(Access.Current), c3, 15);
+        t.setCellValue(t.getRow(Access.Current), c4, 22);
+        assertThat(closeTo(t.getCellValue(t.getRow(Access.Current), c5), 0.5859, 0.0001), is(true));
+    }
 }

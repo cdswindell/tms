@@ -139,7 +139,7 @@ public enum BuiltinOperator implements Labeled, Operator
     NormCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalCumProb", "normalCumProb", "normCP", "normalCP", "normCDF"),
     NormInvCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalInvCumProb", "normalInvCumProb", "normICP", "normalICP", "normInvCDF"),
     NormProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbability", "normalProbability", "normalProb", "normP", "normalP", "normPMF"),
-    NormInRangeProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbInRange", "normalProbInRange", 
+    NormProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbInRange", "normalProbInRange", 
                                                                   "normalProbabilityInRange","normPIR", "normalPIR"),    
     // Two Variable Stat Functions
     LinearSlopeOper("slope", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
@@ -374,7 +374,7 @@ public enum BuiltinOperator implements Labeled, Operator
                     m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
                     break;
                 
-                case NormInRangeProbOper:
+                case NormProbInRangeOper:
                     m_methodArgs = new Class<?>[]{double.class, double.class, double.class, double.class};
                     break;
                 
