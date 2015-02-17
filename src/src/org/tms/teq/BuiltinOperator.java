@@ -31,6 +31,7 @@ public enum BuiltinOperator implements Labeled, Operator
     GtEOper(TokenType.BinaryOp, 4, ">=", "GE"),
     LtEOper(TokenType.BinaryOp, 4,"<=", "LE"),
     
+    // Logical Operators
     AndOper(TokenType.BinaryOp, 4,"&&", "and"),
     OrOper(TokenType.BinaryOp, 4,"||", "or"),
     XorOper(TokenType.BinaryOp, 4, "xor"),
