@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937a;
 import org.tms.api.Cell;
@@ -257,17 +258,17 @@ public class MathUtil
             return arg.toString().trim();
     }  
     
-    static private RandomGenerator sf_NORMAL_DISTRIBUTION_RANDOM_GENERATOR = null;
+    static private RandomGenerator sf_DISTRIBUTION_RANDOM_GENERATOR = null;
     static private final Object sf_LOCK = new Object();
     
     static final public double normalSample(double mean, double stDev) 
     {
         synchronized(sf_LOCK) {
-            if (sf_NORMAL_DISTRIBUTION_RANDOM_GENERATOR == null)
-                sf_NORMAL_DISTRIBUTION_RANDOM_GENERATOR = new Well19937a(System.currentTimeMillis());
+            if (sf_DISTRIBUTION_RANDOM_GENERATOR == null)
+                sf_DISTRIBUTION_RANDOM_GENERATOR = new Well19937a(System.currentTimeMillis());
         }
         
-        NormalDistribution nd = new NormalDistribution(sf_NORMAL_DISTRIBUTION_RANDOM_GENERATOR, mean, stDev);
+        NormalDistribution nd = new NormalDistribution(sf_DISTRIBUTION_RANDOM_GENERATOR, mean, stDev);
         
         return nd.sample();
     }
@@ -304,6 +305,52 @@ public class MathUtil
         NormalDistribution nd = new NormalDistribution(null, mean, stDev);
         
         return nd.probability(x0, x1);
+    }
+    
+    static final public double tSample(double dof) 
+    {
+        synchronized(sf_LOCK) {
+            if (sf_DISTRIBUTION_RANDOM_GENERATOR == null)
+                sf_DISTRIBUTION_RANDOM_GENERATOR = new Well19937a(System.currentTimeMillis());
+        }
+        
+        TDistribution nd = new TDistribution(sf_DISTRIBUTION_RANDOM_GENERATOR, dof);        
+        return nd.sample();
+    }
+    
+    static final public double tDensity(double dof, double x) 
+    {
+        TDistribution nd = new TDistribution(null, dof);        
+        return nd.density(x);
+    }
+    
+    static final public double tCumProb(double dof, double x) 
+    {
+        TDistribution nd = new TDistribution(null, dof);        
+        return nd.cumulativeProbability(x);
+    }
+    
+    static final public double tInvCumProb(double dof, double x) 
+    {
+        TDistribution nd = new TDistribution(null, dof);        
+        return nd.inverseCumulativeProbability(x);
+    }
+    
+    static final public double tProbability(double dof, double x) 
+    {
+        TDistribution nd = new TDistribution(null, dof);
+        return nd.probability(x);
+    }
+    
+    static final public double tProbInRange(double dof, double x0, double x1) 
+    {
+        TDistribution nd = new TDistribution(null, dof);        
+        return nd.probability(x0, x1);
+    }
+    
+    static final public double tScore(double meanPop, double meanSamp, double stDevSamp, double nSamples) 
+    {
+        return (meanSamp - meanPop)/(stDevSamp/Math.sqrt(nSamples));
     }
     
     static final public double lrComputeX(double m, double b, double y) 

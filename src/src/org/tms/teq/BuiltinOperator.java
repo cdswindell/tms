@@ -134,7 +134,7 @@ public enum BuiltinOperator implements Labeled, Operator
     KurtosisOper(TokenType.StatOp, 5, "kurtosis", "kurt"),
     
     PValueOper(TokenType.StatOp, 5, "tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"),
-    TValueOper(TokenType.StatOp, 5, "tStatistic", "tValue", "tScore", "oneSampleTwoTailTTestTValue"),
+    TValueOper(TokenType.StatOp, 5, "tStatistic", "tValue", "oneSampleTwoTailTTestTValue"),
     TTestOper(TokenType.StatOp, 5, "tTest"),
     
     // Normal Distribution Single Variable Stat Functions 
@@ -144,7 +144,16 @@ public enum BuiltinOperator implements Labeled, Operator
     NormInvCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalInvCumProb", "normalInvCumProb", "normICP", "normalICP", "normInvCDF"),
     NormProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbability", "normalProbability", "normalProb", "normP", "normalP", "normPMF"),
     NormProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbInRange", "normalProbInRange", 
-                                                                  "normalProbabilityInRange","normPIR", "normalPIR"),    
+                                                                  "normalProbabilityInRange","normPIR", "normalPIR"), 
+    // T Distribution Single Variable Stat Functions                                                               
+    TSampleOper(TokenType.UnaryFunc, 5, MathUtil.class, "tSample", "tSample", "tS"),
+    TDensityOper(TokenType.GenericFunc, 5, MathUtil.class, "tDensity", "tDensity", "tD", "tPDF"),
+    TCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "tCumProb", "tCumProb", "tCP", "tCDF"),
+    TInvCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "tInvCumProb", "tInvCumProb", "tICP", "tInvCDF"),
+    TProbOper(TokenType.GenericFunc, 5, MathUtil.class, "tProbability", "tProbability", "tProb", "tP", "tPMF"),
+    TProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "tProbInRange", "tProbInRange", "tProbabilityInRange","tPIR"),    
+    TScoreOper("tScore", TokenType.GenericFunc, 5, MathUtil.class, "tScore", double.class, double.class, double.class, double.class),    
+    
     // Two Variable Stat Functions
     LinearSlopeOper("slope", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
     LinearInterceptOper("intercept", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
@@ -389,6 +398,17 @@ public enum BuiltinOperator implements Labeled, Operator
                 
                 case NormProbInRangeOper:
                     m_methodArgs = new Class<?>[]{double.class, double.class, double.class, double.class};
+                    break;
+                
+                case TDensityOper:
+                case TCumProbOper:
+                case TInvCumProbOper:
+                case TProbOper:
+                    m_methodArgs = new Class<?>[]{double.class, double.class};
+                    break;
+                
+                case TProbInRangeOper:
+                    m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
                     break;
                 
                 default:

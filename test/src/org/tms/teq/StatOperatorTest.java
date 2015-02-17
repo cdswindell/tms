@@ -464,6 +464,75 @@ public class StatOperatorTest extends BaseTest
     }
     
     @Test
+    public void testTDistributionStats()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        t.addRow(Access.ByIndex, 25000);
+        
+        Column c1 = t.addColumn();
+        c1.setDerivation("tS(500)");
+        
+        Column c2 = t.addColumn();
+        
+        Cell c = t.getCell(t.getRow(Access.First), c2);
+        c.setDerivation("mean(col 1)");
+        assertThat(closeTo(c.getCellValue(), 0.0, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c2);
+        c.setDerivation("stDev(col 1)");
+        assertThat(closeTo(c.getCellValue(), 1.0, 0.02), is(true));
+    }
+    
+    @Test
+    public void testTProbability()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        Row r1 = t.addRow(Access.First);
+        
+        Column c1 = t.addColumn();
+        c1.setLabel("DOF");
+        c1.fill(13);
+        
+        Column c2 = t.addColumn();
+        c2.setLabel("NRV");
+        c2.fill(-0.4276);
+        
+        Column c3 = t.addColumn();
+        c3.setLabel("Random CDF");
+        c3.fill(0.338);
+        
+        Column c4 = t.addColumn();
+        c4.setLabel("CDF");
+        c4.setDerivation("tCDF(col 1, col 2)");
+        Cell c = t.getCell(r1, c4);
+        assertThat(closeTo(c.getCellValue(), 0.338, 0.001), is(true));
+        
+        Column c5 = t.addColumn();
+        c5.setLabel("NV");
+        c5.setDerivation("tInvCDF(col 1, col 3)");
+        c = t.getCell(r1, c5);
+        assertThat(closeTo(c.getCellValue(), -0.4276, 0.0001), is(true));
+        
+        Row r2 = t.addRow(Access.Next);
+        t.setCellValue(r2, c1, 13);
+        c = (Cell) t.getCell(r2, c2).setDerivation("tScore(20000, 19800, 1750, 14)");
+        t.setCellValue(r2, c3, 0.338);
+        assertThat(closeTo(t.getCellValue(r2, c4), 0.338, 0.001), is(true));
+        assertThat(closeTo(t.getCellValue(r2, c5), -0.4276, 0.0001), is(true));
+        
+        Row r3 = t.addRow(Access.Next);
+        t.setCellValue(r3, c1, 24);
+        c = (Cell) t.getCell(r3, c2).setDerivation("tScore(112.1, 115, 11, 25)");
+        t.setCellValue(r3, c3, 0.90);
+        assertThat(closeTo(t.getCellValue(r3, c4), 0.90, 0.001), is(true));
+        assertThat(closeTo(t.getCellValue(r3, c5), 1.3182, 0.001), is(true));
+    }
+    
+    @Test
     public void testSingleTTest()
     {
         Table t = TableFactory.createTable();        
@@ -505,7 +574,7 @@ public class StatOperatorTest extends BaseTest
         assertThat(closeTo(c.getCellValue(), 0.009818, 0.00001), is(true));
         
         c = t.getCell(t.getRow(Access.Next), c2);
-        c.setDerivation("tTest(col 1, 10, 0.05)");
+        c.setDerivation("tTest(col 1, 10, 0.01)");
         assertThat(c.getCellValue(), is(true));
     }
 }
