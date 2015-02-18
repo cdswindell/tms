@@ -478,7 +478,7 @@ public class StatOperatorTest extends BaseTest
         
         Cell c = t.getCell(t.getRow(Access.First), c2);
         c.setDerivation("mean(col 1)");
-        assertThat(closeTo(c.getCellValue(), 0.0, 0.01), is(true));
+        assertThat(closeTo(c.getCellValue(), 0.0, 0.02), is(true));
         
         c = t.getCell(t.getRow(Access.Next), c2);
         c.setDerivation("stDev(col 1)");
