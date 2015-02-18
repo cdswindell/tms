@@ -118,4 +118,8 @@ public class TableElementListeners implements Listenable
         return !m_listeners.isEmpty();
     }
 
+    public void fireEvents(TableElement te, TableElementEventType evT, Object... args)
+    {
+        // TODO: Implement
+    }
 }

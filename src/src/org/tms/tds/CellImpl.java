@@ -81,13 +81,17 @@ public class CellImpl extends TableElementImpl implements Cell
         clearDerivation();
         
         // set the cell value, taking datatype enforcement into account, if enabled
-        boolean valuesDiffer = setCellValue(value, true);
+        Object oldValue = m_cellValue;
+        boolean valuesDiffer = setCellValue(value, true, true);
         
         // recalculate affected table elements
         TableImpl parentTable = getTable();
         if (valuesDiffer && parentTable != null && 
                 parentTable.isAutoRecalculateEnabled()) 
             Derivation.recalculateAffected(this);
+        
+        if (valuesDiffer)
+            fireEvents(TableElementEventType.OnNewValue, oldValue, m_cellValue);
         
         return valuesDiffer;
     }
@@ -133,18 +137,31 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected boolean postResult(Token t)
     {
+        boolean wasPending = isPendings();
+        boolean nowPending = false;
         decrementPendings();
-        if (t.isError()) 
-            return this.setCellValueNoDataTypeCheck(t.getErrorCode());
-        else if (t.isNull())
-            return setCellValue(null, true);
-        else if (t.isPending()) {
-            m_cellValue = t.getValue();
-            incrementPendings();
-            return true;
+        try {
+            if (t.isError()) 
+                return this.setCellValueNoDataTypeCheck(t.getErrorCode());
+            else if (t.isNull())
+                return setCellValue(null, true, false);
+            else if (t.isPending()) {
+                m_cellValue = t.getValue();
+                nowPending = true;
+                incrementPendings();
+                
+                if (!wasPending)
+                    fireEvents(TableElementEventType.OnPendings);
+               
+                return true;
+            }
+            else
+            	return setCellValue(t.getValue(), true, false);
         }
-        else
-        	return setCellValue(t.getValue(), true);
+        finally {
+            if (!wasPending && nowPending)
+                fireEvents(TableElementEventType.OnNoPendings);                
+        }
     }
 
     private void incrementPendings()
@@ -183,10 +200,10 @@ public class CellImpl extends TableElementImpl implements Cell
     
     boolean setCellValueNoDataTypeCheck(Object value)
     {
-        return setCellValue(value, false);
+        return setCellValue(value, false, false);
     }
     
-    protected boolean setCellValue(Object value, boolean typeSafeCheck)
+    protected boolean setCellValue(Object value, boolean typeSafeCheck, boolean fireEvents)
     {
         decrementPendings();
         if (typeSafeCheck && value != null && this.isDataTypeEnforced()) {
@@ -195,7 +212,10 @@ public class CellImpl extends TableElementImpl implements Cell
         }
         
         boolean valuesDiffer = false;        
-        if (value != m_cellValue) {
+        if (value != m_cellValue) {            
+            if (fireEvents)
+                fireEvents(TableElementEventType.OnBeforeNewValue, m_cellValue, value);
+            
             m_cellValue = value;
             valuesDiffer = true;
         }
@@ -640,6 +660,12 @@ public class CellImpl extends TableElementImpl implements Cell
         invalidateCell();
     }
         
+    private void fireEvents(TableElementEventType evT, Object... args)
+    {
+        if (getTable() != null)
+            getTable().fireCellEvents(this, evT, args);
+    }
+
     @Override
     public boolean addListener(TableElementEventType evT, TableElementListener... tels)
     {

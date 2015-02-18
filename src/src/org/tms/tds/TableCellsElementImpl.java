@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.tms.api.Derivable;
+import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
@@ -177,6 +178,11 @@ abstract class TableCellsElementImpl extends TableElementImpl
     public boolean isPendings()
     {
         return m_pendings > 0;
+    }
+
+    protected void fireEvents(TableElementEventType evT, TableElement te, Object... args)
+    {
+        m_listeners.fireEvents(this, evT, args);
     }
 
     @Override

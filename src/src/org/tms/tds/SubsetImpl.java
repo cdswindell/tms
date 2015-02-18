@@ -17,6 +17,7 @@ import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.event.TableElementEventType;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
@@ -454,13 +455,18 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		    
 	        CellReference cr = tbl.getCurrent();
 		    tbl.deactivateAutoRecalculate();
+		    boolean setSome = false;
 		    try {
 		        for (Cell cell : cells()) {
 		            if (isDerived(cell))
 		                continue;
 		            
-		            ((CellImpl)cell).setCellValue(o, true);
-		        }		        
+		            if (((CellImpl)cell).setCellValue(o, true, false))
+		                setSome = true;
+		        }
+		        
+		        if (setSome)
+		            fireEvents(TableElementEventType.OnNewValue, this, o);
 		    }
 		    finally {	            	            
 	            tbl.activateAutoRecalculate();
@@ -472,7 +478,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		}
 	}
 	
-	/*
+    /*
 	 * If the subset contains only-rows and/or only columns, clear
 	 * any derivations in those elements
 	 */

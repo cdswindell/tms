@@ -418,7 +418,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                             continue;
                         
                         try {
-                            if (((CellImpl)c).setCellValue(o, true));
+                            if (((CellImpl)c).setCellValue(o, true, false));
                                 setSome = true;
                         }
                         catch (ReadOnlyException e) {

@@ -528,6 +528,15 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_subsets.size();
     }
     
+    void fireCellEvents(CellImpl cell, TableElementEventType evT, Object[] args)
+    {
+        if (cell != null && evT != null) {
+            TableElementListeners listeners = m_cellListeners.get(cell);
+            if (listeners != null)
+                listeners.fireEvents(cell, evT, args);
+        }        
+    }
+    
     boolean addCellListener(CellImpl cell, TableElementEventType evT, TableElementListener[] tels)
     {
         if (cell != null && tels != null && tels.length > 0) {
