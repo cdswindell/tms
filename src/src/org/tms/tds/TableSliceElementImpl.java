@@ -67,6 +67,12 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         return (getTable() != null ? getTable().isNullsSupported() : false) && isSupportsNull();
     }
     
+    @Override
+    public int getNumSubsets()
+    {
+        return m_subsets.size();
+    }
+    
     public List<Subset> getSubsets()
     {
         vetElement();
@@ -307,7 +313,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         switch(key)
         {
             case numSubsets:
-                return m_subsets.size();
+                return getNumSubsets();
                 
             case Subsets:
                 return getSubsets();

@@ -127,7 +127,8 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return m_subsets;
     }
 
-    protected int getNumSubsets()
+    @Override
+    public int getNumSubsets()
     {
         return m_subsets.size();
     }
@@ -466,7 +467,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		        }
 		        
 		        if (setSome)
-		            fireEvents(TableElementEventType.OnNewValue, this, o);
+		            fireEvents(this,TableElementEventType.OnNewValue,  o);
 		    }
 		    finally {	            	            
 	            tbl.activateAutoRecalculate();

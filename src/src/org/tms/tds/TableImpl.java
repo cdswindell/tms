@@ -528,12 +528,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_subsets.size();
     }
     
-    void fireCellEvents(CellImpl cell, TableElementEventType evT, Object[] args)
+    void fireCellEvents(CellImpl cell, TableElementEventType evT, Object... args)
     {
         if (cell != null && evT != null) {
             TableElementListeners listeners = m_cellListeners.get(cell);
             if (listeners != null)
                 listeners.fireEvents(cell, evT, args);
+            else if (hasAnyListeners())
+                fireContainerEvents(cell, evT, args);
         }        
     }
     
@@ -603,6 +605,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
         
         return false;
+    }
+    
+
+    boolean hasAnyListeners()
+    {
+        return hasListeners() || !m_cellListeners.isEmpty();
     }
     
     @Override

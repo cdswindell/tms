@@ -489,19 +489,21 @@ public class Derivation
         
         Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(nonPendingCell);
         if (blockedStates != null) {
-            Set<PendingState> unblocked = new HashSet<PendingState>();
-            
-            for (PendingState ps : blockedStates) {
-                if (ps != null && ps.isStillPending()) {
-                    boolean removed = ps.unblockDerivations(nonPendingCell);
-                    if (removed)
-                        unblocked.add(ps);
-                }   
+            synchronized(blockedStates) {
+                Set<PendingState> unblocked = new HashSet<PendingState>();
+                
+                for (PendingState ps : blockedStates) {
+                    if (ps != null && ps.isStillPending()) {
+                        boolean removed = ps.unblockDerivations(nonPendingCell);
+                        if (removed)
+                            unblocked.add(ps);
+                    }   
+                }
+    
+                blockedStates.removeAll(unblocked);
+                if (blockedStates.isEmpty())
+                    m_cellBlockedPendingStatesMap.remove(nonPendingCell);
             }
-
-            blockedStates.removeAll(unblocked);
-            if (blockedStates.isEmpty())
-                m_cellBlockedPendingStatesMap.remove(nonPendingCell);
         }
     }   
 

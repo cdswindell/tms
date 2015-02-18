@@ -26,7 +26,6 @@ public interface Table extends TableElement
     public Subset getSubset(Access mode, Object... mda);
     public List<Subset> getSubsets();
     public Iterable<Subset> subsets();
-    public int getNumSubsets();
        
     public Cell getCell(Row row, Column col);      
     public Cell getCell(Access mode, Object... mda);

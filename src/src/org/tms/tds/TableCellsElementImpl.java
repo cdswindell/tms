@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.tms.api.Cell;
 import org.tms.api.Derivable;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
@@ -180,9 +181,14 @@ abstract class TableCellsElementImpl extends TableElementImpl
         return m_pendings > 0;
     }
 
-    protected void fireEvents(TableElementEventType evT, TableElement te, Object... args)
+    protected void fireEvents(TableElement te, TableElementEventType evT, Object... args)
     {
         m_listeners.fireEvents(this, evT, args);
+    }
+
+    protected void fireContainerEvents(Cell cell, TableElementEventType evT, Object... args)
+    {
+        m_listeners.fireCellContainerEvents(cell, evT, args);
     }
 
     @Override

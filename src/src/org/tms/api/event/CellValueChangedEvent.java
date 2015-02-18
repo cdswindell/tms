@@ -6,36 +6,36 @@ public class CellValueChangedEvent extends TableElementEvent implements OnBefore
 {
     private static final long serialVersionUID = 3025887968647194535L;
 
-    public static final CellValueChangedEvent createOn(TableElement te, Object newValue)
+    public static final CellValueChangedEvent createOn(TableElement te, long timeStamp, Object newValue)
     {
-        return new CellValueChangedEvent(te, TableElementEventType.OnNewValue, newValue);
+        return new CellValueChangedEvent(te, TableElementEventType.OnNewValue, timeStamp, newValue);
     }
     
-    public static final CellValueChangedEvent createOn(TableElement te, Object oldValue, Object newValue)
+    public static final CellValueChangedEvent createOn(TableElement te, long timeStamp, Object oldValue, Object newValue)
     {
-        return new CellValueChangedEvent(te, TableElementEventType.OnNewValue, oldValue, newValue);
+        return new CellValueChangedEvent(te, TableElementEventType.OnNewValue, timeStamp, oldValue, newValue);
     }
     
-    public static final CellValueChangedEvent createOnBefore(TableElement te, Object oldValue, Object newValue)
+    public static final CellValueChangedEvent createOnBefore(TableElement te, long timeStamp, Object oldValue, Object newValue)
     {
-        return new CellValueChangedEvent(te, TableElementEventType.OnBeforeNewValue, oldValue, newValue);
+        return new CellValueChangedEvent(te, TableElementEventType.OnBeforeNewValue, timeStamp, oldValue, newValue);
     }
 
     private boolean m_oldValueAvailable;
     private Object m_oldValue;
     private Object m_newValue;
     
-    private CellValueChangedEvent(TableElement source, TableElementEventType evT, Object newValue)
+    private CellValueChangedEvent(TableElement source, TableElementEventType evT, long timeStamp, Object newValue)
     {
-        super(evT, source);
+        super(evT, source, timeStamp);
         
         m_oldValueAvailable = false;
         m_newValue = newValue;
     }
     
-    private CellValueChangedEvent(TableElement source, TableElementEventType evT, Object oldValue, Object newValue)
+    private CellValueChangedEvent(TableElement source, TableElementEventType evT, long timeStamp, Object oldValue, Object newValue)
     {
-        this(source, evT, newValue);
+        this(source, evT, timeStamp, newValue);
         
         m_oldValueAvailable = true;       
         m_oldValue = oldValue;

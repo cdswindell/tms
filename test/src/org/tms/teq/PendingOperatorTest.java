@@ -269,6 +269,7 @@ public class PendingOperatorTest extends BaseTest
         Column c4 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
         Column c5 = (Column)t.addColumn(); // cell derivations column, c5        
         Column c6 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c6
+        assertThat(((TableImpl)t).isPendings(), is(true));          
         
         assertThat(c2, notNullValue());
         assertThat(c6, notNullValue());

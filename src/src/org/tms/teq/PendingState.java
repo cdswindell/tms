@@ -230,10 +230,14 @@ abstract class PendingState
             return;
 
         // also unblock derivations blocked on this cell
-        Cell c = getPendingCell();
         Derivation d = getDerivation();
-        if (d != null && !c.isPendings())
-            d.unblockDerivations(c);
+        Cell c = getPendingCell();
+        if (c != null) {
+            synchronized(c) {
+                if (d != null && !c.isPendings())
+                    d.unblockDerivations(c);
+            }
+        }
 
     }
     

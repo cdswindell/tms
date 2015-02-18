@@ -154,7 +154,7 @@ public class PendingStatistic
             }
             finally {
                 ps.unlock();
-            }                   
+            }  
         }
         
         return false;
@@ -162,7 +162,7 @@ public class PendingStatistic
 
     protected void delete()
     {
-        markInvalid();       
+        markInvalid();   
         for (PendingState ps : m_blockedCells)
         {
             if (ps == null)

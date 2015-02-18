@@ -15,6 +15,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
+import org.tms.api.event.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.DataTypeEnforcementException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
@@ -213,8 +214,14 @@ public class CellImpl extends TableElementImpl implements Cell
         
         boolean valuesDiffer = false;        
         if (value != m_cellValue) {            
-            if (fireEvents)
-                fireEvents(TableElementEventType.OnBeforeNewValue, m_cellValue, value);
+            if (fireEvents) {
+                try {
+                    fireEvents(TableElementEventType.OnBeforeNewValue, m_cellValue, value);
+                }
+                catch (BlockedRequestException e) {
+                    return false;
+                }
+            }
             
             m_cellValue = value;
             valuesDiffer = true;
@@ -594,6 +601,20 @@ public class CellImpl extends TableElementImpl implements Cell
     }
     
     @Override
+    public int getNumSubsets()
+    {
+        TableImpl parent = getTable();
+        assert parent != null : "Parent table required";
+        if (parent != null) {
+            Set<SubsetImpl> subsets = parent.getCellSubsets(this);
+            if (subsets != null)
+                return subsets.size();
+        }
+        
+        return 0;
+    }
+    
+    @Override
     public List<Subset> getSubsets()
     {
         TableImpl parent = getTable();
@@ -662,7 +683,7 @@ public class CellImpl extends TableElementImpl implements Cell
         
     private void fireEvents(TableElementEventType evT, Object... args)
     {
-        if (getTable() != null)
+        if (getTable() != null && getTable().hasAnyListeners())
             getTable().fireCellEvents(this, evT, args);
     }
 

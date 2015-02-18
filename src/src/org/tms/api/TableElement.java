@@ -2,7 +2,9 @@ package org.tms.api;
 
 import java.util.List;
 
-public interface TableElement extends BaseElement
+import org.tms.api.event.Listenable;
+
+public interface TableElement extends BaseElement, Listenable
 {
     public TableContext getTableContext();
     public Table getTable();
@@ -22,6 +24,7 @@ public interface TableElement extends BaseElement
     public String getLabel();
     public void setLabel(String label);
     
+    public int getNumSubsets();
     /**
      * Returns a {@link java.collections.List<Derivable>} of the {@code Derivable} elements
      * that this {@code TableElement} impacts when modified

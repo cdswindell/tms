@@ -6,9 +6,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.tms.api.Cell;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
+import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
@@ -16,6 +19,8 @@ import org.tms.api.exceptions.UnimplementedException;
 
 public class TableElementListeners implements Listenable
 {
+    private static final AtomicLong sf_AssemblyIdCntr = new AtomicLong();
+    
     private TableElement m_te;
     protected Map<TableElementEventType, Set<TableElementListener>> m_listeners;
     
@@ -119,9 +124,48 @@ public class TableElementListeners implements Listenable
     @Override
     public boolean hasListeners(TableElementEventType... evTs)
     {
-        return !m_listeners.isEmpty();
+        if (evTs == null || evTs.length == 0)
+            return !m_listeners.isEmpty();
+        else {
+            List<TableElementListener> listeners = getListeners(evTs);
+            return listeners != null && listeners.size() > 0;
+        }
     }
 
+    public void fireCellContainerEvents(Cell cell, TableElementEventType evT, Object[] args)
+    {        
+        if (evT.isAlertContainer()) {
+            Set<TableElementEvent> events = new LinkedHashSet<TableElementEvent>();
+            long assemblyId = 0;
+            
+            Row r = cell.getRow();
+            if (r != null && (r.hasListeners(evT) || r.getNumSubsets() > 0)) {
+                if (assemblyId == 0)
+                    assemblyId = sf_AssemblyIdCntr.incrementAndGet();
+                generateEvents(events, assemblyId, true, r, evT, args);
+            }
+            
+            Column c = cell.getColumn();
+            if (c != null && (c.hasListeners(evT) || c.getNumSubsets() > 0)) {
+                if (assemblyId == 0)
+                    assemblyId = sf_AssemblyIdCntr.incrementAndGet();
+                generateEvents(events, assemblyId, true, c, evT, args);
+            }
+            
+            // harvest table events, if we didn't process row or column
+            if (assemblyId == 0) {
+                Table parent = cell.getTable();
+                if (parent != null && (parent.hasListeners(evT) || parent.getNumSubsets() > 0)) {
+                    assemblyId = sf_AssemblyIdCntr.incrementAndGet();
+                    generateEvents(events, assemblyId, true, parent, evT, args);                   
+                }
+            }
+            
+            if (events != null && !events.isEmpty()) 
+                fireEvents(evT, events);
+        }
+    }
+    
     public void fireEvents(Listenable te, TableElementEventType evT, Object... args)
     {
         if (evT == null || te == null)
@@ -133,19 +177,19 @@ public class TableElementListeners implements Listenable
         if (!(te instanceof TableElement))
             return;
         
-        List<TableElementEvent> events = generateEvents(te, evT, args);
+        Set<TableElementEvent> events = generateEvents(te, evT, args);
         if (events != null && !events.isEmpty()) 
-            fireEvents(te, evT, events);
+            fireEvents(evT, events);
     }
 
-    private void fireEvents(Listenable te, TableElementEventType evT, List<TableElementEvent> events)
+    private void fireEvents(TableElementEventType evT, Set<TableElementEvent> events)
     {
         // if we are asked to throw exceptions, process the events in the current thread
         if (evT.isThrowExceptions()) {
-            ((TableElement)te).getTable().pushCurrent();
+            getTable().pushCurrent();
             try {
                 for (TableElementEvent e : events) {
-                List<TableElementListener> listeners = ((TableElementListeners) e.getSource()).getListeners(evT);
+                List<TableElementListener> listeners = ((Listenable) e.getSource()).getListeners(evT);
                 if (listeners != null) {
                     for (TableElementListener listener : listeners) {
                             listener.eventOccured(e);
@@ -154,40 +198,42 @@ public class TableElementListeners implements Listenable
                 } 
             }
             finally {
-                ((TableElement)te).getTable().popCurrent();
+                getTable().popCurrent();
             }
         }
         else
             queueEvents(events);
     }
 
-    private void queueEvents(List<TableElementEvent> events)
+    private void queueEvents(Set<TableElementEvent> events)
     {
         // TODO Auto-generated method stub
         
     }
 
-    private List<TableElementEvent> generateEvents(Listenable te, TableElementEventType evT, Object[] args)
+    private Set<TableElementEvent> generateEvents(Listenable te, TableElementEventType evT, Object[] args)
     {
-        List<TableElementEvent> events = new ArrayList<TableElementEvent>();
+        Set<TableElementEvent> events = new LinkedHashSet<TableElementEvent>();
+        long assemblyId = sf_AssemblyIdCntr.incrementAndGet();
         
-        generateEvents(events, true, (TableElement)te, evT, args);
+        generateEvents(events, assemblyId, true, (TableElement)te, evT, args);
         
         // add in parent table
         Table parentTable =  te.getTable();
         if (parentTable != null && parentTable != this)
-            generateEvents(events, true, parentTable, evT, args);                            
+            generateEvents(events, assemblyId, true, parentTable, evT, args);                            
             
         return events;
     }
 
-    private void generateEvents(List<TableElementEvent> events, boolean doRecurse, TableElement te, TableElementEventType evT, Object[] args)
+    private void generateEvents(Set<TableElementEvent> events, long assemblyId, boolean doRecurse, 
+                                TableElement te, TableElementEventType evT, Object[] args)
     {
         if (te == null)
             return;
         
         if (evT.isImplementedBy(te) && ((Listenable)te).hasListeners(evT)) {
-            TableElementEvent event = TableElementEventFactory.createEvent((TableElement)te, evT, args);
+            TableElementEvent event = TableElementEventFactory.createEvent((TableElement)te, evT, assemblyId, args);
             if (event != null)
                 events.add(event);
         }
@@ -200,22 +246,25 @@ public class TableElementListeners implements Listenable
             List<Subset> subsets = evT.isImplementedBy(ElementType.Subset) ? te.getSubsets() : null;
             switch (te.getElementType()) {
                 case Cell:
+                    generateEvents(events, assemblyId, true, ((Cell)te).getRow(), evT, args);
+                    generateEvents(events, assemblyId, true, ((Cell)te).getColumn(), evT, args);
+                    
                     if (subsets != null) {
                         for (Subset s : subsets) {
-                            generateEvents(events, false, s, evT, args);                            
+                            generateEvents(events, assemblyId, false, s, evT, args);                            
                         }
                     }
-                    
-                    generateEvents(events, true, ((Cell)te).getRow(), evT, args);
-                    generateEvents(events, true, ((Cell)te).getColumn(), evT, args);
                     break;
                     
                 case Row:
                 case Column:
+                    generateEvents(events, assemblyId, true, te.getTable(), evT, args);                            
+                    // do no break, continue on and grab subsets
+                    
                 case Table:
                     if (subsets != null) {
                         for (Subset s : subsets) {
-                            generateEvents(events, false, s, evT, args);                            
+                            generateEvents(events, assemblyId, false, s, evT, args);                            
                         }
                     }
                     break;
