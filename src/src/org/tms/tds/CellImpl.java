@@ -171,13 +171,9 @@ public class CellImpl extends TableElementImpl implements Cell
             TableImpl table = m_col != null ? m_col.getTable() : null;
             if (table != null)
                 table.decrementPendings();
-            else
-                System.out.println("Failed to decrement tbl pendings");
             
             if (m_col != null)
                 m_col.decrementPendings();
-            else
-                System.out.println("Failed to decrement col pendings");
             
             RowImpl row = getRow();
             if (row != null)
@@ -612,6 +608,9 @@ public class CellImpl extends TableElementImpl implements Cell
         // clear the cell value and cell derivation
         clearDerivation();
         
+        // remove listeners
+        removeAllListeners();
+        
         // clear any derivations on elements affected by this cell
         TableImpl parentTable = getTable();
         List<Derivable> affects = parentTable != null ? parentTable.getCellAffects(this, false) : getAffects();
@@ -644,8 +643,6 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean addListener(TableElementEventType evT, TableElementListener... tels)
     {
-        super.addListener(evT, tels);
-        
         if (getTable() != null)
             return getTable().addCellListener(this, evT, tels);
         else
@@ -679,6 +676,15 @@ public class CellImpl extends TableElementImpl implements Cell
             return Collections.emptyList();
     }
 
+    @Override
+    public boolean hasListeners(TableElementEventType... evTs)
+    {
+        if (getTable() != null)
+            return getTable().hasListeners(this, evTs);
+        else
+            return false;
+    }
+    
     @Override
 	public String toString()
 	{

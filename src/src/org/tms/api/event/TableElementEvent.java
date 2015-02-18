@@ -4,12 +4,16 @@ import java.util.EventObject;
 
 import org.tms.api.TableElement;
 
-public class TableElementEvent extends EventObject
+abstract public class TableElementEvent extends EventObject
 {
-
-    public TableElementEvent(TableElement source)
+    private static final long serialVersionUID = -1891192023512811055L;
+    
+    private TableElementEventType m_evT;
+    
+    public TableElementEvent(TableElementEventType evT, TableElement source)
     {
         super(source);
+        m_evT = evT;
     }
 
     @Override
@@ -18,4 +22,8 @@ public class TableElementEvent extends EventObject
         return (TableElement)super.getSource();
     }
 
+    public TableElementEventType getType()
+    {
+        return m_evT;
+    }
 }

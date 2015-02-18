@@ -8,13 +8,13 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import org.tms.api.Access;
@@ -30,6 +30,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
+import org.tms.api.event.TableElementListeners;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
@@ -100,6 +101,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private Map<CellImpl, Set<SubsetImpl>> m_subsetedCells;
     private Map<CellImpl, Derivation> m_derivedCells;
     private Map<CellImpl, Set<Derivable>> m_cellAffects;
+    private Map<CellImpl, TableElementListeners> m_cellListeners;
     
     private JustInTimeSet<SubsetImpl> m_subsets;
     
@@ -182,7 +184,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
         
         int expectedNoOfDerivedCells = m_rowsCapacity * m_colsCapacity / 5; // assume 20%
         m_derivedCells = new HashMap<CellImpl, Derivation>(expectedNoOfDerivedCells);
-        m_cellAffects = new LinkedHashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
+        m_cellAffects = new HashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
+        m_cellListeners = new ConcurrentHashMap<CellImpl, TableElementListeners>();
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
         
         m_subsetedCells = new HashMap<CellImpl, Set<SubsetImpl>>();
@@ -523,6 +526,74 @@ public class TableImpl extends TableCellsElementImpl implements Table
     public int getNumSubsets()
     {
         return m_subsets.size();
+    }
+    
+    boolean addCellListener(CellImpl cell, TableElementEventType evT, TableElementListener[] tels)
+    {
+        if (cell != null && tels != null && tels.length > 0) {
+            synchronized (m_cellListeners) {
+                TableElementListeners listeners = m_cellListeners.get(cell);
+                if (listeners == null) {
+                    listeners = new TableElementListeners(cell);
+                    m_cellListeners.put(cell, listeners);
+                }
+                
+                return listeners.addListener(evT, tels);
+            }
+        }
+        
+        return false;
+    }
+
+    boolean removeCellListener(CellImpl cell, TableElementEventType evT, TableElementListener[] tels)
+    {
+        if (cell != null) {
+            TableElementListeners listeners = m_cellListeners.get(cell);
+            if (listeners != null) {
+                synchronized (m_cellListeners) {
+                    boolean removedAny = listeners.removeListener(evT, tels);                    
+                    if (!listeners.hasListeners())
+                        m_cellListeners.remove(cell);
+                    
+                    return removedAny;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    List<TableElementListener> getCellListeners(CellImpl cell, TableElementEventType[] evTs)
+    {
+        if (cell != null) {
+            TableElementListeners listeners = m_cellListeners.get(cell);
+            if (listeners != null)
+                return listeners.getListeners(evTs);
+        }
+        
+        return Collections.emptyList();
+    }
+
+    List<TableElementListener> removeAllCellListeners(CellImpl cell, TableElementEventType[] evTs)
+    {
+        if (cell != null) {
+            TableElementListeners listeners = m_cellListeners.get(cell);
+            if (listeners != null)
+                return listeners.removeAllListeners(evTs);
+        }
+        
+        return Collections.emptyList();
+    }
+
+    boolean hasListeners(CellImpl cell, TableElementEventType[] evTs)
+    {
+        if (cell != null) {
+            TableElementListeners listeners = m_cellListeners.get(cell);
+            if (listeners != null)
+                return listeners.hasListeners(evTs);
+        }
+        
+        return false;
     }
     
     @Override
@@ -1710,9 +1781,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 affected = new HashSet<Derivable>();
                 m_cellAffects.put(cell, affected);
             }
+            
+            affected.add(d);
         }
-        
-        affected.add(d);
     }
     
     protected void deregisterAffects(CellImpl cell, Derivable d)
@@ -1720,12 +1791,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
         assert cell != null : "Cell required";
         assert d != null : "Derivable required";
         
-        Set<Derivable> affected = m_cellAffects.get(cell);
-        if (affected != null) {
-            affected.remove(d);
-            
-            if (affected.isEmpty())
-                m_cellAffects.remove(cell);
+        synchronized (m_cellAffects) {
+            Set<Derivable> affected = m_cellAffects.get(cell);
+            if (affected != null) {
+                affected.remove(d);
+                
+                if (affected.isEmpty())
+                    m_cellAffects.remove(cell);
+            }
         }
     }
     
@@ -2094,29 +2167,5 @@ public class TableImpl extends TableCellsElementImpl implements Table
             else
                 return false;
         }       
-    }
-
-    public boolean addCellListener(CellImpl cellImpl, TableElementEventType evT, TableElementListener[] tels)
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean removeCellListener(CellImpl cellImpl, TableElementEventType evT, TableElementListener[] tels)
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public List<TableElementListener> getCellListeners(CellImpl cellImpl, TableElementEventType[] evTs)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public List<TableElementListener> removeAllCellListeners(CellImpl cellImpl, TableElementEventType[] evTs)
-    {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

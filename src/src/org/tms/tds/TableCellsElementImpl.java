@@ -10,11 +10,12 @@ import org.tms.api.Derivable;
 import org.tms.api.TableProperty;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
+import org.tms.api.event.TableElementListeners;
 import org.tms.api.exceptions.InvalidParentException;
 
 /**
- * This is the abstract superclass for all table elements that contain cells, including TableImpl, RowImpl, ColumnImpl, SubsetImpl, and CellImpl. 
- * 
+ * This is the abstract superclass for all table elements that contain cells, 
+ * including TableImpl, RowImpl, ColumnImpl, and SubsetImpl. 
  */
 abstract class TableCellsElementImpl extends TableElementImpl 
 {
@@ -22,9 +23,9 @@ abstract class TableCellsElementImpl extends TableElementImpl
     
     protected TableImpl m_table;   
     protected Set<Derivable> m_affects;
-    protected Set<TableElementListener> m_listeners;
     
     private int m_pendings;
+    private TableElementListeners m_listeners;
 
     protected TableCellsElementImpl(TableElementImpl e)
     {
@@ -62,7 +63,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
         clearProperty(TableProperty.Description);
         
         m_affects = new LinkedHashSet<Derivable>();
-        m_listeners = new LinkedHashSet<TableElementListener>();
+        m_listeners = new TableElementListeners(this);
         m_pendings = 0;
     }
     
@@ -179,50 +180,32 @@ abstract class TableCellsElementImpl extends TableElementImpl
     }
 
     @Override
-    public boolean addListener(TableElementEventType evT, TableElementListener... tels)
+    synchronized public boolean addListener(TableElementEventType evT, TableElementListener... tels)
     {
-        super.addListener(evT, tels);
-        
-        if (tels != null) {
-            boolean addedAny = false;
-            for (TableElementListener tel : tels) {
-                if (m_listeners.add(tel))
-                    addedAny = true;
-            }
-            
-            return addedAny;
-        }
-        else 
-            return false;
+        return m_listeners.addListener(evT, tels);
     }
 
     @Override
-    public boolean removeListener(TableElementEventType evT, TableElementListener... tels)
+    synchronized public boolean removeListener(TableElementEventType evT, TableElementListener... tels)
     {
-        if (tels != null) {
-            boolean removedAny = false;
-            for (TableElementListener tel : tels) {
-                if (m_listeners.remove(tel))
-                    removedAny = true;
-            }
-            
-            return removedAny;
-        }
-        else 
-            return false;
+        return m_listeners.removeListener(evT, tels);
     }
 
     @Override
-    public List<TableElementListener> getListeners(TableElementEventType... evTs)
+    synchronized  public List<TableElementListener> getListeners(TableElementEventType... evTs)
     {
-        return new ArrayList<TableElementListener>(m_listeners);
+        return m_listeners.getListeners(evTs);
     }
 
     @Override
-    public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
+    synchronized public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
     {
-        List<TableElementListener> listeners = getListeners();
-        m_listeners.clear();
-        return listeners;
+        return m_listeners.removeAllListeners(evTs);
+    }
+
+    @Override
+    public boolean hasListeners(TableElementEventType... evTs)
+    {
+        return m_listeners.hasListeners(evTs);
     }
 }

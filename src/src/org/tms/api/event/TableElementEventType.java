@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.tms.api.ElementType;
+import org.tms.api.TableElement;
 import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.exceptions.TableException;
-import org.tms.tds.BaseElementImpl;
 
 public enum TableElementEventType
 {
@@ -33,7 +33,7 @@ public enum TableElementEventType
                     throw new TableException(String.format("TableElementEventType: %s Duplicate BaseElementType: %s", this, t), TableErrorClass.Invalid);
         }        
     }
-    public boolean isImplementedBy(BaseElementImpl te)
+    public boolean isImplementedBy(TableElement te)
     {
         if (te == null)
             return false;
