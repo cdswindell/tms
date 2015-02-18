@@ -12,14 +12,16 @@ public enum TableElementEventType
 {
     OnBeforeCreate(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     OnBeforeDelete(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
-    OnBeforeNewValue(true, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset, ElementType.Cell),
+    OnBeforeNewValue(true, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
-    OnNewValue(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset, ElementType.Cell),
-    OnCreate(false, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    OnNewValue(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    OnCreate(false, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     OnDelete(false, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     
-    OnPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
-    OnNoPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
+    OnPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    OnNoPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    
+    OnRecalculate(false, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     ;
     
     private Set<ElementType> m_implementedBy = new HashSet<ElementType>();
@@ -39,7 +41,7 @@ public enum TableElementEventType
         m_alertParent = alertParent;
     }
     
-    public boolean isAlertParent()
+    public boolean isAlertContainer()
     {
         return m_alertParent;
     }
@@ -50,6 +52,11 @@ public enum TableElementEventType
     }
     
     public boolean isImplementedBy(TableElement te)
+    {
+        return isImplementedBy((Listenable)te);
+    }
+    
+    public boolean isImplementedBy(Listenable te)
     {
         if (te == null)
             return false;
