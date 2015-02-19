@@ -5,10 +5,15 @@ import org.tms.api.TableProperty;
 
 public class TableCellValidationException extends TableException
 {
-    private static final long serialVersionUID = -8576278678070745048L;
+    private static final long serialVersionUID = 947266506605358733L;
 
+    public TableCellValidationException(String msg)
+    {
+        super(ElementType.Cell, TableProperty.CellValue, TableErrorClass.Invalid, msg);
+    }
+    
     public TableCellValidationException()
     {
-        super(ElementType.Cell, TableProperty.CellValue, TableErrorClass.Invalid);
+        this((String) null);
     }
 }
