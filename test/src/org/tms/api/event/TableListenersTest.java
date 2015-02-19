@@ -98,12 +98,15 @@ public class TableListenersTest extends BaseTest
         assertThat(tbl.hasListeners(), is(false));
         assertThat(c.hasListeners(), is(true));
         assertThat(TableElementListeners.hasAnyListeners(tbl), is(true));
-        c.setCellValue(13);
+        c.setCellValue(15);
+        c.setCellValue(14);
+        c.setCellValue(15);
         c.setCellValue(14);
         synchronized (stl) {
             if (!stl.isFired())
                 stl.wait();
         }
+        
         assertThat(stl.getNumFired() > 0, is(true));
     }  
     
@@ -128,12 +131,15 @@ public class TableListenersTest extends BaseTest
         @Override
         public void eventOccured(TableElementEvent e)
         {
-            m_fired++;
-            System.out.println(e +  " " + isFired());    
+            synchronized (this) {
+                m_fired++;
+                notifyAll();
+            }
             
             // prevent odd numbers, if a Before event
             if (e.getSource() instanceof Cell) {
                 CellValueChangedEvent cvce = (CellValueChangedEvent) e;
+                System.out.println(String.format("%s Old: %s New %s", cvce, cvce.getOldValue(), cvce.getNewValue()));    
                 
                 if (cvce.isBefore() && cvce.isOldValueAvailable()) {
                     Object nv = cvce.getNewValue();
@@ -144,6 +150,8 @@ public class TableListenersTest extends BaseTest
                     }
                 }
             }
+            else
+                System.out.println(e +  " " + isFired());                    
         }
         
         public int getNumFired()
@@ -152,6 +160,5 @@ public class TableListenersTest extends BaseTest
             m_fired = 0;
             return tmp;
         }        
-    }
-    
+    }  
 }

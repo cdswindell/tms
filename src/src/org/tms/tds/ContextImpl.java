@@ -33,6 +33,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     static final int sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT = 15;
     static final boolean sf_PENDING_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT = true;
     
+    static final boolean sf_EVENTS_NOTIFY_IN_SAME_THREAD_DEFAULT = false;
     static final int sf_EVENTS_CORE_POOL_SIZE_DEFAULT = 2;
     static final int sf_EVENTS_MAX_POOL_SIZE_DEFAULT = 5;
     static final int sf_EVENTS_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT = 30;
@@ -112,6 +113,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     private long m_pendingKeepAliveTimeout;
     private boolean m_pendingAllowCoreThreadTimeout;
     private PendingDerivationExecutor m_pendingThreadPool;
+    private boolean m_eventsNotifyInSameThread;
     
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
@@ -220,6 +222,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                         value = sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
                     setPendingKeepAliveTime((int)value, TimeUnit.SECONDS);
                     break;
+                
+                case isEventsNotifyInSameThread:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_EVENTS_NOTIFY_IN_SAME_THREAD_DEFAULT;
+                    setEventsNotifyInSameThread((boolean)value);
+                    break;      
                     
                 case isEventsAllowCoreThreadTimeout:
                     if (!isValidPropertyValueBoolean(value))
@@ -290,6 +298,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                 
             case PendingThreadKeepAliveTimeout:
                 return getPendingKeepAliveTime(TimeUnit.SECONDS);                
+             
+            case isEventsNotifyInSameThread:
+                return isEventsNotifyInSameThread();
                 
             case isEventsAllowCoreThreadTimeout:
                 return eventsAllowsCoreThreadTimeOut();
@@ -509,10 +520,10 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     }
 
     @Override
-    public void shutdown()
+    public void shutdownDerivableThreadPool()
     {
         if (m_pendingThreadPool != null)
-            m_pendingThreadPool.shutdown();
+            m_pendingThreadPool.shutdownDerivableThreadPool();
     }
     
     @Override
@@ -524,6 +535,16 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             return false;
     }
     
+    public boolean isEventsNotifyInSameThread()
+    {
+        return m_eventsNotifyInSameThread;
+    }
+
+    public void setEventsNotifyInSameThread(boolean notifyInSameThread)
+    {
+        m_eventsNotifyInSameThread = notifyInSameThread;
+    }
+
     public int getEventsCorePoolSize()
     {
         return m_eventsCorePoolThreads;

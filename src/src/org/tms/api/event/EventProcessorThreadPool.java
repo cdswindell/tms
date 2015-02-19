@@ -6,5 +6,5 @@ public interface EventProcessorThreadPool
 {
     public void submitEvents(Collection<TableElementEvent> events);
     public boolean remove(TableElementEvent e);
-    public void shutdown();
+    public void shutdownEventProcessorThreadPool();
 }

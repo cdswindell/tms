@@ -11,7 +11,7 @@ public enum TableProperty implements Comparable<TableProperty>
 {
     // Base Element Properties
     Label,
-    Description,   
+    Description,  
     isNull(true, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
     isReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column),
     isSupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
@@ -67,7 +67,9 @@ public enum TableProperty implements Comparable<TableProperty>
     CellOffset(true, false, ElementType.Row, ElementType.Cell),
     DataType(false, false, ElementType.Column, ElementType.Cell),
     CellValue(false, false, ElementType.Cell),
-    isStronglyTyped(false, false, ElementType.Column);
+    isStronglyTyped(false, false, ElementType.Column),
+    Units(true, false, false, ElementType.Row, ElementType.Column, ElementType.Cell),
+    Validator(true, false, false, ElementType.Row, ElementType.Column, ElementType.Cell),
     ;
     
     private boolean m_optional;
@@ -161,6 +163,7 @@ public enum TableProperty implements Comparable<TableProperty>
         switch(this)
         {
             case Label:
+            case Units:
             case Description:
                 return true;
                 

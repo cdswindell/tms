@@ -17,4 +17,10 @@ public interface Cell extends TableElement, Derivable
     
     public Row getRow();
     public Column getColumn();
+    
+    public String getUnits();
+    public void setUnits(String units);
+
+    public TableCellValidator getValidator();
+    public void setValidator(TableCellValidator validator);
 }

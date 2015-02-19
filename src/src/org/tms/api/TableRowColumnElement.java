@@ -10,6 +10,12 @@ public interface TableRowColumnElement extends TableElement
      */
     public int getIndex();
     
+    public String getUnits();
+    public void setUnits(String units);    
+
+    public TableCellValidator getValidator();
+    public void setValidator(TableCellValidator validator);
+    
     /**
      * Sort the table by a row/column. Null elements are sorted to the end of the row/column.
      * Numeric cells are given sort order priority. All other cells are sorted by the natural

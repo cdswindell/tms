@@ -10,6 +10,7 @@ import java.util.Set;
 import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.Subset;
+import org.tms.api.TableCellValidator;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
@@ -204,7 +205,7 @@ public class CellImpl extends TableElementImpl implements Cell
         return setCellValue(value, false, false);
     }
     
-    protected boolean setCellValue(Object value, boolean typeSafeCheck, boolean fireEvents)
+    protected boolean setCellValue(Object value, boolean typeSafeCheck, boolean validateFireEvents)
     {
         decrementPendings();
         if (typeSafeCheck && value != null && this.isDataTypeEnforced()) {
@@ -213,8 +214,10 @@ public class CellImpl extends TableElementImpl implements Cell
         }
         
         boolean valuesDiffer = false;        
-        if (value != m_cellValue) {            
-            if (fireEvents) {
+        if (value != m_cellValue) {  
+            if (validateFireEvents) {
+                // validate potentian new cell value
+                applyValidator(value);
                 try {
                     fireEvents(TableElementEventType.OnBeforeNewValue, m_cellValue, value);
                 }
@@ -256,6 +259,54 @@ public class CellImpl extends TableElementImpl implements Cell
             return getColumn().getDataType();
         else
             return getDataType();
+    }
+    
+    @Override
+    public String getUnits()
+    {
+        return (String)getProperty(TableProperty.Units);
+    }
+
+    @Override
+    public void setUnits(String units)
+    {
+        if (units == null || (units = units.trim()).length() == 0)
+            clearProperty(TableProperty.Units);
+        else
+            setProperty(TableProperty.Units, units);
+    }
+
+    @Override
+    public TableCellValidator getValidator()
+    {
+        if (isSet(sf_HAS_CELL_VALIDATOR_FLAG))
+            return (TableCellValidator)getProperty(TableProperty.Validator);
+        else
+            return null;
+    }
+
+    @Override
+    public void setValidator(TableCellValidator validator)
+    {
+        if (validator == null)
+            clearProperty(TableProperty.Validator);
+        else
+            setProperty(TableProperty.Validator, validator);
+        
+        // accelerator to minimize map lookups
+        set(sf_HAS_CELL_VALIDATOR_FLAG, validator != null);
+    }
+
+    private void applyValidator(Object newValue)
+    {
+        TableCellValidator validator = getValidator();
+        if (validator == null)
+            validator = getColumn().getValidator();
+        if (validator == null)
+            validator = getRow().getValidator();
+        
+        if (validator != null)
+            validator.validate(this, newValue);
     }
     
     @Override

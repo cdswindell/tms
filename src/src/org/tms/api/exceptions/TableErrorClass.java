@@ -6,6 +6,7 @@ public enum TableErrorClass
     NonNullValueRequired,
     Unimplemented,
     Invalid,
+    Required,
     Deleted,
     Illegal,
     UnsupportedImplementation,

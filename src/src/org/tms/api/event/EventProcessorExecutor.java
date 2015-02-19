@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.util.ThreadLocalUtils;
 
 public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnable, EventProcessorThreadPool
@@ -42,9 +43,11 @@ public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnab
               new ThreadPoolExecutor.AbortPolicy());
         
         m_queuedEvents = new LinkedBlockingQueue<TableElementEvent>();
-        m_continueDraining = true;      
-        allowCoreThreadTimeOut(timeOutCores);
+        m_continueDraining = true;  
+        
         prestartAllCoreThreads();
+        allowCoreThreadTimeOut(timeOutCores);
+        
         setRejectedExecutionHandler(new RejectedExecutionHandler() {
             public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
                // this will block if the queue is full
@@ -66,9 +69,11 @@ public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnab
     @Override
     public void submitEvents(Collection<TableElementEvent> events)
     {
-        if (events != null) {
+        if (isShutdown())
+            throw new IllegalTableStateException("Event Processor Thread pool has been shutdown...");
+        
+        if (events != null) 
             m_queuedEvents.addAll(events);
-        }
         else
             throw new NullPointerException("Collection<TableElementEvent> required.");
     }
@@ -120,11 +125,13 @@ public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnab
     }
     
     @Override
-    public void shutdown()
+    public void shutdownEventProcessorThreadPool()
     {
         super.shutdown();
         
         m_continueDraining = false;
+        m_drainThread.interrupt();
+        
         m_queuedEvents.clear();       
     }
     

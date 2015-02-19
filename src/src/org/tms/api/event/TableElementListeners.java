@@ -99,6 +99,12 @@ public class TableElementListeners implements Listenable
         m_listeners = new HashMap<TableElementEventType, Set<TableElementListener>>();
     }
     
+    public TableElementListeners(TableElement te, boolean notifyInSameThread)
+    {
+        this(te);
+        m_notifyInSameThread = notifyInSameThread;
+    }
+    
     @Override
     synchronized public boolean addListeners(TableElementEventType evT, TableElementListener... tels)
     {

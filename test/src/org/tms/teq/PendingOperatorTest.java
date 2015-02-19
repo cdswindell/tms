@@ -22,6 +22,7 @@ import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
+import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 
 public class PendingOperatorTest extends BaseTest
@@ -30,8 +31,8 @@ public class PendingOperatorTest extends BaseTest
     public final void testPendingTwoVariableStatEngine() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setMaximumPoolSize(1000);
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(1000);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
         
@@ -81,22 +82,22 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c.getCellValue(), is(v1*2));
         }  
         
-        ((DerivableThreadPool)tc).shutdown();
+        ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
     }
         
     @Test
     public final void testPendingColumnOperatorSimple() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setMaximumPoolSize(10);
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(10);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
         
         TokenMapper tm = tc.getTokenMapper();
         tm.registerOperator(new PendingOperator());
         
-        int numRows = 250;
+        int numRows = 500;
         t.addRow(Access.ByIndex, numRows);
         
         Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
@@ -136,15 +137,15 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c, notNullValue());
         }  
         
-        ((DerivableThreadPool)tc).shutdown();
+        ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
     }
         
     @Test
     public final void testPendingColumnOperator() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setMaximumPoolSize(1000);
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(1000);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
         
@@ -195,14 +196,14 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c, notNullValue());
         }       
         
-        ((DerivableThreadPool)tc).shutdown();
+        ((ContextImpl)tc).shutdownDerivableThreadPool();
     }
         
     @Test
     public final void testPendingBlockedPendingOperator() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
         
@@ -248,14 +249,14 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c.getCellValue(), is(7.0*5.0*2.0 + v1*2 + v1*2.0/2.0));
         }
         
-        ((DerivableThreadPool)tc).shutdown();       
+        ((DerivableThreadPool)tc).shutdownDerivableThreadPool();       
     }
     
     @Test
     public final void testPendingColumnOperatorComplex() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
         
@@ -323,7 +324,7 @@ public class PendingOperatorTest extends BaseTest
         }
         
         // try again, with more threads
-        ((DerivableThreadPool)tc).setMaximumPoolSize(1000);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(1000);
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
@@ -336,14 +337,14 @@ public class PendingOperatorTest extends BaseTest
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
-        ((DerivableThreadPool)tc).shutdown();
+        ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
     }
     
     @Test
     public final void testDeleteRowsWhilePending() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
         
@@ -413,7 +414,7 @@ public class PendingOperatorTest extends BaseTest
         }
         
         // try again, with more threads
-        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(500);
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
@@ -426,15 +427,15 @@ public class PendingOperatorTest extends BaseTest
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
-        ((DerivableThreadPool)tc).shutdown();
+        ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
     }
     
     @Test
     public final void testClearDerivationWhilePending() 
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(500);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         Table t = TableFactory.createTable(tc);
         
         TokenMapper tm = tc.getTokenMapper();
@@ -498,15 +499,15 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c.getCellValue(), is(50));
         }
         
-        ((DerivableThreadPool)tc).shutdown();
+        ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
     }
     
     @Test
     public final void testDeleteColumnWhilePending() 
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(500);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
         
@@ -551,15 +552,15 @@ public class PendingOperatorTest extends BaseTest
             assertThat(c.isNull(), is(true));
         }
         
-        ((DerivableThreadPool)tc).shutdown();
+        ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
     }
     
     @Test
     public final void testDeleteTableWhilePending() 
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((DerivableThreadPool)tc).setMaximumPoolSize(500);
-        ((DerivableThreadPool)tc).setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(500);
+        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);
         
@@ -599,7 +600,7 @@ public class PendingOperatorTest extends BaseTest
         assertThat(cR2C4.isInvalid(), is(true));
         assertThat(cR3C4.isInvalid(), is(true));
         
-        ((DerivableThreadPool)tc).shutdown();
+        ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
     }
     
     public class PendingOperator implements Operator, Runnable

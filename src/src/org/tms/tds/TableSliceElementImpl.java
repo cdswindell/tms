@@ -11,6 +11,7 @@ import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Row;
 import org.tms.api.Subset;
+import org.tms.api.TableCellValidator;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
@@ -350,12 +351,49 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                 
             case Index:
                 return getIndex();
-                
+                               
             default:
                 return super.getProperty(key);
         }
     }   
 
+    @Override
+    public String getUnits()
+    {
+        return (String)getProperty(TableProperty.Units);
+    }
+
+    @Override
+    public void setUnits(String units)
+    {
+        if (units == null || (units = units.trim()).length() == 0)
+            clearProperty(TableProperty.Units);
+        else
+            setProperty(TableProperty.Units, units);
+    }
+
+    @Override
+    public TableCellValidator getValidator()
+    {
+        if (isSet(sf_HAS_CELL_VALIDATOR_FLAG))
+            return (TableCellValidator)getProperty(TableProperty.Validator);
+        else
+            return null;
+    }
+
+    @Override
+    public void setValidator(TableCellValidator validator)
+    {
+        if (validator == null)
+            clearProperty(TableProperty.Validator);
+        else
+            setProperty(TableProperty.Validator, validator);
+        
+        // accelerator to minimize map lookups
+        set(sf_HAS_CELL_VALIDATOR_FLAG, validator != null);
+    }
+
+    @Override
     public Cell getCell(Access mode, Object... mda)
     {
         RowImpl row = null;
@@ -378,6 +416,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         return parent.getCell(row,  col);
     }
     
+    @Override
     public int getIndex()
     {
         return m_index ;

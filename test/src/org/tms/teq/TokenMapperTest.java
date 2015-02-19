@@ -13,7 +13,7 @@ import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
-import org.tms.api.exceptions.InvalidExpressionException;
+import org.tms.api.derivables.exceptions.InvalidExpressionException;
 import org.tms.api.factories.TableContextFactory;
 
 public class TokenMapperTest

@@ -131,6 +131,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     private int m_eventsMaxPoolThreads;
     private long m_eventsKeepAliveTimeout;
     private boolean m_eventsAllowCoreThreadTimeout;
+    private boolean m_eventsNotifyInSameThread;
 
     protected TableImpl()
     {
@@ -257,6 +258,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                     setAutoRecalculate((boolean)value);
                     break;
 
+                case isEventsNotifyInSameThread:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_EVENTS_NOTIFY_IN_SAME_THREAD_DEFAULT;
+                    setEventsNotifyInSameThread((boolean)value);
+                    break;      
+                    
                 case isEventsAllowCoreThreadTimeout:
                     if (!isValidPropertyValueBoolean(value))
                         value = ContextImpl.sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT;
@@ -520,6 +527,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             case isAutoRecalculate:
                 return isAutoRecalculate();               
                 
+            case isEventsNotifyInSameThread:
+                return isEventsNotifyInSameThread();
+                
             case isEventsAllowCoreThreadTimeout:
                 return eventsAllowsCoreThreadTimeOut();
                 
@@ -619,7 +629,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             synchronized (m_cellListeners) {
                 TableElementListeners listeners = m_cellListeners.get(cell);
                 if (listeners == null) {
-                    listeners = new TableElementListeners(cell);
+                    listeners = new TableElementListeners(cell, isEventsNotifyInSameThread());
                     m_cellListeners.put(cell, listeners);
                 }
                 
@@ -690,20 +700,27 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         return TableElementListeners.hasAnyListeners(this, evTs) ;
     }
     
-    @Override
-    public void submitEvents(Collection<TableElementEvent> events)
+    /**
+     * Create and initialize the thread pool to support event processing.
+     */
+    public void createEventProcessorThreadPool()
     {
         synchronized (m_eventThreadPoolLock) {
             if (m_eventThreadPool == null) {
                 int maxPoolSize = Math.max(getEventsMaximumPoolSize(), getEventsCorePoolSize());
                 m_eventThreadPool = new EventProcessorExecutor(getEventsCorePoolSize(),
-                                                                maxPoolSize,
-                                                                getEventsKeepAliveTime(),
-                                                                TimeUnit.SECONDS,
-                                                                eventsAllowsCoreThreadTimeOut());  
+                                                               maxPoolSize,
+                                                               getEventsKeepAliveTime(),
+                                                               TimeUnit.SECONDS,
+                                                               eventsAllowsCoreThreadTimeOut());  
             }
         }
-        
+    }
+
+    @Override
+    public void submitEvents(Collection<TableElementEvent> events)
+    {
+        createEventProcessorThreadPool();       
         m_eventThreadPool.submitEvents(events);
     }
 
@@ -717,12 +734,22 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     }
 
     @Override
-    public void shutdown()
+    public void shutdownEventProcessorThreadPool()
     {
         if (m_eventThreadPool != null)
-            m_eventThreadPool.shutdown();
+            m_eventThreadPool.shutdownEventProcessorThreadPool();
     }
     
+    public boolean isEventsNotifyInSameThread()
+    {
+        return m_eventsNotifyInSameThread;
+    }
+
+    public void setEventsNotifyInSameThread(boolean notifyInSameThread)
+    {
+        m_eventsNotifyInSameThread = notifyInSameThread;
+    }
+
     public int getEventsCorePoolSize()
     {
         return m_eventsCorePoolThreads;

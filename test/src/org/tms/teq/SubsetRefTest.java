@@ -15,7 +15,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.ErrorCode;
-import org.tms.api.exceptions.InvalidExpressionException;
+import org.tms.api.derivables.exceptions.InvalidExpressionException;
 import org.tms.api.factories.TableFactory;
 import org.tms.tds.TableImpl;
 

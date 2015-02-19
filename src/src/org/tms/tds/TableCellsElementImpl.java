@@ -207,6 +207,10 @@ abstract class TableCellsElementImpl extends TableElementImpl
     @Override
     public boolean addListeners(TableElementEventType evT, TableElementListener... tels)
     {
+        TableImpl parent = null;
+        if ((parent = getTable()) != null)
+            parent.createEventProcessorThreadPool();
+
         return m_listeners.addListeners(evT, tels);
     }
 

@@ -1,5 +1,6 @@
-package org.tms.api.exceptions;
+package org.tms.api.derivables.exceptions;
 
+import org.tms.api.exceptions.TableException;
 import org.tms.teq.ParseResult;
 
 public class InvalidExpressionException extends TableException

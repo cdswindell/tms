@@ -11,6 +11,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.teq.Derivation;
 import org.tms.util.ThreadLocalUtils;
 
@@ -72,6 +73,9 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     @Override
     public void submitCalculation(UUID transactionId, Runnable r)
     {
+        if (isShutdown())
+            throw new IllegalTableStateException("Pending Derivation Thread pool has been shutdown...");
+        
         if (transactionId != null && r != null) {
             m_runnableUuidMap.put(r,  transactionId);
             m_uuidRunnableMap.put(transactionId, r);
@@ -145,10 +149,11 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     }
     
     @Override
-    public void shutdown()
+    public void shutdownDerivableThreadPool()
     {
         super.shutdown();
         
+        m_drainThread.interrupt();
         m_continueDraining = false;
         m_queuedRunnables.clear(); 
         m_runnableUuidMap.clear();
