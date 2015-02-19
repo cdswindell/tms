@@ -29,12 +29,30 @@ public class TableListenersTest extends BaseTest
         Column c1 = tbl.addColumn(Access.ByIndex, 1);
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
         
+        assertThat(tbl.hasListeners(), is(false));
+        assertThat(r1.hasListeners(), is(false));
+        assertThat(r2.hasListeners(), is(false));
+        assertThat(c1.hasListeners(), is(false));
+        assertThat(TableElementListeners.hasAnyListeners(tbl), is(false));
+        
         TableCellListener stl = new TableCellListener();
         assertThat(stl.getNumFired(), is(0));
         
-        tbl.addListener(TableElementEventType.OnBeforeNewValue, stl);        
-        r1.addListener(TableElementEventType.OnBeforeNewValue, stl);
-        c1.addListener(TableElementEventType.OnBeforeNewValue, stl);
+        tbl.addListeners(TableElementEventType.OnBeforeNewValue, stl); 
+        assertThat(TableElementListeners.hasAnyListeners(tbl), is(true));
+        assertThat(tbl.hasListeners(), is(true));
+        assertThat(tbl.hasListeners(TableElementEventType.OnBeforeNewValue), is(true));
+        assertThat(tbl.hasListeners(TableElementEventType.OnNewValue), is(false));
+
+        r1.addListeners(TableElementEventType.OnBeforeNewValue, stl);
+        assertThat(tbl.hasListeners(TableElementEventType.OnBeforeNewValue), is(true));
+        assertThat(tbl.hasListeners(TableElementEventType.OnNewValue), is(false));
+        
+        assertThat(c1.hasListeners(TableElementEventType.OnBeforeNewValue), is(false));
+        assertThat(c1.hasListeners(TableElementEventType.OnNewValue), is(false));
+        c1.addListeners(TableElementEventType.OnBeforeNewValue, stl);
+        assertThat(c1.hasListeners(TableElementEventType.OnBeforeNewValue), is(true));
+        assertThat(c1.hasListeners(TableElementEventType.OnNewValue), is(false));
         
         // set cell, cell listener should fire 3 times
         Cell c = tbl.getCell(r1,  c1);
@@ -42,7 +60,7 @@ public class TableListenersTest extends BaseTest
         assertThat(stl.getNumFired(), is(3));
 
         // set the cell listener, slightly different event firing path
-        c.addListener(TableElementEventType.OnBeforeNewValue, stl);
+        c.addListeners(TableElementEventType.OnBeforeNewValue, stl);
         c.setCellValue(12);
         assertThat(stl.getNumFired(), is(0)); // shouldn't fire, same value
         
@@ -64,6 +82,16 @@ public class TableListenersTest extends BaseTest
         cR2C1.setCellValue(13);
         assertThat(cR2C1.getCellValue(), is(13));
         assertThat(stl.getNumFired(), is(2));
+        
+        // remove all listeners
+        tbl.removeAllListeners();
+        assertThat(tbl.hasListeners(), is(false));
+        assertThat(r1.hasListeners(), is(false));
+        assertThat(r2.hasListeners(), is(false));
+        assertThat(c1.hasListeners(), is(false));
+        assertThat(c.hasListeners(), is(false));
+        assertThat(cR2C1.hasListeners(), is(false));
+        assertThat(TableElementListeners.hasAnyListeners(tbl), is(false));
     }  
     
     private static class TableCellListener implements TableElementListener

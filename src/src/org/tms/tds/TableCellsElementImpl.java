@@ -192,25 +192,25 @@ abstract class TableCellsElementImpl extends TableElementImpl
     }
 
     @Override
-    synchronized public boolean addListener(TableElementEventType evT, TableElementListener... tels)
+    public boolean addListeners(TableElementEventType evT, TableElementListener... tels)
     {
-        return m_listeners.addListener(evT, tels);
+        return m_listeners.addListeners(evT, tels);
     }
 
     @Override
-    synchronized public boolean removeListener(TableElementEventType evT, TableElementListener... tels)
+    public boolean removeListeners(TableElementEventType evT, TableElementListener... tels)
     {
-        return m_listeners.removeListener(evT, tels);
+        return m_listeners.removeListeners(evT, tels);
     }
 
     @Override
-    synchronized  public List<TableElementListener> getListeners(TableElementEventType... evTs)
+    public List<TableElementListener> getListeners(TableElementEventType... evTs)
     {
         return m_listeners.getListeners(evTs);
     }
 
     @Override
-    synchronized public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
+    public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
     {
         return m_listeners.removeAllListeners(evTs);
     }

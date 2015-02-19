@@ -688,7 +688,7 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
-    public boolean addListener(TableElementEventType evT, TableElementListener... tels)
+    public boolean addListeners(TableElementEventType evT, TableElementListener... tels)
     {
         if (getTable() != null)
             return getTable().addCellListener(this, evT, tels);
@@ -697,7 +697,7 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
-    public boolean removeListener(TableElementEventType evT, TableElementListener... tels)
+    public boolean removeListeners(TableElementEventType evT, TableElementListener... tels)
     {
         if (getTable() != null)
             return getTable().removeCellListener(this, evT, tels);

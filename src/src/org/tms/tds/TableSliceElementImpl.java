@@ -15,6 +15,8 @@ import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
+import org.tms.api.event.TableElementEventType;
+import org.tms.api.event.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
@@ -83,6 +85,23 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     {
         return m_subsets;
     } 
+    
+    @Override 
+    public List<TableElementListener> removeAllListeners(TableElementEventType... evTs )
+    {
+        List<TableElementListener> tblListeners = super.removeAllListeners(evTs);
+        
+        TableImpl t = getTable();
+        if (t != null) {
+            synchronized(t) {
+                // remove listeners from all rows and columns
+                getSubsetsInternal().forEach(s -> {if (s != null) s.removeAllListeners(evTs); });
+            }
+        }
+        
+        // return listeners on the this table
+        return tblListeners;
+    }
     
     @Override
     public boolean isDerived()

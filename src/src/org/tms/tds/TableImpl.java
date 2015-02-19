@@ -528,13 +528,32 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_subsets.size();
     }
     
+    @Override 
+    synchronized public List<TableElementListener> removeAllListeners(TableElementEventType... evTs )
+    {
+        List<TableElementListener> tblListeners = super.removeAllListeners(evTs);
+        
+        // remove listeners from all rows and columns
+        getColumnsInternal().forEach(c -> {if (c != null) c.removeAllListeners(evTs); });
+        getRowsInternal().forEach(r -> {if (r != null) r.removeAllListeners(false, evTs); }); // don't reprocess cells
+        getSubsetsInternal().forEach(s -> {if (s != null) s.removeAllListeners(evTs); });
+        
+        m_cellListeners.clear();
+        
+        // mark table as having no listeners
+        TableElementListeners.deregisterTable(this);
+        
+        // return listeners on the this table
+        return tblListeners;
+    }
+    
     void fireCellEvents(CellImpl cell, TableElementEventType evT, Object... args)
     {
-        if (cell != null && evT != null) {
+        if (cell != null && evT != null && hasAnyListeners(evT)) {
             TableElementListeners listeners = m_cellListeners.get(cell);
             if (listeners != null)
                 listeners.fireEvents(cell, evT, args);
-            else if (hasAnyListeners())
+            else
                 fireContainerEvents(cell, evT, args);
         }        
     }
@@ -549,7 +568,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     m_cellListeners.put(cell, listeners);
                 }
                 
-                return listeners.addListener(evT, tels);
+                return listeners.addListeners(evT, tels);
             }
         }
         
@@ -562,7 +581,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             TableElementListeners listeners = m_cellListeners.get(cell);
             if (listeners != null) {
                 synchronized (m_cellListeners) {
-                    boolean removedAny = listeners.removeListener(evT, tels);                    
+                    boolean removedAny = listeners.removeListeners(evT, tels);                    
                     if (!listeners.hasListeners())
                         m_cellListeners.remove(cell);
                     
@@ -585,10 +604,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return Collections.emptyList();
     }
 
-    List<TableElementListener> removeAllCellListeners(CellImpl cell, TableElementEventType[] evTs)
+    List<TableElementListener> removeAllCellListeners(CellImpl cell, TableElementEventType... evTs)
     {
         if (cell != null) {
-            TableElementListeners listeners = m_cellListeners.get(cell);
+            Set<SubsetImpl> subsets =  getCellSubsets(cell);
+            if (subsets != null) 
+                subsets.forEach(s -> {if (s != null) s.removeAllListeners(evTs); });
+            
+            TableElementListeners listeners = m_cellListeners.remove(cell);
             if (listeners != null)
                 return listeners.removeAllListeners(evTs);
         }
@@ -607,10 +630,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return false;
     }
     
-
-    boolean hasAnyListeners()
+    boolean hasAnyListeners(TableElementEventType... evTs)
     {
-        return hasListeners() || !m_cellListeners.isEmpty();
+        return TableElementListeners.hasAnyListeners(this, evTs) ;
     }
     
     @Override
@@ -639,8 +661,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
             getSubsets().forEach(s -> { if (s != null) ((SubsetImpl)s).delete(false); } );
             
             // compress data structures
-            reclaimColumnSpace();
-            reclaimRowSpace();
+            if (compress) {
+                reclaimColumnSpace();
+                reclaimRowSpace();
+            }
             
         	this.m_subsets.clear();
         	this.m_affects.clear();
@@ -657,10 +681,20 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
         finally {
             invalidate();
+            
             sf_CURRENT_CELL.get().remove(this);
             sf_CURRENT_CELL_STACK.get().remove(this);
+            TableElementListeners.deregisterTable(this);
+            if (getTableContext() != null)
+                getTableContext().deregister(this);           
         }
     }    
+    
+    @Override
+    public void finalize()
+    {
+        delete(false);
+    }
     
     public boolean isAutoRecalculateEnabled()
     {

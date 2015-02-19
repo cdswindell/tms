@@ -12,6 +12,8 @@ import org.tms.api.Column;
 import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.event.TableElementEventType;
+import org.tms.api.event.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
 
 public class ColumnImpl extends TableSliceElementImpl implements Column
@@ -47,6 +49,30 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         m_dataType = null;
     }
 
+    @Override 
+    public List<TableElementListener> removeAllListeners(TableElementEventType... evTs )
+    {
+        List<TableElementListener> tblListeners = super.removeAllListeners(evTs);
+
+        TableImpl t = getTable();
+        if (t != null) {
+            synchronized(t) {
+                t.pushCurrent();
+                try {
+                    // remove listeners from all cells
+                    if (m_cells != null)
+                        m_cells.forEach(c -> {if (c!= null) c.removeAllListeners(evTs); });
+                }
+                finally {
+                    t.popCurrent();
+                }
+            }
+        }
+
+        // return listeners on the this table
+        return tblListeners;
+    }
+    
     /**
      * Compress the cells array as the result of row deletions. This method builds a new cells
      * array where the cells are ordered in row order.

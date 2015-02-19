@@ -2,10 +2,12 @@ package org.tms.api.event;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.tms.api.Cell;
@@ -19,7 +21,67 @@ import org.tms.api.exceptions.UnimplementedException;
 
 public class TableElementListeners implements Listenable
 {
-    private static final AtomicLong sf_AssemblyIdCntr = new AtomicLong();
+    static final private AtomicLong sf_AssemblyIdCntr = new AtomicLong();
+    
+    static final private Map<Table, Set<TableElementEventType>> sf_TableRegisteredListenersMap = 
+            new ConcurrentHashMap<Table, Set<TableElementEventType>>();
+    
+    static final public boolean hasAnyListeners(Table table, TableElementEventType... evTs) 
+    {
+        if (table != null) {
+            synchronized (table) {
+                Set<TableElementEventType> registeredListeners = sf_TableRegisteredListenersMap.get(table);
+                if (registeredListeners == null || registeredListeners.isEmpty())
+                    return false;
+                
+                // check individual types 
+                if (evTs == null || evTs.length == 0)
+                    return true;
+                
+                boolean hasSome = false;
+                for (TableElementEventType evT : evTs) {
+                    if (evT == null)
+                        continue;
+                    else if (!registeredListeners.contains(evT))
+                        return false;
+                    else
+                        hasSome = true;
+                }
+                
+                return hasSome;
+            }
+        }
+        else
+            return false;
+    }
+    
+    static final public void deregisterTable(Table t)
+    {
+        if (t != null)
+            sf_TableRegisteredListenersMap.remove(t);
+    }
+    
+    static final private void registerTableListener(TableElement te, TableElementEventType... evTs)
+    {
+        if (te == null || evTs == null || evTs.length == 0) return;
+        
+        Table parentTable = te.getTable();
+        if (parentTable == null) return;
+        
+        synchronized(parentTable) {
+            Set<TableElementEventType> registeredListeners = sf_TableRegisteredListenersMap.get(parentTable);
+            if (registeredListeners == null) {
+                registeredListeners = new HashSet<TableElementEventType>();
+                sf_TableRegisteredListenersMap.put(parentTable, registeredListeners);
+            }
+                
+            for (TableElementEventType evT : evTs) {
+                if (evT == null) continue;
+                
+                registeredListeners.add(evT);
+            }
+        }
+    }
     
     private TableElement m_te;
     protected Map<TableElementEventType, Set<TableElementListener>> m_listeners;
@@ -31,7 +93,7 @@ public class TableElementListeners implements Listenable
     }
     
     @Override
-    synchronized public boolean addListener(TableElementEventType evT, TableElementListener... tels)
+    synchronized public boolean addListeners(TableElementEventType evT, TableElementListener... tels)
     {
         if (tels != null && tels.length > 0) {
             boolean addedAny = false;
@@ -53,6 +115,9 @@ public class TableElementListeners implements Listenable
                     throw new UnimplementedException(String.format("%s not supported by %s", evT, m_te.getElementType()));
             }
             
+            if (addedAny)
+                TableElementListeners.registerTableListener(m_te, evT);
+            
             return addedAny;
         }
         else 
@@ -60,14 +125,14 @@ public class TableElementListeners implements Listenable
     }
 
     @Override
-    synchronized public boolean removeListener(TableElementEventType evT, TableElementListener... tels)
+    synchronized public boolean removeListeners(TableElementEventType evT, TableElementListener... tels)
     {
-        if (tels != null && tels.length > 0) {            
-            boolean removedAny = false;
-            TableElementEventType [] evTsArray = evT != null ? new TableElementEventType [] {evT} : TableElementEventType.values();
-            for (TableElementEventType eT : evTsArray) {
-                Set<TableElementListener> evTlisteners = m_listeners.get(evT);
-                if (evTlisteners != null)     {           
+        boolean removedAny = false;
+        TableElementEventType [] evTsArray = evT != null ? new TableElementEventType [] {evT} : TableElementEventType.values();
+        for (TableElementEventType eT : evTsArray) {
+            Set<TableElementListener> evTlisteners = m_listeners.get(evT);
+            if (evTlisteners != null)     { 
+                if (tels != null && tels.length > 0) {
                     for (TableElementListener tel : tels) {
                         if (tel == null)
                             continue;
@@ -79,12 +144,14 @@ public class TableElementListeners implements Listenable
                     if (evTlisteners.isEmpty())
                         m_listeners.remove(eT);
                 }
+                else {
+                    // remove all listeners
+                    removedAny = m_listeners.remove(evT) != null;
+                }
             }
-            
-            return removedAny;
         }
-        else 
-            return false;
+        
+        return removedAny;
     }
 
     @Override
@@ -109,7 +176,7 @@ public class TableElementListeners implements Listenable
     synchronized public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
     {
         List<TableElementListener> listeners = getListeners(evTs);
-        if (evTs == null)
+        if (evTs == null || evTs.length == 0)
             m_listeners.clear();
         else {
             for (TableElementEventType evT : evTs) {
@@ -219,7 +286,7 @@ public class TableElementListeners implements Listenable
         generateEvents(events, assemblyId, true, (TableElement)te, evT, args);
         
         // add in parent table
-        Table parentTable =  te.getTable();
+        Table parentTable =  ((TableElement)te).getTable();
         if (parentTable != null && parentTable != this)
             generateEvents(events, assemblyId, true, parentTable, evT, args);                            
             
@@ -275,13 +342,11 @@ public class TableElementListeners implements Listenable
         }                
     }
 
-    @Override
     public ElementType getElementType()
     {
         return m_te.getElementType();
     }
 
-    @Override
     public Table getTable()
     {
         return m_te.getTable();

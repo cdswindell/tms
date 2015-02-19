@@ -53,7 +53,7 @@ public enum TableElementEventType
     
     public boolean isImplementedBy(TableElement te)
     {
-        return isImplementedBy((Listenable)te);
+        return isImplementedBy(te.getElementType());
     }
     
     public boolean isImplementedBy(Listenable te)
@@ -61,7 +61,7 @@ public enum TableElementEventType
         if (te == null)
             return false;
         else
-            return isImplementedBy(te.getElementType());
+            return isImplementedBy((TableElement)te);
     }
     
     public boolean isImplementedBy(ElementType et)

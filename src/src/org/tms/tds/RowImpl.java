@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.tms.api.Access;
@@ -10,6 +11,8 @@ import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
+import org.tms.api.event.TableElementEventType;
+import org.tms.api.event.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
 
 public class RowImpl extends TableSliceElementImpl implements Row
@@ -65,6 +68,41 @@ public class RowImpl extends TableSliceElementImpl implements Row
     /*
      * Class-specific methods
      */   
+    @Override 
+    public List<TableElementListener> removeAllListeners(TableElementEventType... evTs )
+    {
+        return removeAllListeners(true, evTs);
+    }
+    
+    protected List<TableElementListener> removeAllListeners(boolean processCells, TableElementEventType... evTs )
+    {
+        List<TableElementListener> tblListeners = super.removeAllListeners(evTs);
+        
+        TableImpl t = getTable();
+        if (t != null) {
+            synchronized(t) {
+                t.pushCurrent();
+                try {
+                    // remove listeners from all rows and columns
+                    for (ColumnImpl col : getTable().getColumnsInternal()) {
+                        if (col == null) continue;
+                        
+                        CellImpl c = getCellInternal(col, false, false);
+                        if (c != null)
+                            c.removeAllListeners(evTs);
+                    }
+                    
+                }
+                finally {
+                    t.popCurrent();
+                }
+            }
+        }
+        
+        // return listeners on the this row
+        return tblListeners;
+    }
+    
     protected CellImpl getCell(ColumnImpl col, boolean setCurrent)
     {
         vetElement();
