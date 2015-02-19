@@ -13,6 +13,7 @@ import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.ErrorCode;
 import org.tms.api.derivables.Token;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
@@ -21,7 +22,6 @@ import org.tms.api.exceptions.DataTypeEnforcementException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.teq.Derivation;
-import org.tms.teq.ErrorCode;
 
 public class CellImpl extends TableElementImpl implements Cell
 {

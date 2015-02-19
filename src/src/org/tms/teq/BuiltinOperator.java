@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.tms.api.TableElement;
 import org.tms.api.TableRowColumnElement;
+import org.tms.api.derivables.ErrorCode;
 import org.tms.api.derivables.Labeled;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;

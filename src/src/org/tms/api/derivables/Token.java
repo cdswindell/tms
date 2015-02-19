@@ -5,7 +5,6 @@ import org.tms.api.Row;
 import org.tms.api.TableElement;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.Derivation;
-import org.tms.teq.ErrorCode;
 import org.tms.teq.PendingState;
 
 
