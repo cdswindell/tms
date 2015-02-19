@@ -218,6 +218,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     protected void delete(boolean compress)
     {
+        super.delete(compress); // handle on before delete processing
+        
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
     	if (parent != null) {
@@ -278,6 +280,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
     	
         // mark row as deleted
         invalidate();        
+        
+        fireEvents(this, TableElementEventType.OnDelete);
     }
     
     @Override

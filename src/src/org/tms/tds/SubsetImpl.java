@@ -311,6 +311,8 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     @Override 
     protected void delete(boolean compress)
     {
+        super.delete(compress); // handle on before delete processing
+        
         // delete the subset from its parent table
         if (getTable() != null) getTable().remove(this);  
         
@@ -329,7 +331,9 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         m_numCells = Integer.MIN_VALUE;
         
         // Mark the subset as deleted
-        invalidate();       
+        invalidate();      
+        
+        fireEvents(this, TableElementEventType.OnDelete);
     }
     
     /**

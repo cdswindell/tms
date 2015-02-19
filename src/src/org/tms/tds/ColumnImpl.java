@@ -390,6 +390,8 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     @Override
     protected void delete(boolean compress)
     {
+        super.delete(compress);
+        
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
     	if (parent != null) {
@@ -451,7 +453,9 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         this.m_cells = null;
         
         // mark row as deleted
-        invalidate();        
+        invalidate(); 
+        
+        fireEvents(this, TableElementEventType.OnDelete);
     }
 
     @Override

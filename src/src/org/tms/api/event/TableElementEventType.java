@@ -10,12 +10,12 @@ import org.tms.api.exceptions.TableException;
 
 public enum TableElementEventType
 {
-    OnBeforeCreate(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    OnBeforeCreate(true, false, ElementType.Row, ElementType.Column, ElementType.Subset),
     OnBeforeDelete(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     OnBeforeNewValue(true, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     OnNewValue(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
-    OnCreate(false, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    OnCreate(false, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     OnDelete(false, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     
     OnPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),

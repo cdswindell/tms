@@ -45,7 +45,7 @@ class TableElementEventFactory
                     return PendingDerivationsEvent.createNoPendingsEvent(te, timeStamp);
                 
             case OnBeforeCreate:
-                if (numArgs != 1 && !(args[0] instanceof ElementType))
+                if (numArgs < 1 || !(args[0] instanceof ElementType))
                     throw new InvalidException(String.format("%s requires the ElementType that is being created", evT));
                 else
                     return CreateEvent.createOnBefore(te, timeStamp, (ElementType)args[0]);

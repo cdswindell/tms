@@ -31,6 +31,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
 import org.tms.api.event.TableElementListeners;
+import org.tms.api.event.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
@@ -553,7 +554,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             TableElementListeners listeners = m_cellListeners.get(cell);
             if (listeners != null)
                 listeners.fireEvents(cell, evT, args);
-            else
+            else if (evT.isAlertContainer())
                 fireContainerEvents(cell, evT, args);
         }        
     }
@@ -619,7 +620,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return Collections.emptyList();
     }
 
-    boolean hasListeners(CellImpl cell, TableElementEventType[] evTs)
+    boolean hasCellListeners(CellImpl cell, TableElementEventType... evTs)
     {
         if (cell != null) {
             TableElementListeners listeners = m_cellListeners.get(cell);
@@ -638,6 +639,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     synchronized protected void delete(boolean compress)
     {
+        super.delete(compress); // handle on before delete processing
+        
         try {
             // delete all rows and columns, explicitly
             // we have to iterate over the indexes as iterating
@@ -686,7 +689,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
             sf_CURRENT_CELL_STACK.get().remove(this);
             TableElementListeners.deregisterTable(this);
             if (getTableContext() != null)
-                getTableContext().deregister(this);           
+                getTableContext().deregister(this);     
+            
+            fireEvents(this, TableElementEventType.OnDelete);
         }
     }    
     
@@ -1399,17 +1404,30 @@ public class TableImpl extends TableCellsElementImpl implements Table
     {
         vetElement();
 
-        // calculate the index where the row will go
-        ElementType sliceType = tse.getElementType();
-        int idx = calcIndex(sliceType, mode, true, md);
-        if (idx <= -1)
-            throw new InvalidAccessException(ElementType.Table, sliceType, mode, true, md);
+        // handle onBeforeDelete processing
+        try {
+            fireEvents(this, TableElementEventType.OnBeforeCreate, tse.getElementType(), mode, md);
+        }
+        catch (BlockedRequestException e) {
+            return null;
+        }        
         
-        // insert row into data structure at correct index
-        if (tse.insertSlice(idx) != null)
-            tse.setCurrent();
-        
-        return tse;
+        try {
+            // calculate the index where the row will go
+            ElementType sliceType = tse.getElementType();
+            int idx = calcIndex(sliceType, mode, true, md);
+            if (idx <= -1)
+                throw new InvalidAccessException(ElementType.Table, sliceType, mode, true, md);
+            
+            // insert row into data structure at correct index
+            if (tse.insertSlice(idx) != null)
+                tse.setCurrent();
+            
+            return tse;
+        }
+        finally {
+            fireEvents(this, TableElementEventType.OnCreate);
+        }
     }
     
     protected int calcIndex(ElementType et, Access mode)

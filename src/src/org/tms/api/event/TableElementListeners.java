@@ -228,7 +228,7 @@ public class TableElementListeners implements Listenable
                 }
             }
             
-            if (events != null && !events.isEmpty()) 
+            if (!events.isEmpty()) 
                 fireEvents(evT, events);
         }
     }
@@ -238,7 +238,7 @@ public class TableElementListeners implements Listenable
         if (evT == null || te == null)
             return;
         
-        if (!te.hasListeners(evT))
+        if (!(te.hasListeners(evT) || evT.isAlertContainer())) // if we don't have listeners and we don't alert containers, return
             return;
         
         if (!(te instanceof TableElement))

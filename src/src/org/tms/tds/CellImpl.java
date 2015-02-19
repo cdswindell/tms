@@ -676,6 +676,12 @@ public class CellImpl extends TableElementImpl implements Cell
     }
     
     @Override
+    public void delete()
+    {
+        this.setCellValue(null, false, true);
+    }
+        
+    @Override
     protected void delete(boolean compress)
     {
         invalidateCell();
@@ -683,7 +689,7 @@ public class CellImpl extends TableElementImpl implements Cell
         
     private void fireEvents(TableElementEventType evT, Object... args)
     {
-        if (getTable() != null && getTable().hasAnyListeners())
+        if (getTable() != null )
             getTable().fireCellEvents(this, evT, args);
     }
 
@@ -727,7 +733,7 @@ public class CellImpl extends TableElementImpl implements Cell
     public boolean hasListeners(TableElementEventType... evTs)
     {
         if (getTable() != null)
-            return getTable().hasListeners(this, evTs);
+            return getTable().hasCellListeners(this, evTs);
         else
             return false;
     }

@@ -6,7 +6,7 @@ public interface Table extends TableElement
 {    
     public Row addRow();   
     public Row addRow(Access mode, Object... mda);   
-    public Row getRow(Access mode, Object...mda);
+    public Row getRow(Access mode, Object... mda);
     public Row getRow();
     public Row getCurrentRow();
     public List<Row> getRows();
@@ -15,7 +15,7 @@ public interface Table extends TableElement
     
     public Column addColumn();  
     public Column addColumn(Access mode, Object... mda);  
-    public Column getColumn(Access mode, Object...mda);
+    public Column getColumn(Access mode, Object... mda);
     public Column getColumn();
     public Column getCurrentColumn();
     public List<Column> getColumns();
