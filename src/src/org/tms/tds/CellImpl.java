@@ -540,6 +540,8 @@ public class CellImpl extends TableElementImpl implements Cell
         Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null) {
             deriv.recalculateTarget();
+            
+            fireEvents(TableElementEventType.OnRecalculate);
         }
     }    
 

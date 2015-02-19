@@ -179,6 +179,8 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         vetElement();
         if (isDerived()) {
             m_deriv.recalculateTarget();
+            
+            fireEvents(this, TableElementEventType.OnRecalculate);
         }
     }
        

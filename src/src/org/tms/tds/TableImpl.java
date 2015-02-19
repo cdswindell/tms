@@ -1772,6 +1772,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
         CellReference cr = getCurrent();
         try {
             Derivation.recalculateAffected(this);
+            
+            fireEvents(this, TableElementEventType.OnRecalculate);
         }
         finally {
             cr.setCurrentCellReference();

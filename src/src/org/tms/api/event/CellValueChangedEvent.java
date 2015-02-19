@@ -1,22 +1,20 @@
 package org.tms.api.event;
 
-import org.tms.api.TableElement;
-
 public class CellValueChangedEvent extends TableElementEvent implements OnBeforeEvent
 {
-    private static final long serialVersionUID = 3025887968647194535L;
+    private static final long serialVersionUID = -8132668503086998486L;
 
-    public static final CellValueChangedEvent createOn(TableElement te, long timeStamp, Object newValue)
+    public static final CellValueChangedEvent createOn(Listenable te, long timeStamp, Object newValue)
     {
         return new CellValueChangedEvent(te, TableElementEventType.OnNewValue, timeStamp, newValue);
     }
     
-    public static final CellValueChangedEvent createOn(TableElement te, long timeStamp, Object oldValue, Object newValue)
+    public static final CellValueChangedEvent createOn(Listenable te, long timeStamp, Object oldValue, Object newValue)
     {
         return new CellValueChangedEvent(te, TableElementEventType.OnNewValue, timeStamp, oldValue, newValue);
     }
     
-    public static final CellValueChangedEvent createOnBefore(TableElement te, long timeStamp, Object oldValue, Object newValue)
+    public static final CellValueChangedEvent createOnBefore(Listenable te, long timeStamp, Object oldValue, Object newValue)
     {
         return new CellValueChangedEvent(te, TableElementEventType.OnBeforeNewValue, timeStamp, oldValue, newValue);
     }
@@ -25,7 +23,7 @@ public class CellValueChangedEvent extends TableElementEvent implements OnBefore
     private Object m_oldValue;
     private Object m_newValue;
     
-    private CellValueChangedEvent(TableElement source, TableElementEventType evT, long timeStamp, Object newValue)
+    private CellValueChangedEvent(Listenable source, TableElementEventType evT, long timeStamp, Object newValue)
     {
         super(evT, source, timeStamp);
         
@@ -33,7 +31,7 @@ public class CellValueChangedEvent extends TableElementEvent implements OnBefore
         m_newValue = newValue;
     }
     
-    private CellValueChangedEvent(TableElement source, TableElementEventType evT, long timeStamp, Object oldValue, Object newValue)
+    private CellValueChangedEvent(Listenable source, TableElementEventType evT, long timeStamp, Object oldValue, Object newValue)
     {
         this(source, evT, timeStamp, newValue);
         

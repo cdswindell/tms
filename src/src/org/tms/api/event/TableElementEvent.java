@@ -2,8 +2,6 @@ package org.tms.api.event;
 
 import java.util.EventObject;
 
-import org.tms.api.TableElement;
-
 abstract public class TableElementEvent extends EventObject
 {
     private static final long serialVersionUID = -2530794656893005953L;
@@ -12,23 +10,23 @@ abstract public class TableElementEvent extends EventObject
     private long m_timeStamp;
     private long m_assemblyId;
     
-    public TableElementEvent(TableElementEventType evT, TableElement source)
+    public TableElementEvent(TableElementEventType evT, Listenable source)
     {
         super(source);
         m_evT = evT;
         m_timeStamp = System.currentTimeMillis();
     }
 
-    TableElementEvent(TableElementEventType evT, TableElement source, long assemblyId)
+    TableElementEvent(TableElementEventType evT, Listenable source, long assemblyId)
     {
         this(evT, source);
         m_assemblyId = assemblyId;
     }
 
     @Override
-    public TableElement getSource()
+    public Listenable getSource()
     {
-        return (TableElement)super.getSource();
+        return (Listenable)super.getSource();
     }
 
     public TableElementEventType getType()
