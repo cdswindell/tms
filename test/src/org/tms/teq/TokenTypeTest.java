@@ -5,6 +5,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.tms.api.derivables.TokenType;
 
 public class TokenTypeTest
 {

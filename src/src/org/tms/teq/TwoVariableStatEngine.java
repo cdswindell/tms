@@ -1,6 +1,7 @@
 package org.tms.teq;
 
 import org.apache.commons.math3.stat.inference.TTest;
+import org.tms.api.derivables.Token;
 import org.tms.api.exceptions.UnimplementedException;
 
 public class TwoVariableStatEngine

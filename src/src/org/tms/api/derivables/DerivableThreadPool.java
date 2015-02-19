@@ -1,4 +1,4 @@
-package org.tms.api;
+package org.tms.api.derivables;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

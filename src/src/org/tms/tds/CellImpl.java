@@ -8,11 +8,12 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.tms.api.Cell;
-import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Token;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
 import org.tms.api.event.exceptions.BlockedRequestException;
@@ -21,7 +22,6 @@ import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.teq.Derivation;
 import org.tms.teq.ErrorCode;
-import org.tms.teq.Token;
 
 public class CellImpl extends TableElementImpl implements Cell
 {

@@ -7,10 +7,10 @@ import java.util.NoSuchElementException;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
-import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
+import org.tms.api.derivables.Derivable;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;

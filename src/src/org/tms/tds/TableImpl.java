@@ -20,7 +20,6 @@ import java.util.function.Predicate;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
-import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Subset;
@@ -28,6 +27,8 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Token;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
 import org.tms.api.event.TableElementListeners;
@@ -39,7 +40,6 @@ import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
-import org.tms.teq.Token;
 import org.tms.util.JustInTimeSet;
 
 public class TableImpl extends TableCellsElementImpl implements Table

@@ -2,11 +2,11 @@ package org.tms.tds;
 
 import java.util.Set;
 
-import org.tms.api.Derivable;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.derivables.Derivable;
 import org.tms.api.event.Listenable;
 
 abstract class TableElementImpl extends BaseElementImpl implements TableElement, Listenable

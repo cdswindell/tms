@@ -7,9 +7,12 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.tms.api.Operator;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenMapper;
+import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.InvalidExpressionException;
 import org.tms.api.factories.TableContextFactory;
 

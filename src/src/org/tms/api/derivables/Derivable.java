@@ -1,7 +1,9 @@
-package org.tms.api;
+package org.tms.api.derivables;
 
 import java.util.List;
 
+import org.tms.api.BaseElement;
+import org.tms.api.TableElement;
 import org.tms.teq.Derivation;
 
 public interface Derivable extends BaseElement, TableElement

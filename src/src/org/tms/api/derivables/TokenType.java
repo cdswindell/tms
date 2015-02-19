@@ -1,4 +1,4 @@
-package org.tms.teq;
+package org.tms.api.derivables;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

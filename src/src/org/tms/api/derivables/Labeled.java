@@ -1,4 +1,4 @@
-package org.tms.teq;
+package org.tms.api.derivables;
 
 public interface Labeled
 {

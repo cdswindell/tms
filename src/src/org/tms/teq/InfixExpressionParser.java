@@ -5,12 +5,15 @@ import java.util.Iterator;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
-import org.tms.api.Derivable;
-import org.tms.api.Operator;
 import org.tms.api.Subset;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
+import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenMapper;
+import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.InvalidExpressionException;
 
 public class InfixExpressionParser

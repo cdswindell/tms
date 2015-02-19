@@ -1,9 +1,12 @@
-package org.tms.teq;
+package org.tms.api.derivables;
 
 import org.tms.api.Column;
-import org.tms.api.Operator;
 import org.tms.api.Row;
 import org.tms.api.TableElement;
+import org.tms.teq.BuiltinOperator;
+import org.tms.teq.Derivation;
+import org.tms.teq.ErrorCode;
+import org.tms.teq.PendingState;
 
 
 public class Token implements Labeled
@@ -89,7 +92,7 @@ public class Token implements Labeled
         return m_tokenType;
     }
 
-    protected void setTokenType(TokenType tokenType)
+    public void setTokenType(TokenType tokenType)
     {
         m_tokenType = tokenType;
     }
@@ -99,7 +102,7 @@ public class Token implements Labeled
         return m_oper;
     }
 
-    void setOperator(Operator oper)
+    public void setOperator(Operator oper)
     {
         m_oper = oper;
     }
@@ -176,7 +179,7 @@ public class Token implements Labeled
             return null;
     }
     
-    void setValue(Object value)
+    public void setValue(Object value)
     {
     	// we store numbers as doubles, so do some type conversion
         if (value instanceof Number && value.getClass() != Double.class) {

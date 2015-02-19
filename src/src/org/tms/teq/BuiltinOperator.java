@@ -9,9 +9,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.tms.api.Operator;
 import org.tms.api.TableElement;
 import org.tms.api.TableRowColumnElement;
+import org.tms.api.derivables.Labeled;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenType;
 
 public enum BuiltinOperator implements Labeled, Operator
 {

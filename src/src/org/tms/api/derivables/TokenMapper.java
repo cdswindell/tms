@@ -1,4 +1,4 @@
-package org.tms.teq;
+package org.tms.api.derivables;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.tms.api.Operator;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.teq.BuiltinOperator;
 
 public class TokenMapper
 {

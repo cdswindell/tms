@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.tms.api.Cell;
-import org.tms.api.Derivable;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.derivables.Derivable;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
 import org.tms.api.event.TableElementListeners;

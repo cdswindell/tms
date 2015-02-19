@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 
 import org.tms.api.Cell;
-import org.tms.api.Operator;
 import org.tms.api.TableElement;
+import org.tms.api.derivables.Operator;
 import org.tms.teq.Derivation.DerivationContext;
 import org.tms.teq.PendingState.AwaitingState;
 import org.tms.teq.PendingState.BlockedStatisticState;

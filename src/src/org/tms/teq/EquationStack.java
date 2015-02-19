@@ -3,7 +3,10 @@ package org.tms.teq;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 
-import org.tms.api.Operator;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenMapper;
+import org.tms.api.derivables.TokenType;
 
 public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 {

@@ -2,6 +2,7 @@ package org.tms.api;
 
 import java.util.List;
 
+import org.tms.api.derivables.Derivable;
 import org.tms.api.event.Listenable;
 
 public interface TableElement extends BaseElement, Listenable

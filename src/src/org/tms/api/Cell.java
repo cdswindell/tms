@@ -1,5 +1,6 @@
 package org.tms.api;
 
+import org.tms.api.derivables.Derivable;
 import org.tms.teq.ErrorCode;
 
 public interface Cell extends TableElement, Derivable

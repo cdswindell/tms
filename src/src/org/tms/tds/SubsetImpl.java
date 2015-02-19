@@ -11,12 +11,12 @@ import java.util.Set;
 
 import org.tms.api.Cell;
 import org.tms.api.Column;
-import org.tms.api.Derivable;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.derivables.Derivable;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;

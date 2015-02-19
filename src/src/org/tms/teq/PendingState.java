@@ -7,6 +7,7 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.derivables.Token;
 import org.tms.api.exceptions.DeletedElementException;
 import org.tms.teq.Derivation.DerivationContext;
 
@@ -27,7 +28,7 @@ import org.tms.teq.Derivation.DerivationContext;
  * </ul>
  * <p/>
  */
-abstract class PendingState
+public abstract class PendingState
 {
     private PostfixStackEvaluator m_pse;
     private Token m_pendingToken;

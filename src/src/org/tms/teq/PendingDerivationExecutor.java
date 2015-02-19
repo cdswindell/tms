@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.tms.api.DerivableThreadPool;
+import org.tms.api.derivables.DerivableThreadPool;
 
 public class PendingDerivationExecutor extends ThreadPoolExecutor implements Runnable, DerivableThreadPool
 {

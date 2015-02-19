@@ -1,6 +1,6 @@
 package org.tms.api;
 
-import org.tms.teq.TokenMapper;
+import org.tms.api.derivables.TokenMapper;
 
 public interface TableContext extends BaseElement
 {

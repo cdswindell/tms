@@ -1,8 +1,8 @@
 package org.tms.api.exceptions;
 
-import org.tms.api.Operator;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
 import org.tms.teq.PostfixStackEvaluator;
-import org.tms.teq.Token;
 
 public class InvalidOperandsException extends TableException 
 {

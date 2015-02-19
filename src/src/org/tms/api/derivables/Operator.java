@@ -1,8 +1,6 @@
-package org.tms.api;
+package org.tms.api.derivables;
 
 import org.tms.teq.BuiltinOperator;
-import org.tms.teq.Token;
-import org.tms.teq.TokenType;
 
 public interface Operator
 {
