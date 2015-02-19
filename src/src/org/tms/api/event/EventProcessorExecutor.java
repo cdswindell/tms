@@ -1,8 +1,5 @@
 package org.tms.api.event;
 
-import java.lang.ref.Reference;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -13,34 +10,17 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.tms.util.ThreadLocalUtils;
+
 public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnable, EventProcessorThreadPool
 {
-    static private Field threadLocalsField;
-    static private Class<?> threadLocalMapClass;
-    static private Field tableField;
-    static private Field referentField;
-    
-    static {
-        try
-        {
-            threadLocalsField = Thread.class.getDeclaredField("threadLocals");
-            threadLocalMapClass = Class.forName("java.lang.ThreadLocal$ThreadLocalMap");
-            tableField = threadLocalMapClass.getDeclaredField("table");
-            referentField = Reference.class.getDeclaredField("referent");   
-        }
-        catch (NoSuchFieldException | SecurityException | ClassNotFoundException e)
-        {
-            // TODO: log error
-        }       
-    }
-    
     private BlockingQueue<TableElementEvent> m_queuedEvents;
     private boolean m_continueDraining;
     private Thread m_drainThread = null;
     
     public EventProcessorExecutor()
     {
-        this(5, 25, 30, TimeUnit.SECONDS);
+        this(1, 5, 30, TimeUnit.SECONDS);
     }
     
     public EventProcessorExecutor(int corePoolSize, int maximumPoolSize)
@@ -63,8 +43,8 @@ public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnab
         
         m_queuedEvents = new LinkedBlockingQueue<TableElementEvent>();
         m_continueDraining = true;      
-        
         allowCoreThreadTimeOut(timeOutCores);
+        prestartAllCoreThreads();
         setRejectedExecutionHandler(new RejectedExecutionHandler() {
             public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
                // this will block if the queue is full
@@ -79,7 +59,7 @@ public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnab
         // start the drainer thread
         m_drainThread = new Thread(this);
         m_drainThread.setDaemon(true);
-        m_drainThread.setName("PendingEventDrainer");
+        m_drainThread.setName("EventDrainer");
         m_drainThread.start();
     }
 
@@ -136,52 +116,7 @@ public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnab
     protected void afterExecute(Runnable r, Throwable t) 
     {
         super.afterExecute(r, t);       
-        resetThreadLocal();
-    }
-
-    synchronized private void resetThreadLocal()
-    {
-        // Get a reference to the thread locals table of the current thread
-        try {
-            Thread thread = Thread.currentThread();
-            threadLocalsField.setAccessible(true);
-            Object threadLocalTable = threadLocalsField.get(thread);
-            
-            // Get a reference to the array holding the thread local variables inside the
-            // ThreadLocalMap of the current thread
-            
-            tableField.setAccessible(true);
-            Object table = tableField.get(threadLocalTable);
-
-            // The key to the ThreadLocalMap is a WeakReference object. The referent field of this object
-            // is a reference to the actual ThreadLocal variable
-            referentField.setAccessible(true);
-
-            for (int i=0; i < Array.getLength(table); i++) {
-                // Each entry in the table array of ThreadLocalMap is an Entry object
-                // representing the thread local reference and its value
-                Object entry = Array.get(table, i);
-                if (entry != null) {
-                    // Get a reference to the thread local object and remove it from the table
-                    ThreadLocal<?> threadLocal = (ThreadLocal<?>)referentField.get(entry);
-                    threadLocal.remove();
-                }
-            }
-        }
-        catch (Exception e) { } //noop
-        finally {
-            try {
-            if (referentField != null)
-                referentField.setAccessible(false);
-            if (tableField != null)
-                tableField.setAccessible(false);
-            if (threadLocalsField != null)
-                threadLocalsField.setAccessible(false);
-            }
-            catch (Throwable e) {
-                // TODO: log error
-            }
-        }
+        ThreadLocalUtils.resetThreadLocal(this);
     }
     
     @Override
@@ -203,7 +138,7 @@ public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnab
             Thread t = new Thread(r);
             
             t.setDaemon(true);
-            t.setName("PendingEventThread-" + (m_threadNo++));
+            t.setName("EventProcessorThread-" + (m_threadNo++));
             return t;
         }        
     }

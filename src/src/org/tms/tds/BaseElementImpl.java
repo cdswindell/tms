@@ -203,8 +203,11 @@ abstract public class BaseElementImpl implements BaseElement
         if (key.isImplementedBy(this)) {
             if (key.isNonOptional())
                 return true;
-        
-            return hasProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+            
+            if (getProperty(key) != null)
+                return true;
+            else
+                return hasProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
         }
         
         return false;
@@ -284,12 +287,29 @@ abstract public class BaseElementImpl implements BaseElement
         return key;
     }
     
-    public boolean getPropertyBoolean(TableProperty key)
+    public String getPropertyString(TableProperty key)
+    {
+        if (key.isStringValue()) {
+            Object value = getProperty(key);
+            if (value != null && value instanceof String)
+                return (String)value;
+            else if (key.isOptional())
+                return null;
+            else
+                throw new UnimplementedException(this, key, "String");
+        }
+        else
+            throw new InvalidPropertyException(this, key, "not int value");
+    }
+    
+    public Boolean getPropertyBoolean(TableProperty key)
     {
         if (key.isBooleanValue()) {
             Object value = getProperty(key);
             if (value != null && value instanceof Boolean)
                 return (boolean)value;
+            else if (key.isOptional())
+                return null;
             else
                 throw new UnimplementedException(this, key, "boolean");
         }
@@ -297,12 +317,14 @@ abstract public class BaseElementImpl implements BaseElement
             throw new InvalidPropertyException(this, key, "not boolean value");
     }
     
-    public int getPropertyInt(TableProperty key)
+    public Integer getPropertyInt(TableProperty key)
     {
         if (key.isIntValue()) {
             Object value = getProperty(key);
             if (value != null && value instanceof Integer)
                 return (int)value;
+            else if (key.isOptional())
+                return null;
             else
                 throw new UnimplementedException(this, key, "int");
         }
@@ -310,12 +332,14 @@ abstract public class BaseElementImpl implements BaseElement
             throw new InvalidPropertyException(this, key, "not int value");
     }
     
-    public long getPropertyLong(TableProperty key)
+    public Long getPropertyLong(TableProperty key)
     {
         if (key.isLongValue()) {
             Object value = getProperty(key);
             if (value != null && value instanceof Long)
                 return (long)value;
+            else if (key.isOptional())
+                return null;
             else
                 throw new UnimplementedException(this, key, "long");
         }
@@ -323,12 +347,14 @@ abstract public class BaseElementImpl implements BaseElement
             throw new InvalidPropertyException(this, key, "not long value");
     }
     
-    public double getPropertyDouble(TableProperty key)
+    public Double getPropertyDouble(TableProperty key)
     {
         if (key.isDoubleValue()) {
             Object value = getProperty(key);
             if (value != null && value instanceof Double)
                 return (double)value;
+            else if (key.isOptional())
+                return null;
             else
                 throw new UnimplementedException(this, key, "double");
         }
@@ -449,9 +475,14 @@ abstract public class BaseElementImpl implements BaseElement
         return value != null && value instanceof Double && ((double)value) >= 0;    
     }
     
+    protected boolean isValidPropertyValueLong(Object value)
+    {
+        return value != null && value instanceof Long && ((long)value) >= 0;    
+    }
+    
     protected boolean isValidPropertyValueBoolean(Object value)
     {
-        return value != null && value instanceof Boolean;    
+        return value != null && value instanceof Boolean;
     }
     
     public String getLabel()

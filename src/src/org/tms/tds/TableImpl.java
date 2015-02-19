@@ -2,6 +2,7 @@ package org.tms.tds;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
@@ -15,6 +16,7 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.tms.api.Access;
@@ -29,6 +31,9 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Token;
+import org.tms.api.event.EventProcessorExecutor;
+import org.tms.api.event.EventProcessorThreadPool;
+import org.tms.api.event.TableElementEvent;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
 import org.tms.api.event.TableElementListeners;
@@ -42,7 +47,7 @@ import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
 
-public class TableImpl extends TableCellsElementImpl implements Table
+public class TableImpl extends TableCellsElementImpl implements Table, EventProcessorThreadPool
 {
     /**
      * We allow each thread to maintain it's own current row/current column state for every table, this 
@@ -116,6 +121,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private int m_colCapacityIncr;
     private int m_precision;
     private double m_freeSpaceThreshold;
+    
+    // Thread pool for event processing
+    private EventProcessorExecutor m_eventThreadPool;
+    private Object m_eventThreadPoolLock;
+
+
+    private int m_eventsCorePoolThreads;
+    private int m_eventsMaxPoolThreads;
+    private long m_eventsKeepAliveTimeout;
+    private boolean m_eventsAllowCoreThreadTimeout;
 
     protected TableImpl()
     {
@@ -191,6 +206,8 @@ public class TableImpl extends TableCellsElementImpl implements Table
         
         m_subsetedCells = new HashMap<CellImpl, Set<SubsetImpl>>();
         
+        m_eventThreadPoolLock = new Object();
+        
         // clear dirty flag, as table is empty
         markClean();
     }
@@ -240,8 +257,33 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     setAutoRecalculate((boolean)value);
                     break;
 
+                case isEventsAllowCoreThreadTimeout:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT;
+                    eventsAllowCoreThreadTimeOut((boolean)value);
+                    break;                   
+                    
+                case numEventsCorePoolThreads:
+                    if (!isValidPropertyValueInt(value))
+                        value = ContextImpl.sf_EVENTS_CORE_POOL_SIZE_DEFAULT;
+                    setEventsCorePoolSize((int)value);
+                    break;
+                    
+                case numEventsMaxPoolThreads:
+                    if (!isValidPropertyValueInt(value))
+                        value = ContextImpl.sf_EVENTS_MAX_POOL_SIZE_DEFAULT;
+                    setEventsMaximumPoolSize((int)value);
+                    break;
+                    
+                case EventsThreadKeepAliveTimeout:
+                    if (!isValidPropertyValueInt(value))
+                        value = ContextImpl.sf_EVENTS_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
+                    setEventsKeepAliveTime((int)value);
+                    break;
+                    
                 default:
-                    throw new IllegalStateException("No initialization available for Table Property: " + tp);                       
+                    if (!tp.isOptional())
+                        throw new IllegalStateException("No initialization available for Table Property: " + tp);                       
             }
         }
     }
@@ -476,7 +518,19 @@ public class TableImpl extends TableCellsElementImpl implements Table
                 return getPrecision();
                 
             case isAutoRecalculate:
-                return isAutoRecalculate();
+                return isAutoRecalculate();               
+                
+            case isEventsAllowCoreThreadTimeout:
+                return eventsAllowsCoreThreadTimeOut();
+                
+            case numEventsCorePoolThreads:
+                return getEventsCorePoolSize();
+                
+            case numEventsMaxPoolThreads:
+                return getEventsMaximumPoolSize();
+                
+            case EventsThreadKeepAliveTimeout:
+                return getEventsKeepAliveTime();
                 
             default:
                 return super.getProperty(key);
@@ -634,6 +688,97 @@ public class TableImpl extends TableCellsElementImpl implements Table
     boolean hasAnyListeners(TableElementEventType... evTs)
     {
         return TableElementListeners.hasAnyListeners(this, evTs) ;
+    }
+    
+    @Override
+    public void submitEvents(Collection<TableElementEvent> events)
+    {
+        synchronized (m_eventThreadPoolLock) {
+            if (m_eventThreadPool == null) {
+                int maxPoolSize = Math.max(getEventsMaximumPoolSize(), getEventsCorePoolSize());
+                m_eventThreadPool = new EventProcessorExecutor(getEventsCorePoolSize(),
+                                                                maxPoolSize,
+                                                                getEventsKeepAliveTime(),
+                                                                TimeUnit.SECONDS,
+                                                                eventsAllowsCoreThreadTimeOut());  
+            }
+        }
+        
+        m_eventThreadPool.submitEvents(events);
+    }
+
+    @Override
+    public boolean remove(TableElementEvent e)
+    {
+        if (m_eventThreadPool != null)
+            return m_eventThreadPool.remove(e);
+        else
+            return false;
+    }
+
+    @Override
+    public void shutdown()
+    {
+        if (m_eventThreadPool != null)
+            m_eventThreadPool.shutdown();
+    }
+    
+    public int getEventsCorePoolSize()
+    {
+        return m_eventsCorePoolThreads;
+    }
+
+    public void setEventsCorePoolSize(int corePoolSize)
+    {
+        if (corePoolSize < 0)
+                m_eventsCorePoolThreads = getTableContext().getEventsCorePoolSize();
+        else
+            m_eventsCorePoolThreads = corePoolSize; 
+        
+        if (m_eventThreadPool != null && m_eventsCorePoolThreads <= m_eventThreadPool.getMaximumPoolSize())
+            m_eventThreadPool.setCorePoolSize(m_eventsCorePoolThreads);
+    }
+
+    public int getEventsMaximumPoolSize()
+    {
+        return m_eventsMaxPoolThreads;
+    }
+
+    public void setEventsMaximumPoolSize(int maxPoolSize)
+    {
+        if (maxPoolSize < 1) 
+            m_eventsMaxPoolThreads = getTableContext().getEventsMaximumPoolSize();
+        else
+            m_eventsMaxPoolThreads = maxPoolSize;
+        
+        if (m_eventThreadPool != null && m_eventsMaxPoolThreads >= m_eventThreadPool.getCorePoolSize())
+            m_eventThreadPool.setMaximumPoolSize(m_eventsMaxPoolThreads);
+    }
+   
+    public long getEventsKeepAliveTime()
+    {
+        return m_eventsKeepAliveTimeout;
+    }
+
+    public void setEventsKeepAliveTime(long time)
+    {
+        if (time <= 0) 
+              m_eventsKeepAliveTimeout = getTableContext().getEventsKeepAliveTime();
+        else
+            m_eventsKeepAliveTimeout = time;
+        
+        if (m_eventThreadPool != null)
+            m_eventThreadPool.setKeepAliveTime(getEventsKeepAliveTime(), TimeUnit.SECONDS);
+    }
+
+    public boolean eventsAllowsCoreThreadTimeOut()
+    {
+        return m_eventsAllowCoreThreadTimeout;
+    }
+
+    public void eventsAllowCoreThreadTimeOut(boolean allowCoreThreadTimeout)
+    {
+        m_eventsAllowCoreThreadTimeout = allowCoreThreadTimeout;
     }
     
     @Override

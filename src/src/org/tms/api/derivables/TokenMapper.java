@@ -326,4 +326,9 @@ public class TokenMapper
 		}
     }
 
+    public String toString()
+    {
+        return String.format("[Tokens Built in: %d, User: %d, Overloads: %d]", 
+                sf_BuiltInTokenMap.size(), m_userTokenMap.size(), m_userOverloadedOps.size());
+    }
 }

@@ -13,6 +13,9 @@ public interface BaseElement
     public Object getProperty(TableProperty p);
     public Object getProperty(String p);
     
-    public int getPropertyInt(TableProperty p);
-    public boolean getPropertyBoolean(TableProperty p);
+    public Integer getPropertyInt(TableProperty p);
+    public Long getPropertyLong(TableProperty p);
+    public Double getPropertyDouble(TableProperty p);
+    public String getPropertyString(TableProperty p);
+    public Boolean getPropertyBoolean(TableProperty p);
 }

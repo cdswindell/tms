@@ -85,12 +85,17 @@ public class TableElementListeners implements Listenable
         }
     }
     
+    /*
+     * Instance fields and methods
+     */
     private TableElement m_te;
-    protected Map<TableElementEventType, Set<TableElementListener>> m_listeners;
+    private Map<TableElementEventType, Set<TableElementListener>> m_listeners;
+    private boolean m_notifyInSameThread;
     
     public TableElementListeners(TableElement te)
     {
         m_te = te;
+        m_notifyInSameThread = false;
         m_listeners = new HashMap<TableElementEventType, Set<TableElementListener>>();
     }
     
@@ -254,7 +259,7 @@ public class TableElementListeners implements Listenable
     private void fireEvents(TableElement te, TableElementEventType evT, Set<TableElementEvent> events)
     {
         // if we are asked to throw exceptions, process the events in the current thread
-        if (evT.isThrowExceptions()) {
+        if (evT.isNotifyInSameThread() || m_notifyInSameThread) {
             getTable().pushCurrent();
             try {
                 for (TableElementEvent e : events) {
@@ -276,12 +281,18 @@ public class TableElementListeners implements Listenable
 
     private void queueEvents(TableElement te, Set<TableElementEvent> events)
     {
-        synchronized (TableElementListeners.class) {
-            if (sf_EventProcessorThreadPool == null) 
-                sf_EventProcessorThreadPool = new EventProcessorExecutor();
+        if (te.getTable() instanceof EventProcessorThreadPool)
+            ((EventProcessorThreadPool)te.getTable()).submitEvents(events);
+        else if (te.getTableContext() instanceof EventProcessorThreadPool)
+            ((EventProcessorThreadPool)te.getTableContext()).submitEvents(events);
+        else {
+            synchronized (TableElementListeners.class) {
+                if (sf_EventProcessorThreadPool == null) 
+                    sf_EventProcessorThreadPool = new EventProcessorExecutor();
+            }
+            
+            sf_EventProcessorThreadPool.submitEvents(events);
         }
-        
-        sf_EventProcessorThreadPool.submitEvents(events);
     }
 
     private Set<TableElementEvent> generateEvents(Listenable te, TableElementEventType evT, Object[] args)

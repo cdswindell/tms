@@ -25,10 +25,10 @@ public enum TableElementEventType
     ;
     
     private Set<ElementType> m_implementedBy = new HashSet<ElementType>();
-    private boolean m_throwExceptions;
+    private boolean m_notifyInSameThread;
     private boolean m_alertParent;
     
-    private TableElementEventType(boolean throwExceptions, boolean alertParent, ElementType... implementedBy)
+    private TableElementEventType(boolean notifyInSameThread, boolean alertParent, ElementType... implementedBy)
     {
         if (implementedBy != null)
         {
@@ -37,7 +37,7 @@ public enum TableElementEventType
                     throw new TableException(String.format("TableElementEventType: %s Duplicate BaseElementType: %s", this, t), TableErrorClass.Invalid);
         }  
         
-        m_throwExceptions = throwExceptions;
+        m_notifyInSameThread = notifyInSameThread;
         m_alertParent = alertParent;
     }
     
@@ -46,9 +46,9 @@ public enum TableElementEventType
         return m_alertParent;
     }
     
-    public boolean isThrowExceptions()
+    public boolean isNotifyInSameThread()
     {
-        return m_throwExceptions;
+        return m_notifyInSameThread;
     }
     
     public boolean isImplementedBy(TableElement te)

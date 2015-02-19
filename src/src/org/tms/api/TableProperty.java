@@ -30,11 +30,18 @@ public enum TableProperty implements Comparable<TableProperty>
     FreeSpaceThreshold(false, true, ElementType.Context, ElementType.Table),
     isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
     
+    // PendingDerivationThreadPool Properties
+    isPendingAllowCoreThreadTimeout(true, false, true, ElementType.Context, ElementType.Table),
+    numPendingCorePoolThreads(true, false, true, ElementType.Context, ElementType.Table),
+    numPendingMaxPoolThreads(true, false, true, ElementType.Context, ElementType.Table),
+    PendingThreadKeepAliveTimeout(true, false, true, ElementType.Context, ElementType.Table),    
+
     // EventProcessorThreadPool Properties
-    isAllowCoreThreadTimeout(false, true, ElementType.Context),
-    numCorePoolThreads(false, true, ElementType.Context),
-    numMaxPoolThreads(false, true, ElementType.Context),
-    ThreadKeepAliveTimeout(false, true, ElementType.Context),    
+    isEventsNotifyInSameThread(true, false, true, ElementType.Context, ElementType.Table),
+    isEventsAllowCoreThreadTimeout(true, false, true, ElementType.Context, ElementType.Table),
+    numEventsCorePoolThreads(true, false, true, ElementType.Context, ElementType.Table),
+    numEventsMaxPoolThreads(true, false, true, ElementType.Context, ElementType.Table),
+    EventsThreadKeepAliveTimeout(true, false, true, ElementType.Context, ElementType.Table),    
 
     // Table Properties (some shared with Subsets)
     numSubsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
@@ -149,12 +156,25 @@ public enum TableProperty implements Comparable<TableProperty>
         }
     }
     
-
+    public boolean isStringValue()
+    {
+        switch(this)
+        {
+            case Label:
+            case Description:
+                return true;
+                
+            default:
+                return false;
+        }
+    }
+    
     public boolean isLongValue()
     {
         switch(this)
         {
-            case ThreadKeepAliveTimeout:
+            case EventsThreadKeepAliveTimeout:
+            case PendingThreadKeepAliveTimeout:
                 return true;
                 
             default:

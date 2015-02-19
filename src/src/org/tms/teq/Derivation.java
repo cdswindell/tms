@@ -556,7 +556,7 @@ public class Derivation
                 sf_UUID_PENDING_STATE_MAP.remove(ps.getTransactionID());
             
             if (m_threadPool != null && ps.isRunnable() )
-                m_threadPool.remove(ps.getRunnable());
+                m_threadPool.remove(ps.getTransactionID());
             
             ps.delete();
         }

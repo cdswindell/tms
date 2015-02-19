@@ -1,8 +1,5 @@
 package org.tms.api.derivables;
 
-import java.lang.ref.Reference;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -15,30 +12,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.tms.teq.Derivation;
+import org.tms.util.ThreadLocalUtils;
 
 public class PendingDerivationExecutor extends ThreadPoolExecutor implements Runnable, DerivableThreadPool
 {
-    static private Field threadLocalsField;
-    static private Class<?> threadLocalMapClass;
-    static private Field tableField;
-    static private Field referentField;
-    
-    static {
-        try
-        {
-            threadLocalsField = Thread.class.getDeclaredField("threadLocals");
-            threadLocalMapClass = Class.forName("java.lang.ThreadLocal$ThreadLocalMap");
-            tableField = threadLocalMapClass.getDeclaredField("table");
-            referentField = Reference.class.getDeclaredField("referent");   
-        }
-        catch (NoSuchFieldException | SecurityException | ClassNotFoundException e)
-        {
-            // TODO: log error
-        }       
-    }
-    
-    static private Map<Runnable, UUID> sf_runnableUuidMap = new ConcurrentHashMap<Runnable, UUID>(1024);
-    
+    private Map<Runnable, UUID> m_runnableUuidMap;
+    private Map<UUID, Runnable> m_uuidRunnableMap;    
     private BlockingQueue<Runnable> m_queuedRunnables;
     private boolean m_continueDraining;
     private Thread m_drainThread = null;
@@ -68,7 +47,9 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         
         m_queuedRunnables = new LinkedBlockingQueue<Runnable>();
         m_continueDraining = true;      
-        
+        m_runnableUuidMap = new ConcurrentHashMap<Runnable, UUID>(1024);
+        m_uuidRunnableMap = new ConcurrentHashMap<UUID, Runnable>(1024);
+               
         allowCoreThreadTimeOut(timeOutCores);
         setRejectedExecutionHandler(new RejectedExecutionHandler() {
             public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
@@ -92,7 +73,8 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     public void submitCalculation(UUID transactionId, Runnable r)
     {
         if (transactionId != null && r != null) {
-            sf_runnableUuidMap.put(r,  transactionId);
+            m_runnableUuidMap.put(r,  transactionId);
+            m_uuidRunnableMap.put(transactionId, r);
             m_queuedRunnables.add(r);
         }
         else
@@ -100,18 +82,23 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     }
 
     @Override
-    public boolean remove(Runnable r)
+    public boolean remove(UUID transactionId)
     {
-        if (r == null)
+        if (transactionId == null)
             return false;
         
         // backing derivation is being cleared, we don't 
         // want running threads to report back a result
-        sf_runnableUuidMap.remove(r);
-        
-        // runnable could be in the executors queue, the unbounded queue, or already running
-        return getQueue().remove(r) ||
-               m_queuedRunnables.remove(r);
+        Runnable r = m_uuidRunnableMap.remove(transactionId);
+        if (r != null) {
+            m_runnableUuidMap.remove(r);
+            
+            // runnable could be in the executors queue, the unbounded queue, or already running
+            return getQueue().remove(r) ||
+                   m_queuedRunnables.remove(r);
+        }
+        else
+            return false;
     }
     
     @Override
@@ -140,9 +127,11 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     {
         // if the UUID is not found, the backing derivation is
         // in the process of being cleared
-        UUID transactId = sf_runnableUuidMap.remove(r);
-        if (transactId != null)
+        UUID transactId = m_runnableUuidMap.remove(r);
+        if (transactId != null) {
+            m_uuidRunnableMap.remove(transactId);
             Derivation.associateTransactionID(t.getId(), transactId);    
+        }
         
         super.beforeExecute(t, r);  
     }
@@ -152,53 +141,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     {
         super.afterExecute(r, t);
         
-        sf_runnableUuidMap.remove(r);
-        resetThreadLocal();
-    }
-
-    synchronized private void resetThreadLocal()
-    {
-        // Get a reference to the thread locals table of the current thread
-        try {
-            Thread thread = Thread.currentThread();
-            threadLocalsField.setAccessible(true);
-            Object threadLocalTable = threadLocalsField.get(thread);
-            
-            // Get a reference to the array holding the thread local variables inside the
-            // ThreadLocalMap of the current thread
-            
-            tableField.setAccessible(true);
-            Object table = tableField.get(threadLocalTable);
-
-            // The key to the ThreadLocalMap is a WeakReference object. The referent field of this object
-            // is a reference to the actual ThreadLocal variable
-            referentField.setAccessible(true);
-
-            for (int i=0; i < Array.getLength(table); i++) {
-                // Each entry in the table array of ThreadLocalMap is an Entry object
-                // representing the thread local reference and its value
-                Object entry = Array.get(table, i);
-                if (entry != null) {
-                    // Get a reference to the thread local object and remove it from the table
-                    ThreadLocal<?> threadLocal = (ThreadLocal<?>)referentField.get(entry);
-                    threadLocal.remove();
-                }
-            }
-        }
-        catch (Exception e) { } //noop
-        finally {
-            try {
-            if (referentField != null)
-                referentField.setAccessible(false);
-            if (tableField != null)
-                tableField.setAccessible(false);
-            if (threadLocalsField != null)
-                threadLocalsField.setAccessible(false);
-            }
-            catch (Throwable e) {
-                // TODO: log error
-            }
-        }
+        ThreadLocalUtils.resetThreadLocal(this);
     }
     
     @Override
@@ -207,7 +150,9 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         super.shutdown();
         
         m_continueDraining = false;
-        m_queuedRunnables.clear();       
+        m_queuedRunnables.clear(); 
+        m_runnableUuidMap.clear();
+        m_uuidRunnableMap.clear();
     }
     
     protected static class PendingThreadFactory implements ThreadFactory
