@@ -1,4 +1,4 @@
-package org.tms.teq;
+package org.tms.api.derivables;
 
 import java.lang.ref.Reference;
 import java.lang.reflect.Array;
@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.teq.Derivation;
 
 public class PendingDerivationExecutor extends ThreadPoolExecutor implements Runnable, DerivableThreadPool
 {

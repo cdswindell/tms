@@ -30,7 +30,7 @@ public enum TableProperty implements Comparable<TableProperty>
     FreeSpaceThreshold(false, true, ElementType.Context, ElementType.Table),
     isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
     
-    // DerivableThreadPool Properties
+    // EventProcessorThreadPool Properties
     isAllowCoreThreadTimeout(false, true, ElementType.Context),
     numCorePoolThreads(false, true, ElementType.Context),
     numMaxPoolThreads(false, true, ElementType.Context),

@@ -23,6 +23,8 @@ public class TableElementListeners implements Listenable
 {
     static final private AtomicLong sf_AssemblyIdCntr = new AtomicLong();
     
+    static private EventProcessorExecutor sf_EventProcessorThreadPool = null;
+    
     static final private Map<Table, Set<TableElementEventType>> sf_TableRegisteredListenersMap = 
             new ConcurrentHashMap<Table, Set<TableElementEventType>>();
     
@@ -199,7 +201,7 @@ public class TableElementListeners implements Listenable
         }
     }
 
-    public void fireCellContainerEvents(Cell cell, TableElementEventType evT, Object[] args)
+    public void fireCellContainerEvents(Cell cell, TableElementEventType evT, Object... args)
     {        
         if (evT.isAlertContainer()) {
             Set<TableElementEvent> events = new LinkedHashSet<TableElementEvent>();
@@ -229,7 +231,7 @@ public class TableElementListeners implements Listenable
             }
             
             if (!events.isEmpty()) 
-                fireEvents(evT, events);
+                fireEvents(cell, evT, events);
         }
     }
     
@@ -246,19 +248,19 @@ public class TableElementListeners implements Listenable
         
         Set<TableElementEvent> events = generateEvents(te, evT, args);
         if (events != null && !events.isEmpty()) 
-            fireEvents(evT, events);
+            fireEvents((TableElement)te, evT, events);
     }
 
-    private void fireEvents(TableElementEventType evT, Set<TableElementEvent> events)
+    private void fireEvents(TableElement te, TableElementEventType evT, Set<TableElementEvent> events)
     {
         // if we are asked to throw exceptions, process the events in the current thread
         if (evT.isThrowExceptions()) {
             getTable().pushCurrent();
             try {
                 for (TableElementEvent e : events) {
-                List<TableElementListener> listeners = ((Listenable) e.getSource()).getListeners(evT);
-                if (listeners != null) {
-                    for (TableElementListener listener : listeners) {
+                    List<TableElementListener> listeners = ((Listenable) e.getSource()).getListeners(evT);
+                    if (listeners != null) {
+                        for (TableElementListener listener : listeners) {
                             listener.eventOccured(e);
                         }
                     }
@@ -269,13 +271,17 @@ public class TableElementListeners implements Listenable
             }
         }
         else
-            queueEvents(events);
+            queueEvents(te, events);
     }
 
-    private void queueEvents(Set<TableElementEvent> events)
+    private void queueEvents(TableElement te, Set<TableElementEvent> events)
     {
-        // TODO Auto-generated method stub
+        synchronized (TableElementListeners.class) {
+            if (sf_EventProcessorThreadPool == null) 
+                sf_EventProcessorThreadPool = new EventProcessorExecutor();
+        }
         
+        sf_EventProcessorThreadPool.submitEvents(events);
     }
 
     private Set<TableElementEvent> generateEvents(Listenable te, TableElementEventType evT, Object[] args)

@@ -17,7 +17,7 @@ import org.tms.api.factories.TableFactory;
 public class TableListenersTest extends BaseTest
 {
     @Test
-    public void testOnBeforeCellValueChangedEvent()
+    public void testOnBeforeCellValueChangedEvent() throws InterruptedException
     {
         Table tbl = TableFactory.createTable();        
         assert (tbl != null);
@@ -92,6 +92,19 @@ public class TableListenersTest extends BaseTest
         assertThat(c.hasListeners(), is(false));
         assertThat(cR2C1.hasListeners(), is(false));
         assertThat(TableElementListeners.hasAnyListeners(tbl), is(false));
+        
+        // install a onChange event
+        c.addListeners(TableElementEventType.OnNewValue, stl);
+        assertThat(tbl.hasListeners(), is(false));
+        assertThat(c.hasListeners(), is(true));
+        assertThat(TableElementListeners.hasAnyListeners(tbl), is(true));
+        c.setCellValue(13);
+        c.setCellValue(14);
+        synchronized (stl) {
+            if (!stl.isFired())
+                stl.wait();
+        }
+        assertThat(stl.getNumFired() > 0, is(true));
     }  
     
     private static class TableCellListener implements TableElementListener
@@ -102,17 +115,27 @@ public class TableListenersTest extends BaseTest
             m_fired = 0;
         }
 
+        synchronized public boolean isFired()
+        {
+            try {
+                return m_fired > 0;
+            }
+            finally {
+                notifyAll();
+            }
+        }
+
         @Override
         public void eventOccured(TableElementEvent e)
         {
             m_fired++;
-            System.out.println(e);    
+            System.out.println(e +  " " + isFired());    
             
-            // prevent odd numbers
+            // prevent odd numbers, if a Before event
             if (e.getSource() instanceof Cell) {
                 CellValueChangedEvent cvce = (CellValueChangedEvent) e;
                 
-                if (cvce.isBefore()) {
+                if (cvce.isBefore() && cvce.isOldValueAvailable()) {
                     Object nv = cvce.getNewValue();
                     if (nv != null && nv instanceof Number) {
                         int iVal = (int)nv;
