@@ -205,7 +205,7 @@ public class CellImpl extends TableElementImpl implements Cell
         return setCellValue(value, false, false);
     }
     
-    protected boolean setCellValue(Object value, boolean typeSafeCheck, boolean validateFireEvents)
+    protected boolean setCellValue(Object value, boolean typeSafeCheck, boolean doPreprocess)
     {
         decrementPendings();
         if (typeSafeCheck && value != null && this.isDataTypeEnforced()) {
@@ -215,8 +215,8 @@ public class CellImpl extends TableElementImpl implements Cell
         
         boolean valuesDiffer = false;        
         if (value != m_cellValue) {  
-            if (validateFireEvents) {
-                // validate potentian new cell value
+            if (doPreprocess) {
+                // validate potential new cell value
                 applyValidator(value);
                 try {
                     fireEvents(TableElementEventType.OnBeforeNewValue, m_cellValue, value);
