@@ -126,12 +126,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     private EventProcessorExecutor m_eventThreadPool;
     private Object m_eventThreadPoolLock;
 
-
     private int m_eventsCorePoolThreads;
     private int m_eventsMaxPoolThreads;
     private long m_eventsKeepAliveTimeout;
-    private boolean m_eventsAllowCoreThreadTimeout;
-    private boolean m_eventsNotifyInSameThread;
 
     protected TableImpl()
     {
@@ -258,6 +255,18 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                     setAutoRecalculate((boolean)value);
                     break;
 
+                case isRowLabelsIndexed:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_ROW_LABELS_INDEXED_DEFAULT;
+                    setRowLabelsIndexed((boolean)value);
+                    break;
+                    
+                case isColumnLabelsIndexed:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_COLUMN_LABELS_INDEXED_DEFAULT;
+                    setColumnLabelsIndexed((boolean)value);
+                    break;
+                    
                 case isEventsNotifyInSameThread:
                     if (!isValidPropertyValueBoolean(value))
                         value = ContextImpl.sf_EVENTS_NOTIFY_IN_SAME_THREAD_DEFAULT;
@@ -527,6 +536,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             case isAutoRecalculate:
                 return isAutoRecalculate();               
                 
+            case isRowLabelsIndexed:
+                return isRowLabelsIndexed();
+                
+            case isColumnLabelsIndexed:
+                return isColumnLabelsIndexed();
+                
             case isEventsNotifyInSameThread:
                 return isEventsNotifyInSameThread();
                 
@@ -742,12 +757,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     
     public boolean isEventsNotifyInSameThread()
     {
-        return m_eventsNotifyInSameThread;
+        return isSet(sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG);
     }
 
     public void setEventsNotifyInSameThread(boolean notifyInSameThread)
     {
-        m_eventsNotifyInSameThread = notifyInSameThread;
+        set(sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG, notifyInSameThread);
     }
 
     public int getEventsCorePoolSize()
@@ -800,12 +815,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
 
     public boolean eventsAllowsCoreThreadTimeOut()
     {
-        return m_eventsAllowCoreThreadTimeout;
+        return isSet(sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG);
     }
 
     public void eventsAllowCoreThreadTimeOut(boolean allowCoreThreadTimeout)
     {
-        m_eventsAllowCoreThreadTimeout = allowCoreThreadTimeout;
+        set(sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG, allowCoreThreadTimeout);
     }
     
     @Override
@@ -904,6 +919,26 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
     }
        
+    public boolean isRowLabelsIndexed()
+    {
+        return isSet(sf_ROW_LABELS_INDEXED_FLAG);
+    }
+
+    public void setRowLabelsIndexed(boolean rowLabelsIndexed)
+    {
+        set(sf_ROW_LABELS_INDEXED_FLAG, rowLabelsIndexed);
+    }
+
+    public boolean isColumnLabelsIndexed()
+    {
+        return isSet(sf_COLUMN_LABELS_INDEXED_FLAG);
+    }
+
+    public void setColumnLabelsIndexed(boolean colLabelsIndexed)
+    {
+        set(sf_COLUMN_LABELS_INDEXED_FLAG, colLabelsIndexed);
+    }
+
     @Override
     protected boolean isDataTypeEnforced()
     {
@@ -922,6 +957,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         vetElement();
         vetElement(r);
         vetParent(r);
+        
         boolean processed = m_subsets.add(r);
         if (processed) setDirty(true);
         return processed;
@@ -1118,6 +1154,14 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     {
         vetElement();
         
+        // handle onBeforeCreate processing
+        try {
+            fireEvents(this, TableElementEventType.OnBeforeCreate, ElementType.Subset);
+        }
+        catch (BlockedRequestException e) {
+            return null;
+        } 
+        
         Object md = null;
         Object md2 = null;
         if (mda != null && mda.length > 0) {
@@ -1128,42 +1172,48 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         }
         
         SubsetImpl subset = null;
-        switch (mode) {
-            case ByLabel:
-                subset = new SubsetImpl(this);
-                if (md != null && md instanceof String)
-                    subset.setLabel((String)md);
-                break;
-                
-            case ByDescription:
-                subset = new SubsetImpl(this);
-                if (md != null && md instanceof String)
-                    subset.setDescription((String)md);
-                break;
-                
-            case ByProperty:
-                subset = new SubsetImpl(this);
-                if (md != null && md2 != null) {
-                    if (md instanceof TableProperty)
-                        subset.setProperty((TableProperty)md, md2);
-                    else if (md instanceof String)
-                        subset.setProperty((String)md, md2);
-                }
-                break;
-                
-            case First:
-            case Last:
-            case Next:
-            case Previous:
-            case Current:
-                subset = new SubsetImpl(this);
-                break;
-                
+        try {
+            switch (mode) {
+                case ByLabel:
+                    subset = new SubsetImpl(this);
+                    if (md != null && md instanceof String)
+                        subset.setLabel((String)md);
+                    break;
+                    
+                case ByDescription:
+                    subset = new SubsetImpl(this);
+                    if (md != null && md instanceof String)
+                        subset.setDescription((String)md);
+                    break;
+                    
+                case ByProperty:
+                    subset = new SubsetImpl(this);
+                    if (md != null && md2 != null) {
+                        if (md instanceof TableProperty)
+                            subset.setProperty((TableProperty)md, md2);
+                        else if (md instanceof String)
+                            subset.setProperty((String)md, md2);
+                    }
+                    break;
+                    
+                case First:
+                case Last:
+                case Next:
+                case Previous:
+                case Current:
+                    subset = new SubsetImpl(this);
+                    break;
+                    
                 default:
                     throw new InvalidAccessException(ElementType.Table, ElementType.Subset, mode, true, mda);                
+            }
+            
+            return subset;
         }
-        
-        return subset;
+        finally {
+            if (subset != null)
+                fireEvents(subset, TableElementEventType.OnCreate);
+        }
     }
     
     protected double getFreeSpaceThreshold()
@@ -1589,6 +1639,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             return null;
         }        
         
+        boolean successfullyCreated = false;
         try {
             // calculate the index where the row will go
             ElementType sliceType = tse.getElementType();
@@ -1600,10 +1651,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             if (tse.insertSlice(idx) != null)
                 tse.setCurrent();
             
+            successfullyCreated = true;
             return tse;
         }
         finally {
-            fireEvents(this, TableElementEventType.OnCreate);
+            if (successfullyCreated)
+                fireEvents(tse, TableElementEventType.OnCreate);
         }
     }
     

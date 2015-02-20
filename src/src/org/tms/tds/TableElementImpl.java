@@ -106,6 +106,9 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement,
     
     public String toString()
     {
+        if (isInvalid())
+            return String.format("[Deleted %s]", getElementType());
+        
         String label = getLabel();
         if (label != null)
             label = ": " + label;

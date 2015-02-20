@@ -132,6 +132,7 @@ public class TableListenersTest extends BaseTest
         assertThat(stl.getNumFired(), is(0));
         
         tbl.addListeners(TableElementEventType.OnBeforeDelete, stl); 
+        tbl.addListeners(TableElementEventType.OnDelete, stl); 
         assertThat(TableElementListeners.hasAnyListeners(tbl), is(true));
         assertThat(tbl.hasListeners(), is(true));
         assertThat(tbl.hasListeners(TableElementEventType.OnBeforeNewValue), is(false));
@@ -145,6 +146,7 @@ public class TableListenersTest extends BaseTest
         assertThat(r1.isInvalid(), is(true));
         assertThat(tbl.getNumRows(), is(--numRows));
         
+        // delete row 8 should not be allowed, even row index
         Row r8 = tbl.getRow(Access.ByIndex, 8);
         r8.delete();
         assertThat(r8.isInvalid(), is(false));
@@ -252,7 +254,7 @@ public class TableListenersTest extends BaseTest
             
             // prevent even row indexes from being deleted
             // if row is the source, don't allow row 1 to be deleted
-            System.out.println(e +  " " + isFired());                    
+            System.out.println(String.format("%s Fired: %b", e, isFired()));                    
             if (e.getSource() instanceof Row && e.getType() == TableElementEventType.OnBeforeDelete) {
                 Row r = (Row)e.getSource();
                 if ((r != null) && (r.getIndex() == 1))

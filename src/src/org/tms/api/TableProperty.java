@@ -20,8 +20,6 @@ public enum TableProperty implements Comparable<TableProperty>
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
     Precision(false, true, ElementType.Context, ElementType.Table),
-    isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
-    isInUse(true, false, ElementType.Row, ElementType.Column),
     
     // Context/Table Properties  
     TokenMapper(true, true, ElementType.Context),
@@ -29,6 +27,8 @@ public enum TableProperty implements Comparable<TableProperty>
     ColumnCapacityIncr(false, true, ElementType.Context, ElementType.Table),
     FreeSpaceThreshold(false, true, ElementType.Context, ElementType.Table),
     isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
+    isRowLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
+    isColumnLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
     
     // PendingDerivationThreadPool Properties
     isPendingAllowCoreThreadTimeout(true, false, true, ElementType.Context, ElementType.Table),
@@ -43,7 +43,7 @@ public enum TableProperty implements Comparable<TableProperty>
     numEventsMaxPoolThreads(true, false, true, ElementType.Context, ElementType.Table),
     EventsThreadKeepAliveTimeout(true, false, true, ElementType.Context, ElementType.Table),    
 
-    // Table Properties (some shared with Subsets)
+    // Table Element Properties 
     numSubsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     numRows(true, false, ElementType.Table, ElementType.Subset),
     numColumns(true, false, ElementType.Table, ElementType.Subset),
@@ -55,6 +55,8 @@ public enum TableProperty implements Comparable<TableProperty>
     Derivation(false, false, ElementType.Column, ElementType.Row, ElementType.Cell),
     Affects(true, false, ElementType.Table, ElementType.Subset, ElementType.Column, ElementType.Row, ElementType.Cell),
     Index(true, false, ElementType.Row, ElementType.Column),
+    isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    isInUse(true, false, ElementType.Row, ElementType.Column),
     
     Rows(true, false, ElementType.Table, ElementType.Subset),
     Columns(true, false, ElementType.Table, ElementType.Subset), 

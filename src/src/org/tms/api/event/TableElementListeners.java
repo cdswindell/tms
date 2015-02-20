@@ -31,16 +31,16 @@ public class TableElementListeners implements Listenable
     static final public boolean hasAnyListeners(Table table, TableElementEventType... evTs) 
     {
         if (table != null) {
+            Set<TableElementEventType> registeredListeners = sf_TableRegisteredListenersMap.get(table);
+            if (registeredListeners == null || registeredListeners.isEmpty())
+                return false;
+            
+            // check individual types 
+            if (evTs == null || evTs.length == 0)
+                return true;
+            
+            boolean hasSome = false;
             synchronized (table) {
-                Set<TableElementEventType> registeredListeners = sf_TableRegisteredListenersMap.get(table);
-                if (registeredListeners == null || registeredListeners.isEmpty())
-                    return false;
-                
-                // check individual types 
-                if (evTs == null || evTs.length == 0)
-                    return true;
-                
-                boolean hasSome = false;
                 for (TableElementEventType evT : evTs) {
                     if (evT == null)
                         continue;
@@ -49,9 +49,9 @@ public class TableElementListeners implements Listenable
                     else
                         hasSome = true;
                 }
-                
-                return hasSome;
             }
+            
+            return hasSome;
         }
         else
             return false;
@@ -248,10 +248,11 @@ public class TableElementListeners implements Listenable
     
     public void fireEvents(Listenable te, TableElementEventType evT, Object... args)
     {
-        if (evT == null || te == null || !(te instanceof TableElement) || ((TableElement)te).isInvalid())
+        if (evT == null || te == null || !(te instanceof TableElement) )
             return;
         
-        if (!(te.hasListeners(evT) || evT.isAlertContainer())) // if we don't have listeners and we don't alert containers, return
+        // if we don't have listeners and we don't alert containers, return
+        if (!(te.hasListeners(evT) || (evT.isAlertContainer() && hasAnyListeners(((TableElement)te).getTable(), evT)))) 
             return;
         
         Set<TableElementEvent> events = generateEvents(te, evT, args);
@@ -325,7 +326,7 @@ public class TableElementListeners implements Listenable
             return;
         
         if (evT.isAlertContainer()) {
-            List<Subset> subsets = evT.isImplementedBy(ElementType.Subset) ? source.getSubsets() : null;
+            List<Subset> subsets = evT.isImplementedBy(ElementType.Subset) && source.isValid() ? source.getSubsets() : null;
             switch (source.getElementType()) {
                 case Cell:
                     generateEvents(trigger, ((Cell)source).getRow(), events, assemblyId, true, evT, args);

@@ -478,7 +478,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		        }
 		        
 		        if (setSome)
-		            fireEvents(this,TableElementEventType.OnNewValue,  o);
+		            fireEvents(this, TableElementEventType.OnNewValue,  o);
 		    }
 		    finally {	            	            
 	            tbl.activateAutoRecalculate();

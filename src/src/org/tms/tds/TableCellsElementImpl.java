@@ -158,7 +158,6 @@ abstract class TableCellsElementImpl extends TableElementImpl
     @Override
     protected void delete(boolean compress)
     {
-        // handle onBeforeDelete processing
         fireEvents(this, TableElementEventType.OnBeforeDelete);
     }
     
@@ -195,13 +194,13 @@ abstract class TableCellsElementImpl extends TableElementImpl
 
     protected void fireEvents(TableElement te, TableElementEventType evT, Object... args)
     {
-        if (isValid())
-            m_listeners.fireEvents(this, evT, args);
+        if (TableElementListeners.hasAnyListeners(te.getTable()))
+            m_listeners.fireEvents(te, evT, args);
     }
 
     protected void fireContainerEvents(Cell cell, TableElementEventType evT, Object... args)
     {
-        if (cell != null && cell.isValid() && isValid())
+        if (cell != null && cell.isValid() && isValid() && TableElementListeners.hasAnyListeners(cell.getTable()))
             m_listeners.fireCellContainerEvents(cell, evT, args);
     }
 

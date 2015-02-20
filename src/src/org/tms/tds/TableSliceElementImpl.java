@@ -665,6 +665,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public String toString()
     {
+        if (isInvalid())
+            return String.format("[Deleted %s]", getElementType());
+        
         String label = (String)getProperty(TableProperty.Label);
         if (label != null)
             label = ": " + label;

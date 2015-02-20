@@ -43,6 +43,8 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     static final boolean sf_SUPPORTS_NULL_DEFAULT = true;
     static final boolean sf_ENFORCE_DATA_TYPE_DEFAULT = false;
     static final boolean sf_AUTO_RECALCULATE_DEFAULT = true;
+    static final boolean sf_ROW_LABELS_INDEXED_DEFAULT = false;
+    static final boolean sf_COLUMN_LABELS_INDEXED_DEFAULT = false;
     
     static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();    
 
@@ -102,18 +104,15 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     private TokenMapper m_tokenMapper;
     private int m_precision;
     private double m_freeSpaceThreshold;
-
+    
     private int m_eventsCorePoolThreads;
     private int m_eventsMaxPoolThreads;
     private long m_eventsKeepAliveTimeout;
-    private boolean m_eventsAllowCoreThreadTimeout;
     
     private int m_pendingCorePoolThreads;
     private int m_pendingMaxPoolThreads;
     private long m_pendingKeepAliveTimeout;
-    private boolean m_pendingAllowCoreThreadTimeout;
     private PendingDerivationExecutor m_pendingThreadPool;
-    private boolean m_eventsNotifyInSameThread;
     
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
@@ -189,6 +188,18 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                     if (!isValidPropertyValueBoolean(value))
                         value = sf_AUTO_RECALCULATE_DEFAULT;
                     setAutoRecalculate((boolean)value);
+                    break;
+                    
+                case isRowLabelsIndexed:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_ROW_LABELS_INDEXED_DEFAULT;
+                    setRowLabelsIndexed((boolean)value);
+                    break;
+                    
+                case isColumnLabelsIndexed:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_COLUMN_LABELS_INDEXED_DEFAULT;
+                    setColumnLabelsIndexed((boolean)value);
                     break;
                     
                 case TokenMapper:
@@ -284,6 +295,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             case isAutoRecalculate:
                 return isAutoRecalculate();
                 
+            case isRowLabelsIndexed:
+                return isRowLabelsIndexed();
+                
+            case isColumnLabelsIndexed:
+                return isColumnLabelsIndexed();
+                
             case TokenMapper:
                 return getTokenMapper();
                 
@@ -366,6 +383,26 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     protected void setAutoRecalculate(boolean value)
     {
         set(sf_AUTO_RECALCULATE_FLAG, value);
+    }
+
+    public boolean isRowLabelsIndexed()
+    {
+        return isSet(sf_ROW_LABELS_INDEXED_FLAG);
+    }
+
+    public void setRowLabelsIndexed(boolean rowLabelsIndexed)
+    {
+        set(sf_ROW_LABELS_INDEXED_FLAG, rowLabelsIndexed);
+    }
+
+    public boolean isColumnLabelsIndexed()
+    {
+        return isSet(sf_COLUMN_LABELS_INDEXED_FLAG);
+    }
+
+    public void setColumnLabelsIndexed(boolean colLabelsIndexed)
+    {
+        set(sf_COLUMN_LABELS_INDEXED_FLAG, colLabelsIndexed);
     }
 
     public TokenMapper getTokenMapper()
@@ -494,12 +531,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
 
     public boolean pendingAllowsCoreThreadTimeOut()
     {
-        return m_pendingAllowCoreThreadTimeout;
+        return isSet(sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG);
     }
 
     public void pendingAllowCoreThreadTimeOut(boolean allowCoreThreadTimeout)
     {
-        m_pendingAllowCoreThreadTimeout = allowCoreThreadTimeout;
+        set(sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG, allowCoreThreadTimeout);
     }
 
     @Override
@@ -537,12 +574,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     
     public boolean isEventsNotifyInSameThread()
     {
-        return m_eventsNotifyInSameThread;
+        return isSet(sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG);
     }
 
     public void setEventsNotifyInSameThread(boolean notifyInSameThread)
     {
-        m_eventsNotifyInSameThread = notifyInSameThread;
+        set(sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG, notifyInSameThread);
     }
 
     public int getEventsCorePoolSize()
@@ -599,12 +636,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
 
     public boolean eventsAllowsCoreThreadTimeOut()
     {
-        return m_eventsAllowCoreThreadTimeout;
+        return isSet(sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG);
     }
 
     public void eventsAllowCoreThreadTimeOut(boolean allowCoreThreadTimeout)
     {
-        m_eventsAllowCoreThreadTimeout = allowCoreThreadTimeout;
+        set(sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG, allowCoreThreadTimeout);
     }
     
     protected ContextImpl register(Table table)

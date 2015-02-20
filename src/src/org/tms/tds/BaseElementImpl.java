@@ -28,14 +28,23 @@ abstract public class BaseElementImpl implements BaseElement
     static final protected int sf_READONLY_FLAG = 0x02;
     static final protected int sf_SUPPORTS_NULL_FLAG = 0x04;
     static final protected int sf_AUTO_RECALCULATE_FLAG = 0x08;
+    
     static final protected int sf_AUTO_RECALCULATE_DISABLED_FLAG = 0x10;
     static final protected int sf_STRONGLY_TYPED_FLAG = 0x20;
     static final protected int sf_IN_USE_FLAG = 0x40;
     static final protected int sf_IS_PENDING_FLAG = 0x80;
-    static final protected int sf_HAS_CELL_VALIDATOR_FLAG = 0x100;
     
-    static final protected int sf_IS_DEFAULT_FLAG = 0x4000000;
-    static final protected int sf_IS_DIRTY_FLAG = 0x8000000;
+    static final protected int sf_ROW_LABELS_INDEXED_FLAG = 0x100;
+    static final protected int sf_COLUMN_LABELS_INDEXED_FLAG = 0x200;
+    static final protected int sf_HAS_CELL_VALIDATOR_FLAG = 0x400;
+    
+    static final protected int sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG = 0x1000;
+    static final protected int sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG = 0x2000;
+    static final protected int sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG = 0x4000;
+    
+    static final protected int sf_IS_DEFAULT_FLAG  = 0x1000000;
+    static final protected int sf_IS_DIRTY_FLAG    = 0x2000000;
+    
     static final protected int sf_IS_INVALID_FLAG = 0x10000000;
     
     private Map<String, Object> m_elemProperties;

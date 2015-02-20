@@ -220,6 +220,9 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     protected void delete(boolean compress)
     {
+        if (isInvalid())
+            return;
+        
         // handle onBeforeDelete processing
         try {
             super.delete(compress); // handle on before delete processing
@@ -281,7 +284,6 @@ public class RowImpl extends TableSliceElementImpl implements Row
     	}
     	
     	// Mark the row not in in use
-    	m_table = null;
     	setCellOffset(-1);
     	setIndex(-1);
     	setInUse(false);   	

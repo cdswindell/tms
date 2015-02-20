@@ -391,6 +391,9 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     @Override
     protected void delete(boolean compress)
     {
+        if (isInvalid())
+            return;
+        
         // handle onBeforeDelete processing
         try {
             super.delete(compress); // handle on before delete processing
@@ -451,7 +454,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     	}   	
 
     	// Mark the column not in in use
-    	m_table = null;
     	m_cellsCapacity = 0;
     	setIndex(-1);
     	setInUse(false);

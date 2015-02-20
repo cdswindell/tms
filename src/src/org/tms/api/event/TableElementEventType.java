@@ -15,8 +15,8 @@ public enum TableElementEventType
     OnBeforeNewValue(true, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
     OnNewValue(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
-    OnCreate(false, false, ElementType.Table, ElementType.Subset, ElementType.Row, ElementType.Column),
-    OnDelete(false, false, ElementType.Table, ElementType.Subset, ElementType.Row, ElementType.Column),
+    OnCreate(false, true, ElementType.Table, ElementType.Subset, ElementType.Row, ElementType.Column),
+    OnDelete(false, true, ElementType.Table, ElementType.Subset, ElementType.Row, ElementType.Column),
     
     OnPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     OnNoPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
