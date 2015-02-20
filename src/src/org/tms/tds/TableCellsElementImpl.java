@@ -190,17 +190,20 @@ abstract class TableCellsElementImpl extends TableElementImpl
 
     protected void fireEvents(TableElement te, TableElementEventType evT, Object... args)
     {
-        m_listeners.fireEvents(this, evT, args);
+        if (isValid())
+            m_listeners.fireEvents(this, evT, args);
     }
 
     protected void fireContainerEvents(Cell cell, TableElementEventType evT, Object... args)
     {
-        m_listeners.fireCellContainerEvents(cell, evT, args);
+        if (cell != null && cell.isValid() && isValid())
+            m_listeners.fireCellContainerEvents(cell, evT, args);
     }
 
     @Override
     public boolean addListeners(TableElementEventType evT, TableElementListener... tels)
     {
+        vetElement();
         TableImpl parent = null;
         if ((parent = getTable()) != null)
             parent.createEventProcessorThreadPool();
@@ -211,18 +214,21 @@ abstract class TableCellsElementImpl extends TableElementImpl
     @Override
     public boolean removeListeners(TableElementEventType evT, TableElementListener... tels)
     {
+        vetElement();
         return m_listeners.removeListeners(evT, tels);
     }
 
     @Override
     public List<TableElementListener> getListeners(TableElementEventType... evTs)
     {
+        vetElement();
         return m_listeners.getListeners(evTs);
     }
 
     @Override
     public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
     {
+        vetElement();
         return m_listeners.removeAllListeners(evTs);
     }
 

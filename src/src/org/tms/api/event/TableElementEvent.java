@@ -66,10 +66,10 @@ abstract public class TableElementEvent extends EventObject
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (m_assemblyId ^ (m_assemblyId >>> 32));
         result = prime * result + ((m_evT == null) ? 0 : m_evT.hashCode());
         result = prime * result + ((getSource() == null) ? 0 : getSource().hashCode());
         result = prime * result + ((getTrigger() == null) ? 0 : getTrigger().hashCode());
+        result = prime * result + (int) (m_assemblyId ^ (m_assemblyId >>> 32));
         
         return result;
     }
@@ -82,10 +82,10 @@ abstract public class TableElementEvent extends EventObject
         if (!(obj instanceof TableElementEvent)) return false;
         
         TableElementEvent other = (TableElementEvent) obj;
-        if (m_assemblyId != other.m_assemblyId) return false;
         if (m_evT != other.getType()) return false;
         if (getSource() != other.getSource()) return false;
         if (getTrigger() != other.getTrigger()) return false;
+        if (m_assemblyId != other.m_assemblyId) return false;
         
         return true;
     }

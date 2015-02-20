@@ -248,13 +248,10 @@ public class TableElementListeners implements Listenable
     
     public void fireEvents(Listenable te, TableElementEventType evT, Object... args)
     {
-        if (evT == null || te == null)
+        if (evT == null || te == null || !(te instanceof TableElement) || ((TableElement)te).isInvalid())
             return;
         
         if (!(te.hasListeners(evT) || evT.isAlertContainer())) // if we don't have listeners and we don't alert containers, return
-            return;
-        
-        if (!(te instanceof TableElement))
             return;
         
         Set<TableElementEvent> events = generateEvents(te, evT, args);
