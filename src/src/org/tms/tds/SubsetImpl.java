@@ -18,6 +18,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.event.TableElementEventType;
+import org.tms.api.event.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
@@ -311,7 +312,13 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     @Override 
     protected void delete(boolean compress)
     {
-        super.delete(compress); // handle on before delete processing
+        // handle onBeforeDelete processing
+        try {
+            super.delete(compress); // handle on before delete processing
+        }
+        catch (BlockedRequestException e) {
+            return;
+        }        
         
         // delete the subset from its parent table
         if (getTable() != null) getTable().remove(this);  

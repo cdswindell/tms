@@ -2,38 +2,38 @@ package org.tms.api.event;
 
 public class CellValueChangedEvent extends TableElementEvent implements OnBeforeEvent
 {
-    private static final long serialVersionUID = -8132668503086998486L;
+    private static final long serialVersionUID = 7240313166857443883L;
 
-    public static final CellValueChangedEvent createOn(Listenable te, long timeStamp, Object newValue)
+    static final CellValueChangedEvent createOn(Listenable source, Listenable trigger, long assemblyId, Object newValue)
     {
-        return new CellValueChangedEvent(te, TableElementEventType.OnNewValue, timeStamp, newValue);
+        return new CellValueChangedEvent(source, trigger, TableElementEventType.OnNewValue, assemblyId, newValue);
     }
     
-    public static final CellValueChangedEvent createOn(Listenable te, long timeStamp, Object oldValue, Object newValue)
+    static final CellValueChangedEvent createOn(Listenable source, Listenable trigger, long assemblyId, Object oldValue, Object newValue)
     {
-        return new CellValueChangedEvent(te, TableElementEventType.OnNewValue, timeStamp, oldValue, newValue);
+        return new CellValueChangedEvent(source, trigger, TableElementEventType.OnNewValue, assemblyId, oldValue, newValue);
     }
     
-    public static final CellValueChangedEvent createOnBefore(Listenable te, long timeStamp, Object oldValue, Object newValue)
+    static final CellValueChangedEvent createOnBefore(Listenable source, Listenable trigger, long assemblyId, Object oldValue, Object newValue)
     {
-        return new CellValueChangedEvent(te, TableElementEventType.OnBeforeNewValue, timeStamp, oldValue, newValue);
+        return new CellValueChangedEvent(source, trigger, TableElementEventType.OnBeforeNewValue, assemblyId, oldValue, newValue);
     }
 
     private boolean m_oldValueAvailable;
     private Object m_oldValue;
     private Object m_newValue;
     
-    private CellValueChangedEvent(Listenable source, TableElementEventType evT, long timeStamp, Object newValue)
+    private CellValueChangedEvent(Listenable source, Listenable trigger, TableElementEventType evT, long assemblyId, Object newValue)
     {
-        super(evT, source, timeStamp);
+        super(evT, source, trigger, assemblyId);
         
         m_oldValueAvailable = false;
         m_newValue = newValue;
     }
     
-    private CellValueChangedEvent(Listenable source, TableElementEventType evT, long timeStamp, Object oldValue, Object newValue)
+    private CellValueChangedEvent(Listenable source, Listenable trigger, TableElementEventType evT, long assemblyId, Object oldValue, Object newValue)
     {
-        this(source, evT, timeStamp, newValue);
+        this(source, trigger, evT, assemblyId, newValue);
         
         m_oldValueAvailable = true;       
         m_oldValue = oldValue;

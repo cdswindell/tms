@@ -2,21 +2,21 @@ package org.tms.api.event;
 
 public class PendingDerivationsEvent extends TableElementEvent
 {
-    private static final long serialVersionUID = -4497772315539485507L;
+    private static final long serialVersionUID = 4434997403257589967L;
 
-    public static final PendingDerivationsEvent createPendingsEvent(Listenable te, long timeStamp)
+    static final PendingDerivationsEvent createPendingsEvent(Listenable source, Listenable trigger, long assemblyId)
     {
-        return new PendingDerivationsEvent(te, TableElementEventType.OnPendings, timeStamp);
+        return new PendingDerivationsEvent(source, trigger, TableElementEventType.OnPendings, assemblyId);
     }
     
-    public static final PendingDerivationsEvent createNoPendingsEvent(Listenable te, long timeStamp)
+    static final PendingDerivationsEvent createNoPendingsEvent(Listenable source, Listenable trigger, long assemblyId)
     {
-        return new PendingDerivationsEvent(te, TableElementEventType.OnNoPendings, timeStamp);
+        return new PendingDerivationsEvent(source, trigger, TableElementEventType.OnNoPendings, assemblyId);
     }
     
-    private PendingDerivationsEvent(Listenable source, TableElementEventType evT, long timeStamp)
+    private PendingDerivationsEvent(Listenable source, Listenable trigger, TableElementEventType evT, long assemblyId)
     {
-        super(evT, source, timeStamp);
+        super(evT, source, trigger, assemblyId);
     }
     
     public boolean isPendingDerivations() { return getType() == TableElementEventType.OnPendings; }

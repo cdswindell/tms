@@ -13,6 +13,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
+import org.tms.api.event.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
 
 public class RowImpl extends TableSliceElementImpl implements Row
@@ -76,8 +77,10 @@ public class RowImpl extends TableSliceElementImpl implements Row
     
     protected List<TableElementListener> removeAllListeners(boolean processCells, TableElementEventType... evTs )
     {
+        // remove listeners from parent
         List<TableElementListener> tblListeners = super.removeAllListeners(evTs);
         
+        // remove any listeners hanging off of this row's cells
         TableImpl t = getTable();
         if (t != null) {
             synchronized(t) {
@@ -90,8 +93,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
                         CellImpl c = getCellInternal(col, false, false);
                         if (c != null)
                             c.removeAllListeners(evTs);
-                    }
-                    
+                    }                   
                 }
                 finally {
                     t.popCurrent();
@@ -218,7 +220,13 @@ public class RowImpl extends TableSliceElementImpl implements Row
     @Override
     protected void delete(boolean compress)
     {
-        super.delete(compress); // handle on before delete processing
+        // handle onBeforeDelete processing
+        try {
+            super.delete(compress); // handle on before delete processing
+        }
+        catch (BlockedRequestException e) {
+            return;
+        }        
         
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();

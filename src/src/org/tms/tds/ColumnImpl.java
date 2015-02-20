@@ -14,6 +14,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
+import org.tms.api.event.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
 
 public class ColumnImpl extends TableSliceElementImpl implements Column
@@ -390,7 +391,13 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     @Override
     protected void delete(boolean compress)
     {
-        super.delete(compress);
+        // handle onBeforeDelete processing
+        try {
+            super.delete(compress); // handle on before delete processing
+        }
+        catch (BlockedRequestException e) {
+            return;
+        }        
         
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();

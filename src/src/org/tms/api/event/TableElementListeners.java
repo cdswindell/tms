@@ -222,14 +222,14 @@ public class TableElementListeners implements Listenable
             if (r != null && (r.hasListeners(evT) || r.getNumSubsets() > 0)) {
                 if (assemblyId == 0)
                     assemblyId = sf_AssemblyIdCntr.incrementAndGet();
-                generateEvents(events, assemblyId, true, r, evT, args);
+                generateEvents(cell, r, events, assemblyId, true, evT, args);
             }
             
             Column c = cell.getColumn();
             if (c != null && (c.hasListeners(evT) || c.getNumSubsets() > 0)) {
                 if (assemblyId == 0)
                     assemblyId = sf_AssemblyIdCntr.incrementAndGet();
-                generateEvents(events, assemblyId, true, c, evT, args);
+                generateEvents(cell, c, events, assemblyId, true, evT, args);
             }
             
             // harvest table events, if we didn't process row or column
@@ -237,7 +237,7 @@ public class TableElementListeners implements Listenable
                 Table parent = cell.getTable();
                 if (parent != null && (parent.hasListeners(evT) || parent.getNumSubsets() > 0)) {
                     assemblyId = sf_AssemblyIdCntr.incrementAndGet();
-                    generateEvents(events, assemblyId, true, parent, evT, args);                   
+                    generateEvents(cell, parent, events, assemblyId, true, evT, args);
                 }
             }
             
@@ -306,24 +306,19 @@ public class TableElementListeners implements Listenable
         Set<TableElementEvent> events = new LinkedHashSet<TableElementEvent>();
         long assemblyId = sf_AssemblyIdCntr.incrementAndGet();
         
-        generateEvents(events, assemblyId, true, (TableElement)te, evT, args);
+        generateEvents((TableElement)te, (TableElement)te, events, assemblyId, true, evT, args);
         
-        // add in parent table
-        Table parentTable =  ((TableElement)te).getTable();
-        if (parentTable != null && parentTable != this)
-            generateEvents(events, assemblyId, true, parentTable, evT, args);                            
-            
         return events;
     }
 
-    private void generateEvents(Set<TableElementEvent> events, long assemblyId, boolean doRecurse, 
-                                TableElement te, TableElementEventType evT, Object[] args)
+    private void generateEvents(TableElement trigger, TableElement source, Set<TableElementEvent> events, 
+                                long assemblyId, boolean doRecurse, TableElementEventType evT, Object[] args)
     {
-        if (te == null)
+        if (source == null)
             return;
         
-        if (evT.isImplementedBy(te) && ((Listenable)te).hasListeners(evT)) {
-            TableElementEvent event = TableElementEventFactory.createEvent((TableElement)te, evT, assemblyId, args);
+        if (evT.isImplementedBy(source) && ((Listenable)source).hasListeners(evT)) {
+            TableElementEvent event = TableElementEventFactory.createEvent(source, trigger, evT, assemblyId, args);
             if (event != null)
                 events.add(event);
         }
@@ -333,28 +328,28 @@ public class TableElementListeners implements Listenable
             return;
         
         if (evT.isAlertContainer()) {
-            List<Subset> subsets = evT.isImplementedBy(ElementType.Subset) ? te.getSubsets() : null;
-            switch (te.getElementType()) {
+            List<Subset> subsets = evT.isImplementedBy(ElementType.Subset) ? source.getSubsets() : null;
+            switch (source.getElementType()) {
                 case Cell:
-                    generateEvents(events, assemblyId, true, ((Cell)te).getRow(), evT, args);
-                    generateEvents(events, assemblyId, true, ((Cell)te).getColumn(), evT, args);
+                    generateEvents(trigger, ((Cell)source).getRow(), events, assemblyId, true, evT, args);
+                    generateEvents(trigger, ((Cell)source).getColumn(), events, assemblyId, true, evT, args);
                     
                     if (subsets != null) {
                         for (Subset s : subsets) {
-                            generateEvents(events, assemblyId, false, s, evT, args);                            
+                            generateEvents(trigger, s, events, assemblyId, false, evT, args);                            
                         }
                     }
                     break;
                     
                 case Row:
                 case Column:
-                    generateEvents(events, assemblyId, true, te.getTable(), evT, args);                            
+                    generateEvents(trigger, source.getTable(), events, assemblyId, true, evT, args);                            
                     // do no break, continue on and grab subsets
                     
                 case Table:
                     if (subsets != null) {
                         for (Subset s : subsets) {
-                            generateEvents(events, assemblyId, false, s, evT, args);                            
+                            generateEvents(trigger, s, events, assemblyId, false, evT, args);                            
                         }
                     }
                     break;

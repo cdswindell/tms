@@ -811,7 +811,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     @Override
     synchronized protected void delete(boolean compress)
     {
-        super.delete(compress); // handle on before delete processing
+        // handle onBeforeDelete processing
+        try {
+            super.delete(compress); // handle on before delete processing
+        }
+        catch (BlockedRequestException e) {
+            return;
+        }        
         
         try {
             // delete all rows and columns, explicitly

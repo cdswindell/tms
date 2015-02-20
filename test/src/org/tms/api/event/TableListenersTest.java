@@ -109,6 +109,69 @@ public class TableListenersTest extends BaseTest
         
         assertThat(stl.getNumFired() > 0, is(true));
     }  
+    @Test
+    public void testOnBeforeDeleteEvent() throws InterruptedException
+    {
+        Table tbl = TableFactory.createTable();        
+        assert (tbl != null);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        Row r1 = tbl.addRow(Access.ByIndex, 1);
+        Row r10 = tbl.addRow(Access.ByIndex, 10);      
+        
+        Column c1 = tbl.addColumn(Access.ByIndex, 1);
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
+        
+        assertThat(tbl.hasListeners(), is(false));
+        assertThat(r1.hasListeners(), is(false));
+        assertThat(r10.hasListeners(), is(false));
+        assertThat(c1.hasListeners(), is(false));
+        assertThat(TableElementListeners.hasAnyListeners(tbl), is(false));
+        
+        DeleteRowListener stl = new DeleteRowListener();
+        assertThat(stl.getNumFired(), is(0));
+        
+        tbl.addListeners(TableElementEventType.OnBeforeDelete, stl); 
+        assertThat(TableElementListeners.hasAnyListeners(tbl), is(true));
+        assertThat(tbl.hasListeners(), is(true));
+        assertThat(tbl.hasListeners(TableElementEventType.OnBeforeNewValue), is(false));
+        assertThat(tbl.hasListeners(TableElementEventType.OnBeforeDelete), is(true));
+        
+        int numRows = tbl.getNumRows();
+        assertThat(tbl.getNumRows(), is(numRows));
+        
+        // delete row 1, should be allowed
+        r1.delete();
+        assertThat(r1.isInvalid(), is(true));
+        assertThat(tbl.getNumRows(), is(--numRows));
+        
+        Row r8 = tbl.getRow(Access.ByIndex, 8);
+        r8.delete();
+        assertThat(r8.isInvalid(), is(false));
+        assertThat(tbl.getNumRows(), is(numRows));
+        
+        // now block row 1 deletions
+        r1 = tbl.getRow(Access.First);
+        r1.addListeners(TableElementEventType.OnBeforeDelete, stl); 
+        
+        r1.delete();
+        assertThat(r1.isInvalid(), is(false));
+        assertThat(tbl.getNumRows(), is(numRows));
+
+        // remove row listener, make sure r1 can be deleted
+        r1.removeListeners(TableElementEventType.OnBeforeDelete);
+        r1.delete();
+        assertThat(r1.isInvalid(), is(true));
+        assertThat(tbl.getNumRows(), is(--numRows));
+
+        // remove all row listener, make sure r1 can be deleted
+        tbl.removeAllListeners(); // should also remove row listeners
+        
+        Row r2 = tbl.getRow(Access.ByIndex, 2);
+        r2.delete();
+        assertThat(r2.isInvalid(), is(true));
+        assertThat(tbl.getNumRows(), is(--numRows));
+    }  
     
     private static class TableCellListener implements TableElementListener
     {
@@ -152,6 +215,54 @@ public class TableListenersTest extends BaseTest
             }
             else
                 System.out.println(e +  " " + isFired());                    
+        }
+        
+        public int getNumFired()
+        {
+            int tmp = m_fired;
+            m_fired = 0;
+            return tmp;
+        }        
+    }  
+    private static class DeleteRowListener implements TableElementListener
+    {
+        private int m_fired;
+        public DeleteRowListener() 
+        {
+            m_fired = 0;
+        }
+
+        synchronized public boolean isFired()
+        {
+            try {
+                return m_fired > 0;
+            }
+            finally {
+                notifyAll();
+            }
+        }
+
+        @Override
+        public void eventOccured(TableElementEvent e)
+        {
+            synchronized (this) {
+                m_fired++;
+                notifyAll();
+            }
+            
+            // prevent even row indexes from being deleted
+            // if row is the source, don't allow row 1 to be deleted
+            System.out.println(e +  " " + isFired());                    
+            if (e.getSource() instanceof Row && e.getType() == TableElementEventType.OnBeforeDelete) {
+                Row r = (Row)e.getSource();
+                if ((r != null) && (r.getIndex() == 1))
+                    throw new BlockedRequestException(e);
+            }            
+            else if (e.isTriggered() && e.getTrigger() instanceof Row && e.getType() == TableElementEventType.OnBeforeDelete) {
+                Row r = (Row)e.getTrigger();
+                if ((r != null) && (r.getIndex() % 2 == 0))
+                    throw new BlockedRequestException(e);
+            }            
         }
         
         public int getNumFired()

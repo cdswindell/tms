@@ -5,23 +5,23 @@ import org.tms.api.TableElement;
 
 public class CreateEvent extends TableElementEvent implements OnBeforeEvent
 {
-    private static final long serialVersionUID = -8266816554096958366L;
+    private static final long serialVersionUID = 3756424038671548782L;
 
-    public static final CreateEvent createOnBefore(Listenable te, long timeStamp, ElementType et)
+    static final CreateEvent createOnBefore(Listenable source, Listenable trigger, long assemblyId, ElementType et)
     {
-        return new CreateEvent(te, TableElementEventType.OnBeforeCreate, timeStamp, et);
+        return new CreateEvent(source, trigger, TableElementEventType.OnBeforeCreate, assemblyId, et);
     }
     
-    public static final CreateEvent createOn(Listenable te, long timeStamp)
+    static final CreateEvent createOn(Listenable source, Listenable trigger, long assemblyId)
     {
-        return new CreateEvent(te, TableElementEventType.OnCreate, timeStamp, null);
+        return new CreateEvent(source, trigger, TableElementEventType.OnCreate, assemblyId, null);
     }
     
     private ElementType m_createdElementType;
     
-    private CreateEvent(Listenable source, TableElementEventType evT, long timeStamp, ElementType et)
+    private CreateEvent(Listenable source, Listenable trigger, TableElementEventType evT, long timeStamp, ElementType et)
     {
-        super(evT, source, timeStamp);
+        super(evT, source, trigger, timeStamp);
         
         m_createdElementType = isBefore() ? et : ((TableElement)source).getElementType();
     }

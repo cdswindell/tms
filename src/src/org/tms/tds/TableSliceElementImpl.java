@@ -41,8 +41,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
 
     /*
      * Field getters/setters
-     */
-    
+     */   
     boolean isInUse()
     {
         return isSet(sf_IN_USE_FLAG);
@@ -76,6 +75,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         return m_subsets.size();
     }
     
+    @Override
     public List<Subset> getSubsets()
     {
         vetElement();
@@ -234,8 +234,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         
         parent.sort(this, cellSorter);
     }
-    
-    
+        
     CellImpl getCellInternal(TableSliceElementImpl tse)
     {
         if (this instanceof RowImpl)
@@ -663,6 +662,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
 		return getNumCells() == 0;
 	}   
     
+    @Override
     public String toString()
     {
         String label = (String)getProperty(TableProperty.Label);

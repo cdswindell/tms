@@ -4,22 +4,29 @@ import java.util.EventObject;
 
 abstract public class TableElementEvent extends EventObject
 {
-    private static final long serialVersionUID = -2530794656893005953L;
+    private static final long serialVersionUID = 2207788387645138100L;
     
     private TableElementEventType m_evT;
     private long m_timeStamp;
     private long m_assemblyId;
+    private Listenable m_trigger;
     
-    public TableElementEvent(TableElementEventType evT, Listenable source)
+    public TableElementEvent(TableElementEventType evT, Listenable source, Listenable trigger)
     {
         super(source);
+        m_trigger = trigger;
         m_evT = evT;
         m_timeStamp = System.currentTimeMillis();
     }
 
-    TableElementEvent(TableElementEventType evT, Listenable source, long assemblyId)
+    public TableElementEvent(TableElementEventType evT, Listenable source)
     {
-        this(evT, source);
+        this(evT, source, null);
+    }
+
+    TableElementEvent(TableElementEventType evT, Listenable source, Listenable trigger, long assemblyId)
+    {
+        this(evT, source, trigger);
         m_assemblyId = assemblyId;
     }
 
@@ -32,6 +39,16 @@ abstract public class TableElementEvent extends EventObject
     public TableElementEventType getType()
     {
         return m_evT;
+    }
+    
+    public Listenable getTrigger()
+    {
+        return m_trigger;
+    }
+    
+    public boolean isTriggered()
+    {
+        return m_trigger != null && m_trigger != getSource();
     }
     
     public long getAssemblyId()
@@ -52,6 +69,7 @@ abstract public class TableElementEvent extends EventObject
         result = prime * result + (int) (m_assemblyId ^ (m_assemblyId >>> 32));
         result = prime * result + ((m_evT == null) ? 0 : m_evT.hashCode());
         result = prime * result + ((getSource() == null) ? 0 : getSource().hashCode());
+        result = prime * result + ((getTrigger() == null) ? 0 : getTrigger().hashCode());
         
         return result;
     }
@@ -67,12 +85,14 @@ abstract public class TableElementEvent extends EventObject
         if (m_assemblyId != other.m_assemblyId) return false;
         if (m_evT != other.getType()) return false;
         if (getSource() != other.getSource()) return false;
+        if (getTrigger() != other.getTrigger()) return false;
         
         return true;
     }
 
     public String toString()
     {
-        return String.format("Source: %s Event: %s (%d:%d)", getSource(), getType(), getAssemblyId(), getTimeStamp());
+        return String.format("Source: %s Trigger: %s Event: %s (%d:%d)", 
+                getSource(), getTrigger(), getType(), getAssemblyId(), getTimeStamp());
     }
 }

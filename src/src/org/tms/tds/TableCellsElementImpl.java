@@ -13,7 +13,6 @@ import org.tms.api.derivables.Derivable;
 import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
 import org.tms.api.event.TableElementListeners;
-import org.tms.api.event.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.InvalidParentException;
 
 /**
@@ -155,12 +154,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
     protected void delete(boolean compress)
     {
         // handle onBeforeDelete processing
-        try {
-            fireEvents(this, TableElementEventType.OnBeforeDelete);
-        }
-        catch (BlockedRequestException e) {
-            return;
-        }        
+        fireEvents(this, TableElementEventType.OnBeforeDelete);
     }
     
     /*
