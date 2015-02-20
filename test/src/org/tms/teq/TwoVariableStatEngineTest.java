@@ -112,8 +112,8 @@ public class TwoVariableStatEngineTest extends BaseTest
         tData.delete();
         assertThat(tData.isInvalid(), is(true));
         assertThat(c1.isInvalid(), is(true));
-        assertThat(tData.getCurrentRow(), nullValue());
-        assertThat(tData.getCurrentColumn(), nullValue());
+        assertThat(tData.getRow(), nullValue());
+        assertThat(tData.getColumn(), nullValue());
         assertThat(cR1C1.isDerived(), is(false));
         assertThat(cR2C1.isDerived(), is(false));
         

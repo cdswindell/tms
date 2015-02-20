@@ -291,10 +291,10 @@ public class PendingOperatorTest extends BaseTest
         assertThat(cR3C5.getRow().getIndex(), is(3));
         cR3C5.setDerivation("count(Col 3)");
         
-        Row curRow = t.getCurrentRow();
+        Row curRow = t.getRow();
         assertThat(curRow.getIndex(), is(3));
         
-        Column curCol = t.getCurrentColumn();        
+        Column curCol = t.getColumn();        
         assertThat(curCol.getIndex(), is(5));
         
         assertThat(((TableImpl)t).isPendings(), is(true));          
@@ -304,8 +304,8 @@ public class PendingOperatorTest extends BaseTest
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
-        assertThat(t.getCurrentColumn(), is(curCol));
-        assertThat(t.getCurrentRow(), is(curRow));
+        assertThat(t.getColumn(), is(curCol));
+        assertThat(t.getRow(), is(curRow));
         
         assertThat(cR1C5.getCellValue(), is(0.0));
         assertThat(cR2C5.getCellValue(), is(220.0));
@@ -384,8 +384,8 @@ public class PendingOperatorTest extends BaseTest
         assertThat(cR3C4.getRow().getIndex(), is(3));
         cR3C4.setDerivation("count(Col 3)");
               
-        Row curRow = t.getCurrentRow();
-        Column curCol = t.getCurrentColumn();
+        Row curRow = t.getRow();
+        Column curCol = t.getColumn();
         
         while (((TableImpl)t).isPendings()) {
             Thread.sleep(1000);
@@ -393,8 +393,8 @@ public class PendingOperatorTest extends BaseTest
         
         assertThat(((TableImpl)t).isPendings(), is(false));
         
-        assertThat(t.getCurrentRow(), is(curRow));
-        assertThat(t.getCurrentColumn(), is(curCol));
+        assertThat(t.getRow(), is(curRow));
+        assertThat(t.getColumn(), is(curCol));
         
         numRows = t.getNumRows();
         assertThat(closeTo(cR1C4.getCellValue(), 0.0, 0.00000000001), is(true));
@@ -463,16 +463,16 @@ public class PendingOperatorTest extends BaseTest
         
         assertThat(((TableImpl)t).isPendings(), is(true));
         
-        Row curRow = t.getCurrentRow();
-        Column curCol = t.getCurrentColumn();
+        Row curRow = t.getRow();
+        Column curCol = t.getColumn();
         
         // clear derivation
         c2.clearDerivation();
   
         assertThat(((TableImpl)t).isPendings(), is(false));
         
-        assertThat(t.getCurrentRow(), is(curRow));
-        assertThat(t.getCurrentColumn(), is(curCol));
+        assertThat(t.getRow(), is(curRow));
+        assertThat(t.getColumn(), is(curCol));
               
         assertThat(cR1C4.isNull(), is(true));
         assertThat(cR2C4.isNull(), is(true));

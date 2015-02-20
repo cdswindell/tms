@@ -130,8 +130,13 @@ abstract class TableCellsElementImpl extends TableElementImpl
         if (elems != null) {
             for (TableCellsElementImpl e : elems) {
                 if (e == this || e == null)
-                    continue;               
-                else if (e.getTable() == null)
+                    continue;   
+                
+                // make sure element is valid
+                vetElement(e);
+                
+                // now check parent
+                if (e.getTable() == null)
                     e.setTable(this.getTable());              
                 else if (e.getTable() != getTable())
                     throw new InvalidParentException(e, this);

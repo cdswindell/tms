@@ -1253,7 +1253,6 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     
     protected RowImpl setCurrentRow(RowImpl row)
     {
-        vetParent(row);
         CellReference cr = getCurrentCellReference();
         RowImpl prevCurrent = cr.getCurrentRow();
         cr.setCurrentRow(row);
@@ -1288,7 +1287,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     @Override
     public RowImpl getRow()
     {
-        return getRow(Access.Current);
+        return getCurrentRow();
     }
     
     private RowImpl getRowInternal(boolean createIfNull, Access mode, Object...mda)
@@ -1521,7 +1520,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     @Override
     public ColumnImpl getColumn()
     {
-        return getColumn(Access.Current);
+        return getCurrentColumn();
     }
     
     private ColumnImpl getColumnInternal(boolean createIfNull, Access mode, Object...mda)
@@ -2375,21 +2374,33 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
 
         public RowImpl getCurrentRow()
     	{
-    		return m_row;
+            if (m_row != null && m_row.isInvalid())
+                m_row = null;
+
+            return m_row;
     	}
     	
         protected void setCurrentRow(RowImpl row) 
         {
+            if (row != null) 
+                vetParent(row);
+            
             m_row = row;
         }
         
         public ColumnImpl getCurrentColumn()
         {
+            if (m_col != null && m_col.isInvalid())
+                m_col = null;
+
             return m_col;
         }
         
         protected void setCurrentColumn(ColumnImpl col)
         {
+            if (col != null) 
+                vetParent(col);
+            
             m_col = col;
         }
 
