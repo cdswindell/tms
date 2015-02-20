@@ -577,6 +577,69 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         
     }
     
+    @Override
+    public void fill(Object[] o, Access mode, Object... mda) 
+    {
+        vetElement();
+        
+        if (o == null || o.length == 0)
+            return;
+        else if (this.isReadOnly())
+            throw new ReadOnlyException(this, TableProperty.CellValue);
+        
+        TableImpl parent = getTable();
+        assert parent != null : "Parent table required";
+        
+        // we do not push/pop current cell state in this routine, as
+        // the use case is it will be called several times in succession,
+        // and we want the table to adopt the new current cell state
+        if (parent != null)
+            parent.deactivateAutoRecalculate();
+        boolean setSome = false;
+        try {
+            int n = o.length;
+            int idx = 0;
+            synchronized(parent) {
+                CellImpl c = (CellImpl) this.getCell(mode, mda);
+                boolean readOnlyExceptionEncountered = false;
+                boolean nullValueExceptionEncountered = false;
+                while (c != null && idx < n) {                    
+                    try {
+                        if (c.isDerived())
+                            continue;
+                        
+                        if (c.setCellValue(o[idx++]))
+                            setSome = true;
+                    }
+                    catch (ReadOnlyException e) {
+                        readOnlyExceptionEncountered = true;
+                    }
+                    catch (NullValueException e) {
+                        nullValueExceptionEncountered = true;
+                    }
+                    finally {
+                        if (idx >= n) break; // leave the table at the last row/col modified
+                        c = (CellImpl) getCell(Access.Next);
+                    }
+                }
+                
+                if (setSome)
+                    this.setInUse(true); 
+                else if (readOnlyExceptionEncountered)
+                    throw new ReadOnlyException(this, TableProperty.CellValue);
+                else if (nullValueExceptionEncountered)
+                    throw new NullValueException(this, TableProperty.CellValue);
+            }
+        }
+        finally { 
+            if (parent != null)
+                parent.activateAutoRecalculate();
+        }        
+        
+        if (setSome && parent != null && parent.isAutoRecalculateEnabled())
+            Derivation.recalculateAffected(this);        
+    }
+    
 	private boolean isDerived(Cell c)
     {
         if (c.isDerived())

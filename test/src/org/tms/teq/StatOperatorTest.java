@@ -311,7 +311,7 @@ public class StatOperatorTest extends BaseTest
         assertThat(r100.getIndex(), is(100));      
         
         Column c1 = t.addColumn();
-        c1.fill(61, 5, Access.First);
+        c1.fill(new Object[] {61, 61, 61, 61, 61}, Access.First);
         c1.fill(64, 18, Access.Next);
         c1.fill(67, 42, Access.Next);
         c1.fill(70, 27, Access.Next);
