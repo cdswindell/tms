@@ -1,7 +1,7 @@
 package org.tms.api.utils;
 
 import org.tms.api.Cell;
-import org.tms.api.exceptions.TableCellValidationException;
+import org.tms.api.exceptions.ConstraintViolationException;
 
 public class NumericRangeRequired extends NumericRange
 {
@@ -11,10 +11,10 @@ public class NumericRangeRequired extends NumericRange
     }
 
     @Override
-    public void validate(Cell cell, Object newValue) throws TableCellValidationException
+    public void validate(Cell cell, Object newValue) throws ConstraintViolationException
     {
         if (newValue == null)
-            throw new TableCellValidationException("Required");
+            throw new ConstraintViolationException("Required");
             
         super.validate(cell, newValue);
     }

@@ -277,6 +277,15 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
      * Overridden methods
      */
     
+    @Override 
+    public boolean isLabelIndexed()
+    {
+        if (getTable() != null)
+            return getTable().isColumnLabelsIndexed();
+        else
+            return false;
+    }
+    
     @Override
     public Object getProperty(TableProperty key)
     {

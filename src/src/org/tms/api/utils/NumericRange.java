@@ -2,7 +2,7 @@ package org.tms.api.utils;
 
 import org.tms.api.Cell;
 import org.tms.api.TableCellValidator;
-import org.tms.api.exceptions.TableCellValidationException;
+import org.tms.api.exceptions.ConstraintViolationException;
 
 public class NumericRange implements TableCellValidator
 {   
@@ -19,19 +19,19 @@ public class NumericRange implements TableCellValidator
     }
 
     @Override
-    public void validate(Cell cell, Object newValue) throws TableCellValidationException
+    public void validate(Cell cell, Object newValue) throws ConstraintViolationException
     {
         if (newValue == null)
             return;
         
         if (!(newValue instanceof Number))
-            throw new TableCellValidationException("Numeric Required");
+            throw new ConstraintViolationException("Numeric Required");
             
         double n = ((Number)newValue).doubleValue();
         if (m_minValue != Double.MIN_VALUE && n < m_minValue)
-            throw new TableCellValidationException("Too small");
+            throw new ConstraintViolationException("Too small");
         
         if (m_maxValue != Double.MAX_VALUE && n > m_maxValue)
-            throw new TableCellValidationException("Too large");
+            throw new ConstraintViolationException("Too large");
     }
 }

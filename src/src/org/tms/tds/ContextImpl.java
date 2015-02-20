@@ -43,8 +43,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     static final boolean sf_SUPPORTS_NULL_DEFAULT = true;
     static final boolean sf_ENFORCE_DATA_TYPE_DEFAULT = false;
     static final boolean sf_AUTO_RECALCULATE_DEFAULT = true;
+    
     static final boolean sf_ROW_LABELS_INDEXED_DEFAULT = false;
     static final boolean sf_COLUMN_LABELS_INDEXED_DEFAULT = false;
+    static final boolean sf_CELL_LABELS_INDEXED_DEFAULT = false;
+    static final boolean sf_SUBSET_LABELS_INDEXED_DEFAULT = false;
     
     static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();    
 
@@ -113,6 +116,8 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     private int m_pendingMaxPoolThreads;
     private long m_pendingKeepAliveTimeout;
     private PendingDerivationExecutor m_pendingThreadPool;
+
+    private Map<String, Object> m_elemProperties;
     
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
@@ -200,6 +205,18 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                     if (!isValidPropertyValueBoolean(value))
                         value = sf_COLUMN_LABELS_INDEXED_DEFAULT;
                     setColumnLabelsIndexed((boolean)value);
+                    break;
+                    
+                case isCellLabelsIndexed:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_CELL_LABELS_INDEXED_DEFAULT;
+                    setCellLabelsIndexed((boolean)value);
+                    break;
+                    
+                case isSubsetLabelsIndexed:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_SUBSET_LABELS_INDEXED_DEFAULT;
+                    setSubsetLabelsIndexed((boolean)value);
                     break;
                     
                 case TokenMapper:
@@ -301,6 +318,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             case isColumnLabelsIndexed:
                 return isColumnLabelsIndexed();
                 
+            case isCellLabelsIndexed:
+                return isCellLabelsIndexed();
+                
+            case isSubsetLabelsIndexed:
+                return isSubsetLabelsIndexed();
+                
             case TokenMapper:
                 return getTokenMapper();
                 
@@ -336,6 +359,23 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         }        
     }
 
+    @Override
+    synchronized protected Map<String, Object> getElemProperties(boolean createIfEmpty)
+    {
+        if (m_elemProperties == null && createIfEmpty)
+            m_elemProperties = new HashMap<String, Object>();
+        
+        return m_elemProperties;
+    }
+
+    protected void resetElemProperties()
+    {
+        if (m_elemProperties != null) {
+            m_elemProperties.clear();
+            m_elemProperties = null;
+        }
+    }
+    
     protected double getFreeSpaceThreshold()
     {
         return m_freeSpaceThreshold;
@@ -403,6 +443,26 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     public void setColumnLabelsIndexed(boolean colLabelsIndexed)
     {
         set(sf_COLUMN_LABELS_INDEXED_FLAG, colLabelsIndexed);
+    }
+
+    public boolean isCellLabelsIndexed()
+    {
+        return isSet(sf_CELL_LABELS_INDEXED_FLAG);
+    }
+
+    public void setCellLabelsIndexed(boolean rowLabelsIndexed)
+    {
+        set(sf_CELL_LABELS_INDEXED_FLAG, rowLabelsIndexed);
+    }
+
+    public boolean isSubsetLabelsIndexed()
+    {
+        return isSet(sf_SUBSET_LABELS_INDEXED_FLAG);
+    }
+
+    public void setSubsetLabelsIndexed(boolean rowLabelsIndexed)
+    {
+        set(sf_SUBSET_LABELS_INDEXED_FLAG, rowLabelsIndexed);
     }
 
     public TokenMapper getTokenMapper()

@@ -343,6 +343,15 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         fireEvents(this, TableElementEventType.OnDelete);
     }
     
+    @Override 
+    public boolean isLabelIndexed()
+    {
+        if (getTable() != null)
+            return getTable().isSubsetLabelsIndexed();
+        else
+            return false;
+    }
+    
     /**
      * Call TableElementImpl.delete() when object is cleaned up
      */

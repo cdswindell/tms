@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -253,6 +254,16 @@ public class CellImpl extends TableElementImpl implements Cell
         return false;
     }
     
+    @Override
+    public boolean isLabelIndexed()
+    {
+        TableImpl parent;
+        if ((parent = getTable()) != null) 
+            return parent.isCellLabelsIndexed();
+        else
+            return false;
+    }
+
     protected Class<? extends Object> getEnforcedDataType()
     {
         if (getColumn() != null && getColumn().getDataType() != null)
@@ -471,6 +482,25 @@ public class CellImpl extends TableElementImpl implements Cell
         m_cellValue = null;
         m_cellOffset = -1;
         m_col = null;
+    }
+    
+
+    @Override
+    protected Map<String, Object> getElemProperties(boolean createIfEmpty)
+    {
+        TableImpl parent;
+        if ((parent = getTable()) != null)
+            return parent.getCellElemProperties(this, createIfEmpty);
+        else
+            return null;
+    }
+
+    @Override
+    protected void resetElemProperties()
+    {
+        TableImpl parent;
+        if ((parent = getTable()) != null)
+            parent.resetCellElemProperties(this);
     }
     
     @Override
@@ -699,6 +729,9 @@ public class CellImpl extends TableElementImpl implements Cell
      */
     protected void invalidateCell()
     {
+        // clear label, also resets index, if rows are indexed
+        setLabel(null); 
+        
         // clear the cell value and cell derivation
         clearDerivation();
         
@@ -732,6 +765,7 @@ public class CellImpl extends TableElementImpl implements Cell
     public void delete()
     {
         this.setCellValue(null, false, true);
+        this.resetElemProperties();
     }
         
     @Override

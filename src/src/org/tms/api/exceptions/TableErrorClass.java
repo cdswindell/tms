@@ -7,6 +7,8 @@ public enum TableErrorClass
     Unimplemented,
     Invalid,
     Required,
+    ConstraintViolation,
+    NotUnique,
     Deleted,
     Illegal,
     UnsupportedImplementation,

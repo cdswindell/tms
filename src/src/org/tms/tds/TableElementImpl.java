@@ -1,18 +1,19 @@
 package org.tms.tds;
 
+import java.util.Map;
 import java.util.Set;
 
-import org.tms.api.Table;
-import org.tms.api.TableContext;
+import org.tms.api.ElementType;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.event.Listenable;
+import org.tms.api.exceptions.NotUniqueException;
 
 abstract class TableElementImpl extends BaseElementImpl implements TableElement, Listenable
 {
-	abstract public Table getTable();
-	abstract public TableContext getTableContext();
+	abstract public TableImpl getTable();
+	abstract public ContextImpl getTableContext();
     abstract protected void delete(boolean compress);
     abstract public void fill(Object o);
     
@@ -102,6 +103,47 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement,
             source = ContextImpl.getDefaultContext();
 
         return source;
+    }
+    
+    @Override
+    public void setLabel(String label)
+    {
+        if (isLabelIndexed()) {
+            ElementType et = getElementType();
+            Map<String, TableElementImpl> elemIndex = getTable().getElementIndex(et);
+            
+            assert elemIndex != null : et + " Label Index is null";
+            
+            synchronized (elemIndex) {
+                String curLabel = getLabel();
+                TableElementImpl curElem = null;
+                if (curLabel != null) {
+                    curElem = elemIndex.remove(curLabel.trim().toLowerCase());
+                    assert curElem == null || curElem == this : et + " label index inconsistent";
+                }
+                
+                String newLabelKey = null;
+                if (label == null || (newLabelKey = label.trim().toLowerCase()).length() == 0) 
+                    ; // noop, we have already removed the current label
+                else {
+                    // check if key is unique
+                    if (elemIndex.containsKey(newLabelKey)) {
+                        // this means the label isn't unique, reindex the original label
+                        // and throw a NotUniqueException
+                        if (curLabel != null) 
+                            elemIndex.put(curLabel.trim().toLowerCase(), this);
+                        throw new NotUniqueException(this, TableProperty.Label, label);
+                    }
+                    else
+                        elemIndex.put(newLabelKey, this);
+                }
+                
+                // set the actual label
+                super.setLabel(label);
+            } // of sync block
+        }
+        else
+            super.setLabel(label);
     }
     
     public String toString()

@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.tms.api.Access;
+import org.tms.api.BaseElement;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
@@ -42,6 +43,7 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.InvalidParentException;
+import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
@@ -100,6 +102,11 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     private ArrayList<RowImpl> m_rows;
     private ArrayList<ColumnImpl> m_cols;
     
+    private Map<String, TableElementImpl> m_rowLabelIndex;
+    private Map<String, TableElementImpl> m_colLabelIndex;
+    private Map<String, TableElementImpl> m_subsetLabelIndex;
+    private Map<String, TableElementImpl> m_cellLabelIndex;
+    
     private int m_nextCellOffset;
     private Queue<Integer> m_unusedCellOffsets;
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
@@ -108,6 +115,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     private Map<CellImpl, Derivation> m_derivedCells;
     private Map<CellImpl, Set<Derivable>> m_cellAffects;
     private Map<CellImpl, TableElementListeners> m_cellListeners;
+    private Map<CellImpl, Map<String, Object>> m_cellElemProperties;
     
     private JustInTimeSet<SubsetImpl> m_subsets;
     
@@ -176,6 +184,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     
     private void initialize(int nRows, int nCols, TableImpl t)
     {
+        // need to be initialized before calling initialize properties
+        m_rowLabelIndex = new HashMap<String, TableElementImpl>();
+        m_colLabelIndex = new HashMap<String, TableElementImpl>();
+        m_cellLabelIndex = new HashMap<String, TableElementImpl>();
+        m_subsetLabelIndex = new HashMap<String, TableElementImpl>();
+        
+        // initialize values from context/defaults
         initializeProperties(t);
         
         // allocate base memory for rows and columns
@@ -202,6 +217,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         m_cellListeners = new ConcurrentHashMap<CellImpl, TableElementListeners>();
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
         
+        m_cellElemProperties = new ConcurrentHashMap<CellImpl, Map<String, Object>>();
         m_subsetedCells = new HashMap<CellImpl, Set<SubsetImpl>>();
         
         m_eventThreadPoolLock = new Object();
@@ -265,6 +281,18 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                     if (!isValidPropertyValueBoolean(value))
                         value = ContextImpl.sf_COLUMN_LABELS_INDEXED_DEFAULT;
                     setColumnLabelsIndexed((boolean)value);
+                    break;
+                    
+                case isCellLabelsIndexed:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_CELL_LABELS_INDEXED_DEFAULT;
+                    setCellLabelsIndexed((boolean)value);
+                    break;
+                    
+                case isSubsetLabelsIndexed:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_SUBSET_LABELS_INDEXED_DEFAULT;
+                    setSubsetLabelsIndexed((boolean)value);
                     break;
                     
                 case isEventsNotifyInSameThread:
@@ -541,6 +569,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                 
             case isColumnLabelsIndexed:
                 return isColumnLabelsIndexed();
+                
+            case isCellLabelsIndexed:
+                return isCellLabelsIndexed();
+                
+            case isSubsetLabelsIndexed:
+                return isSubsetLabelsIndexed();
                 
             case isEventsNotifyInSameThread:
                 return isEventsNotifyInSameThread();
@@ -926,6 +960,11 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
 
     public void setRowLabelsIndexed(boolean rowLabelsIndexed)
     {
+        if (!rowLabelsIndexed)
+            m_rowLabelIndex.clear();
+        else 
+            indexLabels(m_rows, m_rowLabelIndex, sf_ROW_LABELS_INDEXED_FLAG);
+        
         set(sf_ROW_LABELS_INDEXED_FLAG, rowLabelsIndexed);
     }
 
@@ -936,9 +975,102 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
 
     public void setColumnLabelsIndexed(boolean colLabelsIndexed)
     {
+        if (!colLabelsIndexed)
+            m_colLabelIndex.clear();
+        else 
+            indexLabels(m_cols, m_colLabelIndex, sf_COLUMN_LABELS_INDEXED_FLAG);
+        
         set(sf_COLUMN_LABELS_INDEXED_FLAG, colLabelsIndexed);
     }
 
+    public boolean isSubsetLabelsIndexed()
+    {
+        return isSet(sf_SUBSET_LABELS_INDEXED_FLAG);
+    }
+    
+    public void setSubsetLabelsIndexed(boolean subsetLabelsIndexed)
+    {
+        if (!subsetLabelsIndexed)
+            m_colLabelIndex.clear();
+        else 
+            indexLabels(m_subsets, m_subsetLabelIndex, sf_SUBSET_LABELS_INDEXED_FLAG);
+        
+        set(sf_SUBSET_LABELS_INDEXED_FLAG, subsetLabelsIndexed);
+    }
+
+    public boolean isCellLabelsIndexed()
+    {
+        return isSet(sf_CELL_LABELS_INDEXED_FLAG);
+    }
+
+    public void setCellLabelsIndexed(boolean cellLabelsIndexed)
+    {
+        if (!cellLabelsIndexed)
+            m_cellLabelIndex.clear();
+        else 
+            indexLabels(m_cellElemProperties.keySet(), m_cellLabelIndex, sf_CELL_LABELS_INDEXED_FLAG);
+        
+        set(sf_CELL_LABELS_INDEXED_FLAG, cellLabelsIndexed);
+    }
+
+    @Override
+    public boolean isLabelIndexed()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    synchronized private void indexLabels(Collection<? extends TableElementImpl> elems, 
+                                          Map<String, TableElementImpl> labelIndex, 
+                                          int flagBit)
+    {
+        labelIndex.clear();
+        
+        if (elems == null) {
+            set(flagBit, false);
+            return;
+        }
+        
+        for (TableElementImpl s : elems) {
+            if (s == null)
+                continue;
+            
+            String label = s.getLabel();
+            if (label == null)
+                continue;
+            
+            String key = label.toLowerCase();
+            if (labelIndex.put(key, s) != null) {
+                // found a duplicate label, can't index
+                // reset map and clear flag
+                labelIndex.clear();
+                set(flagBit, false);
+                
+                throw new NotUniqueException(s, TableProperty.Label, label);
+            }
+        }        
+    }
+
+    Map<String, TableElementImpl> getElementIndex(ElementType et)
+    {
+        switch (et) {
+            case Row:
+                return m_rowLabelIndex;
+                
+            case Column:
+                return m_colLabelIndex;
+                
+            case Cell:
+                return m_cellLabelIndex;
+                
+            case Subset:
+                return m_subsetLabelIndex;
+                
+            default:
+                throw new UnsupportedImplementationException(et, "Label Index");
+        }       
+    }
+    
     @Override
     protected boolean isDataTypeEnforced()
     {
@@ -1076,6 +1208,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
 
     private CellImpl findCells(TableProperty key,  Object query)
     {
+        if (key == TableProperty.Label && isCellLabelsIndexed())
+            return (CellImpl)find(ElementType.Cell, null, key, query);
+        
         for (ColumnImpl col : m_cols) {
             if (col != null) {
                 for (CellImpl c : col.cellsInternal()) {
@@ -1107,7 +1242,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                 if (md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));
-                return (SubsetImpl)find(m_subsets, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+                return (SubsetImpl)find(ElementType.Subset, m_subsets, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
                 
             case ByProperty:
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;
@@ -1789,7 +1924,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableSliceElementImpl target = (TableSliceElementImpl)find(slices, TableProperty.Label, md);
+                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Label, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -1802,7 +1937,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableSliceElementImpl target = (TableSliceElementImpl)find(slices, TableProperty.Description, md);
+                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Description, md);
                 // indexes are 1-based; element arrays are 0-based
                 if (target != null)
                     return target.getIndex() - 1;
@@ -1820,7 +1955,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                 // key must either be a table property or a string
                 TableSliceElementImpl target;
                 if (key instanceof TableProperty) 
-                    target = (TableSliceElementImpl)find(slices, (TableProperty)key, value);
+                    target = (TableSliceElementImpl)find(et, slices, (TableProperty)key, value);
                 else if (key instanceof String) 
                     target = (TableSliceElementImpl)find(slices, (String)key, value);
                 else
@@ -1837,6 +1972,33 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         // if we get here, return the default, which indicates an error
         return -1;
     }
+    
+    protected BaseElement find(ElementType et, Collection<? extends BaseElement> slices, TableProperty key, Object value)
+    {
+        if (key == TableProperty.Label) {
+            if (et == ElementType.Row && isRowLabelsIndexed())
+                return findIndexedElement(m_rowLabelIndex, value);
+            else if (et == ElementType.Column && isColumnLabelsIndexed())
+                return findIndexedElement(m_colLabelIndex, value);
+            else if (et == ElementType.Cell && isCellLabelsIndexed())
+                return findIndexedElement(m_cellLabelIndex, value);
+            else if (et == ElementType.Subset && isSubsetLabelsIndexed())
+                return findIndexedElement(m_subsetLabelIndex, value);
+        }
+        
+        return find(slices, key, value);
+    }
+    
+    private BaseElement findIndexedElement(Map<String, TableElementImpl> elemIndex, Object keyValue)
+    {
+        String key;
+        if (elemIndex == null || keyValue == null || 
+                (key = keyValue.toString().trim().toLowerCase()).length() == 0)
+            return null;
+        
+        return elemIndex.get(key);
+    }
+
     
     @Override
     synchronized public int getNumCells()
@@ -2010,12 +2172,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         }
 	}
 	
-    protected Derivation getCellDerivation(CellImpl cell)
+    Derivation getCellDerivation(CellImpl cell)
     {
         return m_derivedCells.get(cell);
     }
     
-    protected Derivation registerDerivedCell(CellImpl cell, Derivation d)
+    Derivation registerDerivedCell(CellImpl cell, Derivation d)
     {
         if (cell != null && d != null)
             return m_derivedCells.put(cell, d);
@@ -2023,7 +2185,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             return null;
     }
     
-    protected Derivation deregisterDerivedCell(CellImpl cell)
+    Derivation deregisterDerivedCell(CellImpl cell)
     {
         if (cell != null)
             return m_derivedCells.remove(cell);
@@ -2031,7 +2193,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             return null;
     }    
 
-    protected int getNumDerivedCells()
+    int getNumDerivedCells()
     {
         return m_derivedCells.size();
     }
@@ -2062,6 +2224,29 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         finally {
             cr.setCurrentCellReference();
         }       
+    }    
+
+    Map<String, Object> getCellElemProperties(CellImpl cell, boolean createIfEmpty)
+    {
+        if (cell != null) {
+            synchronized(cell) {
+                Map<String, Object> cellElemProperties = m_cellElemProperties.get(cell);
+                if (createIfEmpty && cellElemProperties == null) {
+                    cellElemProperties = new HashMap<String, Object>();
+                    m_cellElemProperties.put(cell, cellElemProperties);
+                }
+            
+                return cellElemProperties;
+            }
+        }
+
+        return null;
+    }
+    
+    void resetCellElemProperties(CellImpl cell)
+    {
+        if (cell != null) 
+            m_cellElemProperties.remove(cell);
     }
     
     /**

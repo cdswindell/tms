@@ -29,6 +29,8 @@ public enum TableProperty implements Comparable<TableProperty>
     isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
     isRowLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
     isColumnLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
+    isCellLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
+    isSubsetLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
     
     // PendingDerivationThreadPool Properties
     isPendingAllowCoreThreadTimeout(true, false, true, ElementType.Context, ElementType.Table),

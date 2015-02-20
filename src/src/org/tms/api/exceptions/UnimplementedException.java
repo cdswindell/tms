@@ -1,24 +1,24 @@
 package org.tms.api.exceptions;
 
+import org.tms.api.BaseElement;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
-import org.tms.tds.BaseElementImpl;
 
 public final class UnimplementedException extends TableException
 {
-    private static final long serialVersionUID = 4174806292387968676L;
+    private static final long serialVersionUID = 6396199147218605556L;
 
-    public UnimplementedException(BaseElementImpl te, TableProperty tp)
+    public UnimplementedException(BaseElement te, TableProperty tp)
     {
         super(te.getElementType(), tp, TableErrorClass.Unimplemented);
     }
 
-    public UnimplementedException(BaseElementImpl te, TableProperty tp, String msg)
+    public UnimplementedException(BaseElement te, TableProperty tp, String msg)
     {
         super(te.getElementType(), tp, TableErrorClass.Unimplemented, msg);
     }
 
-    public UnimplementedException(BaseElementImpl te, String msg)
+    public UnimplementedException(BaseElement te, String msg)
     {
         super(te.getElementType(), msg, TableErrorClass.Unimplemented);
     }

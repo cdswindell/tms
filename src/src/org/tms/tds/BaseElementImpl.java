@@ -3,7 +3,6 @@ package org.tms.tds;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,35 +18,39 @@ import org.tms.api.exceptions.UnimplementedException;
 abstract public class BaseElementImpl implements BaseElement
 {
     abstract protected boolean isNull();
+    abstract protected Map<String, Object> getElemProperties(boolean createIfEmpty);
+    abstract protected void resetElemProperties();
     
     public abstract ElementType getElementType();
     
     protected static final String sf_RESERVED_PROPERTY_PREFIX = "~~~";
     
-    static final protected int sf_ENFORCE_DATATYPE_FLAG = 0x01;
-    static final protected int sf_READONLY_FLAG = 0x02;
-    static final protected int sf_SUPPORTS_NULL_FLAG = 0x04;
-    static final protected int sf_AUTO_RECALCULATE_FLAG = 0x08;
+    static final protected int sf_ENFORCE_DATATYPE_FLAG             = 0x01;
+    static final protected int sf_READONLY_FLAG                     = 0x02;
+    static final protected int sf_SUPPORTS_NULL_FLAG                = 0x04;
+    static final protected int sf_AUTO_RECALCULATE_FLAG             = 0x08;
     
-    static final protected int sf_AUTO_RECALCULATE_DISABLED_FLAG = 0x10;
-    static final protected int sf_STRONGLY_TYPED_FLAG = 0x20;
-    static final protected int sf_IN_USE_FLAG = 0x40;
-    static final protected int sf_IS_PENDING_FLAG = 0x80;
+    static final protected int sf_AUTO_RECALCULATE_DISABLED_FLAG    = 0x10;
+    static final protected int sf_STRONGLY_TYPED_FLAG               = 0x20;
+    static final protected int sf_IN_USE_FLAG                       = 0x40;
+    static final protected int sf_IS_PENDING_FLAG                   = 0x80;
     
-    static final protected int sf_ROW_LABELS_INDEXED_FLAG = 0x100;
-    static final protected int sf_COLUMN_LABELS_INDEXED_FLAG = 0x200;
-    static final protected int sf_HAS_CELL_VALIDATOR_FLAG = 0x400;
+    static final protected int sf_ROW_LABELS_INDEXED_FLAG           = 0x100;
+    static final protected int sf_COLUMN_LABELS_INDEXED_FLAG        = 0x200;
+    static final protected int sf_CELL_LABELS_INDEXED_FLAG          = 0x400;
+    static final protected int sf_TABLE_LABELS_INDEXED_FLAG         = 0x800;
     
-    static final protected int sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG = 0x1000;
-    static final protected int sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG = 0x2000;
-    static final protected int sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG = 0x4000;
+    static final protected int sf_SUBSET_LABELS_INDEXED_FLAG        = 0x1000;
+    static final protected int sf_HAS_CELL_VALIDATOR_FLAG           = 0x2000;
     
-    static final protected int sf_IS_DEFAULT_FLAG  = 0x1000000;
-    static final protected int sf_IS_DIRTY_FLAG    = 0x2000000;
+    static final protected int sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG         = 0x100000;
+    static final protected int sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG     = 0x200000;
+    static final protected int sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG   = 0x400000;
     
-    static final protected int sf_IS_INVALID_FLAG = 0x10000000;
+    static final protected int sf_IS_DEFAULT_FLAG                   = 0x1000000;
+    static final protected int sf_IS_DIRTY_FLAG                     = 0x2000000;
     
-    private Map<String, Object> m_elemProperties;
+    static final protected int sf_IS_INVALID_FLAG                   = 0x10000000;
     
     // to save a little space, all flags are maintained in a 
     // single 32 bit integer
@@ -63,14 +66,6 @@ abstract public class BaseElementImpl implements BaseElement
         return getElemProperties(false);
     }
     
-    private synchronized Map<String, Object> getElemProperties(boolean createIfEmpty)
-    {
-        if (m_elemProperties == null && createIfEmpty)
-            m_elemProperties = new HashMap<String, Object>();
-        
-        return m_elemProperties;
-    }
-
     protected boolean isImplements(TableProperty tp)
     {
         if (tp == null)
@@ -82,8 +77,7 @@ abstract public class BaseElementImpl implements BaseElement
     protected void invalidate()
     {
         m_flags |= sf_IS_INVALID_FLAG;        
-        if (m_elemProperties != null)
-            m_elemProperties.clear();
+        resetElemProperties();
     }
     
     protected void vetElement()

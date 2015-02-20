@@ -24,6 +24,7 @@ public interface TableElement extends BaseElement, Listenable
     
     public String getLabel();
     public void setLabel(String label);
+    public boolean isLabelIndexed();
     
     public int getNumSubsets();
     /**

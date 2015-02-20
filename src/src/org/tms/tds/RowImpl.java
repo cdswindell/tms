@@ -123,6 +123,16 @@ public class RowImpl extends TableSliceElementImpl implements Row
     /*
      * Overridden Methods
      */
+    
+    @Override 
+    public boolean isLabelIndexed()
+    {
+        if (getTable() != null)
+            return getTable().isRowLabelsIndexed();
+        else
+            return false;
+    }
+    
     @Override
     public Object getProperty(TableProperty key)
     {

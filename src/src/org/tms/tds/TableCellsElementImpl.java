@@ -2,8 +2,10 @@ package org.tms.tds;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.Cell;
@@ -28,7 +30,8 @@ abstract class TableCellsElementImpl extends TableElementImpl
     
     private int m_pendings;
     private TableElementListeners m_listeners;
-
+    private Map<String, Object> m_elemProperties;
+    
     protected TableCellsElementImpl(TableElementImpl e)
     {
         super(e);
@@ -42,6 +45,23 @@ abstract class TableCellsElementImpl extends TableElementImpl
     /*
      * Field getters and setters
      */
+    
+    @Override
+    synchronized protected Map<String, Object> getElemProperties(boolean createIfEmpty)
+    {
+        if (m_elemProperties == null && createIfEmpty)
+            m_elemProperties = new HashMap<String, Object>();
+        
+        return m_elemProperties;
+    }
+
+    protected void resetElemProperties()
+    {
+        if (m_elemProperties != null) {
+            m_elemProperties.clear();
+            m_elemProperties = null;
+        }
+    }
     
     public TableImpl getTable()
     {
@@ -159,6 +179,9 @@ abstract class TableCellsElementImpl extends TableElementImpl
     protected void delete(boolean compress)
     {
         fireEvents(this, TableElementEventType.OnBeforeDelete);
+        
+        // clear label, also resets index, if rows are indexed
+        setLabel(null);        
     }
     
     /*
