@@ -11,6 +11,8 @@ import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.DataTypeEnforcementException;
+import org.tms.api.exceptions.NotUniqueException;
+import org.tms.api.exceptions.TableErrorClass;
 
 public class CellTest
 {
@@ -208,4 +210,67 @@ public class CellTest
             assertThat(e.getRejected(), is((Object)String.class));
         }       
     }
+    
+    @Test
+    public void testIndexedCells()
+    {
+        TableImpl t = new TableImpl();
+        assertThat(t, notNullValue());
+        
+        t.setCellLabelsIndexed(true);
+        assertThat(t.isCellLabelsIndexed(), is(true));
+        
+        RowImpl r1 = t.addRow();
+        ColumnImpl c1 = t.addColumn();
+        
+        CellImpl c11 = t.getCell(r1,  c1);
+        c11.setLabel("Unique Label 1");
+        
+        ColumnImpl c2 = t.addColumn();
+        CellImpl c12 = t.getCell(r1,  c2);
+        c12.setLabel("Unique Label 3");
+        
+        // test that we can relabel an existing Column
+        c12.setLabel("Unique Label 2");
+
+        // and use the old label somewhere else
+        ColumnImpl c3 = t.addColumn();
+        CellImpl c13 = t.getCell(r1,  c3);
+        c13.setLabel("Unique Label 3");
+        
+        // delete column, should free up cell label
+        c2.delete();
+        c2 = t.addColumn();
+        c12 = t.getCell(r1,  c2);
+        c12.setLabel("Unique Label 2");
+        
+        // try to set a Column to a label that's in use
+        try {
+            c13.setLabel("Unique Label 2");
+            fail("set label to not unique value");
+        }
+        catch (NotUniqueException e) {
+            assertThat(e.getTableErrorClass(), is(TableErrorClass.NotUnique));
+        }
+        
+        // disable indexing and try to set label again
+        t.setCellLabelsIndexed(false);
+        assertThat(t.isColumnLabelsIndexed(), is(false));
+        c13.setLabel("Unique Label 2");
+        
+        // try to reindex Columns, should fail, as Column labels are not unique
+        // try to set a Column to a label that's in use
+        try {
+            t.setCellLabelsIndexed(true);
+            fail("reindexed non-unique labels");
+        }
+        catch (NotUniqueException e) {
+            assertThat(e.getTableErrorClass(), is(TableErrorClass.NotUnique));
+        }
+        
+        // clear non-unique value and try again
+        c13.setLabel(null);
+        t.setCellLabelsIndexed(true);
+        assertThat(t.isCellLabelsIndexed(), is(true));
+    }   
 }

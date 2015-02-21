@@ -2,6 +2,8 @@ package org.tms.api;
 
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.ErrorCode;
+import org.tms.api.utils.TableCellTransformer;
+import org.tms.api.utils.TableCellValidator;
 
 public interface Cell extends TableElement, Derivable
 {
@@ -23,4 +25,5 @@ public interface Cell extends TableElement, Derivable
 
     public TableCellValidator getValidator();
     public void setValidator(TableCellValidator validator);
+    public void setTransformer(TableCellTransformer transformer);
 }

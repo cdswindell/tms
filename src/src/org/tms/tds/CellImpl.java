@@ -11,7 +11,6 @@ import java.util.Set;
 import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.Subset;
-import org.tms.api.TableCellValidator;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
@@ -23,6 +22,8 @@ import org.tms.api.event.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.DataTypeEnforcementException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.utils.TableCellTransformer;
+import org.tms.api.utils.TableCellValidator;
 import org.tms.teq.Derivation;
 
 public class CellImpl extends TableElementImpl implements Cell
@@ -217,8 +218,8 @@ public class CellImpl extends TableElementImpl implements Cell
         boolean valuesDiffer = false;        
         if (value != m_cellValue) {  
             if (doPreprocess) {
-                // validate potential new cell value
-                applyValidator(value);
+                // validate and potentially transform new cell value
+                value = applyTransformer(value);
                 try {
                     fireEvents(TableElementEventType.OnBeforeNewValue, m_cellValue, value);
                 }
@@ -308,7 +309,13 @@ public class CellImpl extends TableElementImpl implements Cell
         set(sf_HAS_CELL_VALIDATOR_FLAG, validator != null);
     }
 
-    private void applyValidator(Object newValue)
+    @Override
+    public void setTransformer(TableCellTransformer transformer)
+    {
+        setValidator(transformer);
+    }
+    
+    private Object applyTransformer(Object newValue)
     {
         TableCellValidator validator = getValidator();
         if (validator == null)
@@ -317,7 +324,9 @@ public class CellImpl extends TableElementImpl implements Cell
             validator = getRow().getValidator();
         
         if (validator != null)
-            validator.validate(this, newValue);
+            newValue = validator.transform(newValue);
+        
+        return newValue;
     }
     
     @Override

@@ -1,5 +1,6 @@
 package org.tms.tds;
 
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -7,7 +8,8 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.Cell;
-import org.tms.api.exceptions.TableCellValidationException;
+import org.tms.api.exceptions.ConstraintViolationException;
+import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.utils.NumericRange;
 import org.tms.api.utils.NumericRangeRequired;
 
@@ -40,7 +42,7 @@ public class CellValidationTest
             cR2C1.setCellValue(-5.0);
             fail("set cell value");
         }
-        catch (TableCellValidationException e)
+        catch (ConstraintViolationException e)
         {
             assertThat(e, notNullValue());
         }       
@@ -49,7 +51,7 @@ public class CellValidationTest
             cR4C1.setCellValue(null);
             fail("set cell value");
         }
-        catch (TableCellValidationException e)
+        catch (ConstraintViolationException e)
         {
             assertThat(e, notNullValue());
         }   
@@ -66,7 +68,7 @@ public class CellValidationTest
             cR1C2.setCellValue(50);
             fail("set cell value");
         }
-        catch (TableCellValidationException e)
+        catch (ConstraintViolationException e)
         {
             assertThat(e, notNullValue());
         }      
@@ -74,5 +76,53 @@ public class CellValidationTest
         r1.setValidator(null);
         cR1C2.setCellValue(50);
         cR1C2.setCellValue(0);
+    }
+
+    @Test
+    public void testLamdaExpressionCellValidator()
+    {
+        TableImpl t = new TableImpl();
+        RowImpl r1 = t.addRow(Access.Next);
+        RowImpl r2 = t.addRow(Access.Next);
+        RowImpl r4 = t.addRow(Access.Next);
+        ColumnImpl c1 = t.addColumn(Access.Next);
+        
+        r1.setValidator(new NumericRange(30.0, 40.0));
+        c1.setValidator(new NumericRange(1.0, 10.0));
+        
+        Cell cR1C1 = t.getCell(r1, c1);
+        Cell cR2C1 = t.getCell(r2, c1);
+        Cell cR4C1 = t.getCell(r4, c1);
+        
+        // test usage of functional interface
+        cR4C1.setValidator(v -> { if (!(v == null || v instanceof Number)) throw new ConstraintViolationException("Number Required"); });
+        
+        cR1C1.setCellValue(2.0);
+        
+        cR2C1.setCellValue(null);
+        cR4C1.setCellValue(-5.0);
+        assertThat(cR4C1.getCellValue(), is(-5.0));
+        cR4C1.setCellValue(null);
+        
+        try {
+            cR4C1.setCellValue("abc");
+            fail("set cell value");
+        }
+        catch (ConstraintViolationException e)
+        {
+            assertThat(e.getTableErrorClass(), is(TableErrorClass.ConstraintViolation));
+        }       
+                
+        cR4C1.setValidator(null);
+        c1.setValidator(null);
+        cR4C1.setCellValue("abc");
+        
+        // test usage of functional interface transformer
+        cR4C1.setTransformer(v -> { if (v != null && v instanceof Number) return ((Number)v).doubleValue() * 2; return v;});
+        cR4C1.setCellValue("def");
+        assertThat(cR4C1.getCellValue(), is("def"));
+        
+        cR4C1.setCellValue(7);
+        assertThat(cR4C1.getCellValue(), is(14.0));        
     }
 }

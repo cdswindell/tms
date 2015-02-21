@@ -1,7 +1,5 @@
 package org.tms.api.utils;
 
-import org.tms.api.Cell;
-import org.tms.api.TableCellValidator;
 import org.tms.api.exceptions.ConstraintViolationException;
 
 public class NumericRange implements TableCellValidator
@@ -19,7 +17,7 @@ public class NumericRange implements TableCellValidator
     }
 
     @Override
-    public void validate(Cell cell, Object newValue) throws ConstraintViolationException
+    public void validate(Object newValue) throws ConstraintViolationException
     {
         if (newValue == null)
             return;

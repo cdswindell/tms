@@ -11,7 +11,6 @@ import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Row;
 import org.tms.api.Subset;
-import org.tms.api.TableCellValidator;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
@@ -21,6 +20,8 @@ import org.tms.api.event.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.utils.TableCellTransformer;
+import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TableImpl.CellReference;
 import org.tms.teq.Derivation;
 import org.tms.util.JustInTimeSet;
@@ -392,6 +393,12 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         set(sf_HAS_CELL_VALIDATOR_FLAG, validator != null);
     }
 
+    @Override
+    public void setTransformer(TableCellTransformer transformer)
+    {
+        setValidator(transformer);
+    }
+    
     @Override
     public Cell getCell(Access mode, Object... mda)
     {

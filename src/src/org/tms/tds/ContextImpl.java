@@ -116,7 +116,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     private int m_pendingMaxPoolThreads;
     private long m_pendingKeepAliveTimeout;
     private PendingDerivationExecutor m_pendingThreadPool;
-
+    
     private Map<String, Object> m_elemProperties;
     
     private ContextImpl(boolean isDefault, TableContext otherContext)
@@ -675,8 +675,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         else
             m_eventsMaxPoolThreads = maxPoolSize;
     }
-
-   
+  
     public long getEventsKeepAliveTime()
     {
         return m_eventsKeepAliveTimeout;

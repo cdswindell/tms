@@ -2,6 +2,9 @@ package org.tms.api;
 
 import java.util.List;
 
+import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.api.event.EventProcessorThreadPool;
+
 public interface Table extends TableElement
 {    
     public Row addRow();   
@@ -40,4 +43,22 @@ public interface Table extends TableElement
      * Recalculate all derived elements (rows, columns and cells)
      */
     public void recalculate();
+    
+    /**
+     * Returns {@code true} if this {@link Table} implements {@link DerivableThreadPool}.
+     * @return true if this Table implements DerivableThreadPool
+     */
+    default public boolean isDerivableThreadPool()
+    {
+        return this instanceof DerivableThreadPool;
+    }
+    
+    /**
+     * Returns {@code true} if this {@link Table} implements {@link EventProcessorThreadPool}.
+     * @return true if this Table implements EventProcessorThreadPool
+     */
+    default public boolean isEventProcessorThreadPool()
+    {
+        return this instanceof EventProcessorThreadPool;
+    }
 }

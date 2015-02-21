@@ -355,7 +355,7 @@ public class StatOperatorTest extends BaseTest
         
         c = t.getCell(t.getRow(Access.Next), c2);
         c.setDerivation("stDev(col 1)");
-        assertThat(closeTo(c.getCellValue(), 1.0, 0.01), is(true));
+        assertThat(closeTo(c.getCellValue(), 1.0, 0.05), is(true));
     }
     
     @Test

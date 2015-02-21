@@ -1,8 +1,10 @@
 package org.tms.tds;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -10,6 +12,8 @@ import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.NotUniqueException;
+import org.tms.api.exceptions.TableErrorClass;
 
 public class RowTest
 {
@@ -71,6 +75,63 @@ public class RowTest
             Object value = r.getProperty(p);
             System.out.println(" = " + (value != null ? value.toString() : "<null>")); 
         }
+    }
+    
+    @Test
+    public void testIndexedRows()
+    {
+        TableImpl t = new TableImpl();
+        assertThat(t, notNullValue());
+        
+        t.setRowLabelsIndexed(true);
+        assertThat(t.isRowLabelsIndexed(), is(true));
+        
+        RowImpl r1 = t.addRow();
+        r1.setLabel("Unique Label 1");
+        
+        RowImpl r2 = t.addRow();
+        r2.setLabel("Unique Label 3");
+        
+        // test that we can relabel an existing row
+        r2.setLabel("Unique Label 2");
+
+        // and use the old label somewhere else
+        RowImpl r3 = t.addRow();
+        r3.setLabel("Unique Label 3");
+        
+        // delete row, should free up label
+        r2.delete();
+        r2 = t.addRow();
+        r2.setLabel("Unique Label 2");
+        
+        // try to set a row to a label that's in use
+        try {
+            r3.setLabel("Unique Label 2");
+            fail("set label to not unique value");
+        }
+        catch (NotUniqueException e) {
+            assertThat(e.getTableErrorClass(), is(TableErrorClass.NotUnique));
+        }
+        
+        // disable indexing and try to set label again
+        t.setRowLabelsIndexed(false);
+        assertThat(t.isRowLabelsIndexed(), is(false));
+        r3.setLabel("Unique Label 2");
+        
+        // try to reindex rows, should fail, as row labels are not unique
+        // try to set a row to a label that's in use
+        try {
+            t.setRowLabelsIndexed(true);
+            fail("reindexed non-unique labels");
+        }
+        catch (NotUniqueException e) {
+            assertThat(e.getTableErrorClass(), is(TableErrorClass.NotUnique));
+        }
+        
+        // clear non-unique value and try again
+        r3.setLabel(null);
+        t.setRowLabelsIndexed(true);
+        assertThat(t.isRowLabelsIndexed(), is(true));
     }
     
     @Test

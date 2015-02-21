@@ -2,6 +2,9 @@ package org.tms.api;
 
 import java.util.Comparator;
 
+import org.tms.api.utils.TableCellTransformer;
+import org.tms.api.utils.TableCellValidator;
+
 public interface TableRowColumnElement extends TableElement
 {
     /**
@@ -15,6 +18,7 @@ public interface TableRowColumnElement extends TableElement
 
     public TableCellValidator getValidator();
     public void setValidator(TableCellValidator validator);
+    public void setTransformer(TableCellTransformer transformer);
     
     /**
      * Sort the table by a row/column. Null elements are sorted to the end of the row/column.
