@@ -376,12 +376,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         }
     }
     
-    protected double getFreeSpaceThreshold()
+    public double getFreeSpaceThreshold()
     {
         return m_freeSpaceThreshold;
     }
     
-    protected void setFreeSpaceThreshold(double value)
+    public void setFreeSpaceThreshold(double value)
     {
         if (value < 0.0) {
             if (this.isDefault()) 
@@ -420,7 +420,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         return isSet(sf_AUTO_RECALCULATE_FLAG);
     }
     
-    protected void setAutoRecalculate(boolean value)
+    public void setAutoRecalculate(boolean value)
     {
         set(sf_AUTO_RECALCULATE_FLAG, value);
     }
@@ -478,12 +478,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         m_tokenMapper = tm;
     }
     
-    protected int getRowCapacityIncr()
+    public int getRowCapacityIncr()
     {
         return m_rowCapacityIncr;
     }
 
-    protected void setRowCapacityIncr(int rowCapacityIncr)
+    public void setRowCapacityIncr(int rowCapacityIncr)
     {
         if (rowCapacityIncr <= 0) {
             if (this.isDefault()) 
@@ -495,12 +495,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             m_rowCapacityIncr = rowCapacityIncr;
     }
 
-    protected int getColumnCapacityIncr()
+    public int getColumnCapacityIncr()
     {
         return m_columnCapacityIncr;
     }
 
-    protected void setColumnCapacityIncr(int columnCapacityIncr)
+    public void setColumnCapacityIncr(int columnCapacityIncr)
     {
         if (columnCapacityIncr <= 0) {
             if (this.isDefault()) 
@@ -512,12 +512,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             m_columnCapacityIncr = columnCapacityIncr;
     }
 
-    protected int getPrecision()
+    public int getPrecision()
     {
         return m_precision;
     }
 
-    protected void setPrecision(int precision)
+    public void setPrecision(int precision)
     {
         if (precision <= 0) {
             if (this.isDefault()) 

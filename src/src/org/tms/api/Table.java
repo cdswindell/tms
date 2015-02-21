@@ -61,4 +61,31 @@ public interface Table extends TableElement
     {
         return this instanceof EventProcessorThreadPool;
     }
+    
+    public boolean isRowLabelsIndexed();
+    public void setRowLabelsIndexed(boolean isIndexed);
+    
+    public boolean isColumnLabelsIndexed();
+    public void setColumnLabelsIndexed(boolean isIndexed);
+    
+    public boolean isCellLabelsIndexed();
+    public void setCellLabelsIndexed(boolean isIndexed);
+    
+    public boolean isSubsetLabelsIndexed();
+    public void setSubsetLabelsIndexed(boolean isIndexed);
+    
+    public int getRowCapacityIncr();
+    public void setRowCapacityIncr(int increment);
+    
+    public int getColumnCapacityIncr();
+    public void setColumnCapacityIncr(int increment);
+    
+    public double getFreeSpaceThreshold();
+    public void setFreeSpaceThreshold(double threshold);
+    
+    public int getPrecision();
+    public void setPrecision(int digits);
+    
+    public boolean isAutoRecalculate();
+    public void setAutoRecalculate(boolean autoRecalculate);
 }

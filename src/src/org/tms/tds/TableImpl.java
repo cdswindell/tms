@@ -938,7 +938,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         return isSet(sf_AUTO_RECALCULATE_FLAG);
     }
     
-    protected void setAutoRecalculate(boolean value)
+    public void setAutoRecalculate(boolean value)
     {
         set(sf_AUTO_RECALCULATE_FLAG, value);
     }
@@ -1351,7 +1351,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         }
     }
     
-    protected double getFreeSpaceThreshold()
+    public double getFreeSpaceThreshold()
     {
         if (m_freeSpaceThreshold < 0)
             m_freeSpaceThreshold = ContextImpl.getPropertyDouble(getTableContext(), TableProperty.FreeSpaceThreshold);
@@ -1359,7 +1359,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         return m_freeSpaceThreshold;
     }
     
-    protected void setFreeSpaceThreshold(double value)
+    public void setFreeSpaceThreshold(double value)
     {
         if (value < 0.0) {
             m_rowCapacityIncr = -1;
@@ -1406,7 +1406,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         return capacity;
     }
     
-    protected int getRowCapacityIncr()
+    public int getRowCapacityIncr()
     {
         if (m_rowCapacityIncr <= 0) 
             m_rowCapacityIncr = ContextImpl.getPropertyInt(getTableContext(), TableProperty.RowCapacityIncr);
@@ -1414,7 +1414,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         return m_rowCapacityIncr;
     }
 
-    protected void setRowCapacityIncr(int rowCapacityIncr)
+    public void setRowCapacityIncr(int rowCapacityIncr)
     {
         if (rowCapacityIncr <= 0) {
             // force a reset of the row capacity value
@@ -1595,7 +1595,8 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     /*
      * Column manipulation methods
      */
-    protected int getColumnCapacityIncr()
+    @Override
+    public int getColumnCapacityIncr()
     {
         if (m_colCapacityIncr <= 0) 
             m_colCapacityIncr = ContextImpl.getPropertyInt(getTableContext(), TableProperty.ColumnCapacityIncr);
@@ -1603,7 +1604,8 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         return m_colCapacityIncr;
     }
 
-    protected void setColumnCapacityIncr(int colCapacityIncr)
+    @Override
+    public void setColumnCapacityIncr(int colCapacityIncr)
     {
         if (colCapacityIncr <= 0) {
             // force a reset of the row capacity value
