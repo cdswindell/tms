@@ -251,16 +251,6 @@ public class Token implements Labeled
         return m_label;
     }
     
-    public int getLabelLength()
-    {
-        return m_label != null ? m_label.length() : 0;
-    }
-    
-    public boolean isLabeled()
-    { 
-        return m_label != null;
-    }
-    
     public String toString()
     {
         if (m_value != null)

@@ -2,10 +2,8 @@ package org.tms.api.derivables;
 
 import org.tms.teq.BuiltinOperator;
 
-public interface Operator
+public interface Operator extends Labeled
 {
-    public String getLabel();
-
     public TokenType getTokenType();
     
     public Class<?> [] getArgTypes();

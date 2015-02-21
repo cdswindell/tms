@@ -342,18 +342,6 @@ public enum BuiltinOperator implements Labeled, Operator
         return m_aliases;
     }
     
-    @Override
-    public int getLabelLength()
-    {
-        return m_label != null ? m_label.length() : 0;
-    }
-    
-    @Override
-    public boolean isLabeled()
-    { 
-        return m_label != null;
-    }
-
 	@Override
     public int numArgs() 
 	{

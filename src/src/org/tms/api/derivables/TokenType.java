@@ -101,16 +101,6 @@ public enum TokenType implements Labeled
         return m_labels.isEmpty() ? null : m_labels.toArray(new String [] {})[0];
     }
     
-    public int getLabelLength()
-    {
-        return getLabel() != null ? getLabel().length() : 0;
-    }
-        
-    public boolean isLabeled()
-    { 
-        return getLabel() != null;
-    }
-    
     public Set<String> getLabels()
     {
         return m_labels;
