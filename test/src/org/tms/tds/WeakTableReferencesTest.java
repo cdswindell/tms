@@ -92,16 +92,15 @@ public class WeakTableReferencesTest
         t.addColumn(Access.ByIndex, cols);
         
         t.addRow(Access.ByIndex, rows);
+        t.addListeners(TableElementEventType.OnNewValue, e -> System.out.println("Table: " + e));
         t.fill(fillValue);
         
-        c1.addListeners(TableElementEventType.OnNewValue, e -> System.out.println(e));
-        t.addListeners(TableElementEventType.OnDelete, e -> System.out.println("Deleting: " + e));
+        c1.addListeners(TableElementEventType.OnNewValue, e -> System.out.println("Col 1: " + e));
         c1.fill("abc");
         
         c1.setDerivation("ridx");
         c2.setDerivation("4 + CoL 1");
         
         assertThat(c1, notNullValue());
-    }
-    
+    }    
 }

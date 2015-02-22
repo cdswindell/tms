@@ -519,15 +519,15 @@ public class CellImpl extends TableElementImpl implements Cell
     }
     
     @Override
-    public void fill(Object o) 
+    public boolean fill(Object o) 
     {
-        setCellValue(o);
+        return setCellValue(o);
     }
 
     @Override
-    public void clear() 
+    public boolean clear() 
     {
-        fill(null);
+        return fill(null);
     }
 
 	/*

@@ -11,8 +11,8 @@ public interface TableElement extends BaseElement, Listenable
     public Table getTable();
     
     public void delete();
-    public void fill(Object o);
-    public void clear();
+    public boolean fill(Object o);
+    public boolean clear();
     
     public int getNumCells();
     public Iterable<Cell> cells();

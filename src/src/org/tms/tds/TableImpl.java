@@ -1754,7 +1754,10 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     synchronized public ColumnImpl getColumn(Access mode, Object...mda)
     {
         vetElement();
-        return getColumnInternal(true, mode, mda);
+        ColumnImpl c = getColumnInternal(true, mode, mda);
+        if (c != null)
+            c.setCurrent();
+        return c;
     }
         
     @Override
@@ -1784,9 +1787,6 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             getColumnsInternal().set(colIdx,  r);
         }
         
-        if (r != null)
-        	r.setCurrent();
-        
         return r;
     }
 
@@ -1794,10 +1794,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     {
         CellReference cr = getCurrent();
         try {
-            for (int i = 1; i <= this.getNumColumns(); i++) {
-                ColumnImpl c = this.getColumnInternal(true, Access.ByIndex, i);
-                assert c != null;
-            }
+            int nCols = getNumColumns();
+            for (int i = 1; i <= nCols; i++)
+                getColumnInternal(true, Access.ByIndex, i);
         }
         finally {        
             cr.setCurrentCellReference(this);
@@ -2129,15 +2128,18 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     }
     
     @Override
-    synchronized public void fill(Object o) 
+    synchronized public boolean fill(Object o) 
     {
         vetElement();
+        
+        boolean setSome = false;
         CellReference cr = getCurrent();
         deactivateAutoRecalculate();
         try {
             ColumnImpl c = getColumn(Access.First);
             while (c != null) {
-                c.fill(o);
+                if (c.fill(o, false, false, false))
+                    setSome = true;
                 c = getColumn(Access.Next);
             }
         }
@@ -2146,14 +2148,19 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             cr.setCurrentCellReference(this);
         }
         
+        if (setSome)
+            fireEvents(this, TableElementEventType.OnNewValue, o);
+        
         // no need to recalc table, as filling all cells
         // clears all derivations
+        
+        return setSome;
     }  
     
     @Override
-    public void clear() 
+    public boolean clear() 
     {
-        fill(null);
+        return fill(null);
     }  
 	
     @Override

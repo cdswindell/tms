@@ -15,7 +15,7 @@ abstract class TableElementImpl extends BaseElementImpl implements TableElement,
 	abstract public TableImpl getTable();
 	abstract public ContextImpl getTableContext();
     abstract protected void delete(boolean compress);
-    abstract public void fill(Object o);
+    abstract public boolean fill(Object o);
     
     abstract protected void registerAffects(Derivable d);
     abstract protected void deregisterAffects(Derivable d);

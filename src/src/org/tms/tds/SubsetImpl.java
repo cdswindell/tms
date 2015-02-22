@@ -464,9 +464,10 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     }
 
 	@Override
-	public void fill(Object o) 
+	public boolean fill(Object o) 
 	{
 	    vetElement();
+        boolean setSome = false;
 		if (!isNull()) {
 		    TableImpl tbl = getTable();
 		    if (tbl == null)
@@ -476,7 +477,6 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		    
 	        CellReference cr = tbl.getCurrent();
 		    tbl.deactivateAutoRecalculate();
-		    boolean setSome = false;
 		    try {
 		        for (Cell cell : cells()) {
 		            if (isDerived(cell))
@@ -497,6 +497,8 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		    if (tbl.isAutoRecalculateEnabled())
 		        Derivation.recalculateAffected(this);
 		}
+		
+		return setSome;
 	}
 	
     /*
@@ -562,9 +564,9 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     }
     
     @Override
-	public void clear()
+	public boolean clear()
 	{
-	    fill(null);
+	    return fill(null);
 	}
 	
     @Override

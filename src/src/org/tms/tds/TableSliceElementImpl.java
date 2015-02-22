@@ -456,13 +456,18 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     }
     
     @Override
-    public void clear() 
+    public boolean clear() 
     {
-        fill(null);
+        return fill(null);
     }
 
     @Override
-    public void fill(Object o) 
+    public boolean fill(Object o) 
+    {
+        return fill(o, true, true, true);
+    }
+    
+    boolean fill(Object o, boolean preserveCurrent, boolean preserveDerivedCells, boolean fireEvents) 
     {
         vetElement();
         TableImpl parent = getTable();
@@ -473,9 +478,18 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         else if (o == null && !isSupportsNull())
             throw new NullValueException(this, TableProperty.CellValue);
         
-        CellReference cr = getCurrent();
-        if (parent != null)
-            parent.deactivateAutoRecalculate();
+        CellReference cr = null;
+        if (preserveCurrent)
+            getCurrent();
+        
+        boolean reactivateAutoRecalc = false;
+        if (parent != null) {
+            if (!parent.isSet(sf_AUTO_RECALCULATE_DISABLED_FLAG)) {
+                parent.deactivateAutoRecalculate();
+                reactivateAutoRecalc = true;
+            }
+        }
+        
         boolean setSome = false;
         try {
             synchronized(parent) {
@@ -486,7 +500,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                 boolean nullValueExceptionEncountered = false;
                 for (Cell c : cells()) {
                     if (c != null) {
-                        if (isDerived(c)) 
+                        if (preserveDerivedCells && isDerived(c)) 
                             continue;
                         
                         try {
@@ -503,25 +517,29 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                 }
                 
                 if (setSome) {
-                    this.setInUse(true); 
-                    fireEvents(this, TableElementEventType.OnNewValue,  o);
+                    setInUse(true); 
+                    
+                    if (fireEvents)
+                        fireEvents(this, TableElementEventType.OnNewValue,  o);
                 }
                 else if (readOnlyExceptionEncountered)
                     throw new ReadOnlyException(this, TableProperty.CellValue);
                 else if (nullValueExceptionEncountered)
                     throw new NullValueException(this, TableProperty.CellValue);
-            }
+           }
         }
         finally { 
-            if (parent != null) {
+            if (cr != null) 
+                cr.setCurrentCellReference(parent);
+            
+            if (reactivateAutoRecalc)
                 parent.activateAutoRecalculate(); 
-                if (cr != null) 
-                    cr.setCurrentCellReference(parent);
-            }
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
             Derivation.recalculateAffected(this);
+        
+        return setSome;
     }
 
     @Override
