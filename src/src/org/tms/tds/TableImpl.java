@@ -1,5 +1,6 @@
 package org.tms.tds;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -39,7 +41,6 @@ import org.tms.api.event.TableElementEventType;
 import org.tms.api.event.TableElementListener;
 import org.tms.api.event.TableElementListeners;
 import org.tms.api.event.exceptions.BlockedRequestException;
-import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.InvalidParentException;
@@ -58,21 +59,32 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
      * 
      * We use ThreadLocal storage for this
      */
-    static private ThreadLocal<Map<TableImpl,CellReference>> sf_CURRENT_CELL = new ThreadLocal<Map<TableImpl,CellReference>>() {
+    private static ThreadLocal<Map<TableImpl,CellReference>> 
+            sf_CURRENT_CELL = new ThreadLocal<Map<TableImpl, CellReference>>() {
         @Override
         protected Map<TableImpl, CellReference> initialValue ()
         {
-            return new HashMap<TableImpl, CellReference>();
+            return new WeakHashMap<TableImpl, CellReference>();
         }
     };
     
-    static private ThreadLocal<Map<TableImpl,Deque<CellReference>>> sf_CURRENT_CELL_STACK = new ThreadLocal<Map<TableImpl, Deque<CellReference>>>() {
+    private static ThreadLocal<Map<TableImpl,Deque<CellReference>>> sf_CURRENT_CELL_STACK = new ThreadLocal<Map<TableImpl, Deque<CellReference>>>() {
         @Override
         protected Map<TableImpl, Deque<CellReference>> initialValue ()
         {
-            return new HashMap<TableImpl, Deque<CellReference>>();
+            return new WeakHashMap<TableImpl, Deque<CellReference>>();
         }
     };
+    
+    static Map<TableImpl, CellReference> getStaticCurrentCell()
+    {
+        return sf_CURRENT_CELL.get();
+    }
+    
+    static Map<TableImpl,Deque<CellReference>> getStaticCurrentCellStack()
+    {
+        return sf_CURRENT_CELL_STACK.get();
+    }
     
 	public static final Table createTable() 
 	{
@@ -106,6 +118,10 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     private Map<String, TableElementImpl> m_colLabelIndex;
     private Map<String, TableElementImpl> m_subsetLabelIndex;
     private Map<String, TableElementImpl> m_cellLabelIndex;
+    
+    private CellReference m_currentCell;
+    private Deque<CellReference> m_currentCellStack;
+    private WeakReference<Thread> m_tableCreationThread;
     
     private int m_nextCellOffset;
     private Queue<Integer> m_unusedCellOffsets;
@@ -185,6 +201,8 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     private void initialize(int nRows, int nCols, TableImpl t)
     {
         // need to be initialized before calling initialize properties
+        m_tableCreationThread = new WeakReference<Thread>(Thread.currentThread());
+        
         m_rowLabelIndex = new HashMap<String, TableElementImpl>();
         m_colLabelIndex = new HashMap<String, TableElementImpl>();
         m_cellLabelIndex = new HashMap<String, TableElementImpl>();
@@ -293,6 +311,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                     if (!isValidPropertyValueBoolean(value))
                         value = ContextImpl.sf_SUBSET_LABELS_INDEXED_DEFAULT;
                     setSubsetLabelsIndexed((boolean)value);
+                    break;
+                    
+                case isPersistant:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_TABLE_PERSISTANCE_DEFAULT;
+                    setPersistant((boolean)value);
                     break;
                     
                 case isEventsNotifyInSameThread:
@@ -575,6 +599,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
                 
             case isSubsetLabelsIndexed:
                 return isSubsetLabelsIndexed();
+                
+            case isPersistant:
+                return isPersistant();
                 
             case isEventsNotifyInSameThread:
                 return isEventsNotifyInSameThread();
@@ -905,20 +932,24 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         	this.m_unusedCellOffsets.clear();
         	this.m_cols.clear();
         	this.m_rows.clear();
-        	
-        	if (getTableContext() != null)
-        		getTableContext().deregister(this);
         }
         finally {
             invalidate();
             
             sf_CURRENT_CELL.get().remove(this);
             sf_CURRENT_CELL_STACK.get().remove(this);
+            
+            m_currentCell = null;
+            if (m_currentCellStack != null)
+                m_currentCellStack.clear();
+            m_currentCellStack = null;
+            
             TableElementListeners.deregisterTable(this);
             if (getTableContext() != null)
                 getTableContext().deregister(this);     
             
-            fireEvents(this, TableElementEventType.OnDelete);
+            shutdownEventProcessorThreadPool();
+            m_eventThreadPool = null;
         }
     }    
     
@@ -1069,6 +1100,28 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             default:
                 throw new UnsupportedImplementationException(et, "Label Index");
         }       
+    }
+    
+    public boolean isPersistant()
+    {
+        return isSet(sf_IS_TABLE_PERSISTANT_FLAG);
+    }
+    
+    public void setPersistant(boolean persistant)
+    {
+        ContextImpl tc = null;
+        if ((tc = getTableContext()) == null)
+            persistant = false;
+        else {
+            if (persistant != isPersistant()) {
+                if (persistant)
+                    tc.registerPersistant(this);
+                else
+                    tc.registerNonpersistant(this);
+            }
+        }
+        
+        set(sf_IS_TABLE_PERSISTANT_FLAG, persistant);
     }
     
     @Override
@@ -1517,7 +1570,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             }
         }
         finally {        
-            cr.setCurrentCellReference();
+            cr.setCurrentCellReference(this);
         }
     }
     
@@ -1747,7 +1800,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             }
         }
         finally {        
-            cr.setCurrentCellReference();
+            cr.setCurrentCellReference(this);
         }
     }
     
@@ -2090,7 +2143,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
         }
         finally {  
             activateAutoRecalculate();
-            cr.setCurrentCellReference();
+            cr.setCurrentCellReference(this);
         }
         
         // no need to recalc table, as filling all cells
@@ -2110,7 +2163,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
 		if (currentCellStack != null && !currentCellStack.isEmpty()) {
 			CellReference cr = currentCellStack.pollFirst();
 			if (cr != null) 
-			    cr.setCurrentCellReference();
+			    cr.setCurrentCellReference(this);
 		}		
 	}
 
@@ -2131,11 +2184,19 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
 
     private CellReference getCurrentCellReference()
     {
-        Map<TableImpl,CellReference> currentCellMap = sf_CURRENT_CELL.get();
-        CellReference cr = currentCellMap.get(this);
-        if (cr == null) {
-            cr = new CellReference();
-            currentCellMap.put(this, cr);
+        CellReference cr = null;
+        if (Thread.currentThread() == m_tableCreationThread.get()) {
+            if (m_currentCell == null)
+                m_currentCell = new CellReference();
+            cr = m_currentCell;
+        }
+        else {
+            Map<TableImpl,CellReference> currentCellMap = sf_CURRENT_CELL.get();
+            cr = currentCellMap.get(this);
+            if (cr == null) {
+                cr = new CellReference();
+                currentCellMap.put(this, new CellReference(cr));
+            }
         }
         
         return cr;
@@ -2143,11 +2204,19 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     
     private Deque<CellReference> getCurrentCellStack()
     {
-        Map<TableImpl, Deque<CellReference>> currentCellStackMap = sf_CURRENT_CELL_STACK.get();
-        Deque<CellReference> currentCellStack = currentCellStackMap.get(this);
-        if (currentCellStack == null) {
-            currentCellStack = new ArrayDeque<CellReference>();
-            currentCellStackMap.put(this, currentCellStack);
+        Deque<CellReference> currentCellStack = null;
+        if (Thread.currentThread() == m_tableCreationThread.get()) {
+            if (m_currentCellStack == null)
+                m_currentCellStack = new ArrayDeque<CellReference>(); 
+            currentCellStack = m_currentCellStack;
+        }
+        else {
+            Map<TableImpl, Deque<CellReference>> currentCellStackMap = sf_CURRENT_CELL_STACK.get();
+            currentCellStack = currentCellStackMap.get(this);
+            if (currentCellStack == null) {
+                currentCellStack = new ArrayDeque<CellReference>();
+                currentCellStackMap.put(this, currentCellStack);
+            }
         }
 
         return currentCellStack;
@@ -2170,7 +2239,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             fireEvents(this, TableElementEventType.OnRecalculate);
         }
         finally {
-            cr.setCurrentCellReference();
+            cr.setCurrentCellReference(this);
         }
 	}
 	
@@ -2181,16 +2250,20 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     
     Derivation registerDerivedCell(CellImpl cell, Derivation d)
     {
-        if (cell != null && d != null)
+        if (cell != null && d != null) {
+            cell.set(sf_IS_DERIVED_CELL_FLAG, true);
             return m_derivedCells.put(cell, d);
+        }
         else
             return null;
     }
     
     Derivation deregisterDerivedCell(CellImpl cell)
     {
-        if (cell != null)
+        if (cell != null) {
+            cell.set(sf_IS_DERIVED_CELL_FLAG, false);
             return m_derivedCells.remove(cell);
+        }
         else
             return null;
     }    
@@ -2224,7 +2297,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
             return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
         }
         finally {
-            cr.setCurrentCellReference();
+            cr.setCurrentCellReference(this);
         }       
     }    
 
@@ -2573,81 +2646,59 @@ public class TableImpl extends TableCellsElementImpl implements Table, EventProc
     /**
      * Class to maintain the current row/column in a given table
      */
-    protected class CellReference 
+    protected static class CellReference 
     {
     	private RowImpl m_row;
     	private ColumnImpl m_col;
-    	private TableImpl m_table;
     	
     	protected CellReference()
         {
             m_row = null;
             m_col = null;
-            m_table = TableImpl.this;
         }
 
         protected CellReference(CellReference cr)
         {
             this();
-            if (cr != null) {
-                if (cr.getTable() != this.m_table)
-                    throw new IllegalTableStateException("CellReference not of the body");
-                
-                m_row = cr.getCurrentRow();
+            if (cr != null) {                
+                m_row = cr.getCurrentRow();               
                 m_col = cr.getCurrentColumn();
             }
         }
 
-        public void setCurrentCellReference() 
+        public void setCurrentCellReference(TableImpl tbl) 
     	{
-            CellReference cr = m_table.getCurrentCellReference();
-            if (m_row != null && m_row.isValid())
-                cr.setCurrentRow(m_row);
-            else
-                cr.setCurrentRow(null);
+            CellReference cr = tbl.getCurrentCellReference();
             
-            if (m_col != null && m_col.isValid())
-                cr.setCurrentColumn(m_col);
-            else
-                cr.setCurrentColumn(null);
+            cr.setCurrentRow(m_row);
+            cr.setCurrentColumn(m_col);
     	}
 
         public RowImpl getCurrentRow()
     	{
-            if (m_row != null && m_row.isInvalid())
-                m_row = null;
-
             return m_row;
     	}
     	
         protected void setCurrentRow(RowImpl row) 
         {
             if (row != null) 
-                vetParent(row);
+                row.vetParent(row);
             
             m_row = row;
         }
         
         public ColumnImpl getCurrentColumn()
         {
-            if (m_col != null && m_col.isInvalid())
-                m_col = null;
-
             return m_col;
         }
         
         protected void setCurrentColumn(ColumnImpl col)
         {
             if (col != null) 
-                vetParent(col);
+                col.vetParent(col);
             
             m_col = col;
         }
-
-    	public TableImpl getTable()
-    	{
-    	    return m_table;
-    	}
     }
     
     private class CellStackPurger implements Predicate<CellReference>

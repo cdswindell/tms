@@ -25,8 +25,8 @@ class TableElementEventFactory
                     return CellValueChangedEvent.createOnBefore(source, trigger, assemblyId, args[0], args[1]);
                 
             case OnNewValue:
-                if (numArgs < 1)
-                    throw new InvalidException(String.format("%s requires at least one (1) value", evT));
+                if (numArgs == 0)
+                    return CellValueChangedEvent.createOn(source, trigger, assemblyId, null);
                 else if (numArgs == 1)
                     return CellValueChangedEvent.createOn(source, trigger, assemblyId, args[0]);
                 else

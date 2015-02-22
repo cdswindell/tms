@@ -19,6 +19,8 @@ public class CellValidationTest
     public void testCellValidation()
     {
         TableImpl t = new TableImpl();
+        t.setLabel("testCellValidation");
+        
         RowImpl r1 = t.addRow(Access.Next);
         RowImpl r2 = t.addRow(Access.Next);
         RowImpl r4 = t.addRow(Access.Next);
@@ -82,6 +84,8 @@ public class CellValidationTest
     public void testLamdaExpressionCellValidator()
     {
         TableImpl t = new TableImpl();
+        t.setLabel("testLamdaExpressionCellValidator");
+        
         RowImpl r1 = t.addRow(Access.Next);
         RowImpl r2 = t.addRow(Access.Next);
         RowImpl r4 = t.addRow(Access.Next);

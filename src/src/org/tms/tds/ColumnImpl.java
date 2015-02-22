@@ -529,11 +529,9 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             if (!hasNext())
                 throw new NoSuchElementException();
             
-            RowImpl curRow = m_table.getCurrentRow();
             RowImpl row = m_table.getRow(Access.ByIndex, m_index++);
             CellImpl c = m_col.getCell(row, false);
-            if (curRow != null && curRow.isValid())
-                curRow.setCurrent();
+
             return c;
         }       
     }

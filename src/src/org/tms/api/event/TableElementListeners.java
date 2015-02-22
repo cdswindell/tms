@@ -1,13 +1,14 @@
 package org.tms.api.event;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.tms.api.Cell;
@@ -26,7 +27,7 @@ public class TableElementListeners implements Listenable
     static private EventProcessorExecutor sf_EventProcessorThreadPool = null;
     
     static final private Map<Table, Set<TableElementEventType>> sf_TableRegisteredListenersMap = 
-            new ConcurrentHashMap<Table, Set<TableElementEventType>>();
+             Collections.synchronizedMap(new WeakHashMap<Table, Set<TableElementEventType>>());
     
     static final public boolean hasAnyListeners(Table table, TableElementEventType... evTs) 
     {
@@ -89,12 +90,14 @@ public class TableElementListeners implements Listenable
      * Instance fields and methods
      */
     private TableElement m_te;
+    private ElementType m_et;
     private Map<TableElementEventType, Set<TableElementListener>> m_listeners;
     private boolean m_notifyInSameThread;
     
     public TableElementListeners(TableElement te)
     {
         m_te = te;
+        m_et = te.getElementType();
         m_notifyInSameThread = false;
         m_listeners = new HashMap<TableElementEventType, Set<TableElementListener>>();
     }
@@ -125,7 +128,7 @@ public class TableElementListeners implements Listenable
                     }
                 }
                 else
-                    throw new UnimplementedException(String.format("%s not supported by %s", evT, m_te.getElementType()));
+                    throw new UnimplementedException(String.format("%s not supported by %s", evT, m_et));
             }
             
             if (addedAny)
@@ -360,11 +363,11 @@ public class TableElementListeners implements Listenable
 
     public ElementType getElementType()
     {
-        return m_te.getElementType();
+        return m_et;
     }
 
     public Table getTable()
     {
-        return m_te.getTable();
+        return m_te != null ? m_te.getTable() : null;
     }
 }

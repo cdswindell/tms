@@ -717,9 +717,10 @@ public class InfixExpressionParser
         	int additionalCharsParsed = 0;
         	
         	// handle Row/Column/Subset references
+        	Token tmpToken = new Token(tt, oper);        	
             if (tt == TokenType.ColumnRef) {
-                additionalCharsParsed = parseColumnReference(exprChars, curPos + charsParsed, table, t);
-                if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+                additionalCharsParsed = parseColumnReference(exprChars, curPos + charsParsed, table, tmpToken);
+                if (additionalCharsParsed > 0 && (value = tmpToken.getValue()) != null) 
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
@@ -728,8 +729,8 @@ public class InfixExpressionParser
                 }
             }
             else if (tt == TokenType.RowRef) {
-                additionalCharsParsed = parseRowReference(exprChars, curPos + charsParsed, table, t);
-                if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+                additionalCharsParsed = parseRowReference(exprChars, curPos + charsParsed, table, tmpToken);
+                if (additionalCharsParsed > 0 && (value = tmpToken.getValue()) != null) 
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
@@ -738,8 +739,8 @@ public class InfixExpressionParser
                 }
             }
             else if (tt == TokenType.SubsetRef) {
-                additionalCharsParsed = parseSubsetReference(exprChars, curPos + charsParsed, table, t);
-                if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+                additionalCharsParsed = parseSubsetReference(exprChars, curPos + charsParsed, table, tmpToken);
+                if (additionalCharsParsed > 0 && (value = tmpToken.getValue()) != null) 
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
@@ -748,8 +749,8 @@ public class InfixExpressionParser
                 }
             }
             else if (tt == TokenType.TableRef) {
-                additionalCharsParsed = parseTableReference(exprChars, curPos + charsParsed, table, t);
-                if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+                additionalCharsParsed = parseTableReference(exprChars, curPos + charsParsed, table, tmpToken);
+                if (additionalCharsParsed > 0 && (value = tmpToken.getValue()) != null) 
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)
@@ -758,8 +759,8 @@ public class InfixExpressionParser
                 }
             }
             else if (tt == TokenType.CellRef) {
-                additionalCharsParsed = parseCellReference(exprChars, curPos + charsParsed, table, t);
-                if (additionalCharsParsed > 0 && (value = t.getValue()) != null) 
+                additionalCharsParsed = parseCellReference(exprChars, curPos + charsParsed, table, tmpToken);
+                if (additionalCharsParsed > 0 && (value = tmpToken.getValue()) != null) 
                     charsParsed += additionalCharsParsed;
                 else {
                     if (pr != null)

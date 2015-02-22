@@ -44,8 +44,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
 
     /*
      * Field getters and setters
-     */
-    
+     */    
     @Override
     synchronized protected Map<String, Object> getElemProperties(boolean createIfEmpty)
     {
@@ -65,12 +64,12 @@ abstract class TableCellsElementImpl extends TableElementImpl
     
     public TableImpl getTable()
     {
-    	return m_table;
+        return m_table;
     }
     
     void setTable(TableImpl t)
     {
-    	m_table = t;
+        m_table = t ;
     }
     
     /**
@@ -85,7 +84,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
         clearProperty(TableProperty.Description);
         
         m_affects = new LinkedHashSet<Derivable>();
-        m_listeners = new TableElementListeners(this);
+        m_listeners = null;
         m_pendings = 0;
     }
     
@@ -215,16 +214,24 @@ abstract class TableCellsElementImpl extends TableElementImpl
         return m_pendings > 0;
     }
 
+    synchronized private TableElementListeners fetchListeners()
+    {
+        if (m_listeners == null)
+            m_listeners = new TableElementListeners(this);
+        
+        return m_listeners;
+    }
+    
     protected void fireEvents(TableElement te, TableElementEventType evT, Object... args)
     {
         if (TableElementListeners.hasAnyListeners(te.getTable()))
-            m_listeners.fireEvents(te, evT, args);
+            fetchListeners().fireEvents(te, evT, args);
     }
 
     protected void fireContainerEvents(Cell cell, TableElementEventType evT, Object... args)
     {
         if (cell != null && cell.isValid() && isValid() && TableElementListeners.hasAnyListeners(cell.getTable()))
-            m_listeners.fireCellContainerEvents(cell, evT, args);
+            fetchListeners().fireCellContainerEvents(cell, evT, args);
     }
 
     @Override
@@ -235,33 +242,36 @@ abstract class TableCellsElementImpl extends TableElementImpl
         if ((parent = getTable()) != null)
             parent.createEventProcessorThreadPool();
 
-        return m_listeners.addListeners(evT, tels);
+        return fetchListeners().addListeners(evT, tels);
     }
 
     @Override
     public boolean removeListeners(TableElementEventType evT, TableElementListener... tels)
     {
         vetElement();
-        return m_listeners.removeListeners(evT, tels);
+        return fetchListeners().removeListeners(evT, tels);
     }
 
     @Override
     public List<TableElementListener> getListeners(TableElementEventType... evTs)
     {
         vetElement();
-        return m_listeners.getListeners(evTs);
+        return fetchListeners().getListeners(evTs);
     }
 
     @Override
     public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
     {
         vetElement();
-        return m_listeners.removeAllListeners(evTs);
+        return fetchListeners().removeAllListeners(evTs);
     }
 
     @Override
     public boolean hasListeners(TableElementEventType... evTs)
     {
-        return m_listeners.hasListeners(evTs);
+        if (m_listeners == null)
+            return false;
+        else
+            return fetchListeners().hasListeners(evTs);
     }
 }

@@ -172,7 +172,7 @@ public class CellImpl extends TableElementImpl implements Cell
     {
         if (!isPendings()) {
             setPending(true);                
-            TableImpl table = m_col != null ? m_col.getTable() : null;
+            TableImpl table = getTable();
             if (table != null)
                 table.incrementPendings();
             
@@ -189,7 +189,7 @@ public class CellImpl extends TableElementImpl implements Cell
     {
         if (isPendings()) {
             setPending(false);                
-            TableImpl table = m_col != null ? m_col.getTable() : null;
+            TableImpl table = getTable();
             if (table != null)
                 table.decrementPendings();
             
@@ -589,8 +589,9 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean isDerived()
     {
-        Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
-        return deriv != null;       
+        return isSet(sf_IS_DERIVED_CELL_FLAG);
+        //Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
+        //return deriv != null;       
     }
 
     @Override

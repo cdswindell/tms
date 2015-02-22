@@ -210,7 +210,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
         }
         finally {
-            if (cr != null) cr.setCurrentCellReference();
+            if (cr != null) cr.setCurrentCellReference(getTable());
         }       
     }
     
@@ -502,8 +502,10 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                     }
                 }
                 
-                if (setSome)
+                if (setSome) {
                     this.setInUse(true); 
+                    fireEvents(this, TableElementEventType.OnNewValue,  o);
+                }
                 else if (readOnlyExceptionEncountered)
                     throw new ReadOnlyException(this, TableProperty.CellValue);
                 else if (nullValueExceptionEncountered)
@@ -511,10 +513,11 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             }
         }
         finally { 
-            if (parent != null)
-                parent.activateAutoRecalculate();
-            if (cr != null) 
-                cr.setCurrentCellReference();
+            if (parent != null) {
+                parent.activateAutoRecalculate(); 
+                if (cr != null) 
+                    cr.setCurrentCellReference(parent);
+            }
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
@@ -565,8 +568,10 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                     }
                 }
                 
-                if (setSome)
+                if (setSome) {
                     this.setInUse(true); 
+                    fireEvents(this, TableElementEventType.OnNewValue,  o);
+                }
                 else if (readOnlyExceptionEncountered)
                     throw new ReadOnlyException(this, TableProperty.CellValue);
                 else if (nullValueExceptionEncountered)
@@ -629,8 +634,10 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                     }
                 }
                 
-                if (setSome)
+                if (setSome) {
                     this.setInUse(true); 
+                    fireEvents(this, TableElementEventType.OnNewValue);
+                }
                 else if (readOnlyExceptionEncountered)
                     throw new ReadOnlyException(this, TableProperty.CellValue);
                 else if (nullValueExceptionEncountered)

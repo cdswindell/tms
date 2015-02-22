@@ -46,6 +46,7 @@ public class Derivation
     private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
     private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
+
     private static final ThreadLocal<UUID> sf_GUID_CACHE = new  ThreadLocal<UUID>() {
         @Override protected UUID initialValue() {
             Thread ct = Thread.currentThread();
@@ -460,6 +461,8 @@ public class Derivation
     private Map<Cell, Set<PendingState>> m_cellBlockedPendingStatesMap;
     
     public boolean m_beingDestroyed;
+
+    private boolean m_pendingCachesInitialized;
     
     private Derivation()
     {
@@ -467,10 +470,23 @@ public class Derivation
         
         m_affectedBy = new LinkedHashSet<TableElement>();
         m_precision = new MathContext(sf_DEFAULT_PRECISION);
-        m_cachedAwaitingStates = Collections.synchronizedSet(new LinkedHashSet<AwaitingState>());
-        m_cachedPendingStats = Collections.synchronizedMap(new LinkedHashMap<TableElement, PendingStatistic>());
         
-        m_cellBlockedPendingStatesMap = Collections.synchronizedMap(new LinkedHashMap<Cell, Set<PendingState>>());       
+        m_pendingCachesInitialized = false;
+        m_cachedAwaitingStates = null;
+        m_cachedPendingStats = null;       
+        m_cellBlockedPendingStatesMap = null; 
+        
+        initializePendingCaches();
+    }
+    
+    private void initializePendingCaches()
+    {
+        if (!m_pendingCachesInitialized) {
+            m_pendingCachesInitialized = true;
+            m_cachedAwaitingStates = Collections.synchronizedSet(new LinkedHashSet<AwaitingState>());
+            m_cachedPendingStats = Collections.synchronizedMap(new LinkedHashMap<TableElement, PendingStatistic>());            
+            m_cellBlockedPendingStatesMap = Collections.synchronizedMap(new LinkedHashMap<Cell, Set<PendingState>>());       
+        }
     }
     
     protected void registerBlockingCell(Cell blockingCell, PendingState ps)
@@ -490,22 +506,24 @@ public class Derivation
     {
         assert nonPendingCell.isPendings() == false : "Cell cannot be pending";
         
-        Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(nonPendingCell);
-        if (blockedStates != null) {
-            synchronized(blockedStates) {
-                Set<PendingState> unblocked = new HashSet<PendingState>();
-                
-                for (PendingState ps : blockedStates) {
-                    if (ps != null && ps.isStillPending()) {
-                        boolean removed = ps.unblockDerivations(nonPendingCell);
-                        if (removed)
-                            unblocked.add(ps);
-                    }   
+        if (m_cellBlockedPendingStatesMap != null) {
+            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(nonPendingCell);
+            if (blockedStates != null) {
+                synchronized(blockedStates) {
+                    Set<PendingState> unblocked = new HashSet<PendingState>();
+                    
+                    for (PendingState ps : blockedStates) {
+                        if (ps != null && ps.isStillPending()) {
+                            boolean removed = ps.unblockDerivations(nonPendingCell);
+                            if (removed)
+                                unblocked.add(ps);
+                        }   
+                    }
+        
+                    blockedStates.removeAll(unblocked);
+                    if (blockedStates.isEmpty())
+                        m_cellBlockedPendingStatesMap.remove(nonPendingCell);
                 }
-    
-                blockedStates.removeAll(unblocked);
-                if (blockedStates.isEmpty())
-                    m_cellBlockedPendingStatesMap.remove(nonPendingCell);
             }
         }
     }   
@@ -544,34 +562,60 @@ public class Derivation
     public void destroy()
     {
         m_beingDestroyed = true;    
-        
+
         // Shut down/clear any async operators
-        for (AwaitingState ps : m_cachedAwaitingStates) {
-            // don't reprocess invalidated pending states
-            if (!ps.isValid())
-                continue;
-            
-            // we need exclusive access
-            if (ps.getTransactionID() != null)
-                sf_UUID_PENDING_STATE_MAP.remove(ps.getTransactionID());
-            
-            if (m_threadPool != null && ps.isRunnable() )
-                m_threadPool.remove(ps.getTransactionID());
-            
-            ps.delete();
+        if (m_cachedAwaitingStates != null) {
+            for (AwaitingState ps : m_cachedAwaitingStates) {
+                // don't reprocess invalidated pending states
+                if (!ps.isValid())
+                    continue;
+
+                // we need exclusive access
+                if (ps.getTransactionID() != null)
+                    sf_UUID_PENDING_STATE_MAP.remove(ps.getTransactionID());
+
+                if (m_threadPool != null && ps.isRunnable() )
+                    m_threadPool.remove(ps.getTransactionID());
+
+                ps.delete();
+            }
+
+            // release all pending states
+            m_cachedAwaitingStates.clear();
         }
-        
-        // release all pending states
-        m_cachedAwaitingStates.clear();
-        
+
         // clear out all pending cells, and delete the blocked states
-        for (Map.Entry<Cell, Set<PendingState>> e : m_cellBlockedPendingStatesMap.entrySet()) {
-            Cell c = e.getKey();
-            if (c != null) 
-                c.getColumn().getTable().setCellValue(c.getRow(), c.getColumn(), Token.createNullToken());
-            
-            // Cannot call resetPendingCellDependents, as it will modify m_cellBlockedPendingStatesMap
-            for (PendingState ps : e.getValue()) {
+        if (m_cellBlockedPendingStatesMap != null) {
+            for (Map.Entry<Cell, Set<PendingState>> e : m_cellBlockedPendingStatesMap.entrySet()) {
+                Cell c = e.getKey();
+                if (c != null) 
+                    c.getColumn().getTable().setCellValue(c.getRow(), c.getColumn(), Token.createNullToken());
+
+                // Cannot call resetPendingCellDependents, as it will modify m_cellBlockedPendingStatesMap
+                for (PendingState ps : e.getValue()) {
+                    ps.lock();
+                    try {
+                        ps.delete();
+                    }
+                    finally {
+                        ps.unlock();
+                    }
+                }
+            }
+
+            m_cellBlockedPendingStatesMap.clear();
+        }
+
+        // clear out all pending stats
+        if (m_cachedPendingStats != null) {
+            for (Entry<TableElement, PendingStatistic> e : m_cachedPendingStats.entrySet()) {
+                PendingStatistic ps = e.getValue();
+
+                // don't reprocess invalidated pending states
+                if (ps == null || !ps.isValid())
+                    continue;
+
+                // we need exclusive access
                 ps.lock();
                 try {
                     ps.delete();
@@ -580,29 +624,11 @@ public class Derivation
                     ps.unlock();
                 }
             }
+
+            m_cachedPendingStats.clear(); 
         }
         
-        m_cellBlockedPendingStatesMap.clear();
-        
-        // clear out all pending stats
-        for (Entry<TableElement, PendingStatistic> e : m_cachedPendingStats.entrySet()) {
-            PendingStatistic ps = e.getValue();
-            
-            // don't reprocess invalidated pending states
-            if (ps == null || !ps.isValid())
-                continue;
-            
-            // we need exclusive access
-            ps.lock();
-            try {
-                ps.delete();
-            }
-            finally {
-                ps.unlock();
-            }
-        }
-        
-        m_cachedPendingStats.clear();        
+        m_pendingCachesInitialized = false;
     }
     
     boolean isBeingDestroyed()
@@ -621,8 +647,9 @@ public class Derivation
 
     protected PendingStatistic getPendingStatistic(TableElement ref)
     {
-        if (!isBeingDestroyed() && ref != null && ref.isValid())
+        if (!isBeingDestroyed() && ref != null && ref.isValid()) {
             return m_cachedPendingStats.get(ref);
+        }
         else
             return null;
     }
@@ -655,7 +682,8 @@ public class Derivation
             if (m_beingDestroyed) 
                 return;
             
-            m_cachedPendingStats.remove(pendingStat.getReferencedElement());  
+            if (m_cachedPendingStats != null)
+                m_cachedPendingStats.remove(pendingStat.getReferencedElement());  
         }
     }
     
@@ -773,12 +801,13 @@ public class Derivation
         dc.processPendings();
     }
     
+    
     private void recalculateTarget(TableElement element, DerivationContext dc)
     {
-        if (m_target.isReadOnly())
+        if (getTarget().isReadOnly())
             throw new ReadOnlyException((BaseElement)m_target, TableProperty.Derivation);
         
-        Table t = m_target.getTable();
+        Table t = getTable();
         t.pushCurrent();
         
         try {
@@ -805,7 +834,7 @@ public class Derivation
     
     private void recalculateAffectedElements(DerivationContext dc)
     {
-        List<Derivable> affected = calculateDependencies(m_target);
+        List<Derivable> affected = calculateDependencies(getTarget());
         if (affected == null ) return;
         
         // remove current element from recalc plan
@@ -813,13 +842,13 @@ public class Derivation
         if (affected.isEmpty()) return;
         
         // recalculate impacted elements
-        Table parentTable = m_target.getTable();
+        Table parentTable = getTable();
         if (parentTable != null)
             parentTable.pushCurrent();
         try {
             for (Derivable d : affected) {
                 Derivation deriv = d.getDerivation();
-                deriv.recalculateTarget(m_target, dc);
+                deriv.recalculateTarget(getTarget(), dc);
             }
         }
         finally {

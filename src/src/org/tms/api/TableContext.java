@@ -19,6 +19,8 @@ public interface TableContext extends BaseElement
      */
     public Table getTable(Access mode, Object... mda);
 
+    public int getNumTables();
+    
     public TokenMapper getTokenMapper();
     
     /**

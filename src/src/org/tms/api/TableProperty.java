@@ -22,6 +22,7 @@ public enum TableProperty implements Comparable<TableProperty>
     Precision(false, true, ElementType.Context, ElementType.Table),
     
     // Context/Table Properties  
+    numTables(true, false, ElementType.Context),
     TokenMapper(true, true, ElementType.Context),
     RowCapacityIncr(false, true, ElementType.Context, ElementType.Table),
     ColumnCapacityIncr(false, true, ElementType.Context, ElementType.Table),
@@ -31,6 +32,7 @@ public enum TableProperty implements Comparable<TableProperty>
     isColumnLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
     isCellLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
     isSubsetLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
+    isPersistant(false, true, ElementType.Context, ElementType.Table),
     
     // PendingDerivationThreadPool Properties
     isPendingAllowCoreThreadTimeout(true, false, true, ElementType.Context, ElementType.Table),

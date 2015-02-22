@@ -1,6 +1,8 @@
 package org.tms.tds;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -27,6 +29,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     static final int sf_ROW_CAPACITY_INCR_DEFAULT = 1024;
     static final int sf_COLUMN_CAPACITY_INCR_DEFAULT = 32;
     static final double sf_FREE_SPACE_THRESHOLD_DEFAULT = 2.0;
+    static final boolean sf_TABLE_PERSISTANCE_DEFAULT = false;
 
     static final int sf_PENDING_CORE_POOL_SIZE_DEFAULT = 8;
     static final int sf_PENDING_MAX_POOL_SIZE_DEFAULT = 128;
@@ -100,7 +103,8 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         return sf_DEFAULT_CONTEXT;
     }
 
-    private Set<Table> m_registeredTables;
+    private Set<TableImpl> m_registeredNonpersistantTables;
+    private Set<TableImpl> m_registeredPersistantTables;
     
     private int m_rowCapacityIncr;
     private int m_columnCapacityIncr;
@@ -123,7 +127,8 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     {
         super();      
         set(sf_IS_DEFAULT_FLAG, isDefault);
-        m_registeredTables = new WeakHashSet<Table>();
+        m_registeredNonpersistantTables = new WeakHashSet<TableImpl>();
+        m_registeredPersistantTables = new HashSet<TableImpl>();
         
         // initialize from default context, unless this the default
         if (otherContext != null && !(otherContext instanceof ContextImpl))
@@ -219,6 +224,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                     setSubsetLabelsIndexed((boolean)value);
                     break;
                     
+                case isPersistant:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_TABLE_PERSISTANCE_DEFAULT;
+                    setPersistant((boolean)value);
+                    break;
+                    
                 case TokenMapper:
                     if (value == null)
                         value = TokenMapper.fetchTokenMapper(this);
@@ -297,6 +308,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     {
         switch(key)
         {
+            case numTables:
+                return getNumTables();
+                
             case RowCapacityIncr:
                 return getRowCapacityIncr();
                 
@@ -323,6 +337,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                 
             case isSubsetLabelsIndexed:
                 return isSubsetLabelsIndexed();
+                
+            case isPersistant:
+                return isPersistant();
                 
             case TokenMapper:
                 return getTokenMapper();
@@ -357,6 +374,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             default:
                 return super.getProperty(key);
         }        
+    }
+        
+    @Override
+    synchronized public int getNumTables()
+    {
+        return m_registeredNonpersistantTables.size() + m_registeredPersistantTables.size();
     }
 
     @Override
@@ -407,7 +430,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     @Override
     protected boolean isNull()
     {
-         return m_registeredTables.isEmpty();
+         return m_registeredNonpersistantTables.isEmpty() && m_registeredPersistantTables.isEmpty();
     }
     
     protected boolean isDefault()
@@ -465,6 +488,16 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         set(sf_SUBSET_LABELS_INDEXED_FLAG, rowLabelsIndexed);
     }
 
+    public boolean isPersistant()
+    {
+        return isSet(sf_IS_TABLE_PERSISTANT_FLAG);
+    }
+    
+    public void setPersistant(boolean persistant)
+    {
+        set(sf_IS_TABLE_PERSISTANT_FLAG, persistant);
+    }
+    
     public TokenMapper getTokenMapper()
     {
         return m_tokenMapper;
@@ -703,24 +736,48 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         set(sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG, allowCoreThreadTimeout);
     }
     
-    protected ContextImpl register(Table table)
+    synchronized protected ContextImpl register(TableImpl table)
     {
         // register the table with this context
-        m_registeredTables.add(table);
+        if (table != null) {
+            if (table.isPersistant())
+                registerPersistant(table);
+            else
+                registerNonpersistant(table);
+        }
+        
         return this;
     }
     
-    protected void deregister(TableImpl table)
+    synchronized protected void deregister(TableImpl table)
     {
-        if (table != null) 
-            m_registeredTables.remove(table);
+        if (table != null) {
+            m_registeredNonpersistantTables.remove(table);
+            m_registeredPersistantTables.remove(table);
+        }
     }
     
-    protected boolean isRegistered(Table t)
+    synchronized protected boolean isRegistered(Table t)
     {
-        return m_registeredTables.contains(t);
+        return m_registeredNonpersistantTables.contains(t) || m_registeredPersistantTables.contains(t);
     }
 
+    synchronized protected void registerPersistant(TableImpl t)
+    {
+        if (t != null) {
+            m_registeredNonpersistantTables.remove(t);
+            m_registeredPersistantTables.add(t);            
+        }        
+    }
+
+    synchronized protected void registerNonpersistant(TableImpl t)
+    {
+        if (t != null) {
+            m_registeredPersistantTables.remove(t);            
+            m_registeredNonpersistantTables.add(t);
+        }        
+    }
+    
     @Override
     public TableImpl getTable(Access mode, Object... mda)
     {
@@ -732,7 +789,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                 if (md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (md == null ? "<null>" : md.toString())));
-                return (TableImpl)find(m_registeredTables, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+                return (TableImpl)find(allTables(), mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
 
             case ByProperty:
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;
@@ -743,9 +800,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                 
                 // key must either be a table property or a string
                 if (key instanceof TableProperty) 
-                    return (TableImpl)find(m_registeredTables, (TableProperty)key, value);
+                    return (TableImpl)find(allTables(), (TableProperty)key, value);
                 else if (key instanceof String) 
-                    return (TableImpl)find(m_registeredTables, (String)key, value);
+                    return (TableImpl)find(allTables(), (String)key, value);
                 else
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (key == null ? "<null>" : key.toString())));                 
@@ -764,5 +821,13 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             default:
                 throw new InvalidAccessException(ElementType.Context, ElementType.Table, mode, false, mda);                
         }
+    }
+
+    private Collection<TableImpl> allTables()
+    {
+        Set<TableImpl> allTables = new HashSet<TableImpl>(m_registeredPersistantTables);
+        allTables.addAll(m_registeredNonpersistantTables);
+        
+        return allTables;
     }
 }

@@ -42,6 +42,8 @@ abstract public class BaseElementImpl implements BaseElement
     
     static final protected int sf_SUBSET_LABELS_INDEXED_FLAG        = 0x1000;
     static final protected int sf_HAS_CELL_VALIDATOR_FLAG           = 0x2000;
+    static final protected int sf_IS_DERIVED_CELL_FLAG              = 0x4000;
+    static final protected int sf_IS_TABLE_PERSISTANT_FLAG          = 0x8000;
     
     static final protected int sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG         = 0x100000;
     static final protected int sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG     = 0x200000;
