@@ -479,6 +479,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     @Override
     public Iterable<Cell> cells()
     {
+        vetElement();
         return new ColumnCellIterable();
     }
     
@@ -529,8 +530,8 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             if (!hasNext())
                 throw new NoSuchElementException();
             
-            RowImpl row = m_table.getRow(Access.ByIndex, m_index++);
-            CellImpl c = m_col.getCell(row, false);
+            RowImpl row = m_table.getRowInternal(true, false, Access.ByIndex, m_index++);
+            CellImpl c = m_col.getCellInternal(row, true, false);
 
             return c;
         }       

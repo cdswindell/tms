@@ -323,10 +323,10 @@ public class InfixExpressionParser
             else if (requiredArgType.isPrimitive() && !lastArgClass.isPrimitive()) {
                 if (lastArgClass == Object.class ||
                     requiredArgType == double.class && lastArgClass == Double.class ||
-                    requiredArgType == float.class && lastArgClass == Float.class ||
-                    requiredArgType == int.class && lastArgClass == Integer.class ||
-                    requiredArgType == short.class && lastArgClass == Short.class ||
-                    requiredArgType == long.class && lastArgClass == Long.class ||
+                    requiredArgType == float.class && (lastArgClass == Float.class || lastArgClass == Double.class) ||
+                    requiredArgType == int.class && (lastArgClass == Integer.class || lastArgClass == Double.class) ||
+                    requiredArgType == short.class && (lastArgClass == Short.class || lastArgClass == Double.class) ||
+                    requiredArgType == long.class && (lastArgClass == Long.class || lastArgClass == Double.class) ||
                     requiredArgType == boolean.class && lastArgClass == Boolean.class)
                     return; // function requires primitive type, arg is a number
             }

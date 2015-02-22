@@ -358,11 +358,10 @@ public class PendingOperatorTest extends BaseTest
         Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2, will block c3
         Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50 + col 2)/2"); // c3
         Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
-        Column c4 = (Column)t.addColumn(); // cell derivations column, c5
-        
+        Column c4 = (Column)t.addColumn(); // cell derivations column, c5        
         Column c5 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c6
         
-        // delete some rows
+        // delete some rows while calculations are pending
         t.getRow(Access.ByIndex, 800).delete();
         t.getRow(Access.ByIndex, 832).delete();
         

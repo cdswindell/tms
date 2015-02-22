@@ -205,6 +205,11 @@ public class Token implements Labeled
             
     public boolean isA(Class<?> targetClazz)
     {
+        return isA(targetClazz, true);
+    }
+    
+    public boolean isA(Class<?> targetClazz, boolean isFuzzy)
+    {
         Class<?> dataType = getDataType();
         if (dataType == null)
             return true;
@@ -213,10 +218,10 @@ public class Token implements Labeled
             return true;
         else if (targetClazz.isPrimitive() && !dataType.isPrimitive()) {
             if (targetClazz == double.class && dataType == Double.class ||
-                targetClazz == float.class && dataType == Float.class ||
-                targetClazz == int.class && dataType == Integer.class ||
-                targetClazz == short.class && dataType == Short.class ||
-                targetClazz == long.class && dataType == Long.class ||
+                targetClazz == float.class && (dataType == Float.class || (isFuzzy && dataType == Double.class)) ||
+                targetClazz == int.class && (dataType == Integer.class || (isFuzzy && dataType == Double.class)) ||
+                targetClazz == short.class && (dataType == Short.class || (isFuzzy && dataType == Double.class)) ||
+                targetClazz == long.class && (dataType == Long.class || (isFuzzy && dataType == Double.class)) ||
                 targetClazz == boolean.class && dataType == Boolean.class)
                 return true;
         }

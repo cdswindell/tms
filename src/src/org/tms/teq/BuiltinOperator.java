@@ -92,6 +92,11 @@ public enum BuiltinOperator implements Labeled, Operator
     SignOper(TokenType.UnaryFunc, 5, Math.class, "signum", "sign", "signum"),
     RoundOper("round", TokenType.UnaryFunc, 5, Math.class),
     
+    // Useful functions from Apache Math Commons
+    IsPrimeOper("isPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "isPrime", int.class),
+    NextPrimeOper("nextPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "nextPrime", int.class),
+    PrimeFactorsOper("primeFactors", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "primeFactors", int.class),
+    
     // String functions
     LenOper("len", TokenType.UnaryFunc, 5, MathUtil.class, "length", String.class),
     toLowerOper("toLower", TokenType.UnaryFunc, 5, MathUtil.class, "toLower", String.class),
@@ -107,7 +112,7 @@ public enum BuiltinOperator implements Labeled, Operator
 
     BiggerOper(TokenType.BinaryFunc, 5, Math.class, "max", "bigger"),
     SmallerOper(TokenType.BinaryFunc, 5, Math.class, "min", "smaller"),
-    HypotOper(TokenType.BinaryFunc, 5, Math.class, "hypot"),
+    HypotOper(TokenType.BinaryFunc, 5, org.apache.commons.math3.util.FastMath.class, "hypot"),
     NumberOfOper("numberOf", TokenType.GenericFunc, 5, MathUtil.class, "numberOf", TableElement.class, Object.class),    
     PermOper("perm", TokenType.BinaryFunc, 5, MathUtil.class, "numPermutations"),    
     CombOper("comb", TokenType.BinaryFunc, 5, MathUtil.class, "numCombinations"),    
@@ -485,7 +490,7 @@ public enum BuiltinOperator implements Labeled, Operator
             else if (!args[i].isA(argTypes[i]))
                 return Token.createErrorToken(ErrorCode.OperandDataTypeMismatch);
                         
-            params[i] = args[i].getValue();
+            params[i] = coerceNumericValue(args[i], argTypes[i]);
         }
         
         try
@@ -501,6 +506,25 @@ public enum BuiltinOperator implements Labeled, Operator
         return retVal;
     }
     
+    private Object coerceNumericValue(Token t, Class<?> requiredClass)
+    {
+        if (t.isNull() || !t.isNumeric() || t.isA(requiredClass, false))
+            return t.getValue();
+        
+        // we know t is non-null and numeric, but not of the same class
+        
+        Double dValue = t.getNumericValue();
+        if (requiredClass == int.class || requiredClass == Integer.class)
+            return dValue.intValue();
+        else if (requiredClass == long.class || requiredClass == Long.class)
+            return dValue.longValue();
+        else if (requiredClass == short.class || requiredClass == Short.class)
+            return dValue.longValue();
+        
+        // coerce argument
+        return null;
+    }
+
     static public final List<Operator> listBuiltinOperators()
     {
         return listBuiltinOperators(null);

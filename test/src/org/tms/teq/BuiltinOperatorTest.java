@@ -2,7 +2,9 @@ package org.tms.teq;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+
+import java.util.ArrayList;
 
 import org.junit.Test;
 import org.tms.api.derivables.Token;
@@ -76,5 +78,75 @@ public class BuiltinOperatorTest
         assertThat(t.isNumeric(), is(false));
         assertThat(t.isString(), is(true));
         assertThat(t.getValue(), is("5.0"));
+        
+        pse = new PostfixStackEvaluator("isPrime(7.0)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isBoolean(), is(true));
+        assertThat(t.getValue(), is(true));
+        
+        pse = new PostfixStackEvaluator("toString(15/3)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(true));
+        assertThat(t.getValue(), is("5.0"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public final void testUnaryMathFunctions() 
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("reverse('abcdefghi')", null);
+        assertThat(pse, notNullValue());
+        
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(true));
+        assertThat(t.getStringValue(), is("ihgfedcba"));
+               
+        pse = new PostfixStackEvaluator("isPrime(7.0)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isBoolean(), is(true));
+        assertThat(t.getValue(), is(true));
+        
+        pse = new PostfixStackEvaluator("nextPrime(14)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.getValue(), is(17.0));
+        
+        pse = new PostfixStackEvaluator("nextPrime(37)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.getValue(), is(37.0));
+        
+        pse = new PostfixStackEvaluator("primeFactors(45)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(false));
+        assertThat(t.isA(ArrayList.class), is(true));
+        assertThat(((ArrayList<Integer>)t.getValue()).toArray(), is(new int[] {3, 3, 5}));
     }
 }

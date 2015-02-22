@@ -1349,7 +1349,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     synchronized public RowImpl getRow(Access mode, Object...mda)
     {
         vetElement();
-        return getRowInternal(true, mode, mda);
+        return getRowInternal(true, true, mode, mda);
     }
     
     @Override
@@ -1358,7 +1358,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return getCurrentRow();
     }
     
-    private RowImpl getRowInternal(boolean createIfNull, Access mode, Object...mda)
+    protected RowImpl getRowInternal(boolean createIfNull, boolean setCurrent, Access mode, Object...mda)
     {
         RowImpl r = null;
         
@@ -1379,7 +1379,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             getRowsInternal().set(rowIdx,  r);
         }
         
-        if (r != null)
+        if (setCurrent && r != null)
         	r.setCurrent();
         
         return r;
@@ -1392,15 +1392,10 @@ public class TableImpl extends TableCellsElementImpl implements Table
      */
     synchronized void ensureRowsExist()
     {
-        CellReference cr = getCurrent();
-        try {
-            for (int i = 1; i <= this.getNumRows(); i++) {
-                RowImpl r = this.getRowInternal(true, Access.ByIndex, i);
-                assert r != null;
-            }
-        }
-        finally {        
-            cr.setCurrentCellReference(this);
+        int nRows = getNumRows();
+        for (int i = 1; i <= nRows; i++) {
+            if (m_rows.get(i - 1) == null)
+                getRowInternal(true, false, Access.ByIndex, i);
         }
     }
     
@@ -1584,10 +1579,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     synchronized public ColumnImpl getColumn(Access mode, Object...mda)
     {
         vetElement();
-        ColumnImpl c = getColumnInternal(true, mode, mda);
-        if (c != null)
-            c.setCurrent();
-        return c;
+        return getColumnInternal(true, true, mode, mda);
     }
         
     @Override
@@ -1596,7 +1588,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return getCurrentColumn();
     }
     
-    private ColumnImpl getColumnInternal(boolean createIfNull, Access mode, Object...mda)
+    private ColumnImpl getColumnInternal(boolean createIfNull, boolean setCurrent, Access mode, Object...mda)
     {
         ColumnImpl r = null;
         
@@ -1617,19 +1609,18 @@ public class TableImpl extends TableCellsElementImpl implements Table
             getColumnsInternal().set(colIdx,  r);
         }
         
+        if (setCurrent && r != null)
+            r.setCurrent();
+        
         return r;
     }
 
     synchronized void ensureColumnsExist()
     {
-        CellReference cr = getCurrent();
-        try {
-            int nCols = getNumColumns();
-            for (int i = 1; i <= nCols; i++)
-                getColumnInternal(true, Access.ByIndex, i);
-        }
-        finally {        
-            cr.setCurrentCellReference(this);
+        int nCols = getNumColumns();
+        for (int i = 1; i <= nCols; i++) {
+            if (m_cols.get(i - 1) == null)
+                getColumnInternal(true, false, Access.ByIndex, i);
         }
     }
     
@@ -1860,14 +1851,30 @@ public class TableImpl extends TableCellsElementImpl implements Table
     protected BaseElement find(ElementType et, Collection<? extends BaseElement> slices, TableProperty key, Object value)
     {
         if (key == TableProperty.Label) {
-            if (et == ElementType.Row && isRowLabelsIndexed())
-                return findIndexedElement(m_rowLabelIndex, value);
-            else if (et == ElementType.Column && isColumnLabelsIndexed())
-                return findIndexedElement(m_colLabelIndex, value);
-            else if (et == ElementType.Cell && isCellLabelsIndexed())
-                return findIndexedElement(m_cellLabelIndex, value);
-            else if (et == ElementType.Subset && isSubsetLabelsIndexed())
-                return findIndexedElement(m_subsetLabelIndex, value);
+            switch (et) {
+                case Row:
+                    if (isRowLabelsIndexed())
+                        return findIndexedElement(m_rowLabelIndex, value);
+                    break;
+                    
+                case Column:
+                    if (isColumnLabelsIndexed())
+                        return findIndexedElement(m_colLabelIndex, value);
+                    break;
+                    
+                case Cell:
+                    if (isCellLabelsIndexed())
+                        return findIndexedElement(m_cellLabelIndex, value);
+                    break;
+                                        
+                case Subset:
+                    if (isSubsetLabelsIndexed())
+                        return findIndexedElement(m_subsetLabelIndex, value);
+                    break;
+                    
+                default:
+                    break;
+            }
         }
         
         return find(slices, key, value);

@@ -29,11 +29,9 @@ public class WeakTableReferencesTest
             createLargeTable(tc, nRows, nCols, "Really big table!!!");
         
         assertThat(tc, notNullValue());
-        //assertThat(tc.getNumTables() > 0, is(true));
         
         System.gc();
-        Thread.sleep(1000);
-        System.gc();
+        Thread.sleep(500);
         
         assertThat(tc.getNumTables(), is(0));      
     }
@@ -58,8 +56,7 @@ public class WeakTableReferencesTest
         assertThat(tc.getNumTables(), is(numTables));
         
         System.gc();
-        Thread.sleep(1000);
-        System.gc();
+        Thread.sleep(500);
         
         assertThat(tc.getNumTables(), is(numTables));     
         
@@ -92,10 +89,10 @@ public class WeakTableReferencesTest
         t.addColumn(Access.ByIndex, cols);
         
         t.addRow(Access.ByIndex, rows);
-        t.addListeners(TableElementEventType.OnNewValue, e -> System.out.println("Table: " + e));
+        t.addListeners(TableElementEventType.OnNewValue, e -> System.out.println(t + ": " + e));
         t.fill(fillValue);
         
-        c1.addListeners(TableElementEventType.OnNewValue, e -> System.out.println("Col 1: " + e));
+        c1.addListeners(TableElementEventType.OnNewValue, e -> System.out.println(c1 + ": " + e));
         c1.fill("abc");
         
         c1.setDerivation("ridx");
