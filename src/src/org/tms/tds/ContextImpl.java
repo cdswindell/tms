@@ -16,13 +16,16 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.PendingDerivationExecutor;
 import org.tms.api.derivables.TokenMapper;
+import org.tms.api.event.EventProcessorExecutor;
+import org.tms.api.event.EventProcessorThreadPool;
+import org.tms.api.event.TableElementEvent;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
 import org.tms.util.WeakHashSet;
 
-public class ContextImpl extends BaseElementImpl implements TableContext, DerivableThreadPool
+public class ContextImpl extends BaseElementImpl implements TableContext, DerivableThreadPool, EventProcessorThreadPool
 {
     private static ContextImpl sf_DEFAULT_CONTEXT;
     
@@ -121,6 +124,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     private long m_pendingKeepAliveTimeout;
     private PendingDerivationExecutor m_pendingThreadPool;
     
+    private EventProcessorExecutor m_eventThreadPool;
+    private Object m_eventThreadPoolLock;
+
     private Map<String, Object> m_elemProperties;
     
     private ContextImpl(boolean isDefault, TableContext otherContext)
@@ -300,7 +306,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
-        m_pendingThreadPool = null;
+        m_pendingThreadPool = null;        
+        m_eventThreadPool = null;
+        m_eventThreadPoolLock = new Object();        
     }
     
     @Override
@@ -686,10 +694,13 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             if (this.isDefault()) 
                 m_eventsCorePoolThreads = sf_EVENTS_CORE_POOL_SIZE_DEFAULT;
             else
-                m_eventsCorePoolThreads = ContextImpl.getDefaultContext().getEventsCorePoolSize();
+                m_eventsCorePoolThreads = getDefaultContext().getEventsCorePoolSize();
         }
         else
-            m_eventsCorePoolThreads = corePoolSize;        
+            m_eventsCorePoolThreads = corePoolSize; 
+        
+        if (m_eventThreadPool != null && m_eventsCorePoolThreads <= m_eventThreadPool.getMaximumPoolSize())
+            m_eventThreadPool.setCorePoolSize(m_eventsCorePoolThreads);
     }
 
     public int getEventsMaximumPoolSize()
@@ -707,6 +718,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         }
         else
             m_eventsMaxPoolThreads = maxPoolSize;
+        
+        if (m_eventThreadPool != null && m_eventsMaxPoolThreads >= m_eventThreadPool.getCorePoolSize())
+            m_eventThreadPool.setMaximumPoolSize(m_eventsMaxPoolThreads);
     }
   
     public long getEventsKeepAliveTime()
@@ -724,6 +738,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         }
         else
             m_eventsKeepAliveTimeout = time;
+        
+        if (m_eventThreadPool != null)
+            m_eventThreadPool.setKeepAliveTime(getEventsKeepAliveTime(), TimeUnit.SECONDS);
     }
 
     public boolean eventsAllowsCoreThreadTimeOut()
@@ -734,6 +751,46 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     public void eventsAllowCoreThreadTimeOut(boolean allowCoreThreadTimeout)
     {
         set(sf_EVENTS_ALLOW_CORE_THREAD_TIMEOUT_FLAG, allowCoreThreadTimeout);
+    }
+    
+    /**
+     * Create and initialize the thread pool to support event processing.
+     */
+    public void createEventProcessorThreadPool()
+    {
+        synchronized (m_eventThreadPoolLock) {
+            if (m_eventThreadPool == null) {
+                int maxPoolSize = Math.max(getEventsMaximumPoolSize(), getEventsCorePoolSize());
+                m_eventThreadPool = new EventProcessorExecutor(getEventsCorePoolSize(),
+                                                               maxPoolSize,
+                                                               getEventsKeepAliveTime(),
+                                                               TimeUnit.SECONDS,
+                                                               eventsAllowsCoreThreadTimeOut());  
+            }
+        }
+    }
+
+    @Override
+    public void submitEvents(Collection<TableElementEvent> events)
+    {
+        createEventProcessorThreadPool();       
+        m_eventThreadPool.submitEvents(events);
+    }
+
+    @Override
+    public boolean remove(TableElementEvent e)
+    {
+        if (m_eventThreadPool != null)
+            return m_eventThreadPool.remove(e);
+        else
+            return false;
+    }
+
+    @Override
+    public void shutdownEventProcessorThreadPool()
+    {
+        if (m_eventThreadPool != null)
+            m_eventThreadPool.shutdownEventProcessorThreadPool();
     }
     
     synchronized protected ContextImpl register(TableImpl table)
