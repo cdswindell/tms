@@ -164,6 +164,14 @@ public enum BuiltinOperator implements Labeled, Operator
     NormProbOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbability", "normalProbability", "normalProb", "normP", "normalP", "normPMF"),
     NormProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbInRange", "normalProbInRange", 
                                                                   "normalProbabilityInRange","normPIR", "normalPIR"), 
+    // Exponential Distribution Single Variable Stat Functions 
+    ExpSampleOper(TokenType.BinaryFunc, 5, MathUtil.class, "exponentialSample", "exponentialSample", "expS"),
+    ExpDensityOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialDensity", "exponentialDensity", "expD", "expPDF"),
+    ExpCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialCumProb", "exponentialCumProb", "expCP", "expCDF"),
+    ExpInvCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialInvCumProb", "exponentialInvCumProb", "expICP", "expInvCDF"),
+    ExpProbOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialProbability", "exponentialProbability", "expProb", "expP", "expPMF"),
+    ExpProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialProbInRange", "exponentialProbInRange", 
+                                                                    "exponentialProbabilityInRange","expPIR"), 
     // T Distribution Single Variable Stat Functions                                                               
     TSampleOper(TokenType.UnaryFunc, 5, MathUtil.class, "tSample", "tSample", "tS"),
     TDensityOper(TokenType.GenericFunc, 5, MathUtil.class, "tDensity", "tDensity", "tD", "tPDF"),

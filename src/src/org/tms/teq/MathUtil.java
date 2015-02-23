@@ -3,6 +3,7 @@ package org.tms.teq;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -307,6 +308,9 @@ public class MathUtil
         return nd.probability(x0, x1);
     }
     
+    /*
+     * T Distribution
+     */
     static final public double tSample(double dof) 
     {
         synchronized(sf_LOCK) {
@@ -348,6 +352,14 @@ public class MathUtil
         return nd.probability(x0, x1);
     }
     
+    /**
+     * 
+     * @param meanPop
+     * @param meanSamp
+     * @param stDevSamp
+     * @param nSamples
+     * @return
+     */
     static final public double tScore(double meanPop, double meanSamp, double stDevSamp, double nSamples) 
     {
         if (nSamples < 1 || stDevSamp <= 0)
@@ -356,6 +368,14 @@ public class MathUtil
         return (meanSamp - meanPop)/(stDevSamp/Math.sqrt(nSamples));
     }
     
+    /**
+     * 
+     * @param cumProb
+     * @param meanSamp
+     * @param stDevSamp
+     * @param nSamples
+     * @return
+     */
     static final public double popMean(double cumProb, double meanSamp, double stDevSamp, double nSamples) 
     {
         if (nSamples < 2)
@@ -364,6 +384,54 @@ public class MathUtil
         return meanSamp - tInvCumProb(nSamples-1, cumProb)*(stDevSamp/Math.sqrt(nSamples));
     }
     
+    /*
+     * Exponential Distribution
+     */
+    
+    static final public double exponentialSample(double mean) 
+    {
+        synchronized(sf_LOCK) {
+            if (sf_DISTRIBUTION_RANDOM_GENERATOR == null)
+                sf_DISTRIBUTION_RANDOM_GENERATOR = new Well19937a(System.currentTimeMillis());
+        }
+        
+        ExponentialDistribution nd = new ExponentialDistribution(sf_DISTRIBUTION_RANDOM_GENERATOR, mean);        
+        return nd.sample();
+    }
+    
+    static final public double exponentialDensity(double mean, double x) 
+    {
+        ExponentialDistribution nd = new ExponentialDistribution(null, mean);        
+        return nd.density(x);
+    }
+    
+    static final public double exponentialCumProb(double mean, double x) 
+    {
+        ExponentialDistribution nd = new ExponentialDistribution(null, mean);        
+        return nd.cumulativeProbability(x);
+    }
+    
+    static final public double exponentialInvCumProb(double mean, double x) 
+    {
+        ExponentialDistribution nd = new ExponentialDistribution(null, mean);        
+        return nd.inverseCumulativeProbability(x);
+    }
+    
+    static final public double exponentialProbability(double mean, double x) 
+    {
+        ExponentialDistribution nd = new ExponentialDistribution(null, mean);
+        return nd.probability(x);
+    }
+    
+    static final public double exponentialProbInRange(double mean, double x0, double x1) 
+    {
+        ExponentialDistribution nd = new ExponentialDistribution(null, mean);        
+        return nd.probability(x0, x1);
+    }
+    
+    /*
+     * Linear Regression
+     */
     static final public double lrComputeX(double m, double b, double y) 
     {
         return (y - b)/m ;
