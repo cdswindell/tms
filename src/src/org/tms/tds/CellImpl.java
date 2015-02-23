@@ -57,22 +57,8 @@ public class CellImpl extends TableElementImpl implements Cell
     
     @Override
     public boolean setCellValue(Object value)
-    {
-        vetElement();   
-        
-        TableImpl parentTable = getTable();
-        if (parentTable != null) {
-            synchronized(parentTable)
-            {
-                return setCellValueInternal(value);
-            }
-        }
-        else
-            return setCellValueInternal(value);
-    }
-    
-    private boolean setCellValueInternal(Object value)
     {        
+        vetElement();   
         if (value != null && value instanceof Token)
             return postResult((Token)value);
         
@@ -141,31 +127,40 @@ public class CellImpl extends TableElementImpl implements Cell
     
     protected boolean postResult(Token t)
     {
-        boolean wasPending = isPendings();
-        boolean nowPending = false;
-        decrementPendings();
-        try {
-            if (t.isError()) 
-                return this.setCellValueNoDataTypeCheck(t.getErrorCode());
-            else if (t.isNull())
-                return setCellValue(null, true, false);
-            else if (t.isPending()) {
-                m_cellValue = t.getValue();
-                nowPending = true;
-                incrementPendings();
-                
-                if (!wasPending)
-                    fireEvents(TableElementEventType.OnPendings);
-               
-                return true;
+        TableImpl parentTable = getTable();
+        if (parentTable != null) {
+            synchronized(parentTable) {
+                boolean wasPending = isPendings();
+                boolean nowPending = false;
+                decrementPendings();
+                try {
+
+                    if (t.isError()) 
+                        return this.setCellValueNoDataTypeCheck(t.getErrorCode());
+                    else if (t.isNull())
+                        return setCellValue(null, true, false);
+                    else if (t.isPending()) {
+                        m_cellValue = t.getValue();
+                        nowPending = true;
+                        incrementPendings();
+
+                        if (!wasPending)
+                            fireEvents(TableElementEventType.OnPendings);
+
+                        return true;
+                    }
+                    else
+                        return setCellValue(t.getValue(), true, false);
+                }
+                finally {
+                    if (!wasPending && nowPending)
+                        fireEvents(TableElementEventType.OnNoPendings);                
+                }
             }
-            else
-            	return setCellValue(t.getValue(), true, false);
         }
-        finally {
-            if (!wasPending && nowPending)
-                fireEvents(TableElementEventType.OnNoPendings);                
-        }
+        
+        return false;
+
     }
 
     private void incrementPendings()

@@ -96,6 +96,10 @@ public enum BuiltinOperator implements Labeled, Operator
     IsPrimeOper("isPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "isPrime", int.class),
     NextPrimeOper("nextPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "nextPrime", int.class),
     PrimeFactorsOper("primeFactors", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "primeFactors", int.class),
+    PowerOf2Oper("isPowerOfTwo", TokenType.UnaryFunc, 5, org.apache.commons.math3.util.ArithmeticUtils.class, "isPowerOfTwo", long.class),
+    
+    GcdOper("gcd", TokenType.BinaryFunc, 5, org.apache.commons.math3.util.ArithmeticUtils.class, "gcd", long.class, long.class),   
+    LcmOper("lcm", TokenType.BinaryFunc, 5, org.apache.commons.math3.util.ArithmeticUtils.class, "lcm", long.class, long.class),
     
     // String functions
     LenOper("len", TokenType.UnaryFunc, 5, MathUtil.class, "length", String.class),
@@ -114,8 +118,8 @@ public enum BuiltinOperator implements Labeled, Operator
     SmallerOper(TokenType.BinaryFunc, 5, Math.class, "min", "smaller"),
     HypotOper(TokenType.BinaryFunc, 5, org.apache.commons.math3.util.FastMath.class, "hypot"),
     NumberOfOper("numberOf", TokenType.GenericFunc, 5, MathUtil.class, "numberOf", TableElement.class, Object.class),    
-    PermOper("perm", TokenType.BinaryFunc, 5, MathUtil.class, "numPermutations"),    
-    CombOper("comb", TokenType.BinaryFunc, 5, MathUtil.class, "numCombinations"),    
+    PermOper(TokenType.BinaryFunc, 5, MathUtil.class, "numPermutations", "perm", "nPk"),    
+    CombOper(TokenType.BinaryFunc, 5, MathUtil.class, "numCombinations", "comb", "nCk", "nChooseK"),    
 
     // Builtin functions
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),

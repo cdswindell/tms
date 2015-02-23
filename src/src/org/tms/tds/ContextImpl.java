@@ -36,7 +36,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
 
     static final int sf_PENDING_CORE_POOL_SIZE_DEFAULT = 8;
     static final int sf_PENDING_MAX_POOL_SIZE_DEFAULT = 128;
-    static final int sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT = 15;
+    static final int sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT = 5;
     static final boolean sf_PENDING_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT = true;
     
     static final boolean sf_EVENTS_NOTIFY_IN_SAME_THREAD_DEFAULT = false;
@@ -118,10 +118,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     private int m_eventsCorePoolThreads;
     private int m_eventsMaxPoolThreads;
     private long m_eventsKeepAliveTimeout;
+    private TimeUnit m_eventsKeepAliveTimeUnit;
     
     private int m_pendingCorePoolThreads;
     private int m_pendingMaxPoolThreads;
     private long m_pendingKeepAliveTimeout;
+    private TimeUnit m_pendingKeepAliveTimeUnit;
     private PendingDerivationExecutor m_pendingThreadPool;
     
     private EventProcessorExecutor m_eventThreadPool;
@@ -308,7 +310,8 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         clearProperty(TableProperty.Description);
         m_pendingThreadPool = null;        
         m_eventThreadPool = null;
-        m_eventThreadPoolLock = new Object();        
+        m_eventThreadPoolLock = new Object();  
+        m_eventsKeepAliveTimeUnit = m_pendingKeepAliveTimeUnit = TimeUnit.SECONDS;
     }
     
     @Override
@@ -377,7 +380,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                 return getEventsMaximumPoolSize();
                 
             case EventsThreadKeepAliveTimeout:
-                return getEventsKeepAliveTime();
+                return getEventsKeepAliveTime(TimeUnit.SECONDS);
                 
             default:
                 return super.getProperty(key);
@@ -612,22 +615,33 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     
     public long getPendingKeepAliveTime(TimeUnit unit)
     {
-        return m_pendingKeepAliveTimeout;
+        if (unit == null)
+            unit = TimeUnit.SECONDS;
+        return m_pendingKeepAliveTimeUnit.convert(m_pendingKeepAliveTimeout, unit);
     }
 
     public void setPendingKeepAliveTime(long time, TimeUnit unit)
     {
+        if (unit == null)
+            unit = TimeUnit.SECONDS;
+        
         if (time <= 0) {
-            if (this.isDefault()) 
+            if (this.isDefault()) {
                 m_pendingKeepAliveTimeout = sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
-            else
-                m_pendingKeepAliveTimeout = ContextImpl.getDefaultContext().getPendingKeepAliveTime(TimeUnit.SECONDS);
+                m_pendingKeepAliveTimeUnit = TimeUnit.SECONDS;
+            }
+            else {
+                m_pendingKeepAliveTimeout = ContextImpl.getDefaultContext().getPendingKeepAliveTime(unit);
+                m_pendingKeepAliveTimeUnit = unit;
+            }
         }
-        else
+        else {
             m_pendingKeepAliveTimeout = time;
+            m_pendingKeepAliveTimeUnit = unit;
+        }
         
         if (m_pendingThreadPool != null)
-            m_pendingThreadPool.setKeepAliveTime(m_pendingKeepAliveTimeout, TimeUnit.SECONDS);
+            m_pendingThreadPool.setKeepAliveTime(m_pendingKeepAliveTimeout, m_pendingKeepAliveTimeUnit);
     }
 
     public boolean pendingAllowsCoreThreadTimeOut()
@@ -646,10 +660,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         synchronized(this) {
             if (m_pendingThreadPool == null) {
                 int maxPoolSize = Math.max(getPendingMaximumPoolSize(), getPendingCorePoolSize());
+                TimeUnit unit = m_pendingKeepAliveTimeUnit != null ? m_pendingKeepAliveTimeUnit : TimeUnit.SECONDS;
                 m_pendingThreadPool = new PendingDerivationExecutor(getPendingCorePoolSize(),
                                                                     maxPoolSize,
-                                                                    getPendingKeepAliveTime(TimeUnit.SECONDS),
-                                                                    TimeUnit.SECONDS,
+                                                                    getPendingKeepAliveTime(unit),
+                                                                    unit,
                                                                     this.pendingAllowsCoreThreadTimeOut());  
             }
         }
@@ -723,24 +738,35 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             m_eventThreadPool.setMaximumPoolSize(m_eventsMaxPoolThreads);
     }
   
-    public long getEventsKeepAliveTime()
+    public long getEventsKeepAliveTime(TimeUnit unit)
     {
-        return m_eventsKeepAliveTimeout;
+        if (unit == null)
+            unit = TimeUnit.SECONDS;
+        return m_eventsKeepAliveTimeUnit.convert(m_eventsKeepAliveTimeout, unit);
     }
 
     public void setEventsKeepAliveTime(long time, TimeUnit unit)
     {
-        if (time <= 0) {
-            if (this.isDefault()) 
-                m_eventsKeepAliveTimeout = sf_EVENTS_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
-            else
-                m_eventsKeepAliveTimeout = ContextImpl.getDefaultContext().getEventsKeepAliveTime();
-        }
-        else
-            m_eventsKeepAliveTimeout = time;
+        if (unit == null)
+            unit = TimeUnit.SECONDS;
         
+        if (time <= 0) {
+            if (this.isDefault()) {
+                m_eventsKeepAliveTimeout = sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
+                m_eventsKeepAliveTimeUnit = TimeUnit.SECONDS;
+            }
+            else {
+                m_eventsKeepAliveTimeout = ContextImpl.getDefaultContext().getEventsKeepAliveTime(unit);
+                m_eventsKeepAliveTimeUnit = unit;
+            }
+        }
+        else {
+            m_eventsKeepAliveTimeout = time;
+            m_eventsKeepAliveTimeUnit = unit;
+        }
+                
         if (m_eventThreadPool != null)
-            m_eventThreadPool.setKeepAliveTime(getEventsKeepAliveTime(), TimeUnit.SECONDS);
+            m_eventThreadPool.setKeepAliveTime(m_eventsKeepAliveTimeout, m_eventsKeepAliveTimeUnit);
     }
 
     public boolean eventsAllowsCoreThreadTimeOut()
@@ -761,10 +787,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
         synchronized (m_eventThreadPoolLock) {
             if (m_eventThreadPool == null) {
                 int maxPoolSize = Math.max(getEventsMaximumPoolSize(), getEventsCorePoolSize());
+                TimeUnit unit = m_eventsKeepAliveTimeUnit != null ? m_eventsKeepAliveTimeUnit : TimeUnit.SECONDS;
                 m_eventThreadPool = new EventProcessorExecutor(getEventsCorePoolSize(),
                                                                maxPoolSize,
-                                                               getEventsKeepAliveTime(),
-                                                               TimeUnit.SECONDS,
+                                                               getEventsKeepAliveTime(unit),
+                                                               unit,
                                                                eventsAllowsCoreThreadTimeOut());  
             }
         }

@@ -35,10 +35,10 @@ public class ProbabilityOperatorTest extends BaseTest
         assertThat(t.getPropertyInt(TableProperty.numCells), is (0));
         
         Column c3 = t.addColumn(Access.ByIndex, 3);
-        c3.setDerivation("perm(col 1, col 2)");
+        c3.setDerivation("nPk(col 1, col 2)");
         
         Column c4 = t.addColumn(Access.ByIndex, 4);
-        c4.setDerivation("comb(col 1, col 2)");
+        c4.setDerivation("nCk(col 1, col 2)");
 
         t.setCellValue(r1, c1, 1);
         assertThat(t.getCellValue(r1,  c3), nullValue());
