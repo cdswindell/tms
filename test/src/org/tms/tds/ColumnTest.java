@@ -286,7 +286,7 @@ public class ColumnTest
     }
     
     @Test
-    public void fillTest()
+    public void testColumnFill()
     {
         TableImpl t = new TableImpl(10, 10);
         assertThat(t, notNullValue());
@@ -299,8 +299,11 @@ public class ColumnTest
         
         RowImpl r1 = t.addRow(Access.Next);
         assertThat(t.getNumCells(), is(0));
-        c1.fill(42);
+        assertThat(c1.fill(42), is(true));
         assertThat(t.getNumCells(), is(1));
+
+        assertThat(c1.fill(42), is(false));
+        
         r1.fill(64);
         assertThat(t.getNumCells(), is(16));       
     }

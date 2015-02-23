@@ -3,6 +3,7 @@ package org.tms.teq;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TDistribution;
@@ -306,6 +307,58 @@ public class MathUtil
         NormalDistribution nd = new NormalDistribution(null, mean, stDev);
         
         return nd.probability(x0, x1);
+    }
+    
+    /*
+     * Chi Squared Distribution
+     */
+    static final public double chiSqSample(double dof) 
+    {
+        synchronized(sf_LOCK) {
+            if (sf_DISTRIBUTION_RANDOM_GENERATOR == null)
+                sf_DISTRIBUTION_RANDOM_GENERATOR = new Well19937a(System.currentTimeMillis());
+        }
+        
+        ChiSquaredDistribution nd = new ChiSquaredDistribution(sf_DISTRIBUTION_RANDOM_GENERATOR, dof);        
+        return nd.sample();
+    }
+    
+    static final public double chiSqDensity(double dof, double x) 
+    {
+        ChiSquaredDistribution nd = new ChiSquaredDistribution(null, dof);        
+        return nd.density(x);
+    }
+    
+    static final public double chiSqCumProb(double dof, double x) 
+    {
+        ChiSquaredDistribution nd = new ChiSquaredDistribution(null, dof);        
+        return nd.cumulativeProbability(x);
+    }
+    
+    static final public double chiSqInvCumProb(double dof, double x) 
+    {
+        ChiSquaredDistribution nd = new ChiSquaredDistribution(null, dof);        
+        return nd.inverseCumulativeProbability(x);
+    }
+    
+    static final public double chiSqProbability(double dof, double x) 
+    {
+        ChiSquaredDistribution nd = new ChiSquaredDistribution(null, dof);
+        return nd.probability(x);
+    }
+    
+    static final public double chiSqProbInRange(double dof, double x0, double x1) 
+    {
+        ChiSquaredDistribution nd = new ChiSquaredDistribution(null, dof);        
+        return nd.probability(x0, x1);
+    }
+    
+    static final public double chiSqScore(double stDevPop, double stDevSamp, double nSamples) 
+    {
+        if (nSamples < 1 || stDevPop == 0.0)
+            return Double.NaN;
+        
+        return (nSamples - 1)*stDevSamp*stDevSamp/(stDevPop*stDevPop);
     }
     
     /*

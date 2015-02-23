@@ -165,19 +165,30 @@ public enum BuiltinOperator implements Labeled, Operator
     NormProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "normalProbInRange", "normalProbInRange", 
                                                                   "normalProbabilityInRange","normPIR", "normalPIR"), 
     // Exponential Distribution Single Variable Stat Functions 
-    ExpSampleOper(TokenType.BinaryFunc, 5, MathUtil.class, "exponentialSample", "exponentialSample", "expS"),
-    ExpDensityOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialDensity", "exponentialDensity", "expD", "expPDF"),
-    ExpCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialCumProb", "exponentialCumProb", "expCP", "expCDF"),
-    ExpInvCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialInvCumProb", "exponentialInvCumProb", "expICP", "expInvCDF"),
-    ExpProbOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialProbability", "exponentialProbability", "expProb", "expP", "expPMF"),
+    ExpSampleOper(TokenType.UnaryFunc, 5, MathUtil.class, "exponentialSample", "exponentialSample", "expS"),
+    ExpDensityOper(TokenType.BinaryFunc, 5, MathUtil.class, "exponentialDensity", "exponentialDensity", "expD", "expPDF"),
+    ExpCumProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "exponentialCumProb", "exponentialCumProb", "expCP", "expCDF"),
+    ExpInvCumProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "exponentialInvCumProb", "exponentialInvCumProb", "expICP", "expInvCDF"),
+    ExpProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "exponentialProbability", "exponentialProbability", "expProb", "expP", "expPMF"),
     ExpProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "exponentialProbInRange", "exponentialProbInRange", 
                                                                     "exponentialProbabilityInRange","expPIR"), 
+    // Chi Squared Distribution Single Variable Stat Functions                                                               
+    ChiSqSampleOper(TokenType.UnaryFunc, 5, MathUtil.class, "chiSqSample", "ChiSqSample", "ChiSqS"),
+    ChiSqDensityOper(TokenType.BinaryFunc, 5, MathUtil.class, "chiSqDensity", "ChiSqDensity", "ChiSqD", "ChiSqPDF"),
+    ChiSqCumProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "chiSqCumProb", "chiSqCumProb", "chiSqCP", "chiSqCDF"),
+    ChiSqInvCumProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "chiSqInvCumProb", "ChiSqInvCumProb", "ChiSqICP", "ChiSqInvCDF"),
+    ChiSqProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "chiSqProbability", "ChiSqProbability", "ChiSqProb", "ChiSqP", "ChiSqPMF"),
+    ChiSqProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "chiSqProbInRange", "ChiSqProbInRange", "ChiSqProbabilityInRange","ChiSqPIR"),    
+    ChiSqScoreOper("chiSqScore", TokenType.GenericFunc, 5, MathUtil.class, "chiSqScore", double.class, double.class, double.class),    
+    ChiSqStatOper("chiSqStat", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
+    ChiSqTestOper("chiSqTest", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class, double.class),
+
     // T Distribution Single Variable Stat Functions                                                               
     TSampleOper(TokenType.UnaryFunc, 5, MathUtil.class, "tSample", "tSample", "tS"),
-    TDensityOper(TokenType.GenericFunc, 5, MathUtil.class, "tDensity", "tDensity", "tD", "tPDF"),
-    TCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "tCumProb", "tCumProb", "tCP", "tCDF"),
-    TInvCumProbOper(TokenType.GenericFunc, 5, MathUtil.class, "tInvCumProb", "tInvCumProb", "tICP", "tInvCDF"),
-    TProbOper(TokenType.GenericFunc, 5, MathUtil.class, "tProbability", "tProbability", "tProb", "tP", "tPMF"),
+    TDensityOper(TokenType.BinaryFunc, 5, MathUtil.class, "tDensity", "tDensity", "tD", "tPDF"),
+    TCumProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "tCumProb", "tCumProb", "tCP", "tCDF"),
+    TInvCumProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "tInvCumProb", "tInvCumProb", "tICP", "tInvCDF"),
+    TProbOper(TokenType.BinaryFunc, 5, MathUtil.class, "tProbability", "tProbability", "tProb", "tP", "tPMF"),
     TProbInRangeOper(TokenType.GenericFunc, 5, MathUtil.class, "tProbInRange", "tProbInRange", "tProbabilityInRange","tPIR"),    
 
     TScoreOper("tScore", TokenType.GenericFunc, 5, MathUtil.class, "tScore", double.class, double.class, double.class, double.class),    
@@ -425,14 +436,9 @@ public enum BuiltinOperator implements Labeled, Operator
                 case NormProbInRangeOper:
                     m_methodArgs = new Class<?>[]{double.class, double.class, double.class, double.class};
                     break;
-                
-                case TDensityOper:
-                case TCumProbOper:
-                case TInvCumProbOper:
-                case TProbOper:
-                    m_methodArgs = new Class<?>[]{double.class, double.class};
-                    break;
-                
+                    
+                case ChiSqProbInRangeOper:
+                case ExpProbInRangeOper:
                 case TProbInRangeOper:
                     m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
                     break;

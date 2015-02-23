@@ -1,5 +1,6 @@
 package org.tms.teq;
 
+import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.tms.api.derivables.Token;
 import org.tms.api.exceptions.UnimplementedException;
@@ -9,11 +10,13 @@ public class TwoVariableStatEngine
     private SingleVariableStatEngine m_statX;
     private SingleVariableStatEngine m_statY;
     private double m_sumXY;
+    private double m_sumOE2divE;
     private double m_slope = Double.MIN_VALUE; 
     private double m_intercept = Double.MIN_VALUE; 
     private double m_r2 = Double.MIN_VALUE;
     private int m_n;
     private boolean m_nonUniform;
+    private int m_numErrors;
     
     public TwoVariableStatEngine()
     {
@@ -25,7 +28,9 @@ public class TwoVariableStatEngine
         m_statX = new SingleVariableStatEngine();
         m_statY = new SingleVariableStatEngine();
         
+        m_numErrors = 0;
         m_sumXY = 0; 
+        m_sumOE2divE = 0;
         m_n = 0;
         m_nonUniform = false;
         
@@ -44,6 +49,11 @@ public class TwoVariableStatEngine
         m_n++;
         
         m_sumXY += x * y;
+        
+        if (y != 0.0)
+            m_sumOE2divE += (x - y) * (x - y) / y;
+        else
+            m_numErrors++;
         
         m_slope = m_intercept = m_r2 = Double.MIN_VALUE;
         return m_n;
@@ -102,6 +112,25 @@ public class TwoVariableStatEngine
                     double alpha = params[0].getNumericValue();
                     tTest = new TTest();
                     return tTest.tTest(m_statX.getSummaryStatistics(), m_statY.getSummaryStatistics(), alpha);
+                }
+                
+            case ChiSqStatOper:
+                if (m_n < 2 || m_numErrors > 0)
+                    return Double.NaN;
+                else 
+                    return m_sumOE2divE;
+                
+                
+            case ChiSqTestOper:
+                if (m_n < 2 || m_numErrors > 0 || params == null || params.length < 1 || !params[0].isNumeric())
+                    return Double.NaN;
+                else {
+                    double dof = m_n - 1;
+                    double alpha = params[0].getNumericValue();
+                    ChiSquaredDistribution nd = new ChiSquaredDistribution(null, dof);        
+                    double alphaObs = nd.inverseCumulativeProbability(alpha);
+                    
+                    return alphaObs >= m_sumOE2divE;
                 }
                 
             default:

@@ -616,4 +616,216 @@ public class StatOperatorTest extends BaseTest
         c.setDerivation("tTest(col 1, 10, 0.01)");
         assertThat(c.getCellValue(), is(true));
     }
+    
+    @Test
+    public void testChiSqDistributionStats()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        t.addRow(Access.ByIndex, 25000);
+        
+        int dof = 500;
+        Column c1 = t.addColumn();
+        c1.setDerivation("chiSqS(" + dof + ")");
+        
+        Column c2 = t.addColumn();
+        
+        Cell c = t.getCell(t.getRow(Access.First), c2);
+        c.setDerivation("mean(col 1)");
+        assertThat(closeTo(c.getCellValue(), dof, 1), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c2);
+        c.setDerivation("stDev.p(col 1)");
+        assertThat(closeTo(c.getCellValue(), Math.sqrt(2.0 * dof), 0.5), is(true));
+    }
+    
+    @Test
+    public void testChiSqProbability()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        Row r1 = t.addRow(Access.First);
+        
+        Column c1 = t.addColumn();
+        c1.setLabel("DOF");
+        c1.fill(9);
+        
+        Column c2 = t.addColumn();
+        c2.setLabel("StDev.p");
+        c2.fill(1);
+        
+        Column c3 = t.addColumn();
+        c3.setLabel("StDev.s");
+        c3.fill(0.95);
+        
+        Column c4 = t.addColumn();
+        c4.setLabel("ChiSq Score");
+        c4.setDerivation("chiSqScore(col 2, col 3, col 1)");
+        Cell c = t.getCell(r1, c4);
+        assertThat(closeTo(c.getCellValue(), 7.22, 0.01), is(true));
+        
+        Column c5 = t.addColumn();
+        c5.setLabel("Cum Prob");
+        c5.setDerivation("chiSqCDF((col 1 - 1), col 4)");
+        c = t.getCell(r1, c5);
+        assertThat(closeTo(c.getCellValue(), 0.49, 0.01), is(true));
+        
+        Column c6 = t.addColumn();
+        c6.setLabel("Inv Cum Prob");
+        c6.setDerivation("chiSqInvCDF((col 1 - 1), col 5)");
+        c = t.getCell(r1, c6);
+        assertThat(closeTo(c.getCellValue(), 7.22, 0.01), is(true));
+    }  
+    
+    @Test
+    public void testChiSqTest()
+    {
+        Table t = TableFactory.createTable();        
+        assert (t != null);
+        
+        Column c1 = t.addColumn();
+        c1.setLabel("Obs");
+        
+        Column c2 = t.addColumn();
+        c2.setLabel("Expected");
+        
+        Column c3 = t.addColumn();
+        c3.setLabel("Results");
+        
+        t.setCellValue(t.addRow(), c1, 8);
+        t.setCellValue(t.getRow(), c2, 6);
+        
+        t.setCellValue(t.addRow(), c1, 5);
+        t.setCellValue(t.getRow(), c2, 6);
+        
+        t.setCellValue(t.addRow(), c1, 9);
+        t.setCellValue(t.getRow(), c2, 6);
+        
+        t.setCellValue(t.addRow(), c1, 2);
+        t.setCellValue(t.getRow(), c2, 6);
+        
+        t.setCellValue(t.addRow(), c1, 7);
+        t.setCellValue(t.getRow(), c2, 6);
+        
+        t.setCellValue(t.addRow(), c1, 5);
+        t.setCellValue(t.getRow(), c2, 6);
+        
+        Cell c = t.getCell(t.getRow(Access.First), c3);
+        c.setDerivation("count(col 1)");
+        assertThat(closeTo(c.getCellValue(), 6, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        c.setLabel("chiSqStatCell");
+        c.setDerivation("chiSqStat(col 1, col 2)");
+        assertThat(closeTo(c.getCellValue(), 5.33, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        c.setDerivation("1 - chiSqCumProb((count(col 1) - 1), chiSqStatCell)");
+        assertThat(closeTo(c.getCellValue(), .377, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        c.setDerivation("chiSqTest(col 1, col 2, .50)");
+        assertThat(c.getCellValue(), is(false));
+        
+        // try again
+        c1.clear();
+        c2.clear();
+        
+        t.setCellValue(t.getRow(Access.First), c1, 9);
+        t.setCellValue(t.getRow(), c2, 16.695);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 60);
+        t.setCellValue(t.getRow(), c2, 35.805);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 17);
+        t.setCellValue(t.getRow(), c2, 35.805);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 19);
+        t.setCellValue(t.getRow(), c2, 16.695);
+        
+        // test results
+        c = t.getCell(t.getRow(Access.First), c3);
+        assertThat(closeTo(c.getCellValue(), 4, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        assertThat(closeTo(c.getCellValue(), 30.09, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        assertThat(closeTo(c.getCellValue(), 0, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        c.setDerivation("chiSqTest(col 1, col 2, 0.95)");
+        assertThat(c.getCellValue(), is(false)); 
+        
+        // and again again
+        c1.clear();
+        c2.clear();
+        
+        t.setCellValue(t.getRow(Access.First), c1, 16);
+        t.setCellValue(t.getRow(), c2, 10);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 5);
+        t.setCellValue(t.getRow(), c2, 10);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 9);
+        t.setCellValue(t.getRow(), c2, 10);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 7);
+        t.setCellValue(t.getRow(), c2, 10);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 6);
+        t.setCellValue(t.getRow(), c2, 10);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 17);
+        t.setCellValue(t.getRow(), c2, 10);
+        
+        // test results
+        c = t.getCell(t.getRow(Access.First), c3);
+        assertThat(closeTo(c.getCellValue(), 6, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        assertThat(closeTo(c.getCellValue(), 13.6, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        assertThat(closeTo(c.getCellValue(), 0.0184, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        c.setDerivation("chiSqTest(col 1, col 2, 0.95)");
+        assertThat(c.getCellValue(), is(false));       
+        
+        // and again again
+        c1.clear();
+        c2.clear();
+        
+        t.setCellValue(t.getRow(Access.First), c1, 76);
+        t.setCellValue(t.getRow(), c2, 73.8);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 19);
+        t.setCellValue(t.getRow(), c2, 29.52);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 83);
+        t.setCellValue(t.getRow(), c2, 73.8);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 65);
+        t.setCellValue(t.getRow(), c2, 61.5);
+        
+        t.setCellValue(t.getRow(Access.Next), c1, 3);
+        t.setCellValue(t.getRow(), c2, 7.38);
+        
+        // test results
+        c = t.getCell(t.getRow(Access.First), c3);
+        assertThat(closeTo(c.getCellValue(), 5, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        assertThat(closeTo(c.getCellValue(), 7.76, 0.01), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        assertThat(closeTo(c.getCellValue(), 0.1008, 0.0001), is(true));
+        
+        c = t.getCell(t.getRow(Access.Next), c3);
+        c.setDerivation("chiSqTest(col 1, col 2, 0.90)");
+        assertThat(c.getCellValue(), is(true));       
+    }
 }

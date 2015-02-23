@@ -1920,10 +1920,13 @@ public class TableImpl extends TableCellsElementImpl implements Table
         if (this != col.getTable())
             throw new InvalidParentException(col, this);
         
-        row.setCurrent();
-        col.setCurrent();
-        
-        return col.getCell(row, true);
+        try {
+            return col.getCell(row, true);
+        }
+        finally {
+            row.setCurrent();
+            col.setCurrent();
+        }
     }
     
     synchronized protected boolean setCellValue(RowImpl row, ColumnImpl col, Object o) 

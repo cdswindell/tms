@@ -666,7 +666,7 @@ public class InfixExpressionParser
         for (int i = curPos; i < maxPos; i++) {
         	char c = exprChars[i];
         	// need to allow for !=, <>, <=, & >=
-        	if (Character.isLetterOrDigit(c) || c == '#' || c == '_' || c == ':') {
+        	if (Character.isLetterOrDigit(c) || c == '#' || c == '_' || c == ':'|| c == '.') {
         		sb.append(c);
         		
                 if (labelCharsParsed == 0)
