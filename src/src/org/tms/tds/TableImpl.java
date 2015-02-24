@@ -1344,9 +1344,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return prevCurrent;
     }  
     
+    @Override
     public RowImpl addRow()
     {
         return addRow(Access.Last);
+    }
+    
+    @Override
+    public RowImpl addRow(int idx)
+    {
+        return addRow(Access.ByIndex, idx);
     }
     
     protected RowImpl addRow(Access mode)
@@ -1372,6 +1379,18 @@ public class TableImpl extends TableCellsElementImpl implements Table
     public RowImpl getRow()
     {
         return getCurrentRow();
+    }
+    
+    @Override
+    public RowImpl getRow(int idx)
+    {
+        return getRow(Access.ByIndex, idx);
+    }
+    
+    @Override
+    public RowImpl getRow(String label)
+    {
+        return getRow(Access.ByLabel, label);
     }
     
     protected RowImpl getRowInternal(boolean createIfNull, boolean setCurrent, Access mode, Object...mda)
@@ -1574,9 +1593,16 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return prevCurrent;
     }  
     
+    @Override
     public ColumnImpl addColumn()
     {
         return addColumn(Access.Last);
+    }
+    
+    @Override
+    public ColumnImpl addColumn(int idx)
+    {
+        return addColumn(Access.ByIndex, idx);
     }
     
     protected ColumnImpl addColumn(Access mode)
@@ -1602,6 +1628,18 @@ public class TableImpl extends TableCellsElementImpl implements Table
     public ColumnImpl getColumn()
     {
         return getCurrentColumn();
+    }
+    
+    @Override
+    public ColumnImpl getColumn(int idx)
+    {
+        return getColumn(Access.ByIndex, idx);
+    }
+    
+    @Override
+    public ColumnImpl getColumn(String label)
+    {
+        return getColumn(Access.ByLabel, label);
     }
     
     private ColumnImpl getColumnInternal(boolean createIfNull, boolean setCurrent, Access mode, Object...mda)

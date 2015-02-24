@@ -6,19 +6,42 @@ import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.events.EventProcessorThreadPool;
 
 public interface Table extends TableElement
-{    
+{  
+    /**
+     * Add a new {@link Row} to this {@link Table} directly following the current row. If the current row is last,
+     * the new {@code Row} is added to the end of the table. Otherwise, the new {@code Row} is inserted directly following the current 
+     * row, and all other rows are moved down by one position.
+     * @return the new {@code Row}
+     */
     public Row addRow();   
-    public Row addRow(Access mode, Object... mda);   
+
+    /**
+     * Add a new {@link Row} to this {@link Table} at the 1-based ordinal index specified by {@code idx}. If the current row is last,
+     * the new {@code Row} is added to the end of the table. Otherwise, the new {@code Row} is inserted directly following the current 
+     * row, and all other rows are moved down by one position.
+     * @return the new {@code Row}
+     */
+    
+    public Row addRow(int idx);  
+    
+    public Row addRow(Access mode, Object... mda);  
+    
+    
     public Row getRow(Access mode, Object... mda);
     public Row getRow();
+    public Row getRow(int idx);
+    public Row getRow(String label);
     public List<Row> getRows();
     public Iterable<Row> rows();
     public int getNumRows();
     
     public Column addColumn();  
+    public Column addColumn(int idx);  
     public Column addColumn(Access mode, Object... mda);  
     public Column getColumn(Access mode, Object... mda);
     public Column getColumn();
+    public Column getColumn(int idx);
+    public Column getColumn(String label);
     public List<Column> getColumns();
     public Iterable<Column> columns();
     public int getNumColumns();
