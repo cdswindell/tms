@@ -13,6 +13,9 @@ public interface TableRowColumnElement extends TableElement
      */
     public int getIndex();
     
+    public void fill(Object o, int n, Access access, Object... mda);
+    public void fill(Object[] o, Access access, Object... mda);
+    
     public String getUnits();
     public void setUnits(String units);    
 
@@ -26,9 +29,6 @@ public interface TableRowColumnElement extends TableElement
      * order of the cell value interpreted as a String.
      */
     public void sort();
-    
-    public void fill(Object o, int n, Access access, Object... mda);
-    public void fill(Object[] o, Access access, Object... mda);
     
     /**
      * Sort the table by a row/column. Null elements are sorted to the end of the row/column.
