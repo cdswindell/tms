@@ -226,11 +226,20 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_cellElemProperties = new ConcurrentHashMap<CellImpl, Map<String, Object>>();
         m_subsetedCells = new HashMap<CellImpl, Set<SubsetImpl>>();
         
+        initializeSpecialized(t);
         // clear dirty flag, as table is empty
         markClean();
     }
 
-    @Override
+    /**
+     * Override in subclasses to perform subclass-specific initialization
+     * @param t
+     */
+    protected void initializeSpecialized(TableImpl t) 
+    {
+	}
+
+	@Override
     protected void initialize(TableElementImpl e) 
     {
         super.initialize(e);
@@ -306,10 +315,17 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     break;
                     
                 default:
-                    if (!tp.isOptional())
+                	if (initializeSpecializedProperty(tp, value))
+                		break;
+                	else if (!tp.isOptional())
                         throw new IllegalStateException("No initialization available for Table Property: " + tp);                       
             }
         }
+    }
+    
+    boolean initializeSpecializedProperty(TableProperty tp, Object value) 
+    {
+    	return false;
     }
     
     /*

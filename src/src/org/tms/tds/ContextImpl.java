@@ -25,7 +25,8 @@ import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.Derivation;
 import org.tms.util.WeakHashSet;
 
-public class ContextImpl extends BaseElementImpl implements TableContext, DerivableThreadPool, EventProcessorThreadPool
+public class ContextImpl extends BaseElementImpl implements TableContext, DerivableThreadPool, 
+															EventProcessorThreadPool, EventsProcessorThreadPoolCreator
 {
     private static ContextImpl sf_DEFAULT_CONTEXT;
     

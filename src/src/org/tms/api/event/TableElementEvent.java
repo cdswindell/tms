@@ -2,6 +2,8 @@ package org.tms.api.event;
 
 import java.util.EventObject;
 
+import org.tms.api.TableElement;
+
 abstract public class TableElementEvent extends EventObject
 {
     private static final long serialVersionUID = 2207788387645138100L;
@@ -95,4 +97,9 @@ abstract public class TableElementEvent extends EventObject
         return String.format("Source: %s Trigger: %s Event: %s (%d:%d)", 
                 getSource(), getTrigger(), getType(), getAssemblyId(), getTimeStamp());
     }
+
+	public Object getTable() 
+	{
+		return getSource() != null ? ((TableElement)getSource()).getTable() : null;
+	}
 }

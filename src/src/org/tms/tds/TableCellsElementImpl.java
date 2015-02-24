@@ -240,8 +240,10 @@ abstract class TableCellsElementImpl extends TableElementImpl
         vetElement();
         TableImpl parent = null;
         ContextImpl tc = null;
-        if ((parent = getTable()) != null && (tc = parent.getTableContext()) != null)
-            tc.createEventProcessorThreadPool();
+        if ((parent = getTable()) != null && parent.isEventProcessorThreadPool())
+            ((EventsProcessorThreadPoolCreator)parent).createEventProcessorThreadPool();
+        else if ((parent = getTable()) != null && (tc = parent.getTableContext()) != null && tc.isEventProcessorThreadPool())
+        	((EventsProcessorThreadPoolCreator)tc).createEventProcessorThreadPool();
 
         return fetchListeners().addListeners(evT, tels);
     }
