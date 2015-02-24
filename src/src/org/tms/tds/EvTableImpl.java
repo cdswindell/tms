@@ -144,6 +144,7 @@ public class EvTableImpl extends TableImpl implements EventProcessorThreadPool, 
         
     public boolean isEventsNotifyInSameThread()
     {
+        
         return isSet(sf_EVENTS_NOTIFY_IN_SAME_THREAD_FLAG);
     }
 

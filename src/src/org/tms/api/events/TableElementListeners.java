@@ -108,6 +108,16 @@ public class TableElementListeners implements Listenable
         m_notifyInSameThread = notifyInSameThread;
     }
     
+    public boolean isNotifyInSameThread()
+    {
+        return m_notifyInSameThread;
+    }
+
+    public void setNotifyInSameThread(boolean notifyInSameThread)
+    {
+        m_notifyInSameThread = notifyInSameThread;
+    }
+
     @Override
     synchronized public boolean addListeners(TableElementEventType evT, TableElementListener... tels)
     {

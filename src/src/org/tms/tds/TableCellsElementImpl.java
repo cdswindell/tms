@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.Cell;
+import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
@@ -216,8 +218,18 @@ abstract class TableCellsElementImpl extends TableElementImpl
 
     synchronized private TableElementListeners fetchListeners()
     {
-        if (m_listeners == null)
-            m_listeners = new TableElementListeners(this);
+        if (m_listeners == null) {
+            boolean notifyInSameThread = false;
+            
+            TableContext tc = null;
+            Table t = getTable();
+            if (t != null && t.isEventProcessorThreadPool()) 
+                notifyInSameThread = ((EventsProcessorThreadPoolCreator)t).isEventsNotifyInSameThread();
+            else if (t != null && (tc = t.getTableContext()) != null && t.isEventProcessorThreadPool())
+                notifyInSameThread = ((EventsProcessorThreadPoolCreator)tc).isEventsNotifyInSameThread();
+            
+            m_listeners = new TableElementListeners(this, notifyInSameThread);
+        }
         
         return m_listeners;
     }
