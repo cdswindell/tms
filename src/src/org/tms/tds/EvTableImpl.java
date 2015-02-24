@@ -3,6 +3,7 @@ package org.tms.tds;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
+import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.api.event.EventProcessorExecutor;
@@ -11,6 +12,31 @@ import org.tms.api.event.TableElementEvent;
 
 public class EvTableImpl extends TableImpl implements EventProcessorThreadPool, EventsProcessorThreadPoolCreator
 {
+	public static final Table createEvTable() 
+	{
+		return new EvTableImpl();
+	}
+	
+	public static final Table createEvTable(int nRows, int nCols) 
+	{
+		return new EvTableImpl(nRows, nCols);
+	}
+	
+    public static final Table createEvTable(TableContext c) 
+    {
+        return new EvTableImpl(c);
+    }
+    
+    public static final Table createEvTable(int nRows, int nCols, ContextImpl c) 
+    {
+        return new EvTableImpl(nRows, nCols, c);
+    }
+    
+    public static final Table createEvTable(int nRows, int nCols, TableImpl t) 
+    {
+        return new EvTableImpl(nRows, nCols, t);
+    }
+    
     private int m_eventsCorePoolThreads;
     private int m_eventsMaxPoolThreads;
     private long m_eventsKeepAliveTimeout;
@@ -42,7 +68,6 @@ public class EvTableImpl extends TableImpl implements EventProcessorThreadPool, 
 	protected EvTableImpl(int nRows, int nCols, TableImpl t) 
 	{
 		super(nRows, nCols, t);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
