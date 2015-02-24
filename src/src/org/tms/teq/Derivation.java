@@ -997,29 +997,27 @@ public class Derivation
 
     void submitCalculation(AwaitingState pendingState)
     {
-        TableContext tc = getTableContext();
-        if (tc instanceof DerivableThreadPool) {
-            ((DerivableThreadPool)tc).submitCalculation(pendingState.getTransactionID(), pendingState.getRunnable());
-            if (m_threadPool != null)
-                m_threadPool = (DerivableThreadPool)tc;
-        }
-        else {
-            submitCalculation(pendingState.getTransactionID(), pendingState.getRunnable());
-            if (m_threadPool != null)
-                m_threadPool = sf_PENDING_EXECUTOR;
-        }
+    	if (m_threadPool == null) {
+	    	Table t = getTable();
+	        TableContext tc = getTableContext();
+	    	if (t.isDerivableThreadPool()) 
+	    		m_threadPool = (DerivableThreadPool)t;
+	    	else if (tc != null && tc.isDerivableThreadPool()) 
+	            m_threadPool = (DerivableThreadPool)tc;
+	        else {
+	            synchronized(Derivation.class) {
+	                if (sf_PENDING_EXECUTOR == null)
+	                    sf_PENDING_EXECUTOR = new PendingDerivationExecutor();
+	            }
+	            
+	            m_threadPool = sf_PENDING_EXECUTOR;
+	        }
+    	}
+    	
+    	if (m_threadPool != null)
+    		m_threadPool.submitCalculation(pendingState.getTransactionID(), pendingState.getRunnable());
     }
 
-    void submitCalculation(UUID transactionID, Runnable pendingRunnable)
-    {
-        synchronized(Derivation.class) {
-            if (sf_PENDING_EXECUTOR == null)
-                sf_PENDING_EXECUTOR = new PendingDerivationExecutor();
-        }
-        
-        sf_PENDING_EXECUTOR.submitCalculation(transactionID, pendingRunnable);       
-    }
-    
     public List<TableElement> getAffectedBy()
     {
         List<TableElement> affectedBy = new ArrayList<TableElement>();       
