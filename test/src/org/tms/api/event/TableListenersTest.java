@@ -11,7 +11,12 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
-import org.tms.api.event.exceptions.BlockedRequestException;
+import org.tms.api.events.CellValueChangedEvent;
+import org.tms.api.events.TableElementEvent;
+import org.tms.api.events.TableElementEventType;
+import org.tms.api.events.TableElementListener;
+import org.tms.api.events.TableElementListeners;
+import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.factories.TableFactory;
 
 public class TableListenersTest extends BaseTest

@@ -1,4 +1,4 @@
-package org.tms.api.event;
+package org.tms.api.events;
 
 public class DeleteEvent extends TableElementEvent implements OnBeforeEvent
 {

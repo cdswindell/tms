@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.tms.api.TableProperty;
-import org.tms.api.event.TableElementEventType;
+import org.tms.api.events.TableElementEventType;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.exceptions.TableException;

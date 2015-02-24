@@ -9,7 +9,7 @@ import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
-import org.tms.api.event.TableElementEventType;
+import org.tms.api.events.TableElementEventType;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 

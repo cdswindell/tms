@@ -3,7 +3,7 @@ package org.tms.api;
 import java.util.List;
 
 import org.tms.api.derivables.DerivableThreadPool;
-import org.tms.api.event.EventProcessorThreadPool;
+import org.tms.api.events.EventProcessorThreadPool;
 
 public interface Table extends TableElement
 {    

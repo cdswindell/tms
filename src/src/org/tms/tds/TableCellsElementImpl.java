@@ -12,9 +12,9 @@ import org.tms.api.Cell;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
-import org.tms.api.event.TableElementEventType;
-import org.tms.api.event.TableElementListener;
-import org.tms.api.event.TableElementListeners;
+import org.tms.api.events.TableElementEventType;
+import org.tms.api.events.TableElementListener;
+import org.tms.api.events.TableElementListeners;
 import org.tms.api.exceptions.InvalidParentException;
 
 /**

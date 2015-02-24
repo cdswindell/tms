@@ -2,7 +2,7 @@ package org.tms.api;
 
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.TokenMapper;
-import org.tms.api.event.EventProcessorThreadPool;
+import org.tms.api.events.EventProcessorThreadPool;
 
 public interface TableContext extends BaseElement
 {

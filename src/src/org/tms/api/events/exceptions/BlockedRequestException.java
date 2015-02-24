@@ -1,6 +1,6 @@
-package org.tms.api.event.exceptions;
+package org.tms.api.events.exceptions;
 
-import org.tms.api.event.TableElementEvent;
+import org.tms.api.events.TableElementEvent;
 import org.tms.api.exceptions.TableException;
 
 public class BlockedRequestException extends TableException

@@ -1,4 +1,4 @@
-package org.tms.api.event;
+package org.tms.api.events;
 
 import org.tms.api.ElementType;
 import org.tms.api.TableElement;

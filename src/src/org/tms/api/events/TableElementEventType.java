@@ -1,4 +1,4 @@
-package org.tms.api.event;
+package org.tms.api.events;
 
 import java.util.HashSet;
 import java.util.Set;
