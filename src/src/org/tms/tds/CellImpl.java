@@ -211,7 +211,7 @@ public class CellImpl extends TableElementImpl implements Cell
         }
         
         boolean valuesDiffer = false;        
-        if (value != m_cellValue || (value != null && !value.equals(m_cellValue))) {  
+        if ((value == null && m_cellValue != null) || (value != null && !value.equals(m_cellValue))) {  
             if (doPreprocess) {
                 // validate and potentially transform new cell value
                 value = applyTransformer(value);

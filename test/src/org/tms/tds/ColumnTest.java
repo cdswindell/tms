@@ -304,6 +304,13 @@ public class ColumnTest
 
         assertThat(c1.fill(42), is(false));
         
+        assertThat(t.fill(412), is(true));
+        assertThat(t.fill(412), is(false));
+        
+        assertThat(t.clear(), is(true));
+        assertThat(t.clear(), is(false));        
+        assertThat(t.fill(412), is(true));
+        
         r1.fill(64);
         assertThat(t.getNumCells(), is(16));       
     }
