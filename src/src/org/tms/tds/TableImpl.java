@@ -2374,6 +2374,9 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	@Override
 	public void sort(ElementType et, TableProperty tp, TableRowColumnElement... others)
 	{
+	    if (et == null || (tp == null && (others == null || others.length == 0)))
+	        throw new IllegalArgumentException("Element type and Table Property and/or other Sort Elements required");
+	        
 	    ElementType otherType;
 	    switch (et) {
 	        case Row:
@@ -2383,8 +2386,14 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	                for (TableRowColumnElement e : others) {
 	                    if (e == null)
 	                        throw new NullPointerException("TableRowColumnElement");
-	                    else if (e.getElementType() != otherType)
-	                        throw new InvalidException("All elements must be of the same type: " + otherType);
+                        else if (e.getElementType() != otherType)
+                            throw new InvalidException("All elements must be of the same type: " + otherType);
+                        else if (!(e instanceof TableSliceElementImpl))
+                            throw new UnsupportedImplementationException(e);
+                        else if (e.getTable() != this)
+                            throw new InvalidParentException(e, this);
+	                    
+	                    ((TableSliceElementImpl)e).vetElement();
 	                }
 	            }
 	            break;
@@ -2571,7 +2580,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     if (c1 == null || c1.isNull()) return 1;
                     if (c2 == null || c2.isNull()) return -1;
                     
-                    int result = compareValue(c1.getCellValue(), c1.getCellValue());
+                    int result = compareValue(c1.getCellValue(), c2.getCellValue());
                     if (result != 0)
                         return result;
                 }

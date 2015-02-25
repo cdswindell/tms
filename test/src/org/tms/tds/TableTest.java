@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -229,5 +230,35 @@ public class TableTest
         assertThat(t.isInvalid(), is(true));
         assertThat(r1.isInvalid(), is(true));
         assertThat(rng.isInvalid(), is(true));        
+    }
+    
+    @Test
+    public void testTableSort()
+    {
+        TableImpl t = new TableImpl();        
+        assertThat (t, notNullValue());
+        assertThat(t.getNumCells(), is (0));
+        
+        t.addRow();
+        t.addRow().setLabel("GHI");
+        t.addRow().setLabel("ABC");
+        t.addRow().setLabel("ABC");
+        
+        ColumnImpl c1 = t.addColumn();
+        t.setCellValue(t.getRow(Access.First), c1, 1);
+        t.setCellValue(t.getRow(Access.Next), c1, 12);
+        t.setCellValue(t.getRow(Access.Next), c1, 12);
+        t.setCellValue(t.getRow(Access.Next), c1, 10);
+        
+        t.sort(ElementType.Row, TableProperty.Label, c1);
+        
+        assertThat(t.getRow(1).getLabel(), is("ABC"));
+        assertThat(t.getCellValue(t.getRow(1), c1), is(10));
+        
+        assertThat(t.getRow(2).getLabel(), is("ABC"));
+        assertThat(t.getCellValue(t.getRow(2), c1), is(12));
+        
+        assertThat(t.getRow(3).getLabel(), is("GHI"));
+        assertThat(t.getCellValue(t.getRow(3), c1), is(12));
     }
 }
