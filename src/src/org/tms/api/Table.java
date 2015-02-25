@@ -20,8 +20,9 @@ public interface Table extends TableElement
      * is greater than the number of rows currently in the table, additional new rows are added, and the table will contain
      * {@code idx} rows when the operation completes. Otherwise, the new {@code Row} is inserted at the position specified by
      * {@code idx} and all existing rows are moved down by one position.
+     * @param idx
      * @return the new {@code Row}
-     * @throws InvalidAccessException if @{code idx} is <= 0
+     * @throws org.tms.api.exceptions.InvalidAccessException if {@code idx} is &lt;= 0
      */    
     public Row addRow(int idx);  
     
@@ -32,8 +33,10 @@ public interface Table extends TableElement
      * <p>If the new {@code Row} is added at a position greater than the current number of rows in the table, additional new rows are added, 
      * as needed. Otherwise, the new {@code Row} is inserted at the position specified by
      * {@code mda} and all existing rows are moved down by one position.
+     * @param mode
+     * @param mda
      * @return the new {@code Row}
-     * @throws InvalidAccessException if an invalid @{code mode} and/or {@code mda} is specified
+     * @throws org.tms.api.exceptions.InvalidAccessException if an invalid {@code mode} and/or {@code mda} is specified
      */    
     public Row addRow(Access mode, Object... mda);  
     
@@ -48,7 +51,7 @@ public interface Table extends TableElement
      * exists at that location.
      * @param idx
      * @return the {@code Row} with the 1-based index of {@code idx}
-     * @throws InvalidAccessException if @{code idx} is <= 0
+     * @throws org.tms.api.exceptions.InvalidAccessException if {@code idx} is &lt;= 0
      */
     public Row getRow(int idx);
     
@@ -58,7 +61,7 @@ public interface Table extends TableElement
      * specified {@code label} is returned.
      * @param label the label of the {@code Row} to retrieve
      * @return the {@code Row} with the specified label
-     * @throws InvalidAccessException if {@code label} is {@code null} or not provided.
+     * @throws org.tms.api.exceptions.InvalidAccessException if {@code label} is {@code null} or not provided.
      */
     public Row getRow(String label);
     

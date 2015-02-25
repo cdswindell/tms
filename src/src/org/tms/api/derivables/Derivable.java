@@ -19,7 +19,7 @@ public interface Derivable extends BaseElement, TableElement
     public boolean isDerived();
     
     /**
-     * Returns a {@link java.collections.List<TableElement>} of the elements
+     * Returns a {@link List} of the {@code Derivable} elements
      * that affect this {@code Derivable}'s calculation
      * @return a List of the TableElement elements that affect this derivation
      */

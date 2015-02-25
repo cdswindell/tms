@@ -28,7 +28,7 @@ public interface TableElement extends BaseElement, Listenable
     
     public int getNumSubsets();
     /**
-     * Returns a {@link java.collections.List<Derivable>} of the {@code Derivable} elements
+     * Returns a {@link List} of the {@code Derivable} elements
      * that this {@code TableElement} impacts when modified
      * @return a List of the Derivable elements that this element affects
      */

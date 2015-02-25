@@ -13,9 +13,9 @@ public interface TableContext extends BaseElement
      * @param mode the Access mode specified to reference the table
      * @param mda the associated Access mode parameters
      * @return the referenced table
-     * @throws InvalidAccessException If {@code Table}s cannot be referenced using {@link Access} {@code mode}.
-     * @throws InvalidException If the {@link Access} additional parameters given in {@code mda} are not appropriate. 
-     * @See {@link Access}
+     * @throws org.tms.api.exceptions.InvalidAccessException If {@code Table}s cannot be referenced using {@link Access} {@code mode}.
+     * @throws org.tms.api.exceptions.InvalidException If the {@link Access} additional parameters given in {@code mda} are not appropriate. 
+     * See {@link Access}
      */
     public Table getTable(Access mode, Object... mda);
 

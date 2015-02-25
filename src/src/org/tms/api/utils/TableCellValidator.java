@@ -16,7 +16,7 @@ public interface TableCellValidator
      * Validate and transform the candidate cell value according to the rules coded in the implementing method. If the candidate
      * cell value passes the validation criteria, it can also be transformed by the implementing method to apply application-specific 
      * formating and data consistency rules.
-     * <p/>
+     * <p>
      * Note that as the {@code TableCellValidator} contract requires that implementing classes supply a {@code validate} method, classes
      * that override {@code transform} may choose to implement all validation logic in {@code validate} and simply invoke that method
      * within.
