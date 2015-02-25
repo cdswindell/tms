@@ -16,23 +16,76 @@ public interface Table extends TableElement
     public Row addRow();   
 
     /**
-     * Add a new {@link Row} to this {@link Table} at the 1-based ordinal index specified by {@code idx}. If the current row is last,
-     * the new {@code Row} is added to the end of the table. Otherwise, the new {@code Row} is inserted directly following the current 
-     * row, and all other rows are moved down by one position.
+     * Add a new {@link Row} to this {@link Table} at the 1-based index specified by {@code idx}. If the {@code idx} value 
+     * is greater than the number of rows currently in the table, additional new rows are added, and the table will contain
+     * {@code idx} rows when the operation completes. Otherwise, the new {@code Row} is inserted at the position specified by
+     * {@code idx} and all existing rows are moved down by one position.
      * @return the new {@code Row}
-     */
-    
+     * @throws InvalidAccessException if @{code idx} is <= 0
+     */    
     public Row addRow(int idx);  
     
+    /**
+     * Add a new {@link Row} to this {@link Table} using the {@link Access} specified by {@code mode} and the optional argument(s)
+     * specified in {@code mda}. See the Javadoc on {@link Access} to learn more about the various {@code Access} modes and
+     * their required parameters (if any). 
+     * <p>If the new {@code Row} is added at a position greater than the current number of rows in the table, additional new rows are added, 
+     * as needed. Otherwise, the new {@code Row} is inserted at the position specified by
+     * {@code mda} and all existing rows are moved down by one position.
+     * @return the new {@code Row}
+     * @throws InvalidAccessException if an invalid @{code mode} and/or {@code mda} is specified
+     */    
     public Row addRow(Access mode, Object... mda);  
     
-    
-    public Row getRow(Access mode, Object... mda);
-    public Row getRow();
+    /**
+     * Returns the current table {@link Row}, or {@code null} if no current row is defined.
+     * @return the current table {@code Row}
+     */
+    public Row getRow();    
+   
+    /**
+     * Returns the table {@link Row} at the 1-based index specified by {@code idx}, or {@code null} if no row 
+     * exists at that location.
+     * @param idx
+     * @return the {@code Row} with the 1-based index of {@code idx}
+     * @throws InvalidAccessException if @{code idx} is <= 0
+     */
     public Row getRow(int idx);
+    
+    /**
+     * Returns the table {@link Row} with the label {@code label}, or {@code null} if no row 
+     * has that label. If multiple rows are labeled with the same value, the first {@code Row} with the
+     * specified {@code label} is returned.
+     * @param label the label of the {@code Row} to retrieve
+     * @return the {@code Row} with the specified label
+     * @throws InvalidAccessException if {@code label} is {@code null} or not provided.
+     */
     public Row getRow(String label);
+    
+    /**
+     * 
+     * @param mode
+     * @param mda
+     * @return
+     */
+    public Row getRow(Access mode, Object... mda);
+    
+    /**
+     * 
+     * @return
+     */
     public List<Row> getRows();
+    
+    /**
+     * 
+     * @return
+     */
     public Iterable<Row> rows();
+    
+    /**
+     * Returns the number of rows in the table.
+     * @return the number of rows in the table
+     */
     public int getNumRows();
     
     public Column addColumn();  
@@ -60,30 +113,18 @@ public interface Table extends TableElement
     public void pushCurrent();
     public void popCurrent();
     
+    public void sort(ElementType et, TableProperty tp, TableRowColumnElement... others);
+    
+    /**
+     * 
+     * @param elements
+     */
     public void delete(TableElement...elements);
     
     /**
      * Recalculate all derived elements (rows, columns and cells)
      */
     public void recalculate();
-    
-    /**
-     * Returns {@code true} if this {@link Table} implements {@link DerivableThreadPool}.
-     * @return true if this Table implements DerivableThreadPool
-     */
-    default public boolean isDerivableThreadPool()
-    {
-        return this instanceof DerivableThreadPool;
-    }
-    
-    /**
-     * Returns {@code true} if this {@link Table} implements {@link EventProcessorThreadPool}.
-     * @return true if this Table implements EventProcessorThreadPool
-     */
-    default public boolean isEventProcessorThreadPool()
-    {
-        return this instanceof EventProcessorThreadPool;
-    }
     
     public boolean isRowLabelsIndexed();
     public void setRowLabelsIndexed(boolean isIndexed);
@@ -111,4 +152,23 @@ public interface Table extends TableElement
     
     public boolean isAutoRecalculate();
     public void setAutoRecalculate(boolean autoRecalculate);
+    
+    /**
+     * Returns {@code true} if this {@link Table} implements {@link DerivableThreadPool}.
+     * @return true if this Table implements DerivableThreadPool
+     */
+    default public boolean isDerivableThreadPool()
+    {
+        return this instanceof DerivableThreadPool;
+    }
+    
+    /**
+     * Returns {@code true} if this {@link Table} implements {@link EventProcessorThreadPool}.
+     * @return true if this Table implements EventProcessorThreadPool
+     */
+    default public boolean isEventProcessorThreadPool()
+    {
+        return this instanceof EventProcessorThreadPool;
+    }
+    
 }

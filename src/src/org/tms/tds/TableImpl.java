@@ -31,6 +31,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Token;
 import org.tms.api.events.TableElementEventType;
@@ -2370,6 +2371,39 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
 	}
 	
+	@Override
+	public void sort(ElementType et, TableProperty tp, TableRowColumnElement... others)
+	{
+	    ElementType otherType;
+	    switch (et) {
+	        case Row:
+	        case Column:
+	            otherType = et == ElementType.Row ? ElementType.Column : ElementType.Row;
+	            if (others != null) {
+	                for (TableRowColumnElement e : others) {
+	                    if (e == null)
+	                        throw new NullPointerException("TableRowColumnElement");
+	                    else if (e.getElementType() != otherType)
+	                        throw new InvalidException("All elements must be of the same type: " + otherType);
+	                }
+	            }
+	            break;
+	            
+	        default:
+	            throw new InvalidException("Can only sort Rows or Columns");
+	    }
+	    
+	    TablePropertySorter tpSorter = new TablePropertySorter(tp, others);
+	    if (et == ElementType.Row) {
+            Collections.sort(m_rows, tpSorter);
+            reindex(m_rows);
+	    }
+	    else {
+	        Collections.sort(m_cols, tpSorter);
+	        reindex(m_cols);
+	    }
+	}
+	
 	private void reindex(ArrayList<? extends TableSliceElementImpl> slices) 
 	{
 		if (slices != null) {
@@ -2493,7 +2527,80 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }	    
 	}
     
-    protected class TableSliceElementComparator implements Comparator<TableSliceElementImpl>
+    protected static class TablePropertySorter implements Comparator<TableSliceElementImpl>
+    {
+        private TableProperty m_tp;
+        private String m_tpStr;
+        private TableRowColumnElement[] m_others;
+        
+        protected TablePropertySorter(TableProperty tp, TableRowColumnElement... others) 
+        {
+            m_tp = tp;
+            m_others = others;
+        }
+
+        protected TablePropertySorter(String tp, TableRowColumnElement... others) 
+        {
+            m_tpStr = tp != null ? tp.trim() : null;
+            m_others = others;
+        }
+
+        @Override
+        public int compare(TableSliceElementImpl tse1, TableSliceElementImpl tse2)
+        {
+            if (tse1 == tse2) return 0;
+            
+            // if a property was specified, sort on it first
+            if (m_tp != null || m_tpStr != null) {
+                Object tpv1 = tse1 != null ? m_tp != null ? tse1.getProperty(m_tp) : tse1.getProperty(m_tpStr) : null;
+                Object tpv2 = tse2 != null ? m_tp != null ? tse2.getProperty(m_tp) : tse2.getProperty(m_tpStr) : null;
+                
+                int result = compareValue(tpv1, tpv2);
+                if (result != 0)
+                    return result;
+            }
+            
+            // compare the cells in the specified slices
+            if (m_others != null) {
+                for (TableRowColumnElement s : m_others) {
+                    CellImpl c1 = tse1 != null ? ((TableSliceElementImpl)s).getCellInternal(tse1) : null;
+                    CellImpl c2 = tse2 != null ? ((TableSliceElementImpl)s).getCellInternal(tse2) : null;
+                    
+                    // if both cells are null, return equal
+                    if ((c1 == null || c1.isNull()) && (c2 == null || c2.isNull())) return 0;
+                    if (c1 == null || c1.isNull()) return 1;
+                    if (c2 == null || c2.isNull()) return -1;
+                    
+                    int result = compareValue(c1.getCellValue(), c1.getCellValue());
+                    if (result != 0)
+                        return result;
+                }
+            }
+            
+            // if we get here, we have a match!
+            return 0;
+        }
+
+        @SuppressWarnings("unchecked")
+        private int compareValue(Object v1, Object v2)
+        {
+            if (v1 == v2)
+                return 0;
+            else if (v2 == null)
+                return -1;
+            else if (v1 == null)
+                return 1;
+            
+            // nulls are dealt with, now handle values
+            if ((v1 instanceof Comparable<?>) && (v1.getClass().isAssignableFrom(v2.getClass())))
+                return ((Comparable<Comparable<?>>)v1).compareTo((Comparable<?>)v2);
+            
+            // if not directly comparable, compare string representations                        
+            return v1.toString().compareTo(v2.toString());
+        }
+    }
+    
+    protected static class TableSliceElementComparator implements Comparator<TableSliceElementImpl>
     {
         private TableSliceElementImpl m_sortSlice;
         private Comparator<Cell> m_cellSorter;
