@@ -66,10 +66,13 @@ public interface Table extends TableElement
     public Row getRow(String label);
     
     /**
-     * 
-     * @param mode
-     * @param mda
-     * @return
+     * Retrieves the table {@link Row} specified by the given {@link Access} {@code mode} and its associated parameters {@code mda},
+     * or {@code null} if the row does not exist. If the row does exist, it is marked as the {@link Table}'s current row. 
+     * @param mode the {@code Access} mode to use to specify a table row
+     * @param mda the associated {@code Access} parameters appropriate to the specified {@code mode}
+     * @return the row specified by {@code Access} {@code mode} and {@code mda}
+     * @throws org.tms.api.exceptions.InvalidAccessException if {@code mode} is not appropriate for row retrieval, or if the associated parameters 
+     * specified in {@code mda} are not valid or are not specified.
      */
     public Row getRow(Access mode, Object... mda);
     
