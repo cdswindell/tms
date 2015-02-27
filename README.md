@@ -3,9 +3,10 @@ tms
 
 Table Management System
 
-The Table Management System (TMS) is a Java implementation of a type-free table system adapted from the BBN Prophet system developed under NIH grant in the 1970’s and 1980’s. It featured spreadsheets with derived columns decades before Microsoft Excel took over the desk top market. 
+TMS, the Table Management System, is a Java subsystem to efficiently manage and analyze tabular data. Its special ability is that it allows users to defined derived columns, derived rows, and derived cells, to perform ad-hoc data analyses. TMS provides a rich language of over 250 functions (see below), as well as allows developers to develop their own functions to operate on standard or custom datatypes from within the framework. TMS allows Java developers to easily incorporate spreadsheet-like analytics capability into web and applet applications.
 
-Over my career in software development, the Prophet Tables concept has been a useful data model to both store and manipulate data. In the 1990’s, I adapted the software to support a molecular spreadsheet used in the Molecular Simulations Cerius 2 software. The implementation allowed functions to be added that took “molecules” (and columns of molecules) as input and perform numerous useful molecular calculations, such as free energy, distance between atoms, substructure search, etc.
+The TMS data structures are performant, and the project uses test-driven development to provide quality and code coverage. A rich API is provided that allows developers to easily and quickly integrate TMS into their applications. Full Javadoc and source are provided.
 
-A long-time goal since I developed the TMS software originally in the mid ’90s was to port the C implementation to an object-oriented language. The Java implementation in this Git Hub repository is just such a port.
+See the TMS Wiki at https://github.com/cdswindell/tms/wiki for complete details and to learn how to become involved.
 
+See the TMS API Javadoc at for details on using the TMS API.
