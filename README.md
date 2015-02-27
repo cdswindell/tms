@@ -9,4 +9,4 @@ The TMS data structures are performant, and the project uses test-driven develop
 
 See the TMS Wiki at https://github.com/cdswindell/tms/wiki for complete details and to learn how to become involved.
 
-See the TMS API Javadoc at for details on using the TMS API.
+See the TMS API Javadoc at http://cdswindell.github.io/tms/doc for details on using the TMS API.
