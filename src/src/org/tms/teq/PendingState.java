@@ -9,7 +9,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.derivables.Token;
 import org.tms.api.exceptions.DeletedElementException;
-import org.tms.teq.Derivation.DerivationContext;
+import org.tms.teq.DerivationImpl.DerivationContext;
 
 /**
  * The PendingState abstract class encapsulates derivation state for derivations where operators
@@ -66,7 +66,7 @@ public abstract class PendingState
         return m_pendingToken;
     }
     
-    protected Derivation getDerivation()
+    protected DerivationImpl getDerivation()
     {
         if (m_pse != null)
             return m_pse.getDerivation();
@@ -189,7 +189,7 @@ public abstract class PendingState
             if (cell.isPendings() && cell.getCellValue() == this)
                 setCellValue(Token.createNullToken());
             
-            Derivation d = getDerivation();
+            DerivationImpl d = getDerivation();
             if (d != null) 
                 d.resetPendingCell(cell);
         }
@@ -231,7 +231,7 @@ public abstract class PendingState
             return;
 
         // also unblock derivations blocked on this cell
-        Derivation d = getDerivation();
+        DerivationImpl d = getDerivation();
         Cell c = getPendingCell();
         if (c != null) {
             synchronized(c) {
@@ -250,7 +250,7 @@ public abstract class PendingState
     protected boolean isBlockedDerivations()
     {
         Cell c = getPendingCell();
-        Derivation d = getDerivation();
+        DerivationImpl d = getDerivation();
         if (d != null)
             return d.isBlockedDerivations(c);
         else
@@ -285,7 +285,7 @@ public abstract class PendingState
                 getDerivation().registerAwaitingState(this);
             
             m_pendingIntermediate = tk.getValue();
-            m_uuid = Derivation.getTransactionID();
+            m_uuid = DerivationImpl.getTransactionID();
         }
         
         @Override
@@ -362,7 +362,7 @@ public abstract class PendingState
         @Override
         protected boolean unblockDerivations(Cell unblockedCell)
         {
-            Derivation psDeriv = null;
+            DerivationImpl psDeriv = null;
             if (isValid() && (psDeriv = getDerivation()) != null) {
                 DerivationContext dc = new DerivationContext(); 
                 try
@@ -438,12 +438,12 @@ public abstract class PendingState
     protected static class BlockedStatisticState extends PendingState
     {
         private PendingStatistic m_pendingStat;
-        private Derivation m_derivation;
+        private DerivationImpl m_derivationImpl;
         
-        protected BlockedStatisticState(PendingStatistic pendingStat, Derivation deriv)
+        protected BlockedStatisticState(PendingStatistic pendingStat, DerivationImpl deriv)
         {
             m_pendingStat = pendingStat;
-            m_derivation = deriv;
+            m_derivationImpl = deriv;
             m_valid = true;
         }
         
@@ -476,9 +476,9 @@ public abstract class PendingState
         }
         
         @Override
-        protected Derivation getDerivation()
+        protected DerivationImpl getDerivation()
         {
-            return m_derivation;
+            return m_derivationImpl;
         }
         
         @Override

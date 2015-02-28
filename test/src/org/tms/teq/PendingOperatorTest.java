@@ -16,6 +16,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
@@ -660,7 +661,7 @@ public class PendingOperatorTest extends BaseTest
         @Override
         public Token evaluate(Token... args)
         {   
-            PendingOperator po = new PendingOperator(Derivation.getTransactionID(), args);
+            PendingOperator po = new PendingOperator(DerivationImpl.getTransactionID(), args);
             return Token.createPendingToken(po);
         }  
         

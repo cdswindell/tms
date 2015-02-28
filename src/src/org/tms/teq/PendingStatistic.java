@@ -9,7 +9,7 @@ import java.util.concurrent.Semaphore;
 import org.tms.api.Cell;
 import org.tms.api.TableElement;
 import org.tms.api.derivables.Operator;
-import org.tms.teq.Derivation.DerivationContext;
+import org.tms.teq.DerivationImpl.DerivationContext;
 import org.tms.teq.PendingState.AwaitingState;
 import org.tms.teq.PendingState.BlockedStatisticState;
 
@@ -20,16 +20,16 @@ public class PendingStatistic
     private Set<Cell> m_blockedOnCells;
     private Semaphore m_lock;
     private boolean m_valid;
-    private Derivation m_derivation;
+    private DerivationImpl m_derivationImpl;
     private Operator m_oper;
     private boolean m_useAccelerator;
     
-    protected PendingStatistic(Derivation deriv, Operator oper, TableElement ref, Set<PendingState> blockedOnSet)
+    protected PendingStatistic(DerivationImpl deriv, Operator oper, TableElement ref, Set<PendingState> blockedOnSet)
     {
         m_blockedCells = new LinkedHashSet<PendingState>();
         m_blockedOnCells = new LinkedHashSet<Cell>();
         m_refElement = ref;
-        m_derivation = deriv;
+        m_derivationImpl = deriv;
         m_lock = new Semaphore(1);
         m_oper = oper;
         m_useAccelerator = true;
@@ -46,8 +46,8 @@ public class PendingStatistic
                     ps.lock();
                     try {                      
                         if (ps.isStillPending()) {
-                            Derivation d = ps.getDerivation();
-                            assert d != null : "Derivation Required";
+                            DerivationImpl d = ps.getDerivation();
+                            assert d != null : "DerivationImpl Required";
                             
                             Cell blockingCell  = ps.getPendingCell();
                             assert blockingCell != null : "Blocked Cell Required";
@@ -77,7 +77,7 @@ public class PendingStatistic
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((m_derivation == null) ? 0 : m_derivation.hashCode());
+        result = prime * result + ((m_derivationImpl == null) ? 0 : m_derivationImpl.hashCode());
         result = prime * result + ((m_refElement == null) ? 0 : m_refElement.hashCode());
         return result;
     }
@@ -89,11 +89,11 @@ public class PendingStatistic
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         PendingStatistic other = (PendingStatistic) obj;
-        if (m_derivation == null)
+        if (m_derivationImpl == null)
         {
-            if (other.m_derivation != null) return false;
+            if (other.m_derivationImpl != null) return false;
         }
-        else if (!m_derivation.equals(other.m_derivation)) return false;
+        else if (!m_derivationImpl.equals(other.m_derivationImpl)) return false;
         if (m_refElement == null)
         {
             if (other.m_refElement != null) return false;
@@ -138,9 +138,9 @@ public class PendingStatistic
             m_lock.release();
     }
     
-    protected Derivation getDerivation()
+    protected DerivationImpl getDerivation()
     {
-        return m_derivation;
+        return m_derivationImpl;
     }
 
     protected boolean registerBlockedDerivation(PendingState ps)
@@ -181,7 +181,7 @@ public class PendingStatistic
         
         m_blockedCells.clear();
         m_blockedOnCells.clear();
-        m_derivation.deregisterPendingStatistic(this);
+        m_derivationImpl.deregisterPendingStatistic(this);
     }
 
     protected boolean unblockStatistic(Cell unblockedCell)
@@ -232,7 +232,7 @@ public class PendingStatistic
             
             DerivationContext dc = new DerivationContext();
             for (PendingState ps : m_blockedCells) {
-                Derivation psDeriv = null;
+                DerivationImpl psDeriv = null;
                 if (ps != null && ps.isValid() && (psDeriv = ps.getDerivation()) != null) {
                     try {
                         // blocks on access to ps

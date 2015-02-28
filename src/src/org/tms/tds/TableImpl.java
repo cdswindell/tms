@@ -44,7 +44,7 @@ import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
-import org.tms.teq.Derivation;
+import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
 public class TableImpl extends TableCellsElementImpl implements Table
@@ -125,7 +125,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     private Map<Integer, RowImpl> m_cellOffsetRowMap;
     
     private Map<CellImpl, Set<SubsetImpl>> m_subsetedCells;
-    private Map<CellImpl, Derivation> m_derivedCells;
+    private Map<CellImpl, DerivationImpl> m_derivedCells;
     private Map<CellImpl, Set<Derivable>> m_cellAffects;
     private Map<CellImpl, TableElementListeners> m_cellListeners;
     private Map<CellImpl, Map<String, Object>> m_cellElemProperties;
@@ -219,7 +219,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
         
         int expectedNoOfDerivedCells = m_rowsCapacity * m_colsCapacity / 5; // assume 20%
-        m_derivedCells = new HashMap<CellImpl, Derivation>(expectedNoOfDerivedCells);
+        m_derivedCells = new HashMap<CellImpl, DerivationImpl>(expectedNoOfDerivedCells);
         m_cellAffects = new HashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
         m_cellListeners = new ConcurrentHashMap<CellImpl, TableElementListeners>();
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
@@ -275,7 +275,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
                     
                 case Precision:
                     if (!isValidPropertyValueInt(value))
-                        value = Derivation.sf_DEFAULT_PRECISION;
+                        value = DerivationImpl.sf_DEFAULT_PRECISION;
                     setPrecision((int)value);
                     break;
 
@@ -2136,7 +2136,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         vetElement();        
         CellReference cr = getCurrent();
         try {
-            Derivation.recalculateAffected(this);
+            DerivationImpl.recalculateAffected(this);
             
             fireEvents(this, TableElementEventType.OnRecalculate);
         }
@@ -2145,12 +2145,12 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
 	}
 	
-    Derivation getCellDerivation(CellImpl cell)
+    DerivationImpl getCellDerivation(CellImpl cell)
     {
         return m_derivedCells.get(cell);
     }
     
-    Derivation registerDerivedCell(CellImpl cell, Derivation d)
+    DerivationImpl registerDerivedCell(CellImpl cell, DerivationImpl d)
     {
         if (cell != null && d != null) {
             cell.set(sf_IS_DERIVED_CELL_FLAG, true);
@@ -2160,7 +2160,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
             return null;
     }
     
-    Derivation deregisterDerivedCell(CellImpl cell)
+    DerivationImpl deregisterDerivedCell(CellImpl cell)
     {
         if (cell != null) {
             cell.set(sf_IS_DERIVED_CELL_FLAG, false);

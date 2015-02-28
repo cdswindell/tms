@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.tms.api.exceptions.IllegalTableStateException;
-import org.tms.teq.Derivation;
+import org.tms.teq.DerivationImpl;
 import org.tms.util.ThreadLocalUtils;
 
 public class PendingDerivationExecutor extends ThreadPoolExecutor implements Runnable, DerivableThreadPool
@@ -134,7 +134,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         UUID transactId = m_runnableUuidMap.remove(r);
         if (transactId != null) {
             m_uuidRunnableMap.remove(transactId);
-            Derivation.associateTransactionID(t.getId(), transactId);    
+            DerivationImpl.associateTransactionID(t.getId(), transactId);    
         }
         
         super.beforeExecute(t, r);  

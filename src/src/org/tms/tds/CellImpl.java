@@ -24,7 +24,7 @@ import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
-import org.tms.teq.Derivation;
+import org.tms.teq.DerivationImpl;
 
 public class CellImpl extends TableElementImpl implements Cell
 {
@@ -78,7 +78,7 @@ public class CellImpl extends TableElementImpl implements Cell
         TableImpl parentTable = getTable();
         if (valuesDiffer && parentTable != null && 
                 parentTable.isAutoRecalculateEnabled()) 
-            Derivation.recalculateAffected(this);
+            DerivationImpl.recalculateAffected(this);
         
         if (valuesDiffer)
             fireEvents(TableElementEventType.OnNewValue, oldValue, m_cellValue);
@@ -526,12 +526,12 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
 	/*
-	 * Derivation-related methods
+	 * DerivationImpl-related methods
 	 */
 	@Override
-    public Derivation getDerivation()
+    public DerivationImpl getDerivation()
     {
-        Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
+        DerivationImpl deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         return deriv;
     }
 
@@ -544,7 +544,7 @@ public class CellImpl extends TableElementImpl implements Cell
         clearDerivation();
         
         if (expr != null && expr.trim().length() > 0) {
-            Derivation deriv = Derivation.create(expr.trim(), this);
+            DerivationImpl deriv = DerivationImpl.create(expr.trim(), this);
             
             // mark the rows/columns that impact the deriv, and evaluate values
             if (deriv != null && deriv.isConverted()) {
@@ -566,7 +566,7 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public Derivable clearDerivation()
     {
-        Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
+        DerivationImpl deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null) {
             Derivable elem = deriv.getTarget();
             for (TableElement d : deriv.getAffectedBy()) {
@@ -585,14 +585,14 @@ public class CellImpl extends TableElementImpl implements Cell
     public boolean isDerived()
     {
         return isSet(sf_IS_DERIVED_CELL_FLAG);
-        //Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
+        //DerivationImpl deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         //return deriv != null;       
     }
 
     @Override
     public List<TableElement> getAffectedBy()
     {
-        Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
+        DerivationImpl deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null)
             return Collections.unmodifiableList(deriv.getAffectedBy());
         else
@@ -623,7 +623,7 @@ public class CellImpl extends TableElementImpl implements Cell
     public void recalculate()
     {
         vetElement();
-        Derivation deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
+        DerivationImpl deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null) {
             deriv.recalculateTarget();
             

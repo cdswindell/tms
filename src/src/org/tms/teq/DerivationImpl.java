@@ -28,6 +28,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.PendingDerivationExecutor;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
@@ -39,7 +40,7 @@ import org.tms.api.factories.TableContextFactory;
 import org.tms.teq.PendingState.AwaitingState;
 import org.tms.util.Tuple;
 
-public class Derivation
+public class DerivationImpl implements Derivation
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
@@ -57,18 +58,18 @@ public class Derivation
     };
     
     /**
-     * Creates a Derivation from the provided expression and assigns it to the specified TableElement.
+     * Creates a DerivationImpl from the provided expression and assigns it to the specified TableElement.
      * The expression is parsed into an infix expression, then converted to postfix notation to
      * ease execution.
-     * @param expr Expression touse as the basis for the Derivation
+     * @param expr Expression touse as the basis for the DerivationImpl
      * @param elem TableElement that will receive the derivation
      * @return
      * @throws InvalidExpressionException if the expression cannot be parsed
      */
-    public static Derivation create(String expr, Derivable elem)
+    public static DerivationImpl create(String expr, Derivable elem)
     {
         // create the derivation structure and save the as-entered expression
-        Derivation deriv = new Derivation();
+        DerivationImpl deriv = new DerivationImpl();
         deriv.m_asEntered = new String(expr);
         deriv.m_target = elem;
         
@@ -200,7 +201,7 @@ public class Derivation
             for (Derivable derivable : orderedDerivables) {
                 if (derivable == null) continue;
                 Derivation d = derivable.getDerivation();
-                d.recalculateTarget(element, dc);
+                ((DerivationImpl)d).recalculateTarget(element, dc);
             }
             
             // start background threads
@@ -380,7 +381,7 @@ public class Derivation
         
         PendingState ps = sf_UUID_PENDING_STATE_MAP.remove(transactId);
         if (ps != null) { 
-            Derivation psDeriv = null;
+            DerivationImpl psDeriv = null;
             
             // need exclusive access to this process state, otherwise,
             // token could become null
@@ -464,7 +465,7 @@ public class Derivation
 
     private boolean m_pendingCachesInitialized;
     
-    private Derivation()
+    private DerivationImpl()
     {
         m_beingDestroyed = false;
         
@@ -658,7 +659,7 @@ public class Derivation
     {
         if (pendingStat != null) { 
             if (pendingStat.getDerivation() != this)
-                throw new IllegalTableStateException("PendingStatistic must be associated with this Derivation");
+                throw new IllegalTableStateException("PendingStatistic must be associated with this DerivationImpl");
             
             // there is a chance that a different thread may be clearing the derivation
             // while another is still caching pending stat; the check below throws away
@@ -674,7 +675,7 @@ public class Derivation
     {
         if (pendingStat != null) { 
             if (pendingStat.getDerivation() != this)
-                throw new IllegalTableStateException("PendingStatistic must be associated with this Derivation");
+                throw new IllegalTableStateException("PendingStatistic must be associated with this DerivationImpl");
             
             // there is a chance that a different thread may be clearing the derivation
             // while another is still caching pending stat; the check below throws away
@@ -691,7 +692,7 @@ public class Derivation
     {
         if (ps != null) { 
             if (ps.getDerivation() != this)
-                throw new IllegalTableStateException("PendingState must be associated with this Derivation");
+                throw new IllegalTableStateException("PendingState must be associated with this DerivationImpl");
             
             // there is a chance that a different thread may be clearing the derivation
             // while another is still caching pending states; the check below throws away
@@ -848,7 +849,7 @@ public class Derivation
         try {
             for (Derivable d : affected) {
                 Derivation deriv = d.getDerivation();
-                deriv.recalculateTarget(getTarget(), dc);
+                ((DerivationImpl)deriv).recalculateTarget(getTarget(), dc);
             }
         }
         finally {
@@ -1005,7 +1006,7 @@ public class Derivation
 	    	else if (tc != null && tc.isDerivableThreadPool()) 
 	            m_threadPool = (DerivableThreadPool)tc;
 	        else {
-	            synchronized(Derivation.class) {
+	            synchronized(DerivationImpl.class) {
 	                if (sf_PENDING_EXECUTOR == null)
 	                    sf_PENDING_EXECUTOR = new PendingDerivationExecutor();
 	            }

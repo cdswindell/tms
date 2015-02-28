@@ -23,7 +23,7 @@ import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TableImpl.CellReference;
-import org.tms.teq.Derivation;
+import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
 abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TableRowColumnElement
@@ -33,7 +33,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     
     private JustInTimeSet<SubsetImpl> m_subsets;
     private int m_index = -1;    
-    private Derivation m_deriv;
+    private DerivationImpl m_deriv;
 
     public TableSliceElementImpl(TableElementImpl e)
     {
@@ -113,7 +113,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     }
     
     @Override
-    public Derivation getDerivation()
+    public DerivationImpl getDerivation()
     {
         vetElement();
         return m_deriv;
@@ -129,7 +129,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             clearDerivation();
         
         if (expr != null && expr.trim().length() > 0) {
-            m_deriv = Derivation.create(expr.trim(), this);
+            m_deriv = DerivationImpl.create(expr.trim(), this);
             
             // mark the rows/columns that impact the deriv, and evaluate values
             if (m_deriv != null && m_deriv.isConverted()) {
@@ -160,7 +160,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     public Derivable clearDerivation()
     {
         if (m_deriv != null) {
-            Derivation deriv = m_deriv;
+            DerivationImpl deriv = m_deriv;
             m_deriv = null;
             
             Derivable elem = deriv.getTarget();
@@ -537,7 +537,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
-            Derivation.recalculateAffected(this);
+            DerivationImpl.recalculateAffected(this);
         
         return setSome;
     }
@@ -602,7 +602,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
-            Derivation.recalculateAffected(this);
+            DerivationImpl.recalculateAffected(this);
         
     }
     
@@ -668,7 +668,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
-            Derivation.recalculateAffected(this);        
+            DerivationImpl.recalculateAffected(this);        
     }
     
 	private boolean isDerived(Cell c)

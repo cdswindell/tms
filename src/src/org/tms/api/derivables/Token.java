@@ -4,7 +4,7 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.TableElement;
 import org.tms.teq.BuiltinOperator;
-import org.tms.teq.Derivation;
+import org.tms.teq.DerivationImpl;
 import org.tms.teq.PendingState;
 
 
@@ -370,6 +370,6 @@ public class Token implements Labeled
 
     public void postResult(Object value)
     {
-        Derivation.postResult(value);        
+        DerivationImpl.postResult(value);        
     }
 }

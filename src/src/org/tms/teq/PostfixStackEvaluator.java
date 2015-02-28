@@ -21,7 +21,7 @@ import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.teq.Derivation.DerivationContext;
+import org.tms.teq.DerivationImpl.DerivationContext;
 import org.tms.teq.PendingState.AwaitingState;
 import org.tms.teq.PendingState.BlockedState;
 
@@ -32,7 +32,7 @@ public class PostfixStackEvaluator
 	private EquationStack m_opStack;
 	private Token[] m_pfsArray;
 	private int m_pfsIdx;
-    private Derivation m_derivation;
+    private DerivationImpl m_derivationImpl;
 	
     public PostfixStackEvaluator(String expr, Table table)
     {
@@ -42,20 +42,20 @@ public class PostfixStackEvaluator
         m_pfsIdx = -1;
     }
     
-    public PostfixStackEvaluator(Derivation deriv)
+    public PostfixStackEvaluator(DerivationImpl deriv)
     {
         m_pfs = deriv.getPostfixStackInternal();        
         if (m_pfs == null || m_pfs.getStackType() != StackType.Postfix)
             throw new IllegalTableStateException("Postfix stack required");
         
-        m_derivation = deriv;
+        m_derivationImpl = deriv;
         m_table = deriv.getTable();
         m_pfsIdx = -1;
     }
 
-    protected Derivation getDerivation()
+    protected DerivationImpl getDerivation()
     {
-        return m_derivation;
+        return m_derivationImpl;
     }
     
     public Token evaluate() 
@@ -120,7 +120,7 @@ public class PostfixStackEvaluator
 		
 		// Assign a unique transaction ID to this calculation; 
 		// the transaction id is stored in ThreadLocal storage
-		Derivation.assignTransactionID();
+		DerivationImpl.assignTransactionID();
 		
 		// walk through postfix stack from tail to head
 		while(m_pfsIdx >= 0) {
@@ -500,9 +500,9 @@ public class PostfixStackEvaluator
             
             boolean arePendings = false;
             Set<PendingState> blockingSet = new LinkedHashSet<PendingState>();
-            Derivation d = getDerivation();
+            DerivationImpl d = getDerivation();
             if (d == null)
-                throw new IllegalTableStateException("Derivation is required");
+                throw new IllegalTableStateException("DerivationImpl is required");
             
             for (Cell c : ref.cells()) {
                 if (c == null)
@@ -565,9 +565,9 @@ public class PostfixStackEvaluator
             TableRowColumnElement pendingsIn = null;
             boolean arePendings = false;
             Set<PendingState> blockingSet = new LinkedHashSet<PendingState>();
-            Derivation d = getDerivation();
+            DerivationImpl d = getDerivation();
             if (d == null)
-                throw new IllegalTableStateException("Derivation is required");
+                throw new IllegalTableStateException("DerivationImpl is required");
             
             List<TableElement> affectedBy = null;
             int idx = 1;

@@ -22,7 +22,7 @@ import org.tms.api.events.TableElementEvent;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
-import org.tms.teq.Derivation;
+import org.tms.teq.DerivationImpl;
 import org.tms.util.WeakHashSet;
 
 public class ContextImpl extends BaseElementImpl implements TableContext, DerivableThreadPool, 
@@ -199,7 +199,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                     
                 case Precision:
                     if (!isValidPropertyValueInt(value))
-                        value = Derivation.sf_DEFAULT_PRECISION;
+                        value = DerivationImpl.sf_DEFAULT_PRECISION;
                     setPrecision((int)value);
                     break;
                     
@@ -566,7 +566,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     {
         if (precision <= 0) {
             if (this.isDefault()) 
-                m_precision = Derivation.sf_DEFAULT_PRECISION;
+                m_precision = DerivationImpl.sf_DEFAULT_PRECISION;
             else
                 m_precision = ContextImpl.getDefaultContext().getPrecision();
         }

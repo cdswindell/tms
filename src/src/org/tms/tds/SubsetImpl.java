@@ -23,7 +23,7 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.tds.TableImpl.CellReference;
-import org.tms.teq.Derivation;
+import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
 public class SubsetImpl extends TableCellsElementImpl implements Subset
@@ -495,7 +495,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 		    }
 		    
 		    if (tbl.isAutoRecalculateEnabled())
-		        Derivation.recalculateAffected(this);
+		        DerivationImpl.recalculateAffected(this);
 		}
 		
 		return setSome;

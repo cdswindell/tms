@@ -83,7 +83,7 @@ public class DerivationTest
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
 
         // create the derivation
-        Derivation d = Derivation.create("10+11", c1);
+        DerivationImpl d = DerivationImpl.create("10+11", c1);
         assertThat(d, notNullValue());
         assertThat(d.isParsed(), is(true));
         assertThat(d.isConverted(), is(true));
@@ -150,7 +150,7 @@ public class DerivationTest
         c2.setDerivation("col 3 + col 5");
         c3.setDerivation("col 4 + col 5 ");
         
-        List<Derivable> plan = Derivation.calculateDependencies(c5);
+        List<Derivable> plan = DerivationImpl.calculateDependencies(c5);
         assertThat(plan, notNullValue());
         assertThat(plan.size(), is(3));
         assertThat(plan.get(0).getPropertyInt(TableProperty.Index), is(3));
@@ -161,7 +161,7 @@ public class DerivationTest
         c2.setDerivation("col 3 + col 4");
         c3.setDerivation("col 1 + col 5 ");
         
-        plan = Derivation.calculateDependencies(c4);
+        plan = DerivationImpl.calculateDependencies(c4);
         assertThat(plan, notNullValue());
         assertThat(plan.size(), is(3));
         assertThat(plan.get(0).getPropertyInt(TableProperty.Index), is(1));
@@ -170,7 +170,7 @@ public class DerivationTest
         
         Cell r1c5 = tbl.getCell(r1, c5);
         
-        plan = Derivation.calculateDependencies(r1c5);
+        plan = DerivationImpl.calculateDependencies(r1c5);
         assertThat(plan, notNullValue());
         assertThat(plan.size(), is(3));
         assertThat(plan.get(0).getPropertyInt(TableProperty.Index), is(1));
