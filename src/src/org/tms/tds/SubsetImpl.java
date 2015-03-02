@@ -123,6 +123,13 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return Collections.unmodifiableList(new ArrayList<Subset>(((JustInTimeSet<SubsetImpl>)m_subsets).clone()));
     }
     
+    @Override
+    synchronized public Iterable<Subset> subsets()
+    {
+        vetElement();
+        return new BaseElementIterable<Subset>(m_subsets);
+    }
+    
     protected Set<SubsetImpl> getSubsetsInternal()
     {
         return m_subsets;

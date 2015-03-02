@@ -838,6 +838,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     public void setRowLabelsIndexed(boolean rowLabelsIndexed)
     {
+        vetElement();
         if (!rowLabelsIndexed)
             m_rowLabelIndex.clear();
         else 
@@ -853,6 +854,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     public void setColumnLabelsIndexed(boolean colLabelsIndexed)
     {
+        vetElement();
         if (!colLabelsIndexed)
             m_colLabelIndex.clear();
         else 
@@ -868,6 +870,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     public void setSubsetLabelsIndexed(boolean subsetLabelsIndexed)
     {
+        vetElement();
         if (!subsetLabelsIndexed)
             m_colLabelIndex.clear();
         else 
@@ -883,6 +886,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 
     public void setCellLabelsIndexed(boolean cellLabelsIndexed)
     {
+        vetElement();
         if (!cellLabelsIndexed)
             m_cellLabelIndex.clear();
         else 
@@ -956,6 +960,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     public void setPersistant(boolean persistant)
     {
+        vetElement();
         ContextImpl tc = null;
         if ((tc = getTableContext()) == null)
             persistant = false;
@@ -987,7 +992,6 @@ public class TableImpl extends TableCellsElementImpl implements Table
     synchronized protected boolean add(SubsetImpl r)
     {
         vetElement();
-        vetElement(r);
         vetParent(r);
         
         boolean processed = m_subsets.add(r);
@@ -2072,6 +2076,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
     @Override
     public void pushCurrent() 
     {
+        vetElement();
         Deque<CellReference> currentCellStack = getCurrentCellStack();
         CellReference cr = getCurrent();
         currentCellStack.push(cr);
@@ -2374,6 +2379,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
 	@Override
 	public void sort(ElementType et, TableProperty tp, TableRowColumnElement... others)
 	{
+	    vetElement();
 	    if (et == null || (tp == null && (others == null || others.length == 0)))
 	        throw new IllegalArgumentException("Element type and Table Property and/or other Sort Elements required");
 	        

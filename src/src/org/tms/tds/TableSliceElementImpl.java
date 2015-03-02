@@ -83,6 +83,13 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         return Collections.unmodifiableList(new ArrayList<Subset>(m_subsets.clone()));
     } 
     
+    @Override
+    synchronized public Iterable<Subset> subsets()
+    {
+        vetElement();
+        return new BaseElementIterable<Subset>(m_subsets);
+    }
+    
     protected Set<SubsetImpl> getSubsetsInternal()
     {
         return m_subsets;

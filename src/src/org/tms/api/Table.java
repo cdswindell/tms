@@ -5,6 +5,11 @@ import java.util.List;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.events.EventProcessorThreadPool;
 
+/**
+ * 
+ * @author davids
+ *
+ */
 public interface Table extends TableElement
 {  
     /**
@@ -176,6 +181,77 @@ public interface Table extends TableElement
     public Iterable<Column> columns();
     
     /**
+     * Add a new {@link Subset} to this {@link Table} using the {@link Access} specified by {@code mode} and the optional argument(s)
+     * specified in {@code mda}. See the Javadoc on {@link Access} to learn more about the various {@code Access} modes and
+     * their required parameters (if any). 
+     * @param mode the {@code Access} mode to use to add the subset
+     * @param mda the additional parameters required by the specified {@code Access} {@code mode}
+     * @return the new {@code Subset}
+     * @throws org.tms.api.exceptions.InvalidAccessException if an invalid {@code mode} and/or {@code mda} is specified
+     */    
+    public Subset addSubset(Access mode, Object... mda);    
+    
+    /**
+     * Retrieves the table {@link Subset} specified by the given {@link Access} {@code mode} and its associated parameters {@code mda},
+     * or {@code null} if the subset does not exist.  
+     * @param mode the {@code Access} mode to use to specify a table subset
+     * @param mda the associated {@code Access} parameters appropriate to the specified {@code mode}
+     * @return the subset specified by {@code Access} {@code mode} and {@code mda}
+     * @throws org.tms.api.exceptions.InvalidAccessException if {@code mode} is not appropriate for subset retrieval, or if the associated parameters 
+     * specified in {@code mda} are not valid or are not specified.
+     */
+    public Subset getSubset(Access mode, Object... mda);
+    
+    /**
+     * Returns the {@link Table} {@link Cell} at the intersection of {@link Row} {@code row} and {@link Column} {@code col} and sets this
+     * table's current row and column to these values. If {@code row} and/or
+     * {@code col} are {@code null}, {@code null} is returned.
+     * @param row the table row containing the desired cell
+     * @param col the table cell containing the desired cell
+     * @return the table cell referenced by {@code row} and {@code col}, or {@code null} if row and/or col are null
+     * @throws org.tms.api.exceptions.DeletedElementException if this table or the specified row or column has been deleted
+     * @throws org.tms.api.exceptions.InvalidParentException if the specified row or column are not a part of this table
+     */
+    public Cell getCell(Row row, Column col);  
+    
+    /**
+     * Retrieves the {@link Table} {@link Cell} specified by the given {@link Access} {@code mode} and its associated parameters {@code mda},
+     * or {@code null} if the cell is not found.  
+     * @param mode the {@code Access} mode to use to specify a table cell
+     * @param mda the associated {@code Access} parameters appropriate to the specified {@code mode}
+     * @return the cell specified by {@code Access} {@code mode} and {@code mda}
+     * @throws org.tms.api.exceptions.InvalidAccessException if {@code mode} is not appropriate for table cell retrieval, or 
+     * if the associated parameters specified in {@code mda} are not valid or are not specified.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
+     */
+    public Cell getCell(Access mode, Object... mda);
+    
+    /**
+     * Returns the value in the {@link Table} {@link Cell} at the intersection of {@link Row} {@code row} and {@link Column} {@code col} 
+     * and sets this
+     * table's current row and column to these values. If {@code row} and/or
+     * {@code col} are {@code null}, {@code null} is returned.
+     * @param row the table row containing the desired cell
+     * @param col the table cell containing the desired cell
+     * @return the value in the table cell referenced by {@code row} and {@code col}, or {@code null} if row and/or col are null
+     * @throws org.tms.api.exceptions.DeletedElementException if this table or the specified row or column has been deleted
+     * @throws org.tms.api.exceptions.InvalidParentException if the specified row or column are not a part of this table
+     */
+    public Object getCellValue(Row row, Column col);
+    
+    /**
+     * Sets the value of the {@link Table} {@link Cell} at the intersection of {@link Row} {@code row} and {@link Column} {@code col} 
+     * to {@code newValue} and returns {@code true} if the cell value was changed.
+     * @param row the table row containing the desired cell to set the value of
+     * @param col the table cell containing the desired cell to set the value of
+     * @param newValue the new value to assign to the table cell at the specified row/column position
+     * @return {@code true} if the cell value was not equal to {@code newValue}
+     * @throws org.tms.api.exceptions.DeletedElementException if this table or the specified row or column has been deleted
+     * @throws org.tms.api.exceptions.InvalidParentException if the specified row or column are not a part of this table
+     */
+    public boolean setCellValue(Row row, Column col, Object newValue);
+    
+    /**
      * Returns the number of columns in the table.
      * @return the number of columns in the table
      */
@@ -184,12 +260,14 @@ public interface Table extends TableElement
     /**
      * Saves this {@link Table}'s current {@link Row} and current {@link Column} to a {@code stack} where they can be recalled 
      * and reapplied, as required.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void pushCurrent();
     
     /**
      * Retrieves a current cell reference from this {@link Table}'s current row/column {@code stack} and sets the table's
      * current {@link Row} and {@link Column}.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void popCurrent();
     
@@ -205,19 +283,9 @@ public interface Table extends TableElement
      * @throws NullPointerException if an element in {@code others} is null
      * @throws org.tms.api.exceptions.InvalidParentException if an element in {@code others} isn't associated with this {@link Table}
      * @throws org.tms.api.exceptions.InvalidException if {@code et} is not {@link ElementType#Row} or {@code ElementType#Column}
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void sort(ElementType et, TableProperty tp, TableRowColumnElement... others);
-    
-    public Subset addSubset(Access mode, Object... mda);    
-    public Subset getSubset(Access mode, Object... mda);
-    public List<Subset> getSubsets();
-    public Iterable<Subset> subsets();
-       
-    public Cell getCell(Row row, Column col);      
-    public Cell getCell(Access mode, Object... mda);
-    
-    public Object getCellValue(Row row, Column col);
-    public boolean setCellValue(Row row, Column col, Object o);
     
     /**
      * Deletes the table elements in this {@link Table} specified in {@code elements}. Deleted elements are removed
@@ -228,6 +296,7 @@ public interface Table extends TableElement
     
     /**
      * Recalculate all derived elements (rows, columns and cells) in this {@link Table}.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void recalculate();
     
@@ -242,6 +311,7 @@ public interface Table extends TableElement
      * which makes parsing {@link org.tms.api.derivables.Derivation}s more performant, and/but the labels must all be unique.
      * @param isIndexed {@code true} or {@code false}
      * @throws org.tms.api.exceptions.NotUniqueException if {@code isIndexed} is {@code true} and this table contains non-unique row labels
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void setRowLabelsIndexed(boolean isIndexed);
     
@@ -256,6 +326,7 @@ public interface Table extends TableElement
      * which makes parsing {@link org.tms.api.derivables.Derivation}s more performant, and/but the labels must all be unique.
      * @param isIndexed {@code true} or {@code false}
      * @throws org.tms.api.exceptions.NotUniqueException if {@code isIndexed} is {@code true} and this table contains non-unique column labels
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void setColumnLabelsIndexed(boolean isIndexed);
     
@@ -270,10 +341,23 @@ public interface Table extends TableElement
      * which makes parsing {@link org.tms.api.derivables.Derivation}s more performant, and/but the labels must all be unique.
      * @param isIndexed {@code true} or {@code false}
      * @throws org.tms.api.exceptions.NotUniqueException if {@code isIndexed} is {@code true} and this table contains non-unique cell labels
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void setCellLabelsIndexed(boolean isIndexed);
     
+    /**
+     * Returns {@code true} if the {@link Subset} labels in this {@link Table} are indexed.
+     * @return {@code true} if the {@code Subset} labels in this {@code Table} are indexed
+     */
     public boolean isSubsetLabelsIndexed();
+    
+    /**
+     * Set to {@code true} to index the {@link Subset} labels in this {@link Table}. Indexed subsets are faster to retrieve,
+     * which makes parsing {@link org.tms.api.derivables.Derivation}s more performant, and/but the labels must all be unique.
+     * @param isIndexed {@code true} or {@code false}
+     * @throws org.tms.api.exceptions.NotUniqueException if {@code isIndexed} is {@code true} and this table contains non-unique subset labels
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
+     */
     public void setSubsetLabelsIndexed(boolean isIndexed);
     
     public int getRowCapacityIncr();

@@ -719,6 +719,23 @@ public class CellImpl extends TableElementImpl implements Cell
         return Collections.emptyList();
     }
 
+    @Override
+    synchronized public Iterable<Subset> subsets()
+    {
+        TableImpl parent = getTable();
+        assert parent != null : "Parent table required";
+        if (parent != null) {
+            Set<SubsetImpl> subsets = parent.getCellSubsets(this);
+            if (subsets != null) {
+                List<Subset> subsetsList = new ArrayList<Subset>(subsets.size());
+                subsetsList.addAll(subsets);
+                return new BaseElementIterable<Subset>(subsets);
+            }
+        }
+        
+        return Collections.emptyList();
+    }
+    
     protected Set<SubsetImpl> getSubsetsInternal()
     {
         TableImpl parent = getTable();

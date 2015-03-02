@@ -40,7 +40,7 @@ import org.tms.api.factories.TableContextFactory;
 import org.tms.teq.PendingState.AwaitingState;
 import org.tms.util.Tuple;
 
-public class DerivationImpl implements Derivation
+public final class DerivationImpl implements Derivation
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
@@ -66,7 +66,7 @@ public class DerivationImpl implements Derivation
      * @return
      * @throws InvalidExpressionException if the expression cannot be parsed
      */
-    public static DerivationImpl create(String expr, Derivable elem)
+    public static final DerivationImpl create(String expr, Derivable elem)
     {
         // create the derivation structure and save the as-entered expression
         DerivationImpl deriv = new DerivationImpl();
@@ -716,6 +716,7 @@ public class DerivationImpl implements Derivation
         }
     }
 
+    @Override
     public Table getTable()
     {
         if (m_target != null)
@@ -724,6 +725,7 @@ public class DerivationImpl implements Derivation
             return null;
     }
     
+    @Override
     public TableContext getTableContext()
     {
         Table parentTable = getTable();
@@ -734,16 +736,19 @@ public class DerivationImpl implements Derivation
         return tc != null ? tc : TableContextFactory.fetchDefaultTableContext();
     }
     
+    @Override
     public boolean isParsed()
     {
         return m_parsed;
     }
 
+    @Override
     public boolean isConverted()
     {
         return m_converted;
     }
     
+    @Override
     public String getInfixExpression()
     {
         if (m_ifs != null)
@@ -752,6 +757,7 @@ public class DerivationImpl implements Derivation
             return null;
     }
     
+    @Override
     public String getPostfixExpression()
     {
         if (m_pfs != null)
@@ -760,6 +766,7 @@ public class DerivationImpl implements Derivation
             return null;
     }
     
+    @Override
     public String getAsEnteredExpression()
     {
         if (m_asEntered != null)
@@ -795,13 +802,13 @@ public class DerivationImpl implements Derivation
         return m_precision;
     }
     
+    @Override
     public void recalculateTarget()
     {
     	DerivationContext dc = new DerivationContext();
         recalculateTarget(null, dc);
         dc.processPendings();
-    }
-    
+    }   
     
     private void recalculateTarget(TableElement element, DerivationContext dc)
     {

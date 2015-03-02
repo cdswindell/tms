@@ -26,6 +26,18 @@ public interface TableElement extends BaseElement, Listenable
     public void setLabel(String label);
     public boolean isLabelIndexed();
     
+    /**
+     * Returns an {@link java.util.Collections#unmodifiableList} of {@link Subset}s of this {@link Table}. 
+     * @return an {@code unmodifiableList} of the table subsets
+     */
+    public List<Subset> getSubsets();
+    
+    /**
+     * Returns an {@link Iterable} to an {@link java.util.Collections#unmodifiableList} of {@link Subset}s of this {@link Table}. 
+     * @return an {@link Iterable} to an {@code unmodifiableList} of the table subsets
+     */
+    public Iterable<Subset> subsets();
+       
     public int getNumSubsets();
     /**
      * Returns a {@link List} of the {@code Derivable} elements
@@ -35,6 +47,4 @@ public interface TableElement extends BaseElement, Listenable
     public List<Derivable> getAffects();
        
     public List<Derivable> getDerivedElements();
-    
-    public List<Subset> getSubsets();
 }
