@@ -65,6 +65,7 @@ public interface Table extends TableElement
      * the new {@code Row} is added to the end of the table. Otherwise, the new {@code Row} is inserted directly following the current 
      * row, and all other rows are moved down by one.
      * @return the new {@code Row}
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Row addRow();   
 
@@ -76,6 +77,7 @@ public interface Table extends TableElement
      * @param idx the 1-based index where the new row will be inserted or added
      * @return the new {@code Row}
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code idx} is &lt;= 0
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */    
     public Row addRow(int idx);  
     
@@ -90,12 +92,14 @@ public interface Table extends TableElement
      * @param mda the additional parameters required by the specified {@code Access} {@code mode}
      * @return the new {@code Row}
      * @throws org.tms.api.exceptions.InvalidAccessException if an invalid {@code mode} and/or {@code mda} is specified
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */    
     public Row addRow(Access mode, Object... mda);  
     
     /**
      * Returns the current table {@link Row}, or {@code null} if no current row is defined.
      * @return the current table {@code Row}
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Row getRow();    
    
@@ -105,6 +109,7 @@ public interface Table extends TableElement
      * @param idx the 1-based index of the table row to retrieve
      * @return the {@code Row} with the 1-based index of {@code idx}
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code idx} is &lt;= 0
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Row getRow(int idx);
     
@@ -115,6 +120,7 @@ public interface Table extends TableElement
      * @param label the label of the {@code Row} to retrieve
      * @return the {@code Row} with the specified label
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code label} is {@code null} or not provided.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Row getRow(String label);
     
@@ -126,18 +132,21 @@ public interface Table extends TableElement
      * @return the row specified by {@code Access} {@code mode} and {@code mda}
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code mode} is not appropriate for row retrieval, or if the associated parameters 
      * specified in {@code mda} are not valid or are not specified.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Row getRow(Access mode, Object... mda);
     
     /**
      * Returns an {@link java.util.Collections#unmodifiableList} of {@link Row}s of this {@link Table}. 
      * @return an {@code unmodifiableList} of the table rows
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public List<Row> getRows();
     
     /**
      * Returns an {@link Iterable} to an {@link java.util.Collections#unmodifiableList} of {@link Row}s of this {@link Table}. 
      * @return an {@link Iterable} to an {@code unmodifiableList} of the table rows
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Iterable<Row> rows();
     
@@ -152,6 +161,7 @@ public interface Table extends TableElement
      * the new {@code Column} is added to the end of the table. Otherwise, the new {@code Column} is inserted directly following the current 
      * column, and all other columns are moved down by one.
      * @return the new {@code Column}
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Column addColumn();  
     
@@ -163,6 +173,7 @@ public interface Table extends TableElement
      * @param idx the 1-based index where the new column will be inserted or added
      * @return the new {@code Column}
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code idx} is &lt;= 0
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */    
     public Column addColumn(int idx);  
     
@@ -177,12 +188,14 @@ public interface Table extends TableElement
      * @param mda the additional parameters required by the specified {@code Access} {@code mode}
      * @return the new {@code Column}
      * @throws org.tms.api.exceptions.InvalidAccessException if an invalid {@code mode} and/or {@code mda} is specified
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */    
     public Column addColumn(Access mode, Object... mda);  
     
     /**
      * Returns the current table {@link Column}, or {@code null} if no current column is defined.
      * @return the current table {@code Column}
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Column getColumn();    
    
@@ -192,6 +205,7 @@ public interface Table extends TableElement
      * @param idx the 1-based index of the table column to retrieve
      * @return the {@code Column} with the 1-based index of {@code idx}
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code idx} is &lt;= 0
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Column getColumn(int idx);
     
@@ -202,6 +216,7 @@ public interface Table extends TableElement
      * @param label the label of the {@code Column} to retrieve
      * @return the {@code Column} with the specified label
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code label} is {@code null} or not provided.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Column getColumn(String label);
     
@@ -213,18 +228,27 @@ public interface Table extends TableElement
      * @return the column specified by {@code Access} {@code mode} and {@code mda}
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code mode} is not appropriate for column retrieval, or if the associated parameters 
      * specified in {@code mda} are not valid or are not specified.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Column getColumn(Access mode, Object... mda);
 
     /**
+     * Returns the number of columns in the table.
+     * @return the number of columns in the table
+     */
+    public int getNumColumns();
+    
+    /**
      * Returns an {@link java.util.Collections#unmodifiableList} of {@link Column}s of this {@link Table}. 
      * @return an {@code unmodifiableList} of the table columns
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public List<Column> getColumns();
     
     /**
      * Returns an {@link Iterable} to an {@link java.util.Collections#unmodifiableList} of {@link Column}s of this {@link Table}. 
      * @return an {@link Iterable} to an {@code unmodifiableList} of the table columns
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Iterable<Column> columns();
     
@@ -236,6 +260,7 @@ public interface Table extends TableElement
      * @param mda the additional parameters required by the specified {@code Access} {@code mode}
      * @return the new {@code Subset}
      * @throws org.tms.api.exceptions.InvalidAccessException if an invalid {@code mode} and/or {@code mda} is specified
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */    
     public Subset addSubset(Access mode, Object... mda);    
     
@@ -247,6 +272,7 @@ public interface Table extends TableElement
      * @return the subset specified by {@code Access} {@code mode} and {@code mda}
      * @throws org.tms.api.exceptions.InvalidAccessException if {@code mode} is not appropriate for subset retrieval, or if the associated parameters 
      * specified in {@code mda} are not valid or are not specified.
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public Subset getSubset(Access mode, Object... mda);
     
@@ -298,12 +324,6 @@ public interface Table extends TableElement
      * @throws org.tms.api.exceptions.InvalidParentException if the specified row or column are not a part of this table
      */
     public boolean setCellValue(Row row, Column col, Object newValue);
-    
-    /**
-     * Returns the number of columns in the table.
-     * @return the number of columns in the table
-     */
-    public int getNumColumns();
     
     /**
      * Saves this {@link Table}'s current {@link Row} and current {@link Column} to a {@code stack} where they can be recalled 
