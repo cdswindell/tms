@@ -133,7 +133,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
     }
     
     /**
-     * Retrieve the Context associated with this table element; the context is associated with the parent table
+     * Retrieve the TableContext associated with this table element; the context is associated with the parent table
      * @return
      */
     public ContextImpl getTableContext()

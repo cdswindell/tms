@@ -101,7 +101,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     {
         if (sf_DEFAULT_CONTEXT == null) {
             sf_DEFAULT_CONTEXT = new ContextImpl(true, null);
-            sf_DEFAULT_CONTEXT.setLabel("Default Table Context");
+            sf_DEFAULT_CONTEXT.setLabel("Default Table TableContext");
         }
             
         return sf_DEFAULT_CONTEXT;
@@ -303,7 +303,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
                     
                 default:
                     if (!tp.isOptional())
-                        throw new IllegalStateException("No initialization available for Context Property: " + tp);                       
+                        throw new IllegalStateException("No initialization available for TableContext Property: " + tp);                       
             }
         }
         
@@ -437,7 +437,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
     @Override
     public ElementType getElementType()
     {
-        return ElementType.Context;
+        return ElementType.TableContext;
     }
     @Override
     protected boolean isNull()
@@ -904,7 +904,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext, Deriva
             }
             
             default:
-                throw new InvalidAccessException(ElementType.Context, ElementType.Table, mode, false, mda);                
+                throw new InvalidAccessException(ElementType.TableContext, ElementType.Table, mode, false, mda);                
         }
     }
 

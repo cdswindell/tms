@@ -91,7 +91,7 @@ public class TokenMapper
     private TokenMapper(TableContext context)
     {
         if (context == null)
-            throw new IllegalTableStateException("Table Context Required");
+            throw new IllegalTableStateException("Table TableContext Required");
             
         m_operTable = null;
         m_context = context;

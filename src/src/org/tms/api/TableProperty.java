@@ -12,40 +12,40 @@ public enum TableProperty implements Comparable<TableProperty>
     // Base Element Properties
     Label,
     Description,  
-    isNull(true, false, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
-    isReadOnly(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column),
-    isSupportsNull(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    isNull(true, false, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
+    isReadOnly(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column),
+    isSupportsNull(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
-    // Table Element Properties (Context implements initializable ones)
+    // Table Element Properties (TableContext implements initializable ones)
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
-    Precision(true, false, true, ElementType.Context, ElementType.Table),
+    Precision(true, false, true, ElementType.TableContext, ElementType.Table),
     
-    // Context/Table Properties  
-    numTables(true, false, ElementType.Context),
-    TokenMapper(true, true, ElementType.Context),
-    RowCapacityIncr(false, true, ElementType.Context, ElementType.Table),
-    ColumnCapacityIncr(false, true, ElementType.Context, ElementType.Table),
-    FreeSpaceThreshold(false, true, ElementType.Context, ElementType.Table),
-    isAutoRecalculate(false, true, ElementType.Context, ElementType.Table),
-    isRowLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
-    isColumnLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
-    isCellLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
-    isSubsetLabelsIndexed(false, true, ElementType.Context, ElementType.Table),
-    isPersistant(false, true, ElementType.Context, ElementType.Table),
+    // TableContext/Table Properties  
+    numTables(true, false, ElementType.TableContext),
+    TokenMapper(true, true, ElementType.TableContext),
+    RowCapacityIncr(false, true, ElementType.TableContext, ElementType.Table),
+    ColumnCapacityIncr(false, true, ElementType.TableContext, ElementType.Table),
+    FreeSpaceThreshold(false, true, ElementType.TableContext, ElementType.Table),
+    isAutoRecalculate(false, true, ElementType.TableContext, ElementType.Table),
+    isRowLabelsIndexed(false, true, ElementType.TableContext, ElementType.Table),
+    isColumnLabelsIndexed(false, true, ElementType.TableContext, ElementType.Table),
+    isCellLabelsIndexed(false, true, ElementType.TableContext, ElementType.Table),
+    isSubsetLabelsIndexed(false, true, ElementType.TableContext, ElementType.Table),
+    isPersistant(false, true, ElementType.TableContext, ElementType.Table),
     
     // PendingDerivationThreadPool Properties
-    isPendingAllowCoreThreadTimeout(true, false, true, ElementType.Context, ElementType.Table),
-    numPendingCorePoolThreads(true, false, true, ElementType.Context, ElementType.Table),
-    numPendingMaxPoolThreads(true, false, true, ElementType.Context, ElementType.Table),
-    PendingThreadKeepAliveTimeout(true, false, true, ElementType.Context, ElementType.Table),    
+    isPendingAllowCoreThreadTimeout(true, false, true, ElementType.TableContext, ElementType.Table),
+    numPendingCorePoolThreads(true, false, true, ElementType.TableContext, ElementType.Table),
+    numPendingMaxPoolThreads(true, false, true, ElementType.TableContext, ElementType.Table),
+    PendingThreadKeepAliveTimeout(true, false, true, ElementType.TableContext, ElementType.Table),    
 
     // EventProcessorThreadPool Properties
-    isEventsNotifyInSameThread(true, false, true, ElementType.Context, ElementType.Table),
-    isEventsAllowCoreThreadTimeout(true, false, true, ElementType.Context, ElementType.Table),
-    numEventsCorePoolThreads(true, false, true, ElementType.Context, ElementType.Table),
-    numEventsMaxPoolThreads(true, false, true, ElementType.Context, ElementType.Table),
-    EventsThreadKeepAliveTimeout(true, false, true, ElementType.Context, ElementType.Table),    
+    isEventsNotifyInSameThread(true, false, true, ElementType.TableContext, ElementType.Table),
+    isEventsAllowCoreThreadTimeout(true, false, true, ElementType.TableContext, ElementType.Table),
+    numEventsCorePoolThreads(true, false, true, ElementType.TableContext, ElementType.Table),
+    numEventsMaxPoolThreads(true, false, true, ElementType.TableContext, ElementType.Table),
+    EventsThreadKeepAliveTimeout(true, false, true, ElementType.TableContext, ElementType.Table),    
 
     // Table Element Properties 
     numSubsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
@@ -59,7 +59,7 @@ public enum TableProperty implements Comparable<TableProperty>
     Derivation(false, false, ElementType.Column, ElementType.Row, ElementType.Cell),
     Affects(true, false, ElementType.Table, ElementType.Subset, ElementType.Column, ElementType.Row, ElementType.Cell),
     Index(true, false, ElementType.Row, ElementType.Column),
-    isEnforceDataType(false, true, ElementType.Context, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    isEnforceDataType(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     isInUse(true, false, ElementType.Row, ElementType.Column),
     
     Rows(true, false, ElementType.Table, ElementType.Subset),
@@ -96,7 +96,7 @@ public enum TableProperty implements Comparable<TableProperty>
              ElementType.Column,
              ElementType.Cell,
              ElementType.Subset,
-             ElementType.Context);
+             ElementType.TableContext);
     }
     
     /**
