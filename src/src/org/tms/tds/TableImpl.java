@@ -33,6 +33,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Precisionable;
 import org.tms.api.derivables.Token;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
@@ -47,7 +48,7 @@ import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
-public class TableImpl extends TableCellsElementImpl implements Table
+public class TableImpl extends TableCellsElementImpl implements Table, Precisionable
 {
     /**
      * We allow each thread to maintain it's own current row/current column state for every table, this 
@@ -818,16 +819,19 @@ public class TableImpl extends TableCellsElementImpl implements Table
     
     public void setAutoRecalculate(boolean value)
     {
+        vetElement();
         set(sf_AUTO_RECALCULATE_FLAG, value);
     }
 
     public void deactivateAutoRecalculate()
     {
+        vetElement();
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, true);
     }
 
     public void activateAutoRecalculate()
     {
+        vetElement();
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
     }
        
@@ -1683,6 +1687,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         }
     }
     
+    @Override
     public int getPrecision()
     {
         if (m_precision == Integer.MAX_VALUE || m_precision == Integer.MIN_VALUE) 
@@ -1691,6 +1696,7 @@ public class TableImpl extends TableCellsElementImpl implements Table
         return m_precision;
     }
 
+    @Override
     public void setPrecision(int precision)
     {
         m_precision = precision;

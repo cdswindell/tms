@@ -19,7 +19,7 @@ public enum TableProperty implements Comparable<TableProperty>
     // Table Element Properties (Context implements initializable ones)
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
     Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
-    Precision(false, true, ElementType.Context, ElementType.Table),
+    Precision(true, false, true, ElementType.Context, ElementType.Table),
     
     // Context/Table Properties  
     numTables(true, false, ElementType.Context),

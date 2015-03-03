@@ -6,9 +6,57 @@ import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.events.EventProcessorThreadPool;
 
 /**
- * Tables
- * @since 1.0
- * @version $Id$
+ * A standard two dimensional table consisting of {@link Row}s, {@link Column}s, and {@link Cell}s, 
+ * and, optionally, {@link Subset}s.
+ * Tables are the key element in the TMS subsystem and only through table instance objects 
+ * is it possible to create rows, columns, cells, and subsets.
+ * <p>
+ * The {@code Table} interface defines the methods available to operate on tables, including adding and 
+ * retrieving {@link Row}s, {@link Column}s, {@link Cell}s, and {@link Subset}s, to get and set cell values, 
+ * and to perform table-wide operations, such as sorting, recalculating derived elements, and manipulating
+ * the <em>current cell</em>. It also defines methods to get and set table-wide properties to enable 
+ * indexed element labels and row and column allocation increments, and to manage thread pool characteristics 
+ * for the thread pools available to execute asynchronous derivations and to service event listeners. Thread
+ * pool management is an optional feature that not all table implementations may support. 
+ * See {@link TableContext} for more information on these capabilities.
+ * <p>
+ * TMS {@code Table}s are similar to Microsoft Excel spreadsheets in that both:
+ * <ul>
+ * <li>are cell-oriented,</li>
+ * <li>have rows, columns, and multiple sheets,</li>
+ * <li>allow table cells to contain data of different types (e.g., A1 is a number, B1 is a String), as well as 
+ * contain the result of a calculation (known as a {@link org.tms.api.derivables.Derivation} in TMS),</li>
+ * <li>automatically recalculate formulas when the data (table cells) on which they depend change, </li>
+ * <li>allow rows, columns, and cell ranges to be grouped into {@link Subset}s, </li>
+ * <li>support formatting,</li>
+ * <li> are sortable. </li>
+ * </ul>
+ * <p>
+ * TMS {@code Table}s differ from standard spreadsheets and provide the following advantages:
+ * <ul>
+ * <li>cells can contain any valid Java class instance, including those defined by the JDK (String, Integer, etc.), 
+ * as well as custom classes your application provides,</li>
+ * <li>formulas (derivations) can be assigned to columns and rows, as well as to specific cells; 
+ * whenever cells are modified that affect the column (row) derivation, the appropriate cells 
+ * in the column (row) are recalculated as well,</li>
+ * <li>new functions can be registered (see {@link org.tms.api.derivables.Operator}) that can be used in 
+ * {@link Column}, {@link Row},
+ * and {@link Cell} {@link org.tms.api.derivables.Derivation}s to operate on standard Java data types as well as custom data types,</li>
+ * <li>functions can execute asynchronously and post results to the table when complete; cells
+ * dependent on asynchronous calculations are put into a <em>pending</em> state,</li>
+ * <li>derivations referring to pending cells will suspend until they are able to proceed 
+ * (all pending cells are resolved),</li>
+ * <li>Rows and columns can be named, in addition to cells and subsets (cell ranges),</li>
+ * <li>the numeric precision (number of significant digits) used to express derivation results 
+ * can be specified,</li>
+ * <li>custom Java {@link java.util.Comparator}s can be supplied to sort rows and columns,</li>
+ * <li>cells can be constrained to specific data-types, </li>
+ * <li>cell validators (and transformers) can be defined to help enforce data integrity,</li>
+ * <li>event listeners are supported and can be registered on tables, rows, columns, and cells.</li>
+ * </ul>
+ * <p>
+ * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
 public interface Table extends TableElement
 {  
@@ -300,6 +348,24 @@ public interface Table extends TableElement
      */
     public void recalculate();
     
+    /**                                                           
+     * Returns {@code true} if derived table elements (see {@link org.tms.api.derivables.Derivation}) 
+     * are automatically recalculated
+     * in response to changes to dependent table cells.
+     * @return true if derived elements are automatically recalculated when dependent cells are modified
+     */
+    public boolean isAutoRecalculate();
+    
+    /**
+     * Set to {@code true} to allow derived elements to automatically recalculate when dependent cells are modified.
+     * Set to {@code false} to inhibit this behavior, which can be useful if you are about to make several
+     * changes to table elements, all of which would trigger derivations to recalculate. Call the 
+     * {@link #recalculate()} method to manually recalculate all derived elements in this table.
+     * @param autoRecalculate true if derived elements should automatically recalculate when dependent cells are modified
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
+     */
+    public void setAutoRecalculate(boolean autoRecalculate);
+    
     /**
      * Returns {@code true} if the {@link Row} labels in this {@link Table} are indexed.
      * @return {@code true} if the {@code Row} labels in this {@code Table} are indexed
@@ -360,20 +426,43 @@ public interface Table extends TableElement
      */
     public void setSubsetLabelsIndexed(boolean isIndexed);
     
+    /**
+     * Returns the row capacity increment for this table. When new {@link Row}s are added to a
+     * table, room for the new row plus the row capacity increment are allocated at the same time
+     * to make subsequent row additions more efficient. The default row capacity increment is
+     * {@value org.tms.tds.ContextImpl#sf_ROW_CAPACITY_INCR_DEFAULT}.
+     * @return the row capacity increment 
+     */
     public int getRowCapacityIncr();
+    
+    /**
+     * Sets the row capacity increment for this table. This value is used to minimize
+     * memory fragmentation by {@link Table} implementations that use {@link List} data structures.
+     * <p>
+     * The default row capacity increment is
+     * {@value org.tms.tds.ContextImpl#sf_ROW_CAPACITY_INCR_DEFAULT}. 
+     * @param increment the new row capacity increment  
+     */
     public void setRowCapacityIncr(int increment);
     
+    /**
+     * Returns the column capacity increment for this table. When new {@link Column}s are added to a
+     * table, room for the new column plus the column capacity increment are allocated at the same time
+     * to make subsequent column additions more efficient. The default column capacity increment is
+     * {@value org.tms.tds.ContextImpl#sf_COLUMN_CAPACITY_INCR_DEFAULT}.
+     * @return the column capacity increment 
+     */
     public int getColumnCapacityIncr();
+    
+    /**
+     * Sets the column capacity increment for this table. This value is used to minimize
+     * memory fragmentation by {@link Table} implementations that use {@link List} data structures.
+     * <p>
+     * The default column capacity increment is
+     * {@value org.tms.tds.ContextImpl#sf_COLUMN_CAPACITY_INCR_DEFAULT}. 
+     * @param increment the new column capacity increment  
+     */
     public void setColumnCapacityIncr(int increment);
-    
-    public double getFreeSpaceThreshold();
-    public void setFreeSpaceThreshold(double threshold);
-    
-    public int getPrecision();
-    public void setPrecision(int digits);
-    
-    public boolean isAutoRecalculate();
-    public void setAutoRecalculate(boolean autoRecalculate);
     
     /**
      * Returns {@code true} if this {@link Table} implements {@link DerivableThreadPool}.
