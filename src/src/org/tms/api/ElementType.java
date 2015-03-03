@@ -21,7 +21,7 @@ public enum ElementType
     Table,
     /** A {@link Table} row */
     Row,
-    /** A {@link Table} row */
+    /** A {@link Table} column */
     Column,
     /** A {@link Table} cell */
     Cell,
