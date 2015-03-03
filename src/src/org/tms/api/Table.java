@@ -7,8 +7,8 @@ import org.tms.api.events.EventProcessorThreadPool;
 
 /**
  * 
- * @author davids
- *
+ * @since 1.0
+ * @version $Id$
  */
 public interface Table extends TableElement
 {  
