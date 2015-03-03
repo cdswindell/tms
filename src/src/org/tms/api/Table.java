@@ -14,8 +14,9 @@ import org.tms.api.events.EventProcessorThreadPool;
  * The {@code Table} interface defines the methods available to operate on tables, including adding and 
  * retrieving {@link Row}s, {@link Column}s, {@link Cell}s, and {@link Subset}s, to get and set cell values, 
  * and to perform table-wide operations, such as sorting, recalculating derived elements, and manipulating
- * the <em>current cell</em>. It also defines methods to get and set table-wide properties to enable 
- * indexed element labels and row and column allocation increments, and to manage thread pool characteristics 
+ * the <em>current cell</em>. It also defines methods to get and set table-wide properties such as row and 
+ * column allocation increments, 
+ * and to manage thread pool characteristics 
  * for the thread pools available to execute asynchronous derivations and to service event listeners. Thread
  * pool management is an optional feature that not all table implementations may support. 
  * See {@link TableContext} for more information on these capabilities.
@@ -58,7 +59,7 @@ import org.tms.api.events.EventProcessorThreadPool;
  * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public interface Table extends TableElement
+public interface Table extends TableElement, InitializableTableProperties
 {  
     /**
      * Add a new {@link Row} to this {@link Table} directly following the current row. If the current row is last,
@@ -367,122 +368,6 @@ public interface Table extends TableElement
      * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void recalculate();
-    
-    /**                                                           
-     * Returns {@code true} if derived table elements (see {@link org.tms.api.derivables.Derivation}) 
-     * are automatically recalculated
-     * in response to changes to dependent table cells.
-     * @return true if derived elements are automatically recalculated when dependent cells are modified
-     */
-    public boolean isAutoRecalculate();
-    
-    /**
-     * Set to {@code true} to allow derived elements to automatically recalculate when dependent cells are modified.
-     * Set to {@code false} to inhibit this behavior, which can be useful if you are about to make several
-     * changes to table elements, all of which would trigger derivations to recalculate. Call the 
-     * {@link #recalculate()} method to manually recalculate all derived elements in this table.
-     * @param autoRecalculate true if derived elements should automatically recalculate when dependent cells are modified
-     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
-     */
-    public void setAutoRecalculate(boolean autoRecalculate);
-    
-    /**
-     * Returns {@code true} if the {@link Row} labels in this {@link Table} are indexed.
-     * @return {@code true} if the {@code Row} labels in this {@code Table} are indexed
-     */
-    public boolean isRowLabelsIndexed();
-    
-    /**
-     * Set to {@code true} to index the {@link Row} labels in this {@link Table}. Indexed rows are faster to retrieve,
-     * which makes parsing {@link org.tms.api.derivables.Derivation}s more performant, and/but the labels must all be unique.
-     * @param isIndexed {@code true} or {@code false}
-     * @throws org.tms.api.exceptions.NotUniqueException if {@code isIndexed} is {@code true} and this table contains non-unique row labels
-     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
-     */
-    public void setRowLabelsIndexed(boolean isIndexed);
-    
-    /**
-     * Returns {@code true} if the {@link Column} labels in this {@link Table} are indexed.
-     * @return {@code true} if the {@code Column} labels in this {@code Table} are indexed
-     */
-    public boolean isColumnLabelsIndexed();
-    
-    /**
-     * Set to {@code true} to index the {@link Column} labels in this {@link Table}. Indexed columns are faster to retrieve,
-     * which makes parsing {@link org.tms.api.derivables.Derivation}s more performant, and/but the labels must all be unique.
-     * @param isIndexed {@code true} or {@code false}
-     * @throws org.tms.api.exceptions.NotUniqueException if {@code isIndexed} is {@code true} and this table contains non-unique column labels
-     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
-     */
-    public void setColumnLabelsIndexed(boolean isIndexed);
-    
-    /**
-     * Returns {@code true} if the {@link Cell} labels in this {@link Table} are indexed.
-     * @return {@code true} if the {@code Cell} labels in this {@code Table} are indexed
-     */
-    public boolean isCellLabelsIndexed();
-    
-    /**
-     * Set to {@code true} to index the {@link Cell} labels in this {@link Table}. Indexed cells are faster to retrieve,
-     * which makes parsing {@link org.tms.api.derivables.Derivation}s more performant, and/but the labels must all be unique.
-     * @param isIndexed {@code true} or {@code false}
-     * @throws org.tms.api.exceptions.NotUniqueException if {@code isIndexed} is {@code true} and this table contains non-unique cell labels
-     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
-     */
-    public void setCellLabelsIndexed(boolean isIndexed);
-    
-    /**
-     * Returns {@code true} if the {@link Subset} labels in this {@link Table} are indexed.
-     * @return {@code true} if the {@code Subset} labels in this {@code Table} are indexed
-     */
-    public boolean isSubsetLabelsIndexed();
-    
-    /**
-     * Set to {@code true} to index the {@link Subset} labels in this {@link Table}. Indexed subsets are faster to retrieve,
-     * which makes parsing {@link org.tms.api.derivables.Derivation}s more performant, and/but the labels must all be unique.
-     * @param isIndexed {@code true} or {@code false}
-     * @throws org.tms.api.exceptions.NotUniqueException if {@code isIndexed} is {@code true} and this table contains non-unique subset labels
-     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
-     */
-    public void setSubsetLabelsIndexed(boolean isIndexed);
-    
-    /**
-     * Returns the row capacity increment for this table. When new {@link Row}s are added to a
-     * table, room for the new row plus the row capacity increment are allocated at the same time
-     * to make subsequent row additions more efficient. The default row capacity increment is
-     * {@value org.tms.tds.ContextImpl#sf_ROW_CAPACITY_INCR_DEFAULT}.
-     * @return the row capacity increment 
-     */
-    public int getRowCapacityIncr();
-    
-    /**
-     * Sets the row capacity increment for this table. This value is used to minimize
-     * memory fragmentation by {@link Table} implementations that use {@link List} data structures.
-     * <p>
-     * The default row capacity increment is
-     * {@value org.tms.tds.ContextImpl#sf_ROW_CAPACITY_INCR_DEFAULT}. 
-     * @param increment the new row capacity increment  
-     */
-    public void setRowCapacityIncr(int increment);
-    
-    /**
-     * Returns the column capacity increment for this table. When new {@link Column}s are added to a
-     * table, room for the new column plus the column capacity increment are allocated at the same time
-     * to make subsequent column additions more efficient. The default column capacity increment is
-     * {@value org.tms.tds.ContextImpl#sf_COLUMN_CAPACITY_INCR_DEFAULT}.
-     * @return the column capacity increment 
-     */
-    public int getColumnCapacityIncr();
-    
-    /**
-     * Sets the column capacity increment for this table. This value is used to minimize
-     * memory fragmentation by {@link Table} implementations that use {@link List} data structures.
-     * <p>
-     * The default column capacity increment is
-     * {@value org.tms.tds.ContextImpl#sf_COLUMN_CAPACITY_INCR_DEFAULT}. 
-     * @param increment the new column capacity increment  
-     */
-    public void setColumnCapacityIncr(int increment);
     
     /**
      * Returns {@code true} if this {@link Table} implements {@link DerivableThreadPool}.

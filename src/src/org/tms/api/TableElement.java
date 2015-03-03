@@ -7,7 +7,16 @@ import org.tms.api.events.Listenable;
 
 public interface TableElement extends BaseElement, Listenable
 {
+    /**
+     * Returns the parent {@link TableContext}.
+     * @return the parent TableContext
+     */
     public TableContext getTableContext();
+
+    /**
+     * Returns the parent {@link Table}.
+     * @return the parent Table
+     */
     public Table getTable();
     
     public void delete();
@@ -38,7 +47,12 @@ public interface TableElement extends BaseElement, Listenable
      */
     public Iterable<Subset> subsets();
        
+    /** 
+     * Return the number of {@link Subset}s that this element is contained within.
+     * @return the number of Subsets that this element is contained within
+     */
     public int getNumSubsets();
+    
     /**
      * Returns a {@link List} of the {@code Derivable} elements
      * that this {@code TableElement} impacts when modified

@@ -15,9 +15,9 @@ import org.tms.teq.DerivationImpl.DerivationContext;
  * The PendingState abstract class encapsulates derivation state for derivations where operators
  * perform asynchronous calculations, leaving table cells in the "Pending" state while
  * the calculations are performed.
- * <p/>
+ * <p>
  * There are three possible pending states:
- * <p/>
+ * <p>
  * <ul>
  * <li><b>AwaitingState</b>: The calculation is awaiting the completion of an asynchronous Operator 
  *     and will continue when the calculation results are posted.</li>
@@ -26,7 +26,7 @@ import org.tms.teq.DerivationImpl.DerivationContext;
  * <li><b>BlockedStatisticState</b>: The calculation is dependent on a Statistics or Transform operator
  *        that has encountered <b>AwaitingState</b>, <b>BlockedState</b> or other <b>BlockedStatisticState</b> cells. </li>
  * </ul>
- * <p/>
+ * <p>
  */
 public abstract class PendingState
 {

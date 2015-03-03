@@ -15,6 +15,7 @@ import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.PendingDerivationExecutor;
+import org.tms.api.derivables.Precisionable;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.events.EventProcessorExecutor;
 import org.tms.api.events.EventProcessorThreadPool;
@@ -25,7 +26,9 @@ import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.WeakHashSet;
 
-public class ContextImpl extends BaseElementImpl implements TableContext, DerivableThreadPool, 
+public class ContextImpl extends BaseElementImpl implements TableContext, 
+                                                            Precisionable,
+                                                            DerivableThreadPool, 
 															EventProcessorThreadPool, EventsProcessorThreadPoolCreator
 {
     private static ContextImpl sf_DEFAULT_CONTEXT;

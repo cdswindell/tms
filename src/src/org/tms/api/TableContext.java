@@ -4,7 +4,16 @@ import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.events.EventProcessorThreadPool;
 
-public interface TableContext extends BaseElement
+/**
+ * A collection of {@link Table}, initializable {@link TableProperty}s, and optional thread pools. Tables that share the same {@code TableContext}
+ * can reference one another in {@link Column}, {@link Row}, and {@link Cell} {@link org.tms.api.derivables.Derivation Derivation}s.
+ * <p>
+ * See {@link IndexableTableElements} and {@link InitializableTableProperties} for additional methods that affect {@code TableContext}s.
+ * 
+ * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ */
+public interface TableContext extends BaseElement, InitializableTableProperties
 {
     /**
      * Returns the {@link Table} referenced by the {@link Access} specification and associated parameters. 
@@ -19,6 +28,10 @@ public interface TableContext extends BaseElement
      */
     public Table getTable(Access mode, Object... mda);
 
+    /**
+     * Returns the number of {@link Table} instances in this {@code TableContext}.
+     * @return the number of Table instances in this TableContext
+     */
     public int getNumTables();
     
     public TokenMapper getTokenMapper();
@@ -39,32 +52,5 @@ public interface TableContext extends BaseElement
     default public boolean isEventProcessorThreadPool()
     {
         return this instanceof EventProcessorThreadPool;
-    }
-    
-    public boolean isRowLabelsIndexed();
-    public void setRowLabelsIndexed(boolean isIndexed);
-    
-    public boolean isColumnLabelsIndexed();
-    public void setColumnLabelsIndexed(boolean isIndexed);
-    
-    public boolean isCellLabelsIndexed();
-    public void setCellLabelsIndexed(boolean isIndexed);
-    
-    public boolean isSubsetLabelsIndexed();
-    public void setSubsetLabelsIndexed(boolean isIndexed);
-    
-    public int getRowCapacityIncr();
-    public void setRowCapacityIncr(int increment);
-    
-    public int getColumnCapacityIncr();
-    public void setColumnCapacityIncr(int increment);
-    
-    public double getFreeSpaceThreshold();
-    public void setFreeSpaceThreshold(double threshold);
-    
-    public int getPrecision();
-    public void setPrecision(int digits);
-    
-    public boolean isAutoRecalculate();
-    public void setAutoRecalculate(boolean autoRecalculate);
+    }   
 }

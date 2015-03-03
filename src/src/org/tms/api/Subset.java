@@ -8,6 +8,7 @@ package org.tms.api;
  * as new cells are added to elements within a {@code Subset}, they are automatically added to the containing subset as well.
  * <p>
  * Subsets are created by calling {@link Table#addSubset Table.addSubset(...)}.
+ * <p>
  * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
