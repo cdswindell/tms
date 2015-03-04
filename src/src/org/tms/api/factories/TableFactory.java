@@ -5,7 +5,7 @@ import org.tms.api.TableContext;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 
-public class TableFactory 
+public final class TableFactory 
 {
     static public Table createTable()
     {
@@ -19,11 +19,11 @@ public class TableFactory
 		return t;
     }
 
-    static public Table createTable(int nRows, int nCols, TableContext c)
+    static public Table createTable(Table ot)
     {
         Table t = null;       
-        if (c instanceof ContextImpl)
-        	t = TableImpl.createTable(nRows, nCols, (ContextImpl)c);
+        if (ot != null && ot instanceof TableImpl) 
+            t = TableImpl.createTable((TableImpl)ot);
         
         return t;
     }
@@ -44,5 +44,26 @@ public class TableFactory
         	t = TableImpl.createTable(nRows, nCols, (TableImpl)rt);
         
 		return t;
+    }
+    
+    static public Table createTable(int nRows, int nCols, TableContext c)
+    {
+        Table t = null;       
+        if (c instanceof ContextImpl)
+            t = TableImpl.createTable(nRows, nCols, (ContextImpl)c);
+        
+        return t;
+    }
+
+    /**
+     * Construct a TableFactory instance.
+     * <p>
+     * Protected constructor prevents anyone creating a TableFactory from outside of the package.
+     * The TableFactory class is intended only to provide a place for the static factory methods
+     * to reside.
+     */
+    protected TableFactory()
+    {
+        // noop
     }
 }

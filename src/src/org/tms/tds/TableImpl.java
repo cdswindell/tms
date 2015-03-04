@@ -84,27 +84,35 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return sf_CURRENT_CELL_STACK.get();
     }
     
-	public static final Table createTable() 
+	public static final TableImpl createTable() 
 	{
 		return new TableImpl();
 	}
 	
-	public static final Table createTable(int nRows, int nCols) 
+	public static final TableImpl createTable(int nRows, int nCols) 
 	{
 		return new TableImpl(nRows, nCols);
 	}
 	
-    public static final Table createTable(ContextImpl c) 
+    public static final TableImpl createTable(ContextImpl c) 
     {
-        return new TableImpl(c);
+        return new TableImpl(ContextImpl.getPropertyInt(c, TableProperty.RowCapacityIncr), 
+                             ContextImpl.getPropertyInt(c, TableProperty.ColumnCapacityIncr), c);
     }
     
-    public static final Table createTable(int nRows, int nCols, ContextImpl c) 
+    public static final TableImpl createTable(TableImpl t) 
+    {
+        ContextImpl tc = t.getTableContext();
+        return new TableImpl(ContextImpl.getPropertyInt(tc, TableProperty.RowCapacityIncr), 
+                             ContextImpl.getPropertyInt(tc, TableProperty.ColumnCapacityIncr), t);
+    }
+    
+    public static final TableImpl createTable(int nRows, int nCols, ContextImpl c) 
     {
         return new TableImpl(nRows, nCols, c);
     }
     
-    public static final Table createTable(int nRows, int nCols, TableImpl t) 
+    public static final TableImpl createTable(int nRows, int nCols, TableImpl t) 
     {
         return new TableImpl(nRows, nCols, t);
     }
@@ -150,19 +158,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
              ContextImpl.getPropertyInt(null, TableProperty.ColumnCapacityIncr));
     }
     
-    protected TableImpl(TableContext c)
-    {
-        this(ContextImpl.getPropertyInt(null, TableProperty.RowCapacityIncr),
-                ContextImpl.getPropertyInt(null, TableProperty.ColumnCapacityIncr),
-                c);
-   }
-
     protected TableImpl(int nRows, int nCols)
     {
         this(nRows, nCols, ContextImpl.getDefaultContext());
     }
 
-    protected TableImpl(int nRows, int nCols, TableContext c)
+    protected TableImpl(int nRows, int nCols, ContextImpl c)
     {
         super(null);
         setTable(this);
@@ -595,9 +596,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         if (c == null)
             c = ContextImpl.getDefaultContext();
         
-        if (c != null)
-        	c.deregister(this);
-        
+        c.deregister(this);        
         m_context = c.register(this);
         
         return m_context;

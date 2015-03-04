@@ -89,11 +89,11 @@ public class ContextTest
         ContextImpl c = new ContextImpl();
         assertThat(c, notNullValue());
         
-        TableImpl t1 = new TableImpl(c);
+        TableImpl t1 = TableImpl.createTable(c);
         assertThat(t1, notNullValue());
         t1.setLabel("t1");
         
-        TableImpl t2 = new TableImpl(c);
+        TableImpl t2 = TableImpl.createTable(c);
         assertThat(t2, notNullValue());        
         t2.setLabel("t2");
                

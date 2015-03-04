@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.tms.api.Table;
-import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.api.events.EventProcessorExecutor;
 import org.tms.api.events.EventProcessorThreadPool;
@@ -22,9 +21,17 @@ public class EvTableImpl extends TableImpl implements EventProcessorThreadPool, 
 		return new EvTableImpl(nRows, nCols);
 	}
 	
-    public static final Table createEvTable(TableContext c) 
+    public static final Table createEvTable(ContextImpl c) 
     {
-        return new EvTableImpl(c);
+        return new EvTableImpl(ContextImpl.getPropertyInt(c, TableProperty.RowCapacityIncr), 
+                               ContextImpl.getPropertyInt(c, TableProperty.ColumnCapacityIncr), c);
+    }
+    
+    public static final Table createEvTable(TableImpl t) 
+    {
+        ContextImpl tc = t.getTableContext();
+        return new EvTableImpl(ContextImpl.getPropertyInt(tc, TableProperty.RowCapacityIncr), 
+                               ContextImpl.getPropertyInt(tc, TableProperty.ColumnCapacityIncr), t);
     }
     
     public static final Table createEvTable(int nRows, int nCols, ContextImpl c) 
@@ -48,11 +55,6 @@ public class EvTableImpl extends TableImpl implements EventProcessorThreadPool, 
 	protected EvTableImpl() 
 	{
 		super();
-	}
-
-	protected EvTableImpl(TableContext c) 
-	{
-		super(c);
 	}
 
 	protected EvTableImpl(int nRows, int nCols) 
