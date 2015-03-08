@@ -1,7 +1,14 @@
 package org.tms.api;
 
+/**
+ * 
+ */
 public interface BaseElement 
 {
+	/**
+	 * Return the {@link ElementType} of this table element.
+	 * @return theElementType of this table element
+	 */
 	public ElementType getElementType();
 	
     public boolean isReadOnly();
