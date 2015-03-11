@@ -125,7 +125,6 @@ public class PostfixStackEvaluator
 		// walk through postfix stack from tail to head
 		while(m_pfsIdx >= 0) {
             Token t = m_pfsArray[m_pfsIdx--];         
-            //Token t = m_pfsIter.next();         
 			TokenType tt = t.getTokenType();
 			Operator oper = t.getOperator();
 			Object value = t.getValue();
@@ -151,7 +150,7 @@ public class PostfixStackEvaluator
                 case UnaryFunc:
                 case UnaryTrailingOp:
 					x = asOperand(rewind, tbl, row, col);
-					if (x == null || !x.isOperand()) // stack is in invalid state
+					if (x == null || (!x.isOperand() && oper != BuiltinOperator.IsErrorOper)) // stack is in invalid state
 					    return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);					
 					m_opStack.push(doUnaryOp(oper, x));					
 					break;
@@ -1154,7 +1153,9 @@ public class PostfixStackEvaluator
                 case IsEvenOper:
                 case IsOddOper:
                 case IsNumberOper:
-                case IsStringOper:
+                case IsTextOper:
+                case IsLogicalOper:
+                case IsErrorOper:
                 case NotOper:
                     result = doBuiltInOp(bio, x);
                     break;
@@ -1195,7 +1196,13 @@ public class PostfixStackEvaluator
         }
         
         switch (bio) {
-            case IsStringOper:
+            case IsErrorOper:
+                return new Token(x.isError()); 
+                
+            case IsLogicalOper:
+                return new Token(x.isBoolean()); 
+                
+            case IsTextOper:
                 return new Token(x.isString()); 
                 
             case IsNumberOper:

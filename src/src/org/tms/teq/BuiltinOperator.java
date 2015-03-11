@@ -41,11 +41,14 @@ public enum BuiltinOperator implements Labeled, Operator
     XorOper(TokenType.BinaryOp, 4, "xor"),
     NotOper(TokenType.UnaryOp, 4,"~", "not"),
     
-    // Unary if tests
+    // Unary is tests
     IsEvenOper("isEven", TokenType.UnaryFunc),
     IsOddOper("isOdd", TokenType.UnaryFunc),
+    
+    IsErrorOper("isError", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
     IsNumberOper("isNumber", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
-    IsStringOper("isString", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
+    IsTextOper("isText", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
+    IsLogicalOper("isLogical", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
     
     // special isNull operator, which is somewhat out of bounds
     IsNullOper("isNull", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
@@ -95,8 +98,8 @@ public enum BuiltinOperator implements Labeled, Operator
     TanHOper("tanh", TokenType.UnaryFunc, 5, Math.class),
 
     FactFunc(TokenType.UnaryFunc, 5, MathUtil.class, "fact", "factorial"),
-    FloorOper("floor", TokenType.UnaryFunc, 5, Math.class),
-    CeilOper("ceil", TokenType.UnaryFunc, 5, Math.class),
+    FloorOper(TokenType.UnaryFunc, 5, Math.class, "floor", "rounddown"),
+    CeilOper(TokenType.UnaryFunc, 5, Math.class, "ceil", "roundup"),
     SignOper(TokenType.UnaryFunc, 5, Math.class, "signum", "sign", "signum"),
     RoundOper("round", TokenType.UnaryFunc, 5, Math.class),
     

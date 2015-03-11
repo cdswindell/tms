@@ -221,7 +221,7 @@ public class BuiltinOperatorTest
         assertThat(t.isBoolean(), is(true));
         assertThat(t.getValue(), is(true));
 
-        pse = new PostfixStackEvaluator("isString(124)", null);
+        pse = new PostfixStackEvaluator("isText(124)", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
@@ -230,7 +230,43 @@ public class BuiltinOperatorTest
         assertThat(t.isBoolean(), is(true));
         assertThat(t.getValue(), is(false));
 
-        pse = new PostfixStackEvaluator("isString('124')", null);
+        pse = new PostfixStackEvaluator("isText('124')", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isBoolean(), is(true));
+        assertThat(t.getValue(), is(true));
+
+        pse = new PostfixStackEvaluator("isLogical(isText('124'))", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isBoolean(), is(true));
+        assertThat(t.getValue(), is(true));
+
+        pse = new PostfixStackEvaluator("isLogical('124')", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isBoolean(), is(true));
+        assertThat(t.getValue(), is(false));
+
+        pse = new PostfixStackEvaluator("isError(3*0)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isBoolean(), is(true));
+        assertThat(t.getValue(), is(false));
+
+        pse = new PostfixStackEvaluator("isError(3/0)", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
