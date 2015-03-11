@@ -1121,13 +1121,13 @@ public class PostfixStackEvaluator
                     return new Token(x / y);
                 
             case AndOper:
-                return new Token((int)x & (int)y);
+                return new Token(Math.round(x) & Math.round(y));
                 
             case OrOper:
-                return new Token((int)x | (int)y);
+                return new Token(Math.round(x) | Math.round(y));
                 
             case XorOper:
-                return new Token((int)x ^ (int)y);
+                return new Token(Math.round(x) ^ Math.round(y));
                 
             default:
                 throw new UnimplementedException("Unimplemented built in operator: " + bio);    
@@ -1151,6 +1151,10 @@ public class PostfixStackEvaluator
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
             switch (bio) {
+                case IsEvenOper:
+                case IsOddOper:
+                case IsNumberOper:
+                case IsStringOper:
                 case NotOper:
                     result = doBuiltInOp(bio, x);
                     break;
@@ -1170,21 +1174,33 @@ public class PostfixStackEvaluator
 
     private Token doBuiltInOp(BuiltinOperator bio, Token x)
     {
+        Token result = null;
         if (x.isNumeric())
-            return doBuiltInOp(bio, x.getNumericValue());        
+            result = doBuiltInOp(bio, x.getNumericValue());        
         else if (x.isBoolean())
-            return doBuiltInOp(bio, x.getBooleanValue());
+            result = doBuiltInOp(bio, x.getBooleanValue());
+        
+        if (result != null)
+            return result;
         
         // if a token mapper exists, look for a supporting overload
         TokenMapper tm = m_pfs.getTokenMapper();
-        if (tm != null) {
+        TokenType tt = bio.getTokenType();
+        if (tm != null && (tt == TokenType.UnaryOp || tt == TokenType.UnaryTrailingOp)) {
             Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType()});
             if (oper != null) {
-                Token t = oper.evaluate(x);
-                return t;
+                result = oper.evaluate(x);
+                return result;
             }
         }
+        
         switch (bio) {
+            case IsStringOper:
+                return new Token(x.isString()); 
+                
+            case IsNumberOper:
+                return new Token(x.isNumeric()); 
+                
             case NotOper:
                 return Token.createNullToken();
                 
@@ -1200,9 +1216,16 @@ public class PostfixStackEvaluator
     {
         switch(bio) {
             case NotOper:
-                return new Token(~(int)dv);
+                return new Token(~Math.round(dv));
+                
+            case IsEvenOper:
+                return new Token(Math.round(dv) % 2 == 0);
+                
+            case IsOddOper:
+                return new Token(Math.round(dv) % 2 == 1);
+                
             default:
-                throw new UnimplementedException("Unimplemented built in operator: " + bio);                
+                return null;                
         }
     }   
 
@@ -1211,8 +1234,9 @@ public class PostfixStackEvaluator
         switch(bio) {
             case NotOper:
                 return new Token(!bv);
+                
             default:
-                throw new UnimplementedException("Unimplemented built in operator: " + bio);                
+                return null;                
         }
     }   
 }

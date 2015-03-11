@@ -41,8 +41,16 @@ public enum BuiltinOperator implements Labeled, Operator
     XorOper(TokenType.BinaryOp, 4, "xor"),
     NotOper(TokenType.UnaryOp, 4,"~", "not"),
     
+    // Unary if tests
+    IsEvenOper("isEven", TokenType.UnaryFunc),
+    IsOddOper("isOdd", TokenType.UnaryFunc),
+    IsNumberOper("isNumber", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
+    IsStringOper("isString", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
+    
     // special isNull operator, which is somewhat out of bounds
     IsNullOper("isNull", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
+    
+    // special "if" operator
     IfOper("if", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
     
     // Special math operators, implemented in Java Math class
