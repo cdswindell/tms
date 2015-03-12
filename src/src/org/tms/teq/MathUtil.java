@@ -17,23 +17,58 @@ public class MathUtil
 
     static final public double pmt(double ipt, int nPer, double pv, double fv)
     {
-        double tmp = Math.pow(1.0 + ipt, nPer);
+        double tmp = Math.exp(nPer*Math.log1p(ipt));
         double pmt = ((pv*tmp + fv)*ipt)/(1.0 - tmp);      
         return pmt;
     }
     
     static final public double fv(double ipt, int nPer, double pmt, double pv)
     {
-        double tmp = Math.pow(1.0 + ipt, nPer);
+        double tmp = Math.exp(nPer*Math.log1p(ipt));
         double fv = -pv * tmp - pmt * ((tmp - 1.0)/ipt);      
         return fv;
     }
     
     static final public double pv(double ipt, int nPer, double pmt, double fv)
     {
-        double tmp = Math.pow(1.0 + ipt, nPer);
+        double tmp = Math.exp(nPer*Math.log1p(ipt));
         double pv = (-fv - pmt * ((tmp - 1.0)/ipt))/tmp;      
         return pv;
+    }
+    
+    static final public double nper(double ipt, double pmt, double pv, double fv)
+    {
+        double tmp = pmt/ipt;
+        double tmp2 = (-fv + tmp)/(pv + tmp);   
+        
+        double nPer = Math.log(tmp2)/Math.log(1+ipt);
+        return nPer;
+    }
+    
+    static final public double rate(int nPer, double pmt, double pv, double fv)
+    {
+        double ipt = 0.0;
+        double in = 0;
+        
+        if (pv != 0.0)             
+            ipt = (-fv - pv - pmt*nPer)/pv/nPer;
+        else
+            ipt = -fv /pmt/nPer/nPer;
+        
+        while (true) {
+            double t1 = Math.exp(nPer*Math.log1p(ipt));
+            double t2 = pmt/ipt*(t1 - 1);
+            double t3 = t2 + fv + pv * t1;
+            double t4 = (t2 + (fv * ipt - pmt)*nPer/(1 + ipt))/ipt;
+            
+            in = ipt + t3/t4;
+            double diff = Math.abs((in-ipt)/in);
+            if (diff < 1e-13) break;
+            
+            ipt = in;
+        }
+        
+        return ipt;
     }
     
     /**

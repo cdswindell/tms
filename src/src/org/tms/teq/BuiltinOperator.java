@@ -79,6 +79,8 @@ public enum BuiltinOperator implements Labeled, Operator
     PmtOper("pmt", TokenType.GenericFunc, 5, MathUtil.class, "pmt", double.class, int.class, double.class, double.class),
     FvOper("fv", TokenType.GenericFunc, 5, MathUtil.class, "fv", double.class, int.class, double.class, double.class),
     PvOper("pv", TokenType.GenericFunc, 5, MathUtil.class, "pv", double.class, int.class, double.class, double.class),
+    NPerOper("nper", TokenType.GenericFunc, 5, MathUtil.class, "nper", double.class, double.class, double.class, double.class),
+    RateOper("rate", TokenType.GenericFunc, 5, MathUtil.class, "rate", int.class, double.class, double.class, double.class),
     
     // trig functions, radians
     toDegreesOper("toDegrees", TokenType.UnaryFunc, 5, Math.class),

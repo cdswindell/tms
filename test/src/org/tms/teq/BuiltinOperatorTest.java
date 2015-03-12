@@ -384,5 +384,42 @@ public class BuiltinOperatorTest extends BaseTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.isString(), is(false));
         assertThat(closeTo(t.getValue(), -75.13, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("nper((12/12/100), (-100), (-1000), 10000)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), 60.08, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("nper((12/12/100), (-100), (-1000), 0)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), -9.5786, 0.0001), is(true));
+
+        pse = new PostfixStackEvaluator("rate((4*12), (-200), 8000, 0)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), 0.0077, 0.0001), is(true));
+        assertThat(closeTo(12.0 * (double)t.getValue(), 0.09242, 0.00001), is(true));
+
+        pse = new PostfixStackEvaluator("rate((365*24*60*60), (-0.01), 0, 331667.006690776891780341908435)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(31536000 * (double)t.getValue(), 0.10, 0.00001), is(true));
     }
 }
