@@ -7,9 +7,10 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 
 import org.junit.Test;
+import org.tms.BaseTest;
 import org.tms.api.derivables.Token;
 
-public class BuiltinOperatorTest
+public class BuiltinOperatorTest extends BaseTest
 {
 
     @Test
@@ -306,5 +307,82 @@ public class BuiltinOperatorTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.isString(), is(false));
         assertThat(t.getValue(), is(9.0));
+    }
+    
+    @Test
+    public final void testGenericMathFunctions() 
+            throws PendingDerivationException, BlockedDerivationException
+    {
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("pmt((10/12/100), (10*12), 0, 10000)", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), -48.82, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("pmt((10/12/100), (10*12), 5000, 10000)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), -114.89, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("pmt((10/12/100), (10*12), (-5000), 10000)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), 17.26, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("fv((6/12/100), (5*12), 100, 0)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), -6977, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("fv((6/12/100), (5*12), 100, 1000)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), -8325.85, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("fv((6/12/100), (5*12), 0, 1000)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), -1348.85, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("pv((8/12/100), (20*12), 500, 0)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), -59777.15, 0.01), is(true));
+
+        pse = new PostfixStackEvaluator("pv(0.10, 3, 0, 100)", null);
+        assertThat(pse, notNullValue());
+
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(closeTo(t.getValue(), -75.13, 0.01), is(true));
     }
 }

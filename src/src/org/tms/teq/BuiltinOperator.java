@@ -75,10 +75,15 @@ public enum BuiltinOperator implements Labeled, Operator
     Log10Oper(TokenType.UnaryFunc, 5, Math.class, "log10", "log", "log10"),
     RandIntOper(TokenType.UnaryFunc, 5, MathUtil.class, "randomInt", "randomInt", "randInt"),
 
+    // TVM Calculations
+    PmtOper("pmt", TokenType.GenericFunc, 5, MathUtil.class, "pmt", double.class, int.class, double.class, double.class),
+    FvOper("fv", TokenType.GenericFunc, 5, MathUtil.class, "fv", double.class, int.class, double.class, double.class),
+    PvOper("pv", TokenType.GenericFunc, 5, MathUtil.class, "pv", double.class, int.class, double.class, double.class),
+    
+    // trig functions, radians
     toDegreesOper("toDegrees", TokenType.UnaryFunc, 5, Math.class),
     toRadiansOper("toRadians", TokenType.UnaryFunc, 5, Math.class),
     
-    // trig functions, radians
     SinOper("sin", TokenType.UnaryFunc, 5, Math.class),
     CosOper("cos", TokenType.UnaryFunc, 5, Math.class),
     TanOper("tan", TokenType.UnaryFunc, 5, Math.class),

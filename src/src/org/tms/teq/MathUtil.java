@@ -14,6 +14,28 @@ import org.tms.api.TableElement;
 
 public class MathUtil
 {
+
+    static final public double pmt(double ipt, int nPer, double pv, double fv)
+    {
+        double tmp = Math.pow(1.0 + ipt, nPer);
+        double pmt = ((pv*tmp + fv)*ipt)/(1.0 - tmp);      
+        return pmt;
+    }
+    
+    static final public double fv(double ipt, int nPer, double pmt, double pv)
+    {
+        double tmp = Math.pow(1.0 + ipt, nPer);
+        double fv = -pv * tmp - pmt * ((tmp - 1.0)/ipt);      
+        return fv;
+    }
+    
+    static final public double pv(double ipt, int nPer, double pmt, double fv)
+    {
+        double tmp = Math.pow(1.0 + ipt, nPer);
+        double pv = (-fv - pmt * ((tmp - 1.0)/ipt))/tmp;      
+        return pv;
+    }
+    
     /**
      * A formula for the number of possible combinations of r objects from a set of n objects where order is not important. 
      * From probability theory, this is the calculation of nCr or n Choose r, or n!/r!(n-r)!.
