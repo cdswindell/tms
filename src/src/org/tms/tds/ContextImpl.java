@@ -236,6 +236,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
                     setSubsetLabelsIndexed((boolean)value);
                     break;
                     
+                case DisplayFormat:
+                    if (!isValidPropertyValueString(value))
+                        value = null;
+                    setDisplayFormat((String)value);
+                    break;
+                    
                 case isPersistant:
                     if (!isValidPropertyValueBoolean(value))
                         value = sf_TABLE_PERSISTANCE_DEFAULT;
@@ -337,6 +343,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
                 
             case Precision:
                 return getPrecision();
+                
+            case DisplayFormat:
+                return getDisplayFormat();
                 
             case isAutoRecalculate:
                 return isAutoRecalculate();
@@ -513,6 +522,19 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         set(sf_IS_TABLE_PERSISTANT_FLAG, persistant);
     }
     
+    public String getDisplayFormat()
+    {
+        return this.getPropertyString(TableProperty.DisplayFormat);
+    }
+    
+    public void setDisplayFormat(String value)
+    {
+        if (value != null && (value = value.trim()).length() > 0)
+            setProperty(TableProperty.DisplayFormat, value);
+        else
+            this.clearProperty(TableProperty.DisplayFormat);        
+    }
+
     public TokenMapper getTokenMapper()
     {
         return m_tokenMapper;

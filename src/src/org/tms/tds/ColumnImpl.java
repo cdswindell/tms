@@ -40,7 +40,8 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
             if (super.initializeProperty(tp, value)) continue;            
             switch (tp) {
                 default:
-                    throw new IllegalStateException("No initialization available for Column Property: " + tp);                       
+                    if (!tp.isOptional())
+                        throw new IllegalStateException("No initialization available for Column Property: " + tp);                       
             }
         }
         

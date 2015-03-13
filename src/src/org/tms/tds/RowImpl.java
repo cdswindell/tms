@@ -38,7 +38,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
             
             switch (tp) {
                 default:
-                    throw new IllegalStateException("No initialization available for Row Property: " + tp);                       
+                    if (!tp.isOptional())
+                        throw new IllegalStateException("No initialization available for Row Property: " + tp);                       
             }
         }
         

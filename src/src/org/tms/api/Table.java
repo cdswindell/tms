@@ -315,6 +315,16 @@ public interface Table extends TableElement, InitializableTableProperties
     public Object getCellValue(Row row, Column col);
     
     /**
+     * 
+     * @param row the table row containing the desired cell
+     * @param col the table cell containing the desired cell
+     * @return the formatted cell value
+     * @throws org.tms.api.exceptions.DeletedElementException if this table or the specified row or column has been deleted
+     * @throws org.tms.api.exceptions.InvalidParentException if the specified row or column are not a part of this table
+     */
+    public String getFormattedCellValue(Row row, Column col);
+    
+    /**
      * Sets the value of the {@link Table} {@link Cell} at the intersection of {@link Row} {@code row} and {@link Column} {@code col} 
      * to {@code newValue} and returns {@code true} if the cell value was changed.
      * @param row the table row containing the desired cell to set the value of

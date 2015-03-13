@@ -317,6 +317,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                     setPersistant((boolean)value);
                     break;
                     
+                case DisplayFormat:
+                    if (!isValidPropertyValueString(value))
+                        value = null;
+                    setDisplayFormat((String)value);
+                    break;
+                    
                 default:
                 	if (initializeSpecializedProperty(tp, value))
                 		break;
@@ -507,6 +513,16 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
+    public String getFormattedCellValue(Row row, Column col)
+    {
+        CellImpl c = getCell((RowImpl)row, (ColumnImpl)col);
+        if (c != null)
+            return c.getFormattedCellValue();
+        else
+            return null;
+    }
+    
+    @Override
     public boolean setCellValue(Row row, Column col, Object o)
     {
         return setCellValue((RowImpl)row, (ColumnImpl)col, o);        
@@ -559,6 +575,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                 
             case Precision:
                 return getPrecision();
+                
+            case DisplayFormat:
+                return getDisplayFormat();
                 
             case isAutoRecalculate:
                 return isAutoRecalculate();               
@@ -1701,6 +1720,19 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         m_precision = precision;
     }
     
+    public String getDisplayFormat()
+    {
+        return this.getPropertyString(TableProperty.DisplayFormat);
+    }
+    
+    public void setDisplayFormat(String value)
+    {
+        if (value != null && (value = value.trim()).length() > 0)
+            setProperty(TableProperty.DisplayFormat, value);
+        else
+            this.clearProperty(TableProperty.DisplayFormat);        
+    }
+
     synchronized protected TableSliceElementImpl add(TableSliceElementImpl tse, Access mode, Object... md)
     {
         vetElement();

@@ -56,6 +56,25 @@ public class CellImpl extends TableElementImpl implements Cell
     }
     
     @Override
+    public String getFormattedCellValue()
+    {
+        if (m_cellValue == null)
+            return null;
+        
+        String format = getFormatString();
+        if (format != null) {
+            try {
+                return String.format(format, m_cellValue);
+            }
+            catch (Exception e) {
+                // noop
+            }
+        }
+        
+        return m_cellValue.toString();
+    }   
+    
+    @Override
     public boolean setCellValue(Object value)
     {        
         vetElement();   
@@ -284,6 +303,48 @@ public class CellImpl extends TableElementImpl implements Cell
     }
 
     @Override
+    public String getDisplayFormat()
+    {
+        return (String)getProperty(TableProperty.DisplayFormat);
+    }
+    
+    @Override
+    public void setDisplayFormat(String value)
+    {
+        if (value != null && (value = value.trim()).length() > 0)
+            setProperty(TableProperty.DisplayFormat, value);
+        else
+            clearProperty(TableProperty.DisplayFormat);        
+    }
+
+    protected String getFormatString()
+    {
+        String format = getDisplayFormat();
+        if (format != null)
+            return format;
+        
+        RowImpl row = getRow();
+        if (row != null)
+            format = row.getDisplayFormat();
+        
+        if (format != null)
+            return format;
+        
+        ColumnImpl col = getColumn();
+        if (col != null)
+            format = col.getDisplayFormat();
+        
+        if (format != null)
+            return format;
+        
+        TableImpl tbl = getTable();
+        if (tbl != null)
+            format = tbl.getDisplayFormat();
+        
+        return format;
+    }
+    
+    @Override
     public TableCellValidator getValidator()
     {
         if (isSet(sf_HAS_CELL_VALIDATOR_FLAG))
@@ -478,7 +539,8 @@ public class CellImpl extends TableElementImpl implements Cell
             if (super.initializeProperty(tp, value)) continue;            
             switch (tp) {
                 default:
-                    throw new IllegalStateException("No initialization available for CellImpl Property: " + tp);                       
+                    if (!tp.isOptional())
+                        throw new IllegalStateException("No initialization available for CellImpl Property: " + tp);                       
             }
         }
         

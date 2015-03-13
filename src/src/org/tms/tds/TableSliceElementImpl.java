@@ -325,8 +325,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             
             switch (tp) {                    
                 default:
-                    throw new IllegalStateException("No initialization available for " + 
-                                                    this.getClass().getSimpleName() +" Property: " + tp);                       
+                    if (!tp.isOptional())
+                        throw new IllegalStateException("No initialization available for " + 
+                                                        this.getClass().getSimpleName() +" Property: " + tp);                       
             }
         }
         
@@ -359,6 +360,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             case Index:
                 return getIndex();
                                
+            case DisplayFormat:
+                return getDisplayFormat();
+                
             default:
                 return super.getProperty(key);
         }
@@ -377,6 +381,21 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             clearProperty(TableProperty.Units);
         else
             setProperty(TableProperty.Units, units);
+    }
+
+    @Override
+    public String getDisplayFormat()
+    {
+        return this.getPropertyString(TableProperty.DisplayFormat);
+    }
+    
+    @Override
+    public void setDisplayFormat(String value)
+    {
+        if (value != null && (value = value.trim()).length() > 0)
+            setProperty(TableProperty.DisplayFormat, value);
+        else
+            this.clearProperty(TableProperty.DisplayFormat);        
     }
 
     @Override

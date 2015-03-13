@@ -9,6 +9,7 @@ public interface Cell extends TableElement, Derivable
 {
     public boolean setCellValue(Object value);
     public Object getCellValue();
+    public String getFormattedCellValue();
     public boolean isNumericValue();
     public boolean isStringValue();
     
@@ -22,6 +23,9 @@ public interface Cell extends TableElement, Derivable
     
     public String getUnits();
     public void setUnits(String units);
+
+    public String getDisplayFormat();
+    public void setDisplayFormat(String format);
 
     public TableCellValidator getValidator();
     public void setValidator(TableCellValidator validator);

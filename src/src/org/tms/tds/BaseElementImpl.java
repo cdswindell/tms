@@ -491,6 +491,11 @@ abstract public class BaseElementImpl implements BaseElement
         return value != null && value instanceof Boolean;
     }
     
+    protected boolean isValidPropertyValueString(Object value)
+    {
+        return value == null || value instanceof String;
+    }
+    
     public String getLabel()
     {
         return (String)getProperty(TableProperty.Label);

@@ -19,6 +19,9 @@ public interface TableRowColumnElement extends TableElement
     public String getUnits();
     public void setUnits(String units);    
 
+    public String getDisplayFormat();
+    public void setDisplayFormat(String format);
+
     public TableCellValidator getValidator();
     public void setValidator(TableCellValidator validator);
     public void setTransformer(TableCellTransformer transformer);

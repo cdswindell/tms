@@ -75,6 +75,7 @@ public enum TableProperty implements Comparable<TableProperty>
     CellValue(false, false, ElementType.Cell),
     isStronglyTyped(false, false, ElementType.Column),
     Units(true, false, false, ElementType.Row, ElementType.Column, ElementType.Cell),
+    DisplayFormat(true, false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     Validator(true, false, false, ElementType.Row, ElementType.Column, ElementType.Cell),
     ;
     
