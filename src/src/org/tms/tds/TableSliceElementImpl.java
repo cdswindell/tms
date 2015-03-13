@@ -360,9 +360,6 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
             case Index:
                 return getIndex();
                                
-            case DisplayFormat:
-                return getDisplayFormat();
-                
             default:
                 return super.getProperty(key);
         }
@@ -386,7 +383,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public String getDisplayFormat()
     {
-        return this.getPropertyString(TableProperty.DisplayFormat);
+        return (String)getProperty(TableProperty.DisplayFormat);
     }
     
     @Override

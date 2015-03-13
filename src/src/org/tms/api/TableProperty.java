@@ -172,6 +172,7 @@ public enum TableProperty implements Comparable<TableProperty>
             case Label:
             case Units:
             case Description:
+            case DisplayFormat:
                 return true;
                 
             default:

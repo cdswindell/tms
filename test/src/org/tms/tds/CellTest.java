@@ -76,6 +76,22 @@ public class CellTest
     }
     
     @Test
+    public void testFormattedCellValue()
+    {
+        TableImpl t = new TableImpl();
+        RowImpl r1 = t.addRow(Access.Next);
+        RowImpl r2 = t.addRow(Access.Next);
+        ColumnImpl c1 = t.addColumn(Access.Next);
+        
+        t.setCellValue(r1, c1, -23.457);
+        t.setCellValue(r2, c1, 56.782);
+        c1.setDisplayFormat("$ %(,.2f");
+        
+        assertThat(t.getFormattedCellValue(r1,  c1), is("$ (23.46)"));
+        assertThat(t.getFormattedCellValue(r2,  c1), is("$ 56.78"));
+    }
+    
+    @Test
     public void enforceCellDataTypeHierarchyTest()
     {
         TableImpl t = new TableImpl();

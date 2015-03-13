@@ -344,9 +344,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
             case Precision:
                 return getPrecision();
                 
-            case DisplayFormat:
-                return getDisplayFormat();
-                
             case isAutoRecalculate:
                 return isAutoRecalculate();
                 
@@ -524,7 +521,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     
     public String getDisplayFormat()
     {
-        return this.getPropertyString(TableProperty.DisplayFormat);
+        return (String)getProperty(TableProperty.DisplayFormat);
     }
     
     public void setDisplayFormat(String value)

@@ -576,9 +576,6 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             case Precision:
                 return getPrecision();
                 
-            case DisplayFormat:
-                return getDisplayFormat();
-                
             case isAutoRecalculate:
                 return isAutoRecalculate();               
                 
@@ -1722,7 +1719,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     
     public String getDisplayFormat()
     {
-        return this.getPropertyString(TableProperty.DisplayFormat);
+        return (String)getProperty(TableProperty.DisplayFormat);
     }
     
     public void setDisplayFormat(String value)
