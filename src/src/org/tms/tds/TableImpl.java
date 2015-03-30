@@ -1999,7 +1999,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return numCells;
     }
     
-    synchronized protected CellImpl getCell(RowImpl row, ColumnImpl col)
+    protected CellImpl getCell(RowImpl row, ColumnImpl col)
+    {
+        return getCell(row, col, true);
+    }
+    
+    synchronized protected CellImpl getCell(RowImpl row, ColumnImpl col, boolean createIfNull)
     {
         vetElement();
         if (row == null || col == null)
@@ -2013,18 +2018,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         if (this != col.getTable())
             throw new InvalidParentException(col, this);
         
-        try {
-            return col.getCell(row, true);
-        }
-        finally {
-            row.setCurrent();
-            col.setCurrent();
-        }
+        return col.getCell(row, createIfNull);
     }
     
     synchronized protected boolean setCellValue(RowImpl row, ColumnImpl col, Object o) 
     {
-        CellImpl cell = getCell(row, col);
+        CellImpl cell = getCell(row, col, o != null);
         if (cell != null) {
             if (o instanceof Token)
                 return cell.postResult((Token)o);
@@ -2037,7 +2036,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     
     synchronized protected Object getCellValue(RowImpl row, ColumnImpl col) 
     {
-        CellImpl cell = getCell(row, col);
+        CellImpl cell = getCell(row, col, false);
         if (cell != null) 
             return cell.getCellValue();
         else

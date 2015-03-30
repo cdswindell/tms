@@ -428,12 +428,12 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
         RowImpl row = null;
         ColumnImpl col = null;
         
-        TableImpl parent = this.getTable();
+        TableImpl parent = getTable();
         if (parent != null) {    
             synchronized(parent) {
                 if (this instanceof RowImpl) {
                     row = (RowImpl)this;
-                    col = this.getTable().getColumn(mode, mda);
+                    col = parent.getColumn(mode, mda);
                 }
                 else if (this instanceof ColumnImpl) {
                     row = parent.getRow(mode, mda);
