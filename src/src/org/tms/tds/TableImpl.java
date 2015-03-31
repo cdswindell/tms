@@ -1310,7 +1310,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
      * Sets the maximum capacity of the Rows data structure, (re)allocating space as needed
      * @param capacity
      */
-    void setRowsCapacity(int capacity)
+    protected void setRowsCapacity(int capacity)
     {
         if (m_rows != null) {
             m_rows.ensureCapacity(capacity);
@@ -1318,7 +1318,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         }
     }
     
-    int calcRowsCapacity(int nRows)
+    protected int calcRowsCapacity(int nRows)
     {
         int capacity = getRowCapacityIncr();
         if (nRows > 0) {
@@ -1553,7 +1553,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             m_colCapacityIncr = colCapacityIncr;
     }
     
-    int calcColumnsCapacity(int nCols)
+    protected int calcColumnsCapacity(int nCols)
     {
         int capacity = getColumnCapacityIncr();
         if (nCols > 0) {
@@ -1569,7 +1569,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return m_colsCapacity;
     }
 
-    void setColumnsCapacity(int capacity)
+    protected void setColumnsCapacity(int capacity)
     {
         if (m_cols != null) {
             m_cols.ensureCapacity(capacity);
@@ -1580,8 +1580,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     public int getNumColumns()
     {
         return m_cols == null ? 0 : m_cols.size();
-    }
-    
+    }   
     
     /**
      * Return the raw columns arraylist. Allows Column class to insert a column into the table.
@@ -1730,13 +1729,21 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             this.clearProperty(TableProperty.DisplayFormat);        
     }
 
-    synchronized protected TableSliceElementImpl add(TableSliceElementImpl tse, Access mode, Object... md)
+    protected TableSliceElementImpl add(TableSliceElementImpl tse, Access mode, Object... md)
+    {
+        return add(tse, true, true, mode, md);
+    }
+    
+    synchronized protected TableSliceElementImpl add(TableSliceElementImpl tse, 
+                                                     boolean setCurrent, boolean fireEvents,
+                                                     Access mode, Object... md)
     {
         vetElement();
 
         // handle onBeforeDelete processing
         try {
-            fireEvents(this, TableElementEventType.OnBeforeCreate, tse.getElementType(), mode, md);
+            if (fireEvents)
+                fireEvents(this, TableElementEventType.OnBeforeCreate, tse.getElementType(), mode, md);
         }
         catch (BlockedRequestException e) {
             return null;
@@ -1751,14 +1758,14 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                 throw new InvalidAccessException(ElementType.Table, sliceType, mode, true, md);
             
             // insert row into data structure at correct index
-            if (tse.insertSlice(idx) != null)
+            if (tse.insertSlice(idx) != null && setCurrent)
                 tse.setCurrent();
             
             successfullyCreated = true;
             return tse;
         }
         finally {
-            if (successfullyCreated)
+            if (fireEvents && successfullyCreated)
                 fireEvents(tse, TableElementEventType.OnCreate);
         }
     }

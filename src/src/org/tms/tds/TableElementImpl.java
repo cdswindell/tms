@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.ElementType;
+import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
@@ -13,7 +14,7 @@ import org.tms.api.exceptions.NotUniqueException;
 abstract class TableElementImpl extends BaseElementImpl implements TableElement, Listenable
 {
 	abstract public TableImpl getTable();
-	abstract public ContextImpl getTableContext();
+	abstract public TableContext getTableContext();
     abstract protected void delete(boolean compress);
     abstract public boolean fill(Object o);
     

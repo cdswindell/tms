@@ -60,18 +60,19 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     static final boolean sf_SUBSET_LABELS_INDEXED_DEFAULT = false;
     
     static final Map<TableProperty, Object> sf_PROPERTY_DEFAULTS = new HashMap<TableProperty, Object>();    
+    static final Set<String> sf_LOADED_DATABASE_DRIVERS = new HashSet<String>();
 
-    public static TableContext createContext()
+    public static ContextImpl createContext()
     {
         return new ContextImpl(false, null);
     }
     
-    public static TableContext createContext(TableContext c)
+    public static ContextImpl createContext(TableContext c)
     {
         return new ContextImpl(false, c);
     }
     
-    public static TableContext createDefaultContext()
+    public static ContextImpl createDefaultContext()
     {
         return getDefaultContext();
     }
@@ -418,6 +419,37 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
             m_elemProperties.clear();
             m_elemProperties = null;
         }
+    }
+    
+    public void loadDatabaseDriver(String driverClassName) throws ClassNotFoundException
+    {
+        if (driverClassName != null && (driverClassName = driverClassName.trim()).length() > 0) {
+            if (!isDatabaseDriverLoaded(driverClassName)) {
+                // The newInstance() call is a work around for some
+                // broken Java implementations
+                try
+                {
+                    Class.forName(driverClassName).newInstance();
+                    sf_LOADED_DATABASE_DRIVERS.add(driverClassName);
+                }
+                catch (ClassNotFoundException e) 
+                {
+                    throw e;
+                }
+                catch (InstantiationException | IllegalAccessException e)
+                {
+                    throw new ClassNotFoundException(e.getMessage(), e);
+                }
+            }
+        }
+    }
+    
+    public boolean isDatabaseDriverLoaded(String driverClassName)
+    {
+        if (driverClassName != null && (driverClassName = driverClassName.trim()).length() > 0) 
+            return sf_LOADED_DATABASE_DRIVERS.contains(driverClassName);
+        else
+            return false;
     }
     
     public double getFreeSpaceThreshold()

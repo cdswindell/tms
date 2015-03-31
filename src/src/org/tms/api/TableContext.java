@@ -3,6 +3,7 @@ package org.tms.api;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.events.EventProcessorThreadPool;
+import org.tms.api.exceptions.UnsupportedImplementationException;
 
 /**
  * A collection of {@link Table}, initializable {@link TableProperty}s, and optional thread pools. Tables that share the same {@code TableContext}
@@ -35,6 +36,33 @@ public interface TableContext extends BaseElement, InitializableTableProperties
     public int getNumTables();
     
     public TokenMapper getTokenMapper();
+    
+    /**
+     * Loads the JDBC database driver class named {@code driverClassName} and maintains an index of 
+     * loaded class names. 
+     * <p>
+     * The default implementation throws {@link org.tms.exceptions.UnsupportedImplementationException UnsupportedImplementationException}. 
+     * @param driverClassName the JDBC driver class name to load
+     * @throws ClassNotFoundException if the named JDBC driver class cannot be loaded
+     * @throws UnsupportedImplementationException if this method is called on a TableContext that uses the default implementation
+     */
+    default public void loadDatabaseDriver(String driverClassName) throws ClassNotFoundException
+    {
+        throw new UnsupportedImplementationException(ElementType.TableContext, "loadDatabaseDriver");
+    }
+    
+    /**
+     * Returns true if the JDBC driver class named {@code driverClassName} has been loaded and initialized.
+     * <p>
+     * The default implementation throws {@link org.tms.exceptions.UnsupportedImplementationException UnsupportedImplementationException}. 
+     * @param driverClassName
+     * @return true if driverClassName has been loaded
+     * @throws UnsupportedImplementationException if this method is called on a TableContext that uses the default implementation
+     */
+    default public boolean isDatabaseDriverLoaded(String driverClassName)
+    {
+        throw new UnsupportedImplementationException(ElementType.TableContext, "loadDatabaseDriver");
+    }
     
     /**
      * Returns {@code true} if this {@link TableContext} implements {@link DerivableThreadPool}.

@@ -58,20 +58,20 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public String getFormattedCellValue()
     {
-        if (m_cellValue == null)
+        if (getCellValue() == null)
             return null;
         
         String format = getFormatString();
         if (format != null) {
             try {
-                return String.format(format, m_cellValue);
+                return String.format(format, getCellValue());
             }
             catch (Exception e) {
                 // noop
             }
         }
         
-        return m_cellValue.toString();
+        return getCellValue().toString();
     }   
     
     @Override
@@ -109,14 +109,14 @@ public class CellImpl extends TableElementImpl implements Cell
     public boolean isNumericValue()
     {
         vetElement();
-        return m_cellValue != null && (m_cellValue instanceof Number);
+        return getCellValue() != null && (getCellValue() instanceof Number);
     }
     
     @Override
     public boolean isStringValue()
     {
         vetElement();
-        return m_cellValue != null && (m_cellValue instanceof String);
+        return getCellValue() != null && (getCellValue() instanceof String);
     }
     
     @Override
@@ -424,8 +424,8 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public Class<? extends Object> getDataType()
     {
-        if (m_cellValue != null)
-            return m_cellValue.getClass();
+        if (getCellValue() != null)
+            return getCellValue().getClass();
         else
             return null;
     }
@@ -479,7 +479,7 @@ public class CellImpl extends TableElementImpl implements Cell
     @Override
     public boolean isNull()
     {
-        return m_cellValue == null;
+        return getCellValue() == null;
     }
 
     public boolean isPending()
