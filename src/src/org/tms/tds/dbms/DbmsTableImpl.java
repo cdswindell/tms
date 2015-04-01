@@ -9,10 +9,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 
 import org.tms.api.Access;
-import org.tms.tds.CellImpl;
-import org.tms.tds.ColumnImpl;
 import org.tms.tds.ContextImpl;
-import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 
 public class DbmsTableImpl extends TableImpl
