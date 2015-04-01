@@ -3,9 +3,11 @@ package org.tms.tds.dbms;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Token;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
 
 public class DbmsCellImpl extends CellImpl
@@ -32,6 +34,18 @@ public class DbmsCellImpl extends CellImpl
     public boolean setCellValue(Object value)
     {
         throw new ReadOnlyException(this, TableProperty.CellValue);
+    }
+    
+    @Override 
+    public boolean fill(Object value)
+    {
+        throw new ReadOnlyException(this, TableProperty.CellValue);
+    }
+    
+    @Override 
+    public void delete()
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot delete a database cell");
     }
     
     @Override

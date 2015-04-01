@@ -8,6 +8,7 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.TableContext;
@@ -34,7 +35,7 @@ public class DbmsTableImplTest
         assertThat(value, notNullValue());
         
         Column c = t.addColumn();
-        c.setDerivation("col 1 * col 1");
+        c.setDerivation("col empno * col 'empno'");
         
         for (int i = 1; i < t.getNumRows(); i++) {
             Row r = t.getRow(Access.ByIndex, i);
@@ -46,6 +47,11 @@ public class DbmsTableImplTest
             
             assertThat((double)derivedValue, is((double)dbValue * (double)dbValue));            
         }
+        
+        Row r = t.addRow();
+        Cell cell = t.getCell(r, t.getColumn(Access.First));
+        cell.setDerivation("mean(col 1)");
+        assertThat(cell.isNumericValue(), is(true));
     }
 
 }

@@ -149,7 +149,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return getCellInternal(row, true, setCurrent);
     }
     
-    CellImpl getCellInternal(RowImpl row, boolean createIfSparse, boolean setCurrent)
+    protected CellImpl getCellInternal(RowImpl row, boolean createIfSparse, boolean setCurrent)
     {
         assert row != null : "Row required";
         assert this.getTable() != null: "Table required";

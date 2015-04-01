@@ -22,6 +22,8 @@ public class DbmsTableImpl extends TableImpl
     private ResultSet m_resultSet;
     private Statement m_statement;
     private Connection m_connection;
+    private int m_numDbmsCols;
+    private int m_numDbmsRows;
     
     protected DbmsTableImpl(String connectionUrl, String query)
     throws ClassNotFoundException, SQLException
@@ -34,6 +36,7 @@ public class DbmsTableImpl extends TableImpl
     {
         // initialize the default table object
         super(tc.getRowCapacityIncr(), tc.getColumnCapacityIncr(), tc);
+        m_numDbmsCols = m_numDbmsRows = 0;
         
         // load the database driver, this could throw an exception
         tc.loadDatabaseDriver(driverClassName);
@@ -44,7 +47,6 @@ public class DbmsTableImpl extends TableImpl
         
         fetchResultSet();
     }
-
     
     @Override
     protected CellImpl getCell(RowImpl row, ColumnImpl col, boolean createIfNull)
@@ -55,6 +57,22 @@ public class DbmsTableImpl extends TableImpl
         }
         else
             return super.getCell(row, col, createIfNull);
+    }
+    
+    @Override
+    protected RowImpl getRowInternal(boolean createIfNull, boolean setCurrent, Access mode, Object...mda)
+    {
+        return super.getRowInternal(createIfNull, setCurrent, mode, mda);
+    }
+    
+    public int getNumDatabaseColumns()
+    {
+        return m_numDbmsCols;
+    }
+    
+    public int getNumDatabaseRows()
+    {
+        return m_numDbmsRows;
     }
     
     protected ResultSet getResultSet()
@@ -80,11 +98,11 @@ public class DbmsTableImpl extends TableImpl
     throws SQLException
     {
         // count number of rows
-        int numRows = getRowCount(resultSet);
+        m_numDbmsRows = getRowCount(resultSet);
         
         // create row data structures
-        setRowsCapacity(calcRowsCapacity(numRows));
-        for (int i = 1; i <= numRows; i++) {
+        setRowsCapacity(calcRowsCapacity(m_numDbmsRows));
+        for (int i = 1; i <= m_numDbmsRows; i++) {
             DbmsRowImpl row = new DbmsRowImpl(this, i);
             add(row, false, false, Access.ByIndex, i);
         }
@@ -92,10 +110,10 @@ public class DbmsTableImpl extends TableImpl
         // process column information
         ResultSetMetaData rsmd = resultSet.getMetaData();
         if (rsmd != null) {
-            int numCols = rsmd.getColumnCount();
-            setColumnsCapacity(calcColumnsCapacity(numCols));
+            m_numDbmsCols = rsmd.getColumnCount();
+            setColumnsCapacity(calcColumnsCapacity(m_numDbmsCols));
             
-            for (int i = 1; i <= numCols; i++) {
+            for (int i = 1; i <= m_numDbmsCols; i++) {
                 DbmsColumnImpl col = new DbmsColumnImpl(this, i, rsmd.getColumnClassName(i));
                 add(col, false, false, Access.ByIndex, i);
                 
@@ -128,6 +146,7 @@ public class DbmsTableImpl extends TableImpl
 
     private void releaseJdbcResources()
     {
+        m_numDbmsCols = m_numDbmsRows = 0;
         if (m_resultSet != null) {
             try {
                 m_resultSet.close();
@@ -160,10 +179,24 @@ public class DbmsTableImpl extends TableImpl
     }
     
     @Override
+    protected void delete(boolean compress)
+    {
+        try {
+            super.delete(compress);
+        }
+        finally {
+            releaseJdbcResources();
+        }
+    }
+    
+    @Override
     public void finalize() 
     {
-        super.finalize();
-        
-        releaseJdbcResources();
+        try {
+            super.finalize();   
+        }
+        finally {
+            releaseJdbcResources();
+        }
     }
 }

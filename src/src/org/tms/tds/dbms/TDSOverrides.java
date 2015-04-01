@@ -7,6 +7,11 @@ import org.tms.api.exceptions.UnsupportedImplementationException;
 
 public interface TDSOverrides
 {
+    default public void delete()
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot delete a database element row/column");
+    }
+    
     default public boolean clear()
     {
         throw new UnsupportedImplementationException(ElementType.Cell, "Cannot clear a database element row/column");
