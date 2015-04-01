@@ -181,7 +181,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     c = m_cells.get(cellOffset);
                     
                     if (c == null && createIfSparse) {
-                        c = new CellImpl(this, cellOffset);
+                        c = createNewCell(row);
                         m_cells.set(cellOffset, c);
                     }
                 }
@@ -206,7 +206,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     assert cellOffset == numCells : "cellOffset != numCells";
                     
                     // create a new cell structure and add it to the array              
-                    c = new CellImpl(this, cellOffset);
+                    c = createNewCell(row);
                     m_cells.add(c);
                 }
             } // of synchronized
@@ -226,6 +226,17 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return c;
     }
     
+    /**
+     * Create a new cell data structure; can be overridden in subclasses to
+     * build other cell types
+     * @param row the parent row
+     * @return a CellImpl instance
+     */
+    protected CellImpl createNewCell(RowImpl row)
+    {
+        return new CellImpl(this, row.getCellOffset());
+    }
+
     List<CellImpl> ensureCellCapacity()
     {
         TableImpl table = getTable();

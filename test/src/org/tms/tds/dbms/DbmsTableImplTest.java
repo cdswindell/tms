@@ -45,13 +45,16 @@ public class DbmsTableImplTest
             assertThat(dbValue instanceof Number, is(true));
             assertThat(derivedValue instanceof Number, is(true));
             
-            assertThat((double)derivedValue, is((double)dbValue * (double)dbValue));            
+            assertThat((double)derivedValue, is(1.0 * (int)dbValue * (int)dbValue));            
         }
         
         Row r = t.addRow();
         Cell cell = t.getCell(r, t.getColumn(Access.First));
         cell.setDerivation("mean(col 1)");
         assertThat(cell.isNumericValue(), is(true));
+        
+        cell = t.getCell(r, t.getColumn(Access.ByLabel, "mgr"));
+        cell.setDerivation("mean(col 'mgr')");
+        assertThat(cell.getCellValue(), is(10.0));
     }
-
 }

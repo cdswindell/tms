@@ -2,20 +2,30 @@ package org.tms.tds.dbms;
 
 import org.tms.api.derivables.Derivable;
 import org.tms.api.exceptions.UnsupportedImplementationException;
-import org.tms.tds.CellImpl;
-import org.tms.tds.ColumnImpl;
 import org.tms.tds.RowImpl;
 
 public class DbmsRowImpl extends RowImpl
 {
     private int m_resultSetIndex;
+    private boolean m_resultSetRowProcessed;
     
     public DbmsRowImpl(DbmsTableImpl parentTable, int rsIndex)
     {
         super(parentTable);
+        m_resultSetRowProcessed = false;
         m_resultSetIndex = rsIndex;
     }
 
+    protected boolean isResultSetRowProcessed()
+    {
+        return m_resultSetRowProcessed;
+    }
+    
+    void setResultSetRowProcessed(boolean processed)
+    {
+        m_resultSetRowProcessed = processed;
+    }
+    
     /**
      * Return the 1-based index of the row in the dbms table result set
      * @return the 1-based index of the row in the dbms table result set
@@ -32,28 +42,11 @@ public class DbmsRowImpl extends RowImpl
     }
    
     @Override
-    public int getNumCells()
+    protected int getCellOffset()
     {
-        return getTable().getNumDatabaseRows() + super.getNumCells();
+        return super.getCellOffset();
     }
-    
-    @Override
-    protected CellImpl getCell(ColumnImpl col, boolean setCurrent)
-    {
-        if (col != null && col instanceof DbmsColumnImpl) {
-            DbmsCellImpl cell = new DbmsCellImpl(this, (DbmsColumnImpl)col);
-            if (setCurrent) {
-                if (col != null)
-                    col.setCurrent();
-                this.setCurrent();
-            }
-            
-            return cell;
-        }
-        else
-            return super.getCell(col, setCurrent);
-    }
-    
+
     @Override
     public Derivable setDerivation(String expr) 
     {

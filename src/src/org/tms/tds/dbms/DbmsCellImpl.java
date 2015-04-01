@@ -3,9 +3,11 @@ package org.tms.tds.dbms;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.tms.api.Cell;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
-import org.tms.api.derivables.Token;
+import org.tms.api.derivables.Derivable;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
@@ -14,11 +16,10 @@ public class DbmsCellImpl extends CellImpl
 {
 
     private DbmsRowImpl m_row;
-    private Token m_cellValue;
     
     protected DbmsCellImpl(DbmsRowImpl row, DbmsColumnImpl col)
     {
-        super(col, -1);
+        super(col, row.getCellOffset());
         
         m_row = row;
         setReadOnly(true);
@@ -51,24 +52,42 @@ public class DbmsCellImpl extends CellImpl
     @Override
     public Object getCellValue()
     {
-        if (m_cellValue == null) {
-            ResultSet rs = getTable().getResultSet();
-            try
-            {
-                rs.absolute(m_row.getResultSetIndex());
-                Object value = rs.getObject(getColumn().getResultSetIndex());
-                m_cellValue = new Token(value);
-            }
-            catch (SQLException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        synchronized (m_row) {
+            if (!m_row.isResultSetRowProcessed()) {
+                try {
+                    processResultSetRow(m_row);
+                }
+                finally {
+                    m_row.setResultSetRowProcessed(true);
+                }
             }
         }
             
-        return m_cellValue.getValue();
+        return m_cellValue;
     }
     
+    private void processResultSetRow(DbmsRowImpl row)
+    {
+        DbmsTableImpl table = row.getTable();
+        ResultSet rs = table.getResultSet();
+        try
+        {
+            rs.absolute(row.getResultSetIndex());
+            for (Cell cell : row.cells()) {
+                if (cell == null || !(cell instanceof DbmsCellImpl)) continue;
+                
+                Column c = cell.getColumn();
+                if (c != null && c instanceof DbmsColumnImpl) 
+                    ((DbmsCellImpl)cell).m_cellValue = rs.getObject(((DbmsColumnImpl)c).getResultSetIndex());
+            }
+        }
+        catch (SQLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public DbmsRowImpl getRow()
     {
@@ -78,7 +97,7 @@ public class DbmsCellImpl extends CellImpl
     @Override
     public DbmsColumnImpl getColumn()
     {
-        return (DbmsColumnImpl)super.getColumn();
+        return (DbmsColumnImpl)m_col;
     }
     
     @Override
@@ -90,4 +109,9 @@ public class DbmsCellImpl extends CellImpl
             return null;
     }
 
+    @Override
+    public Derivable setDerivation(String expr) 
+    {
+        throw new UnsupportedImplementationException(this, "Cannot set a derivation on a database cell");
+    }
 }

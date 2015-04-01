@@ -28,8 +28,9 @@ import org.tms.teq.DerivationImpl;
 
 public class CellImpl extends TableElementImpl implements Cell
 {
-    private Object m_cellValue;
-    private ColumnImpl m_col;
+    protected Object m_cellValue;  
+    protected ColumnImpl m_col;
+    
     private int m_cellOffset;
     
     protected CellImpl(ColumnImpl col, int cellOffset)

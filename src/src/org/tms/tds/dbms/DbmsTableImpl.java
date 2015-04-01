@@ -48,29 +48,12 @@ public class DbmsTableImpl extends TableImpl
         fetchResultSet();
     }
     
-    @Override
-    protected CellImpl getCell(RowImpl row, ColumnImpl col, boolean createIfNull)
-    {
-        if (row instanceof DbmsRowImpl && col instanceof DbmsColumnImpl) {
-            DbmsCellImpl cell = new DbmsCellImpl((DbmsRowImpl)row, (DbmsColumnImpl)col);
-            return cell;
-        }
-        else
-            return super.getCell(row, col, createIfNull);
-    }
-    
-    @Override
-    protected RowImpl getRowInternal(boolean createIfNull, boolean setCurrent, Access mode, Object...mda)
-    {
-        return super.getRowInternal(createIfNull, setCurrent, mode, mda);
-    }
-    
-    public int getNumDatabaseColumns()
+    public int getNumDbmsColumns()
     {
         return m_numDbmsCols;
     }
     
-    public int getNumDatabaseRows()
+    public int getNumDbmsRows()
     {
         return m_numDbmsRows;
     }
@@ -98,7 +81,7 @@ public class DbmsTableImpl extends TableImpl
     throws SQLException
     {
         // count number of rows
-        m_numDbmsRows = getRowCount(resultSet);
+        m_numDbmsRows = getDbmsRowCount(resultSet);
         
         // create row data structures
         setRowsCapacity(calcRowsCapacity(m_numDbmsRows));
@@ -124,7 +107,7 @@ public class DbmsTableImpl extends TableImpl
             throw new SQLException("No metadata available");
     }
 
-    private int getRowCount(ResultSet resultSet)
+    private int getDbmsRowCount(ResultSet resultSet)
     {
         int totalRows = 0;
         try {

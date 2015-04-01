@@ -1665,7 +1665,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return getColumn(Access.ByLabel, label);
     }
     
-    private ColumnImpl getColumnInternal(boolean createIfNull, boolean setCurrent, Access mode, Object...mda)
+    protected ColumnImpl getColumnInternal(boolean createIfNull, boolean setCurrent, Access mode, Object...mda)
     {
         ColumnImpl r = null;
         

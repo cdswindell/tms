@@ -381,7 +381,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
             if (!hasNext())
                 throw new NoSuchElementException();
             
-            ColumnImpl col = m_table.getColumn(Access.ByIndex, m_index++);
+            ColumnImpl col = m_table.getColumnInternal(true, false, Access.ByIndex, m_index++);
             CellImpl c = m_row.getCell(col, false);
             return c;
         }       
