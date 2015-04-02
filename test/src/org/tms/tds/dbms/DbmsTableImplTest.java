@@ -26,7 +26,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         tc.loadDatabaseDriver("com.mysql.jdbc.Driver");
         assertThat(tc.isDatabaseDriverLoaded("com.mysql.jdbc.Driver"), is(true));
         
-        // count the number of expected rows
+        // count the number of expected rows and columns
         ResultSet rs = fetchResultSet("jdbc:mysql://localhost/cds?user=davids&password=mysql", 
                                       "select * from emp order by ename");
         
@@ -47,6 +47,14 @@ public class DbmsTableImplTest extends BaseDbmsTest
         t.refresh();
         Column c = t.addColumn();
         c.setDerivation("col empno * col 'empno'");
+        
+        // test deleting a database row
+        Row fr = t.getRow(Access.First);
+        assertThat(fr, notNullValue());
+        
+        fr.delete();
+        assertThat(t.getNumDbmsRows(), is(numRows - 1));
+        assertThat(t.getNumRows(), is(numRows - 1));
         
         for (int i = 1; i < t.getNumRows(); i++) {
             Row r = t.getRow(Access.ByIndex, i);

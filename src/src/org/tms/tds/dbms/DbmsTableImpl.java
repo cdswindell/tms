@@ -15,16 +15,22 @@ import org.tms.api.Row;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
+import org.tms.util.WeakHashSet;
 
 public class DbmsTableImpl extends TableImpl
 {
     private String m_connectionUrl;
     private String m_query;
+    
     private ResultSet m_resultSet;
     private PreparedStatement m_statement;
     private Connection m_connection;
+    
     private int m_numDbmsCols;
     private int m_numDbmsRows;
+    
+    private Set<DbmsRowImpl> m_unprocessedRows;
+    private boolean m_processingResultSet = false;
     
     protected DbmsTableImpl(String connectionUrl, String query)
     throws ClassNotFoundException, SQLException
@@ -70,6 +76,36 @@ public class DbmsTableImpl extends TableImpl
         return m_resultSet;
     }
     
+    /**
+     * Remove the specified row from the set of unprocessed rows and release JDBC resources
+     * if all rows have been processed
+     * @param row the row to removed from the unprocessed set
+     */
+    synchronized protected void removeDbmsRowFromUnprocessed(DbmsRowImpl row)
+    {
+        // exit if we're processing a result set, rows are deleted  in this case
+        if (m_processingResultSet)
+            return;
+        
+        if (row != null && m_unprocessedRows != null) {
+            m_unprocessedRows.remove(row);
+            if (m_unprocessedRows.isEmpty())
+                releaseJdbcResources();
+        }       
+    }
+    
+    synchronized protected int decrementNumDbmsRows()
+    {
+        // skip operation if we're processing a result set
+        if (m_processingResultSet)
+            return m_numDbmsRows;
+        
+        if (--m_numDbmsRows < 0)
+            m_numDbmsRows = 0;
+        
+        return m_numDbmsRows;
+    }
+    
     private void fetchResultSet(boolean isRefresh)
     throws SQLException
     {
@@ -86,48 +122,63 @@ public class DbmsTableImpl extends TableImpl
     private void processResultSet(ResultSet resultSet, boolean isRefresh) 
     throws SQLException
     {
-        // count number of rows
-        m_numDbmsRows = getDbmsRowCount(resultSet);
-        
-        // delete existing database rows
-        if (isRefresh) {
-            Set<Row> toDeleteRows = new HashSet<Row>(m_numDbmsRows);            
-            for (RowImpl row : getRowsInternal()) {
-                if (row instanceof DbmsRowImpl)
-                    toDeleteRows.add(row);
+        m_processingResultSet = true;        
+        try {
+            // delete existing database rows
+            if (isRefresh) {
+                if (m_unprocessedRows != null) {
+                    this.delete(m_unprocessedRows.toArray(new Row [] {}));
+                    m_unprocessedRows = null;
+                }
+                    
+                Set<Row> toDeleteRows = new HashSet<Row>(getNumRows());            
+                for (RowImpl row : getRowsInternal()) {
+                    if (row instanceof DbmsRowImpl)
+                        toDeleteRows.add(row);
+                }
+                
+                this.delete(toDeleteRows.toArray(new Row [] {}));
+                m_numDbmsRows = 0;
+            }
+            else
+                m_numDbmsCols = m_numDbmsRows = 0;
+            
+            // create row data structures
+            m_numDbmsRows = getDbmsRowCount(resultSet);
+            
+            setRowsCapacity(calcRowsCapacity(Math.max(m_numDbmsRows, getNumRows())));
+            m_unprocessedRows = new WeakHashSet<DbmsRowImpl>(m_numDbmsRows);
+            for (int i = 1; i <= m_numDbmsRows; i++) {
+                DbmsRowImpl row = new DbmsRowImpl(this, i);
+                m_unprocessedRows.add(row);
+                add(row, false, false, Access.ByIndex, i);
+            }
+           
+            // process column information
+            if (!isRefresh) {
+                ResultSetMetaData rsmd = resultSet.getMetaData();
+                if (rsmd != null) {
+                    m_numDbmsCols = rsmd.getColumnCount();
+                    setColumnsCapacity(calcColumnsCapacity(m_numDbmsCols));
+                    
+                    for (int i = 1; i <= m_numDbmsCols; i++) {
+                        DbmsColumnImpl col = new DbmsColumnImpl(this, i, rsmd.getColumnClassName(i));
+                        add(col, false, false, Access.ByIndex, i);
+                        
+                        col.setLabel(rsmd.getColumnLabel(i));
+                    }            
+                }
+                else
+                    throw new SQLException("No metadata available");
             }
             
-            this.delete(toDeleteRows.toArray(new Row [] {}));
+            // if we're refreshing, recalculate all derivations
+            if (isRefresh)
+                recalculate();
         }
-        
-        // create row data structures
-        setRowsCapacity(calcRowsCapacity(Math.max(m_numDbmsRows, getNumRows())));
-        for (int i = 1; i <= m_numDbmsRows; i++) {
-            DbmsRowImpl row = new DbmsRowImpl(this, i);
-            add(row, false, false, Access.ByIndex, i);
+        finally {
+            m_processingResultSet = false;
         }
-       
-        // process column information
-        ResultSetMetaData rsmd = resultSet.getMetaData();
-        if (rsmd != null) {
-            m_numDbmsCols = rsmd.getColumnCount();
-            if (!isRefresh) {
-                setColumnsCapacity(calcColumnsCapacity(m_numDbmsCols));
-                
-                for (int i = 1; i <= m_numDbmsCols; i++) {
-                    DbmsColumnImpl col = new DbmsColumnImpl(this, i, rsmd.getColumnClassName(i));
-                    add(col, false, false, Access.ByIndex, i);
-                    
-                    col.setLabel(rsmd.getColumnLabel(i));
-                }            
-            }
-        }
-        else
-            throw new SQLException("No metadata available");
-        
-        // if we're refreshing, recalculate all derivations
-        if (isRefresh)
-            recalculate();
     }
 
     private int getDbmsRowCount(ResultSet resultSet)
@@ -152,7 +203,6 @@ public class DbmsTableImpl extends TableImpl
 
     private void releaseJdbcResources()
     {
-        m_numDbmsCols = m_numDbmsRows = 0;
         if (m_resultSet != null) {
             try {
                 m_resultSet.close();
@@ -189,6 +239,7 @@ public class DbmsTableImpl extends TableImpl
     {
         try {
             super.delete(compress);
+            m_unprocessedRows = null;
         }
         finally {
             releaseJdbcResources();

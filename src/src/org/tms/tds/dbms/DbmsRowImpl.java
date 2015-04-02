@@ -24,6 +24,8 @@ public class DbmsRowImpl extends RowImpl
     void setResultSetRowProcessed(boolean processed)
     {
         m_resultSetRowProcessed = processed;
+        if (processed)
+            getTable().removeDbmsRowFromUnprocessed(this);
     }
     
     /**
@@ -33,6 +35,15 @@ public class DbmsRowImpl extends RowImpl
     protected int getResultSetIndex()
     {
         return m_resultSetIndex;
+    }
+    
+    @Override
+    protected void delete(boolean compress)
+    {
+        getTable().removeDbmsRowFromUnprocessed(this);
+        getTable().decrementNumDbmsRows();
+        
+        super.delete(compress);
     }
     
     @Override

@@ -26,29 +26,26 @@ public class DbmsCellImpl extends CellImpl
     }
 
     @Override
-    protected boolean isWriteProtected()
+    public DbmsRowImpl getRow()
     {
-        return true;
+        return m_row;
     }
     
-    @Override 
-    public boolean setCellValue(Object value)
+    @Override
+    public DbmsColumnImpl getColumn()
     {
-        throw new ReadOnlyException(this, TableProperty.CellValue);
+        return (DbmsColumnImpl)m_col;
     }
     
-    @Override 
-    public boolean fill(Object value)
+    @Override
+    public DbmsTableImpl getTable() 
     {
-        throw new ReadOnlyException(this, TableProperty.CellValue);
+        if (m_row != null)
+            return m_row.getTable();
+        else
+            return null;
     }
-    
-    @Override 
-    public void delete()
-    {
-        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot delete a database cell");
-    }
-    
+
     @Override
     public Object getCellValue()
     {
@@ -89,26 +86,29 @@ public class DbmsCellImpl extends CellImpl
     }
 
     @Override
-    public DbmsRowImpl getRow()
+    protected boolean isWriteProtected()
     {
-        return m_row;
+        return true;
     }
     
-    @Override
-    public DbmsColumnImpl getColumn()
+    @Override 
+    public boolean setCellValue(Object value)
     {
-        return (DbmsColumnImpl)m_col;
+        throw new ReadOnlyException(this, TableProperty.CellValue);
     }
     
-    @Override
-    public DbmsTableImpl getTable() 
+    @Override 
+    public boolean fill(Object value)
     {
-        if (m_row != null)
-            return m_row.getTable();
-        else
-            return null;
+        throw new ReadOnlyException(this, TableProperty.CellValue);
     }
-
+    
+    @Override 
+    public void delete()
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot delete a database cell");
+    }
+    
     @Override
     public Derivable setDerivation(String expr) 
     {
