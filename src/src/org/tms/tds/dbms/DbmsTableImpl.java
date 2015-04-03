@@ -11,7 +11,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.tms.api.Access;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
+import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
@@ -276,5 +278,17 @@ public class DbmsTableImpl extends TableImpl
         finally {
             releaseJdbcResources();
         }
+    }
+    
+    @Override
+    public boolean clear()
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot clear a database element");
+    }
+    
+    @Override
+    public boolean fill(Object o)
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill a database row/column");
     }
 }

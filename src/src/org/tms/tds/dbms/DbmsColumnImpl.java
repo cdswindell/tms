@@ -1,5 +1,7 @@
 package org.tms.tds.dbms;
 
+import org.tms.api.Access;
+import org.tms.api.ElementType;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
@@ -7,7 +9,7 @@ import org.tms.tds.ColumnImpl;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 
-public class DbmsColumnImpl extends ColumnImpl implements TDSOverrides
+public class DbmsColumnImpl extends ColumnImpl
 {
     private int m_resultSetIndex;
 
@@ -58,5 +60,29 @@ public class DbmsColumnImpl extends ColumnImpl implements TDSOverrides
     public Derivable setDerivation(String expr) 
     {
         throw new UnsupportedImplementationException(this, "Cannot set a derivation on a database column");
+    }
+    
+    @Override
+    public boolean clear()
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot clear a database element");
+    }
+    
+    @Override
+    public boolean fill(Object o)
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill a database row/column");
+    }
+    
+    @Override
+    public void fill(Object o, int n, Access access, Object... mda)
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill a database row/column");
+    }
+    
+    @Override
+    public void fill(Object[] o, Access access, Object... mda)
+    {
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill a database row/column");
     }
 }
