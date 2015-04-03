@@ -72,7 +72,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         return new ContextImpl(false, c);
     }
     
-    public static ContextImpl createDefaultContext()
+    public static ContextImpl fetchDefaultContext()
     {
         return getDefaultContext();
     }

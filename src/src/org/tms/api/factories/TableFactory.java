@@ -1,9 +1,12 @@
 package org.tms.api.factories;
 
+import java.sql.SQLException;
+
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
+import org.tms.tds.dbms.DbmsTableImpl;
 
 public final class TableFactory 
 {
@@ -52,6 +55,31 @@ public final class TableFactory
         if (c instanceof ContextImpl)
             t = TableImpl.createTable(nRows, nCols, (ContextImpl)c);
         
+        return t;
+    }
+
+    /*
+     * DBMS Tables
+     */
+    static public Table createDbmsTable(String connectionUrl, String query) 
+    throws SQLException
+    {
+        Table t = DbmsTableImpl.createTable(connectionUrl, query);       
+        return t;
+    }
+
+    static public Table createDbmsTable(String connectionUrl, String query, String driverClassName, ContextImpl tc) 
+    throws SQLException, ClassNotFoundException
+    {
+        Table t = DbmsTableImpl.createTable(connectionUrl, query, driverClassName, tc);       
+        return t;
+    }
+
+    static public Table createDbmsTable(String connectionUrl, String query, String driverClassName) 
+    throws SQLException, ClassNotFoundException
+    {
+        Table t = DbmsTableImpl.createTable(connectionUrl, query, 
+                  driverClassName, ContextImpl.fetchDefaultContext());       
         return t;
     }
 

@@ -20,7 +20,7 @@ public class TableContextFactory
     
     static public TableContext fetchDefaultTableContext()
     {
-        TableContext tc = ContextImpl.createDefaultContext();
+        TableContext tc = ContextImpl.fetchDefaultContext();
         return tc;
     }   
     

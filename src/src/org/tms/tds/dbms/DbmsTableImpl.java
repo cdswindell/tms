@@ -19,6 +19,26 @@ import org.tms.util.WeakHashSet;
 
 public class DbmsTableImpl extends TableImpl
 {
+    public static final DbmsTableImpl createTable(String connectionUrl, String query) 
+    throws SQLException
+    {
+        try
+        {
+            return new DbmsTableImpl(connectionUrl, query);
+        }
+        catch (ClassNotFoundException e)
+        {
+            // noop, cannot happen in this instance;
+            return null;
+        }
+    }
+    
+    public static final DbmsTableImpl createTable(String connectionUrl, String query, String driverClassName, ContextImpl tc) 
+    throws SQLException, ClassNotFoundException
+    {
+        return new DbmsTableImpl(connectionUrl, query, driverClassName, tc);
+    }
+
     private String m_connectionUrl;
     private String m_query;
     
@@ -33,9 +53,9 @@ public class DbmsTableImpl extends TableImpl
     private boolean m_processingResultSet = false;
     
     protected DbmsTableImpl(String connectionUrl, String query)
-    throws ClassNotFoundException, SQLException
+    throws SQLException, ClassNotFoundException
     {
-        this(connectionUrl, query, null, ContextImpl.createDefaultContext());
+        this(connectionUrl, query, null, ContextImpl.fetchDefaultContext());
     }
     
     protected DbmsTableImpl(String connectionUrl, String query, String driverClassName, ContextImpl tc) 
@@ -46,7 +66,8 @@ public class DbmsTableImpl extends TableImpl
         m_numDbmsCols = m_numDbmsRows = 0;
         
         // load the database driver, this could throw an exception
-        tc.loadDatabaseDriver(driverClassName);
+        if (driverClassName != null)
+            tc.loadDatabaseDriver(driverClassName);
         
         // save the connection info
         m_connectionUrl = connectionUrl;
