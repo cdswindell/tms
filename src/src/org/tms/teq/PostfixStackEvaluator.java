@@ -412,8 +412,7 @@ public class PostfixStackEvaluator
             return Token.createErrorToken(ErrorCode.OperandRequired);
         else if (token.isNumeric()) {
             int idx = token.getNumericValue().intValue();
-            if (idx > 0) {   
-                
+            if (idx > 0) {                 
                 if (bio == BuiltinOperator.ColRefOper) {
                     ref = getTable().getColumn(Access.ByIndex, idx);
                     refType = TokenType.ColumnRef;
@@ -428,19 +427,20 @@ public class PostfixStackEvaluator
             }
         }
         else if (token.isString()) {
-            String label = token.getLabel().trim();
-            
-            if (bio == BuiltinOperator.ColRefOper) {
-                ref = getTable().getColumn(Access.ByLabel, label);
-                refType = TokenType.ColumnRef;
+            String label = token.getStringValue();
+            if (label != null && (label = label.trim()).length() > 0) {
+                if (bio == BuiltinOperator.ColRefOper) {
+                    ref = getTable().getColumn(Access.ByLabel, label);
+                    refType = TokenType.ColumnRef;
+                }
+                else if (bio == BuiltinOperator.RowRefOper) {
+                    ref = getTable().getRow(Access.ByLabel, label);
+                    refType = TokenType.RowRef;
+                }
+                    
+                if (ref != null && refType != null)
+                    return new Token(refType, ref);
             }
-            else if (bio == BuiltinOperator.RowRefOper) {
-                ref = getTable().getRow(Access.ByLabel, label);
-                refType = TokenType.RowRef;
-            }
-                
-            if (ref != null && refType != null)
-                return new Token(refType, ref);
         }
         
         // if we get here, we have an invalid argument

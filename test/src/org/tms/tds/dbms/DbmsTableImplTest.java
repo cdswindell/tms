@@ -78,8 +78,9 @@ public class DbmsTableImplTest extends BaseDbmsTest
         
         r.delete();
         r = t.addRow();
-        r.setDerivation("mean(colref(cidx))");
         assertThat(r, notNullValue());
-        
+
+        r.setDerivation("mean(colref('empno'))");
+        r.setDerivation("mean(colref(1))");
     }
 }
