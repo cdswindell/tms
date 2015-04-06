@@ -75,5 +75,11 @@ public class DbmsTableImplTest extends BaseDbmsTest
         cell = t.getCell(r, t.getColumn(Access.ByLabel, "mgr"));
         cell.setDerivation("mean(col 'mgr')");
         assertThat(cell.getCellValue(), is(10.0));
+        
+        r.delete();
+        r = t.addRow();
+        r.setDerivation("mean(colref(cidx))");
+        assertThat(r, notNullValue());
+        
     }
 }

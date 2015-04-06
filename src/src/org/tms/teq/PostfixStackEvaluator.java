@@ -381,16 +381,71 @@ public class PostfixStackEvaluator
     private Token doGenericOp(Operator oper, Token... args)
     {
         // process builtins first
-        if (oper == BuiltinOperator.IfOper) {
-            if ((Boolean)args[0].getValue())
-                return args[1];
-            else
-                return args[2];
+        BuiltinOperator biOper = oper.getBuiltinOperator();
+        if (biOper != null) {
+            switch (biOper) {
+                case IfOper:
+                    if ((Boolean)args[0].getValue())
+                        return args[1];
+                    else
+                        return args[2];
+                 
+                case ColRefOper:
+                case RowRefOper:
+                    return doRefOp(biOper, args[0]);
+                    
+                default:
+                    break;
+            }
         }
         
         Token t = oper.evaluate(args);
         return t;
     }
+
+    private Token doRefOp(BuiltinOperator bio, Token token)
+    {
+        TableRowColumnElement ref = null;
+        TokenType refType = null;
+        
+        if (token == null || token.isNull())
+            return Token.createErrorToken(ErrorCode.OperandRequired);
+        else if (token.isNumeric()) {
+            int idx = token.getNumericValue().intValue();
+            if (idx > 0) {   
+                
+                if (bio == BuiltinOperator.ColRefOper) {
+                    ref = getTable().getColumn(Access.ByIndex, idx);
+                    refType = TokenType.ColumnRef;
+                }
+                else if (bio == BuiltinOperator.RowRefOper) {
+                    ref = getTable().getRow(Access.ByIndex, idx);
+                    refType = TokenType.RowRef;
+                }
+                    
+                if (ref != null && refType != null)
+                    return new Token(refType, ref);
+            }
+        }
+        else if (token.isString()) {
+            String label = token.getLabel().trim();
+            
+            if (bio == BuiltinOperator.ColRefOper) {
+                ref = getTable().getColumn(Access.ByLabel, label);
+                refType = TokenType.ColumnRef;
+            }
+            else if (bio == BuiltinOperator.RowRefOper) {
+                ref = getTable().getRow(Access.ByLabel, label);
+                refType = TokenType.RowRef;
+            }
+                
+            if (ref != null && refType != null)
+                return new Token(refType, ref);
+        }
+        
+        // if we get here, we have an invalid argument
+        return Token.createErrorToken(ErrorCode.InvalidOperand);
+    }        
 
     private PendingState getPendingState(Cell c)
     {

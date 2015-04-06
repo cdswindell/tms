@@ -10,6 +10,11 @@ public interface Operator extends Labeled
 
     public Token evaluate(Token... args);
     
+    default public Class<?> getResultType()
+    {
+        return Object.class;
+    }
+    
     default public int numArgs()
     {
         Class<?> [] args = getArgTypes();

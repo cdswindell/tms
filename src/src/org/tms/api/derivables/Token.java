@@ -224,11 +224,19 @@ public class Token implements Labeled
                 targetClazz == long.class && (dataType == Long.class || (isFuzzy && dataType == Double.class)) ||
                 targetClazz == boolean.class && dataType == Boolean.class)
                 return true;
+        }        
+        else if (!targetClazz.isPrimitive() && dataType.isPrimitive()) {
+            if (targetClazz == Double.class && dataType == double.class ||
+                (targetClazz == Float.class || (isFuzzy && targetClazz == Double.class)) && dataType == float.class ||
+                (targetClazz == Integer.class || (isFuzzy && targetClazz == Double.class)) && dataType == int.class ||
+                (targetClazz == Short.class || (isFuzzy && targetClazz == Double.class)) && dataType == short.class ||
+                (targetClazz == Long.class || (isFuzzy && targetClazz == Double.class)) && dataType == long.class ||
+                targetClazz == Boolean.class && dataType == boolean.class)
+                return true;
         }
         
         return false;
     }
-
 
     public boolean isA(Token y)
     {

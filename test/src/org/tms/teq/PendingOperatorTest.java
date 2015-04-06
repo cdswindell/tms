@@ -641,6 +641,12 @@ public class PendingOperatorTest extends BaseTest
         }
 
         @Override
+        public Class<?> getResultType()
+        {
+            return double.class;
+        }
+
+        @Override
         public String getLabel()
         {
             return "pending";
@@ -732,6 +738,12 @@ public class PendingOperatorTest extends BaseTest
             PendingOperator2 po = new PendingOperator2(Derivation.getTransactionID(), args);
             return Token.createPendingToken(po);
         }  
+        
+        @Override
+        public Class<?> getResultType()
+        {
+            return double.class;
+        }
         
         public UUID getTransactionId()
         {

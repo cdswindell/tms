@@ -151,7 +151,7 @@ public class SubsetRefTest extends BaseTest
         catch (InvalidExpressionException e) {
             ParseResult pr = e.getParseResult();
             assertThat(pr, notNullValue());
-            assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));
+            assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidFunctionTarget));
         }
         
         // negative test; can't transform a cell        

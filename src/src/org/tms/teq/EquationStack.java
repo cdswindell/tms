@@ -80,11 +80,11 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 		return super.offerLast(t);
 	}
 
-	@Override
-	public void push(Token t) 
-	{
-		super.push(t);
-	}
+    @Override
+    public void push(Token t) 
+    {
+        super.push(t);
+    }
 
     public void push (double value)
     {

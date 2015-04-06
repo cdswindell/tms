@@ -111,7 +111,7 @@ public class PostfixExpressionParserTest
         EquationStack pfs = pfp.getPostfixStack();
         assertThat(pfs, notNullValue());        
         
-        iep = new InfixExpressionParser("5 % mod((2 + 7), 5)");
+        iep = new InfixExpressionParser("5 % (mod((2 + 7), 5))");
         assertThat(iep, notNullValue());
         
         pr = iep.validateExpression();
@@ -120,8 +120,8 @@ public class PostfixExpressionParserTest
         
         ifs = iep.getInfixStack();
         assertThat(ifs, notNullValue());
-        assertThat(ifs.size(), is(12));
-        assertThat(ifs.toExpression(), is("5.0 % mod ( ( 2.0 + 7.0 ) , 5.0 )"));
+        assertThat(ifs.size(), is(14));
+        assertThat(ifs.toExpression(), is("5.0 % ( mod ( ( 2.0 + 7.0 ) , 5.0 ) )"));
               
         pfp = new PostfixStackGenerator(ifs, null);
         assertThat(pfp, notNullValue());

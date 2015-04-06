@@ -9,6 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.TableElement;
 import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.ErrorCode;
@@ -55,6 +57,9 @@ public enum BuiltinOperator implements Labeled, Operator
     
     // special "if" operator
     IfOper("if", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
+    
+    ColRefOper("colRef", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Object.class),
+    RowRefOper("rowRef", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Object.class),
     
     // Special math operators, implemented in Java Math class
     ModOper(TokenType.BinaryOp, 5, Math.class, "IEEEremainder", "%"),  
@@ -414,6 +419,10 @@ public enum BuiltinOperator implements Labeled, Operator
                 case AndOper:
                 case OrOper:
                 case XorOper:
+                case PlusOper:
+                case MinusOper:
+                case MultOper:
+                case DivOper:
                     m_methodArgs = new Class<?>[]{Object.class, Object.class};
                     break;
                     
@@ -610,5 +619,63 @@ public enum BuiltinOperator implements Labeled, Operator
             return binaryOpLabels().contains(label.trim().toLowerCase());
         else
             return false;
+    }
+
+    public boolean isMathOper()
+    {
+        switch (this) {
+            case PlusOper:
+            case MinusOper:
+            case MultOper:
+            case DivOper:
+                return true;
+            
+            default:
+                return false;
+        }
+    }
+    
+    @Override
+    public Class<?> getResultType()
+    {
+        switch (this) {
+            case ColumnIndex:
+            case RowIndex:
+                return int.class;
+                
+            case PiOper:
+            case EOper:
+            case RandOper:
+                return double.class;
+                
+            case AndOper:
+            case OrOper:
+            case XorOper:
+            case NotOper:
+            case IsEvenOper:
+            case IsOddOper:
+            case IsPrimeOper:
+            case IsNumberOper:
+            case IsLogicalOper:
+            case IsTextOper:
+            case IsErrorOper:
+            case IsNullOper:
+            case EqOper:
+            case NEqOper:
+            case GtOper:
+            case LtOper:
+            case GtEOper:
+            case LtEOper:               
+                return boolean.class;
+                
+            case ColRefOper:
+                return Column.class;
+                
+            case RowRefOper:
+                return Row.class;
+                
+            default:
+                return Object.class;
+        }
     }
 }

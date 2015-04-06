@@ -215,8 +215,14 @@ public class InfixExpressionParserTest
 
         pr = iep.validateExpression();
         assertThat(pr, notNullValue());
-        assertThat(pr.isSuccess(), is(false));
-        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));        
+        assertThat(pr.isSuccess(), is(true));
+        
+        PostfixStackGenerator psg = new PostfixStackGenerator(iep);
+        assertThat(psg, notNullValue());
+        
+        pr = psg.convertInfixToPostfix();
+        assertThat(pr, notNullValue());
+        assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));
     }  
     
     @Test
@@ -297,7 +303,13 @@ public class InfixExpressionParserTest
 
         pr = iep.validateExpression();
         assertThat(pr, notNullValue());
-        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.isSuccess(), is(true));
+        
+        PostfixStackGenerator psg = new PostfixStackGenerator(iep);
+        assertThat(psg, notNullValue());
+        
+        pr = psg.convertInfixToPostfix();
+        assertThat(pr, notNullValue());
         assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentCountMismatch));
     }
     
@@ -319,7 +331,13 @@ public class InfixExpressionParserTest
 
         pr = iep.validateExpression();
         assertThat(pr, notNullValue());
-        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.isSuccess(), is(true));
+        
+        PostfixStackGenerator psg = new PostfixStackGenerator(iep);
+        assertThat(psg, notNullValue());
+        
+        pr = psg.convertInfixToPostfix();
+        assertThat(pr, notNullValue());
         assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));
         
         // mean operator, wrong argument type
@@ -328,7 +346,13 @@ public class InfixExpressionParserTest
 
         pr = iep.validateExpression();
         assertThat(pr, notNullValue());
-        assertThat(pr.isSuccess(), is(false));
+        assertThat(pr.isSuccess(), is(true));
+        
+        psg = new PostfixStackGenerator(iep);
+        assertThat(psg, notNullValue());
+        
+        pr = psg.convertInfixToPostfix();
+        assertThat(pr, notNullValue());
         assertThat(pr.getParserStatusCode(), is(ParserStatusCode.ArgumentTypeMismatch));
     }
 }
