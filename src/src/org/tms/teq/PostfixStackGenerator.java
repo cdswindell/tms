@@ -162,6 +162,8 @@ public class PostfixStackGenerator
                         else if ((p1 = t.getPriority()) <
                                  (p2 = oper.getPriority()))
                             endRight = true;
+                        else if (p1 == p2 && tt == TokenType.BinaryOp && oper.isRightAssociative())
+                            endRight = true;
                         else if (p1 == p2 && p2 == BuiltinOperator.MAX_PRIORITY)
                             endRight = true;
                         else {

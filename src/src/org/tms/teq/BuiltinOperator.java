@@ -62,7 +62,7 @@ public enum BuiltinOperator implements Labeled, Operator
     RowRefOper("rowRef", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Object.class),
     
     // Special math operators, implemented in Java Math class
-    ModOper(TokenType.BinaryOp, 4, Math.class, "IEEEremainder", "%"),  
+    ModOper(TokenType.BinaryOp, 4, MathUtil.class, "mod", "%"),  
     PowerOper(TokenType.BinaryOp, 4, Math.class, "pow", "^"),
     
     // Factorial operator, implemented in code
@@ -134,7 +134,8 @@ public enum BuiltinOperator implements Labeled, Operator
     toNumberOper("toNumber", TokenType.UnaryFunc, 5, MathUtil.class, "toNumber", Object.class),
    
     // Binary functions, mostly supported in Java Math
-    ModFuncOper(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "mod"),
+    ReminderFuncOper(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "remainder"),
+    ModFuncOper(TokenType.BinaryFunc, 5, MathUtil.class, "mod", "mod"),
     PowerFuncOper(TokenType.BinaryFunc, 5, Math.class, "pow", "pow", "power"),
 
     BiggerOper(TokenType.BinaryFunc, 5, Math.class, "max", "bigger"),
@@ -621,6 +622,19 @@ public enum BuiltinOperator implements Labeled, Operator
             return false;
     }
 
+    @Override
+    public boolean isRightAssociative()
+    {
+        switch (this) {
+            case PowerOper:
+            case ModOper:
+                return true;
+            
+            default:
+                return false;
+        }
+    }
+    
     public boolean isMathOper()
     {
         switch (this) {

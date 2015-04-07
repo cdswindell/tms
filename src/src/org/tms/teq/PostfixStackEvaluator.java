@@ -53,6 +53,15 @@ public class PostfixStackEvaluator
         m_pfsIdx = -1;
     }
 
+    public PostfixStackEvaluator(PostfixStackGenerator psg)
+    {
+        m_pfs = psg.getPostfixStack();        
+        if (m_pfs == null || m_pfs.getStackType() != StackType.Postfix)
+            throw new IllegalTableStateException("Postfix stack required");
+        
+        m_pfsIdx = -1;
+    }
+
     protected DerivationImpl getDerivation()
     {
         return m_derivationImpl;

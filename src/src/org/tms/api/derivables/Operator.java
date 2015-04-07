@@ -27,6 +27,11 @@ public interface Operator extends Labeled
         return 5;
     }
 
+    default boolean isRightAssociative() 
+    {
+        return false;
+    }
+
     default BuiltinOperator getBuiltinOperator() 
     {
         return BuiltinOperator.NULL_operator;

@@ -120,6 +120,11 @@ public class MathUtil
         return result;
     }
     
+    static final public double mod(double x, double y)
+    {
+        return x % y;
+    }
+    
     static final public double neg(double arg)
     {
         return -arg;
