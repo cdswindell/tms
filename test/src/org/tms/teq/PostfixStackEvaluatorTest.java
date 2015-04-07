@@ -529,8 +529,8 @@ public class PostfixStackEvaluatorTest
         tbl.fill(42);
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (16*8));
         
-        // RowIndex operator
-        PostfixStackEvaluator pse = new PostfixStackEvaluator("RowIndex", null);
+        // RowIndexOper operator
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("RowIndexOper", null);
         assertThat(pse, notNullValue());
 
         Token t = pse.evaluate(r1, c1);

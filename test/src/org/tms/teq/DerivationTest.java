@@ -32,12 +32,12 @@ public class DerivationTest
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
 
         // create the derivation
-        c1.setDerivation("RowIndex + Cidx");
+        c1.setDerivation("RowIndexOper + Cidx");
         assertThat(c1.isDerived(), is(true));
 
         String expr = c1.getDerivation().getAsEnteredExpression();
         assertThat(expr, notNullValue());
-        assertThat(expr, is("RowIndex + Cidx"));      
+        assertThat(expr, is("RowIndexOper + Cidx"));      
         assertThat(tbl.getCellValue(r1,  c1), is(18.0));
 
         // get the cell and make sure it's value is correct
@@ -58,12 +58,12 @@ public class DerivationTest
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (0));
 
         // create the derivation
-        r1.setDerivation("ColumnIndex * 2");
+        r1.setDerivation("ColumnIndexOper * 2");
         assertThat(r1.isDerived(), is(true));
 
         String expr = r1.getDerivation().getAsEnteredExpression();
         assertThat(expr, notNullValue());
-        assertThat(expr, is("ColumnIndex * 2"));      
+        assertThat(expr, is("ColumnIndexOper * 2"));      
         assertThat(tbl.getCellValue(r1,  c1), is(16.0));
 
         // get the cell and make sure it's value is correct

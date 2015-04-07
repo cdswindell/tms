@@ -854,14 +854,14 @@ public class PostfixStackEvaluator
         BuiltinOperator bio = oper.getBuiltinOperator();
         if (bio != null) {
             switch (bio) {
-                case RowIndex:
+                case RowIndexOper:
                     if (row == null)
                         result = Token.createErrorToken(ErrorCode.InvalidTableOperand);
                     else
                         result = new Token(row.getPropertyInt(TableProperty.Index));
                     break;
                     
-                case ColumnIndex:
+                case ColumnIndexOper:
                     if (col == null)
                         result = Token.createErrorToken(ErrorCode.InvalidTableOperand);
                     else

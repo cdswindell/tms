@@ -109,7 +109,7 @@ public enum BuiltinOperator implements Labeled, Operator
     CosHOper("cosh", TokenType.UnaryFunc, 5, Math.class),
     TanHOper("tanh", TokenType.UnaryFunc, 5, Math.class),
 
-    FactFunc(TokenType.UnaryFunc, 5, MathUtil.class, "fact", "factorial"),
+    FactFuncOper(TokenType.UnaryFunc, 5, MathUtil.class, "fact", "factorial"),
     FloorOper(TokenType.UnaryFunc, 5, Math.class, "floor", "rounddown"),
     CeilOper(TokenType.UnaryFunc, 5, Math.class, "ceil", "roundup"),
     SignOper(TokenType.UnaryFunc, 5, Math.class, "signum", "sign", "signum"),
@@ -134,8 +134,8 @@ public enum BuiltinOperator implements Labeled, Operator
     toNumberOper("toNumber", TokenType.UnaryFunc, 5, MathUtil.class, "toNumber", Object.class),
    
     // Binary functions, mostly supported in Java Math
-    ModFunc(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "mod"),
-    PowerFunc(TokenType.BinaryFunc, 5, Math.class, "pow", "pow", "power"),
+    ModFuncOper(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "mod"),
+    PowerFuncOper(TokenType.BinaryFunc, 5, Math.class, "pow", "pow", "power"),
 
     BiggerOper(TokenType.BinaryFunc, 5, Math.class, "max", "bigger"),
     SmallerOper(TokenType.BinaryFunc, 5, Math.class, "min", "smaller"),
@@ -148,8 +148,8 @@ public enum BuiltinOperator implements Labeled, Operator
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
     EOper(TokenType.BuiltIn, 5, MathUtil.class, "e"),
     RandOper(TokenType.BuiltIn, 5, Math.class, "random"),
-    ColumnIndex(TokenType.BuiltIn, 5, "ColumnIndex", "cidx"),
-    RowIndex(TokenType.BuiltIn, 5, "RowIndex", "ridx"),
+    ColumnIndexOper(TokenType.BuiltIn, 5, "ColumnIndexOper", "cidx"),
+    RowIndexOper(TokenType.BuiltIn, 5, "RowIndexOper", "ridx"),
 
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 5, "sum"),
@@ -639,8 +639,8 @@ public enum BuiltinOperator implements Labeled, Operator
     public Class<?> getResultType()
     {
         switch (this) {
-            case ColumnIndex:
-            case RowIndex:
+            case ColumnIndexOper:
+            case RowIndexOper:
                 return int.class;
                 
             case PiOper:
