@@ -189,5 +189,27 @@ public class InfixToPostfixConversionTest extends BaseTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getNumericValue(), is(232.0));
+
+        iep = new InfixExpressionParser("11 % 6 % 3");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        psg = new PostfixStackGenerator(iep);
+        assertThat(psg, notNullValue());
+        
+        pr = psg.convertInfixToPostfix();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        pse = new PostfixStackEvaluator(psg);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getNumericValue(), is(2.0));
     }     
 }

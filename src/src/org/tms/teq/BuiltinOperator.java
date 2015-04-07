@@ -627,7 +627,6 @@ public enum BuiltinOperator implements Labeled, Operator
     {
         switch (this) {
             case PowerOper:
-            case ModOper:
                 return true;
             
             default:
