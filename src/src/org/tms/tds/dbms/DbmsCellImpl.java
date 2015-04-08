@@ -86,7 +86,7 @@ public class DbmsCellImpl extends CellImpl
     }
 
     @Override
-    protected boolean isWriteProtected()
+    public boolean isWriteProtected()
     {
         return true;
     }

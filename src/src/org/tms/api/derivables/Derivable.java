@@ -2,10 +2,9 @@ package org.tms.api.derivables;
 
 import java.util.List;
 
-import org.tms.api.BaseElement;
 import org.tms.api.TableElement;
 
-public interface Derivable extends BaseElement, TableElement
+public interface Derivable extends TableElement
 {    
     public Derivation getDerivation();
     public Derivable setDerivation(String expression);

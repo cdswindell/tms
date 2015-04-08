@@ -2060,7 +2060,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
-    protected boolean isWriteProtected()
+    public boolean isWriteProtected()
     {
         return isReadOnly() ||
                (getTableContext() != null ? getTableContext().isReadOnly() : false);

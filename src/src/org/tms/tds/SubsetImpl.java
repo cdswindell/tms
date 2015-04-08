@@ -613,7 +613,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     }
 
     @Override
-    protected boolean isWriteProtected()
+    public boolean isWriteProtected()
     {
         if (getTable() != null)
             return getTable().isWriteProtected();

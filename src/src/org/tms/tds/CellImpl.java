@@ -467,13 +467,14 @@ public class CellImpl extends TableElementImpl implements Cell
     }
     
     @Override
-    protected boolean isWriteProtected()
+    public boolean isWriteProtected()
     {
         return isReadOnly() ||
                 (getColumn() != null ? getColumn().isWriteProtected() : false) ||
                 (getRow() != null ? getRow().isWriteProtected() : false);
                 
     }
+    
     /**
      * A cell is empty if it is null
      */

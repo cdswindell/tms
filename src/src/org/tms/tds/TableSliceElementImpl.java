@@ -471,7 +471,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     }
     
     @Override
-    protected boolean isWriteProtected()
+    public boolean isWriteProtected()
     {
         return isReadOnly() ||
                (getTable() != null ? getTable().isWriteProtected() : false);

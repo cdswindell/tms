@@ -149,7 +149,7 @@ public final class DerivationImpl implements Derivation
      * @param affectedBy
      * @return <b>true</b> if a circular reference is detected
      */
-    private static boolean checkCircularReference(Derivable target, List<TableElement> affectedBy)
+    private static boolean checkCircularReference(TableElement target, List<TableElement> affectedBy)
     {
         if (affectedBy == null)
             return false;
