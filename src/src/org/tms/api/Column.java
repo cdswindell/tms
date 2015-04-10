@@ -14,4 +14,8 @@ import org.tms.api.derivables.Derivable;
  */
 public interface Column extends TableElement, Derivable, TableRowColumnElement
 {
+
+    public Class<?> getDataType();
+
+    public void setDataType(Class<? extends Object> dataType);
 }

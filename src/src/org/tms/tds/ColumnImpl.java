@@ -112,12 +112,14 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return ElementType.Column;
     }
     
-    protected Class<? extends Object> getDataType()
+    @Override
+    public Class<? extends Object> getDataType()
     {
         return m_dataType;
     }
     
-    protected void setDataType(Class<? extends Object> dataType)
+    @Override
+    public void setDataType(Class<? extends Object> dataType)
     {
         m_dataType = dataType;
     }

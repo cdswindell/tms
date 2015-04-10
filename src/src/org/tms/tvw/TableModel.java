@@ -48,7 +48,20 @@ public class TableModel extends AbstractTableModel
                 return label;
         }
         
-        return super.getColumnName(column);
+        return "Col " + (column + 1);
+    }
+
+    @Override
+    public Class<?> getColumnClass(int column) 
+    {
+        Column col = m_table.getColumn(column + 1);
+        if (col != null) {
+            Class<?> clazz = col.getDataType();
+            if (clazz != null)
+                return clazz;
+        }
+        
+        return super.getColumnClass(column);
     }
 
     @Override
@@ -83,16 +96,34 @@ public class TableModel extends AbstractTableModel
         }
         else {
             // see if aValue is a number
-            try {
-                if (aValue != null && aValue instanceof String) {
+            if (aValue != null && aValue instanceof String && 
+                    ((String)(aValue = ((String)aValue).trim())).length() > 0) {
+                try {
                     double d = Double.parseDouble((String) aValue);
                     aValue = d;
                 }
+                catch (Exception e) {
+                    // try boolean conversion
+                    try {
+                        boolean b = Boolean.parseBoolean((String)aValue);
+                        if (b)
+                            aValue = b;
+                    }
+                    catch (Exception eb) {}
+                }
             }
-            catch (Exception e) {}
-            
+
+
             m_table.setCellValue(m_table.getRow(rowIndex + 1), 
-                             m_table.getColumn(columnIndex + 1), aValue);
+                    m_table.getColumn(columnIndex + 1), aValue);
         }
+        
+        fireTableDataChanged();
+    }
+
+    
+    public Table getTable()
+    {
+        return m_table;
     }
 }
