@@ -4,10 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Font;
 import java.awt.HeadlessException;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
@@ -15,14 +12,11 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -90,8 +84,10 @@ public class TableViewer extends JApplet implements TableModelListener
         m_jTable.setCellSelectionEnabled(true);
         m_jTable.setGridColor(Color.BLACK);
         
-        TableCellRenderer tcr = new TableCellRenderer(m_jTable);
+        TableCellRenderer tcr = new TableCellRenderer();
         m_jTable.setDefaultRenderer(Object.class, tcr);
+        
+        ((DefaultTableCellRenderer)m_jTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
         m_jTable.getSelectionModel().addListSelectionListener(new LSL());
                 
         m_jTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -154,79 +150,9 @@ public class TableViewer extends JApplet implements TableModelListener
         m_jTable.revalidate();       
     }
 
-    /*
-     *  Attempt to mimic the table header renderer
-     */
-    private static class ColumnNumberRenderer extends DefaultTableCellRenderer implements FocusListener
-    {
-        private JTable m_main;
-        public ColumnNumberRenderer(JTable main)
-        {
-            setHorizontalAlignment(JLabel.CENTER);
-            this.setFocusable(true);
-            m_main = main;
-        }
-
-        public Component getTableCellRendererComponent(
-            JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-        {
-            if (table != null)
-            {
-                JTableHeader header = table.getTableHeader();
-
-                if (header != null)
-                {
-                    setForeground(header.getForeground());
-                    setBackground(header.getBackground());
-                    setFont(header.getFont());
-                }
-            }
-
-            if (isSelected)
-            {
-                setFont( getFont().deriveFont(Font.BOLD) );
-                if (hasFocus) {
-                    m_main.setCellSelectionEnabled(false);
-                    m_main.setRowSelectionAllowed(false);
-                    m_main.setColumnSelectionAllowed(true);
-                }
-                else {
-                    m_main.setCellSelectionEnabled(true);
-                }
-            }
-
-            setText((value == null) ? "" : value.toString());
-            setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-
-            return this;
-        }
-
-        @Override
-        public void focusGained(FocusEvent e)
-        {
-            if (e != null)
-            {
-                
-            }
-            
-        }
-
-        @Override
-        public void focusLost(FocusEvent e)
-        {
-            // TODO Auto-generated method stub
-            
-        }
-    }
-    
     private static class TableCellRenderer extends DefaultTableCellRenderer
     {
-        private JTable m_main;
-        
-        public TableCellRenderer(JTable main)
-        {
-            m_main = main;
-        }
+        private static final long serialVersionUID = -6128873046060680754L;
 
         public Component getTableCellRendererComponent(
             JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)

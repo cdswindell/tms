@@ -108,6 +108,8 @@ public class TableModel extends AbstractTableModel
                         boolean b = Boolean.parseBoolean((String)aValue);
                         if (b)
                             aValue = b;
+                        else if (((String)aValue).equalsIgnoreCase("false"))
+                            aValue = false;
                     }
                     catch (Exception eb) {}
                 }
