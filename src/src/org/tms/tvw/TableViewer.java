@@ -6,12 +6,14 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.HeadlessException;
 
+import javax.swing.DefaultCellEditor;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -54,7 +56,7 @@ public class TableViewer extends JApplet implements TableModelListener
     {
         this(TableFactory.createTable());
         
-        m_table.addRow(Access.ByIndex, 10);
+        m_table.addRow(Access.ByIndex, 20);
         m_table.addColumn(Access.ByIndex, 10);
         m_table.fill(null);
     }
@@ -170,5 +172,24 @@ public class TableViewer extends JApplet implements TableModelListener
  
             return this;
         }
+    }
+    
+    public static class CustomCellEditor extends DefaultCellEditor 
+    {
+        private static final long serialVersionUID = 9033645675530952066L;
+
+        public CustomCellEditor() 
+        {
+            super(new JTextField());
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) 
+        {
+            table.clearSelection();
+            table.setColumnSelectionAllowed(false);
+            table.setRowSelectionAllowed(true);
+            return super.getTableCellEditorComponent(table, value, isSelected, row, column);
+        }
+
     }
 }

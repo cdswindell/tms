@@ -88,7 +88,7 @@ public class TableModel extends AbstractTableModel
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex)
     {
-        if (aValue != null && aValue instanceof String && ((String)aValue).startsWith("=")) {
+        if (aValue != null && aValue instanceof String && ((String)aValue).startsWith("=") && ((String)aValue).length() > 1) {
             Cell c = m_table.getCell(m_table.getRow(rowIndex + 1), 
                                           m_table.getColumn(columnIndex + 1));
             if (c != null) 
@@ -114,7 +114,6 @@ public class TableModel extends AbstractTableModel
                     catch (Exception eb) {}
                 }
             }
-
 
             m_table.setCellValue(m_table.getRow(rowIndex + 1), 
                     m_table.getColumn(columnIndex + 1), aValue);
