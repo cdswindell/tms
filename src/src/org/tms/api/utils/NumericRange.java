@@ -10,7 +10,7 @@ public class NumericRange implements TableCellValidator
     public NumericRange(double minValue, double maxValue)
     {
         if (maxValue < minValue)
-            throw new IllegalArgumentException("Minimum value must be less than or equal to maximum.");
+            throw new IllegalArgumentException("Minimum value must be less than or equal to maximum value.");
         
         m_minValue = minValue;
         m_maxValue = maxValue;

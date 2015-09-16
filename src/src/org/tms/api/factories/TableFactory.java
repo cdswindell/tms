@@ -83,11 +83,21 @@ public final class TableFactory
         return t;
     }
 
+    /*
+     * Import Operations
+     */
+    
+    static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders)
+    {
+        Table t = null;
+        return t;
+    }
+    
     /**
      * Construct a TableFactory instance.
      * <p>
      * Protected constructor prevents anyone creating a TableFactory from outside of the package.
-     * The TableFactory class is intended only to provide a place for the static factory methods
+     * The TableFactory class is intended only to provide a home for the static factory methods
      * to reside.
      */
     protected TableFactory()
