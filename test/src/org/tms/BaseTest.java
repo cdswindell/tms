@@ -1,5 +1,7 @@
 package org.tms;
 
+import java.io.File;
+
 
 public class BaseTest
 {
@@ -15,5 +17,22 @@ public class BaseTest
         
         return withIn > Math.abs((Double)x - y);
     }
-
+    
+    protected final String qualifiedFileName(String fn)
+    {
+        StringBuffer sb = new StringBuffer();
+        sb.append(System.getProperty("user.dir"));
+        sb.append(File.separator);
+        sb.append("src");
+        sb.append(File.separator);
+        
+        String packagePath = this.getClass().getPackage().getName();
+        packagePath = packagePath.replaceAll("\\.", File.separator);
+        
+        sb.append(packagePath);
+        sb.append(File.separator);
+        sb.append(fn);
+        
+        return sb.toString();
+    }
 }
