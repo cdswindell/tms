@@ -1,9 +1,12 @@
 package org.tms.api.factories;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.exceptions.TableIOException;
+import org.tms.io.CSVReader;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
@@ -85,12 +88,23 @@ public final class TableFactory
 
     /*
      * Import Operations
-     */
-    
+     */    
     static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders)
     {
-        Table t = null;
-        return t;
+        return importCSV(csvFileName, hasRowNames, hasColumnHeaders, ContextImpl.fetchDefaultContext());
+    }
+    
+    static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders, TableContext tc)
+    {
+        CSVReader r = new CSVReader(csvFileName, hasRowNames, hasColumnHeaders, tc);
+        try
+        {
+            return r.parse();
+        }
+        catch (IOException e)
+        {
+            throw new TableIOException(e);
+        }
     }
     
     /**

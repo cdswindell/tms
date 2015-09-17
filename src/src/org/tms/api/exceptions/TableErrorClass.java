@@ -12,5 +12,6 @@ public enum TableErrorClass
     Deleted,
     Illegal,
     UnsupportedImplementation,
+    IO,
     Unknown;
 }
