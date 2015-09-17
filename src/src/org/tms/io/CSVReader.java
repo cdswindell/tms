@@ -76,12 +76,14 @@ public class CSVReader
                             row.setLabel(s);
                             firstCol = false;
                         }
-                        else if (s != null) {
-                            Column col = t.getColumn(colNum);
-                            if (col == null)
-                                col = t.addColumn(colNum);
-                            
-                            t.setCellValue(row, col, parseCellValue(s));
+                        else {
+                            if (s != null) {
+                                Column col = t.getColumn(colNum);
+                                if (col == null)
+                                    col = t.addColumn(colNum);
+                                
+                                t.setCellValue(row, col, parseCellValue(s));
+                            }
                             
                             colNum++;
                         }

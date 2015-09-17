@@ -18,14 +18,15 @@ import org.tms.api.factories.TableFactory;
 
 public class CSVReaderTest extends BaseTest
 {
-    private static final String SIMPLE1 = "simpleRowNameColName.csv";
+    private static final String SAMPLE1 = "sample1.csv";
+    private static final String SAMPLE2 = "sample2.csv";
     
     @Test
     public final void testCSVReaderConstructor()
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SIMPLE1), true, true); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), true, true); 
         assertNotNull(r);
-        assertThat(r.getCSVFileName(), is(SIMPLE1));
+        assertThat(r.getCSVFileName(), is(SAMPLE1));
         assertThat(r.isRowNames(), is(true));
         assertThat(r.isColumnNames(), is(true));
     }
@@ -33,7 +34,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParse() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SIMPLE1), true, true); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), true, true); 
         assertNotNull(r);
         
         try
@@ -65,9 +66,48 @@ public class CSVReaderTest extends BaseTest
     }
     
     @Test
+    public final void testParseComplex() 
+    {
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE2), true, true); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            assertThat(t.getNumRows(), is(4));
+            assertThat(t.getNumColumns(), is(3));
+            assertThat(t.getNumCells(), is(4 * 2));
+            
+            assertThat(t.getColumn(1).getLabel(), is("Abc"));
+            assertThat(t.getColumn(2).getLabel(), nullValue());
+            assertThat(t.getColumn(3).getLabel(), is("Def, Ghi"));
+            
+            Column c1 = t.getColumn(1);
+            Column c2 = t.getColumn(2);
+            Column c3 = t.getColumn(3);
+            for (Row row : t.rows()) {
+                if (t.getCellValue(row, c1) != null)
+                    assertThat(Number.class.isAssignableFrom(t.getCellValue(row, c1).getClass()), is(true));
+                
+                if (t.getCellValue(row, c2) != null)
+                    assertThat(row.getLabel(), is(t.getCellValue(row, c2) + " Row"));
+                
+                if (t.getCellValue(row, c3) != null)
+                    assertThat(Boolean.class.isAssignableFrom(t.getCellValue(row, c3).getClass()), is(true));
+            }
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
+    
+    @Test
     public final void testParseNoColumnNames() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SIMPLE1), true, false); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), true, false); 
         assertNotNull(r);
         
         try
@@ -108,7 +148,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseNoRowNames() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SIMPLE1), false, true); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), false, true); 
         assertNotNull(r);
         
         try
@@ -146,7 +186,7 @@ public class CSVReaderTest extends BaseTest
     {
         try
         {
-            Table t = TableFactory.importCSV(qualifiedFileName(SIMPLE1), true, true); 
+            Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true); 
             assertNotNull(t);
             
             assertThat(t.getNumRows(), is(4));
