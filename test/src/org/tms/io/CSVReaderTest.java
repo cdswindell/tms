@@ -24,7 +24,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testCSVReaderConstructor()
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), IOOptions.CSV); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.CSV); 
         assertNotNull(r);
         assertThat(r.getCSVFileName(), is(SAMPLE1));
         assertThat(r.isRowNames(), is(true));
@@ -34,7 +34,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParse() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), IOOptions.CSV); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.CSV); 
         assertNotNull(r);
         
         try
@@ -68,7 +68,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseComplex() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE2), IOOptions.CSV); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE2), CSVOptions.CSV); 
         assertNotNull(r);
         
         try
@@ -107,7 +107,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseNoColumnNames() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), IOOptions.CSV.withColumnNames(false)); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.CSV.withColumnNames(false)); 
         assertNotNull(r);
         
         try
@@ -148,7 +148,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseNoRowNames() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), IOOptions.CSV.withRowNames(false)); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.CSV.withRowNames(false)); 
         assertNotNull(r);
         
         try

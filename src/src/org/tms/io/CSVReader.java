@@ -22,23 +22,27 @@ public class CSVReader
     private CSVFormat m_csvFormat;
     private IOOptions m_ioFormat;
     
-    public CSVReader(String fileName, IOOptions format)
+    public CSVReader(String fileName, CSVOptions format)
     {
         this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
     }
 
-    public CSVReader(String fileName, TableContext context, IOOptions format)
+    public CSVReader(String fileName, TableContext context, CSVOptions format)
     {
         this(new File(fileName), context, format);
     }
 
-    public CSVReader(File csvFile, TableContext context, IOOptions format)
+    public CSVReader(File csvFile, TableContext context, CSVOptions format)
     {
         m_context = context;
         m_csvFile = csvFile;
         m_ioFormat = format;
         
-        m_csvFormat = CSVFormat.DEFAULT.withIgnoreEmptyLines(format.isIgnoreEmptyRows()).withIgnoreSurroundingSpaces(format.isIgnoreSuroundingSpaces());
+        m_csvFormat = CSVFormat.DEFAULT
+                                .withIgnoreEmptyLines(format.isIgnoreEmptyRows())
+                                .withIgnoreSurroundingSpaces(format.isIgnoreSuroundingSpaces())
+                                .withDelimiter(format.getDelimiter())
+                                .withQuote(format.getQuote());
     }
     
     public Table parse() throws IOException
