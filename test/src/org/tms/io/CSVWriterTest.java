@@ -56,6 +56,38 @@ public class CSVWriterTest extends BaseTest
                 assertThat(t2.getCellValue(r2, c2), is(t.getCellValue(r1, c1)));
             }
         }
+        
+        t = TableFactory.importCSV(qualifiedFileName(SAMPLE2), true, true);
+        assertNotNull(t);
+        
+        tmpFile = File.createTempFile("testExport2", ".csv");
+        tmpFile.deleteOnExit();
+        
+        // export the file
+        t.export(tmpFile.getPath());
+        
+        // now reimport it
+        t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        assertNotNull(t2);        
+        assertThat(t2.isValid(), is(true));
+        assertThat(t2.getNumRows(), is(t.getNumRows()));
+        assertThat(t2.getNumColumns(), is(t.getNumColumns()));
+        assertThat(t2.getNumCells(), is(t.getNumCells()));
+        
+        for (Row r2 : t2.getRows()) {
+            assertNotNull(r2);
+            Row r1 = t.getRow(Access.ByIndex, r2.getIndex());
+            assertNotNull(r1);
+            assertThat(r2.getLabel(), is(r1.getLabel()));
+            
+            for (Column c2 : t2.getColumns()) {
+                assertNotNull(c2);
+                Column c1 = t.getColumn(Access.ByIndex, c2.getIndex());
+                assertNotNull(c1);
+                assertThat(c2.getLabel(), is(c1.getLabel()));
+                
+                assertThat(t2.getCellValue(r2, c2), is(t.getCellValue(r1, c1)));
+            }
+        }
     }
-
 }

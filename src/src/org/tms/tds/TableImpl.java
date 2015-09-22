@@ -2035,7 +2035,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         if (this != col.getTable())
             throw new InvalidParentException(col, this);
         
-        return col.getCell(row, createIfNull);
+        return col.getCellInternal(row, createIfNull, true);
     }
     
     synchronized protected boolean setCellValue(RowImpl row, ColumnImpl col, Object o) 
