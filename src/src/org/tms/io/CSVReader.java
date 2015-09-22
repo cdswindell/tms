@@ -20,25 +20,25 @@ public class CSVReader
     private File m_csvFile;
     private TableContext m_context;
     private CSVFormat m_csvFormat;
-    private IOFormat m_ioFormat;
+    private IOOptions m_ioFormat;
     
-    public CSVReader(String fileName, IOFormat format)
+    public CSVReader(String fileName, IOOptions format)
     {
         this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
     }
 
-    public CSVReader(String fileName, TableContext context, IOFormat format)
+    public CSVReader(String fileName, TableContext context, IOOptions format)
     {
         this(new File(fileName), context, format);
     }
 
-    public CSVReader(File csvFile, TableContext context, IOFormat format)
+    public CSVReader(File csvFile, TableContext context, IOOptions format)
     {
         m_context = context;
         m_csvFile = csvFile;
         m_ioFormat = format;
         
-        m_csvFormat = CSVFormat.DEFAULT.withIgnoreEmptyLines(format.isIgnoreEmptyRows()).withIgnoreSurroundingSpaces(true);
+        m_csvFormat = CSVFormat.DEFAULT.withIgnoreEmptyLines(format.isIgnoreEmptyRows()).withIgnoreSurroundingSpaces(format.isIgnoreSuroundingSpaces());
     }
     
     public Table parse() throws IOException
