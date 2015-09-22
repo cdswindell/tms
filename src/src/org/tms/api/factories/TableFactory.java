@@ -6,8 +6,10 @@ import java.sql.SQLException;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
+import org.tms.api.exceptions.UnimplementedException;
 import org.tms.io.CSVOptions;
 import org.tms.io.CSVReader;
+import org.tms.io.IOOptions;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
@@ -92,15 +94,25 @@ public final class TableFactory
      */    
     static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders)
     {
-        return importCSV(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.CSV.withRowNames(hasRowNames).withColumnNames(hasColumnHeaders));
+        return importFile(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.CSV.withRowNames(hasRowNames).withColumnNames(hasColumnHeaders));
     }
     
-    static public Table importCSV(String csvFileName, TableContext tc, CSVOptions format)
+    static public Table importFile(String csvFileName, TableContext tc, IOOptions format)
     {
-        CSVReader r = new CSVReader(csvFileName, tc, format);
+        if (format == null)
+            throw new IllegalArgumentException("Format argument cannot be null");
+        
         try
         {
-            return r.parse();
+            if (format.isCSV()) {
+                CSVReader r = new CSVReader(csvFileName, tc, (CSVOptions)format);
+                return r.parse();
+            }
+            else if (format.isTMS()) {
+                
+            }
+            
+            throw new UnimplementedException("No support for file format:" + format.getFileFormat());
         }
         catch (IOException e)
         {

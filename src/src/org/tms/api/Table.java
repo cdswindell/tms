@@ -1,9 +1,11 @@
 package org.tms.api;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.events.EventProcessorThreadPool;
+import org.tms.io.IOOptions;
 
 /**
  * A standard two dimensional table consisting of {@link Row}s, {@link Column}s, and {@link Cell}s, 
@@ -396,4 +398,26 @@ public interface Table extends TableElement, InitializableTableProperties
     {
         return this instanceof EventProcessorThreadPool;
     }   
+    
+    /**
+     * Exports this {@link Table} to the specified file format using the export options given in {@code options}.
+     * @param fileName the file name where the table is written to
+     * @param options the {@link IOOptions} that specifies the output file format as well as any specific export options
+     * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
+     * @throws IOException if {@code fileName} cannot be created
+     */
+    public void export(String fileName, IOOptions options) 
+    throws IOException;
+    
+    /**
+     * Exports this {@link Table} to the specified file format using default {@link IOOptions} determined by the file name extension.
+     * @param fileName the file name where the table is written to
+     * @throws IllegalArgumentException if {@code fileName} is {@code} null
+     * @throws IOException if {@code fileName} cannot be created
+     */
+    default public void export(String fileName) 
+    throws IOException
+    {
+        export(fileName, null);
+    }
 }

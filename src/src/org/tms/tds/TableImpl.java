@@ -1,5 +1,6 @@
 package org.tms.tds;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -45,6 +46,8 @@ import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.io.IOOptions;
+import org.tms.io.TableWriter;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
@@ -341,6 +344,14 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
      * Methods defined by interface Table; mostly adapters
      */
     
+    @Override
+    public void export(String fileName, IOOptions options) 
+    throws IOException
+    {
+        TableWriter writer = new TableWriter(this, fileName, options);
+        writer.export();
+    }
+
     @Override 
     synchronized public void delete(TableElement... elements)
     {
@@ -372,7 +383,6 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             }
         }
     }
-    
     /**
      * Reclaim free space in columns list. Free space is calculated as the total array 
      * capacity - the number of active columns. When this value divided by the column
