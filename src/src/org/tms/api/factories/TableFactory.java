@@ -7,6 +7,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.io.CSVReader;
+import org.tms.io.IOFormat;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
@@ -91,12 +92,12 @@ public final class TableFactory
      */    
     static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders)
     {
-        return importCSV(csvFileName, hasRowNames, hasColumnHeaders, ContextImpl.fetchDefaultContext());
+        return importCSV(csvFileName, ContextImpl.fetchDefaultContext(), IOFormat.CSV.withRowNames(hasRowNames).withColumnNames(hasColumnHeaders));
     }
     
-    static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders, TableContext tc)
+    static public Table importCSV(String csvFileName, TableContext tc, IOFormat format)
     {
-        CSVReader r = new CSVReader(csvFileName, hasRowNames, hasColumnHeaders, tc);
+        CSVReader r = new CSVReader(csvFileName, tc, format);
         try
         {
             return r.parse();

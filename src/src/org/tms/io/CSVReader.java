@@ -18,29 +18,27 @@ import org.tms.api.factories.TableFactory;
 public class CSVReader
 {
     private File m_csvFile;
-    private boolean m_isRowNames;
-    private boolean m_isColumnNames;
     private TableContext m_context;
     private CSVFormat m_csvFormat;
+    private IOFormat m_ioFormat;
     
-    public CSVReader(String fileName, boolean hasRowNames, boolean hasColumnNames)
+    public CSVReader(String fileName, IOFormat format)
     {
-        this(fileName, hasRowNames, hasColumnNames, TableContextFactory.fetchDefaultTableContext());
+        this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
     }
 
-    public CSVReader( String fileName, boolean hasRowNames, boolean hasColumnNames, TableContext context)
+    public CSVReader(String fileName, TableContext context, IOFormat format)
     {
-        this(new File(fileName), hasRowNames, hasColumnNames, context);
+        this(new File(fileName), context, format);
     }
 
-    public CSVReader(File csvFile, boolean hasRowNames, boolean hasColumnNames, TableContext context)
+    public CSVReader(File csvFile, TableContext context, IOFormat format)
     {
         m_context = context;
         m_csvFile = csvFile;
-        setRowNames(hasRowNames);
-        setColumnNames(hasColumnNames);
+        m_ioFormat = format;
         
-        m_csvFormat = CSVFormat.DEFAULT.withIgnoreEmptyLines(false).withIgnoreSurroundingSpaces(true);
+        m_csvFormat = CSVFormat.DEFAULT.withIgnoreEmptyLines(format.isIgnoreEmptyRows()).withIgnoreSurroundingSpaces(true);
     }
     
     public Table parse() throws IOException
@@ -60,7 +58,7 @@ public class CSVReader
             // and fill the table with it
             boolean firstRow = true;;
             for (CSVRecord csvRec : parser) {
-                if (m_isColumnNames && firstRow)
+                if (m_ioFormat.isColumnNames() && firstRow)
                     parseColumnHeaders(t, csvRec);
                 else {
                     Row row = t.addRow();
@@ -72,7 +70,7 @@ public class CSVReader
                         
                         // TMS column indexes are 1-based, so we want to increment the
                         // column number here, no matter what
-                        if (firstCol && m_isRowNames) {
+                        if (firstCol && isRowNames()) {
                             row.setLabel(s);
                             firstCol = false;
                         }
@@ -133,7 +131,7 @@ public class CSVReader
         boolean firstCol = true;
         int colNum = 0;
         for (String s : csvRec) {
-            if (firstCol && this.m_isRowNames)
+            if (firstCol && isRowNames())
                 ;
             else {
                 colNum++;
@@ -175,26 +173,14 @@ public class CSVReader
      */
     public boolean isRowNames()
     {
-        return m_isRowNames;
+        return m_ioFormat.isRowNames();
     }
-
-    protected void setRowNames(boolean isRowNames)
-    {
-        m_isRowNames = isRowNames;
-    }
-
     /**
      * Return {@code true} if the CSV file contains column names.
      * @return true if the CSV file contains column names
      */
     public boolean isColumnNames()
     {
-        return m_isColumnNames;
+        return m_ioFormat.isColumnNames();
     }
-
-    public void setColumnNames(boolean isColumnNames)
-    {
-        m_isColumnNames = isColumnNames;
-    }
-
 }
