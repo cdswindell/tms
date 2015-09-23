@@ -102,6 +102,9 @@ public final class TableFactory
         if (format == null)
             throw new IllegalArgumentException("Format argument cannot be null");
         
+        if (!format.canImport())
+            throw new IllegalArgumentException("Format does not support import");
+        
         try
         {
             if (format.isCSV()) {
@@ -123,11 +126,11 @@ public final class TableFactory
     /**
      * Construct a TableFactory instance.
      * <p>
-     * Protected constructor prevents anyone creating a TableFactory from outside of the package.
+     * Protected constructor prevents anyone creating a TableFactory from outside of the class.
      * The TableFactory class is intended only to provide a home for the static factory methods
      * to reside.
      */
-    protected TableFactory()
+    private TableFactory()
     {
         // noop
     }

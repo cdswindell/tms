@@ -47,6 +47,10 @@ public class TableWriter
                 CSVWriter.export(m_table, m_file, (CSVOptions)m_options);
                 break;
                 
+            case PDF:
+                PDFWriter.export(m_table, m_file, (PDFOptions)m_options);
+                break;
+                
             default:
                 break;
         }
