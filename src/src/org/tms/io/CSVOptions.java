@@ -3,7 +3,7 @@ package org.tms.io;
 public class CSVOptions extends IOOptions
 {
 
-    public static final CSVOptions CSV = new CSVOptions(Constants.COMMA, Constants.DOUBLE_QUOTE_CHAR, true, true, false, false, true);
+    public static final CSVOptions Default = new CSVOptions(Constants.COMMA, Constants.DOUBLE_QUOTE_CHAR, true, true, false, false, true);
 
     private char m_delimiter;
     private Character m_quoteCharacter;

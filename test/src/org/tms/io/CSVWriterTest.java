@@ -139,7 +139,7 @@ public class CSVWriterTest extends BaseTest
         tmpFile.deleteOnExit();
         
         // export the file, ignoring empty columns       
-        t.export(tmpFile.getPath(), CSVOptions.CSV.withIgnoreEmptyColumns());
+        t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyColumns());
         
         // now reimport it
         Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
@@ -182,7 +182,7 @@ public class CSVWriterTest extends BaseTest
         tmpFile.deleteOnExit();
         
         // export the file, ignoring empty rows        
-        t.export(tmpFile.getPath(), CSVOptions.CSV.withIgnoreEmptyRows());
+        t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyRows());
         
         // now reimport it
         Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
@@ -226,7 +226,7 @@ public class CSVWriterTest extends BaseTest
         tmpFile.deleteOnExit();
         
         // export the file, ignoring empty rows and columns       
-        t.export(tmpFile.getPath(), CSVOptions.CSV.withIgnoreEmptyRows().withIgnoreEmptyColumns());
+        t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyRows().withIgnoreEmptyColumns());
         
         // now reimport it
         Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);

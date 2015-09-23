@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The core elements provided in the TMS system
+ * The core elements provided in the Default system
  * 
  * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}

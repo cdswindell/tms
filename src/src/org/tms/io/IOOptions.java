@@ -18,10 +18,13 @@ public abstract class IOOptions
             if (fmt != null) {
                 switch (fmt) {
                     case CSV:
-                        return CSVOptions.CSV;
+                        return CSVOptions.Default;
                         
                     case TMS:
-                        return TMSOptions.TMS;
+                        return TMSOptions.Default;
+                        
+                    case PDF:
+                        return PDFOptions.Default;
                         
                     default:
                         break;
@@ -31,22 +34,24 @@ public abstract class IOOptions
             return null;
         }
         else
-            return TMSOptions.TMS;
+            return TMSOptions.Default;
     }
     
     private static final Map<String, FileFormat> sf_FileFormatMap = new HashMap<String, FileFormat>();
     
     protected static enum FileFormat 
     {
-        CSV("csv"),
-        PDF("pdf"),
-        Excel("xls", "xlsx"), 
-        TMS("tms");
+        CSV(true, "csv"),
+        PDF(false, "pdf"),
+        Excel(true, "xls", "xlsx"), 
+        TMS(true, "tms");
         
+        private boolean m_supportsImport;
         private Set<String> m_fileExtensions;
         
-        private FileFormat(String... fileExtensions)
+        private FileFormat(boolean supportsImport, String... fileExtensions)
         {
+            m_supportsImport = supportsImport;
             m_fileExtensions = new HashSet<String>();
             if (fileExtensions != null) {
                 for (String s : fileExtensions) {
@@ -92,9 +97,29 @@ public abstract class IOOptions
         return m_fileFormat == FileFormat.CSV;
     }
 
+    public boolean isPDF()
+    {
+        return m_fileFormat == FileFormat.PDF;
+    }
+
+    public boolean isExcel()
+    {
+        return m_fileFormat == FileFormat.Excel;
+    }
+
     public FileFormat getFileFormat()
     {
         return m_fileFormat;
+    }
+    
+    public boolean canImport()
+    {
+        return m_fileFormat.m_supportsImport;
+    }
+    
+    public boolean canExport()
+    {
+        return true;
     }
     
     public boolean isColumnNames()

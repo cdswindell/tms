@@ -94,7 +94,7 @@ public final class TableFactory
      */    
     static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders)
     {
-        return importFile(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.CSV.withRowNames(hasRowNames).withColumnNames(hasColumnHeaders));
+        return importFile(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.Default.withRowNames(hasRowNames).withColumnNames(hasColumnHeaders));
     }
     
     static public Table importFile(String csvFileName, TableContext tc, IOOptions format)

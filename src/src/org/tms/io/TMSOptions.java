@@ -3,7 +3,7 @@ package org.tms.io;
 public class TMSOptions extends IOOptions
 {
 
-    public static final TMSOptions TMS = new TMSOptions(true, true, false, false);
+    public static final TMSOptions Default = new TMSOptions(true, true, false, false);
 
     public TMSOptions(final boolean rowNames, 
                       final boolean colNames, 

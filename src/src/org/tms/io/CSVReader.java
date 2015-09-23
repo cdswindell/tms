@@ -64,7 +64,7 @@ public class CSVReader
             // create the table scaffold
             Table t = TableFactory.createTable(m_context);
             
-            // read the data from the CSV file, one row at a time, 
+            // read the data from the Default file, one row at a time, 
             // and fill the table with it
             boolean firstRow = true;;
             for (CSVRecord csvRec : parser) {
@@ -81,7 +81,7 @@ public class CSVReader
                         if (s != null && (s = s.trim()).length() == 0)
                             s = null;
                         
-                        // TMS column indexes are 1-based, so we want to increment the
+                        // Default column indexes are 1-based, so we want to increment the
                         // column number here, no matter what
                         if (firstCol && isRowNames()) {
                             row.setLabel(s);
@@ -216,16 +216,16 @@ public class CSVReader
     }
 
     /**
-     * Return {@code true} if the CSV file contains row names.
-     * @return true if the CSV file contains row names
+     * Return {@code true} if the Default file contains row names.
+     * @return true if the Default file contains row names
      */
     public boolean isRowNames()
     {
         return m_options.isRowNames();
     }
     /**
-     * Return {@code true} if the CSV file contains column names.
-     * @return true if the CSV file contains column names
+     * Return {@code true} if the Default file contains column names.
+     * @return true if the Default file contains column names
      */
     public boolean isColumnNames()
     {

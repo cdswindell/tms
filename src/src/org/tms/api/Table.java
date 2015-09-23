@@ -10,7 +10,7 @@ import org.tms.io.IOOptions;
 /**
  * A standard two dimensional table consisting of {@link Row}s, {@link Column}s, and {@link Cell}s, 
  * and, optionally, {@link Subset}s.
- * Tables are the key element in the TMS subsystem and only through table instance objects 
+ * Tables are the key element in the Default subsystem and only through table instance objects 
  * is it possible to create rows, columns, cells, and subsets.
  * <p>
  * The {@code Table} interface defines the methods available to operate on tables, including adding and 
@@ -23,19 +23,19 @@ import org.tms.io.IOOptions;
  * pool management is an optional feature that not all table implementations may support. 
  * See {@link TableContext} for more information on these capabilities.
  * <p>
- * TMS {@code Table}s are similar to Microsoft Excel spreadsheets in that both:
+ * Default {@code Table}s are similar to Microsoft Excel spreadsheets in that both:
  * <ul>
  * <li>are cell-oriented,</li>
  * <li>have rows, columns, and multiple sheets,</li>
  * <li>allow table cells to contain data of different types (e.g., A1 is a number, B1 is a String), as well as 
- * contain the result of a calculation (known as a {@link org.tms.api.derivables.Derivation} in TMS),</li>
+ * contain the result of a calculation (known as a {@link org.tms.api.derivables.Derivation} in Default),</li>
  * <li>automatically recalculate formulas when the data (table cells) on which they depend change, </li>
  * <li>allow rows, columns, and cell ranges to be grouped into {@link Subset}s, </li>
  * <li>support formatting,</li>
  * <li> are sortable. </li>
  * </ul>
  * <p>
- * TMS {@code Table}s differ from standard spreadsheets and provide the following advantages:
+ * Default {@code Table}s differ from standard spreadsheets and provide the following advantages:
  * <ul>
  * <li>cells can contain any valid Java class instance, including those defined by the JDK (String, Integer, etc.), 
  * as well as custom classes your application provides,</li>
