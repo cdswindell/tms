@@ -60,6 +60,9 @@ abstract class BaseWriter
     
     protected boolean isIgnoreColumn(int i)
     {
+        if (!m_baseOptions.isIgnoreEmptyColumns())
+            return false;
+        
         if (m_ignoredColumns == null)
             getNumConsumableColumns();
         
