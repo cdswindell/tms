@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -47,32 +49,55 @@ public class CSVWriter
         
         CSVPrinter out = new CSVPrinter(fw, format);
         try {
-            List<Object> record = new ArrayList<Object>(m_table.getNumColumns());
+            List<Object> emptyRow = null;
+            int nCols = m_table.getNumColumns();    
+            int nConsumableColumns = nCols;
+            Set<Integer> ignoredColumns = new HashSet<Integer>();
+            if (m_options.isIgnoreEmptyColumns()) {
+                int emptyColCnt = 0;
+                for (int i = 1; i <= nCols; i++) {
+                    Column c = m_table.getColumn(i);
+                    if (c == null || c.isNull()) {
+                        emptyColCnt++;
+                        ignoredColumns.add(i);
+                    }
+                }
+                
+                nConsumableColumns -= emptyColCnt;
+            }
+            
+            List<Object> record = new ArrayList<Object>(nConsumableColumns);
             if (m_options.isColumnNames()) {
                 if (m_options.isRowNames())
                     record.add(null);
-                for (Column col : m_table.columns()) {
-                    if (col != null)
-                        record.add(col.getLabel());
-                    else
-                        record.add(null);                       
+                
+                for (int cIdx = 1; cIdx <= nCols; cIdx++) {
+                    if (!ignoredColumns.contains(cIdx)) {
+                        Column c = m_table.getColumn(cIdx);
+                        if (c != null)
+                            record.add(c.getLabel());
+                        else
+                            record.add(null);  
+                    }
                 }
                 
                 out.printRecord(record);
             }
             
-            List<Object> emptyRow = null;
             for (Row r : m_table.getRows()) {
                 record.clear();
                 boolean rowIsNull = true;
-                if (r != null && !r.isNull()) {
-                    for (Column c : m_table.getColumns()) {
-                        Object value = m_table.getCellValue(r, c);
-                        if (value == null)
-                            record.add(null);
-                        else {
-                            rowIsNull = false;
-                            record.add(value.toString());
+                if (!(r == null || r.isNull())) {
+                    for (int cIdx = 1; cIdx <= nCols; cIdx++) {
+                        if (!ignoredColumns.contains(cIdx)) {
+                            Column c = m_table.getColumn(cIdx);
+                            Object value = m_table.getCellValue(r, c);
+                            if (value == null)
+                                record.add(null);
+                            else {
+                                rowIsNull = false;
+                                record.add(value.toString());
+                            }
                         }
                     }
                 }
@@ -82,10 +107,9 @@ public class CSVWriter
                     if (m_options.isIgnoreEmptyRows())
                         continue;
                     else {
-                        if (emptyRow == null) {
-                            int nCols = m_table.getNumColumns();
-                            emptyRow = new ArrayList<Object>(nCols);
-                            for (int i = 0; i < nCols; i++)
+                        if (emptyRow == null) {                            
+                            emptyRow = new ArrayList<Object>(nConsumableColumns);
+                            for (int i = 0; i < nConsumableColumns; i++)
                                 emptyRow.add(null);
                             
                             record.addAll(emptyRow);
