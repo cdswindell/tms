@@ -3,6 +3,7 @@ package org.tms.tds.dbms;
 import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.derivables.Derivable;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
@@ -28,7 +29,7 @@ public class DbmsColumnImpl extends ColumnImpl
         }
         catch (ClassNotFoundException e)
         {
-            // TODO throw exception
+            throw new IllegalTableStateException("Cannot load DBMS driver: " + e.getMessage());
         }
     }
 
