@@ -32,6 +32,16 @@ public class DbmsColumnImpl extends ColumnImpl
         }
     }
 
+    @Override
+    protected CellImpl getCellInternal(RowImpl row, boolean createIfSparse, boolean setCurrent)
+    {
+        // in that this column is a database cell, we need to override createIfSparse
+        if (!createIfSparse && (row instanceof DbmsRowImpl))
+            createIfSparse = true;
+        
+        return super.getCellInternal(row, createIfSparse, setCurrent);
+    }
+    
     /**
      * Return the 1-based index of the row in the dbms table result set
      * @return the 1-based index of the row in the dbms table result set
