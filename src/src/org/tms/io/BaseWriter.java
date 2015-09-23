@@ -10,8 +10,8 @@ import org.tms.api.Table;
 
 abstract class BaseWriter
 {
-    protected Table m_table;
-    protected File m_outFile;
+    private Table m_table;
+    private File m_outFile;
     private IOOptions m_baseOptions;
     
     private int m_nCols;
@@ -28,6 +28,11 @@ abstract class BaseWriter
         m_nConsumableColumns = -1; // to be initialized later
     }
 
+    protected IOOptions options()
+    {
+        return m_baseOptions;
+    }
+    
     protected int getNumColumns()
     {
         return m_nCols;
@@ -67,5 +72,15 @@ abstract class BaseWriter
             getNumConsumableColumns();
         
         return m_ignoredColumns.contains(i);           
+    }
+    
+    protected Table getTable()
+    {
+        return m_table;
+    }
+
+    protected File getOutputFile()
+    {
+        return m_outFile;
     }
 }

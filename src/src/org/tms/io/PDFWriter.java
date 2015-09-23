@@ -15,14 +15,16 @@ public class PDFWriter extends BaseWriter
         writer.exportPDF();        
     }
     
-    private PDFOptions m_options;
-       
     private PDFWriter(Table t, File f, PDFOptions options)
     {
         super(t, f, options);
-        m_options = options;
     }
 
+    protected PDFOptions options()
+    {
+        return (PDFOptions)super.options();
+    }
+ 
     private void exportPDF()
     {
         // TODO Auto-generated method stub

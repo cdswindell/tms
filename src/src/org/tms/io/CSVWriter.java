@@ -23,22 +23,24 @@ public class CSVWriter extends BaseWriter
         writer.exportCVS();        
     }
     
-    private CSVOptions m_options;
-       
     private CSVWriter(Table t, File f, CSVOptions options)
     {
         super(t, f, options);
-        m_options = options;
     }
   
+    protected CSVOptions options()
+    {
+        return (CSVOptions)super.options();
+    }
+ 
     private void exportCVS() 
     throws IOException
     {
-        FileWriter fw = new FileWriter(m_outFile);
+        FileWriter fw = new FileWriter(getOutputFile());
         CSVFormat format = CSVFormat.DEFAULT
                                         .withAllowMissingColumnNames(true)
-                                        .withDelimiter(m_options.getDelimiter())
-                                        .withQuote(m_options.getQuote())
+                                        .withDelimiter(options().getDelimiter())
+                                        .withQuote(options().getQuote())
                                         .withQuoteMode(QuoteMode.MINIMAL);
         
         CSVPrinter out = new CSVPrinter(fw, format);
@@ -46,13 +48,13 @@ public class CSVWriter extends BaseWriter
             List<Object> emptyRow = null;
             
             List<Object> record = new ArrayList<Object>(getNumConsumableColumns());
-            if (m_options.isColumnNames()) {
-                if (m_options.isRowNames())
+            if (options().isColumnNames()) {
+                if (options().isRowNames())
                     record.add(null);
                 
                 for (int cIdx = 1; cIdx <= getNumColumns(); cIdx++) {
                     if (!isIgnoreColumn(cIdx)) {
-                        Column c = m_table.getColumn(cIdx);
+                        Column c = getTable().getColumn(cIdx);
                         if (c != null)
                             record.add(c.getLabel());
                         else
@@ -63,14 +65,14 @@ public class CSVWriter extends BaseWriter
                 out.printRecord(record);
             }
             
-            for (Row r : m_table.getRows()) {
+            for (Row r : getTable().getRows()) {
                 record.clear();
                 boolean rowIsNull = true;
                 if (!(r == null || r.isNull())) {
                     for (int cIdx = 1; cIdx <= getNumColumns(); cIdx++) {
                         if (!isIgnoreColumn(cIdx)) {
-                            Column c = m_table.getColumn(cIdx);
-                            Object value = m_table.getCellValue(r, c);
+                            Column c = getTable().getColumn(cIdx);
+                            Object value = getTable().getCellValue(r, c);
                             if (value == null)
                                 record.add(null);
                             else {
@@ -83,7 +85,7 @@ public class CSVWriter extends BaseWriter
             
                 // handle empty row
                 if (rowIsNull) {
-                    if (m_options.isIgnoreEmptyRows())
+                    if (options().isIgnoreEmptyRows())
                         continue;
                     else {
                         if (emptyRow == null) {                            
@@ -96,7 +98,7 @@ public class CSVWriter extends BaseWriter
                     }
                 }
                 
-                if (m_options.isRowNames())
+                if (options().isRowNames())
                   if (r == null)
                       record.add(0, null);
                   else
@@ -113,15 +115,5 @@ public class CSVWriter extends BaseWriter
             if (fw != null)
                 fw.close();
         }        
-    }
-    
-    public Table getTable()
-    {
-        return m_table;
-    }
-
-    public File getOutputFile()
-    {
-        return m_outFile;
     }
 }

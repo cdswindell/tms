@@ -19,8 +19,7 @@ public class CSVWriterTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.csv";
     private static final String SAMPLE2 = "sample2.csv";
-    private static final String SAMPLE3 = "sample3.csv";
-    
+    private static final String SAMPLE3 = "sample3.csv";    
 
     @Test
     public final void testExportSample1() throws IOException
