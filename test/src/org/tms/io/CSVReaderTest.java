@@ -1,10 +1,10 @@
 package org.tms.io;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.hamcrest.core.IsNull.nullValue;
 
 import java.io.IOException;
 
@@ -20,6 +20,7 @@ public class CSVReaderTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.csv";
     private static final String SAMPLE2 = "sample2.csv";
+    private static final String SAMPLE3 = "sample3.csv";
     
     @Test
     public final void testCSVReaderConstructor()
@@ -91,6 +92,113 @@ public class CSVReaderTest extends BaseTest
                 if (t.getCellValue(row, c1) != null)
                     assertThat(Number.class.isAssignableFrom(t.getCellValue(row, c1).getClass()), is(true));
                 
+                if (t.getCellValue(row, c2) != null)
+                    assertThat(row.getLabel(), is(t.getCellValue(row, c2) + " Row"));
+                
+                if (t.getCellValue(row, c3) != null)
+                    assertThat(Boolean.class.isAssignableFrom(t.getCellValue(row, c3).getClass()), is(true));
+            }
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public final void testParseIgnoreEmptyRows() 
+    {
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE2), CSVOptions.CSV.withIgnoreEmptyRows()); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            assertThat(t.getNumRows(), is(3));
+            assertThat(t.getNumColumns(), is(3));
+            assertThat(t.getNumCells(), is(4 * 2));
+            
+            assertThat(t.getColumn(1).getLabel(), is("Abc"));
+            assertThat(t.getColumn(2).getLabel(), nullValue());
+            assertThat(t.getColumn(3).getLabel(), is("Def, Ghi"));
+            
+            Column c1 = t.getColumn(1);
+            Column c2 = t.getColumn(2);
+            Column c3 = t.getColumn(3);
+            for (Row row : t.rows()) {
+                if (t.getCellValue(row, c1) != null)
+                    assertThat(Number.class.isAssignableFrom(t.getCellValue(row, c1).getClass()), is(true));
+                
+                if (t.getCellValue(row, c2) != null)
+                    assertThat(row.getLabel(), is(t.getCellValue(row, c2) + " Row"));
+                
+                if (t.getCellValue(row, c3) != null)
+                    assertThat(Boolean.class.isAssignableFrom(t.getCellValue(row, c3).getClass()), is(true));
+            }
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public final void testParseIgnoreEmptyCols() 
+    {
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE3), CSVOptions.CSV.withIgnoreEmptyColumns()); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            assertThat(t.getNumRows(), is(4));
+            assertThat(t.getNumColumns(), is(2));
+            assertThat(t.getNumCells(), is(6));
+            
+            assertThat(t.getColumn(1).getLabel(), nullValue());
+            assertThat(t.getColumn(2).getLabel(), is("Def, Ghi"));
+            
+            Column c2 = t.getColumn(1);
+            Column c3 = t.getColumn(2);
+            for (Row row : t.rows()) {
+                if (t.getCellValue(row, c2) != null)
+                    assertThat(row.getLabel(), is(t.getCellValue(row, c2) + " Row"));
+                
+                if (t.getCellValue(row, c3) != null)
+                    assertThat(Boolean.class.isAssignableFrom(t.getCellValue(row, c3).getClass()), is(true));
+            }
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public final void testParseIgnoreEmptyRowsAndCols() 
+    {
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE3), CSVOptions.CSV.withIgnoreEmptyRows().withIgnoreEmptyColumns()); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            assertThat(t.getNumRows(), is(3));
+            assertThat(t.getNumColumns(), is(2));
+            assertThat(t.getNumCells(), is(6));
+            
+            assertThat(t.getColumn(1).getLabel(), nullValue());
+            assertThat(t.getColumn(2).getLabel(), is("Def, Ghi"));
+            
+            Column c2 = t.getColumn(1);
+            Column c3 = t.getColumn(2);
+            for (Row row : t.rows()) {
                 if (t.getCellValue(row, c2) != null)
                     assertThat(row.getLabel(), is(t.getCellValue(row, c2) + " Row"));
                 

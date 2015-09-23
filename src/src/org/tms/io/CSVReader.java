@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -20,29 +22,33 @@ public class CSVReader
     private File m_csvFile;
     private TableContext m_context;
     private CSVFormat m_csvFormat;
-    private IOOptions m_ioFormat;
+    private CSVOptions m_options;
     
-    public CSVReader(String fileName, CSVOptions format)
+    public CSVReader(String fileName, IOOptions format)
     {
         this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
     }
 
-    public CSVReader(String fileName, TableContext context, CSVOptions format)
+    public CSVReader(String fileName, TableContext context, IOOptions format)
     {
         this(new File(fileName), context, format);
     }
 
-    public CSVReader(File csvFile, TableContext context, CSVOptions format)
+    public CSVReader(File csvFile, TableContext context, IOOptions format)
     {
         m_context = context;
         m_csvFile = csvFile;
-        m_ioFormat = format;
+        
+        if (!(format instanceof CSVOptions))
+            throw new IllegalArgumentException("CSVOptions required");
+        
+        m_options = (CSVOptions)format;
         
         m_csvFormat = CSVFormat.DEFAULT
                                 .withIgnoreEmptyLines(format.isIgnoreEmptyRows())
-                                .withIgnoreSurroundingSpaces(format.isIgnoreSuroundingSpaces())
-                                .withDelimiter(format.getDelimiter())
-                                .withQuote(format.getQuote());
+                                .withIgnoreSurroundingSpaces(m_options.isIgnoreSuroundingSpaces())
+                                .withDelimiter(m_options.getDelimiter())
+                                .withQuote(m_options.getQuote());
     }
     
     public Table parse() throws IOException
@@ -62,9 +68,12 @@ public class CSVReader
             // and fill the table with it
             boolean firstRow = true;;
             for (CSVRecord csvRec : parser) {
-                if (m_ioFormat.isColumnNames() && firstRow)
+                if (m_options.isColumnNames() && firstRow)
                     parseColumnHeaders(t, csvRec);
                 else {
+                    if (m_options.isIgnoreEmptyRows() && isEmpty(csvRec))
+                        continue;
+                    
                     Row row = t.addRow();
                     int colNum = 1;
                     boolean firstCol = true;
@@ -95,6 +104,21 @@ public class CSVReader
                 firstRow = false;
             }
             
+            // if we're ignoring extra columns, we have one more check
+            if (m_options.isIgnoreEmptyColumns()) {
+                Set<Column> emptyCols = null;
+                for (Column c : t.getColumns()) {
+                    if (c != null && c.isNull()) {
+                        if (emptyCols == null)
+                            emptyCols = new HashSet<Column>();
+                        emptyCols.add(c);
+                    }
+                }
+                
+                if (emptyCols != null)
+                    t.delete(emptyCols.toArray(new Column [] {}));
+            }
+            
             return t;
         }
         finally {
@@ -105,6 +129,26 @@ public class CSVReader
             if (in != null)
                 in.close();
         }
+    }
+
+    private boolean isEmpty(CSVRecord csvRec)
+    {
+        if (csvRec != null) {
+            boolean firstCol = true;
+            for (String s : csvRec) {
+                if (firstCol && m_options.isRowNames())
+                    ; // noop
+                else {
+                    // if s isn't null or empty, the record isn't empty
+                    if (s != null && (s = s.trim()).length() > 0)
+                        return false;
+                }
+                
+                firstCol = false;
+            }
+        }
+        
+        return true;
     }
 
     private Object parseCellValue(String s)
@@ -177,7 +221,7 @@ public class CSVReader
      */
     public boolean isRowNames()
     {
-        return m_ioFormat.isRowNames();
+        return m_options.isRowNames();
     }
     /**
      * Return {@code true} if the CSV file contains column names.
@@ -185,6 +229,6 @@ public class CSVReader
      */
     public boolean isColumnNames()
     {
-        return m_ioFormat.isColumnNames();
+        return m_options.isColumnNames();
     }
 }
