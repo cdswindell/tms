@@ -27,5 +27,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.35-bin.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports-6.1.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

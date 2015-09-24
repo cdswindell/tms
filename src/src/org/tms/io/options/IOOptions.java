@@ -1,4 +1,4 @@
-package org.tms.io;
+package org.tms.io.options;
 
 import java.io.File;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public abstract class IOOptions
     
     private static final Map<String, FileFormat> sf_FileFormatMap = new HashMap<String, FileFormat>();
     
-    protected static enum FileFormat 
+    public static enum FileFormat 
     {
         CSV(true, "csv"),
         PDF(false, "pdf"),

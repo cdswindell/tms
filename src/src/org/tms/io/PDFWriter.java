@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.tms.api.Table;
+import org.tms.io.jasper.TMSReport;
+import org.tms.io.options.PDFOptions;
 import org.tms.tds.TableImpl;
 
 public class PDFWriter extends BaseWriter
@@ -20,14 +22,15 @@ public class PDFWriter extends BaseWriter
         super(t, f, options);
     }
 
-    protected PDFOptions options()
+    public PDFOptions options()
     {
         return (PDFOptions)super.options();
     }
  
-    private void exportPDF()
+    private void exportPDF() 
+    throws IOException
     {
-        // TODO Auto-generated method stub
-        
+        TMSReport report = new TMSReport(this);
+        report.export();
     }
 }

@@ -15,6 +15,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableFactory;
+import org.tms.io.options.CSVOptions;
 
 public class CSVReaderTest extends BaseTest
 {

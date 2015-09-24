@@ -1,4 +1,5 @@
-package org.tms.io;
+package org.tms.io.options;
+
 
 public class CSVOptions extends IOOptions
 {
@@ -9,7 +10,7 @@ public class CSVOptions extends IOOptions
     private Character m_quoteCharacter;
     private boolean m_ignoreSuroundingSpaces;
     
-    public CSVOptions(final char delimiter,
+    private CSVOptions(final char delimiter,
                       final Character quoteCharacter,
                       final boolean rowNames, 
                       final boolean colNames, 
@@ -17,7 +18,7 @@ public class CSVOptions extends IOOptions
                       final boolean ignoreEmptyCols, 
                       final boolean ignoreSurroundingSpaces)
     {
-        super(org.tms.io.IOOptions.FileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(org.tms.io.options.IOOptions.FileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
         m_delimiter = delimiter;
         m_quoteCharacter = quoteCharacter;
         m_ignoreSuroundingSpaces = ignoreSurroundingSpaces;

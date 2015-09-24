@@ -318,6 +318,12 @@ public class CellImpl extends TableElementImpl implements Cell
             clearProperty(TableProperty.DisplayFormat);        
     }
 
+    @Override
+    public boolean isFormatted()
+    {
+        return getFormatString() != null;
+    }
+    
     protected String getFormatString()
     {
         String format = getDisplayFormat();

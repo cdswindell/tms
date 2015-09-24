@@ -12,6 +12,7 @@ import org.apache.commons.csv.QuoteMode;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.io.options.CSVOptions;
 import org.tms.tds.TableImpl;
 
 public class CSVWriter extends BaseWriter
@@ -28,7 +29,7 @@ public class CSVWriter extends BaseWriter
         super(t, f, options);
     }
   
-    protected CSVOptions options()
+    public CSVOptions options()
     {
         return (CSVOptions)super.options();
     }

@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.io.options.CSVOptions;
+import org.tms.io.options.IOOptions;
+import org.tms.io.options.PDFOptions;
 import org.tms.tds.TableImpl;
 
 public class TableWriter
@@ -25,8 +28,8 @@ public class TableWriter
         m_file = new File(fileName);
         
         // check if file can be written
-        if (!m_file.canWrite())
-            throw new IOException("Cannot write to " + fileName);
+        if (!canWrite())
+                throw new IOException("Cannot write to " + fileName);
         
         // select default options, if none provided
         if (options == null) {
@@ -37,6 +40,27 @@ public class TableWriter
         }
         else
             m_options = options;
+    }
+
+    private boolean canWrite()
+    {
+        if (m_file.exists())
+            return m_file.canWrite();
+          
+        // have to try to create the file; if we can, then delete it right away
+        try
+        {
+            m_file.createNewFile();
+            return true;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+        finally {
+            if (m_file.exists())
+                m_file.delete();
+        }
     }
 
     public void export() 

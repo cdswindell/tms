@@ -30,6 +30,7 @@ public interface Cell extends TableElement, Derivable
 
     public String getDisplayFormat();
     public void setDisplayFormat(String format);
+    public boolean isFormatted();
 
     public TableCellValidator getValidator();
     public void setValidator(TableCellValidator validator);

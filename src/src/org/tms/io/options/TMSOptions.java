@@ -1,16 +1,16 @@
-package org.tms.io;
+package org.tms.io.options;
 
 public class TMSOptions extends IOOptions
 {
 
     public static final TMSOptions Default = new TMSOptions(true, true, false, false);
 
-    public TMSOptions(final boolean rowNames, 
+    private TMSOptions(final boolean rowNames, 
                       final boolean colNames, 
                       final boolean ignoreEmptyRows, 
                       final boolean ignoreEmptyCols)
     {
-        super(org.tms.io.IOOptions.FileFormat.TMS, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(org.tms.io.options.IOOptions.FileFormat.TMS, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
     }
     
     public TMSOptions withRowNames(final boolean b)

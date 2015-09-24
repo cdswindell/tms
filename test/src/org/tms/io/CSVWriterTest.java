@@ -14,6 +14,7 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
+import org.tms.io.options.CSVOptions;
 
 public class CSVWriterTest extends BaseTest
 {
@@ -28,13 +29,14 @@ public class CSVWriterTest extends BaseTest
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport", ".csv");
-        tmpFile.deleteOnExit();
         
         // export the file
         t.export(tmpFile.getPath());
         
         // now reimport it
         Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        tmpFile.delete();
+        
         assertNotNull(t2);        
         assertThat(t2.isValid(), is(true));
         assertThat(t2.getNumRows(), is(t.getNumRows()));
@@ -61,13 +63,14 @@ public class CSVWriterTest extends BaseTest
         assertNotNull(t);
         
         tmpFile = File.createTempFile("testExport2", ".csv");
-        tmpFile.deleteOnExit();
         
         // export the file
         t.export(tmpFile.getPath());
         
         // now reimport it
         t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        tmpFile.delete();
+        
         assertNotNull(t2);        
         assertThat(t2.isValid(), is(true));
         assertThat(t2.getNumRows(), is(t.getNumRows()));
@@ -98,13 +101,14 @@ public class CSVWriterTest extends BaseTest
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport2", ".csv");
-        tmpFile.deleteOnExit();
         
         // export the file
         t.export(tmpFile.getPath());
         
         // now reimport it
         Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        tmpFile.delete();
+        
         assertNotNull(t2);        
         assertThat(t2.isValid(), is(true));
         assertThat(t2.getNumRows(), is(t.getNumRows()));
@@ -135,13 +139,14 @@ public class CSVWriterTest extends BaseTest
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport3", ".csv");
-        tmpFile.deleteOnExit();
         
         // export the file, ignoring empty columns       
         t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyColumns());
         
         // now reimport it
         Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        tmpFile.delete();
+        
         assertNotNull(t2);        
         assertThat(t2.isValid(), is(true));
         assertThat(t2.getNumRows(), is(t.getNumRows()));
@@ -178,13 +183,14 @@ public class CSVWriterTest extends BaseTest
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport4", ".csv");
-        tmpFile.deleteOnExit();
         
         // export the file, ignoring empty rows        
         t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyRows());
         
         // now reimport it
         Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        tmpFile.delete();
+        
         assertNotNull(t2);        
         assertThat(t2.isValid(), is(true));
         assertThat(t2.getNumRows(), is(t.getNumRows() - 1));
@@ -222,13 +228,14 @@ public class CSVWriterTest extends BaseTest
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport5", ".csv");
-        tmpFile.deleteOnExit();
         
         // export the file, ignoring empty rows and columns       
         t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyRows().withIgnoreEmptyColumns());
         
         // now reimport it
         Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        tmpFile.delete();
+        
         assertNotNull(t2);        
         assertThat(t2.isValid(), is(true));
         assertThat(t2.getNumRows(), is(t.getNumRows() - 1));

@@ -7,8 +7,9 @@ import java.util.Set;
 
 import org.tms.api.Column;
 import org.tms.api.Table;
+import org.tms.io.options.IOOptions;
 
-abstract class BaseWriter
+public abstract class BaseWriter
 {
     private Table m_table;
     private File m_outFile;
@@ -28,9 +29,22 @@ abstract class BaseWriter
         m_nConsumableColumns = -1; // to be initialized later
     }
 
-    protected IOOptions options()
+    /*
+     * Publically available methods for use outside of package
+     */
+    public IOOptions options()
     {
         return m_baseOptions;
+    }
+    
+    public Table getTable()
+    {
+        return m_table;
+    }
+
+    public File getOutputFile()
+    {
+        return m_outFile;
     }
     
     protected int getNumColumns()
@@ -72,15 +86,5 @@ abstract class BaseWriter
             getNumConsumableColumns();
         
         return m_ignoredColumns.contains(i);           
-    }
-    
-    protected Table getTable()
-    {
-        return m_table;
-    }
-
-    protected File getOutputFile()
-    {
-        return m_outFile;
     }
 }
