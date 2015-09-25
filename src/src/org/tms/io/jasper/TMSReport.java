@@ -13,9 +13,14 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.design.JRDesignBand;
+import net.sf.jasperreports.engine.design.JRDesignExpression;
+import net.sf.jasperreports.engine.design.JRDesignField;
 import net.sf.jasperreports.engine.design.JRDesignParameter;
 import net.sf.jasperreports.engine.design.JRDesignStyle;
+import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
 import net.sf.jasperreports.engine.type.ModeEnum;
 
 import org.tms.api.Column;
@@ -29,8 +34,8 @@ import org.tms.io.options.TitleableOption;
 
 public class TMSReport
 {
-    private static final int sf_StandardFontPointSize = 8;
-    private static final int sf_TitleFontPointSize = 14;
+    private static final float sf_StandardFontPointSize = 8;
+    private static final float sf_TitleFontPointSize = 14;
     
     private static final int sf_PortraitPageWidth = (int)(72 * 8.5); // 612px
     private static final int sf_PortraitPageHeight = (int)(72 * 11); // 792px
@@ -45,7 +50,7 @@ public class TMSReport
     private Table m_table;
     private IOOptions m_options;
     
-    private Map<Column, JRField> m_columnFieldMap;
+    private Map<Column, JRField> m_colFieldMap;
     private TMSDataSource m_jrDataSource;
     private Map<String, Object> m_jrParams;
     
@@ -102,7 +107,7 @@ public class TMSReport
     
     Map<Column, JRField> getColumnFieldMap()
     {
-        return m_columnFieldMap;
+        return m_colFieldMap;
     }
     
     void generateReport() 
@@ -153,48 +158,131 @@ public class TMSReport
 
     private void buildJasperDesign() throws JRException
     {
+        // Figure out how many columns we have
+        int nCols = m_writer.getNumActiveColumns();
+        
         m_jrDesign = new JasperDesign();
         m_jrDesign.setName(m_table.getLabel() != null ? m_table.getLabel() : "TMS Table");
         
         // Paginated??
-        boolean paginated = (m_options instanceof PageableOption) ? ((PageableOption)m_options).isPageNumbers() : false;
+        boolean paginated = (m_options instanceof PageableOption) ? ((PageableOption)m_options).isPaged() : false;
         m_jrDesign.setIgnorePagination(!paginated);
-           
-        int colWidth = 0;
-        JRDesignStyle boldStyle = defineBoldStyle(m_jrDesign);
+        
+        int pageWidth = getPageWidth();
+        int colWidth = paginated ? pageWidth - sf_PageLeftMargin - sf_PageRightMargin : pageWidth;
+                
+        // set page parameters, including size and margin
+        m_jrDesign.setPageWidth(pageWidth);
+        if (paginated) {
+            m_jrDesign.setLeftMargin(sf_PageLeftMargin);
+            m_jrDesign.setRightMargin(sf_PageRightMargin);
+            m_jrDesign.setColumnCount(1);
+            m_jrDesign.setColumnWidth(colWidth);
+        }
+        else {
+            m_jrDesign.setLeftMargin(0);
+            m_jrDesign.setRightMargin(0);
+        }
+        
+        int pageHeight = getPageHeight();
+        m_jrDesign.setPageHeight(pageHeight);
+        if (paginated) {
+            m_jrDesign.setTopMargin(sf_PageTopMargin);
+            m_jrDesign.setBottomMargin(sf_PageBottomMargin);
+        }
+        else {
+            m_jrDesign.setTopMargin(0);
+            m_jrDesign.setBottomMargin(0);
+        }    
+
+        // define font styles
+        JRDesignStyle boldStyle = defineStyle(m_jrDesign, "Sans_Bold", sf_StandardFontPointSize, false, true);
+        JRDesignStyle normalStyle = defineStyle(m_jrDesign, "Sans_Normal", sf_StandardFontPointSize, true, false);
         
         defineGlobalParameters(m_jrDesign);
         
+        // create JR fields for each printable column
+        m_colFieldMap = new HashMap<Column, JRField>(nCols);
+        for (Column col : m_writer.getActiveColumns()) {
+            JRDesignField jrField = new JRDesignField();
+            jrField.setName(String.valueOf(col.getIndex()));
+            
+            m_jrDesign.addField(jrField);
+            m_colFieldMap.put(col, jrField);
+        }
+            
         // finally, set title and force recompile
-        defineTitleBand(m_jrDesign, boldStyle, colWidth);
+        if ((m_options instanceof TitleableOption) && ((TitleableOption)m_options).hasTitle())
+            defineTitleBand(m_jrDesign, boldStyle, colWidth);
         
         m_jrReport = null;
         m_jrPrint = null;
     }
 
-    private void defineTitleBand(JasperDesign jrDesign, JRDesignStyle boldStyle, int colWidth)
+    private int getPageWidth()
     {
-        // TODO Auto-generated method stub
+        int pageWidth = 0;
+        if ((m_options instanceof PageableOption)) {
+            pageWidth = ((PageableOption)m_options).getPageWidth();
+            if (pageWidth <= 0)
+                pageWidth = sf_PortraitPageWidth;
+        }
         
+        return pageWidth;
     }
 
-    private JRDesignStyle defineBoldStyle(JasperDesign jrDesign) 
+    private int getPageHeight()
+    {
+        int pageHeight = 0;
+        if ((m_options instanceof PageableOption)) {
+            pageHeight = ((PageableOption)m_options).getPageHeight();
+            if (pageHeight <= 0)
+                pageHeight = sf_PortraitPageHeight;
+        }
+        
+        return pageHeight;
+    }
+
+    private JRDesignBand defineTitleBand(JasperDesign jrDesign, JRDesignStyle boldStyle, int colWidth)
+    {
+        JRDesignBand titleBand = new JRDesignBand();
+        titleBand.setHeight(35);
+        
+        JRDesignTextField titleField = new JRDesignTextField();
+        titleField.setBlankWhenNull(true);
+        titleField.setX(0);
+        titleField.setY(5);
+        titleField.setWidth(colWidth);
+        titleField.setStretchWithOverflow(true);
+        titleField.setHeight(30);
+        titleField.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+        titleField.setStyle(boldStyle);
+        titleField.setFontSize(sf_TitleFontPointSize);
+        
+        JRDesignExpression titleExpression = new JRDesignExpression();
+        titleExpression.setText("$P{ReportTitle}");
+        titleField.setExpression(titleExpression);
+        titleBand.addElement(titleField);
+        jrDesign.setTitle(titleBand);
+        
+        return titleBand;
+    }
+
+    private JRDesignStyle defineStyle(JasperDesign jrDesign, String name, float fontSize, boolean isDefault, boolean isBold) 
     throws JRException
     {
-        float fontSize = sf_StandardFontPointSize;
+        JRDesignStyle style = new JRDesignStyle();
+        style.setName(name);
+        style.setDefault(isDefault);
+        style.setFontName("SansSerif");
+        style.setFontSize(fontSize);
+        style.setBold(isBold);
+        style.setPdfEmbedded(false);
+        style.setMode(ModeEnum.OPAQUE);
         
-        JRDesignStyle boldStyle = new JRDesignStyle();
-        boldStyle.setName("Sans_Bold");
-        boldStyle.setDefault(false);
-        boldStyle.setFontName("SansSerif");
-        boldStyle.setFontSize(fontSize);
-        boldStyle.setBold(true);
-        boldStyle.setPdfEmbedded(false);
-        boldStyle.setMode(ModeEnum.OPAQUE);
+        jrDesign.addStyle(style);
         
-        jrDesign.addStyle(boldStyle);
-        
-        return boldStyle;
+        return style;
     }
 
     private void defineGlobalParameters(JasperDesign jrDesign) throws JRException

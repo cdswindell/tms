@@ -1,8 +1,10 @@
 package org.tms.io;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.tms.api.Column;
@@ -18,6 +20,7 @@ public abstract class BaseWriter
     private int m_nCols;
     private int m_nConsumableColumns;
     private Set<Integer> m_ignoredColumns;
+    private List<Column> m_activeCols;
     
     protected BaseWriter(Table t, File f, IOOptions options)
     {
@@ -47,12 +50,12 @@ public abstract class BaseWriter
         return m_outFile;
     }
     
-    protected int getNumColumns()
+    public int getNumColumns()
     {
         return m_nCols;
     }
 
-    protected int getNumConsumableColumns()
+    public int getNumConsumableColumns()
     {
         if (m_nConsumableColumns == -1) {
             m_nConsumableColumns = m_nCols;
@@ -77,7 +80,7 @@ public abstract class BaseWriter
         return m_nConsumableColumns;
     }
     
-    protected boolean isIgnoreColumn(int i)
+    public boolean isIgnoreColumn(int i)
     {
         if (!m_baseOptions.isIgnoreEmptyColumns())
             return false;
@@ -86,5 +89,37 @@ public abstract class BaseWriter
             getNumConsumableColumns();
         
         return m_ignoredColumns.contains(i);           
+    }
+    
+    /**
+     * Return a list of active columns in the table. Active columns are non-empty columns, 
+     * if isIgnoreEmptyColumns() is true, or all columns otherwise
+     * @return
+     */
+    public List<Column> getActiveColumns()
+    {
+        if (m_baseOptions.isIgnoreEmptyColumns()) {
+            if (m_activeCols != null || getNumColumns() != getNumConsumableColumns()) {
+                    
+                if (m_activeCols == null) {
+                    m_activeCols = new ArrayList<Column>(getNumConsumableColumns());
+                    
+                    for (int i = 1; i <= m_nCols; i++) {
+                        Column c = m_table.getColumn(i);
+                        if (c != null && !isIgnoreColumn(i)) 
+                            m_activeCols.add(m_table.getColumn(i));
+                    }
+                }
+                
+                return m_activeCols;
+            }
+        }
+        
+        return m_table.getColumns();
+    }
+    
+    public int getNumActiveColumns()
+    {
+        return getActiveColumns().size();
     }
 }

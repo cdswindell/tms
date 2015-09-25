@@ -20,6 +20,8 @@ public class PDFWriterTest extends BaseTest
         Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
         assertNotNull(t);
         
-        t.export("a.pdf", PDFOptions.Default);
+        t.export("a.pdf", PDFOptions.Default
+                .withPages(false)
+                .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
     }
 }
