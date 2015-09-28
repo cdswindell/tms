@@ -6,6 +6,8 @@ import java.util.Map;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.design.JRDesignTextField;
+import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
 
 import org.tms.api.Cell;
 import org.tms.api.Column;
@@ -21,7 +23,7 @@ public class TMSDataSource implements JRDataSource
     
     private int m_maxRows;
     private int m_rowIndex;
-    private Map<JRField, Column> m_fieldToColMap;
+    private Map<String, Column> m_fieldToColMap;
     
     TMSDataSource(TMSReport tr)
     {
@@ -37,22 +39,23 @@ public class TMSDataSource implements JRDataSource
     public Object getFieldValue(JRField jrField) throws JRException
     {
         if (m_fieldToColMap == null) {
-            m_fieldToColMap = new HashMap<JRField, Column>(m_table.getNumColumns());
+            m_fieldToColMap = new HashMap<String, Column>(m_table.getNumColumns());
             for (Map.Entry<Column, JRField> e : m_report.getColumnFieldMap().entrySet()) {
-                m_fieldToColMap.put(e.getValue(), e.getKey());
+                m_fieldToColMap.put(e.getValue().getName(), e.getKey());
             }
         }
         
         Row row = m_table.getRow(m_rowIndex);
-        Column col = m_fieldToColMap.get(jrField);
+        Column col = m_fieldToColMap.get(jrField.getName());
         Object o = m_table.getCellValue(row, col);
         
         if (o != null) {
             Cell c = m_table.getCell(row, col);
             if (c.isFormatted())
                 o = c.getFormattedCellValue();
+            o = c;
         }
-        
+                
         return o;
     }
 
