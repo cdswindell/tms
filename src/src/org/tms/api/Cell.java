@@ -13,6 +13,7 @@ public interface Cell extends TableElement, Derivable
     
     public boolean isNumericValue();
     public boolean isStringValue();
+    public boolean isBooleanValue();
     
     public ErrorCode getErrorCode();
     public boolean isErrorValue();

@@ -24,9 +24,10 @@ import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
+import org.tms.io.Printable;
 import org.tms.teq.DerivationImpl;
 
-public class CellImpl extends TableElementImpl implements Cell
+public class CellImpl extends TableElementImpl implements Cell, Printable
 {
     protected Object m_cellValue;  
     protected ColumnImpl m_col;
@@ -71,6 +72,9 @@ public class CellImpl extends TableElementImpl implements Cell
                 // noop
             }
         }
+        else if (isBooleanValue()) 
+            return (Boolean)getCellValue() ? "Yes" : "No";
+        
         
         return getCellValue().toString();
     }   
@@ -110,14 +114,21 @@ public class CellImpl extends TableElementImpl implements Cell
     public boolean isNumericValue()
     {
         vetElement();
-        return getCellValue() != null && (getCellValue() instanceof Number);
+        return getCellValue() != null && (Number.class.isAssignableFrom(getCellValue().getClass()));
     }
     
     @Override
     public boolean isStringValue()
     {
         vetElement();
-        return getCellValue() != null && (getCellValue() instanceof String);
+        return getCellValue() != null && (String.class.isAssignableFrom(getCellValue().getClass()));
+    }
+    
+    @Override
+    public boolean isBooleanValue()
+    {
+        vetElement();
+        return getCellValue() != null && (Boolean.class.isAssignableFrom(getCellValue().getClass()));
     }
     
     @Override
@@ -969,5 +980,23 @@ public class CellImpl extends TableElementImpl implements Cell
             m_hasNext = false;
             return CellImpl.this;
         }        
+    }
+
+    @Override
+    public boolean isLeftAligned()
+    {
+        return !(isNumericValue() || isBooleanValue());
+    }
+
+    @Override
+    public boolean isRightAligned()
+    {
+        return isNumericValue();
+    }
+
+    @Override
+    public boolean isCenterAligned()
+    {
+        return isBooleanValue();
     }
 }

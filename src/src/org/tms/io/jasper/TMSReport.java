@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -17,6 +16,7 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.design.JRDesignBand;
 import net.sf.jasperreports.engine.design.JRDesignExpression;
 import net.sf.jasperreports.engine.design.JRDesignField;
+import net.sf.jasperreports.engine.design.JRDesignLine;
 import net.sf.jasperreports.engine.design.JRDesignParameter;
 import net.sf.jasperreports.engine.design.JRDesignSection;
 import net.sf.jasperreports.engine.design.JRDesignStyle;
@@ -24,7 +24,9 @@ import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
 import net.sf.jasperreports.engine.type.ModeEnum;
+import net.sf.jasperreports.engine.type.PositionTypeEnum;
 import net.sf.jasperreports.engine.type.SplitTypeEnum;
+import net.sf.jasperreports.engine.type.StretchTypeEnum;
 import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.type.WhenNoDataTypeEnum;
 
@@ -39,11 +41,11 @@ import org.tms.io.options.TitleableOption;
 
 public class TMSReport
 {
-    private static final int sf_StringColWidth = 75;
-    private static final int sf_NonStringColWidth = 55;
+    private static final int sf_StringColWidth = 65;
     private static final int sf_InterColSpace = 5;
     
     private static final float sf_StandardFontPointSize = 8;
+    private static final float sf_HeaderFontPointSize = 9;
     private static final float sf_TitleFontPointSize = 14;
     
     private static final int sf_PortraitPageWidth = (int)(72 * 8.5); // 612px
@@ -191,7 +193,7 @@ public class TMSReport
             m_jrDesign.setColumnWidth(colWidth);
         }
         else {
-            m_jrDesign.setLeftMargin(0);
+            m_jrDesign.setLeftMargin(2);
             m_jrDesign.setRightMargin(0);
         }
         
@@ -221,9 +223,14 @@ public class TMSReport
         JRDesignBand detailBand = new JRDesignBand();
         detailBand.setHeight(detailBandHeight);
         detailBand.setSplitType(SplitTypeEnum.PREVENT);
+        
         int tfX = 0;
         int tfY = 2;
         m_colFieldMap = new HashMap<Column, JRField>(nCols);
+        
+        int fieldWidth = (m_options instanceof PageableOption) && ((PageableOption)m_options).getColumnWidth() > 0 ?
+                ((PageableOption)m_options).getColumnWidth() : sf_StringColWidth;
+                
         for (Column col : m_writer.getActiveColumns()) {
             String colName = String.valueOf(col.getIndex());
             JRDesignField jrField = new JRDesignField();
@@ -233,64 +240,100 @@ public class TMSReport
             m_jrDesign.addField(jrField);
             m_colFieldMap.put(col, jrField);
             
-            int fieldWidth = sf_StringColWidth;
-            JRDesignTextField tf = new JRDesignTextField();
-            tf.setX(tfX);
-            tf.setY(tfY);
-            tf.setWidth(fieldWidth);
-            tf.setHeight(detailBandHeight - 2);
-            tf.setMode(ModeEnum.OPAQUE);
-            tf.setStretchWithOverflow(true);
-            tf.setBlankWhenNull(true);
-            tf.setStyle(normalStyle);
-            tf.setVerticalTextAlign(VerticalTextAlignEnum.TOP);
-            tf.setHorizontalTextAlign(HorizontalTextAlignEnum.LEFT);
-            
-            JRDesignExpression ex = new JRDesignExpression();
-            ex.setText(String.format("$F{%s} == null ? null : String.valueOf(((org.tms.api.Cell)$F{%s}).getFormattedCellValue())",colName, colName));
-            tf.setExpression(ex);
-            
-            JRDesignExpression pwe = new JRDesignExpression();
-            pwe.setText(String.format("$F{%s} == null ? true : ((org.tms.api.Cell)$F{%s}).isNumericValue() == false", colName, colName));
-            tf.setPrintWhenExpression(pwe);
-
+            JRDesignTextField tf = defineTextField(colName, tfX, tfY, fieldWidth, detailBandHeight - 2, 
+                    normalStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
+                    "$F{%s} == null ? null : ((org.tms.api.Cell)$F{%<s}).getFormattedCellValue()",
+                    "$F{%s} == null ? false : ((org.tms.io.Printable)$F{%<s}).isLeftAligned()");   
             detailBand.addElement(tf);
             
             // now add text field for numeric values
-            tf = new JRDesignTextField();
-            tf.setX(tfX);
-            tf.setY(tfY);
-            tf.setWidth(fieldWidth);
-            tf.setHeight(detailBandHeight - 2);
-            tf.setMode(ModeEnum.OPAQUE);
-            tf.setStretchWithOverflow(true);
-            tf.setBlankWhenNull(true);
-            tf.setStyle(normalStyle);
-            tf.setVerticalTextAlign(VerticalTextAlignEnum.TOP);
-            tf.setHorizontalTextAlign(HorizontalTextAlignEnum.RIGHT);
-            
-            ex = new JRDesignExpression();
-            ex.setText(String.format("$F{%s} == null ? null : String.valueOf(((org.tms.api.Cell)$F{%s}).getFormattedCellValue())",colName, colName));
-            tf.setExpression(ex);
-
-            pwe = new JRDesignExpression();
-            pwe.setText(String.format("$F{%s} == null ? false : ((org.tms.api.Cell)$F{%s}).isNumericValue() == true", colName, colName));
-            tf.setPrintWhenExpression(pwe);
-            
+            tf = defineTextField(colName, tfX, tfY, fieldWidth, detailBandHeight - 2, 
+                    normalStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.RIGHT,
+                    "$F{%s} == null ? null : ((org.tms.api.Cell)$F{%<s}).getFormattedCellValue()",
+                    "$F{%s} == null ? false : ((org.tms.io.Printable)$F{%<s}).isRightAligned()");            
             detailBand.addElement(tf);
+            
+            // and text field for boolean values
+            tf = defineTextField(colName, tfX, tfY, fieldWidth, detailBandHeight - 2, 
+                    normalStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.CENTER,
+                    "$F{%s} == null ? null : ((org.tms.api.Cell)$F{%<s}).getFormattedCellValue()",
+                    "$F{%s} == null ? false : ((org.tms.io.Printable)$F{%<s}).isCenterAligned()");            
+            detailBand.addElement(tf);
+            
+            // now add column heading, if one is defined
+            if (m_options.isColumnNames()) {
+                String label = col.getLabel();
+                if (label == null || (label = label.trim()).length() <= 0)
+                    label = String.format("Column %d", col.getIndex());
+                
+                JRDesignTextField hf = defineTextField(colName, tfX, 0, fieldWidth, colHeadBandHeight - 3, 
+                        boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
+                        "\"" + label + "\"",
+                        null);        
+                hf.setFontSize(sf_HeaderFontPointSize);
+                hf.setStretchType(StretchTypeEnum.RELATIVE_TO_TALLEST_OBJECT);
+                
+                pageHeaderBand.addElement(hf);
+                
+                JRDesignLine line = new JRDesignLine();
+                line.setX(tfX);
+                line.setY(colHeadBandHeight-2);
+                line.setWidth(fieldWidth);
+                line.setHeight(0);
+                line.getLinePen().setLineWidth((float) 0.5);
+                line.setPositionType(PositionTypeEnum.FLOAT);
+
+                pageHeaderBand.addElement(line);
+            }
             
             // bump the field
             tfX += sf_InterColSpace + fieldWidth;
         }
-            
-        ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);       
-
+        
+        // add the detail band; this is essentially the report data
+        ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);    
+        
+        //Page header
+        if (m_options.isColumnNames()) {
+            m_jrDesign.setPageHeader(pageHeaderBand);
+        }
+        
         // finally, set title and force recompile
-        if ((m_options instanceof TitleableOption) && ((TitleableOption)m_options).hasTitle())
-            defineTitleBand(m_jrDesign, boldStyle, colWidth);
+        if ((m_options instanceof TitleableOption) && ((TitleableOption)m_options).hasTitle()) {
+            JRDesignBand titleBand = defineTitleBand(m_jrDesign, boldStyle, colWidth);
+            m_jrDesign.setTitle(titleBand);
+      }
         
         m_jrReport = null;
         m_jrPrint = null;
+    }
+
+    private JRDesignTextField defineTextField(String colName, int tfX, int tfY, int fw, int fh, JRDesignStyle ns, 
+            VerticalTextAlignEnum va, HorizontalTextAlignEnum ha, String formatEx, String printWhenEx)
+    {
+        JRDesignTextField tf = new JRDesignTextField();
+        tf.setX(tfX);
+        tf.setY(tfY);
+        tf.setWidth(fw);
+        tf.setHeight(fh);
+        tf.setMode(ModeEnum.OPAQUE);
+        tf.setStretchWithOverflow(true);
+        tf.setBlankWhenNull(true);
+        tf.setStyle(ns);
+        tf.setVerticalTextAlign(va);
+        tf.setHorizontalTextAlign(ha);
+        
+        JRDesignExpression ex = new JRDesignExpression();
+        ex.setText(String.format(formatEx, colName));
+        tf.setExpression(ex);
+
+        if (printWhenEx != null) {
+            JRDesignExpression pwe = new JRDesignExpression();
+            pwe.setText(String.format(printWhenEx, colName));
+            tf.setPrintWhenExpression(pwe);
+        }
+        
+        return tf;
     }
 
     private int getPageWidth()
@@ -337,8 +380,7 @@ public class TMSReport
         titleExpression.setText("$P{ReportTitle}");
         titleField.setExpression(titleExpression);
         titleBand.addElement(titleField);
-        jrDesign.setTitle(titleBand);
-        
+                
         return titleBand;
     }
 

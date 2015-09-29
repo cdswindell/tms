@@ -6,10 +6,7 @@ import java.util.Map;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.design.JRDesignTextField;
-import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
 
-import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
@@ -49,12 +46,8 @@ public class TMSDataSource implements JRDataSource
         Column col = m_fieldToColMap.get(jrField.getName());
         Object o = m_table.getCellValue(row, col);
         
-        if (o != null) {
-            Cell c = m_table.getCell(row, col);
-            if (c.isFormatted())
-                o = c.getFormattedCellValue();
-            o = c;
-        }
+        if (o != null) 
+            o = m_table.getCell(row, col);
                 
         return o;
     }

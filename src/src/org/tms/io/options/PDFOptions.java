@@ -6,9 +6,10 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     public static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
     public static final int DefaultPageWidthPx = (int) (8.5 * 72);
     public static final int DefaultPageHeightPx = (int) (11 * 72);
+    public static final int DefaultColumnWidthPx = (int) 65;
     
     public static final PDFOptions Default = new PDFOptions(true, true, false, false, null, DateTimeFormatPattern, 
-                                                            true, true, DefaultPageWidthPx, DefaultPageHeightPx, 
+                                                            true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
                                                             true, true);
 
     private String m_title;
@@ -16,6 +17,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     private boolean m_pageNumbers;
     private int m_pageWidthPx;
     private int m_pageHeightPx;
+    private int m_columnWidthPx;
     private boolean m_stickyRowNames;
     private boolean m_stickyColNames;
     private boolean m_paged;
@@ -30,6 +32,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
                       final boolean pageNumbers,
                       final int pageWidthPx,
                       final int pageHeightPx,
+                      final int colWidthPx,
                       final boolean stickyRowNames,
                       final boolean stickyColNames)
     {
@@ -42,6 +45,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         m_pageNumbers = pageNumbers;
         m_pageWidthPx = pageWidthPx;
         m_pageHeightPx = pageHeightPx;
+        m_columnWidthPx = colWidthPx;
         
         m_stickyRowNames = stickyRowNames;
         m_stickyColNames = stickyColNames;
@@ -52,7 +56,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         if (!b)
             m_stickyRowNames = false;            
         return new PDFOptions(b, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     }
     
     public PDFOptions withColumnNames(final boolean b)
@@ -60,19 +64,19 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         if (!b)
             m_stickyColNames = false;            
         return new PDFOptions(m_rowNames, b, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     }
 
     public PDFOptions withIgnoreEmptyRows(final boolean b)
     {
         return new PDFOptions(m_rowNames, m_colNames, b, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     } 
 
     public PDFOptions withIgnoreEmptyColumns(final boolean b)
     {
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, b, m_title, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     } 
     
     @Override
@@ -90,7 +94,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     public PDFOptions withTitle(String t)
     {
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, t, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     }
     
     @Override
@@ -108,7 +112,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     public PDFOptions withDateTimeFormat(String t)
     {
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, t, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     }
     
     public boolean isPaged()
@@ -124,7 +128,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     public PDFOptions withPages(boolean b)
     {
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            b, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            b, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     }
     
     @Override
@@ -141,7 +145,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     public PDFOptions withPageNumbers(boolean b)
     {
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            m_paged, b, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            m_paged, b, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     }
     
     @Override
@@ -158,7 +162,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     public PDFOptions withPageWidthInPx(int f)
     {
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, f, m_pageHeightPx, m_stickyRowNames, m_stickyColNames);
+                            m_paged, m_pageNumbers, f, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
     }
     
     @Override
@@ -175,7 +179,24 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     public PDFOptions withPageHeightInPx(int f)
     {
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, f, m_stickyRowNames, m_stickyColNames);
+                            m_paged, m_pageNumbers, m_pageWidthPx, f, m_columnWidthPx, m_stickyRowNames, m_stickyColNames);
+    }
+       
+    @Override
+    public int getColumnWidth()
+    {
+        return m_columnWidthPx;
+    }
+    
+    public PDFOptions withColumnWidthInInches(double f)
+    {
+        return withColumnWidthInPx((int)(f * 72));
+    }
+    
+    public PDFOptions withColumnWidthInPx(int f)
+    {
+        return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, f, m_stickyRowNames, m_stickyColNames);
     }
     
     @Override
@@ -194,7 +215,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         if (b)
             m_rowNames = true;
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, b, m_stickyColNames);
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, b, m_stickyColNames);
     }
     
     @Override
@@ -213,6 +234,6 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         if (b)
             m_colNames = true;
         return new PDFOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols, m_title, m_dateTimeFormat, 
-                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_stickyRowNames, b);
+                            m_paged, m_pageNumbers, m_pageWidthPx, m_pageHeightPx, m_columnWidthPx, m_stickyRowNames, b);
     }
 }

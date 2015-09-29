@@ -22,6 +22,7 @@ public class PDFWriterTest extends BaseTest
         
         t.export("a.pdf", PDFOptions.Default
                 .withPages(false)
+                .withColumnWidthInInches(.45)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
     }
 }
