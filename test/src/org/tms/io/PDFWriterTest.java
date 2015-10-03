@@ -21,8 +21,11 @@ public class PDFWriterTest extends BaseTest
         assertNotNull(t);
         
         t.export("a.pdf", PDFOptions.Default
-                .withPages(false)
-                .withColumnWidthInInches(.45)
+                .withPages(true)
+                .withPageNumbers(true)
+                .withColumnWidthInInches(2.5)
+                .withStickyColumnNames(true)
+                .withPageHeightInInches(5)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
     }
 }

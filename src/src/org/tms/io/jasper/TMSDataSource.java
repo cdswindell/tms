@@ -43,13 +43,22 @@ public class TMSDataSource implements JRDataSource
         }
         
         Row row = m_table.getRow(m_rowIndex);
-        Column col = m_fieldToColMap.get(jrField.getName());
-        Object o = m_table.getCellValue(row, col);
-        
-        if (o != null) 
-            o = m_table.getCell(row, col);
-                
-        return o;
+        if (TMSReport.sf_RowNameFieldName.equals(jrField.getName())) {
+            String label = row.getLabel();
+            if (label == null || (label = label.trim()).length() <= 0)
+                label = String.format("Row %d", m_rowIndex);
+            
+            return label;
+        }
+        else {
+            Column col = m_fieldToColMap.get(jrField.getName());
+            Object o = m_table.getCellValue(row, col);
+            
+            if (o != null) 
+                o = m_table.getCell(row, col);
+                    
+            return o;
+        }
     }
 
     @Override
