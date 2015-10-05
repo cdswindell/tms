@@ -6,13 +6,14 @@ import java.util.Map;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JRRewindableDataSource;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.io.options.IOOptions;
 
-public class TMSDataSource implements JRDataSource
+public class TMSDataSource implements JRDataSource, JRRewindableDataSource
 {
     private TMSReport m_report;
     private Table m_table;
@@ -79,6 +80,13 @@ public class TMSDataSource implements JRDataSource
         }
         
         return false;
+    }
+    
+    @Override
+    public void moveFirst() throws JRException
+    {
+        m_maxRows = m_table.getNumRows();
+        m_rowIndex = 0;
     }
     
     public TMSReport getReport()

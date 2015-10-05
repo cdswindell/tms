@@ -219,7 +219,7 @@ public class TMSReport
         
         // create JR fields for each printable column
         int colHeadBandHeight = 15;
-        int detailBandHeight = 18;
+        int detailBandHeight = 13;
         JRDesignBand colHeaderBand = new JRDesignBand();
         colHeaderBand.setHeight(colHeadBandHeight);
         
@@ -254,32 +254,32 @@ public class TMSReport
         for (Column col : m_writer.getActiveColumns()) {            
             // create multiple columns to handle overflow
             // if report gets too wide
-            if (paginated && (tfX + fieldWidth) > colWidth) {
-                
-                // add the filled band to the report               
-                ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);   
-                
-                // and create a new band
-                detailBand = new JRDesignBand();
-                detailBand.setHeight(detailBandHeight);
-                detailBand.setSplitType(SplitTypeEnum.PREVENT);
-                
-                // reset starting point for next band
-                tfX = 0;
-                                    
-                // add row names, if sticky
-                if (m_options.isRowNames() && ((PageableOption)m_options).isStickyRowNames()) {
-                    JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, sf_RowNameColWidth, detailBandHeight - 2, 
-                            boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
-                            "$F{%s}",
-                            null);   
-                    tf.setFontSize(sf_HeaderFontPointSize);
-                    detailBand.addElement(tf);
-                    
-                    // bump the field
-                    tfX += sf_InterColSpace + sf_RowNameColWidth;
-                }
-            }
+//            if (paginated && (tfX + fieldWidth) > colWidth) {
+//                
+//                // add the filled band to the report               
+//                ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);   
+//                
+//                // and create a new band
+//                detailBand = new JRDesignBand();
+//                detailBand.setHeight(detailBandHeight);
+//                detailBand.setSplitType(SplitTypeEnum.PREVENT);
+//                
+//                // reset starting point for next band
+//                tfX = 0;
+//                                    
+//                // add row names, if sticky
+//                if (m_options.isRowNames() && ((PageableOption)m_options).isStickyRowNames()) {
+//                    JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, sf_RowNameColWidth, detailBandHeight - 2, 
+//                            boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
+//                            "$F{%s}",
+//                            null);   
+//                    tf.setFontSize(sf_HeaderFontPointSize);
+//                    detailBand.addElement(tf);
+//                    
+//                    // bump the field
+//                    tfX += sf_InterColSpace + sf_RowNameColWidth;
+//                }
+//            }
             
             String colName = String.valueOf(col.getIndex());
             JRDesignField jrField = new JRDesignField();
