@@ -7,10 +7,11 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
     public static final int DefaultPageWidthPx = (int) (8.5 * 72);
     public static final int DefaultPageHeightPx = (int) (11 * 72);
     public static final int DefaultColumnWidthPx = (int) 65;
+    public static final int DefaultFontSizePx = 8;
     
     public static final PDFOptions Default = new PDFOptions(true, true, false, false, DateTimeFormatPattern, 
                                                             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-                                                            true, true);
+                                                            true, true, DefaultFontSizePx);
 
     protected int m_defaultFontSizePx;
     protected int m_headingFontSizePx;
@@ -25,7 +26,10 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         PageHeight,
         ColumnWidth,
         IsStickyRowNames,
-        IsStickyColumnNames
+        IsStickyColumnNames,
+        DefaultFontSize,
+        HeadingFontSize,
+        TitleFontSize,
     }
     
     private PDFOptions(final boolean rowNames, 
@@ -39,7 +43,8 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
                       final int pageHeightPx,
                       final int colWidthPx,
                       final boolean stickyRowNames,
-                      final boolean stickyColNames)
+                      final boolean stickyColNames,
+                      final int defaultFontSize)
     {
         super(org.tms.io.options.IOOptions.FileFormat.PDF, (rowNames || stickyRowNames), (colNames || stickyColNames), ignoreEmptyRows, ignoreEmptyCols);
         
@@ -53,6 +58,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         set(Options.ColumnWidth, colWidthPx);
         set(Options.IsStickyRowNames, stickyRowNames);
         set(Options.IsStickyColumnNames, stickyColNames);
+        set(Options.DefaultFontSize, defaultFontSize);
     }
     
     private PDFOptions (final PDFOptions format)
@@ -289,7 +295,7 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         newOptions.setColumnWidth(f);
         return newOptions;
     }
-    
+
     @Override
     public boolean isStickyRowNames()
     {
@@ -331,4 +337,71 @@ public class PDFOptions extends IOOptions implements TitleableOption, DateTimeFo
         
         return newOptions;
     }
+    
+    @Override
+    public int getDefaultFontSize()
+    {
+        Object d = get(Options.DefaultFontSize);
+        return d != null ? (int)d : DefaultFontSizePx;
+    }
+    
+    protected void setDefaultFontSize(int i)
+    {
+        if (i < 4)
+            throw new IllegalArgumentException("Default font size must be at least 4px");
+        
+        set(Options.DefaultFontSize, i);
+    }
+    
+    public PDFOptions withDefaultFontSize(int f)
+    {
+        PDFOptions newOptions = new PDFOptions(this);
+        newOptions.setDefaultFontSize(f);
+        return newOptions;
+    }
+       
+    @Override
+    public int getHeadingFontSize()
+    {
+        Object d = get(Options.HeadingFontSize);
+        return d != null ? (int)d : (int)(getDefaultFontSize() * 1.2);
+    }
+    
+    protected void setHeadingFontSize(int i)
+    {
+        if (i < 4)
+            throw new IllegalArgumentException("Heading font size must be at least 4px");
+        
+        set(Options.HeadingFontSize, i);
+    }
+    
+    public PDFOptions withHeadingFontSize(int f)
+    {
+        PDFOptions newOptions = new PDFOptions(this);
+        newOptions.setHeadingFontSize(f);
+        return newOptions;
+    }
+    
+    
+     @Override
+     public int getTitleFontSize()
+     {
+         Object d = get(Options.TitleFontSize);
+         return d != null ? (int)d : (int)(getDefaultFontSize() * 2);
+     }
+     
+     protected void setTitleFontSize(int i)
+     {
+         if (i < 4)
+             throw new IllegalArgumentException("Title font size must be at least 4px");
+         
+         set(Options.TitleFontSize, i);
+     }
+     
+     public PDFOptions withTitleFontSize(int f)
+     {
+         PDFOptions newOptions = new PDFOptions(this);
+         newOptions.setTitleFontSize(f);
+         return newOptions;
+     }
 }

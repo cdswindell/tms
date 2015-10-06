@@ -24,8 +24,8 @@ public class PDFWriterTest extends BaseTest
                 .withPages(true)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
-                .withColumnWidthInInches(.5)
                 .withStickyColumnNames(true)
+                .withColumnWidthInInches(1)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
     }
 }

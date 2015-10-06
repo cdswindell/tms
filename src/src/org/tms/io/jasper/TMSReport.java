@@ -48,9 +48,9 @@ public class TMSReport
     private static final int sf_RowNameColWidth = sf_StringColWidth;
     private static final int sf_InterColSpace = 5;
     
-    private static final float sf_StandardFontPointSize = 8;
-    private static final float sf_HeaderFontPointSize = 9;
-    private static final float sf_TitleFontPointSize = 14;
+    private static final float sf_StandardFontSize = 8;
+    private static final float sf_HeaderFontSize = 9;
+    private static final float sf_TitleFontSize = 14;
     
     private static final int sf_PortraitPageWidth = (int)(72 * 8.5); // 612px
     private static final int sf_PortraitPageHeight = (int)(72 * 11); // 792px
@@ -212,14 +212,22 @@ public class TMSReport
         }    
 
         // define font styles
-        JRDesignStyle boldStyle = defineStyle(m_jrDesign, "Sans_Bold", sf_StandardFontPointSize, false, true);
-        JRDesignStyle normalStyle = defineStyle(m_jrDesign, "Sans_Normal", sf_StandardFontPointSize, true, false);
+        float defaultFontSize = paginated ? ((PageableOption)m_options).getDefaultFontSize() : sf_StandardFontSize;
+        if (defaultFontSize <= 0)
+            defaultFontSize = sf_StandardFontSize;
+        
+        float headingFontSize = paginated ? ((PageableOption)m_options).getHeadingFontSize() : sf_HeaderFontSize;
+        if (headingFontSize <= 0)
+            headingFontSize = sf_HeaderFontSize;
+        
+        JRDesignStyle boldStyle = defineStyle(m_jrDesign, "Sans_Bold", defaultFontSize, false, true);
+        JRDesignStyle normalStyle = defineStyle(m_jrDesign, "Sans_Normal", defaultFontSize, true, false);
         
         defineGlobalParameters(m_jrDesign);
         
         // create JR fields for each printable column
-        int colHeadBandHeight = 15;
-        int detailBandHeight = 13;
+        int colHeadBandHeight = (int)(headingFontSize * 1.5);
+        int detailBandHeight = (int)(defaultFontSize * 1.5);
         JRDesignBand colHeaderBand = new JRDesignBand();
         colHeaderBand.setHeight(colHeadBandHeight);
         
@@ -234,6 +242,7 @@ public class TMSReport
         int fieldWidth = (m_options instanceof PageableOption) && ((PageableOption)m_options).getColumnWidth() > 0 ?
                 ((PageableOption)m_options).getColumnWidth() : sf_StringColWidth;
         
+                
         if (m_options.isRowNames()) {
             JRDesignField jrField = new JRDesignField();
             jrField.setName(sf_RowNameFieldName);
@@ -244,7 +253,8 @@ public class TMSReport
                     boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
                     "$F{%s}",
                     null);   
-            tf.setFontSize(sf_HeaderFontPointSize);
+            tf.setFontSize(headingFontSize);
+            tf.setBold(true);
             detailBand.addElement(tf);
             
             // bump the field
@@ -319,7 +329,8 @@ public class TMSReport
                         boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
                         "\"" + label + "\"",
                         null);        
-                hf.setFontSize(sf_HeaderFontPointSize);
+                hf.setFontSize(headingFontSize);
+                hf.setBold(true);
                 hf.setStretchType(StretchTypeEnum.RELATIVE_TO_TALLEST_OBJECT);
                 
                 colHeaderBand.addElement(hf);
@@ -385,6 +396,7 @@ public class TMSReport
         tf.setStretchWithOverflow(true);
         tf.setBlankWhenNull(true);
         tf.setStyle(ns);
+        tf.setBold(false);
         tf.setVerticalTextAlign(va);
         tf.setHorizontalTextAlign(ha);
         
@@ -427,19 +439,28 @@ public class TMSReport
 
     private JRDesignBand defineTitleBand(JasperDesign jrDesign, JRDesignStyle boldStyle, int colWidth)
     {
+        float titleFontSize = ((PageableOption)m_options).getTitleFontSize();
+        if (titleFontSize <= 0)
+            titleFontSize = sf_TitleFontSize;
+        
+        int height = (int)(titleFontSize * 3);
+        int offset = 5;
+        
         JRDesignBand titleBand = new JRDesignBand();
-        titleBand.setHeight(40);
+        titleBand.setHeight(height);
         
         JRDesignTextField titleField = new JRDesignTextField();
         titleField.setBlankWhenNull(true);
         titleField.setX(0);
-        titleField.setY(5);
+        titleField.setY(offset);
         titleField.setWidth(colWidth);
+        titleField.setHeight(height - offset);
         titleField.setStretchWithOverflow(true);
-        titleField.setHeight(30);
+        titleField.setStretchType(StretchTypeEnum.RELATIVE_TO_BAND_HEIGHT);
         titleField.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
         titleField.setStyle(boldStyle);
-        titleField.setFontSize(sf_TitleFontPointSize);
+        titleField.setFontSize(titleFontSize);
+        titleField.setBold(true);
         
         JRDesignExpression titleExpression = new JRDesignExpression();
         titleExpression.setText("$P{ReportTitle}");
@@ -451,16 +472,22 @@ public class TMSReport
 
     private JRDesignBand defineFooterBand(JasperDesign jrDesign, JRDesignStyle normalStyle, int pageWidth)
     {
+        float fontSize = (int)(((PageableOption)m_options).getDefaultFontSize() * .9);
+        if (fontSize <= 0)
+            fontSize = (int)(sf_StandardFontSize * .9);
+            
         JRDesignBand pageFooter = new JRDesignBand();
-        pageFooter.setHeight(30);
+        int height = (int)(fontSize * 2);
+        int offset = (int)(fontSize / 2);
+        pageFooter.setHeight(height);
         
         JRDesignTextField nowField = new JRDesignTextField();
         nowField.setStyle(normalStyle);
-        nowField.setFontSize(sf_StandardFontPointSize);
-        nowField.setHeight(15);
-        nowField.setWidth(pageWidth);
-        //nowField.setX(0);
-        nowField.setY(10);
+        nowField.setFontSize(fontSize);
+        nowField.setBold(false);
+        nowField.setHeight(height - offset);
+        nowField.setWidth(pageWidth); 
+        nowField.setY(offset);
         nowField.setMode(ModeEnum.TRANSPARENT);
         nowField.setHorizontalTextAlign( HorizontalTextAlignEnum.RIGHT);     
         
@@ -472,12 +499,12 @@ public class TMSReport
         
         JRDesignTextField pageNoField = new JRDesignTextField();
         pageNoField.setStyle(normalStyle);
-        pageNoField.setFontSize(sf_StandardFontPointSize);
+        pageNoField.setFontSize(fontSize);
+        pageNoField.setBold(false);
         pageNoField.setMode(ModeEnum.TRANSPARENT);
-        pageNoField.setHeight(15);
+        pageNoField.setHeight(height - offset);
         pageNoField.setWidth(pageWidth);
-        pageNoField.setX(0);
-        pageNoField.setY(10);
+        pageNoField.setY(offset);
         pageNoField.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);    
         
         JRDesignExpression pageNoFieldEx = new JRDesignExpression();

@@ -9,4 +9,7 @@ public interface PageableOption
     public int getColumnWidth();
     public boolean isStickyRowNames();
     public boolean isStickyColumnNames();
+    public int getDefaultFontSize();
+    public int getHeadingFontSize();
+    public int getTitleFontSize();
 }
