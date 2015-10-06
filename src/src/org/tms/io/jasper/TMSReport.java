@@ -443,7 +443,7 @@ public class TMSReport
         if (titleFontSize <= 0)
             titleFontSize = sf_TitleFontSize;
         
-        int height = (int)(titleFontSize * 3);
+        int height = (int)(titleFontSize * 4);
         int offset = 5;
         
         JRDesignBand titleBand = new JRDesignBand();
