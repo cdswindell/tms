@@ -13,23 +13,64 @@ public class TMSOptions extends IOOptions
         super(org.tms.io.options.IOOptions.FileFormat.TMS, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
     }
     
-    public TMSOptions withRowNames(final boolean b)
+    private TMSOptions (final TMSOptions format)
     {
-        return new TMSOptions(b, m_colNames, m_ignoreEmptyRows, m_ignoreEmptyCols);
+        super(format);
     }
     
+    @Override
+    public TMSOptions withRowNames()
+    {
+        return withRowNames(true);
+    }
+    
+    @Override
+    public TMSOptions withRowNames(final boolean b)
+    {
+        TMSOptions newOptions = new TMSOptions(this);
+        newOptions.setRowNames(b);
+        return newOptions;
+    }
+    
+    @Override
+    public TMSOptions withColumnNames()
+    {
+        return withColumnNames(true);
+    }
+    
+    @Override
     public TMSOptions withColumnNames(final boolean b)
     {
-        return new TMSOptions(m_rowNames, b, m_ignoreEmptyRows, m_ignoreEmptyCols);
+        TMSOptions newOptions = new TMSOptions(this);
+        newOptions.setColumnNames(b);
+        return newOptions;
     }
 
+    @Override
+    public TMSOptions withIgnoreEmptyRows()
+    {
+        return withIgnoreEmptyRows(true);
+    }
+
+    @Override
     public TMSOptions withIgnoreEmptyRows(final boolean b)
     {
-        return new TMSOptions(m_rowNames, m_colNames, b, m_ignoreEmptyCols);
+        TMSOptions newOptions = new TMSOptions(this);
+        newOptions.setIgnoreEmptyRows(b);
+        return newOptions;
     } 
 
+    @Override
+    public TMSOptions withIgnoreEmptyColumns()
+    {
+        return withIgnoreEmptyColumns(true);
+    }
+
+    @Override
     public TMSOptions withIgnoreEmptyColumns(final boolean b)
     {
-        return new TMSOptions(m_rowNames, m_colNames, m_ignoreEmptyRows, b);
+        TMSOptions newOptions = new TMSOptions(this);
+        newOptions.setIgnoreEmptyColumns(b);
+        return newOptions;
     } 
 }
