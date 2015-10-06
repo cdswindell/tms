@@ -6,7 +6,6 @@ import java.io.IOException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.io.options.CSVOptions;
 import org.tms.io.options.IOOptions;
-import org.tms.io.options.PDFOptions;
 import org.tms.tds.TableImpl;
 
 public class TableWriter
@@ -72,13 +71,14 @@ public class TableWriter
                 break;
                 
             case PDF:
-                PDFWriter.export(m_table, m_file, (PDFOptions)m_options);
+            case RTF:
+            case HTML:
+            case XML:
+                JasperWriter.export(m_table, m_file, m_options);
                 break;
                 
             default:
                 break;
-        }
-        
+        }        
     }
-
 }

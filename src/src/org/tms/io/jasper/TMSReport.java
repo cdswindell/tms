@@ -9,7 +9,6 @@ import java.util.Map;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -40,9 +39,11 @@ import org.tms.io.options.PageableOption;
 import org.tms.io.options.TitleableOption;
 
 
-public class TMSReport
+abstract public class TMSReport
 {
     static final String sf_RowNameFieldName = "__ROW_NAME__";
+    
+    abstract public void export() throws IOException;
     
     private static final int sf_StringColWidth = 65;
     private static final int sf_RowNameColWidth = sf_StringColWidth;
@@ -73,7 +74,7 @@ public class TMSReport
     private JasperReport m_jrReport;
     private JasperPrint m_jrPrint;
     
-    public TMSReport(BaseWriter w)
+    TMSReport(BaseWriter w)
     {
         m_writer = w;
         m_table = w.getTable();
@@ -83,6 +84,11 @@ public class TMSReport
     BaseWriter getWriter()
     {
         return m_writer;
+    }
+    
+    JasperPrint getPrint()
+    {
+        return m_jrPrint;
     }
     
     Table getTable()
@@ -95,37 +101,7 @@ public class TMSReport
         return m_options;
     }
 
-    public void export() 
-    throws IOException
-    {
-        FileOutputStream out = null;
-        try
-        {
-            // generate the design, compile it, and run it
-            generateReport();
-            
-            out = new FileOutputStream(m_writer.getOutputFile());
-            
-            // print report to file
-            JasperExportManager.exportReportToPdfStream(m_jrPrint, out);
-        }
-        catch (JRException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        finally {
-            if (out != null)
-                out.close();
-        }        
-    }
-    
-    Map<Column, JRField> getColumnFieldMap()
-    {
-        return m_colFieldMap;
-    }
-    
-    void generateReport() 
+    protected void generateReport() 
     throws JRException
     {
         m_jrDataSource = new TMSDataSource(this);
@@ -133,6 +109,20 @@ public class TMSReport
         printJasperReport();
     }
 
+    protected FileOutputStream prepareReport() 
+    throws IOException, JRException
+    {
+        // generate the design, compile it, and run it
+        generateReport();
+        
+        return new FileOutputStream(m_writer.getOutputFile());
+    }
+    
+    Map<Column, JRField> getColumnFieldMap()
+    {
+        return m_colFieldMap;
+    }
+    
     private void fillJasperParams()
     {
         m_jrParams = new HashMap<String, Object>();
@@ -212,11 +202,13 @@ public class TMSReport
         }    
 
         // define font styles
-        float defaultFontSize = paginated ? ((PageableOption)m_options).getDefaultFontSize() : sf_StandardFontSize;
+        float defaultFontSize = m_options instanceof PageableOption ?
+                ((PageableOption)m_options).getDefaultFontSize() : sf_StandardFontSize;
         if (defaultFontSize <= 0)
             defaultFontSize = sf_StandardFontSize;
         
-        float headingFontSize = paginated ? ((PageableOption)m_options).getHeadingFontSize() : sf_HeaderFontSize;
+        float headingFontSize = m_options instanceof PageableOption ?
+                ((PageableOption)m_options).getHeadingFontSize() : sf_HeaderFontSize;
         if (headingFontSize <= 0)
             headingFontSize = sf_HeaderFontSize;
         

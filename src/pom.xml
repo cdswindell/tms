@@ -104,16 +104,8 @@
   				<groupId>stax</groupId>
   			</exclusion>
   			<exclusion>
-  				<artifactId>jackson-databind</artifactId>
-  				<groupId>com.fasterxml.jackson.core</groupId>
-  			</exclusion>
-  			<exclusion>
   				<artifactId>spring-context</artifactId>
   				<groupId>org.springframework</groupId>
-  			</exclusion>
-  			<exclusion>
-  				<artifactId>jackson-core</artifactId>
-  				<groupId>com.fasterxml.jackson.core</groupId>
   			</exclusion>
   			<exclusion>
   				<artifactId>spring-asm</artifactId>

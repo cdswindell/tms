@@ -18,14 +18,23 @@ public abstract class IOOptions
             FileFormat fmt = sf_FileFormatMap.get(ext);
             if (fmt != null) {
                 switch (fmt) {
-                    case CSV:
-                        return CSVOptions.Default;
-                        
                     case TMS:
                         return TMSOptions.Default;
                         
+                    case CSV:
+                        return CSVOptions.Default;
+                        
+                    case HTML:
+                        return HTMLOptions.Default;
+                        
+                    case RTF:
+                        return RTFOptions.Default;
+                        
                     case PDF:
                         return PDFOptions.Default;
+                        
+                    case XML:
+                        return XMLOptions.Default;
                         
                     default:
                         break;
@@ -43,8 +52,11 @@ public abstract class IOOptions
     public static enum FileFormat 
     {
         CSV(true, "csv"),
+        EXCEL(true, "xls", "xlsx"), 
+        HTML(false, "htm", "html"),
         PDF(false, "pdf"),
-        Excel(true, "xls", "xlsx"), 
+        RTF(false, "rtf"),
+        XML(true, "XML"),
         TMS(true, "tms");
         
         private boolean m_supportsImport;
@@ -127,7 +139,17 @@ public abstract class IOOptions
 
     public boolean isExcel()
     {
-        return FileFormat.Excel == getFileFormat();
+        return FileFormat.EXCEL == getFileFormat();
+    }
+
+    public boolean isHtml()
+    {
+        return FileFormat.HTML == getFileFormat();
+    }
+
+    public boolean isRTF()
+    {
+        return FileFormat.RTF == getFileFormat();
     }
 
     public FileFormat getFileFormat()

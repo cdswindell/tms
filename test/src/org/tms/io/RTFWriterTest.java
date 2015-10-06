@@ -8,9 +8,9 @@ import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
-import org.tms.io.options.PDFOptions;
+import org.tms.io.options.RTFOptions;
 
-public class PDFWriterTest extends BaseTest
+public class RTFWriterTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.csv";
 
@@ -20,13 +20,12 @@ public class PDFWriterTest extends BaseTest
         Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
         assertNotNull(t);
         
-        t.export("a.pdf", PDFOptions.Default
+        t.export("a.rtf", RTFOptions.Default
                 .withPages(true)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
                 .withStickyColumnNames(true)
                 .withColumnWidthInInches(1)
-                .withPages(false)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
     }
 }
