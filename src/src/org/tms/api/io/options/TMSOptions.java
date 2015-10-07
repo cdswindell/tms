@@ -1,5 +1,7 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOOptions;
+
 public class TMSOptions extends IOOptions
 {
 
@@ -10,7 +12,7 @@ public class TMSOptions extends IOOptions
                       final boolean ignoreEmptyRows, 
                       final boolean ignoreEmptyCols)
     {
-        super(org.tms.api.io.options.IOOptions.FileFormat.TMS, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(org.tms.io.options.IOOptions.FileFormat.TMS, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
     }
     
     private TMSOptions (final TMSOptions format)

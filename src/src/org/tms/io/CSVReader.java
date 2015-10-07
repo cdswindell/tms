@@ -17,7 +17,7 @@ import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.options.CSVOptions;
-import org.tms.api.io.options.IOOptions;
+import org.tms.io.options.IOOptions;
 
 public class CSVReader
 {

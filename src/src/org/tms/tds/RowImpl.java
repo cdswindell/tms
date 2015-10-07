@@ -16,9 +16,9 @@ import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
-import org.tms.api.io.options.IOOptions;
 import org.tms.io.RowExportAdapter;
 import org.tms.io.TableExportAdapter;
+import org.tms.io.options.IOOptions;
 
 public class RowImpl extends TableSliceElementImpl implements Row
 {

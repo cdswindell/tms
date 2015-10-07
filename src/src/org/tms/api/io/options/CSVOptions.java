@@ -1,10 +1,13 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOOptions;
+import org.tms.io.options.OptionEnum;
+
 
 public class CSVOptions extends IOOptions
 {
 
-    public static final CSVOptions Default = new CSVOptions(true, true, false, false, Constants.COMMA, Constants.DOUBLE_QUOTE_CHAR, true);
+    public static final CSVOptions Default = new CSVOptions(true, true, false, false, COMMA, DOUBLE_QUOTE_CHAR, true);
 
     private enum Options implements OptionEnum {
         DelimiterChar,
@@ -20,7 +23,7 @@ public class CSVOptions extends IOOptions
                       final Character quoteCharacter,
                       final boolean ignoreSurroundingSpaces)
     {
-        super(org.tms.api.io.options.IOOptions.FileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(org.tms.io.options.IOOptions.FileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
         set(Options.DelimiterChar, delimiter);
         set(Options.QuoteChar, quoteCharacter);
         set(Options.IsIgnoreSurrountingSpaces, ignoreSurroundingSpaces);

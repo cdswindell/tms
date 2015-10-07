@@ -1,4 +1,4 @@
-package org.tms.api.io.options;
+package org.tms.io.options;
 
 public interface TitleableOption
 {

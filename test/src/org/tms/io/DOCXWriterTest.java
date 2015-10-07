@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
-import org.tms.io.options.DocXOptions;
+import org.tms.api.io.options.DocXOptions;
 
 public class DOCXWriterTest extends BaseTest
 {

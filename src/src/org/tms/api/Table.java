@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.events.EventProcessorThreadPool;
-import org.tms.api.io.options.IOOptions;
+import org.tms.io.options.IOOptions;
 
 /**
  * A standard two dimensional table consisting of {@link Row}s, {@link Column}s, and {@link Cell}s, 

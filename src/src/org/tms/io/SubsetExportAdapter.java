@@ -6,7 +6,7 @@ import java.util.List;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
-import org.tms.api.io.options.IOOptions;
+import org.tms.io.options.IOOptions;
 
 public class SubsetExportAdapter extends TableExportAdapter
 {

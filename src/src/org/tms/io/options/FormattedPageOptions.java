@@ -1,7 +1,6 @@
-package org.tms.api.io.options;
+package org.tms.io.options;
 
-
-abstract class FormattedPageOptions<E extends FormattedPageOptions<?>> 
+public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>> 
     extends IOOptions 
     implements TitleableOption, DateTimeFormatOption, PageableOption, FontedOption
 {
@@ -28,9 +27,9 @@ abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
         FontFamily;
     }
 
-    abstract E clone(FormattedPageOptions<?> model);
+    protected abstract E clone(FormattedPageOptions<?> model);
     
-    protected FormattedPageOptions(final org.tms.api.io.options.IOOptions.FileFormat format,
+    protected FormattedPageOptions(final org.tms.io.options.IOOptions.FileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 

@@ -1,5 +1,7 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.FormattedPageOptions;
+
 public class HTMLOptions extends FormattedPageOptions<HTMLOptions> 
 {
     public static final int DefaultHTMLFontSizePx = 12;
@@ -15,7 +17,7 @@ public class HTMLOptions extends FormattedPageOptions<HTMLOptions>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(org.tms.api.io.options.IOOptions.FileFormat.HTML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(org.tms.io.options.IOOptions.FileFormat.HTML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 null, false, false, 0, 0, colWidthPx,
                 false, false, defaultFontSize, defaultFontFamily);
     }
