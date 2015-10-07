@@ -7,14 +7,15 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.OutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleDocxReportConfiguration;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 import org.tms.io.BaseWriter;
 
-public class DOCXReport extends TMSReport
+public class DocXReport extends TMSReport
 {
-    public DOCXReport(BaseWriter w)
+    public DocXReport(BaseWriter w)
     {
         super(w);
     }
@@ -29,15 +30,19 @@ public class DOCXReport extends TMSReport
             out = prepareReport();
             
             // print report to file
-            JRDocxExporter rtfExporter  = new JRDocxExporter();
+            JRDocxExporter docExporter  = new JRDocxExporter();
+            
+            SimpleDocxReportConfiguration rc = new SimpleDocxReportConfiguration();           
+            rc.setFlexibleRowHeight(true);
+            docExporter.setConfiguration(rc);
             
             ExporterInput inp = new SimpleExporterInput(getPrint());
-            rtfExporter.setExporterInput(inp);
+            docExporter.setExporterInput(inp);
             
             OutputStreamExporterOutput output = new SimpleOutputStreamExporterOutput(out);
-            rtfExporter.setExporterOutput(output);
+            docExporter.setExporterOutput(output);
             
-            rtfExporter.exportReport();           
+            docExporter.exportReport();           
         }
         catch (JRException e)
         {

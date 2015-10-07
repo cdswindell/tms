@@ -1,12 +1,12 @@
 package org.tms.io.options;
 
-public class DOCXOptions extends FormattedPageOptions 
+public class DocXOptions extends FormattedPageOptions 
 {
-    public static final DOCXOptions Default = new DOCXOptions(true, true, false, false, DateTimeFormatPattern, 
+    public static final DocXOptions Default = new DocXOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
             true, true, DefaultFontSizePx);
     
-    private DOCXOptions(final boolean rowNames, 
+    private DocXOptions(final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
             final boolean ignoreEmptyCols,
@@ -25,198 +25,198 @@ public class DOCXOptions extends FormattedPageOptions
                 stickyRowNames, stickyColNames, defaultFontSize);
     }
 
-    private DOCXOptions(final DOCXOptions format)
+    private DocXOptions(final DocXOptions format)
     {
         super(format);
     }
 
     @Override
-    public DOCXOptions withRowNames()
+    public DocXOptions withRowNames()
     {
         return withRowNames(true);
     }
 
     @Override
-    public DOCXOptions withRowNames(final boolean b)
+    public DocXOptions withRowNames(final boolean b)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setRowNames(b);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withColumnNames()
+    public DocXOptions withColumnNames()
     {
         return withColumnNames(true);
     }
 
     @Override
-    public DOCXOptions withColumnNames(final boolean b)
+    public DocXOptions withColumnNames(final boolean b)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setColumnNames(b);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withIgnoreEmptyRows()
+    public DocXOptions withIgnoreEmptyRows()
     {
         return withIgnoreEmptyRows(true);
     }
 
     @Override
-    public DOCXOptions withIgnoreEmptyRows(final boolean b)
+    public DocXOptions withIgnoreEmptyRows(final boolean b)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setIgnoreEmptyRows(b);
         return newOptions;
     } 
 
     @Override
-    public DOCXOptions withIgnoreEmptyColumns()
+    public DocXOptions withIgnoreEmptyColumns()
     {
         return withIgnoreEmptyColumns(true);
     }
 
     @Override
-    public DOCXOptions withIgnoreEmptyColumns(final boolean b)
+    public DocXOptions withIgnoreEmptyColumns(final boolean b)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setIgnoreEmptyColumns(b);
         return newOptions;
     } 
 
     @Override
-    public DOCXOptions withTitle(String t)
+    public DocXOptions withTitle(String t)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setTitle(t);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withDateTimeFormat(String t)
+    public DocXOptions withDateTimeFormat(String t)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setDateTimeFormat(t);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withPages()
+    public DocXOptions withPages()
     {
         return withPages(true);
     }
 
     @Override
-    public DOCXOptions withPages(boolean b)
+    public DocXOptions withPages(boolean b)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setPaged(b);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withPageNumbers()
+    public DocXOptions withPageNumbers()
     {
         return withPageNumbers(true);
     }
 
     @Override
-    public DOCXOptions withPageNumbers(boolean b)
+    public DocXOptions withPageNumbers(boolean b)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setPageNumbers(b);
         return newOptions;
     }
 
-    public DOCXOptions withPageWidthInInches(double f)
+    public DocXOptions withPageWidthInInches(double f)
     {
         return withPageWidthInPx((int)(f * 72));
     }
 
     @Override
-    public DOCXOptions withPageWidthInPx(int f)
+    public DocXOptions withPageWidthInPx(int f)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setPageWidth(f);
         return newOptions;
     }
 
-    public DOCXOptions withPageHeightInInches(double f)
+    public DocXOptions withPageHeightInInches(double f)
     {
         return withPageHeightInPx((int)(f * 72));
     }
 
     @Override
-    public DOCXOptions withPageHeightInPx(int f)
+    public DocXOptions withPageHeightInPx(int f)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setPageHeight(f);
         return newOptions;
     }
 
-    public DOCXOptions withColumnWidthInInches(double f)
+    public DocXOptions withColumnWidthInInches(double f)
     {
         return withColumnWidthInPx((int)(f * 72));
     }
 
     @Override
-    public DOCXOptions withColumnWidthInPx(int f)
+    public DocXOptions withColumnWidthInPx(int f)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setColumnWidth(f);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withStickyRowNames()
+    public DocXOptions withStickyRowNames()
     {
         return withStickyRowNames(true);
     }
 
     @Override
-    public DOCXOptions withStickyRowNames(boolean b)
+    public DocXOptions withStickyRowNames(boolean b)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setStickyRowNames(b);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withStickyColumnNames()
+    public DocXOptions withStickyColumnNames()
     {
         return withStickyColumnNames(true);
     }
 
     @Override
-    public DOCXOptions withStickyColumnNames(boolean b)
+    public DocXOptions withStickyColumnNames(boolean b)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setStickyColumnNames(b);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withDefaultFontSize(int f)
+    public DocXOptions withDefaultFontSize(int f)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setDefaultFontSize(f);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withHeadingFontSize(int f)
+    public DocXOptions withHeadingFontSize(int f)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setHeadingFontSize(f);
         return newOptions;
     }
 
     @Override
-    public DOCXOptions withTitleFontSize(int f)
+    public DocXOptions withTitleFontSize(int f)
     {
-        DOCXOptions newOptions = new DOCXOptions(this);
+        DocXOptions newOptions = new DocXOptions(this);
         newOptions.setTitleFontSize(f);
         return newOptions;
     }

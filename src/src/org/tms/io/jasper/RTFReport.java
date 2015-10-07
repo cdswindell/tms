@@ -25,6 +25,7 @@ public class RTFReport extends TMSReport
         FileOutputStream out = null;
         try
         {
+            // generate the report and convert the file name to an output stream
             out = prepareReport();
             
             // print report to file

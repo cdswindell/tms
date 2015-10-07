@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.io.jasper.DOCXReport;
+import org.tms.io.jasper.DocXReport;
 import org.tms.io.jasper.HTMLReport;
 import org.tms.io.jasper.PDFReport;
 import org.tms.io.jasper.RTFReport;
@@ -35,7 +35,7 @@ public class JasperWriter extends BaseWriter
                 break;
                 
             case DOCX:
-                report = new DOCXReport(writer);
+                report = new DocXReport(writer);
                 break;
                 
             default:

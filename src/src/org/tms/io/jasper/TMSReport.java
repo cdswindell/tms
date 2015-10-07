@@ -34,6 +34,7 @@ import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.io.BaseWriter;
 import org.tms.io.options.DateTimeFormatOption;
+import org.tms.io.options.FontedOption;
 import org.tms.io.options.IOOptions;
 import org.tms.io.options.PageableOption;
 import org.tms.io.options.TitleableOption;
@@ -202,13 +203,13 @@ abstract public class TMSReport
         }    
 
         // define font styles
-        float defaultFontSize = m_options instanceof PageableOption ?
-                ((PageableOption)m_options).getDefaultFontSize() : sf_StandardFontSize;
+        float defaultFontSize = m_options instanceof FontedOption ?
+                ((FontedOption)m_options).getDefaultFontSize() : sf_StandardFontSize;
         if (defaultFontSize <= 0)
             defaultFontSize = sf_StandardFontSize;
         
-        float headingFontSize = m_options instanceof PageableOption ?
-                ((PageableOption)m_options).getHeadingFontSize() : sf_HeaderFontSize;
+        float headingFontSize = m_options instanceof FontedOption ?
+                ((FontedOption)m_options).getHeadingFontSize() : sf_HeaderFontSize;
         if (headingFontSize <= 0)
             headingFontSize = sf_HeaderFontSize;
         
@@ -431,7 +432,7 @@ abstract public class TMSReport
 
     private JRDesignBand defineTitleBand(JasperDesign jrDesign, JRDesignStyle boldStyle, int colWidth)
     {
-        float titleFontSize = ((PageableOption)m_options).getTitleFontSize();
+        float titleFontSize = ((FontedOption)m_options).getTitleFontSize();
         if (titleFontSize <= 0)
             titleFontSize = sf_TitleFontSize;
         
@@ -464,7 +465,7 @@ abstract public class TMSReport
 
     private JRDesignBand defineFooterBand(JasperDesign jrDesign, JRDesignStyle normalStyle, int pageWidth)
     {
-        float fontSize = (int)(((PageableOption)m_options).getDefaultFontSize() * .9);
+        float fontSize = (int)(((FontedOption)m_options).getDefaultFontSize() * .9);
         if (fontSize <= 0)
             fontSize = (int)(sf_StandardFontSize * .9);
             
@@ -514,7 +515,7 @@ abstract public class TMSReport
         JRDesignStyle style = new JRDesignStyle();
         style.setName(name);
         style.setDefault(isDefault);
-        style.setFontName("SansSerif");
+        style.setFontName("Helvetica");
         style.setFontSize(fontSize);
         style.setBold(isBold);
         style.setPdfEmbedded(false);

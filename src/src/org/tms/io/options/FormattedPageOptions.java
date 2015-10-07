@@ -1,7 +1,7 @@
 package org.tms.io.options;
 
 
-public abstract class FormattedPageOptions extends IOOptions implements TitleableOption, DateTimeFormatOption, PageableOption
+abstract class FormattedPageOptions extends IOOptions implements TitleableOption, DateTimeFormatOption, PageableOption, FontedOption
 {
     public static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
     public static final int DefaultPageWidthPx = (int) (8.5 * 72);

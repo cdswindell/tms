@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
-import org.tms.io.options.DOCXOptions;
+import org.tms.io.options.DocXOptions;
 
 public class DOCXWriterTest extends BaseTest
 {
@@ -20,7 +20,7 @@ public class DOCXWriterTest extends BaseTest
         Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
         assertNotNull(t);
         
-        t.export("a.docx", DOCXOptions.Default
+        t.export("a.docx", DocXOptions.Default
                 .withPages(true)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
