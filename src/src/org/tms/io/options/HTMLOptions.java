@@ -5,18 +5,19 @@ public class HTMLOptions extends FormattedPageOptions
     public static final int DefaultHTMLFontSizePx = 12;
     
     public static final HTMLOptions Default = new HTMLOptions(true, true, false, false,
-                                                              DefaultColumnWidthPx, DefaultHTMLFontSizePx);
+                                                              DefaultColumnWidthPx, DefaultHTMLFontSizePx, "Arial");
     
     private HTMLOptions(final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
             final boolean ignoreEmptyCols,
             final int colWidthPx,
-            final int defaultFontSize)
+            final int defaultFontSize,
+            final String defaultFontFamily)
     {
         super(org.tms.io.options.IOOptions.FileFormat.HTML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 null, false, false, 0, 0, colWidthPx,
-                false, false, defaultFontSize);
+                false, false, defaultFontSize, defaultFontFamily);
     }
 
     private HTMLOptions(final HTMLOptions format)
@@ -202,6 +203,14 @@ public class HTMLOptions extends FormattedPageOptions
     {
         HTMLOptions newOptions = new HTMLOptions(this);
         newOptions.setTitleFontSize(f);
+        return newOptions;
+    }
+
+    @Override
+    public HTMLOptions withFontFamily(String ff)
+    {
+        HTMLOptions newOptions = new HTMLOptions(this);
+        newOptions.setFontFamily(ff);
         return newOptions;
     }
 }

@@ -8,6 +8,7 @@ abstract class FormattedPageOptions extends IOOptions implements TitleableOption
     public static final int DefaultPageHeightPx = (int) (11 * 72);
     public static final int DefaultColumnWidthPx = (int) 65;
     public static final int DefaultFontSizePx = 8;
+    public static final String DefaultFontFamily = "SansSerif";
 
     private enum Options implements OptionEnum {
         Title,
@@ -22,6 +23,7 @@ abstract class FormattedPageOptions extends IOOptions implements TitleableOption
         DefaultFontSize,
         HeadingFontSize,
         TitleFontSize,
+        FontFamily;
     }
 
     abstract public FormattedPageOptions withTitle(String t);
@@ -56,6 +58,8 @@ abstract class FormattedPageOptions extends IOOptions implements TitleableOption
     
     abstract public FormattedPageOptions withTitleFontSize(int f);
 
+    abstract public FormattedPageOptions withFontFamily(String ff);
+
     protected FormattedPageOptions(final org.tms.io.options.IOOptions.FileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
@@ -69,12 +73,16 @@ abstract class FormattedPageOptions extends IOOptions implements TitleableOption
             final int colWidthPx,
             final boolean stickyRowNames,
             final boolean stickyColNames,
-            final int defaultFontSize)
+            final int defaultFontSize,
+            final String defaultFontFamily)
     {
         super(format, (rowNames || stickyRowNames), (colNames || stickyColNames), ignoreEmptyRows, ignoreEmptyCols);
 
         if (dateTimeFormat != null && dateTimeFormat.trim().length() > 0)
             set(Options.DateTimeFormat, dateTimeFormat.trim());
+
+        if (defaultFontFamily != null && defaultFontFamily.trim().length() > 0)
+            set(Options.FontFamily, defaultFontFamily.trim());
 
         set(Options.IsPaged, paged);
         set(Options.IsPageNumbers, pageNumbers);
@@ -273,5 +281,16 @@ abstract class FormattedPageOptions extends IOOptions implements TitleableOption
             throw new IllegalArgumentException("Title font size must be at least 4px");
 
         set(Options.TitleFontSize, i);
+    }
+    
+    @Override
+    public String getFontFamily()
+    {
+        return (String)get(Options.FontFamily);
+    }
+
+    protected void setFontFamily(String ff)
+    {
+        set(Options.FontFamily, ff);
     }
 }

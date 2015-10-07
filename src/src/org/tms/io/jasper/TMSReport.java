@@ -53,6 +53,7 @@ abstract public class TMSReport
     private static final float sf_StandardFontSize = 8;
     private static final float sf_HeaderFontSize = 9;
     private static final float sf_TitleFontSize = 14;
+    private static final String sf_DefaultFontFamily = "SansSerif";
     
     private static final int sf_PortraitPageWidth = (int)(72 * 8.5); // 612px
     private static final int sf_PortraitPageHeight = (int)(72 * 11); // 792px
@@ -430,6 +431,18 @@ abstract public class TMSReport
         return pageHeight;
     }
 
+    private String getFontFamily()
+    {
+        String fontFamily = sf_DefaultFontFamily;
+        if ((m_options instanceof FontedOption)) {
+            fontFamily = ((FontedOption)m_options).getFontFamily();
+            if (fontFamily == null || (fontFamily = fontFamily.trim()).length() <= 0)
+                fontFamily = sf_DefaultFontFamily;
+        }
+        
+        return fontFamily;
+    }
+
     private JRDesignBand defineTitleBand(JasperDesign jrDesign, JRDesignStyle boldStyle, int colWidth)
     {
         float titleFontSize = ((FontedOption)m_options).getTitleFontSize();
@@ -515,7 +528,7 @@ abstract public class TMSReport
         JRDesignStyle style = new JRDesignStyle();
         style.setName(name);
         style.setDefault(isDefault);
-        style.setFontName("Helvetica");
+        style.setFontName(getFontFamily());
         style.setFontSize(fontSize);
         style.setBold(isBold);
         style.setPdfEmbedded(false);

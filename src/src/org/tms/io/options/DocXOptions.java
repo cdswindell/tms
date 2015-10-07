@@ -4,7 +4,7 @@ public class DocXOptions extends FormattedPageOptions
 {
     public static final DocXOptions Default = new DocXOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-            true, true, DefaultFontSizePx);
+            true, true, DefaultFontSizePx, "Helvetica");
     
     private DocXOptions(final boolean rowNames, 
             final boolean colNames, 
@@ -18,11 +18,12 @@ public class DocXOptions extends FormattedPageOptions
             final int colWidthPx,
             final boolean stickyRowNames,
             final boolean stickyColNames,
-            final int defaultFontSize)
+            final int defaultFontSize,
+            final String defaultFontFamily)
     {
         super(org.tms.io.options.IOOptions.FileFormat.DOCX, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
-                stickyRowNames, stickyColNames, defaultFontSize);
+                stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }
 
     private DocXOptions(final DocXOptions format)
@@ -218,6 +219,14 @@ public class DocXOptions extends FormattedPageOptions
     {
         DocXOptions newOptions = new DocXOptions(this);
         newOptions.setTitleFontSize(f);
+        return newOptions;
+    }
+
+    @Override
+    public DocXOptions withFontFamily(String ff)
+    {
+        DocXOptions newOptions = new DocXOptions(this);
+        newOptions.setFontFamily(ff);
         return newOptions;
     }
 }

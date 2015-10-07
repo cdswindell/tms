@@ -5,7 +5,8 @@ public class PDFOptions extends FormattedPageOptions
 {
     public static final PDFOptions Default = new PDFOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-            true, true, DefaultFontSizePx);
+            true, true, DefaultFontSizePx, DefaultFontFamily);
+    
     private PDFOptions(final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
@@ -18,11 +19,12 @@ public class PDFOptions extends FormattedPageOptions
             final int colWidthPx,
             final boolean stickyRowNames,
             final boolean stickyColNames,
-            final int defaultFontSize)
+            final int defaultFontSize,
+            final String defaultFontFamily)
     {
         super(org.tms.io.options.IOOptions.FileFormat.PDF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
-                stickyRowNames, stickyColNames, defaultFontSize);
+                stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }
 
     private PDFOptions(final PDFOptions format)
@@ -218,6 +220,14 @@ public class PDFOptions extends FormattedPageOptions
     {
         PDFOptions newOptions = new PDFOptions(this);
         newOptions.setTitleFontSize(f);
+        return newOptions;
+    }
+
+    @Override
+    public PDFOptions withFontFamily(String ff)
+    {
+        PDFOptions newOptions = new PDFOptions(this);
+        newOptions.setFontFamily(ff);
         return newOptions;
     }
 }

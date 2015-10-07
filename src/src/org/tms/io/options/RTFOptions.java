@@ -4,7 +4,7 @@ public class RTFOptions extends FormattedPageOptions
 {
     public static final RTFOptions Default = new RTFOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-            true, true, DefaultFontSizePx);
+            true, true, DefaultFontSizePx, "Helvetica");
     
     private RTFOptions(final boolean rowNames, 
             final boolean colNames, 
@@ -18,11 +18,12 @@ public class RTFOptions extends FormattedPageOptions
             final int colWidthPx,
             final boolean stickyRowNames,
             final boolean stickyColNames,
-            final int defaultFontSize)
+            final int defaultFontSize,
+            final String defaultFontFamily)
     {
         super(org.tms.io.options.IOOptions.FileFormat.RTF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
-                stickyRowNames, stickyColNames, defaultFontSize);
+                stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }
 
     private RTFOptions(final RTFOptions format)
@@ -218,6 +219,14 @@ public class RTFOptions extends FormattedPageOptions
     {
         RTFOptions newOptions = new RTFOptions(this);
         newOptions.setTitleFontSize(f);
+        return newOptions;
+    }
+
+    @Override
+    public RTFOptions withFontFamily(String ff)
+    {
+        RTFOptions newOptions = new RTFOptions(this);
+        newOptions.setFontFamily(ff);
         return newOptions;
     }
 }
