@@ -40,7 +40,7 @@ public class PDFWriterTest extends BaseTest
         assertNotNull(t);
         
         Subset s = t.addSubset(Access.ByLabel, "CDS");
-        s.add(t.getColumn(1), t.getColumn(3));
+        s.add(t.getColumn(1), t.getColumn(3), t.getRow(1), t.getRow(3), t.getRow(4));
         
         s.export("asubset.pdf", PDFOptions.Default
                 .withPages(false)
@@ -49,7 +49,6 @@ public class PDFWriterTest extends BaseTest
                 .withStickyColumnNames(true)
                 .withColumnWidthInInches(1)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
-                .withFontFamily("Courier")
                 .withPages(true));
     }
 }

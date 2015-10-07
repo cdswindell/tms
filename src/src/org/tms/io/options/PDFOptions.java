@@ -3,9 +3,11 @@ package org.tms.io.options;
 
 public class PDFOptions extends FormattedPageOptions<PDFOptions> 
 {
+    public static final String DefaultFontFamilyPDF = "Helvetica";
+    
     public static final PDFOptions Default = new PDFOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-            true, true, DefaultFontSizePx, DefaultFontFamily);
+            true, true, DefaultFontSizePx, DefaultFontFamilyPDF);
     
     private PDFOptions(final boolean rowNames, 
             final boolean colNames, 

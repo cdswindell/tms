@@ -4,7 +4,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -43,6 +45,23 @@ import org.tms.io.options.TitleableOption;
 abstract public class TMSReport
 {
     static final String sf_RowNameFieldName = "__ROW_NAME__";
+    
+    static final Set<String> sf_JavaLogicalFonts = new HashSet<String>();
+    {
+        sf_JavaLogicalFonts.add(java.awt.Font.SANS_SERIF.toLowerCase());
+        sf_JavaLogicalFonts.add(java.awt.Font.SERIF.toLowerCase());
+        sf_JavaLogicalFonts.add(java.awt.Font.MONOSPACED.toLowerCase());
+        sf_JavaLogicalFonts.add(java.awt.Font.DIALOG.toLowerCase());
+        sf_JavaLogicalFonts.add(java.awt.Font.DIALOG_INPUT.toLowerCase());
+    }
+    
+    static final boolean isLogicalFontFamily(String ff)
+    {
+        if (ff != null)
+            return sf_JavaLogicalFonts.contains(ff.trim().toLowerCase());
+        else
+            return false;
+    }
     
     abstract public void export() throws IOException;
     
@@ -236,7 +255,6 @@ abstract public class TMSReport
         int fieldWidth = (m_options instanceof PageableOption) && ((PageableOption)m_options).getColumnWidth() > 0 ?
                 ((PageableOption)m_options).getColumnWidth() : sf_StringColWidth;
         
-                
         if (m_options.isRowNames()) {
             JRDesignField jrField = new JRDesignField();
             jrField.setName(sf_RowNameFieldName);
@@ -530,7 +548,9 @@ abstract public class TMSReport
         style.setDefault(isDefault);
         if (m_options.isPDF()) {
             style.setFontName(sf_DefaultFontFamily);
-            style.setPdfFontName(getFontFamily());
+            String ff = getFontFamily();
+            if (!isLogicalFontFamily(ff))
+                style.setPdfFontName(getFontFamily());
         }
         else
             style.setFontName(getFontFamily());
