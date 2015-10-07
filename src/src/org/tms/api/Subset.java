@@ -1,5 +1,9 @@
 package org.tms.api;
 
+import java.io.IOException;
+
+import org.tms.io.options.IOOptions;
+
 /**
  * A {@link Table} subset, containing a collection of rows, columns, cells and other subsets. 
  * <p>
@@ -14,6 +18,10 @@ package org.tms.api;
  */
 public interface Subset extends TableElement
 {
+    
+    public int getNumColumns();
+    public int getNumRows();
+ 
     /**
      * Add {@link TableElement}s to this {@code Subset}. Returns {@code true} if this {@code Subset} did not contain some or all
      * of the {@link TableElement}s specified in {@code tableElements}, or {@code false} if {@code tableElements} is {@code null} or
@@ -43,4 +51,14 @@ public interface Subset extends TableElement
      * @return {@code true} if this {@code Subset} contains {@code tableElement}
      */
     public boolean contains(TableElement tableElement);
+    
+    /**
+     * Exports this {@link Subset} to the specified file format using the export options given in {@code options}.
+     * @param fileName the file name where the table is written to
+     * @param options the {@link IOOptions} that specifies the output file format as well as any specific export options
+     * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
+     * @throws IOException if {@code fileName} cannot be created
+     */
+    public void export(String fileName, IOOptions options) 
+    throws IOException;
 }

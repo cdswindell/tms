@@ -46,7 +46,7 @@ import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
-import org.tms.io.TableWriter;
+import org.tms.io.TableExportAdapter;
 import org.tms.io.options.IOOptions;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
@@ -348,7 +348,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     public void export(String fileName, IOOptions options) 
     throws IOException
     {
-        TableWriter writer = new TableWriter(this, fileName, options);
+        TableExportAdapter writer = new TableExportAdapter(this, fileName, options);
         writer.export();
     }
 

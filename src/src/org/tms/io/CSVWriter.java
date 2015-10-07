@@ -11,20 +11,18 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
 import org.tms.api.Column;
 import org.tms.api.Row;
-import org.tms.api.Table;
 import org.tms.io.options.CSVOptions;
-import org.tms.tds.TableImpl;
 
 public class CSVWriter extends BaseWriter
 {
-    public static void export(TableImpl table, File file, CSVOptions options) 
+    public static void export(TableExportAdapter tea, File file, CSVOptions options) 
     throws IOException
     {
-        CSVWriter writer = new CSVWriter(table, file, options);
+        CSVWriter writer = new CSVWriter(tea, file, options);
         writer.exportCVS();        
     }
     
-    private CSVWriter(Table t, File f, CSVOptions options)
+    private CSVWriter(TableExportAdapter t, File f, CSVOptions options)
     {
         super(t, f, options);
     }
@@ -53,33 +51,27 @@ public class CSVWriter extends BaseWriter
                 if (options().isRowNames())
                     record.add(null);
                 
-                for (int cIdx = 1; cIdx <= getNumColumns(); cIdx++) {
-                    if (!isIgnoreColumn(cIdx)) {
-                        Column c = getTable().getColumn(cIdx);
-                        if (c != null)
-                            record.add(c.getLabel());
-                        else
-                            record.add(null);  
-                    }
+                for (Column c : getActiveColumns()) {
+                    if (c != null)
+                        record.add(c.getLabel());
+                    else
+                        record.add(null);  
                 }
                 
                 out.printRecord(record);
             }
             
-            for (Row r : getTable().getRows()) {
+            for (Row r : getRows()) {
                 record.clear();
                 boolean rowIsNull = true;
                 if (!(r == null || r.isNull())) {
-                    for (int cIdx = 1; cIdx <= getNumColumns(); cIdx++) {
-                        if (!isIgnoreColumn(cIdx)) {
-                            Column c = getTable().getColumn(cIdx);
-                            Object value = getTable().getCellValue(r, c);
-                            if (value == null)
-                                record.add(null);
-                            else {
-                                rowIsNull = false;
-                                record.add(value.toString());
-                            }
+                    for (Column c : getActiveColumns()) {
+                        Object value = getTable().getCellValue(r, c);
+                        if (value == null)
+                            record.add(null);
+                        else {
+                            rowIsNull = false;
+                            record.add(value.toString());
                         }
                     }
                 }

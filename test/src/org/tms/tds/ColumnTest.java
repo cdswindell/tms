@@ -246,7 +246,7 @@ public class ColumnTest
         assertThat(c2.getIndex(), is(2));
         assertThat(t.getNumColumns(), is(2));
              
-        assertThat(r.getNumColumns(), is(2));
+        assertThat(r.getNumColumnsInternal(), is(2));
         assertThat(r.contains(c1), is(true));
         assertThat(r.contains(c2), is(true));
         
@@ -256,7 +256,7 @@ public class ColumnTest
         assertThat(t.getNumColumns(), is(1));
         assertThat(c1.isInUse(), is(false));
         
-        assertThat(r.getNumColumns(), is(1));
+        assertThat(r.getNumColumnsInternal(), is(1));
         assertThat(r.contains(c1), is(false));
         assertThat(r.contains(c2), is(true));
         

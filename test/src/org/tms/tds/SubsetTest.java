@@ -95,7 +95,7 @@ public class SubsetTest
         rs.add(r3);
         
         assertThat(r.addAll(rs), is(true));
-        assertThat(r.getNumRows(), is(3));
+        assertThat(r.getNumRowsInternal(), is(3));
         assertThat(r.contains(r1), is(true));
         assertThat(r.contains(r2), is(true));
         assertThat(r.contains(r3), is(true));
@@ -128,7 +128,7 @@ public class SubsetTest
         
         // test range removal methods
         r.remove(r1, r2, r3);
-        assertThat(r.getNumRows(), is(0));
+        assertThat(r.getNumRowsInternal(), is(0));
         
         assertThat(r.removeAll(rs), is(false));
     }

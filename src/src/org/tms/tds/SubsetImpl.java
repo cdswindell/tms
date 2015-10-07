@@ -1,5 +1,6 @@
 package org.tms.tds;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +23,9 @@ import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.io.SubsetExportAdapter;
+import org.tms.io.TableExportAdapter;
+import org.tms.io.options.IOOptions;
 import org.tms.tds.TableImpl.CellReference;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
@@ -66,12 +70,12 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     
     protected Collection<RowImpl> getEffectiveRows()
     {
-        if (this.getNumRows() > 0)
+        if (this.getNumRowsInternal() > 0)
             return m_rows;
         
         TableImpl parent = getTable();
         if (parent != null) {
-            if (this.getNumColumns() > 0)
+            if (this.getNumColumnsInternal() > 0)
                 return parent.getRowsInternal();
         }
         
@@ -80,12 +84,12 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     
     protected Collection<ColumnImpl> getEffectiveColumns()
     {
-        if (this.getNumColumns() > 0)
+        if (this.getNumColumnsInternal() > 0)
             return m_cols;
         
         TableImpl parent = getTable();
         if (parent != null) {
-            if (this.getNumRows() > 0)
+            if (this.getNumRowsInternal() > 0)
                 return parent.getColumnsInternal();
         }
         
@@ -97,7 +101,17 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return getRows();
     }
     
-    protected int getNumRows()
+    @Override
+    public int getNumRows()
+    {
+        int numRows = getNumRowsInternal();
+        if (numRows <= 0)
+            numRows = getTable().getNumRows();
+        
+        return numRows;
+    }
+    
+    protected int getNumRowsInternal()
     {
     	return m_rows.size();
     }
@@ -112,7 +126,17 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return getColumns();
     }
     
-    protected int getNumColumns()
+    @Override
+    public int getNumColumns()
+    {
+        int numCols = getNumColumnsInternal();
+        if (numCols <= 0)
+            numCols = getTable().getNumColumns();
+        
+        return numCols;
+    }
+    
+    protected int getNumColumnsInternal()
     {
         return m_cols.size();
     }
@@ -144,6 +168,13 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     /*
      * Class-specific methods
      */
+    @Override
+    public void export(String fileName, IOOptions options) throws IOException
+    {
+        TableExportAdapter writer = new SubsetExportAdapter(this, fileName, options);
+        writer.export();
+    }
+    
     @Override
     public boolean contains(TableElement r)
     {
@@ -386,10 +417,10 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         switch(key)
         {
             case numRows:
-                return getNumRows();
+                return getNumRowsInternal();
                 
             case numColumns:
-                return getNumColumns();
+                return getNumColumnsInternal();
                 
             case numSubsets:
                 return getNumSubsets();
@@ -514,8 +545,8 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 	 */
 	private void clearComponentDerivations()
     {
-	    int numRows = getNumRows();
-	    int numCols = getNumColumns();
+	    int numRows = getNumRowsInternal();
+	    int numCols = getNumColumnsInternal();
 	    
         if (numRows > 0 && numCols == 0) {
             for (Row row : rows()) {
@@ -655,8 +686,8 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
             m_rowIndex = m_colIndex = m_subsetIndex = m_cellIndex = 1;
             m_subsetIterator = null;
             
-            if (m_subset.getNumRows() > 0 || m_subset.getNumColumns() > 0) {
-                if (m_subset.getNumRows() > 0)
+            if (m_subset.getNumRowsInternal() > 0 || m_subset.getNumColumnsInternal() > 0) {
+                if (m_subset.getNumRowsInternal() > 0)
                     m_rows = m_subset.getRows();
                 else {
                     m_table.ensureRowsExist();
@@ -665,7 +696,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
                 
                 m_numRows = m_rows.size();
                            
-                if (m_subset.getNumColumns() > 0)
+                if (m_subset.getNumColumnsInternal() > 0)
                     m_cols = m_subset.getColumns();
                 else {
                     m_table.ensureColumnsExist();

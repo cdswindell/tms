@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.io.options.IOOptions;
 
 public abstract class BaseWriter
 {
-    private Table m_table;
+    private TableExportAdapter m_tableExportAdapter;
     private File m_outFile;
     private IOOptions m_baseOptions;
     
@@ -22,39 +23,39 @@ public abstract class BaseWriter
     private Set<Integer> m_ignoredColumns;
     private List<Column> m_activeCols;
     
-    protected BaseWriter(Table t, File f, IOOptions options)
+    protected BaseWriter(TableExportAdapter tw, File f, IOOptions options)
     {
-        m_table = t;
+        m_tableExportAdapter = tw;
         m_outFile = f;
         m_baseOptions = options;
         
-        m_nCols = m_table.getNumColumns();
+        m_nCols = tw.getNumColumns();
         m_nConsumableColumns = -1; // to be initialized later
     }
 
     /*
-     * Publically available methods for use outside of package
+     * Publicly available methods for use outside of package
      */
     public IOOptions options()
     {
         return m_baseOptions;
     }
     
-    public Table getTable()
-    {
-        return m_table;
-    }
-
     public File getOutputFile()
     {
         return m_outFile;
     }
     
-    public int getNumColumns()
+    public Table getTable()
     {
-        return m_nCols;
+        return m_tableExportAdapter.getTable();
     }
-
+    
+    public TableExportAdapter getExportAdapter()
+    {
+        return m_tableExportAdapter;
+    }
+    
     public int getNumConsumableColumns()
     {
         if (m_nConsumableColumns == -1) {
@@ -62,11 +63,10 @@ public abstract class BaseWriter
             if (m_baseOptions.isIgnoreEmptyColumns()) {
                 m_ignoredColumns = new HashSet<Integer>();
                 int emptyColCnt = 0;
-                for (int i = 1; i <= m_nCols; i++) {
-                    Column c = m_table.getColumn(i);
-                    if (c == null || c.isNull()) {
+                for (Column c : m_tableExportAdapter.getColumns()) {
+                    if (c.isNull()) {
                         emptyColCnt++;
-                        m_ignoredColumns.add(i);
+                        m_ignoredColumns.add(c.getIndex());
                     }
                 }
                 
@@ -91,6 +91,20 @@ public abstract class BaseWriter
         return m_ignoredColumns.contains(i);           
     }
     
+    public boolean isIgnoreColumn(Column c)
+    {
+        if (c == null)
+            return true;
+        
+        if (!m_baseOptions.isIgnoreEmptyColumns())
+            return false;
+        
+        if (m_ignoredColumns == null)
+            getNumConsumableColumns();
+        
+        return m_ignoredColumns.contains(c.getIndex());           
+    }
+    
     /**
      * Return a list of active columns in the table. Active columns are non-empty columns, 
      * if isIgnoreEmptyColumns() is true, or all columns otherwise
@@ -99,27 +113,30 @@ public abstract class BaseWriter
     public List<Column> getActiveColumns()
     {
         if (m_baseOptions.isIgnoreEmptyColumns()) {
-            if (m_activeCols != null || getNumColumns() != getNumConsumableColumns()) {
-                    
+            if (m_activeCols == null) {                    
                 if (m_activeCols == null) {
                     m_activeCols = new ArrayList<Column>(getNumConsumableColumns());
                     
-                    for (int i = 1; i <= m_nCols; i++) {
-                        Column c = m_table.getColumn(i);
-                        if (c != null && !isIgnoreColumn(i)) 
-                            m_activeCols.add(m_table.getColumn(i));
+                    for (Column c : m_tableExportAdapter.getColumns()) {
+                        if (c != null && !isIgnoreColumn(c)) 
+                            m_activeCols.add(c);
                     }
-                }
-                
-                return m_activeCols;
+                }               
             }
+            
+            return m_activeCols;
         }
-        
-        return m_table.getColumns();
+        else        
+            return m_tableExportAdapter.getColumns();
     }
     
     public int getNumActiveColumns()
     {
         return getActiveColumns().size();
+    }
+    
+    public List<Row> getRows()
+    {
+        return m_tableExportAdapter.getRows();
     }
 }

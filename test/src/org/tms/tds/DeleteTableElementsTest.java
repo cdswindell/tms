@@ -32,7 +32,7 @@ public class DeleteTableElementsTest
         assertThat(rng, notNullValue());
         
         rng.add(r1);
-        assertThat(rng.getNumRows(), is(1));
+        assertThat(rng.getNumRowsInternal(), is(1));
         assertThat(rng.getRows(), notNullValue());
         assertThat(rng.getRows().size(), is(1));
         
@@ -52,7 +52,7 @@ public class DeleteTableElementsTest
         assertThat(c.isInvalid(), is(true));  
         
         // assert that subset contains no rows
-        assertThat(rng.getNumRows(), is(0));
+        assertThat(rng.getNumRowsInternal(), is(0));
         assertThat(rng.getNumCells(), is(0));
         assertThat(rng.getRows(), notNullValue());
         assertThat(rng.getRows().size(), is(0));
@@ -235,8 +235,8 @@ public class DeleteTableElementsTest
         assertThat(rng, notNullValue());
         
         rng.add(c1);
-        assertThat(rng.getNumRows(), is(0));
-        assertThat(rng.getNumColumns(), is(1));
+        assertThat(rng.getNumRowsInternal(), is(0));
+        assertThat(rng.getNumColumnsInternal(), is(1));
         assertThat(rng.getColumns(), notNullValue());
         assertThat(rng.getColumns().size(), is(1));
         
@@ -258,7 +258,7 @@ public class DeleteTableElementsTest
         assertThat(c.isInvalid(), is(true));  
         
         // assert that subset contains no rows
-        assertThat(rng.getNumColumns(), is(0));
+        assertThat(rng.getNumColumnsInternal(), is(0));
         assertThat(rng.getNumCells(), is(0));
         assertThat(rng.getColumns(), notNullValue());
         assertThat(rng.getColumns().size(), is(0));

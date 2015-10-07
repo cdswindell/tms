@@ -2,19 +2,22 @@ package org.tms.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import org.tms.api.Column;
+import org.tms.api.Row;
+import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.io.options.CSVOptions;
 import org.tms.io.options.IOOptions;
-import org.tms.tds.TableImpl;
 
-public class TableWriter
+public class TableExportAdapter
 {
-    private TableImpl m_table;
+    private Table m_table;
     private IOOptions m_options;
     private File m_file;
     
-    public TableWriter(TableImpl t, String fileName, IOOptions options) 
+    public TableExportAdapter(Table t, String fileName, IOOptions options) 
     throws IOException
     {
         if (t == null)
@@ -67,18 +70,52 @@ public class TableWriter
     {
         switch (m_options.getFileFormat()) {
             case CSV:
-                CSVWriter.export(m_table, m_file, (CSVOptions)m_options);
+                CSVWriter.export(this, m_file, (CSVOptions)m_options);
                 break;
                 
             case PDF:
             case RTF:
             case HTML:
             case DOCX:
-                JasperWriter.export(m_table, m_file, m_options);
+                JasperWriter.export(this, m_file, m_options);
                 break;
                 
             default:
                 break;
         }        
+    }
+
+    public int getNumColumns()
+    {
+        return m_table.getNumColumns();
+    }
+    
+    public List<Column> getColumns()
+    {
+        return m_table.getColumns();
+    }
+
+    public int getNumRows()
+    {
+        return m_table.getNumRows();
+    }
+    
+    public List<Row> getRows()
+    {
+        return m_table.getRows();
+    }
+
+    public Table getTable()
+    {
+        return m_table;
+    }
+
+    public Row getRow(int rowIndex)
+    {
+        List<Row> rows = getRows();
+        if (rowIndex >= 1 && rowIndex <= rows.size())
+            return rows.get(rowIndex - 1);
+        else
+            return null;
     }
 }
