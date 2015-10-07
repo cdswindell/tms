@@ -1,6 +1,7 @@
 package org.tms.api;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.tms.io.options.IOOptions;
 
@@ -21,6 +22,9 @@ public interface Subset extends TableElement
     
     public int getNumColumns();
     public int getNumRows();
+    
+    public List<Row> getRows();
+    public List<Column> getColumns();
  
     /**
      * Add {@link TableElement}s to this {@code Subset}. Returns {@code true} if this {@code Subset} did not contain some or all

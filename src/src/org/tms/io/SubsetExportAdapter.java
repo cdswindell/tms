@@ -22,24 +22,28 @@ public class SubsetExportAdapter extends TableExportAdapter
     @Override
     public int getNumRows()
     {
-        return m_subset.getNumRows();
+        int nRows = m_subset.getNumRows();
+        return nRows > 0 ? nRows : getTable().getNumRows();
     }
 
     @Override
     public List<Row> getRows()
     {
-        return null;
+        List<Row> rows = m_subset.getRows();
+        return rows != null && rows.size() > 0 ? rows : getTable().getRows();
     }
     
     @Override
     public int getNumColumns()
     {
-        return m_subset.getNumColumns();
+        int nCols = m_subset.getNumColumns();
+        return nCols > 0 ? nCols : getTable().getNumColumns();
     }
     
     @Override
     public List<Column> getColumns()
     {
-        return null;
+        List<Column> cols = m_subset.getColumns();
+        return cols != null && cols.size() > 0 ? cols : getTable().getColumns();
     }    
 }

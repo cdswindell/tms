@@ -33,8 +33,8 @@ public class DeleteTableElementsTest
         
         rng.add(r1);
         assertThat(rng.getNumRowsInternal(), is(1));
-        assertThat(rng.getRows(), notNullValue());
-        assertThat(rng.getRows().size(), is(1));
+        assertThat(rng.getRowsInternal(), notNullValue());
+        assertThat(rng.getRowsInternal().size(), is(1));
         
         // set a value, it should become invalid when the row is deleted
         CellImpl c = t.getCell(r1, c1);
@@ -54,8 +54,8 @@ public class DeleteTableElementsTest
         // assert that subset contains no rows
         assertThat(rng.getNumRowsInternal(), is(0));
         assertThat(rng.getNumCells(), is(0));
-        assertThat(rng.getRows(), notNullValue());
-        assertThat(rng.getRows().size(), is(0));
+        assertThat(rng.getRowsInternal(), notNullValue());
+        assertThat(rng.getRowsInternal().size(), is(0));
         
         // verify that no operations can be performed
         try {
@@ -237,8 +237,8 @@ public class DeleteTableElementsTest
         rng.add(c1);
         assertThat(rng.getNumRowsInternal(), is(0));
         assertThat(rng.getNumColumnsInternal(), is(1));
-        assertThat(rng.getColumns(), notNullValue());
-        assertThat(rng.getColumns().size(), is(1));
+        assertThat(rng.getColumnsInternal(), notNullValue());
+        assertThat(rng.getColumnsInternal().size(), is(1));
         
         // set a value, it should become invalid when the row is deleted
         CellImpl c = t.getCell(r1, c1);
@@ -260,8 +260,8 @@ public class DeleteTableElementsTest
         // assert that subset contains no rows
         assertThat(rng.getNumColumnsInternal(), is(0));
         assertThat(rng.getNumCells(), is(0));
-        assertThat(rng.getColumns(), notNullValue());
-        assertThat(rng.getColumns().size(), is(0));
+        assertThat(rng.getColumnsInternal(), notNullValue());
+        assertThat(rng.getColumnsInternal().size(), is(0));
         
         assertThat(rng.contains(c1), is(false));
         assertThat(rng.contains(c), is(false));

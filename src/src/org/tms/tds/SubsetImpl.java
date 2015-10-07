@@ -63,9 +63,15 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return ElementType.Subset;
     }
     
-    protected List<RowImpl> getRows()
+    @Override
+    public List<Row> getRows()
     {
-        return new ArrayList<RowImpl>(((JustInTimeSet<RowImpl>)m_rows).clone());
+       return new ArrayList<Row>(((JustInTimeSet<RowImpl>)m_rows).clone());
+    }
+    
+    protected List<RowImpl> getRowsInternal()
+    {
+        return new ArrayList<RowImpl>(m_rows != null ? m_rows : Collections.emptySet());
     }
     
     protected Collection<RowImpl> getEffectiveRows()
@@ -98,17 +104,13 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     
     protected Iterable<RowImpl> rows()
     {
-        return getRows();
+        return getRowsInternal();
     }
     
     @Override
     public int getNumRows()
     {
-        int numRows = getNumRowsInternal();
-        if (numRows <= 0)
-            numRows = getTable().getNumRows();
-        
-        return numRows;
+        return getNumRowsInternal();
     }
     
     protected int getNumRowsInternal()
@@ -116,24 +118,26 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     	return m_rows.size();
     }
 
-    protected List<ColumnImpl> getColumns()
+    @Override
+    public List<Column> getColumns()
     {
-        return new ArrayList<ColumnImpl>(((JustInTimeSet<ColumnImpl>)m_cols).clone());
+        return new ArrayList<Column>(((JustInTimeSet<ColumnImpl>)m_cols).clone());
+    }
+
+    protected List<ColumnImpl> getColumnsInternal()
+    {
+        return new ArrayList<ColumnImpl>(m_cols != null ? m_cols : Collections.emptySet());
     }
 
     public Iterable<ColumnImpl> columns()
     {
-        return getColumns();
+        return getColumnsInternal();
     }
     
     @Override
     public int getNumColumns()
     {
-        int numCols = getNumColumnsInternal();
-        if (numCols <= 0)
-            numCols = getTable().getNumColumns();
-        
-        return numCols;
+        return getNumColumnsInternal();
     }
     
     protected int getNumColumnsInternal()
@@ -429,10 +433,10 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
                 return getNumCells();
                 
             case Rows:
-                return getRows(); 
+                return getRowsInternal(); 
                 
             case Columns:
-                return getColumns(); 
+                return getColumnsInternal(); 
                 
             case Subsets:
                 return getSubsets(); 
@@ -688,7 +692,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
             
             if (m_subset.getNumRowsInternal() > 0 || m_subset.getNumColumnsInternal() > 0) {
                 if (m_subset.getNumRowsInternal() > 0)
-                    m_rows = m_subset.getRows();
+                    m_rows = m_subset.getRowsInternal();
                 else {
                     m_table.ensureRowsExist();
                     m_rows = new ArrayList<RowImpl>(m_table.getRowsInternal());
@@ -697,7 +701,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
                 m_numRows = m_rows.size();
                            
                 if (m_subset.getNumColumnsInternal() > 0)
-                    m_cols = m_subset.getColumns();
+                    m_cols = m_subset.getColumnsInternal();
                 else {
                     m_table.ensureColumnsExist();
                     m_cols = new ArrayList<ColumnImpl>(m_table.getColumnsInternal());
