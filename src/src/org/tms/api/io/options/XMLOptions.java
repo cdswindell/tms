@@ -8,9 +8,9 @@ public class XMLOptions extends IOOptions
     public static final XMLOptions Default = new XMLOptions(true, true, false, false);
 
     private XMLOptions(final boolean rowNames, 
-                      final boolean colNames, 
-                      final boolean ignoreEmptyRows, 
-                      final boolean ignoreEmptyCols)
+                       final boolean colNames, 
+                       final boolean ignoreEmptyRows, 
+                       final boolean ignoreEmptyCols)
     {
         super(org.tms.io.options.IOOptions.FileFormat.XML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
     }

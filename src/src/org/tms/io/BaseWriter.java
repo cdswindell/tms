@@ -1,6 +1,7 @@
 package org.tms.io;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,6 +23,8 @@ public abstract class BaseWriter
     private int m_nConsumableColumns;
     private Set<Integer> m_ignoredColumns;
     private List<Column> m_activeCols;
+    
+    abstract protected void export() throws IOException;
     
     protected BaseWriter(TableExportAdapter tw, File f, IOOptions options)
     {

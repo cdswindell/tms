@@ -19,7 +19,7 @@ public class CSVWriter extends BaseWriter
     throws IOException
     {
         CSVWriter writer = new CSVWriter(tea, file, options);
-        writer.exportCVS();        
+        writer.export();        
     }
     
     private CSVWriter(TableExportAdapter t, File f, CSVOptions options)
@@ -32,7 +32,7 @@ public class CSVWriter extends BaseWriter
         return (CSVOptions)super.options();
     }
  
-    private void exportCVS() 
+    protected void export() 
     throws IOException
     {
         FileWriter fw = new FileWriter(getOutputFile());

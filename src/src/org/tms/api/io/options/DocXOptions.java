@@ -34,7 +34,7 @@ public class DocXOptions extends FormattedPageOptions<DocXOptions>
     }
 
     @Override
-    protected DocXOptions clone(FormattedPageOptions<?> model)
+    protected DocXOptions clone(final FormattedPageOptions<?> model)
     {
         return new DocXOptions((DocXOptions)model);
     }

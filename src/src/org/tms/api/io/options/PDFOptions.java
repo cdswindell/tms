@@ -37,7 +37,7 @@ public class PDFOptions extends FormattedPageOptions<PDFOptions>
     }
 
     @Override
-    protected PDFOptions clone(FormattedPageOptions<?> model)
+    protected PDFOptions clone(final FormattedPageOptions<?> model)
     {
         return new PDFOptions((PDFOptions)model);
     }

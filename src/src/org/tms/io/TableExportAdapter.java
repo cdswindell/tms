@@ -9,6 +9,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.options.CSVOptions;
+import org.tms.api.io.options.TMSOptions;
 import org.tms.io.options.IOOptions;
 
 public class TableExportAdapter
@@ -69,6 +70,10 @@ public class TableExportAdapter
     throws IOException
     {
         switch (m_options.getFileFormat()) {
+            case TMS:
+                TMSWriter.export(this, m_file, (TMSOptions)m_options);
+                break;
+                
             case CSV:
                 CSVWriter.export(this, m_file, (CSVOptions)m_options);
                 break;

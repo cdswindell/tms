@@ -28,7 +28,7 @@ public class HTMLOptions extends FormattedPageOptions<HTMLOptions>
     }
 
     @Override
-    protected HTMLOptions clone(FormattedPageOptions<?> model)
+    protected HTMLOptions clone(final FormattedPageOptions<?> model)
     {
         return new HTMLOptions((HTMLOptions)model);
     }

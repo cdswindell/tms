@@ -1,11 +1,9 @@
 package org.tms.io;
 
-public class TableReader
+public class TMSReader
 {
-
-    public TableReader()
+    public TMSReader()
     {
         // TODO Auto-generated constructor stub
     }
-
 }

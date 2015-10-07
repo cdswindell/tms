@@ -41,11 +41,20 @@ public class JasperWriter extends BaseWriter
         }
         
         // export the report using Jasper Reports
-        report.export();        
+        writer.m_report = report;  
+        writer.export();
     }
+    
+    private TMSReport m_report;
     
     private JasperWriter(TableExportAdapter t, File f, IOOptions options)
     {
         super(t, f, options);
+    }
+
+    @Override
+    protected void export() throws IOException
+    {
+       m_report.export();
     }
 }
