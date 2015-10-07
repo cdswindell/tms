@@ -1,5 +1,6 @@
 package org.tms.tds;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -16,6 +17,9 @@ import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
+import org.tms.io.ColumnExportAdapter;
+import org.tms.io.TableExportAdapter;
+import org.tms.io.options.IOOptions;
 
 public class ColumnImpl extends TableSliceElementImpl implements Column
 {
@@ -145,6 +149,14 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     /*
      * Class-specific methods
      */    
+
+    @Override
+    public void export(String fileName, IOOptions options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new ColumnExportAdapter(this, fileName, options);
+        writer.export();
+    }
 
     protected CellImpl getCell(RowImpl row, boolean setCurrent)
     {

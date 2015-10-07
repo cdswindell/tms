@@ -1,9 +1,11 @@
 package org.tms.api;
 
+import java.io.IOException;
 import java.util.Comparator;
 
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
+import org.tms.io.options.IOOptions;
 
 public interface TableRowColumnElement extends TableElement
 {
@@ -25,6 +27,16 @@ public interface TableRowColumnElement extends TableElement
     public TableCellValidator getValidator();
     public void setValidator(TableCellValidator validator);
     public void setTransformer(TableCellTransformer transformer);
+       
+    /**
+     * Exports this {@link TableRowColumnElement} to the specified file format using the export options given in {@code options}.
+     * @param fileName the file name where the row/column is written to
+     * @param options the {@link IOOptions} that specifies the output file format as well as any specific export options
+     * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
+     * @throws IOException if {@code fileName} cannot be created
+     */
+    public void export(String fileName, IOOptions options) 
+    throws IOException;
     
     /**
      * Sort the table by a row/column. Null elements are sorted to the end of the row/column.

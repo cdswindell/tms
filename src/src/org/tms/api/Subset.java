@@ -58,7 +58,9 @@ public interface Subset extends TableElement
     
     /**
      * Exports this {@link Subset} to the specified file format using the export options given in {@code options}.
-     * @param fileName the file name where the table is written to
+     * If no {@link Row}s are present in the subset, all {@code row}s in the underlying {@link Table} are exported.
+     * If no {@link Column}s are present in the subset, all {@code columns}s in the underlying {@link Table} are exported.
+     * @param fileName the file name where the subset is written to
      * @param options the {@link IOOptions} that specifies the output file format as well as any specific export options
      * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
      * @throws IOException if {@code fileName} cannot be created

@@ -1,5 +1,6 @@
 package org.tms.tds;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +16,9 @@ import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
+import org.tms.io.RowExportAdapter;
+import org.tms.io.TableExportAdapter;
+import org.tms.io.options.IOOptions;
 
 public class RowImpl extends TableSliceElementImpl implements Row
 {
@@ -70,6 +74,14 @@ public class RowImpl extends TableSliceElementImpl implements Row
     /*
      * Class-specific methods
      */   
+    @Override
+    public void export(String fileName, IOOptions options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new RowExportAdapter(this, fileName, options);
+        writer.export();
+    }
+
     @Override 
     public List<TableElementListener> removeAllListeners(TableElementEventType... evTs )
     {

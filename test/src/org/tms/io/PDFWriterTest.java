@@ -7,6 +7,8 @@ import java.io.IOException;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
+import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
@@ -49,6 +51,42 @@ public class PDFWriterTest extends BaseTest
                 .withStickyColumnNames(true)
                 .withColumnWidthInInches(1)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
+                .withPages(true));
+    }
+    
+    @Test
+    public final void testExportRow() throws IOException
+    {
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        assertNotNull(t);
+        
+        Row r = t.getRow(3);
+        
+        r.export("arow.pdf", PDFOptions.Default
+                .withPages(false)
+                .withPageNumbers(true)
+                .withIgnoreEmptyColumns()
+                .withStickyColumnNames(true)
+                .withColumnWidthInInches(1)
+                .withTitle("Only Row 3")
+                .withPages(true));
+    }
+    
+    @Test
+    public final void testExportColumn() throws IOException
+    {
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        assertNotNull(t);
+        
+        Column c = t.getColumn(2);
+        
+        c.export("acol.pdf", PDFOptions.Default
+                .withPages(false)
+                .withPageNumbers(true)
+                .withIgnoreEmptyColumns()
+                .withStickyColumnNames(true)
+                .withColumnWidthInInches(1)
+                .withTitle("Only Column 2")
                 .withPages(true));
     }
 }
