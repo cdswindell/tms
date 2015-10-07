@@ -528,7 +528,12 @@ abstract public class TMSReport
         JRDesignStyle style = new JRDesignStyle();
         style.setName(name);
         style.setDefault(isDefault);
-        style.setFontName(getFontFamily());
+        if (m_options.isPDF()) {
+            style.setFontName(sf_DefaultFontFamily);
+            style.setPdfFontName(getFontFamily());
+        }
+        else
+            style.setFontName(getFontFamily());
         style.setFontSize(fontSize);
         style.setBold(isBold);
         style.setPdfEmbedded(false);

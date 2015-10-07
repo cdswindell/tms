@@ -1,7 +1,9 @@
 package org.tms.io.options;
 
 
-abstract class FormattedPageOptions extends IOOptions implements TitleableOption, DateTimeFormatOption, PageableOption, FontedOption
+abstract class FormattedPageOptions<E extends FormattedPageOptions<?>> 
+    extends IOOptions 
+    implements TitleableOption, DateTimeFormatOption, PageableOption, FontedOption
 {
     public static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
     public static final int DefaultPageWidthPx = (int) (8.5 * 72);
@@ -26,40 +28,8 @@ abstract class FormattedPageOptions extends IOOptions implements TitleableOption
         FontFamily;
     }
 
-    abstract public FormattedPageOptions withTitle(String t);
+    abstract E clone(FormattedPageOptions<?> model);
     
-    abstract public FormattedPageOptions withDateTimeFormat(String t);
-
-    abstract public FormattedPageOptions withPages();
-
-    abstract public FormattedPageOptions withPages(boolean b);
-
-    abstract public FormattedPageOptions withPageNumbers();
-
-    abstract public FormattedPageOptions withPageNumbers(boolean b);
-
-    abstract public FormattedPageOptions withPageWidthInPx(int f);
-
-    abstract public FormattedPageOptions withPageHeightInPx(int f);
-
-    abstract public FormattedPageOptions withColumnWidthInPx(int f);
-
-    abstract public FormattedPageOptions withStickyRowNames();
-
-    abstract public FormattedPageOptions withStickyRowNames(boolean b);
-
-    abstract public FormattedPageOptions withStickyColumnNames();
-
-    abstract public FormattedPageOptions withStickyColumnNames(boolean b);
-    
-    abstract public FormattedPageOptions withDefaultFontSize(int f);
-    
-    abstract public FormattedPageOptions withHeadingFontSize(int f); 
-    
-    abstract public FormattedPageOptions withTitleFontSize(int f);
-
-    abstract public FormattedPageOptions withFontFamily(String ff);
-
     protected FormattedPageOptions(final org.tms.io.options.IOOptions.FileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
@@ -94,9 +64,190 @@ abstract class FormattedPageOptions extends IOOptions implements TitleableOption
         set(Options.DefaultFontSize, defaultFontSize);
     }
 
-    protected FormattedPageOptions(final FormattedPageOptions format)
+    protected FormattedPageOptions(final FormattedPageOptions<?> format)
     {
         super(format);
+    }
+
+    public E withTitle(String t)
+    {
+        E newOption = clone(this);
+        newOption.set(Options.Title, t);
+        return newOption;
+    }
+    
+    public E withRowNames()
+    {
+        return withRowNames(true);
+    }
+
+    @Override
+    public E withRowNames(final boolean b)
+    {
+        E newOptions = clone(this);
+        newOptions.setRowNames(b);
+        return newOptions;
+    }
+
+    @Override
+    public E withColumnNames()
+    {
+        return withColumnNames(true);
+    }
+
+    @Override
+    public E withColumnNames(final boolean b)
+    {
+        E newOptions = clone(this);
+        newOptions.setColumnNames(b);
+        return newOptions;
+    }
+
+    @Override
+    public E withIgnoreEmptyRows()
+    {
+        return withIgnoreEmptyRows(true);
+    }
+
+    @Override
+    public E withIgnoreEmptyRows(final boolean b)
+    {
+        E newOptions = clone(this);
+        newOptions.setIgnoreEmptyRows(b);
+        return newOptions;
+    } 
+
+    @Override
+    public E withIgnoreEmptyColumns()
+    {
+        return withIgnoreEmptyColumns(true);
+    }
+
+    @Override
+    public E withIgnoreEmptyColumns(final boolean b)
+    {
+        E newOptions = clone(this);
+        newOptions.setIgnoreEmptyColumns(b);
+        return newOptions;
+    } 
+
+    public E withDateTimeFormat(String t)
+    {
+        E newOptions = clone(this);
+        newOptions.setDateTimeFormat(t);
+        return newOptions;
+    }
+
+    public E withPages()
+    {
+        return withPages(true);
+    }
+
+    public E withPages(boolean b)
+    {
+        E newOptions = clone(this);
+        newOptions.setPaged(b);
+        return newOptions;
+    }
+
+    public E withPageNumbers()
+    {
+        return withPageNumbers(true);
+    }
+
+    public E withPageNumbers(boolean b)
+    {
+        E newOptions = clone(this);
+        newOptions.setPageNumbers(b);
+        return newOptions;
+    }
+
+    public E withPageWidthInInches(double f)
+    {
+        return withPageWidthInPx((int)(f * 72));
+    }
+
+    public E withPageWidthInPx(int f)
+    {
+        E newOptions = clone(this);
+        newOptions.setPageWidth(f);
+        return newOptions;
+    }
+
+    public E withPageHeightInInches(double f)
+    {
+        return withPageHeightInPx((int)(f * 72));
+    }
+
+    public E withPageHeightInPx(int f)
+    {
+        E newOptions = clone(this);
+        newOptions.setPageHeight(f);
+        return newOptions;
+    }
+
+    public E withColumnWidthInInches(double f)
+    {
+        return withColumnWidthInPx((int)(f * 72));
+    }
+
+    public E withColumnWidthInPx(int f)
+    {
+        E newOptions = clone(this);
+        newOptions.setColumnWidth(f);
+        return newOptions;
+    }
+    
+    public E withStickyRowNames()
+    {
+        return withStickyRowNames(true);
+    }
+
+    public E withStickyRowNames(boolean b)
+    {
+        E newOptions = clone(this);
+        newOptions.setStickyRowNames(b);
+        return newOptions;
+    }
+
+    public E withStickyColumnNames()
+    {
+        return withStickyColumnNames(true);
+    }
+
+    public E withStickyColumnNames(boolean b)
+    {
+        E newOptions = clone(this);
+        newOptions.setStickyColumnNames(b);
+        return newOptions;
+    }
+
+    public E withDefaultFontSize(int f)
+    {
+        E newOptions = clone(this);
+        newOptions.setDefaultFontSize(f);
+        return newOptions;
+    }
+
+    public E withHeadingFontSize(int f)
+    {
+        E newOptions = clone(this);
+        newOptions.setHeadingFontSize(f);
+        return newOptions;
+    }
+
+    public E withTitleFontSize(int f)
+    {
+        E newOptions = clone(this);
+        newOptions.setTitleFontSize(f);
+        return newOptions;
+    }
+
+    public E withFontFamily(String ff)
+    {
+        E newOptions = clone(this);
+        newOptions.setFontFamily(ff);
+        return newOptions;
     }
 
     @Override
