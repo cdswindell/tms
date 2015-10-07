@@ -52,9 +52,11 @@ public abstract class IOOptions
     public static enum FileFormat 
     {
         CSV(true, "csv"),
+        DOCX(false, "docx", "doc"),
         EXCEL(true, "xls", "xlsx"), 
         HTML(false, "htm", "html"),
         PDF(false, "pdf"),
+        JSON(true, "json"),
         RTF(false, "rtf"),
         XML(true, "XML"),
         TMS(true, "tms");

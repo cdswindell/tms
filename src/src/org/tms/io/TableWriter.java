@@ -73,7 +73,7 @@ public class TableWriter
             case PDF:
             case RTF:
             case HTML:
-            case XML:
+            case DOCX:
                 JasperWriter.export(m_table, m_file, m_options);
                 break;
                 
