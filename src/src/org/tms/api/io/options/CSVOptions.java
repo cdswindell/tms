@@ -1,4 +1,4 @@
-package org.tms.io.options;
+package org.tms.api.io.options;
 
 
 public class CSVOptions extends IOOptions
@@ -20,7 +20,7 @@ public class CSVOptions extends IOOptions
                       final Character quoteCharacter,
                       final boolean ignoreSurroundingSpaces)
     {
-        super(org.tms.io.options.IOOptions.FileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(org.tms.api.io.options.IOOptions.FileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
         set(Options.DelimiterChar, delimiter);
         set(Options.QuoteChar, quoteCharacter);
         set(Options.IsIgnoreSurrountingSpaces, ignoreSurroundingSpaces);

@@ -11,7 +11,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
 import org.tms.api.Column;
 import org.tms.api.Row;
-import org.tms.io.options.CSVOptions;
+import org.tms.api.io.options.CSVOptions;
 
 public class CSVWriter extends BaseWriter
 {

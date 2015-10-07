@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.IOException;
 
 import org.tms.api.exceptions.UnimplementedException;
+import org.tms.api.io.options.IOOptions;
 import org.tms.io.jasper.DocXReport;
 import org.tms.io.jasper.HTMLReport;
 import org.tms.io.jasper.PDFReport;
 import org.tms.io.jasper.RTFReport;
 import org.tms.io.jasper.TMSReport;
-import org.tms.io.options.IOOptions;
 
 public class JasperWriter extends BaseWriter
 {

@@ -1,12 +1,12 @@
-package org.tms.io.options;
+package org.tms.api.io.options;
 
-public class RTFOptions extends FormattedPageOptions<RTFOptions> 
+public class DocXOptions extends FormattedPageOptions<DocXOptions> 
 {
-    public static final RTFOptions Default = new RTFOptions(true, true, false, false, DateTimeFormatPattern, 
+    public static final DocXOptions Default = new DocXOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
             true, true, DefaultFontSizePx, "Helvetica");
     
-    private RTFOptions(final boolean rowNames, 
+    private DocXOptions(final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
             final boolean ignoreEmptyCols,
@@ -21,19 +21,19 @@ public class RTFOptions extends FormattedPageOptions<RTFOptions>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(org.tms.io.options.IOOptions.FileFormat.RTF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(org.tms.api.io.options.IOOptions.FileFormat.DOCX, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
                 stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }
 
-    private RTFOptions(final RTFOptions format)
+    private DocXOptions(final DocXOptions format)
     {
         super(format);
     }
 
     @Override
-    protected RTFOptions clone(FormattedPageOptions<?> model)
+    protected DocXOptions clone(FormattedPageOptions<?> model)
     {
-        return new RTFOptions((RTFOptions)model);
+        return new DocXOptions((DocXOptions)model);
     }
 }

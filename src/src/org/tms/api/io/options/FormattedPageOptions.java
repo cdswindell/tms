@@ -1,4 +1,4 @@
-package org.tms.io.options;
+package org.tms.api.io.options;
 
 
 abstract class FormattedPageOptions<E extends FormattedPageOptions<?>> 
@@ -30,7 +30,7 @@ abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
 
     abstract E clone(FormattedPageOptions<?> model);
     
-    protected FormattedPageOptions(final org.tms.io.options.IOOptions.FileFormat format,
+    protected FormattedPageOptions(final org.tms.api.io.options.IOOptions.FileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 

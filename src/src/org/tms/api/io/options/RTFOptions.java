@@ -1,15 +1,12 @@
-package org.tms.io.options;
+package org.tms.api.io.options;
 
-
-public class PDFOptions extends FormattedPageOptions<PDFOptions> 
+public class RTFOptions extends FormattedPageOptions<RTFOptions> 
 {
-    public static final String DefaultFontFamilyPDF = "Helvetica";
-    
-    public static final PDFOptions Default = new PDFOptions(true, true, false, false, DateTimeFormatPattern, 
+    public static final RTFOptions Default = new RTFOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-            true, true, DefaultFontSizePx, DefaultFontFamilyPDF);
+            true, true, DefaultFontSizePx, "Helvetica");
     
-    private PDFOptions(final boolean rowNames, 
+    private RTFOptions(final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
             final boolean ignoreEmptyCols,
@@ -24,19 +21,19 @@ public class PDFOptions extends FormattedPageOptions<PDFOptions>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(org.tms.io.options.IOOptions.FileFormat.PDF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(org.tms.api.io.options.IOOptions.FileFormat.RTF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
                 stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }
 
-    private PDFOptions(final PDFOptions format)
+    private RTFOptions(final RTFOptions format)
     {
         super(format);
     }
 
     @Override
-    protected PDFOptions clone(FormattedPageOptions<?> model)
+    protected RTFOptions clone(FormattedPageOptions<?> model)
     {
-        return new PDFOptions((PDFOptions)model);
+        return new RTFOptions((RTFOptions)model);
     }
 }

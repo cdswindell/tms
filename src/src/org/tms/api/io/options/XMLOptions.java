@@ -1,4 +1,4 @@
-package org.tms.io.options;
+package org.tms.api.io.options;
 
 public class XMLOptions extends IOOptions
 {
@@ -10,7 +10,7 @@ public class XMLOptions extends IOOptions
                       final boolean ignoreEmptyRows, 
                       final boolean ignoreEmptyCols)
     {
-        super(org.tms.io.options.IOOptions.FileFormat.XML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(org.tms.api.io.options.IOOptions.FileFormat.XML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
     }
     
     private XMLOptions (final XMLOptions format)

@@ -8,8 +8,8 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.io.options.CSVOptions;
-import org.tms.io.options.IOOptions;
+import org.tms.api.io.options.CSVOptions;
+import org.tms.api.io.options.IOOptions;
 
 public class TableExportAdapter
 {

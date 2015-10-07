@@ -1,12 +1,15 @@
-package org.tms.io.options;
+package org.tms.api.io.options;
 
-public class DocXOptions extends FormattedPageOptions<DocXOptions> 
+
+public class PDFOptions extends FormattedPageOptions<PDFOptions> 
 {
-    public static final DocXOptions Default = new DocXOptions(true, true, false, false, DateTimeFormatPattern, 
-            true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-            true, true, DefaultFontSizePx, "Helvetica");
+    public static final String DefaultFontFamilyPDF = "Helvetica";
     
-    private DocXOptions(final boolean rowNames, 
+    public static final PDFOptions Default = new PDFOptions(true, true, false, false, DateTimeFormatPattern, 
+            true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
+            true, true, DefaultFontSizePx, DefaultFontFamilyPDF);
+    
+    private PDFOptions(final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
             final boolean ignoreEmptyCols,
@@ -21,19 +24,19 @@ public class DocXOptions extends FormattedPageOptions<DocXOptions>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(org.tms.io.options.IOOptions.FileFormat.DOCX, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(org.tms.api.io.options.IOOptions.FileFormat.PDF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
                 stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }
 
-    private DocXOptions(final DocXOptions format)
+    private PDFOptions(final PDFOptions format)
     {
         super(format);
     }
 
     @Override
-    protected DocXOptions clone(FormattedPageOptions<?> model)
+    protected PDFOptions clone(FormattedPageOptions<?> model)
     {
-        return new DocXOptions((DocXOptions)model);
+        return new PDFOptions((PDFOptions)model);
     }
 }

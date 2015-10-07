@@ -46,8 +46,8 @@ import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.api.io.options.IOOptions;
 import org.tms.io.TableExportAdapter;
-import org.tms.io.options.IOOptions;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
