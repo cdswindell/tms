@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.jasperreports.engine.JRBreak;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -15,6 +16,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.design.JRDesignBand;
+import net.sf.jasperreports.engine.design.JRDesignBreak;
 import net.sf.jasperreports.engine.design.JRDesignExpression;
 import net.sf.jasperreports.engine.design.JRDesignField;
 import net.sf.jasperreports.engine.design.JRDesignLine;
@@ -23,6 +25,7 @@ import net.sf.jasperreports.engine.design.JRDesignSection;
 import net.sf.jasperreports.engine.design.JRDesignStyle;
 import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.type.BreakTypeEnum;
 import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
 import net.sf.jasperreports.engine.type.ModeEnum;
 import net.sf.jasperreports.engine.type.PositionTypeEnum;
@@ -45,6 +48,7 @@ import org.tms.io.options.TitleableOption;
 abstract public class TMSReport
 {
     static final String sf_RowNameFieldName = "__ROW_NAME__";
+    static final String sf_RowIndexFieldName = "__ROW_INDEX__";
     
     static final Set<String> sf_JavaLogicalFonts = new HashSet<String>();
     {
@@ -243,11 +247,11 @@ abstract public class TMSReport
         int detailBandHeight = (int)(defaultFontSize * 1.5);
         JRDesignBand colHeaderBand = new JRDesignBand();
         colHeaderBand.setHeight(colHeadBandHeight);
-        
+               
         JRDesignBand detailBand = new JRDesignBand();
         detailBand.setHeight(detailBandHeight);
         detailBand.setSplitType(SplitTypeEnum.PREVENT);
-        
+                
         int tfX = 0;
         int tfY = 2;
         m_colFieldMap = new HashMap<Column, JRField>(nCols);
@@ -273,35 +277,40 @@ abstract public class TMSReport
             tfX += sf_InterColSpace + sf_RowNameColWidth;
         }
         
+        boolean addBreak = false;
         for (Column col : m_writer.getActiveColumns()) {            
             // create multiple columns to handle overflow
             // if report gets too wide
-//            if (paginated && (tfX + fieldWidth) > colWidth) {
-//                
-//                // add the filled band to the report               
-//                ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);   
-//                
-//                // and create a new band
-//                detailBand = new JRDesignBand();
-//                detailBand.setHeight(detailBandHeight);
-//                detailBand.setSplitType(SplitTypeEnum.PREVENT);
-//                
-//                // reset starting point for next band
-//                tfX = 0;
-//                                    
-//                // add row names, if sticky
-//                if (m_options.isRowNames() && ((PageableOption)m_options).isStickyRowNames()) {
-//                    JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, sf_RowNameColWidth, detailBandHeight - 2, 
-//                            boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
-//                            "$F{%s}",
-//                            null);   
-//                    tf.setFontSize(sf_HeaderFontPointSize);
-//                    detailBand.addElement(tf);
-//                    
-//                    // bump the field
-//                    tfX += sf_InterColSpace + sf_RowNameColWidth;
-//                }
-//            }
+            if (paginated && (tfX + fieldWidth) > colWidth) {  
+                addBreak = true;
+                detailBand.addElement(createBreak(m_jrDesign));
+                
+                // add the filled band to the report      
+                
+                ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);   
+                
+                // and create a new band
+                detailBand = new JRDesignBand();
+                detailBand.setHeight(detailBandHeight);
+                detailBand.setSplitType(SplitTypeEnum.PREVENT);
+                
+                // reset starting point for next band
+                tfX = 0;
+                                    
+                // add row names, if sticky
+                if (m_options.isRowNames() && ((PageableOption)m_options).isStickyRowNames()) {
+                    JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, sf_RowNameColWidth, detailBandHeight - 2, 
+                            boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
+                            "$F{%s}",
+                            null);   
+                    tf.setFontSize(headingFontSize);
+                    tf.setBold(true);
+                    detailBand.addElement(tf);
+                    
+                    // bump the field
+                    tfX += sf_InterColSpace + sf_RowNameColWidth;
+                }
+            }
             
             String colName = String.valueOf(col.getIndex());
             JRDesignField jrField = new JRDesignField();
@@ -368,6 +377,8 @@ abstract public class TMSReport
         m_jrDesign.setPrintOrder(PrintOrderEnum.VERTICAL);
         
         // add the detail band; this is essentially the report data
+        if (addBreak) 
+            detailBand.addElement(createBreak(m_jrDesign));        
         ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);    
         
         //Column header
@@ -538,6 +549,14 @@ abstract public class TMSReport
         pageFooter.addElement(pageNoField);
         
         return pageFooter;
+    }
+    
+    private JRBreak createBreak(JasperDesign jrDesign)
+    {
+        JRDesignBreak br = new JRDesignBreak(jrDesign);
+        br.setType(BreakTypeEnum.COLUMN);
+        
+        return br;
     }
     
     private JRDesignStyle defineStyle(JasperDesign jrDesign, String name, float fontSize, boolean isDefault, boolean isBold) 

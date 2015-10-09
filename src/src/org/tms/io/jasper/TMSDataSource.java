@@ -47,15 +47,19 @@ public class TMSDataSource implements JRDataSource, JRRewindableDataSource
         }
         
         Row row = m_exportAdapter.getRow(m_rowIndex);
-        if (TMSReport.sf_RowNameFieldName.equals(jrField.getName())) {
+        String fieldName = jrField.getName();
+        
+        if (TMSReport.sf_RowNameFieldName.equals(fieldName)) {
             String label = row.getLabel();
             if (label == null || (label = label.trim()).length() <= 0)
                 label = String.format("Row %d", m_rowIndex);
             
             return label;
         }
+        else if (TMSReport.sf_RowIndexFieldName.equals(fieldName)) 
+            return row.getIndex();
         else {
-            Column col = m_fieldToColMap.get(jrField.getName());
+            Column col = m_fieldToColMap.get(fieldName);
             Object o = m_exportAdapter.getTable().getCellValue(row, col);
             
             if (o != null) 
