@@ -28,10 +28,10 @@ public class PDFWriterTest extends BaseTest
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
-                .withStickyColumnNames(true)
+                .withStickyColumnNames(false)
                 .withColumnWidthInInches(2.8)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
-                .withFontFamily("Courier")
+                .withFontFamily("Helvetica")
                 .withPages(true));
     }
     
@@ -48,8 +48,8 @@ public class PDFWriterTest extends BaseTest
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
-                .withStickyColumnNames(true)
-                .withColumnWidthInInches(1)
+                .withStickyColumnNames(false)
+                .withColumnWidthInInches(2.8)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
                 .withPages(true));
     }

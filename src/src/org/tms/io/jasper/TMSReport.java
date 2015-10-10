@@ -3,12 +3,13 @@ package org.tms.io.jasper;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.jasperreports.engine.JRBreak;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -16,7 +17,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.design.JRDesignBand;
-import net.sf.jasperreports.engine.design.JRDesignBreak;
 import net.sf.jasperreports.engine.design.JRDesignExpression;
 import net.sf.jasperreports.engine.design.JRDesignField;
 import net.sf.jasperreports.engine.design.JRDesignLine;
@@ -24,8 +24,8 @@ import net.sf.jasperreports.engine.design.JRDesignParameter;
 import net.sf.jasperreports.engine.design.JRDesignSection;
 import net.sf.jasperreports.engine.design.JRDesignStyle;
 import net.sf.jasperreports.engine.design.JRDesignTextField;
+import net.sf.jasperreports.engine.design.JRDesignVariable;
 import net.sf.jasperreports.engine.design.JasperDesign;
-import net.sf.jasperreports.engine.type.BreakTypeEnum;
 import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
 import net.sf.jasperreports.engine.type.ModeEnum;
 import net.sf.jasperreports.engine.type.PositionTypeEnum;
@@ -34,6 +34,8 @@ import net.sf.jasperreports.engine.type.SplitTypeEnum;
 import net.sf.jasperreports.engine.type.StretchTypeEnum;
 import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.type.WhenNoDataTypeEnum;
+import net.sf.jasperreports.export.ExporterInputItem;
+import net.sf.jasperreports.export.SimpleExporterInputItem;
 
 import org.tms.api.Column;
 import org.tms.api.Table;
@@ -92,12 +94,10 @@ abstract public class TMSReport
     private IOOptions m_options;
     
     private Map<Column, JRField> m_colFieldMap;
-    private TMSDataSource m_jrDataSource;
     private Map<String, Object> m_jrParams;
     
-    private JasperDesign m_jrDesign;
-    private JasperReport m_jrReport;
-    private JasperPrint m_jrPrint;
+    private List<JasperDesign> m_jrDesigns;
+    private List<JasperPrint> m_jrPrints;
     
     TMSReport(BaseWriter w)
     {
@@ -111,9 +111,21 @@ abstract public class TMSReport
         return m_writer;
     }
     
-    JasperPrint getPrint()
+    List<JasperPrint> getPrints()
     {
-        return m_jrPrint;
+        return m_jrPrints;
+    }
+    
+    List<ExporterInputItem> getExporterInputItems()
+    {
+        List<ExporterInputItem> items = new ArrayList<ExporterInputItem>();
+        
+        for (JasperPrint jp : getPrints()) {
+            ExporterInputItem item = new SimpleExporterInputItem(jp);
+            items.add(item);
+        }
+        
+        return items;
     }
     
     Table getTable()
@@ -129,7 +141,7 @@ abstract public class TMSReport
     protected void generateReport() 
     throws JRException
     {
-        m_jrDataSource = new TMSDataSource(this);
+        m_jrDesigns = new ArrayList<JasperDesign>();
         fillJasperParams();
         printJasperReport();
     }
@@ -171,60 +183,139 @@ abstract public class TMSReport
         if (m_jrParams == null)
             fillJasperParams();
         
-        if (m_jrReport == null)
-            compileJasperReport();
-        
-        m_jrPrint = JasperFillManager.fillReport(m_jrReport,  m_jrParams, m_jrDataSource);        
-    }
-
-    private void compileJasperReport() 
-    throws JRException
-    {
-        if (m_jrDesign == null)
+        if (m_jrDesigns == null || m_jrDesigns.isEmpty())
             buildJasperDesign();
         
-        m_jrReport = JasperCompileManager.compileReport(m_jrDesign);        
+        m_jrPrints = new ArrayList<JasperPrint>(m_jrDesigns.size());
+        int pageCnt = 1;
+        for (JasperDesign jd : m_jrDesigns) {
+            // adjust page number
+            JRDesignVariable jv = (JRDesignVariable)jd.getVariablesMap().get("PAGE_NUMBER");
+            if (jv != null) {
+                JRDesignExpression pnEx = new JRDesignExpression();
+                pnEx.setText(String.format("($V{%s} != null)?(new Integer($V{%s}.intValue() + 1)):(new Integer(%s))", "PAGE_NUMBER", "PAGE_NUMBER", pageCnt));  
+                jv.setInitialValueExpression(pnEx);
+            }
+            
+            // compile the design
+            JasperReport jr = JasperCompileManager.compileReport(jd);  
+            
+            // fill the report
+            JasperPrint jrPrint = JasperFillManager.fillReport(jr,  m_jrParams, new TMSDataSource(this));  
+            m_jrPrints.add(jrPrint);
+            
+            // calculate starting page number of next section, if any
+            pageCnt += jrPrint.getPages().size();
+        }
+    }
+
+    private JasperDesign createReportDesign(int rptNo, boolean paginated, int pageWidth, int pageHeight, int colWidth) 
+    throws JRException
+    {
+        JasperDesign jrDesign = new JasperDesign();
+        String tblLbl = (m_table.getLabel() != null ? m_table.getLabel() : "TMS Table") + rptNo;
+        jrDesign.setName(tblLbl);
+        
+        jrDesign.setIgnorePagination(!paginated);
+        
+        // set page parameters, including size and margin
+        jrDesign.setPageWidth(pageWidth);
+        jrDesign.setWhenNoDataType(WhenNoDataTypeEnum.ALL_SECTIONS_NO_DETAIL);
+        if (paginated) {
+            jrDesign.setLeftMargin(sf_PageLeftMargin);
+            jrDesign.setRightMargin(sf_PageRightMargin);
+            jrDesign.setColumnWidth(colWidth);
+        }
+        else {
+            jrDesign.setLeftMargin(2);
+            jrDesign.setRightMargin(0);
+        }
+        
+        jrDesign.setPageHeight(pageHeight);
+        if (paginated) {
+            jrDesign.setTopMargin(sf_PageTopMargin);
+            jrDesign.setBottomMargin(sf_PageBottomMargin);
+        }
+        else {
+            jrDesign.setTopMargin(0);
+            jrDesign.setBottomMargin(0);
+        }    
+
+        // set the number of columns, now that we know
+        jrDesign.setColumnSpacing(0);
+        jrDesign.setColumnCount(1);
+        jrDesign.setPrintOrder(PrintOrderEnum.VERTICAL);
+        
+        // define global params 
+        defineGlobalParameters(jrDesign);
+        
+        return jrDesign;
+    }
+    
+    private int addRowNames(JasperDesign jrDesign, int tfX, int tfY, JRDesignBand detailBand, 
+            int detailBandHeight, JRDesignStyle boldStyle, float headingFontSize) 
+    throws JRException
+    {
+        if (m_options.isRowNames()) {
+            JRDesignField jrField = new JRDesignField();
+            jrField.setName(sf_RowNameFieldName);
+            jrField.setValueClass(String.class);
+            jrDesign.addField(jrField);
+            
+            JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, sf_RowNameColWidth, detailBandHeight - 2, 
+                    boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
+                    "$F{%s}",
+                    null);   
+            tf.setFontSize(headingFontSize);
+            tf.setBold(true);
+            detailBand.addElement(tf);
+            
+            // bump the field
+            tfX += sf_InterColSpace + sf_RowNameColWidth;
+        }
+        
+        return tfX;
+    }
+    
+    private void completeReport(boolean paginated, int printableWidth, JasperDesign jrDesign,
+            JRDesignStyle normalStyle, JRDesignBand colHeaderBand, JRDesignBand detailBand)
+    {
+        // add the detail band; this is essentially the report data
+        ((JRDesignSection)jrDesign.getDetailSection()).addBand(detailBand);    
+        
+        //Column header
+        if (m_options.isColumnNames()) {
+            if (paginated && !((PageableOption)m_options).isStickyColumnNames()) {
+                JRDesignExpression firstPageOnly = new JRDesignExpression();
+                firstPageOnly.setText("$V{PAGE_NUMBER} == 1");               
+                colHeaderBand.setPrintWhenExpression(firstPageOnly);
+            }
+            
+            jrDesign.setColumnHeader(colHeaderBand);
+        }
+        
+        if (paginated && ((PageableOption)m_options).isPageNumbers()) {
+            JRDesignBand footerBand = defineFooterBand(jrDesign, normalStyle, printableWidth);
+            jrDesign.setPageFooter(footerBand);
+        }
+        
+        m_jrDesigns.add(jrDesign);
     }
 
     private void buildJasperDesign() throws JRException
     {
         // Figure out how many columns we have
         int nCols = m_writer.getNumActiveColumns();
-        
-        m_jrDesign = new JasperDesign();
-        m_jrDesign.setName(m_table.getLabel() != null ? m_table.getLabel() : "TMS Table");
+        int rptNo = 1;
         
         // Paginated??
         boolean paginated = (m_options instanceof PageableOption) ? ((PageableOption)m_options).isPaged() : false;
-        m_jrDesign.setIgnorePagination(!paginated);
-        
+       
         int pageWidth = getPageWidth();
         int colWidth = paginated ? pageWidth - sf_PageLeftMargin - sf_PageRightMargin : pageWidth;
-        int printableWidth = colWidth;
-                
-        // set page parameters, including size and margin
-        m_jrDesign.setPageWidth(pageWidth);
-        m_jrDesign.setWhenNoDataType(WhenNoDataTypeEnum.ALL_SECTIONS_NO_DETAIL);
-        if (paginated) {
-            m_jrDesign.setLeftMargin(sf_PageLeftMargin);
-            m_jrDesign.setRightMargin(sf_PageRightMargin);
-            m_jrDesign.setColumnWidth(colWidth);
-        }
-        else {
-            m_jrDesign.setLeftMargin(2);
-            m_jrDesign.setRightMargin(0);
-        }
+        int printableWidth = colWidth;                
         
         int pageHeight = getPageHeight();
-        m_jrDesign.setPageHeight(pageHeight);
-        if (paginated) {
-            m_jrDesign.setTopMargin(sf_PageTopMargin);
-            m_jrDesign.setBottomMargin(sf_PageBottomMargin);
-        }
-        else {
-            m_jrDesign.setTopMargin(0);
-            m_jrDesign.setBottomMargin(0);
-        }    
 
         // define font styles
         float defaultFontSize = m_options instanceof FontedOption ?
@@ -237,14 +328,21 @@ abstract public class TMSReport
         if (headingFontSize <= 0)
             headingFontSize = sf_HeaderFontSize;
         
-        JRDesignStyle boldStyle = defineStyle(m_jrDesign, "Sans_Bold", defaultFontSize, false, true);
-        JRDesignStyle normalStyle = defineStyle(m_jrDesign, "Sans_Normal", defaultFontSize, true, false);
+        JasperDesign jrDesign = createReportDesign(rptNo, paginated, pageWidth, pageHeight, colWidth);
         
-        defineGlobalParameters(m_jrDesign);
+        JRDesignStyle boldStyle = defineStyle(jrDesign, "Sans_Bold", defaultFontSize, false, true);
+        JRDesignStyle normalStyle = defineStyle(jrDesign, "Sans_Normal", defaultFontSize, true, false);
+                
+        // add title, but only on first report
+        if ((m_options instanceof TitleableOption) && ((TitleableOption)m_options).hasTitle()) {
+            JRDesignBand titleBand = defineTitleBand(jrDesign, boldStyle, printableWidth);
+            jrDesign.setTitle(titleBand);
+        }
         
         // create JR fields for each printable column
         int colHeadBandHeight = (int)(headingFontSize * 1.5);
         int detailBandHeight = (int)(defaultFontSize * 1.5);
+        
         JRDesignBand colHeaderBand = new JRDesignBand();
         colHeaderBand.setHeight(colHeadBandHeight);
                
@@ -259,57 +357,30 @@ abstract public class TMSReport
         int fieldWidth = (m_options instanceof PageableOption) && ((PageableOption)m_options).getColumnWidth() > 0 ?
                 ((PageableOption)m_options).getColumnWidth() : sf_StringColWidth;
         
-        if (m_options.isRowNames()) {
-            JRDesignField jrField = new JRDesignField();
-            jrField.setName(sf_RowNameFieldName);
-            jrField.setValueClass(String.class);
-            m_jrDesign.addField(jrField);
-            
-            JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, sf_RowNameColWidth, detailBandHeight - 2, 
-                    boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
-                    "$F{%s}",
-                    null);   
-            tf.setFontSize(headingFontSize);
-            tf.setBold(true);
-            detailBand.addElement(tf);
-            
-            // bump the field
-            tfX += sf_InterColSpace + sf_RowNameColWidth;
-        }
-        
-        boolean addBreak = false;
+        tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, headingFontSize);
+
         for (Column col : m_writer.getActiveColumns()) {            
             // create multiple columns to handle overflow
             // if report gets too wide
-            if (paginated && (tfX + fieldWidth) > colWidth) {  
-                addBreak = true;
-                detailBand.addElement(createBreak(m_jrDesign));
+            if (paginated && (tfX + fieldWidth) > colWidth) {                  
+                // complete this report and initialize a new one                     
+                completeReport(paginated, printableWidth, jrDesign, normalStyle, colHeaderBand, detailBand);
                 
-                // add the filled band to the report      
-                
-                ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);   
+                // initialize a new report
+                jrDesign = createReportDesign(rptNo, paginated, pageWidth, pageHeight, colWidth);
+                boldStyle = defineStyle(jrDesign, "Sans_Bold", defaultFontSize, false, true);
+                normalStyle = defineStyle(jrDesign, "Sans_Normal", defaultFontSize, true, false);
                 
                 // and create a new band
                 detailBand = new JRDesignBand();
                 detailBand.setHeight(detailBandHeight);
                 detailBand.setSplitType(SplitTypeEnum.PREVENT);
                 
+                colHeaderBand = new JRDesignBand();
+                colHeaderBand.setHeight(colHeadBandHeight);
+                
                 // reset starting point for next band
-                tfX = 0;
-                                    
-                // add row names, if sticky
-                if (m_options.isRowNames() && ((PageableOption)m_options).isStickyRowNames()) {
-                    JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, sf_RowNameColWidth, detailBandHeight - 2, 
-                            boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
-                            "$F{%s}",
-                            null);   
-                    tf.setFontSize(headingFontSize);
-                    tf.setBold(true);
-                    detailBand.addElement(tf);
-                    
-                    // bump the field
-                    tfX += sf_InterColSpace + sf_RowNameColWidth;
-                }
+                tfX = addRowNames(jrDesign, 0, tfY, detailBand, detailBandHeight, boldStyle, headingFontSize);
             }
             
             String colName = String.valueOf(col.getIndex());
@@ -317,7 +388,7 @@ abstract public class TMSReport
             jrField.setName(colName);
             jrField.setValueClass(Object.class);
             
-            m_jrDesign.addField(jrField);
+            jrDesign.addField(jrField);
             m_colFieldMap.put(col, jrField);
             
             JRDesignTextField tf = defineTextField(colName, tfX, tfY, fieldWidth, detailBandHeight - 2, 
@@ -371,40 +442,7 @@ abstract public class TMSReport
             tfX += sf_InterColSpace + fieldWidth;
         }
         
-        // set the number of columns, now that we know
-        m_jrDesign.setColumnSpacing(0);
-        m_jrDesign.setColumnCount(1);
-        m_jrDesign.setPrintOrder(PrintOrderEnum.VERTICAL);
-        
-        // add the detail band; this is essentially the report data
-        if (addBreak) 
-            detailBand.addElement(createBreak(m_jrDesign));        
-        ((JRDesignSection)m_jrDesign.getDetailSection()).addBand(detailBand);    
-        
-        //Column header
-        if (m_options.isColumnNames()) {
-            if (paginated && !((PageableOption)m_options).isStickyColumnNames()) {
-                JRDesignExpression firstPageOnly = new JRDesignExpression();
-                firstPageOnly.setText("$V{PAGE_NUMBER} == 1");               
-                colHeaderBand.setPrintWhenExpression(firstPageOnly);
-            }
-            
-            m_jrDesign.setColumnHeader(colHeaderBand);
-        }
-        
-        if (paginated && ((PageableOption)m_options).isPageNumbers()) {
-            JRDesignBand footerBand = defineFooterBand(m_jrDesign, normalStyle, printableWidth);
-            m_jrDesign.setPageFooter(footerBand);
-        }
-        
-        // finally, set title and force recompile
-        if ((m_options instanceof TitleableOption) && ((TitleableOption)m_options).hasTitle()) {
-            JRDesignBand titleBand = defineTitleBand(m_jrDesign, boldStyle, printableWidth);
-            m_jrDesign.setTitle(titleBand);
-        }
-        
-        m_jrReport = null;
-        m_jrPrint = null;
+        completeReport(paginated, printableWidth, jrDesign, normalStyle, colHeaderBand, detailBand);
     }
 
     private JRDesignTextField defineTextField(String colName, int tfX, int tfY, int fw, int fh, JRDesignStyle ns, 
@@ -549,14 +587,6 @@ abstract public class TMSReport
         pageFooter.addElement(pageNoField);
         
         return pageFooter;
-    }
-    
-    private JRBreak createBreak(JasperDesign jrDesign)
-    {
-        JRDesignBreak br = new JRDesignBreak(jrDesign);
-        br.setType(BreakTypeEnum.COLUMN);
-        
-        return br;
     }
     
     private JRDesignStyle defineStyle(JasperDesign jrDesign, String name, float fontSize, boolean isDefault, boolean isBold) 

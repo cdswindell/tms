@@ -36,7 +36,7 @@ public class DocXReport extends TMSReport
             rc.setFlexibleRowHeight(true);
             docExporter.setConfiguration(rc);
             
-            ExporterInput inp = new SimpleExporterInput(getPrint());
+            ExporterInput inp = new SimpleExporterInput(getExporterInputItems());
             docExporter.setExporterInput(inp);
             
             OutputStreamExporterOutput output = new SimpleOutputStreamExporterOutput(out);

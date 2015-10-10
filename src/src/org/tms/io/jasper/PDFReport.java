@@ -4,7 +4,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.ExporterInput;
+import net.sf.jasperreports.export.OutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 import org.tms.io.BaseWriter;
 
@@ -25,7 +29,15 @@ public class PDFReport extends TMSReport
             out = prepareReport();
             
             // print report to file
-            JasperExportManager.exportReportToPdfStream(getPrint(), out);
+            JRPdfExporter exporter = new JRPdfExporter();
+            
+            ExporterInput inp = new SimpleExporterInput(getExporterInputItems());
+            exporter.setExporterInput(inp);
+            
+            OutputStreamExporterOutput output = new SimpleOutputStreamExporterOutput(out);
+            exporter.setExporterOutput(output);
+            
+            exporter.exportReport();
         }
         catch (JRException e)
         {

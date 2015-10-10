@@ -31,7 +31,7 @@ public class RTFReport extends TMSReport
             // print report to file
             JRRtfExporter rtfExporter  = new JRRtfExporter();
             
-            ExporterInput inp = new SimpleExporterInput(getPrint());
+            ExporterInput inp = new SimpleExporterInput(getExporterInputItems());
             rtfExporter.setExporterInput(inp);
             
             SimpleWriterExporterOutput output = new SimpleWriterExporterOutput(out);
