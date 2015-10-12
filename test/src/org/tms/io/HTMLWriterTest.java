@@ -68,7 +68,7 @@ public class HTMLWriterTest extends BaseTest
             }
         }
 
-        // there will be some failures, they should start at 1983
+        // there should be no failures
         System.out.println("Export Table to HTML, Failures: " + failures);
         assertThat(failures, is(0));
     }
@@ -135,7 +135,7 @@ public class HTMLWriterTest extends BaseTest
     @Test
     public final void testExportColumn() throws IOException
     {
-        Path path = Paths.get(ExportRowGold);
+        Path path = Paths.get(ExportColumnGold);
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
