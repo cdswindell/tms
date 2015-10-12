@@ -13,6 +13,8 @@ import java.nio.file.Paths;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
+import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
@@ -23,6 +25,8 @@ public class HTMLWriterTest extends BaseTest
     private static final String SAMPLE1 = "sample1.csv";
     private static final String ExportTableGold = "testExportTable.html";
     private static final String ExportSubsetGold = "testExportSubset.html";
+    private static final String ExportRowGold = "testExportRow.html";
+    private static final String ExportColumnGold = "testExportColumn.html";
 
     @Test
     public final void testExportTable() throws IOException
@@ -33,13 +37,13 @@ public class HTMLWriterTest extends BaseTest
          */
         Path path = Paths.get(ExportTableGold);
         byte[] gold = Files.readAllBytes(path);  
-        
+
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
-        
+
         Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
         assertNotNull(t);
-        
+
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         t.export(bos, HTMLOptions.Default
@@ -52,7 +56,7 @@ public class HTMLWriterTest extends BaseTest
         // test byte streams are the same
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
-        
+
         assertThat(gold.length, is(output.length));
         int failures = 0;
         int firstFailure = 0;
@@ -63,27 +67,27 @@ public class HTMLWriterTest extends BaseTest
                     firstFailure = i;
             }
         }
-        
+
         // there will be some failures, they should start at 1983
         System.out.println("Export Table to HTML, Failures: " + failures);
         assertThat(failures, is(0));
     }
-    
+
     @Test
     public final void testExportSubset() throws IOException
     {
         Path path = Paths.get(ExportSubsetGold);
         byte[] gold = Files.readAllBytes(path);  
-        
+
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
-        
+
         Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
         assertNotNull(t);
-        
+
         Subset s = t.addSubset(Access.ByLabel, "CDS");
         s.add(t.getColumn(1), t.getColumn(3), t.getRow(1), t.getRow(3), t.getRow(4));
-        
+
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         s.export(bos, HTMLOptions.Default
                 .withIgnoreEmptyColumns()
@@ -98,5 +102,60 @@ public class HTMLWriterTest extends BaseTest
         assertNotNull(pdf);
         assertThat(pdf.length > 0, is(true));
     }
-    
+
+    @Test
+    public final void testExportRow() throws IOException
+    {
+        Path path = Paths.get(ExportRowGold);
+        byte[] gold = Files.readAllBytes(path);  
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        assertNotNull(t);
+
+        Row r = t.getRow(2);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        r.export(bos, HTMLOptions.Default
+                .withColumnNames(false)
+                .withRowNames(false)
+                .withColumnWidthInInches(1)
+                .withFontFamily("Courier")
+                .withTitle("Row 2"));
+        bos.close();
+
+        // test byte streams are the same
+        byte [] pdf =  bos.toByteArray();
+        assertNotNull(pdf);
+        assertThat(pdf.length > 0, is(true));
+    }
+
+    @Test
+    public final void testExportColumn() throws IOException
+    {
+        Path path = Paths.get(ExportRowGold);
+        byte[] gold = Files.readAllBytes(path);  
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        assertNotNull(t);
+
+        Column c = t.getColumn(1);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        c.export(bos, HTMLOptions.Default
+                .withFontFamily("Comic Sans MS")
+                .withRowNameColumnWidthInInches(1.25)
+                .withTitle("Column 1"));
+        bos.close();
+
+        // test byte streams are the same
+        byte [] pdf =  bos.toByteArray();
+        assertNotNull(pdf);
+        assertThat(pdf.length > 0, is(true));
+    }
 }
