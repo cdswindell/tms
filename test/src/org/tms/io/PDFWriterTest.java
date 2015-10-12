@@ -28,7 +28,6 @@ public class PDFWriterTest extends BaseTest
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
-                .withStickyColumnNames(false)
                 .withColumnWidthInInches(2.8)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
                 .withFontFamily("Helvetica")

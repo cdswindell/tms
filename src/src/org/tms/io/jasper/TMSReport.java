@@ -187,14 +187,17 @@ abstract public class TMSReport
             buildJasperDesign();
         
         m_jrPrints = new ArrayList<JasperPrint>(m_jrDesigns.size());
+        boolean paginated = (m_options instanceof PageableOption) ? ((PageableOption)m_options).isPaged() : false;
         int pageCnt = 1;
         for (JasperDesign jd : m_jrDesigns) {
-            // adjust page number
-            JRDesignVariable jv = (JRDesignVariable)jd.getVariablesMap().get("PAGE_NUMBER");
-            if (jv != null) {
-                JRDesignExpression pnEx = new JRDesignExpression();
-                pnEx.setText(String.format("($V{%s} != null)?(new Integer($V{%s}.intValue() + 1)):(new Integer(%s))", "PAGE_NUMBER", "PAGE_NUMBER", pageCnt));  
-                jv.setInitialValueExpression(pnEx);
+            if (paginated) {
+                // adjust page number
+                JRDesignVariable jv = (JRDesignVariable)jd.getVariablesMap().get("PAGE_NUMBER");
+                if (jv != null) {
+                    JRDesignExpression pnEx = new JRDesignExpression();
+                    pnEx.setText(String.format("($V{%s} != null)?(new Integer($V{%<s}.intValue() + 1)):(new Integer(%s))", "PAGE_NUMBER", pageCnt));  
+                    jv.setInitialValueExpression(pnEx);
+                }
             }
             
             // compile the design
@@ -205,7 +208,8 @@ abstract public class TMSReport
             m_jrPrints.add(jrPrint);
             
             // calculate starting page number of next section, if any
-            pageCnt += jrPrint.getPages().size();
+            if (paginated) 
+                pageCnt += jrPrint.getPages().size();
         }
     }
 
@@ -380,7 +384,9 @@ abstract public class TMSReport
                 colHeaderBand.setHeight(colHeadBandHeight);
                 
                 // reset starting point for next band
-                tfX = addRowNames(jrDesign, 0, tfY, detailBand, detailBandHeight, boldStyle, headingFontSize);
+                tfX = 0;
+                if (paginated && ((PageableOption)m_options).isStickyRowNames()) 
+                    tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, headingFontSize);
             }
             
             String colName = String.valueOf(col.getIndex());
