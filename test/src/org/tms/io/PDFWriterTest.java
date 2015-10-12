@@ -1,8 +1,14 @@
 package org.tms.io;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.Test;
 import org.tms.BaseTest;
@@ -17,21 +23,52 @@ import org.tms.api.io.options.PDFOptions;
 public class PDFWriterTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.csv";
+    private static final String ExportTableGold = "testExportTable.pdf";
 
     @Test
-    public final void testExport() throws IOException
+    public final void testExportTable() throws IOException
     {
+        Path path = Paths.get(ExportTableGold);
+        byte[] gold = Files.readAllBytes(path);  
+        
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+        
         Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
         assertNotNull(t);
         
-        t.export("a.pdf", PDFOptions.Default
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        t.export(bos, PDFOptions.Default
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
                 .withColumnWidthInInches(2.8)
+                .withDateTimeFormat(null)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
                 .withFontFamily("Helvetica")
                 .withPages(true));
+        
+        bos.close();
+
+        // test byte streams are the same
+        byte [] pdf =  bos.toByteArray();
+        assertNotNull(pdf);
+        
+        assertThat(gold.length, is(pdf.length));
+        int failures = 0;
+        int firstFailure = 0;
+        for (int i = 0; i < gold.length; i++) {
+            if (gold[i] != pdf[i]) {
+                failures++;
+                if (firstFailure == 0)
+                    firstFailure = i;
+            }
+        }
+        
+        // there will be some failures, they should start at 1983
+        System.out.println("Export Table to PDF, Failures: " + failures);
+        assertThat(firstFailure, is(1983));
     }
     
     @Test
@@ -43,7 +80,8 @@ public class PDFWriterTest extends BaseTest
         Subset s = t.addSubset(Access.ByLabel, "CDS");
         s.add(t.getColumn(1), t.getColumn(3), t.getRow(1), t.getRow(3), t.getRow(4));
         
-        s.export("asubset.pdf", PDFOptions.Default
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        s.export(bos, PDFOptions.Default
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
@@ -51,6 +89,12 @@ public class PDFWriterTest extends BaseTest
                 .withColumnWidthInInches(2.8)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
                 .withPages(true));
+        bos.close();
+
+        // test byte streams are the same
+        byte [] pdf =  bos.toByteArray();
+        assertNotNull(pdf);
+        assertThat(pdf.length > 0, is(true));
     }
     
     @Test
@@ -61,7 +105,9 @@ public class PDFWriterTest extends BaseTest
         
         Row r = t.getRow(3);
         
-        r.export("arow.pdf", PDFOptions.Default
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        r.export(bos, PDFOptions.Default
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
@@ -69,6 +115,12 @@ public class PDFWriterTest extends BaseTest
                 .withColumnWidthInInches(1)
                 .withTitle("Only Row 3")
                 .withPages(true));
+        bos.close();
+
+        // test byte streams are the same
+        byte [] pdf =  bos.toByteArray();
+        assertNotNull(pdf);
+        assertThat(pdf.length > 0, is(true));
     }
     
     @Test
@@ -79,7 +131,9 @@ public class PDFWriterTest extends BaseTest
         
         Column c = t.getColumn(2);
         
-        c.export("acol.pdf", PDFOptions.Default
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        c.export(bos, PDFOptions.Default
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
@@ -87,5 +141,11 @@ public class PDFWriterTest extends BaseTest
                 .withColumnWidthInInches(1)
                 .withTitle("Only Column 2")
                 .withPages(true));
+        bos.close();
+
+        // test byte streams are the same
+        byte [] pdf =  bos.toByteArray();
+        assertNotNull(pdf);
+        assertThat(pdf.length > 0, is(true));
     }
 }

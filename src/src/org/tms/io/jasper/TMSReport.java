@@ -257,7 +257,7 @@ abstract public class TMSReport
     }
     
     private int addRowNames(JasperDesign jrDesign, int tfX, int tfY, JRDesignBand detailBand, 
-            int detailBandHeight, JRDesignStyle boldStyle, float headingFontSize) 
+            int detailBandHeight, JRDesignStyle boldStyle, float headingFontSize, int rowNameColWidth) 
     throws JRException
     {
         if (m_options.isRowNames()) {
@@ -266,7 +266,7 @@ abstract public class TMSReport
             jrField.setValueClass(String.class);
             jrDesign.addField(jrField);
             
-            JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, sf_RowNameColWidth, detailBandHeight - 2, 
+            JRDesignTextField tf = defineTextField(sf_RowNameFieldName, tfX, tfY, rowNameColWidth, detailBandHeight - 2, 
                     boldStyle, VerticalTextAlignEnum.TOP, HorizontalTextAlignEnum.LEFT,
                     "$F{%s}",
                     null);   
@@ -275,7 +275,7 @@ abstract public class TMSReport
             detailBand.addElement(tf);
             
             // bump the field
-            tfX += sf_InterColSpace + sf_RowNameColWidth;
+            tfX += sf_InterColSpace + rowNameColWidth;
         }
         
         return tfX;
@@ -360,8 +360,12 @@ abstract public class TMSReport
         
         int fieldWidth = (m_options instanceof PageableOption) && ((PageableOption)m_options).getColumnWidth() > 0 ?
                 ((PageableOption)m_options).getColumnWidth() : sf_StringColWidth;
+                
+        int rowNameColWidth =  (m_options instanceof PageableOption) && ((PageableOption)m_options).getRowNameColumnWidth() > 0 ?
+                ((PageableOption)m_options).getRowNameColumnWidth() : sf_RowNameColWidth;
         
-        tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, headingFontSize);
+        tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, 
+                          headingFontSize, rowNameColWidth);
 
         for (Column col : m_writer.getActiveColumns()) {            
             // create multiple columns to handle overflow
@@ -386,7 +390,8 @@ abstract public class TMSReport
                 // reset starting point for next band
                 tfX = 0;
                 if (paginated && ((PageableOption)m_options).isStickyRowNames()) 
-                    tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, headingFontSize);
+                    tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, 
+                                      headingFontSize, rowNameColWidth);
             }
             
             String colName = String.valueOf(col.getIndex());
@@ -560,21 +565,25 @@ abstract public class TMSReport
         int offset = (int)(fontSize / 2);
         pageFooter.setHeight(height);
         
-        JRDesignTextField nowField = new JRDesignTextField();
-        nowField.setStyle(normalStyle);
-        nowField.setFontSize(fontSize);
-        nowField.setBold(false);
-        nowField.setHeight(height - offset);
-        nowField.setWidth(pageWidth); 
-        nowField.setY(offset);
-        nowField.setMode(ModeEnum.TRANSPARENT);
-        nowField.setHorizontalTextAlign( HorizontalTextAlignEnum.RIGHT);     
-        
-        JRDesignExpression nowFieldEx = new JRDesignExpression();
-        nowFieldEx.setText("$P{now}");
-        
-        nowField.setExpression(nowFieldEx);
-        pageFooter.addElement(nowField);
+        if (m_options instanceof DateTimeFormatOption) {
+            if (((DateTimeFormatOption)m_options).hasDateTimeFormat()) {
+                JRDesignTextField nowField = new JRDesignTextField();
+                nowField.setStyle(normalStyle);
+                nowField.setFontSize(fontSize);
+                nowField.setBold(false);
+                nowField.setHeight(height - offset);
+                nowField.setWidth(pageWidth); 
+                nowField.setY(offset);
+                nowField.setMode(ModeEnum.TRANSPARENT);
+                nowField.setHorizontalTextAlign( HorizontalTextAlignEnum.RIGHT);     
+
+                JRDesignExpression nowFieldEx = new JRDesignExpression();
+                nowFieldEx.setText("$P{now}");
+
+                nowField.setExpression(nowFieldEx);
+                pageFooter.addElement(nowField);
+            }
+        }
         
         JRDesignTextField pageNoField = new JRDesignTextField();
         pageNoField.setStyle(normalStyle);

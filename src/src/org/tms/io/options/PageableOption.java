@@ -7,6 +7,7 @@ public interface PageableOption
     public int getPageWidth();
     public int getPageHeight();
     public int getColumnWidth();
+    public int getRowNameColumnWidth();
     public boolean isStickyRowNames();
     public boolean isStickyColumnNames();
 }

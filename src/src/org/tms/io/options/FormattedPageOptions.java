@@ -19,6 +19,7 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
         PageWidth,
         PageHeight,
         ColumnWidth,
+        RowNameColumnWidth,
         IsStickyRowNames,
         IsStickyColumnNames,
         DefaultFontSize,
@@ -185,18 +186,6 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
         return newOptions;
     }
 
-    public E withColumnWidthInInches(double f)
-    {
-        return withColumnWidthInPx((int)(f * 72));
-    }
-
-    public E withColumnWidthInPx(int f)
-    {
-        E newOptions = clone(this);
-        newOptions.setColumnWidth(f);
-        return newOptions;
-    }
-    
     public E withStickyRowNames()
     {
         return withStickyRowNames(true);
@@ -362,6 +351,42 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
         set(Options.ColumnWidth, i);
     }
 
+    public E withColumnWidthInInches(double f)
+    {
+        return withColumnWidthInPx((int)(f * 72));
+    }
+
+    public E withColumnWidthInPx(int f)
+    {
+        E newOptions = clone(this);
+        newOptions.setColumnWidth(f);
+        return newOptions;
+    }
+    
+    @Override
+    public int getRowNameColumnWidth()
+    {
+        Object d = get(Options.RowNameColumnWidth);
+        return d != null ? (int)d : 0;
+    }
+
+    protected void setRowNameColumnWidth(int i)
+    {
+        set(Options.RowNameColumnWidth, i);
+    }
+
+    public E withRowNameColumnWidthInInches(double f)
+    {
+        return withRowNameColumnWidthInPx((int)(f * 72));
+    }
+
+    public E withRowNameColumnWidthInPx(int f)
+    {
+        E newOptions = clone(this);
+        newOptions.setRowNameColumnWidth(f);
+        return newOptions;
+    }
+    
     @Override
     public boolean isStickyRowNames()
     {

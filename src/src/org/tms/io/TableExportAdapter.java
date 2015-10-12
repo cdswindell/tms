@@ -58,7 +58,7 @@ public class TableExportAdapter
     public TableExportAdapter(Table t, OutputStream out, IOOptions options) 
     throws IOException
     {
-        if (m_options == null)
+        if (options == null)
             throw new UnimplementedException("Options required");
         
         m_table = t;
