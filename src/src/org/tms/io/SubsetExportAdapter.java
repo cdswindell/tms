@@ -1,6 +1,7 @@
 package org.tms.io;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import org.tms.api.Column;
@@ -16,6 +17,13 @@ public class SubsetExportAdapter extends TableExportAdapter
     throws IOException
     {
         super(s.getTable(), fileName, options);
+        m_subset = s;
+    }
+
+    public SubsetExportAdapter(Subset s, OutputStream out, IOOptions options) 
+    throws IOException
+    {
+        super(s.getTable(), out, options);
         m_subset = s;
     }
 

@@ -1,7 +1,7 @@
 package org.tms.io.jasper;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -146,13 +146,13 @@ abstract public class TMSReport
         printJasperReport();
     }
 
-    protected FileOutputStream prepareReport() 
+    protected OutputStream prepareReport() 
     throws IOException, JRException
     {
         // generate the design, compile it, and run it
         generateReport();
         
-        return new FileOutputStream(m_writer.getOutputFile());
+        return m_writer.getOutputStream();
     }
     
     Map<Column, JRField> getColumnFieldMap()

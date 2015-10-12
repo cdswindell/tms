@@ -1,7 +1,7 @@
 package org.tms.io.jasper;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
@@ -11,6 +11,7 @@ import net.sf.jasperreports.export.SimpleDocxReportConfiguration;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
+import org.tms.api.exceptions.TableIOException;
 import org.tms.io.BaseWriter;
 
 public class DocXReport extends TMSReport
@@ -24,7 +25,7 @@ public class DocXReport extends TMSReport
     public void export() 
     throws IOException
     {
-        FileOutputStream out = null;
+        OutputStream out = null;
         try
         {
             out = prepareReport();
@@ -46,12 +47,7 @@ public class DocXReport extends TMSReport
         }
         catch (JRException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new TableIOException(e);
         }
-        finally {
-            if (out != null)
-                out.close();
-        }        
     }
 }

@@ -1,7 +1,7 @@
 package org.tms.io.jasper;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.export.HtmlExporter;
@@ -10,6 +10,7 @@ import net.sf.jasperreports.export.HtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 
+import org.tms.api.exceptions.TableIOException;
 import org.tms.io.BaseWriter;
 
 public class HTMLReport extends TMSReport
@@ -23,7 +24,7 @@ public class HTMLReport extends TMSReport
     public void export() 
     throws IOException
     {
-        FileOutputStream out = null;
+        OutputStream out = null;
         try
         {
             // generate the report and convert the file name to an output stream
@@ -42,12 +43,7 @@ public class HTMLReport extends TMSReport
         }
         catch (JRException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new TableIOException(e);
         }
-        finally {
-            if (out != null)
-                out.close();
-        }        
     }
 }

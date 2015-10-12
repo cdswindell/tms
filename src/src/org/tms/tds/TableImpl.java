@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -349,6 +350,14 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     throws IOException
     {
         TableExportAdapter writer = new TableExportAdapter(this, fileName, options);
+        writer.export();
+    }
+
+    @Override
+    public void export(OutputStream out, IOOptions options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new TableExportAdapter(this, out, options);
         writer.export();
     }
 

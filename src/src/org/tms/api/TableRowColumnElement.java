@@ -1,6 +1,7 @@
 package org.tms.api;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Comparator;
 
 import org.tms.api.utils.TableCellTransformer;
@@ -36,6 +37,9 @@ public interface TableRowColumnElement extends TableElement
      * @throws IOException if {@code fileName} cannot be created
      */
     public void export(String fileName, IOOptions options) 
+    throws IOException;
+    
+    public void export(OutputStream out, IOOptions options) 
     throws IOException;
     
     /**

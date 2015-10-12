@@ -1,8 +1,10 @@
 package org.tms.io;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +17,22 @@ import org.tms.api.io.options.CSVOptions;
 
 public class CSVWriter extends BaseWriter
 {
-    public static void export(TableExportAdapter tea, File file, CSVOptions options) 
-    throws IOException
+    public static void export(TableExportAdapter tea, OutputStream out, CSVOptions options) 
+    throws IOException 
     {
-        CSVWriter writer = new CSVWriter(tea, file, options);
+        CSVWriter writer = new CSVWriter(tea, out, options);
         writer.export();        
     }
     
-    private CSVWriter(TableExportAdapter t, File f, CSVOptions options)
+    public static void export(TableExportAdapter tea, File file, CSVOptions options) 
+    throws IOException
     {
-        super(t, f, options);
+        export(tea, new FileOutputStream(file), options);        
+    }
+    
+    private CSVWriter(TableExportAdapter t, OutputStream out, CSVOptions options)
+    {
+        super(t, out, options);
     }
   
     public CSVOptions options()
@@ -32,10 +40,11 @@ public class CSVWriter extends BaseWriter
         return (CSVOptions)super.options();
     }
  
+    @Override
     protected void export() 
-    throws IOException
+    throws IOException 
     {
-        FileWriter fw = new FileWriter(getOutputFile());
+        Appendable fw = new OutputStreamWriter(getOutputStream());
         CSVFormat format = CSVFormat.DEFAULT
                                         .withAllowMissingColumnNames(true)
                                         .withDelimiter(options().getDelimiter())
@@ -104,9 +113,6 @@ public class CSVWriter extends BaseWriter
         finally {
             if (out != null)
                 out.close();
-            
-            if (fw != null)
-                fw.close();
         }        
     }
 }

@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -79,6 +80,14 @@ public class RowImpl extends TableSliceElementImpl implements Row
     throws IOException
     {
         TableExportAdapter writer = new RowExportAdapter(this, fileName, options);
+        writer.export();
+    }
+
+    @Override
+    public void export(OutputStream out, IOOptions options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new RowExportAdapter(this, out, options);
         writer.export();
     }
 

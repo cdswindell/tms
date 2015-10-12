@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -155,6 +156,14 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     throws IOException
     {
         TableExportAdapter writer = new ColumnExportAdapter(this, fileName, options);
+        writer.export();
+    }
+
+    @Override
+    public void export(OutputStream out, IOOptions options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new ColumnExportAdapter(this, out, options);
         writer.export();
     }
 

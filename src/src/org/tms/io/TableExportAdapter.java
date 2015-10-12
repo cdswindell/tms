@@ -1,7 +1,9 @@
 package org.tms.io;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import org.tms.api.Column;
@@ -17,6 +19,8 @@ public class TableExportAdapter
     private Table m_table;
     private IOOptions m_options;
     private File m_file;
+    private OutputStream m_output;
+    private boolean m_isFileBased;
     
     public TableExportAdapter(Table t, String fileName, IOOptions options) 
     throws IOException
@@ -43,8 +47,26 @@ public class TableExportAdapter
         }
         else
             m_options = options;
+        
+        // create the output stream
+        m_output = new FileOutputStream(m_file);
+        
+        // indicate that this writer is based on a file, output stream should be closed
+        m_isFileBased = true;
     }
 
+    public TableExportAdapter(Table t, OutputStream out, IOOptions options) 
+    throws IOException
+    {
+        if (m_options == null)
+            throw new UnimplementedException("Options required");
+        
+        m_table = t;
+        m_output = out;
+        m_options = options;
+        m_isFileBased = false;
+    }
+    
     private boolean canWrite()
     {
         if (m_file.exists())
@@ -71,23 +93,28 @@ public class TableExportAdapter
     {
         switch (m_options.getFileFormat()) {
             case TMS:
-                TMSWriter.export(this, m_file, (TMSOptions)m_options);
+                TMSWriter.export(this, m_output, (TMSOptions)m_options);
                 break;
                 
             case CSV:
-                CSVWriter.export(this, m_file, (CSVOptions)m_options);
+                CSVWriter.export(this, m_output, (CSVOptions)m_options);
                 break;
                 
             case PDF:
             case RTF:
             case HTML:
             case DOCX:
-                JasperWriter.export(this, m_file, m_options);
+                JasperWriter.export(this, m_output, m_options);
                 break;
                 
             default:
                 break;
-        }        
+        }
+        
+        if (m_isFileBased && m_output != null) {
+            m_output.flush();
+            m_output.close();
+        }
     }
 
     public int getNumColumns()

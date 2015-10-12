@@ -1,6 +1,7 @@
 package org.tms.api;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import org.tms.io.options.IOOptions;
@@ -67,4 +68,8 @@ public interface Subset extends TableElement
      */
     public void export(String fileName, IOOptions options) 
     throws IOException;
+    
+    public void export(OutputStream out, IOOptions options) 
+    throws IOException;
+    
 }

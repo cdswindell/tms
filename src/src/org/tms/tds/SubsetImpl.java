@@ -1,6 +1,7 @@
 package org.tms.tds;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -176,6 +177,14 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     public void export(String fileName, IOOptions options) throws IOException
     {
         TableExportAdapter writer = new SubsetExportAdapter(this, fileName, options);
+        writer.export();
+    }
+    
+    @Override
+    public void export(OutputStream out, IOOptions options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new SubsetExportAdapter(this, out, options);
         writer.export();
     }
     

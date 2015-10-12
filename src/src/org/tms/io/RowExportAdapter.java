@@ -1,6 +1,7 @@
 package org.tms.io;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,6 +17,13 @@ public class RowExportAdapter extends TableExportAdapter
     throws IOException
     {
         super(r.getTable(), fileName, options);
+        m_row = r;
+    }
+
+    public RowExportAdapter(Row r, OutputStream out, IOOptions options) 
+    throws IOException
+    {
+        super(r.getTable(), out, options);
         m_row = r;
     }
 

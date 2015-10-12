@@ -1,7 +1,7 @@
 package org.tms.io;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.io.jasper.DocXReport;
@@ -13,10 +13,10 @@ import org.tms.io.options.IOOptions;
 
 public class JasperWriter extends BaseWriter
 {
-    public static void export(TableExportAdapter tw, File file, IOOptions options)
+    public static void export(TableExportAdapter tw, OutputStream out, IOOptions options)
     throws IOException
     {
-        JasperWriter writer = new JasperWriter(tw, file, options);
+        JasperWriter writer = new JasperWriter(tw, out, options);
         
         TMSReport report = null;
         switch (options.getFileFormat()) {
@@ -47,9 +47,9 @@ public class JasperWriter extends BaseWriter
     
     private TMSReport m_report;
     
-    private JasperWriter(TableExportAdapter t, File f, IOOptions options)
+    private JasperWriter(TableExportAdapter t, OutputStream out, IOOptions options)
     {
-        super(t, f, options);
+        super(t, out, options);
     }
 
     @Override

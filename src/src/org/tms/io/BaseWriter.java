@@ -1,7 +1,9 @@
 package org.tms.io;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,7 +18,7 @@ import org.tms.io.options.IOOptions;
 public abstract class BaseWriter
 {
     private TableExportAdapter m_tableExportAdapter;
-    private File m_outFile;
+    private OutputStream m_outStream;
     private IOOptions m_baseOptions;
     
     private int m_nCols;
@@ -26,27 +28,33 @@ public abstract class BaseWriter
     
     abstract protected void export() throws IOException;
     
-    protected BaseWriter(TableExportAdapter tw, File f, IOOptions options)
+    protected BaseWriter(TableExportAdapter tw, OutputStream out, IOOptions options)
     {
         m_tableExportAdapter = tw;
-        m_outFile = f;
+        m_outStream = out;
         m_baseOptions = options;
         
         m_nCols = tw.getNumColumns();
         m_nConsumableColumns = -1; // to be initialized later
     }
 
+    protected BaseWriter(TableExportAdapter tw, File f, IOOptions options) 
+    throws IOException
+    {
+        this(tw, new FileOutputStream(f), options);
+    }
+
+    public OutputStream getOutputStream()
+    {
+        return m_outStream;
+    }
+    
     /*
      * Publicly available methods for use outside of package
      */
     public IOOptions options()
     {
         return m_baseOptions;
-    }
-    
-    public File getOutputFile()
-    {
-        return m_outFile;
     }
     
     public Table getTable()
