@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -267,4 +268,75 @@ public class CSVWriterTest extends BaseTest
             r1 = t.getRow(Access.Next);
         }
     }
+    
+    @Test
+    public final void testExportToString() throws IOException
+    {
+        String expected = "\"\",Abc,,\"Def, Ghi\"\r\n" +
+                          "Blue Row,,Blue,true\r\n" + 
+                          "\"\",,,\r\n" +
+                          "Yellow Row,,Yellow,true\r\n" +
+                          "Cyan Row,,Cyan,false\r\n";
+        
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3), true, true);
+        assertNotNull(t);
+        
+        // export the file, ignoring empty rows and columns    
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        t.export(bos, CSVOptions.Default);
+        
+        byte [] csv = bos.toByteArray();
+        assertNotNull(csv);
+        assertThat(csv.length > 0, is(true));
+        
+        String csvStr= new String(csv);
+        assertThat(csvStr, is(expected));
+    }   
+    
+    @Test
+    public final void testExportToStringNoColNames() throws IOException
+    {
+        String expected = "Blue Row,,Blue,true\r\n" + 
+                          "\"\",,,\r\n" +
+                          "Yellow Row,,Yellow,true\r\n" +
+                          "Cyan Row,,Cyan,false\r\n";
+        
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3), true, true);
+        assertNotNull(t);
+        
+        // export the file, ignoring empty rows and columns    
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        t.export(bos, CSVOptions.Default.withColumnNames(false));
+        
+        byte [] csv = bos.toByteArray();
+        assertNotNull(csv);
+        assertThat(csv.length > 0, is(true));
+        
+        String csvStr= new String(csv);
+        assertThat(csvStr, is(expected));
+    }   
+    
+    @Test
+    public final void testExportToStringNoRowNames() throws IOException
+    {
+        String expected = "Abc,,\"Def, Ghi\"\r\n" +
+                "\"\",Blue,true\r\n" + 
+                "\"\",,\r\n" +
+                "\"\",Yellow,true\r\n" +
+                "\"\",Cyan,false\r\n";
+
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3), true, true);
+        assertNotNull(t);
+        
+        // export the file, ignoring empty rows and columns    
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        t.export(bos, CSVOptions.Default.withRowNames(false));
+        
+        byte [] csv = bos.toByteArray();
+        assertNotNull(csv);
+        assertThat(csv.length > 0, is(true));
+        
+        String csvStr= new String(csv);
+        assertThat(csvStr, is(expected));
+    }   
 }
