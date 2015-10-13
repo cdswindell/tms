@@ -453,7 +453,7 @@ abstract public class TMSReport
         // fix up print width, if we are not paginated
         if (!paginated && tfX > printableWidth) {
             jrDesignFirst.setPageWidth(tfX);
-            jrDesignFirst.setColumnWidth(tfX);
+            jrDesignFirst.setColumnWidth(tfX - sf_InterColSpace);
             printableWidth = tfX;
         }
         
