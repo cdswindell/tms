@@ -1,34 +1,24 @@
 package org.tms.io.options;
 
-public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>> 
-    extends IOOptions 
-    implements TitleableOption, DateTimeFormatOption, PageableOption, FontedOption
+public abstract class FormattedPageOptions<F extends FormattedPageOptions<F>>
+    extends TitledPageOptions<FormattedPageOptions<F>> 
+    implements DateTimeFormatOption, PageableOption
 {
     public static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
     public static final int DefaultPageWidthPx = (int) (8.5 * 72);
     public static final int DefaultPageHeightPx = (int) (11 * 72);
-    public static final int DefaultColumnWidthPx = (int) 65;
-    public static final int DefaultFontSizePx = 8;
-    public static final String DefaultFontFamily = "SansSerif";
 
     private enum Options implements OptionEnum {
-        Title,
         DateTimeFormat,
         IsPaged,
         IsPageNumbers,
         PageWidth,
         PageHeight,
-        ColumnWidth,
-        RowNameColumnWidth,
         IsStickyRowNames,
         IsStickyColumnNames,
-        DefaultFontSize,
-        HeadingFontSize,
-        TitleFontSize,
-        FontFamily;
     }
 
-    protected abstract E clone(FormattedPageOptions<?> model);
+    protected abstract F clone(FormattedPageOptions<F> model);
     
     protected FormattedPageOptions(final org.tms.io.options.IOOptions.FileFormat format,
             final boolean rowNames, 
@@ -46,195 +36,107 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(format, (rowNames || stickyRowNames), (colNames || stickyColNames), ignoreEmptyRows, ignoreEmptyCols);
+        super(format, (rowNames || stickyRowNames), (colNames || stickyColNames), 
+              ignoreEmptyRows, ignoreEmptyCols, colWidthPx, defaultFontSize, defaultFontFamily);
 
         if (dateTimeFormat != null && dateTimeFormat.trim().length() > 0)
             set(Options.DateTimeFormat, dateTimeFormat.trim());
-
-        if (defaultFontFamily != null && defaultFontFamily.trim().length() > 0)
-            set(Options.FontFamily, defaultFontFamily.trim());
 
         set(Options.IsPaged, paged);
         set(Options.IsPageNumbers, pageNumbers);
         set(Options.PageWidth, pageWidthPx);
         set(Options.PageHeight, pageHeightPx);
-        set(Options.ColumnWidth, colWidthPx);
         set(Options.IsStickyRowNames, stickyRowNames);
         set(Options.IsStickyColumnNames, stickyColNames);
-        set(Options.DefaultFontSize, defaultFontSize);
     }
 
-    protected FormattedPageOptions(final FormattedPageOptions<?> format)
+    protected FormattedPageOptions(final FormattedPageOptions<F> format)
     {
         super(format);
     }
 
-    public E withTitle(String t)
+    @Override
+    protected F clone(TitledPageOptions<FormattedPageOptions<F>> model)
     {
-        E newOption = clone(this);
-        newOption.set(Options.Title, t);
-        return newOption;
-    }
-    
-    public E withRowNames()
-    {
-        return withRowNames(true);
+        return clone((FormattedPageOptions<F>)model);
     }
 
-    @Override
-    public E withRowNames(final boolean b)
+    public F withDateTimeFormat(String t)
     {
-        E newOptions = clone(this);
-        newOptions.setRowNames(b);
-        return newOptions;
-    }
-
-    @Override
-    public E withColumnNames()
-    {
-        return withColumnNames(true);
-    }
-
-    @Override
-    public E withColumnNames(final boolean b)
-    {
-        E newOptions = clone(this);
-        newOptions.setColumnNames(b);
-        return newOptions;
-    }
-
-    @Override
-    public E withIgnoreEmptyRows()
-    {
-        return withIgnoreEmptyRows(true);
-    }
-
-    @Override
-    public E withIgnoreEmptyRows(final boolean b)
-    {
-        E newOptions = clone(this);
-        newOptions.setIgnoreEmptyRows(b);
-        return newOptions;
-    } 
-
-    @Override
-    public E withIgnoreEmptyColumns()
-    {
-        return withIgnoreEmptyColumns(true);
-    }
-
-    @Override
-    public E withIgnoreEmptyColumns(final boolean b)
-    {
-        E newOptions = clone(this);
-        newOptions.setIgnoreEmptyColumns(b);
-        return newOptions;
-    } 
-
-    public E withDateTimeFormat(String t)
-    {
-        E newOptions = clone(this);
+        F newOptions = clone(this);
         newOptions.setDateTimeFormat(t);
         return newOptions;
     }
 
-    public E withPages()
+    public F withPages()
     {
         return withPages(true);
     }
 
-    public E withPages(boolean b)
+    public F withPages(boolean b)
     {
-        E newOptions = clone(this);
+        F newOptions = clone(this);
         newOptions.setPaged(b);
         return newOptions;
     }
 
-    public E withPageNumbers()
+    public F withPageNumbers()
     {
         return withPageNumbers(true);
     }
 
-    public E withPageNumbers(boolean b)
+    public F withPageNumbers(boolean b)
     {
-        E newOptions = clone(this);
+        F newOptions = clone(this);
         newOptions.setPageNumbers(b);
         return newOptions;
     }
 
-    public E withPageWidthInInches(double f)
+    public F withPageWidthInInches(double f)
     {
         return withPageWidthInPx((int)(f * 72));
     }
 
-    public E withPageWidthInPx(int f)
+    public F withPageWidthInPx(int f)
     {
-        E newOptions = clone(this);
+        F newOptions = clone(this);
         newOptions.setPageWidth(f);
         return newOptions;
     }
 
-    public E withPageHeightInInches(double f)
+    public F withPageHeightInInches(double f)
     {
         return withPageHeightInPx((int)(f * 72));
     }
 
-    public E withPageHeightInPx(int f)
+    public F withPageHeightInPx(int f)
     {
-        E newOptions = clone(this);
+        F newOptions = clone(this);
         newOptions.setPageHeight(f);
         return newOptions;
     }
 
-    public E withStickyRowNames()
+    public F withStickyRowNames()
     {
         return withStickyRowNames(true);
     }
 
-    public E withStickyRowNames(boolean b)
+    public F withStickyRowNames(boolean b)
     {
-        E newOptions = clone(this);
+        F newOptions = clone(this);
         newOptions.setStickyRowNames(b);
         return newOptions;
     }
 
-    public E withStickyColumnNames()
+    public F withStickyColumnNames()
     {
         return withStickyColumnNames(true);
     }
 
-    public E withStickyColumnNames(boolean b)
+    public F withStickyColumnNames(boolean b)
     {
-        E newOptions = clone(this);
+        F newOptions = clone(this);
         newOptions.setStickyColumnNames(b);
-        return newOptions;
-    }
-
-    public E withDefaultFontSize(int f)
-    {
-        E newOptions = clone(this);
-        newOptions.setDefaultFontSize(f);
-        return newOptions;
-    }
-
-    public E withHeadingFontSize(int f)
-    {
-        E newOptions = clone(this);
-        newOptions.setHeadingFontSize(f);
-        return newOptions;
-    }
-
-    public E withTitleFontSize(int f)
-    {
-        E newOptions = clone(this);
-        newOptions.setTitleFontSize(f);
-        return newOptions;
-    }
-
-    public E withFontFamily(String ff)
-    {
-        E newOptions = clone(this);
-        newOptions.setFontFamily(ff);
         return newOptions;
     }
 
@@ -256,24 +158,6 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
             set(Options.IsStickyColumnNames, false);
     }
     
-    @Override
-    public String getTitle()
-    {
-        return (String)get(Options.Title);
-    }
-
-    @Override
-    public boolean hasTitle()
-    {
-        String title = getTitle();
-        return title != null && title.trim().length() > 0;
-    }
-
-    protected void setTitle(String t)
-    {
-        set(Options.Title, t);
-    }
-
     @Override
     public String getDateTimeFormat()
     {
@@ -340,54 +224,6 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
     }
 
     @Override
-    public int getColumnWidth()
-    {
-        Object d = get(Options.ColumnWidth);
-        return d != null ? (int)d : 0;
-    }
-
-    protected void setColumnWidth(int i)
-    {
-        set(Options.ColumnWidth, i);
-    }
-
-    public E withColumnWidthInInches(double f)
-    {
-        return withColumnWidthInPx((int)(f * 72));
-    }
-
-    public E withColumnWidthInPx(int f)
-    {
-        E newOptions = clone(this);
-        newOptions.setColumnWidth(f);
-        return newOptions;
-    }
-    
-    @Override
-    public int getRowNameColumnWidth()
-    {
-        Object d = get(Options.RowNameColumnWidth);
-        return d != null ? (int)d : 0;
-    }
-
-    protected void setRowNameColumnWidth(int i)
-    {
-        set(Options.RowNameColumnWidth, i);
-    }
-
-    public E withRowNameColumnWidthInInches(double f)
-    {
-        return withRowNameColumnWidthInPx((int)(f * 72));
-    }
-
-    public E withRowNameColumnWidthInPx(int f)
-    {
-        E newOptions = clone(this);
-        newOptions.setRowNameColumnWidth(f);
-        return newOptions;
-    }
-    
-    @Override
     public boolean isStickyRowNames()
     {
         return isTrue(Options.IsStickyRowNames);
@@ -413,59 +249,4 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<?>>
             setColumnNames(true);
     }
 
-    @Override
-    public int getDefaultFontSize()
-    {
-        Object d = get(Options.DefaultFontSize);
-        return d != null ? (int)d : DefaultFontSizePx;
-    }
-
-    protected void setDefaultFontSize(int i)
-    {
-        if (i < 4)
-            throw new IllegalArgumentException("Default font size must be at least 4px");
-
-        set(Options.DefaultFontSize, i);
-    }
-
-    @Override
-    public int getHeadingFontSize()
-    {
-        Object d = get(Options.HeadingFontSize);
-        return d != null ? (int)d : (int)(getDefaultFontSize() * 1.2);
-    }
-
-    protected void setHeadingFontSize(int i)
-    {
-        if (i < 4)
-            throw new IllegalArgumentException("Heading font size must be at least 4px");
-
-        set(Options.HeadingFontSize, i);
-    }
-
-    @Override
-    public int getTitleFontSize()
-    {
-        Object d = get(Options.TitleFontSize);
-        return d != null ? (int)d : (int)(getDefaultFontSize() * 2);
-    }
-
-    protected void setTitleFontSize(int i)
-    {
-        if (i < 4)
-            throw new IllegalArgumentException("Title font size must be at least 4px");
-
-        set(Options.TitleFontSize, i);
-    }
-    
-    @Override
-    public String getFontFamily()
-    {
-        return (String)get(Options.FontFamily);
-    }
-
-    protected void setFontFamily(String ff)
-    {
-        set(Options.FontFamily, ff);
-    }
 }

@@ -68,7 +68,7 @@ public class PDFWriterTest extends BaseTest
         
         // there will be some failures, they should start at 1983
         System.out.println("Export Table to PDF, Failures: " + failures);
-        assertThat(firstFailure, is(1983));
+        assertThat(firstFailure, is(1984));
     }
     
     @Test
@@ -110,7 +110,7 @@ public class PDFWriterTest extends BaseTest
         r.export(bos, PDFOptions.Default
                 .withPages(false)
                 .withPageNumbers(true)
-                .withIgnoreEmptyColumns()
+                .withIgnoreEmptyColumns(true)
                 .withStickyColumnNames(true)
                 .withColumnWidthInInches(1)
                 .withTitle("Only Row 3")

@@ -2,7 +2,6 @@ package org.tms.api.io.options;
 
 import org.tms.io.options.FormattedPageOptions;
 
-
 public class PDFOptions extends FormattedPageOptions<PDFOptions> 
 {
     public static final String DefaultFontFamilyPDF = "Helvetica";
@@ -37,7 +36,7 @@ public class PDFOptions extends FormattedPageOptions<PDFOptions>
     }
 
     @Override
-    protected PDFOptions clone(final FormattedPageOptions<?> model)
+    protected PDFOptions clone(final FormattedPageOptions<PDFOptions> model)
     {
         return new PDFOptions((PDFOptions)model);
     }

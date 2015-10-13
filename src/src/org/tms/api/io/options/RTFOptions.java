@@ -34,7 +34,7 @@ public class RTFOptions extends FormattedPageOptions<RTFOptions>
     }
 
     @Override
-    protected RTFOptions clone(final FormattedPageOptions<?> model)
+    protected RTFOptions clone(final FormattedPageOptions<RTFOptions> model)
     {
         return new RTFOptions((RTFOptions)model);
     }

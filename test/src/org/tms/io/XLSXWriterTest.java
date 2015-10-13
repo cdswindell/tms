@@ -14,12 +14,12 @@ import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.options.DocXOptions;
+import org.tms.api.io.options.XLSXOptions;
 
-public class DOCXWriterTest extends BaseTest
+public class XLSXWriterTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.csv";
-    private static final String ExportTableGold = "testExportTable.docx";
+    private static final String ExportTableGold = "testExportTable.xlsx";
 
     @Test
     public final void testExportTable() throws IOException
@@ -28,7 +28,7 @@ public class DOCXWriterTest extends BaseTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(ExportTableGold);
+        Path path = Paths.get("testExportColumn.html");
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
@@ -39,14 +39,7 @@ public class DOCXWriterTest extends BaseTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        t.export(bos, DocXOptions.Default
-                .withPages(true)
-                .withPageNumbers(true)
-                .withDateTimeFormat(null)
-                .withIgnoreEmptyColumns()
-                .withStickyColumnNames(false)
-                .withColumnWidthInInches(2.8)
-                .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
+        t.export(ExportTableGold, XLSXOptions.Default);
         bos.close();
 
         // test byte streams are the same
@@ -66,6 +59,6 @@ public class DOCXWriterTest extends BaseTest
 
         // there will be failures, as new documents have date/time stamped into them
         System.out.println("Export Table to DocX, Failures: " + failures);
-        assertThat(failures, is(12));
+        assertThat(failures, is(24));
     }
 }

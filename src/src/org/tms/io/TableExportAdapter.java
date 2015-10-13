@@ -12,6 +12,7 @@ import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.options.CSVOptions;
 import org.tms.api.io.options.TMSOptions;
+import org.tms.api.io.options.XLSXOptions;
 import org.tms.io.options.IOOptions;
 
 public class TableExportAdapter
@@ -98,6 +99,10 @@ public class TableExportAdapter
                 
             case CSV:
                 CSVWriter.export(this, m_output, (CSVOptions)m_options);
+                break;
+                
+            case EXCEL:
+                XLSXWriter.export(this, m_output, (XLSXOptions)m_options);
                 break;
                 
             case PDF:

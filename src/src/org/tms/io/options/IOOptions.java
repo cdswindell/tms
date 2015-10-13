@@ -127,8 +127,7 @@ public abstract class IOOptions extends Constants
         m_options = new HashMap<OptionEnum, Object>();
         for (Entry<OptionEnum, Object> e : format.m_options.entrySet()) {
             m_options.put(e.getKey(), e.getValue());
-        }
-        
+        }        
     }
                   
     public boolean isTMS()

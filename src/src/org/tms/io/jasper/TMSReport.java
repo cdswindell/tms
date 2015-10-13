@@ -41,9 +41,9 @@ import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.io.BaseWriter;
 import org.tms.io.options.DateTimeFormatOption;
-import org.tms.io.options.FontedOption;
 import org.tms.io.options.IOOptions;
 import org.tms.io.options.PageableOption;
+import org.tms.io.options.StyleableOption;
 import org.tms.io.options.TitleableOption;
 
 
@@ -322,27 +322,22 @@ abstract public class TMSReport
         int pageHeight = getPageHeight();
 
         // define font styles
-        float defaultFontSize = m_options instanceof FontedOption ?
-                ((FontedOption)m_options).getDefaultFontSize() : sf_StandardFontSize;
+        float defaultFontSize = m_options instanceof StyleableOption ?
+                ((StyleableOption)m_options).getDefaultFontSize() : sf_StandardFontSize;
         if (defaultFontSize <= 0)
             defaultFontSize = sf_StandardFontSize;
         
-        float headingFontSize = m_options instanceof FontedOption ?
-                ((FontedOption)m_options).getHeadingFontSize() : sf_HeaderFontSize;
+        float headingFontSize = m_options instanceof StyleableOption ?
+                ((StyleableOption)m_options).getHeadingFontSize() : sf_HeaderFontSize;
         if (headingFontSize <= 0)
             headingFontSize = sf_HeaderFontSize;
         
-        JasperDesign jrDesign = createReportDesign(rptNo, paginated, pageWidth, pageHeight, colWidth);
+        JasperDesign jrDesignFirst = createReportDesign(rptNo, paginated, pageWidth, pageHeight, colWidth);
+        JasperDesign jrDesign = jrDesignFirst;
         
         JRDesignStyle boldStyle = defineStyle(jrDesign, "Sans_Bold", defaultFontSize, false, true);
         JRDesignStyle normalStyle = defineStyle(jrDesign, "Sans_Normal", defaultFontSize, true, false);
-                
-        // add title, but only on first report
-        if ((m_options instanceof TitleableOption) && ((TitleableOption)m_options).hasTitle()) {
-            JRDesignBand titleBand = defineTitleBand(jrDesign, boldStyle, printableWidth);
-            jrDesign.setTitle(titleBand);
-        }
-        
+                        
         // create JR fields for each printable column
         int colHeadBandHeight = (int)(headingFontSize * 1.5);
         int detailBandHeight = (int)(defaultFontSize * 1.5);
@@ -358,11 +353,11 @@ abstract public class TMSReport
         int tfY = 2;
         m_colFieldMap = new HashMap<Column, JRField>(nCols);
         
-        int fieldWidth = (m_options instanceof PageableOption) && ((PageableOption)m_options).getColumnWidth() > 0 ?
-                ((PageableOption)m_options).getColumnWidth() : sf_StringColWidth;
+        int fieldWidth = (m_options instanceof StyleableOption) && ((StyleableOption)m_options).getColumnWidth() > 0 ?
+                ((StyleableOption)m_options).getColumnWidth() : sf_StringColWidth;
                 
-        int rowNameColWidth =  (m_options instanceof PageableOption) && ((PageableOption)m_options).getRowNameColumnWidth() > 0 ?
-                ((PageableOption)m_options).getRowNameColumnWidth() : sf_RowNameColWidth;
+        int rowNameColWidth =  (m_options instanceof StyleableOption) && ((StyleableOption)m_options).getRowNameColumnWidth() > 0 ?
+                ((StyleableOption)m_options).getRowNameColumnWidth() : sf_RowNameColWidth;
         
         tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, 
                           headingFontSize, rowNameColWidth);
@@ -454,6 +449,19 @@ abstract public class TMSReport
         }
         
         completeReport(paginated, printableWidth, jrDesign, normalStyle, colHeaderBand, detailBand);
+        
+        // fix up print width, if we are not paginated
+        if (!paginated && tfX > printableWidth) {
+            jrDesign.setPageWidth(tfX);
+            printableWidth = tfX;
+        }
+        
+        // add title, but only on first report
+        JRDesignBand titleBand = null;
+        if ((m_options instanceof TitleableOption) && ((TitleableOption)m_options).hasTitle()) {
+            titleBand = defineTitleBand(jrDesignFirst, boldStyle, printableWidth);
+            jrDesignFirst.setTitle(titleBand);
+        }
     }
 
     private JRDesignTextField defineTextField(String colName, int tfX, int tfY, int fw, int fh, JRDesignStyle ns, 
@@ -488,11 +496,11 @@ abstract public class TMSReport
     private int getPageWidth()
     {
         int pageWidth = 0;
-        if ((m_options instanceof PageableOption)) {
+        if ((m_options instanceof PageableOption)) 
             pageWidth = ((PageableOption)m_options).getPageWidth();
-            if (pageWidth <= 0)
-                pageWidth = sf_PortraitPageWidth;
-        }
+        
+        if (pageWidth <= 0)
+            pageWidth = sf_PortraitPageWidth;
         
         return pageWidth;
     }
@@ -500,11 +508,11 @@ abstract public class TMSReport
     private int getPageHeight()
     {
         int pageHeight = 0;
-        if ((m_options instanceof PageableOption)) {
+        if ((m_options instanceof PageableOption)) 
             pageHeight = ((PageableOption)m_options).getPageHeight();
-            if (pageHeight <= 0)
-                pageHeight = sf_PortraitPageHeight;
-        }
+        
+        if (pageHeight <= 0)
+            pageHeight = sf_PortraitPageHeight;        
         
         return pageHeight;
     }
@@ -512,8 +520,8 @@ abstract public class TMSReport
     private String getFontFamily()
     {
         String fontFamily = sf_DefaultFontFamily;
-        if ((m_options instanceof FontedOption)) {
-            fontFamily = ((FontedOption)m_options).getFontFamily();
+        if ((m_options instanceof StyleableOption)) {
+            fontFamily = ((StyleableOption)m_options).getFontFamily();
             if (fontFamily == null || (fontFamily = fontFamily.trim()).length() <= 0)
                 fontFamily = sf_DefaultFontFamily;
         }
@@ -523,7 +531,7 @@ abstract public class TMSReport
 
     private JRDesignBand defineTitleBand(JasperDesign jrDesign, JRDesignStyle boldStyle, int colWidth)
     {
-        float titleFontSize = ((FontedOption)m_options).getTitleFontSize();
+        float titleFontSize = ((TitleableOption)m_options).getTitleFontSize();
         if (titleFontSize <= 0)
             titleFontSize = sf_TitleFontSize;
         
@@ -556,7 +564,7 @@ abstract public class TMSReport
 
     private JRDesignBand defineFooterBand(JasperDesign jrDesign, JRDesignStyle normalStyle, int pageWidth)
     {
-        float fontSize = (int)(((FontedOption)m_options).getDefaultFontSize() * .9);
+        float fontSize = (int)(((StyleableOption)m_options).getDefaultFontSize() * .9);
         if (fontSize <= 0)
             fontSize = (int)(sf_StandardFontSize * .9);
             

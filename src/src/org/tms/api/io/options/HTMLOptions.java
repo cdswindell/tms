@@ -1,8 +1,8 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.FormattedPageOptions;
+import org.tms.io.options.TitledPageOptions;
 
-public class HTMLOptions extends FormattedPageOptions<HTMLOptions> 
+public class HTMLOptions extends TitledPageOptions<HTMLOptions> 
 {
     public static final int DefaultHTMLFontSizePx = 12;
     
@@ -18,8 +18,7 @@ public class HTMLOptions extends FormattedPageOptions<HTMLOptions>
             final String defaultFontFamily)
     {
         super(org.tms.io.options.IOOptions.FileFormat.HTML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
-                null, false, false, 0, 0, colWidthPx,
-                false, false, defaultFontSize, defaultFontFamily);
+              colWidthPx, defaultFontSize, defaultFontFamily);
     }
 
     private HTMLOptions(final HTMLOptions format)
@@ -28,7 +27,7 @@ public class HTMLOptions extends FormattedPageOptions<HTMLOptions>
     }
 
     @Override
-    protected HTMLOptions clone(final FormattedPageOptions<?> model)
+    protected HTMLOptions clone(final TitledPageOptions<HTMLOptions> model)
     {
         return new HTMLOptions((HTMLOptions)model);
     }
