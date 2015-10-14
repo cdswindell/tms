@@ -12,7 +12,11 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 import org.tms.BaseTest;
+import org.tms.api.Cell;
+import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.derivables.ErrorCode;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.options.XlsOptions;
 
@@ -38,10 +42,35 @@ public class XLSXWriterTest extends BaseTest
         assertNotNull(t);
         t.setLabel("Test Table");
         
+        Column dCol = t.addColumn();
+        dCol.setDerivation("col 1 * 3");
+        
+        Column eCol = t.addColumn();        
+        Row r1 = t.getRow(1);
+        Cell cell = t.getCell(r1,  eCol);
+        cell.setDerivation("col 1 / 0");
+        
+        Row r2 = t.getRow(2);
+        cell = t.getCell(r2,  eCol);
+        cell.setCellValue(Double.NaN);
+        
+        Row r3 = t.getRow(3);
+        cell = t.getCell(r3,  eCol);
+        cell.setCellValue(Double.POSITIVE_INFINITY);
+        
+        Row r4 = t.getRow(4);
+        cell = t.getCell(r4,  eCol);
+        cell.setCellValue(ErrorCode.ReferenceRequired);
+        
+        Row r5 = t.addRow(5);
+        r5.setDerivation("sum(colRef(cidx))");
+        
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         t.export(ExportTableGold, XlsOptions.Default
                 .withColumnNames(true)
+                .withColumnWidthInInches(1.5)
+                .withRowNameColumnWidthInInches(1)
                 );
         bos.close();
 

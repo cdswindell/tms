@@ -5,7 +5,7 @@ import org.tms.io.options.StyledPageOptions;
 
 public class XlsOptions extends StyledPageOptions<XlsOptions>
 {
-    public static final int DefaultColumnWidthPx = (int)(.75 * 72);
+    public static final int DefaultColumnWidthPx = 65;
     public static final int DefaultFontSizePx = 12;
     
     public static final XlsOptions Default = new XlsOptions(true, true, false, false, DefaultColumnWidthPx, DefaultFontSizePx);
