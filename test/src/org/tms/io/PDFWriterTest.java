@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
@@ -146,5 +147,24 @@ public class PDFWriterTest extends BaseTest
         byte [] pdf =  bos.toByteArray();
         assertNotNull(pdf);
         assertThat(pdf.length > 0, is(true));
+    }
+    
+    @Ignore
+    @Test
+    public final void testExportTablePersistant() throws IOException
+    {
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        assertNotNull(t);
+        
+        // Write to file
+        t.export("exportTable.pdf", PDFOptions.Default
+                .withPages(false)
+                .withPageNumbers(false)
+                .withIgnoreEmptyColumns()
+                .withColumnWidthInInches(2)
+                .withDateTimeFormat(null)
+                .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
+                .withFontFamily("Helvetica")
+                .withPages(false));       
     }
 }

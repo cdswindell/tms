@@ -460,8 +460,16 @@ abstract public class TMSReport
         // add title, but only on first report
         JRDesignBand titleBand = null;
         if ((m_options instanceof TitleableOption) && ((TitleableOption)m_options).hasTitle()) {
-            titleBand = defineTitleBand(jrDesignFirst, boldStyle, printableWidth);
+            float titleFontSize = ((TitleableOption)m_options).getTitleFontSize();
+            if (titleFontSize <= 0)
+                titleFontSize = sf_TitleFontSize;
+            
+            titleBand = defineTitleBand(boldStyle, printableWidth, titleFontSize);
             jrDesignFirst.setTitle(titleBand);
+            
+            JRDesignBand pageHeader = new JRDesignBand();
+            pageHeader.setHeight((int)titleFontSize);
+            jrDesignFirst.setPageHeader(pageHeader);
         }
     }
 
@@ -530,13 +538,9 @@ abstract public class TMSReport
         return fontFamily;
     }
 
-    private JRDesignBand defineTitleBand(JasperDesign jrDesign, JRDesignStyle boldStyle, int colWidth)
+    private JRDesignBand defineTitleBand(JRDesignStyle boldStyle, int colWidth, float titleFontSize)
     {
-        float titleFontSize = ((TitleableOption)m_options).getTitleFontSize();
-        if (titleFontSize <= 0)
-            titleFontSize = sf_TitleFontSize;
-        
-        int height = (int)(titleFontSize * 4);
+        int height = (int)(titleFontSize);
         int offset = 5;
         
         JRDesignBand titleBand = new JRDesignBand();
