@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.options.XLSXOptions;
+import org.tms.api.io.options.XlsOptions;
 
 public class XLSXWriterTest extends BaseTest
 {
@@ -28,18 +28,21 @@ public class XLSXWriterTest extends BaseTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get("testExportColumn.html");
+        Path path = Paths.get(ExportTableGold);
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
-        assertThat(gold.length > 0, is(true));
+        //assertThat(gold.length > 0, is(true));
 
         Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
         assertNotNull(t);
+        t.setLabel("Test Table");
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        t.export(ExportTableGold, XLSXOptions.Default);
+        t.export(ExportTableGold, XlsOptions.Default
+                .withColumnNames(true)
+                );
         bos.close();
 
         // test byte streams are the same

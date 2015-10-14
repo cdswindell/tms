@@ -13,6 +13,7 @@ import org.tms.api.io.options.PDFOptions;
 import org.tms.api.io.options.RTFOptions;
 import org.tms.api.io.options.TMSOptions;
 import org.tms.api.io.options.XMLOptions;
+import org.tms.api.io.options.XlsOptions;
 
 public abstract class IOOptions extends Constants
 {      
@@ -43,6 +44,13 @@ public abstract class IOOptions extends Constants
                     case XML:
                         return XMLOptions.Default;
                         
+                    case EXCEL:
+                        // if xls file, return modified option
+                        if ("xls".equalsIgnoreCase(ext))
+                            return XlsOptions.Default.withXlsFormat();
+                        else
+                            return XlsOptions.Default;
+                        
                     default:
                         break;
                 }
@@ -59,13 +67,13 @@ public abstract class IOOptions extends Constants
     public static enum FileFormat 
     {
         CSV(true, "csv"),
-        DOCX(false, "docx", "doc"),
-        EXCEL(true, "xls", "xlsx"), 
+        WORD(false, "docx", "doc"),
+        EXCEL(true, "xlsx", "xls"), 
         HTML(false, "htm", "html"),
         PDF(false, "pdf"),
         JSON(true, "json"),
         RTF(false, "rtf"),
-        XML(true, "XML"),
+        XML(true, "xml"),
         TMS(true, "tms");
         
         private boolean m_supportsImport;

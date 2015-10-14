@@ -150,4 +150,12 @@ public abstract class BaseWriter
     {
         return m_tableExportAdapter.getRows();
     }
+    
+    protected String trimString(String arg)
+    {
+        if (arg == null || (arg = arg.trim()).length() <= 0)
+            return null;
+        else
+            return arg;
+    }
 }

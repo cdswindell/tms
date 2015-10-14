@@ -12,7 +12,7 @@ import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.options.CSVOptions;
 import org.tms.api.io.options.TMSOptions;
-import org.tms.api.io.options.XLSXOptions;
+import org.tms.api.io.options.XlsOptions;
 import org.tms.io.options.IOOptions;
 
 public class TableExportAdapter
@@ -46,8 +46,9 @@ public class TableExportAdapter
             if (m_options == null)
                 throw new UnimplementedException(String.format("No support for writting %s", fileName));
         }
-        else
+        else {
             m_options = options;
+        }
         
         // create the output stream
         m_output = new FileOutputStream(m_file);
@@ -102,13 +103,13 @@ public class TableExportAdapter
                 break;
                 
             case EXCEL:
-                XLSXWriter.export(this, m_output, (XLSXOptions)m_options);
+                XLSXWriter.export(this, m_output, (XlsOptions)m_options);
                 break;
                 
             case PDF:
             case RTF:
             case HTML:
-            case DOCX:
+            case WORD:
                 JasperWriter.export(this, m_output, m_options);
                 break;
                 

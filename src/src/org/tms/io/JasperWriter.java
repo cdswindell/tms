@@ -32,7 +32,7 @@ public class JasperWriter extends BaseWriter
                 report = new HTMLReport(writer);
                 break;
                 
-            case DOCX:
+            case WORD:
                 report = new DocXReport(writer);
                 break;
                 

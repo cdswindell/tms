@@ -936,8 +936,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     @Override
     public boolean isLabelIndexed()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return getTableContext().isSet(sf_TABLE_LABELS_INDEXED_FLAG);
     }
     
     synchronized private void indexLabels(Collection<? extends TableElementImpl> elems, 
