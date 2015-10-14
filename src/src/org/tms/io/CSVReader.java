@@ -17,40 +17,30 @@ import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.options.CSVOptions;
-import org.tms.io.options.IOOptions;
 
-public class CSVReader
+public class CSVReader extends BaseReader<CSVOptions>
 {
-    private File m_csvFile;
-    private TableContext m_context;
     private CSVFormat m_csvFormat;
-    private CSVOptions m_options;
     
-    public CSVReader(String fileName, IOOptions format)
+    public CSVReader(String fileName, CSVOptions format)
     {
         this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
     }
 
-    public CSVReader(String fileName, TableContext context, IOOptions format)
+    public CSVReader(String fileName, TableContext context, CSVOptions format)
     {
         this(new File(fileName), context, format);
     }
 
-    public CSVReader(File csvFile, TableContext context, IOOptions format)
+    public CSVReader(File csvFile, TableContext context, CSVOptions format)
     {
-        m_context = context;
-        m_csvFile = csvFile;
-        
-        if (!(format instanceof CSVOptions))
-            throw new IllegalArgumentException("CSVOptions required");
-        
-        m_options = (CSVOptions)format;
+        super(csvFile, context, format);
         
         m_csvFormat = CSVFormat.DEFAULT
                                 .withIgnoreEmptyLines(format.isIgnoreEmptyRows())
-                                .withIgnoreSurroundingSpaces(m_options.isIgnoreSuroundingSpaces())
-                                .withDelimiter(m_options.getDelimiter())
-                                .withQuote(m_options.getQuote());
+                                .withIgnoreSurroundingSpaces(options().isIgnoreSuroundingSpaces())
+                                .withDelimiter(options().getDelimiter())
+                                .withQuote(options().getQuote());
     }
     
     public Table parse() throws IOException
@@ -60,20 +50,20 @@ public class CSVReader
         
         try {
             // build a CSVParser to do the heavy lifting
-            in = new InputStreamReader(new FileInputStream(m_csvFile));
+            in = new InputStreamReader(new FileInputStream(getInputFile()));
             parser = m_csvFormat.parse(in);
             
             // create the table scaffold
-            Table t = TableFactory.createTable(m_context);
+            Table t = TableFactory.createTable(getTableContext());
             
             // read the data from the Default file, one row at a time, 
             // and fill the table with it
             boolean firstRow = true;;
             for (CSVRecord csvRec : parser) {
-                if (m_options.isColumnNames() && firstRow)
+                if (options().isColumnNames() && firstRow)
                     parseColumnHeaders(t, csvRec);
                 else {
-                    if (m_options.isIgnoreEmptyRows() && isEmpty(csvRec))
+                    if (options().isIgnoreEmptyRows() && isEmpty(csvRec))
                         continue;
                     
                     Row row = t.addRow();
@@ -107,7 +97,7 @@ public class CSVReader
             }
             
             // if we're ignoring extra columns, we have one more check
-            if (m_options.isIgnoreEmptyColumns()) {
+            if (options().isIgnoreEmptyColumns()) {
                 Set<Column> emptyCols = null;
                 for (Column c : t.getColumns()) {
                     if (c != null && c.isNull()) {
@@ -138,7 +128,7 @@ public class CSVReader
         if (csvRec != null) {
             boolean firstCol = true;
             for (String s : csvRec) {
-                if (firstCol && m_options.isRowNames())
+                if (firstCol && options().isRowNames())
                     ; // noop
                 else {
                     // if s isn't null or empty, the record isn't empty
@@ -162,7 +152,7 @@ public class CSVReader
             else if ("false".equalsIgnoreCase(s))
                 return false;
             else if ((c = s.charAt(0)) > 0 && (!Character.isDigit(c) && c != '+' && c != '-'))
-                return s;
+                return options().isIgnoreSuroundingSpaces() ? s.trim() : s;
             
             return Integer.parseInt(s);
         }
@@ -197,40 +187,5 @@ public class CSVReader
             
             firstCol = false;
         }        
-    }
-
-    /**
-     * Return the {@link java.io.File} to parse.
-     * @return the {@link java.io.File} to parse
-     */
-    public File getCSVFile()
-    {
-        return m_csvFile;
-    }
-
-    /**
-     * Return the file name to parse.
-     * @return the file name to parse
-     */
-    public String getCSVFileName()
-    {
-        return m_csvFile.getName();
-    }
-
-    /**
-     * Return {@code true} if the Default file contains row names.
-     * @return true if the Default file contains row names
-     */
-    public boolean isRowNames()
-    {
-        return m_options.isRowNames();
-    }
-    /**
-     * Return {@code true} if the Default file contains column names.
-     * @return true if the Default file contains column names
-     */
-    public boolean isColumnNames()
-    {
-        return m_options.isColumnNames();
     }
 }

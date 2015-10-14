@@ -28,7 +28,7 @@ public class CSVReaderTest extends BaseTest
     {
         CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.Default); 
         assertNotNull(r);
-        assertThat(r.getCSVFileName(), is(SAMPLE1));
+        assertThat(r.getFileName(), is(SAMPLE1));
         assertThat(r.isRowNames(), is(true));
         assertThat(r.isColumnNames(), is(true));
     }

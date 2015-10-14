@@ -103,7 +103,7 @@ public class TableExportAdapter
                 break;
                 
             case EXCEL:
-                XLSXWriter.export(this, m_output, (XlsOptions)m_options);
+                XlsWriter.export(this, m_output, (XlsOptions)m_options);
                 break;
                 
             case PDF:

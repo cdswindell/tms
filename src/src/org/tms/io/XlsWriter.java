@@ -18,18 +18,18 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.tms.api.Column;
 import org.tms.api.io.options.XlsOptions;
 
-public class XLSXWriter extends BaseWriter
+public class XlsWriter extends BaseWriter
 {
     private XlsOptions m_options;
 
     public static void export(TableExportAdapter tea, OutputStream output, XlsOptions options) 
             throws IOException
     {
-        XLSXWriter writer = new XLSXWriter(tea, output, options);
+        XlsWriter writer = new XlsWriter(tea, output, options);
         writer.export();
     }
 
-    private XLSXWriter(TableExportAdapter tw, OutputStream out, XlsOptions options)
+    private XlsWriter(TableExportAdapter tw, OutputStream out, XlsOptions options)
     {
         super(tw, out, options);        
         m_options = options;        
