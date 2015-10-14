@@ -1,7 +1,7 @@
 package org.tms.io.options;
 
-public abstract class TitledPageOptions<T extends TitledPageOptions<T>> 
-    extends StyledPageOptions<T>
+public abstract class TitledPageOptions<E extends TitledPageOptions<E>> 
+    extends StyledPageOptions<E>
     implements TitleableOption
 {
     private enum Options implements OptionEnum {
@@ -9,7 +9,7 @@ public abstract class TitledPageOptions<T extends TitledPageOptions<T>>
         TitleFontSize,
     }
     
-    protected abstract T clone(TitledPageOptions<T> model);
+    protected abstract E clone(TitledPageOptions<E> model);
     
     protected TitledPageOptions(final org.tms.io.options.IOOptions.FileFormat format,
             final boolean rowNames, 
@@ -24,15 +24,15 @@ public abstract class TitledPageOptions<T extends TitledPageOptions<T>>
               ignoreEmptyRows, ignoreEmptyCols, colWidthPx, defaultFontSize, defaultFontFamily);
     }
 
-    public TitledPageOptions(final TitledPageOptions<T> format)
+    public TitledPageOptions(final TitledPageOptions<E> format)
     {
         super(format);
     }
 
     @Override
-    protected T clone(StyledPageOptions<T> model)
+    protected E clone(StyledPageOptions<E> model)
     {
-        return clone((TitledPageOptions<T>) model);
+        return clone((TitledPageOptions<E>) model);
     }
 
     @Override
@@ -53,9 +53,9 @@ public abstract class TitledPageOptions<T extends TitledPageOptions<T>>
         return title != null && title.trim().length() > 0;
     }
 
-    public T withTitle(String t)
+    public E withTitle(String t)
     {
-        T newOption = clone(this);
+        E newOption = clone(this);
         newOption.set(Options.Title, t);
         return newOption;
     }
@@ -75,9 +75,9 @@ public abstract class TitledPageOptions<T extends TitledPageOptions<T>>
         set(Options.TitleFontSize, i);
     }
     
-    public T withTitleFontSize(int f)
+    public E withTitleFontSize(int f)
     {
-        T newOptions = clone(this);
+        E newOptions = clone(this);
         newOptions.setTitleFontSize(f);
         return newOptions;
     }

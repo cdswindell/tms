@@ -1,7 +1,7 @@
 package org.tms.io.options;
 
-public abstract class FormattedPageOptions<F extends FormattedPageOptions<F>>
-    extends TitledPageOptions<FormattedPageOptions<F>> 
+public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
+    extends TitledPageOptions<FormattedPageOptions<E>> 
     implements DateTimeFormatOption, PageableOption
 {
     public static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
@@ -18,7 +18,7 @@ public abstract class FormattedPageOptions<F extends FormattedPageOptions<F>>
         IsStickyColumnNames,
     }
 
-    protected abstract F clone(FormattedPageOptions<F> model);
+    protected abstract E clone(FormattedPageOptions<E> model);
     
     protected FormattedPageOptions(final org.tms.io.options.IOOptions.FileFormat format,
             final boolean rowNames, 
@@ -50,92 +50,92 @@ public abstract class FormattedPageOptions<F extends FormattedPageOptions<F>>
         set(Options.IsStickyColumnNames, stickyColNames);
     }
 
-    protected FormattedPageOptions(final FormattedPageOptions<F> format)
+    protected FormattedPageOptions(final FormattedPageOptions<E> format)
     {
         super(format);
     }
 
     @Override
-    protected F clone(TitledPageOptions<FormattedPageOptions<F>> model)
+    protected E clone(TitledPageOptions<FormattedPageOptions<E>> model)
     {
-        return clone((FormattedPageOptions<F>)model);
+        return clone((FormattedPageOptions<E>)model);
     }
 
-    public F withDateTimeFormat(String t)
+    public E withDateTimeFormat(String t)
     {
-        F newOptions = clone(this);
+        E newOptions = clone(this);
         newOptions.setDateTimeFormat(t);
         return newOptions;
     }
 
-    public F withPages()
+    public E withPages()
     {
         return withPages(true);
     }
 
-    public F withPages(boolean b)
+    public E withPages(boolean b)
     {
-        F newOptions = clone(this);
+        E newOptions = clone(this);
         newOptions.setPaged(b);
         return newOptions;
     }
 
-    public F withPageNumbers()
+    public E withPageNumbers()
     {
         return withPageNumbers(true);
     }
 
-    public F withPageNumbers(boolean b)
+    public E withPageNumbers(boolean b)
     {
-        F newOptions = clone(this);
+        E newOptions = clone(this);
         newOptions.setPageNumbers(b);
         return newOptions;
     }
 
-    public F withPageWidthInInches(double f)
+    public E withPageWidthInInches(double f)
     {
         return withPageWidthInPx((int)(f * 72));
     }
 
-    public F withPageWidthInPx(int f)
+    public E withPageWidthInPx(int f)
     {
-        F newOptions = clone(this);
+        E newOptions = clone(this);
         newOptions.setPageWidth(f);
         return newOptions;
     }
 
-    public F withPageHeightInInches(double f)
+    public E withPageHeightInInches(double f)
     {
         return withPageHeightInPx((int)(f * 72));
     }
 
-    public F withPageHeightInPx(int f)
+    public E withPageHeightInPx(int f)
     {
-        F newOptions = clone(this);
+        E newOptions = clone(this);
         newOptions.setPageHeight(f);
         return newOptions;
     }
 
-    public F withStickyRowNames()
+    public E withStickyRowNames()
     {
         return withStickyRowNames(true);
     }
 
-    public F withStickyRowNames(boolean b)
+    public E withStickyRowNames(boolean b)
     {
-        F newOptions = clone(this);
+        E newOptions = clone(this);
         newOptions.setStickyRowNames(b);
         return newOptions;
     }
 
-    public F withStickyColumnNames()
+    public E withStickyColumnNames()
     {
         return withStickyColumnNames(true);
     }
 
-    public F withStickyColumnNames(boolean b)
+    public E withStickyColumnNames(boolean b)
     {
-        F newOptions = clone(this);
+        E newOptions = clone(this);
         newOptions.setStickyColumnNames(b);
         return newOptions;
     }
