@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.Name;
@@ -14,8 +15,12 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.tms.api.Access;
 import org.tms.api.Column;
+import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
@@ -120,17 +125,7 @@ public class XlsReader extends BaseReader<XlsOptions>
             }
             
             // handle named ranges
-            int numNamedRegions = wb.getNumberOfNames();
-            if (numNamedRegions > 0) {
-                for (int i = 0; i < numNamedRegions; i++) {
-                    Name namedRegion = wb.getNameAt(i);
-                    String name = namedRegion.getNameName();
-                    String regionRef = namedRegion.getRefersToFormula();
-                    if (namedRegion != null && (sheetName == null || sheetName.equals(namedRegion.getSheetName()))) {
-                        parseRegionRef(regionRef);
-                    }
-                }
-            }
+            processNamedRegions(wb, sheet, sheetName, t);
         }
         catch (EncryptedDocumentException | InvalidFormatException e)
         {
@@ -145,10 +140,80 @@ public class XlsReader extends BaseReader<XlsOptions>
         return t;
     }
 
-    private void parseRegionRef(String regionRef)
+    private void processNamedRegions(Workbook wb, Sheet activeSheet, String sheetName, Table t)
     {
-        // TODO Auto-generated method stub
+        int numNamedRegions = wb.getNumberOfNames();
+        if (numNamedRegions > 0) {
+            SpreadsheetVersion ssV = wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;
+            for (int i = 0; i < numNamedRegions; i++) {
+                Name namedRegion = wb.getNameAt(i);
+                if (namedRegion != null && (sheetName == null || sheetName.equals(namedRegion.getSheetName()))) {
+                    // get the region name and encoded region reference
+                    String name = namedRegion.getNameName();
+                    String regionRef = namedRegion.getRefersToFormula();
+                    
+                    // use the helper classes AreaRef and CellReference to
+                    // decode region reference
+                    // Note: we cannot rely on aref.isSingleCell 
+                    AreaReference aref = new AreaReference(regionRef, ssV);
+                    CellReference[] cRefs = aref.getAllReferencedCells();
+                    
+                    if (isSingleCell(cRefs)) {
+                        org.tms.api.Cell tCell = getSingleCell(cRefs, t);
+                        if (tCell != null)
+                            tCell.setLabel(name);
+                    }  
+                    else 
+                        createSubset(cRefs, t, name);
+                }
+            }
+        }
+    }
+
+    private Subset createSubset(CellReference[] cRefs, Table t, String label)
+    {
+        // assume success
+        Subset s = t.addSubset(Access.ByLabel, label);
         
+        // iterate over cell references, abstracting rows and columns
+        for (CellReference cRef : cRefs) {
+            int excelRowNo = cRef.getRow();
+            int excelColNo = cRef.getCol();
+            
+            if (excelColNo >= 0)
+                s.add(t.getColumn(excelColNo + 1 - (options().isRowNames() ? 1 : 0)));
+            
+            if (excelRowNo >= 0)
+                s.add(t.getRow(excelRowNo + 1 - (options().isColumnNames() ? 1 : 0)));           
+        }
+        
+        return s;
+    }
+
+    private org.tms.api.Cell getSingleCell(CellReference[] cRefs, Table t)
+    {
+        // first, get Excel row and column values; they will be zero-based
+        int excelRowNo = cRefs[0].getRow();
+        int excelColNo = cRefs[0].getCol();
+        
+        // now, return cell, correcting for 1-based TMS row/column indexes
+        return t.getCell(t.getRow(excelRowNo + 1 - (options().isColumnNames() ? 1 : 0)), 
+                         t.getColumn(excelColNo + 1 - (options().isRowNames() ? 1 : 0)));
+    }
+
+    private boolean isSingleCell(CellReference[] cRefs)
+    {
+        /*
+         * we have a single cell iff there is only one cRef (array len == 1)
+         * and getRow() is valid and getCol() is valid
+         */
+        return cRefs.length == 1 && 
+                cRefs[0].getCol() > -1 && 
+                cRefs[0].getRow() > -1 &&
+                cRefs[0].isColAbsolute() &&
+                cRefs[0].isRowAbsolute() &&
+                (!options().isColumnNames() || cRefs[0].getRow() > 0) &&
+                (!options().isRowNames() || cRefs[0].getCol() > 0);
     }
 
     private String fetchCellComment(Cell eC, boolean removeAuthors)

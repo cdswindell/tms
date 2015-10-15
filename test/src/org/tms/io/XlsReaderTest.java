@@ -10,9 +10,11 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.tms.BaseTest;
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.io.options.XlsOptions;
 
@@ -20,7 +22,7 @@ public class XlsReaderTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.xlsx";
     private static final String SAMPLE2 = "sample2.xlsx";
-    private static final String SAMPLE3 = "sample3.xlsx";
+    //private static final String SAMPLE3 = "sample3.xlsx";
     
     @Test
     public final void testXlsReaderConstructor()
@@ -137,6 +139,47 @@ public class XlsReaderTest extends BaseTest
             assertThat(cell.getLabel(), is("Cyan"));
             vetCellValue(t, r4, c3, false);
             //vetCellValue(t, r4, c4, 52.95);
+            
+            // check subsets
+            Subset s = t.getSubset(Access.ByLabel, "Booleans");
+            assertNotNull(s);
+            assertNotNull(s.getColumns());
+            assertThat(s.getNumColumns(), is(1));
+            assertThat(s.contains(c1), is(false));
+            assertThat(s.contains(c2), is(false));
+            assertThat(s.contains(c3), is(true));
+            assertThat(s.contains(c4), is(false));
+            assertThat(s.getNumRows(), is(0));
+            assertThat(s.contains(r1), is(false));
+            assertThat(s.contains(r2), is(false));
+            assertThat(s.contains(r3), is(false));
+            assertThat(s.contains(r4), is(false));
+
+            s = t.getSubset(Access.ByLabel, "YellowRow");
+            assertNotNull(s);
+            assertThat(s.getNumColumns(), is(0));
+            assertThat(s.contains(c1), is(false));
+            assertThat(s.contains(c2), is(false));
+            assertThat(s.contains(c3), is(false));
+            assertThat(s.contains(c4), is(false));
+            assertThat(s.getNumRows(), is(1));
+            assertThat(s.contains(r1), is(false));
+            assertThat(s.contains(r2), is(false));
+            assertThat(s.contains(r3), is(true));
+            assertThat(s.contains(r4), is(false));
+
+            s = t.getSubset(Access.ByLabel, "Subset");
+            assertNotNull(s);
+            assertThat(s.getNumColumns(), is(3));
+            assertThat(s.contains(c1), is(true));
+            assertThat(s.contains(c2), is(true));
+            assertThat(s.contains(c3), is(true));
+            assertThat(s.contains(c4), is(false));
+            assertThat(s.getNumRows(), is(3));
+            assertThat(s.contains(r1), is(false));
+            assertThat(s.contains(r2), is(true));
+            assertThat(s.contains(r3), is(true));
+            assertThat(s.contains(r4), is(true));
         }
         catch (IOException e)
         {
