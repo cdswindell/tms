@@ -1,6 +1,7 @@
 package org.tms.io;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -9,6 +10,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.tms.BaseTest;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
@@ -31,7 +33,7 @@ public class XlsReaderTest extends BaseTest
     }
 
     @Test
-    public final void testParse() 
+    public final void testImportSimpleSheet() 
     {
         XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1), XlsOptions.Default); 
         assertNotNull(r);
@@ -62,5 +64,83 @@ public class XlsReaderTest extends BaseTest
         {
             fail(e.getMessage());
         }
-    }    
+    }  
+    
+    @Test
+    public final void testImportSheetWithRangesNotesEquations() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE2), XlsOptions.Default); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            assertThat(t.getNumRows(), is(4));
+            assertThat(t.getNumColumns(), is(4));
+            assertThat(t.getNumCells(), is(12));
+            
+            Column c1 = t.getColumn(1);
+            assertNotNull(c1);
+            assertThat(c1.getLabel(), is("Abc"));
+            
+            Column c2 = t.getColumn(2);
+            assertNotNull(c2);
+            assertThat(c2.getLabel(), is ("Col 2"));
+            
+            Column c3 = t.getColumn(3);
+            assertNotNull(c3);
+            assertThat(c3.getLabel(), is("Def Ghi"));
+            assertThat(c3.getDescription(), is("This is the Def Ghi Column label"));
+            
+            Column c4 = t.getColumn(4);
+            assertNotNull(c4);           
+            assertThat(c4.getLabel(), is ("Col 4"));
+            
+            Row r1 = t.getRow(1);
+            assertNotNull(r1);
+            assertThat(r1.getLabel(), is("Blue Row"));
+            assertThat(r1.getDescription(), is("This is the row label for the blue row"));
+            
+            Row r2 = t.getRow(2);
+            assertNotNull(r2);
+            assertThat(r2.getLabel(), nullValue());
+            
+            Row r3 = t.getRow(3);
+            assertNotNull(r3);
+            assertThat(r3.getLabel(), is("Yellow Row"));
+            
+            Row r4 = t.getRow(4);
+            assertNotNull(r4);
+            assertThat(r4.getLabel(), is("Cyan Row"));    
+            
+            // check cell values
+            vetCellValue(t, r1, c1, 12.0);
+            vetCellValue(t, r1, c2, "Blue");
+            vetCellValue(t, r1, c3, true);
+            //vetCellValue(t, r1, c4, 36.0);
+            
+            vetCellValue(t, r2, c1, null);
+            vetCellValue(t, r2, c2, null);
+            vetCellValue(t, r2, c3, null);
+            //vetCellValue(t, r2, c4, 0);
+            
+            vetCellValue(t, r3, c1, null);
+            vetCellValue(t, r3, c2, "Yellow");
+            Cell cell = vetCellValue(t, r3, c3, true);
+            assertThat(cell.getDescription(), is("This is the boolean column in the Yellow row"));
+            //vetCellValue(t, r3, c4, 0);
+            
+            vetCellValue(t, r4, c1, 17.65);
+            cell = vetCellValue(t, r4, c2, "Cyan");
+            assertThat(cell.getLabel(), is("Cyan"));
+            vetCellValue(t, r4, c3, false);
+            //vetCellValue(t, r4, c4, 52.95);
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
 }

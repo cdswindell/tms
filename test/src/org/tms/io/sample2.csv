@@ -1,5 +1,5 @@
-, Abc, , "Def, Ghi"
-"Blue Row", 12, Blue, true
-, ,,
-"Yellow Row",, Yellow, true
-"Cyan Row", 17.65, Cyan, false
+,Abc, , "Def, Ghi"
+"Blue Row",12,Blue,true
+,,,
+"Yellow Row",,Yellow,true
+"Cyan Row",17.65,Cyan,false

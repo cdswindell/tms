@@ -2,10 +2,14 @@ package org.tms.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -49,7 +53,8 @@ public class XlsReader extends BaseReader<XlsOptions>
             int asi = wb.getActiveSheetIndex();
             
             Sheet sheet = wb.getSheetAt(asi); 
-            if (sheet.getSheetName() != null)
+            String sheetName = trimString(sheet.getSheetName());
+            if (sheetName != null)
                 t.setLabel(sheet.getSheetName());
             
             // handle column headings
@@ -63,6 +68,10 @@ public class XlsReader extends BaseReader<XlsOptions>
                     Column tC= t.addColumn(); // add the TMS column
                     Cell eC = eR.getCell(i, Row.RETURN_BLANK_AS_NULL);
                     Object cv = fetchCellValue(eC);
+                    String note = fetchCellComment(eC, true);
+                    
+                    if (note != null)
+                        tC.setDescription(note);
                     
                     if (cv != null)                       
                         tC.setLabel(cv.toString());
@@ -78,7 +87,11 @@ public class XlsReader extends BaseReader<XlsOptions>
                     for (short i = 0; i < eR.getLastCellNum(); i++) {
                         Cell eC = eR.getCell(i, Row.RETURN_BLANK_AS_NULL);
                         Object cv = fetchCellValue(eC);
+                        String note = fetchCellComment(eC, true);
                         if (i == 0 && isRowNames()) {
+                            if (note != null)
+                                tR.setDescription(note);
+                            
                             if (cv != null)                       
                                 tR.setLabel(cv.toString());
                         }
@@ -88,12 +101,33 @@ public class XlsReader extends BaseReader<XlsOptions>
                             
                             if (eC != null || cv != null) {
                                 org.tms.api.Cell tCell = t.getCell(tR, tC);
+                                if (note != null)
+                                    tCell.setDescription(note);
+                                
                                 if (cv != null)
                                     tCell.setCellValue(cv);
                             }
                             
                             // bump column
                             tC = t.getColumn(Access.Next);                        }
+                    }
+                }
+                else if (!options().isIgnoreEmptyRows()) {
+                    // excel row is empty and we don't want to ignore empty rows
+                    // add a new row
+                    t.addRow();
+                }
+            }
+            
+            // handle named ranges
+            int numNamedRegions = wb.getNumberOfNames();
+            if (numNamedRegions > 0) {
+                for (int i = 0; i < numNamedRegions; i++) {
+                    Name namedRegion = wb.getNameAt(i);
+                    String name = namedRegion.getNameName();
+                    String regionRef = namedRegion.getRefersToFormula();
+                    if (namedRegion != null && (sheetName == null || sheetName.equals(namedRegion.getSheetName()))) {
+                        parseRegionRef(regionRef);
                     }
                 }
             }
@@ -109,6 +143,35 @@ public class XlsReader extends BaseReader<XlsOptions>
         }
         
         return t;
+    }
+
+    private void parseRegionRef(String regionRef)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private String fetchCellComment(Cell eC, boolean removeAuthors)
+    {
+        if (eC != null) {        
+            Comment cellComment = eC.getCellComment();
+            if (cellComment != null) {        
+                RichTextString rts = cellComment.getString();
+                if (rts != null) {
+                    String note = trimString(rts.getString());
+                    
+                    if (removeAuthors) {
+                        String author = trimString(cellComment.getAuthor());
+                        if (author != null) 
+                            note = removeString(note, author);
+                    }
+                    
+                    return note;
+                }
+            }
+        }
+
+        return null;       
     }
 
     private Object fetchCellValue(Cell eC)
@@ -144,6 +207,9 @@ public class XlsReader extends BaseReader<XlsOptions>
                 
             case "FALSE":
                 return false;
+                
+            case "NOW":
+                return new Date();
         }
         
         return null;

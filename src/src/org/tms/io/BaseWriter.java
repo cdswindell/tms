@@ -15,7 +15,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.io.options.IOOptions;
 
-public abstract class BaseWriter
+public abstract class BaseWriter extends BaseIO
 {
     private TableExportAdapter m_tableExportAdapter;
     private OutputStream m_outStream;
@@ -149,13 +149,5 @@ public abstract class BaseWriter
     public List<Row> getRows()
     {
         return m_tableExportAdapter.getRows();
-    }
-    
-    protected String trimString(String arg)
-    {
-        if (arg == null || (arg = arg.trim()).length() <= 0)
-            return null;
-        else
-            return arg;
     }
 }

@@ -1,6 +1,15 @@
 package org.tms;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
 import java.io.File;
+
+import org.tms.api.Cell;
+import org.tms.api.Column;
+import org.tms.api.Row;
+import org.tms.api.Table;
 
 
 public class BaseTest
@@ -35,4 +44,17 @@ public class BaseTest
         
         return sb.toString();
     }
+
+    protected Cell vetCellValue(Table t, Row r, Column c, Object cv)
+    {
+        Cell cell = t.getCell(r, c);
+        assertNotNull(cell);
+        
+        if (cv == null)
+            assertThat(cell.isNull(), is(true));
+        else
+            assertThat(cell.getCellValue(), is(cv));
+        
+        return cell;
+    }    
 }

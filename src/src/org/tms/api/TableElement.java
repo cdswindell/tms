@@ -35,6 +35,9 @@ public interface TableElement extends BaseElement, Listenable
     public void setLabel(String label);
     public boolean isLabelIndexed();
     
+    public String getDescription();
+    public void setDescription(String description);
+    
     /**
      * Returns an {@link java.util.Collections#unmodifiableList} of {@link Subset}s of this {@link Table}. 
      * @return an {@code unmodifiableList} of the table subsets

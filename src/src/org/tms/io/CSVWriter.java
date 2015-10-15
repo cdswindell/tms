@@ -49,6 +49,7 @@ public class CSVWriter extends BaseWriter
                                         .withAllowMissingColumnNames(true)
                                         .withDelimiter(options().getDelimiter())
                                         .withQuote(options().getQuote())
+                                        .withIgnoreSurroundingSpaces(true)
                                         .withQuoteMode(QuoteMode.MINIMAL);
         
         CSVPrinter out = new CSVPrinter(fw, format);

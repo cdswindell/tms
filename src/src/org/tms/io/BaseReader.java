@@ -5,7 +5,7 @@ import java.io.File;
 import org.tms.api.TableContext;
 import org.tms.io.options.IOOptions;
 
-abstract class BaseReader<E extends IOOptions>
+abstract class BaseReader<E extends IOOptions> extends BaseIO
 {
     private File m_inputFile;
     private E m_options;
