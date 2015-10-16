@@ -121,24 +121,24 @@ public class XlsReaderTest extends BaseTest
             vetCellValue(t, r1, c1, 12.0);
             vetCellValue(t, r1, c2, "Blue");
             vetCellValue(t, r1, c3, true);
-            //vetCellValue(t, r1, c4, 36.0);
+            vetCellValue(t, r1, c4, 36.0);
             
             vetCellValue(t, r2, c1, null);
             vetCellValue(t, r2, c2, null);
             vetCellValue(t, r2, c3, null);
-            //vetCellValue(t, r2, c4, 0);
+            vetCellValue(t, r2, c4, 0.0);
             
             vetCellValue(t, r3, c1, null);
             vetCellValue(t, r3, c2, "Yellow");
             Cell cell = vetCellValue(t, r3, c3, true);
             assertThat(cell.getDescription(), is("This is the boolean column in the Yellow row"));
-            //vetCellValue(t, r3, c4, 0);
+            vetCellValue(t, r3, c4, 0.0);
             
             vetCellValue(t, r4, c1, 17.65);
             cell = vetCellValue(t, r4, c2, "Cyan");
             assertThat(cell.getLabel(), is("Cyan"));
             vetCellValue(t, r4, c3, false);
-            //vetCellValue(t, r4, c4, 52.95);
+            vetCellValue(t, r4, c4, 52.95);
             
             // check subsets
             Subset s = t.getSubset(Access.ByLabel, "Booleans");

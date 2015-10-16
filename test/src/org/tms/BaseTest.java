@@ -52,6 +52,8 @@ public class BaseTest
         
         if (cv == null)
             assertThat(cell.isNull(), is(true));
+        else if (Number.class.isAssignableFrom(cv.getClass()))
+            assertThat(closeTo(cell.getCellValue(), ((Number)cv).doubleValue(), 0.0000001), is(true));
         else
             assertThat(cell.getCellValue(), is(cv));
         
