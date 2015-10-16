@@ -245,14 +245,10 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             }
             
             String expr = operands.pop().getStringValue();
-            int lpIdx = expr.indexOf('(', 1);
-            int rpIdx = expr.indexOf(')', 1);
-            while (expr.startsWith("(") && expr.endsWith(")") && ((lpIdx == -1 && rpIdx == expr.length() - 1) || (lpIdx < rpIdx))) 
+            
+            while (expr.startsWith("(") && expr.endsWith(")") && isBalancedParens(expr)) 
             {
                 expr = expr.substring(1, expr.length() - 1);
-                
-                lpIdx = expr.indexOf('(', 1);
-                rpIdx = expr.indexOf(')', 1);
             }
             
             return expr;
@@ -261,6 +257,23 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
         throw new IllegalStateException(String.format("Cannot convert %s stack to %s", this.getStackType(), type));
     }
     
+    private boolean isBalancedParens(String expr)
+    {
+        expr = expr.substring(1, expr.length() - 1);
+        int parenCnt = 0;
+        for (char c : expr.toCharArray()) {
+            if (c == '(')
+                parenCnt++;
+            else if (c == ')') {
+                if (parenCnt == 0)
+                    return false;
+                parenCnt--;
+            }
+        }
+        
+        return parenCnt == 0;
+    }
+
     private boolean putInParens(int priority)
     {
         return priority <= 2;

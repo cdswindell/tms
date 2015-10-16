@@ -149,10 +149,6 @@ public class XlsReader extends BaseReader<XlsOptions>
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        finally {
-            if (wb != null)
-                wb.close();
-        }
 
         return t;
     }

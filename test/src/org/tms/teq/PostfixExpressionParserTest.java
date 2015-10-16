@@ -179,5 +179,26 @@ public class PostfixExpressionParserTest
         
         infixExpr = pfs.toExpression(StackType.Infix);
         assertThat(infixExpr, is("(5.0 + 3.0) * (2.0 - 7.0)") );
+        
+        iep = new InfixExpressionParser("(-5 + 3) * (2 - 7)");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        ifs = iep.getInfixStack();
+        assertThat(ifs, notNullValue());
+        assertThat(ifs.toExpression(), is("( neg 5.0 + 3.0 ) * ( 2.0 - 7.0 )"));
+              
+        pfp = new PostfixStackGenerator(ifs, null);
+        assertThat(pfp, notNullValue());
+        
+        pfs = pfp.getPostfixStack();
+        assertThat(pfs.toExpression(), is("5.0 neg 3.0 + 2.0 7.0 - *"));
+        assertThat(pfs, notNullValue());   
+        
+        infixExpr = pfs.toExpression(StackType.Infix);
+        assertThat(infixExpr, is("(neg(5.0) + 3.0) * (2.0 - 7.0)") );
     }  
 }
