@@ -22,6 +22,8 @@ public enum TokenType implements Labeled
     Variable(false),
     Operand(false),
     
+    Expression(false), // Special case, used to convert postfix expressions to infix
+    
     StatOp(true, 1),
     TransformOp(true, 1),
     BinaryOp(true, 2),
@@ -66,6 +68,11 @@ public enum TokenType implements Labeled
         }
     }
 
+    public boolean isOperator()
+    {
+        return isFunction() || isTransform() || isReference() || (this == BinaryOp);
+    }
+    
     public boolean isFunction()
     {
         switch (this) {
@@ -118,7 +125,7 @@ public enum TokenType implements Labeled
 
 	public boolean isOperand() 
 	{
-        return this == Operand;
+        return this == Operand || this == Expression;
 	}
 
 	public int numArgs() 

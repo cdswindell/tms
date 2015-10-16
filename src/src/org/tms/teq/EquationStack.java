@@ -30,8 +30,16 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 
     protected EquationStack(StackType st) 
     {
-    	super();
-    	m_stackType = st;
+        super();
+        m_stackType = st;
+    }
+    
+    protected EquationStack(EquationStack eqS) 
+    {
+        super();
+        m_stackType = eqS.getStackType();
+        
+        this.addAll(eqS);
     }
     
 	public TokenMapper getTokenMapper()
@@ -161,6 +169,109 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
         }
     }
     
+    public String toExpression(StackType type)
+    {
+        if (type == null)
+            throw new IllegalArgumentException("StackType required");
+        else if (this.getStackType() == type)
+            return toExpression();
+        else if (type == StackType.Postfix && this.getStackType() == StackType.Infix) {
+            PostfixStackGenerator psg = new PostfixStackGenerator(this, null);
+            psg.convertInfixToPostfix();
+            return psg.getPostfixStack().toExpression();
+        }
+        else if (type == StackType.Infix && this.getStackType() == StackType.Postfix) {
+            EquationStack operands = new EquationStack(StackType.Op);
+            
+            Iterator<Token> di = this.descendingIterator();
+            while (di != null && di.hasNext()) {
+                Token t = di.next();
+                if (t.isOperand()) {
+                    operands.push(t);
+                    continue;
+                }
+                else if (t.isOperator()) {
+                    Operator op = t.getOperator();
+                    int numArgs = t.getOperator().numArgs();
+                    int priority = op.getPriority();
+                    
+                    StringBuffer expr = new StringBuffer();
+                    if (t.getTokenType() == TokenType.UnaryOp) {
+                        Token x = operands.pop();
+                        expr.append(op.getLabel());                            
+                        expr.append(x.toExpressionValue());
+                    }
+                    else if (t.getTokenType() == TokenType.BinaryOp) {
+                        Token y = operands.pop();
+                        Token x = operands.pop();
+                        
+                        if (putInParens(priority))
+                            expr.append('(');
+                            
+                        expr.append(x.toExpressionValue()).append(' ');
+                        expr.append(op.getLabel()).append(' ');
+                        expr.append(y.toExpressionValue());
+                        
+                        if (putInParens(priority))
+                            expr.append(')');
+                    } 
+                    else { // some kind of function
+                        Token[] args = new Token[numArgs];
+                        
+                        for (int i = numArgs - 1; i >= 0; i--) {
+                            args[i] = operands.pop();
+                        }
+                        
+                        expr.append(op.getLabel()).append('(');
+                        
+                        for (int i = 0; i < numArgs; i++) {
+                            if (putInParens(args[i]))
+                                expr.append('(');
+                            
+                            expr.append(args[i].toExpressionValue());
+                            
+                            if (putInParens(args[i]))
+                                expr.append(')');
+                            
+                            if ((i + 1) < numArgs)
+                                expr.append(", ");
+                        }
+                        
+                        expr.append(')');
+                    }
+                    
+                    operands.push(new Token(TokenType.Expression, expr.toString()));
+                }                    
+            }
+            
+            String expr = operands.pop().getStringValue();
+            int lpIdx = expr.indexOf('(', 1);
+            int rpIdx = expr.indexOf(')', 1);
+            while (expr.startsWith("(") && expr.endsWith(")") && ((lpIdx == -1 && rpIdx == expr.length() - 1) || (lpIdx < rpIdx))) 
+            {
+                expr = expr.substring(1, expr.length() - 1);
+                
+                lpIdx = expr.indexOf('(', 1);
+                rpIdx = expr.indexOf(')', 1);
+            }
+            
+            return expr;
+        }
+        
+        throw new IllegalStateException(String.format("Cannot convert %s stack to %s", this.getStackType(), type));
+    }
+    
+    private boolean putInParens(int priority)
+    {
+        return priority <= 2;
+    }
+
+    private boolean putInParens(Token token)
+    {
+        return token.isExpression() && 
+               !token.toExpressionValue().startsWith("(");
+    }
+
     public String toString()
     {
         if (isEmpty())

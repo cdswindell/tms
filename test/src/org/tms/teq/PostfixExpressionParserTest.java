@@ -110,6 +110,11 @@ public class PostfixExpressionParserTest
         
         EquationStack pfs = pfp.getPostfixStack();
         assertThat(pfs, notNullValue());        
+        assertThat(pfs.toExpression(), is("5.0 2.0 % 7.0 5.0 mod +"));
+        assertThat(pfs, notNullValue());   
+        
+        String infixExpr = pfs.toExpression(StackType.Infix);
+        assertThat(infixExpr, is("5.0 % 2.0 + mod(7.0, 5.0)") );
         
         iep = new InfixExpressionParser("5 % mod((2 + 7), 5)");
         assertThat(iep, notNullValue());
@@ -127,6 +132,52 @@ public class PostfixExpressionParserTest
         assertThat(pfp, notNullValue());
         
         pfs = pfp.getPostfixStack();
-        assertThat(pfs, notNullValue());        
+        assertThat(pfs.toExpression(), is("5.0 2.0 7.0 + 5.0 mod %"));
+        assertThat(pfs, notNullValue());   
+        
+        infixExpr = pfs.toExpression(StackType.Infix);
+        assertThat(infixExpr, is("5.0 % mod((2.0 + 7.0), 5.0)") );
+        
+        iep = new InfixExpressionParser("5 * 3 + 2 / 7");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        ifs = iep.getInfixStack();
+        assertThat(ifs, notNullValue());
+        assertThat(ifs.toExpression(), is("5.0 * 3.0 + 2.0 / 7.0"));
+              
+        pfp = new PostfixStackGenerator(ifs, null);
+        assertThat(pfp, notNullValue());
+        
+        pfs = pfp.getPostfixStack();
+        assertThat(pfs.toExpression(), is("5.0 3.0 * 2.0 7.0 / +"));
+        assertThat(pfs, notNullValue());   
+        
+        infixExpr = pfs.toExpression(StackType.Infix);
+        assertThat(infixExpr, is("5.0 * 3.0 + 2.0 / 7.0") );
+        
+        iep = new InfixExpressionParser("(5 + 3) * (2 - 7)");
+        assertThat(iep, notNullValue());
+        
+        pr = iep.validateExpression();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        ifs = iep.getInfixStack();
+        assertThat(ifs, notNullValue());
+        assertThat(ifs.toExpression(), is("( 5.0 + 3.0 ) * ( 2.0 - 7.0 )"));
+              
+        pfp = new PostfixStackGenerator(ifs, null);
+        assertThat(pfp, notNullValue());
+        
+        pfs = pfp.getPostfixStack();
+        assertThat(pfs.toExpression(), is("5.0 3.0 + 2.0 7.0 - *"));
+        assertThat(pfs, notNullValue());   
+        
+        infixExpr = pfs.toExpression(StackType.Infix);
+        assertThat(infixExpr, is("(5.0 + 3.0) * (2.0 - 7.0)") );
     }  
 }

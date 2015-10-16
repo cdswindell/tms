@@ -292,10 +292,15 @@ public class Token implements Labeled
         return getTokenType() != null && getTokenType().isRightParen();
     }
 
-	public boolean isOperand() 
-	{
+    public boolean isOperand() 
+    {
         return getTokenType() != null && (getTokenType().isOperand() || getTokenType().isNull());
-	}
+    }
+
+    public boolean isOperator() 
+    {
+        return getTokenType() != null && getTokenType().isOperator();
+    }
 
     public boolean isNumeric()
     {
@@ -357,6 +362,14 @@ public class Token implements Labeled
         return (getTokenType() == TokenType.NullValue) || (getTokenType() == TokenType.Operand && getValue() == null);
     }
     
+    public boolean isExpression()
+    {
+        if (isOperand() && this.getTokenType() == TokenType.Expression) 
+            return isString();
+        
+        return false;
+    }
+    
     public boolean isError() 
     {
         return (getTokenType() == TokenType.EvaluationError);
@@ -379,5 +392,19 @@ public class Token implements Labeled
     public void postResult(Object value)
     {
         DerivationImpl.postResult(value);        
+    }
+
+    public String toExpressionValue()
+    {
+        if (isNumeric())
+            return getNumericValue().toString();
+        else if (isBoolean())
+            return getBooleanValue().toString();
+        else if (isExpression())
+            return getStringValue();
+        else if (isString())
+            return "\"" +getStringValue() + "\"";
+        else
+            return null;
     }
 }
