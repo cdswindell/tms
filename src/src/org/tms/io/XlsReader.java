@@ -2,7 +2,14 @@ package org.tms.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFEvaluationWorkbook;
@@ -12,8 +19,28 @@ import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.formula.FormulaParser;
 import org.apache.poi.ss.formula.FormulaParsingWorkbook;
 import org.apache.poi.ss.formula.FormulaType;
+import org.apache.poi.ss.formula.ptg.AddPtg;
+import org.apache.poi.ss.formula.ptg.BoolPtg;
+import org.apache.poi.ss.formula.ptg.ControlPtg;
+import org.apache.poi.ss.formula.ptg.DividePtg;
+import org.apache.poi.ss.formula.ptg.EqualPtg;
+import org.apache.poi.ss.formula.ptg.GreaterEqualPtg;
+import org.apache.poi.ss.formula.ptg.GreaterThanPtg;
+import org.apache.poi.ss.formula.ptg.IntPtg;
+import org.apache.poi.ss.formula.ptg.LessEqualPtg;
+import org.apache.poi.ss.formula.ptg.LessThanPtg;
+import org.apache.poi.ss.formula.ptg.MultiplyPtg;
+import org.apache.poi.ss.formula.ptg.NotEqualPtg;
+import org.apache.poi.ss.formula.ptg.NumberPtg;
+import org.apache.poi.ss.formula.ptg.OperandPtg;
+import org.apache.poi.ss.formula.ptg.OperationPtg;
+import org.apache.poi.ss.formula.ptg.ParenthesisPtg;
+import org.apache.poi.ss.formula.ptg.PowerPtg;
 import org.apache.poi.ss.formula.ptg.Ptg;
-import org.apache.poi.ss.formula.ptg.Ref3DPxg;
+import org.apache.poi.ss.formula.ptg.RefPtgBase;
+import org.apache.poi.ss.formula.ptg.ScalarConstantPtg;
+import org.apache.poi.ss.formula.ptg.StringPtg;
+import org.apache.poi.ss.formula.ptg.SubtractPtg;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.Name;
@@ -31,13 +58,41 @@ import org.tms.api.Column;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.ErrorCode;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenType;
+import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.options.XlsOptions;
+import org.tms.teq.BuiltinOperator;
+import org.tms.teq.EquationStack;
+import org.tms.teq.StackType;
 
 public class XlsReader extends BaseReader<XlsOptions>
 {
+    private static final Map<Class<? extends OperationPtg>, Operator> sf_OperatorMap 
+        = new HashMap<Class<? extends OperationPtg>, Operator>();
+    
+    static {
+        sf_OperatorMap.put(AddPtg.class, BuiltinOperator.PlusOper);
+        sf_OperatorMap.put(SubtractPtg.class, BuiltinOperator.MinusOper);
+        sf_OperatorMap.put(DividePtg.class, BuiltinOperator.DivOper);
+        sf_OperatorMap.put(MultiplyPtg.class, BuiltinOperator.MultOper);
+        sf_OperatorMap.put(PowerPtg.class, BuiltinOperator.PowerOper);
+        
+        sf_OperatorMap.put(EqualPtg.class, BuiltinOperator.EqOper);
+        sf_OperatorMap.put(NotEqualPtg.class, BuiltinOperator.NEqOper);
+        sf_OperatorMap.put(GreaterEqualPtg.class, BuiltinOperator.GtEOper);
+        sf_OperatorMap.put(LessEqualPtg.class, BuiltinOperator.LtEOper);
+        sf_OperatorMap.put(GreaterThanPtg.class, BuiltinOperator.GtOper);
+        sf_OperatorMap.put(LessThanPtg.class, BuiltinOperator.LtOper);
+    }
+    
+    private Map<String, DerivationScope> m_derivCache = null;
+    
     public XlsReader(String fileName, XlsOptions format)
     {
         this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
@@ -65,6 +120,8 @@ public class XlsReader extends BaseReader<XlsOptions>
         {
             wb = WorkbookFactory.create(getInputFile());
             int asi = wb.getActiveSheetIndex();
+            
+            List<ParsedFormula> parsedFormulas = new ArrayList<ParsedFormula>();
 
             Sheet sheet = wb.getSheetAt(asi); 
             String sheetName = trimString(sheet.getSheetName());
@@ -100,7 +157,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                     org.tms.api.Column tC = t.getColumn(Access.First);
                     for (short i = 0; i < eR.getLastCellNum(); i++) {
                         Cell eC = eR.getCell(i, Row.RETURN_BLANK_AS_NULL);
-                        Object cv = fetchCellValue(wb, sheet, asi, eC, t);
+                        Object cv = fetchCellValue(eC);
                         String note = fetchCellComment(eC, true);
                         if (i == 0 && isRowNames()) {
                             if (note != null)
@@ -124,8 +181,8 @@ public class XlsReader extends BaseReader<XlsOptions>
                                 // record presence of cell formula; we will process
                                 // once all of table is imported
                                 if (eC.getCellType() == Cell.CELL_TYPE_FORMULA) {
-                                    // TODO: implement
-                                    processExcelFormula(wb, sheet, asi, eC, t);
+                                    ParsedFormula pf = processExcelFormula(wb, sheet, asi, eC, tCell);
+                                    parsedFormulas.add(pf);
                                 }
                             }
 
@@ -143,6 +200,9 @@ public class XlsReader extends BaseReader<XlsOptions>
 
             // handle named ranges
             processNamedRegions(wb, sheet, sheetName, t);
+            
+            // handle equations
+            processEquations(wb, sheet, sheetName, asi, parsedFormulas, t);
         }
         catch (EncryptedDocumentException | InvalidFormatException e)
         {
@@ -151,6 +211,139 @@ public class XlsReader extends BaseReader<XlsOptions>
         }
 
         return t;
+    }
+
+    private void processEquations(Workbook wb, Sheet sheet, String sheetName, int asi, 
+            List<ParsedFormula> parsedFormulas, Table t)
+    {
+        for (ParsedFormula pf : parsedFormulas) {
+            try {
+                EquationStack es = EquationStack.createPostfixStack();
+                for (Ptg eT : pf.getTokens()) {
+                    Token tmsT = excelToken2TmsToken(pf, eT);
+                    if (tmsT != null)
+                        es.push(tmsT);
+                }
+                
+                // we now have a post fix stack in TMS form
+                String formula = trimString(es.toExpression(StackType.Infix));
+                if (formula != null)
+                    cacheDerivation(formula, pf.getTmsCell());
+            }
+            catch (UnimplementedException e) {
+                System.out.println(e.getMessage());
+            }
+        } 
+        
+        // with all excel formulas processed and transformed
+        // into tms derivations, assign the derivations to the targets
+        if (m_derivCache != null) {
+            boolean autoRecalc = t.isAutoRecalculate();
+            t.setAutoRecalculate(false);
+            for(Map.Entry<String, DerivationScope> e : m_derivCache.entrySet()) {
+                String deriv = e.getKey();
+                for (Derivable d : e.getValue().getTargets()) {
+                    d.setDerivation(deriv);
+                }
+            }
+            
+            t.setAutoRecalculate(autoRecalc);
+        }
+    }
+
+    private void cacheDerivation(String deriv, org.tms.api.Cell tmsCell)
+    {
+        if (m_derivCache == null)
+            m_derivCache = new HashMap<String, DerivationScope>();
+        
+        // create DerivationScope, if one doesn't exist
+        DerivationScope  ds = m_derivCache.get(deriv);
+        if (ds == null) {
+            ds = new DerivationScope();
+            m_derivCache.put(deriv, ds);
+        }
+        
+        // add this cell to the scope object
+        ds.cache(tmsCell);
+    }
+
+    private Token excelToken2TmsToken(ParsedFormula pf, Ptg eT)
+    {
+        if (eT instanceof ControlPtg) {
+            if (eT instanceof ParenthesisPtg)
+                return null;
+        }
+        else if (eT instanceof ScalarConstantPtg) 
+            return createOperandToken((ScalarConstantPtg)eT);
+        else if (eT instanceof OperationPtg) 
+            return createOperationToken((OperationPtg)eT);
+        else if (eT instanceof OperandPtg) 
+            return createOperationToken((OperandPtg)eT, pf);
+        
+        // if we get here, we don't support this excel token
+        throw new UnimplementedException(eT.getClass().getSimpleName());            
+    }
+
+    private Token createOperationToken(OperandPtg eT, ParsedFormula pf)
+    {
+        switch (eT.getClass().getSimpleName()) {
+            case "Ref3DPxg":
+            case "Ref3DPtg":
+            case "RefNPtg":
+            case "RefPtg":
+                return createOperandToken((RefPtgBase)eT, pf);
+        }           
+        
+        // if we get here, we don't support this excel token
+        throw new UnimplementedException(eT.getClass().getSimpleName());            
+    }
+
+    private Token createOperandToken(RefPtgBase eT, ParsedFormula pf)
+    {
+        // determine tms-based indices of reference
+        int rowRef = eT.getRow() + 1 - (options().isColumnNames() ? 1 : 0);
+        int colRef = eT.getColumn() + 1 - (options().isRowNames() ? 1 : 0);
+        
+        // if the reference is in the same row or column as the tms target cell, 
+        // return a column or row reference
+        org.tms.api.Cell tCell = pf.getTmsCell();
+        Table t = tCell.getTable();
+        if (tCell.getRow().getIndex() == rowRef)
+            return new Token(TokenType.ColumnRef, t.getColumn(colRef));
+        else if (tCell.getColumn().getIndex() == colRef)
+            return new Token(TokenType.RowRef, t.getRow(rowRef));
+        else {
+            org.tms.api.Cell refedCell = t.getCell(t.getRow(rowRef), t.getColumn(colRef));
+            if (trimString(refedCell.getLabel()) == null)
+                refedCell.setLabel(String.format("FROM_EXCEL_%d_%d", eT.getRow(), eT.getColumn())); // assign string a unique name
+            
+            return new Token(TokenType.CellRef, refedCell);
+        }
+    }
+
+    private Token createOperationToken(OperationPtg eT)
+    {
+        Operator op = sf_OperatorMap.get(eT.getClass());
+        if (op != null)
+            return new Token(op);
+        
+        // if we get here, we don't support this excel token
+        throw new UnimplementedException(eT.getClass().getSimpleName());            
+    }
+
+    private Token createOperandToken(ScalarConstantPtg eT)
+    {
+        if (eT instanceof IntPtg)
+            return new Token(TokenType.Operand, ((IntPtg)eT).getValue());
+        else if (eT instanceof BoolPtg)
+            return new Token(TokenType.Operand, ((BoolPtg)eT).getValue());
+        else if (eT instanceof StringPtg)
+            return new Token(TokenType.Operand, ((StringPtg)eT).getValue());
+        else if (eT instanceof NumberPtg)
+            return new Token(TokenType.Operand, ((NumberPtg)eT).getValue());
+        
+        // if we get here, we don't support this excel token
+        throw new UnimplementedException(eT.getClass().getSimpleName());            
     }
 
     private void processNamedRegions(Workbook wb, Sheet activeSheet, String sheetName, Table t)
@@ -254,11 +447,6 @@ public class XlsReader extends BaseReader<XlsOptions>
 
     private Object fetchCellValue(Cell eC) 
     {
-        return fetchCellValue(null, null, -1, eC, null);
-    }
-
-    private Object fetchCellValue(Workbook wb, Sheet sheet, int asi, Cell eC, Table t) 
-    {
         if (eC == null)
             return null;
 
@@ -318,7 +506,7 @@ public class XlsReader extends BaseReader<XlsOptions>
         return cv;
     }
 
-    private void processExcelFormula(Workbook wb, Sheet sheet, int asi, Cell eC, Table t)
+    private ParsedFormula processExcelFormula(Workbook wb, Sheet sheet, int asi, Cell eC, org.tms.api.Cell tCell)
     {
         // parse the formula
         String formula = eC.getCellFormula();
@@ -326,7 +514,91 @@ public class XlsReader extends BaseReader<XlsOptions>
                 HSSFEvaluationWorkbook.create((HSSFWorkbook)wb) : XSSFEvaluationWorkbook.create((XSSFWorkbook)wb);
 
         Ptg [] tokens = FormulaParser.parse(formula, fpWb, FormulaType.NAMEDRANGE, asi);
-        ((Ref3DPxg)tokens[0]).getColumn();
-        ((Ref3DPxg)tokens[0]).getRow();
+        return new ParsedFormula(eC, tCell, tokens);
+    }
+    
+    static class ParsedFormula
+    {
+        private Cell m_excelCell;
+        private org.tms.api.Cell m_tmsCell;
+        private Ptg [] m_tokens;
+
+        ParsedFormula(Cell eC, org.tms.api.Cell tCell, Ptg [] tokens)
+        {
+            m_excelCell = eC;
+            m_tmsCell = tCell;
+            m_tokens = tokens;
+        }
+        
+        Cell getExcelCell()
+        {
+            return m_excelCell;
+        }
+        
+        org.tms.api.Cell getTmsCell()
+        {
+            return m_tmsCell;
+        }
+        
+        Ptg [] getTokens()
+        {
+            return m_tokens;
+        }
+    }
+    
+    static class DerivationScope
+    {
+        private Set<Derivable> m_targets;
+        private Map<org.tms.api.Column, Set<org.tms.api.Cell>> m_colTargets;
+        private Map<org.tms.api.Row, Set<org.tms.api.Cell>> m_rowTargets;
+        
+        DerivationScope()
+        {
+            m_targets = new LinkedHashSet<Derivable>();
+            
+            m_colTargets = new HashMap<org.tms.api.Column, Set<org.tms.api.Cell>>(0);
+            m_rowTargets = new HashMap<org.tms.api.Row, Set<org.tms.api.Cell>>(0);
+        }
+        
+        public void cache(org.tms.api.Cell tmsCell)
+        {
+            m_targets.add(tmsCell);
+            Table t = tmsCell.getTable();
+            
+            // if each cell in the row is this derivation, then
+            // use the formula as the row derivation
+            org.tms.api.Row row = tmsCell.getRow();
+            Set<org.tms.api.Cell> rowCells = m_rowTargets.get(row);
+            if (rowCells == null) {
+                rowCells = new HashSet<org.tms.api.Cell>();
+                m_rowTargets.put(row,  rowCells);
+            }
+            
+            rowCells.add(tmsCell);
+            if (rowCells.size() == t.getNumColumns()) {
+                m_targets.add(row);
+                m_targets.removeAll(rowCells);
+            }
+            
+            // if each cell in the column is this derivation, then
+            // use the formula as the column derivation
+            org.tms.api.Column col = tmsCell.getColumn();  
+            Set<org.tms.api.Cell> colCells = m_colTargets.get(col);
+            if (colCells == null) {
+                colCells = new HashSet<org.tms.api.Cell>();
+                m_colTargets.put(col,  colCells);
+            }
+            
+            colCells.add(tmsCell);
+            if (colCells.size() == t.getNumRows()) {
+                m_targets.add(col);
+                m_targets.removeAll(colCells);
+            }
+        }
+        
+        List<Derivable> getTargets()
+        {
+            return  new ArrayList<Derivable>(m_targets);
+        }
     }
 }

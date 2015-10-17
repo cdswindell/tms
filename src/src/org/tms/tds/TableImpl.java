@@ -526,6 +526,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }    
     
     @Override
+    public boolean isCellDefined(Row row, Column col)
+    {
+        CellImpl c = getCell((RowImpl)row, (ColumnImpl)col, false);
+        return c != null;
+    }
+    
+    @Override
     public Object getCellValue(Row row, Column col)
     {
         return getCellValue((RowImpl)row, (ColumnImpl)col);        

@@ -45,7 +45,7 @@ public class SubsetRefTest extends BaseTest
         
         Column c7 = tbl.getColumn(Access.ByIndex, 7);
         c7.setDerivation("col 8");
-        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 2));
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows()));
         
         c8.fill(42);
         assertThat(tbl.getPropertyInt(TableProperty.numCells), is (tbl.getNumRows() * 2));

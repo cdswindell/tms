@@ -186,7 +186,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             Iterator<Token> di = this.descendingIterator();
             while (di != null && di.hasNext()) {
                 Token t = di.next();
-                if (t.isOperand()) {
+                if (t.isOperand() || t.isReference()) {
                     operands.push(t);
                     continue;
                 }
@@ -257,10 +257,10 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
         throw new IllegalStateException(String.format("Cannot convert %s stack to %s", this.getStackType(), type));
     }
     
-    private boolean isBalancedParens(String expr)
+    protected boolean isBalancedParens(String expr)
     {
-        expr = expr.substring(1, expr.length() - 1);
         int parenCnt = 0;
+        expr = expr.substring(1, expr.length() - 1);
         for (char c : expr.toCharArray()) {
             if (c == '(')
                 parenCnt++;

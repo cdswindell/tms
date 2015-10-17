@@ -1,7 +1,9 @@
 package org.tms.api.derivables;
 
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.DerivationImpl;
@@ -76,6 +78,12 @@ public class Token implements Labeled
     public Token(TokenType tt, Operator o)
     {
         setTokenType(tt);
+        setOperator(o);
+    }
+
+    public Token(Operator o)
+    {
+        setTokenType(o.getTokenType());
         setOperator(o);
     }
 
@@ -400,6 +408,39 @@ public class Token implements Labeled
             return getNumericValue().toString();
         else if (isBoolean())
             return getBooleanValue().toString();
+        else if (isReference()) {
+            StringBuffer sb = new StringBuffer();
+            switch (getTokenType()) {
+                case ColumnRef:
+                    sb.append("col ");
+                    sb.append(((Column)getValue()).getIndex());
+                    break;
+                    
+                case RowRef:
+                    sb.append("row ");
+                    sb.append(((Row)getValue()).getIndex());
+                    break;
+                    
+                case CellRef:
+                    sb.append("cell ");
+                    sb.append("\"");
+                    sb.append(((Cell)getValue()).getLabel());
+                    sb.append("\"");
+                    break;
+                    
+                case SubsetRef:
+                    sb.append("subset ");
+                    sb.append("\"");
+                    sb.append(((Subset)getValue()).getLabel());
+                    sb.append("\"");
+                    break;
+                    
+                default:
+                    return null;
+            }
+            
+            return sb.toString();
+        }
         else if (isExpression())
             return getStringValue();
         else if (isString())

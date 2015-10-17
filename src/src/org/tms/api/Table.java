@@ -424,4 +424,6 @@ public interface Table extends TableElement, InitializableTableProperties
     {
         export(fileName, null);
     }
+
+    public boolean isCellDefined(Row rowRef, Column colRef);
 }

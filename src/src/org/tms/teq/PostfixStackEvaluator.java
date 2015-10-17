@@ -351,8 +351,10 @@ public class PostfixStackEvaluator
             else if (value != null && value instanceof Cell) 
                 cell = (Cell)value;
             
-            if (haveRef) 
-                cell = tbl.getCell(rowRef, colRef);
+            if (haveRef) {
+                if (tbl.isCellDefined(rowRef, colRef))
+                    cell = tbl.getCell(rowRef, colRef);
+            }
             
             if (cell != null) {
                 if (cell.isPendings()) {
@@ -381,7 +383,7 @@ public class PostfixStackEvaluator
                     return new Token(TokenType.Operand, cell.getCellValue());
             }
             else
-                return t;
+                return Token.createNullToken();
         }
         else
             return t;

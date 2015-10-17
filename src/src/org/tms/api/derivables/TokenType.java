@@ -70,7 +70,7 @@ public enum TokenType implements Labeled
 
     public boolean isOperator()
     {
-        return isFunction() || isTransform() || isReference() || (this == BinaryOp);
+        return isFunction() || isTransform() || (this == BinaryOp);
     }
     
     public boolean isFunction()

@@ -18,7 +18,7 @@ import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.io.options.XlsOptions;
 
-public class XlsReaderTest extends BaseTest
+public class XLSReaderTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.xlsx";
     private static final String SAMPLE2 = "sample2.xlsx";
@@ -99,6 +99,8 @@ public class XlsReaderTest extends BaseTest
             Column c4 = t.getColumn(4);
             assertNotNull(c4);           
             assertThat(c4.getLabel(), is ("Col 4"));
+            assertThat(c4.isDerived(), is(true));
+            assertThat(c4.getDerivation().getAsEnteredExpression(), is("col 1 * 3.0"));
             
             Row r1 = t.getRow(1);
             assertNotNull(r1);
@@ -126,13 +128,13 @@ public class XlsReaderTest extends BaseTest
             vetCellValue(t, r2, c1, null);
             vetCellValue(t, r2, c2, null);
             vetCellValue(t, r2, c3, null);
-            vetCellValue(t, r2, c4, 0.0);
+            vetCellValue(t, r2, c4, null);
             
             vetCellValue(t, r3, c1, null);
             vetCellValue(t, r3, c2, "Yellow");
             Cell cell = vetCellValue(t, r3, c3, true);
             assertThat(cell.getDescription(), is("This is the boolean column in the Yellow row"));
-            vetCellValue(t, r3, c4, 0.0);
+            vetCellValue(t, r3, c4, null);
             
             vetCellValue(t, r4, c1, 17.65);
             cell = vetCellValue(t, r4, c2, "Cyan");
