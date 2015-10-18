@@ -22,7 +22,7 @@ public class XLSReaderTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.xlsx";
     private static final String SAMPLE2 = "sample2.xlsx";
-    //private static final String SAMPLE3 = "sample3.xlsx";
+    private static final String SAMPLE3 = "sample3.xlsx";
     
     @Test
     public final void testXlsReaderConstructor()
@@ -188,4 +188,21 @@ public class XLSReaderTest extends BaseTest
             fail(e.getMessage());
         }
     }
+    
+    @Test
+    public final void testImportSheetComplexEquations() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3), XlsOptions.Default); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }            
 }
