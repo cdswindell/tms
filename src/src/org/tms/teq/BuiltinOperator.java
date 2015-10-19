@@ -353,6 +353,7 @@ public enum BuiltinOperator implements Labeled, Operator
             case MedianOper:
             case FirstQuartileOper:
             case ThirdQuartileOper:
+            case QuartileOper:
                 return true;
                 
             default:

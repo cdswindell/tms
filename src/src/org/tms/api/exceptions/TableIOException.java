@@ -14,6 +14,11 @@ public class TableIOException extends TableException
         m_rootCause = e;
     }
     
+    public TableIOException(String msg)
+    {
+        super(msg);
+    }
+
     public Exception getRootCause()
     {
         return m_rootCause;

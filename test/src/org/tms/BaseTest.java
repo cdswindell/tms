@@ -64,12 +64,12 @@ public class BaseTest
     protected Cell vetCellValue(Table t, String label, Object cv)
     {
         Cell cell = t.getCell(Access.ByLabel, label);
-        assertNotNull(cell);
+        assertNotNull("Cell \"" + label + "\" not found", cell);
         
         if (cv == null)
-            assertThat(cell.isNull(), is(true));
+            assertThat("cell is not null", cell.isNull(), is(true));
         else if (Number.class.isAssignableFrom(cv.getClass()))
-            assertThat(closeTo(cell.getCellValue(), ((Number)cv).doubleValue(), 0.0000001), is(true));
+            assertThat("cell value not within tolerance",closeTo(cell.getCellValue(), ((Number)cv).doubleValue(), 0.0000001), is(true));
         else
             assertThat(cell.getCellValue(), is(cv));
         

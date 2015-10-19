@@ -34,6 +34,7 @@ import org.apache.poi.ss.formula.ptg.LessEqualPtg;
 import org.apache.poi.ss.formula.ptg.LessThanPtg;
 import org.apache.poi.ss.formula.ptg.MissingArgPtg;
 import org.apache.poi.ss.formula.ptg.MultiplyPtg;
+import org.apache.poi.ss.formula.ptg.NamePtg;
 import org.apache.poi.ss.formula.ptg.NotEqualPtg;
 import org.apache.poi.ss.formula.ptg.NumberPtg;
 import org.apache.poi.ss.formula.ptg.OperandPtg;
@@ -102,10 +103,19 @@ public class XlsReader extends BaseReader<XlsOptions>
         = new HashMap<String, Operator>();
 
     static {
+        sf_FunctionMap.put("PI", BuiltinOperator.PiOper);
+        
+        sf_FunctionMap.put("UPPER",  BuiltinOperator.toUpperOper);
+        sf_FunctionMap.put("LOWER",  BuiltinOperator.toLowerOper);
+        sf_FunctionMap.put("LEN",  BuiltinOperator.LenOper);
+        sf_FunctionMap.put("TRIM",  BuiltinOperator.trimOper);
+        sf_FunctionMap.put("CONCATENATE",  BuiltinOperator.PlusOper);
+        
         sf_FunctionMap.put("AVERAGE", BuiltinOperator.MeanOper);
         sf_FunctionMap.put("MEDIAN", BuiltinOperator.MedianOper);
         sf_FunctionMap.put("MODE", BuiltinOperator.ModeOper);
         sf_FunctionMap.put("STDEV", BuiltinOperator.StDevSampleOper);
+        sf_FunctionMap.put("VAR", BuiltinOperator.VarSampleOper);
         sf_FunctionMap.put("MIN", BuiltinOperator.MinOper);
         sf_FunctionMap.put("MAX", BuiltinOperator.MaxOper);
         sf_FunctionMap.put("COUNT", BuiltinOperator.CountOper);
@@ -122,6 +132,7 @@ public class XlsReader extends BaseReader<XlsOptions>
     
     private Map<String, DerivationScope> m_derivCache = null;
     private Map<org.tms.api.Cell, String> m_derivedCells = null;
+    private Map<String, TableElement> m_namedTableElements = null;
     private Table m_table;
     
     public XlsReader(String fileName, XlsOptions format)
@@ -298,6 +309,7 @@ public class XlsReader extends BaseReader<XlsOptions>
             }
             
             t.setAutoRecalculate(autoRecalc);
+            t.recalculate();
         }
     }
 
@@ -362,10 +374,33 @@ public class XlsReader extends BaseReader<XlsOptions>
                 
             case "AreaPtg":
                 return createOperandToken((AreaPtgBase)eT, pf);
+                
+            case "NamePtg":
+                return createOperandToken((NamePtg)eT, pf);
         }           
         
         // if we get here, we don't support this excel token
         throw new UnimplementedException(eT.getClass().getSimpleName());            
+    }
+
+    private Token createOperandToken(NamePtg eT, ParsedFormula pf)
+    {
+        if (m_namedTableElements != null) {
+            Name namedRange = pf.getExcelCell().getSheet().getWorkbook().getNameAt(eT.getIndex());
+            
+            if (namedRange != null) {
+                String refName = namedRange.getNameName();
+                TableElement te = m_namedTableElements.get(refName);
+                if (te != null) {
+                    if (te instanceof org.tms.api.Cell)
+                        return new Token(TokenType.CellRef, te);
+                    else if (te instanceof Subset)
+                        return new Token(TokenType.SubsetRef, te);
+                }
+            }
+        }
+            
+        throw new TableIOException("Excel range reference not found");            
     }
 
     private Token createOperandToken(AreaPtgBase eT, ParsedFormula pf)
@@ -543,6 +578,7 @@ public class XlsReader extends BaseReader<XlsOptions>
     {
         int numNamedRegions = wb.getNumberOfNames();
         if (numNamedRegions > 0) {
+            m_namedTableElements = new HashMap<String, TableElement>(numNamedRegions);
             SpreadsheetVersion ssV = wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;
             for (int i = 0; i < numNamedRegions; i++) {
                 Name namedRegion = wb.getNameAt(i);
@@ -559,11 +595,16 @@ public class XlsReader extends BaseReader<XlsOptions>
 
                     if (isSingleCell(cRefs)) {
                         org.tms.api.Cell tCell = getSingleCell(cRefs, t);
-                        if (tCell != null)
+                        if (tCell != null) {
                             tCell.setLabel(name);
+                            m_namedTableElements.put(name, tCell);
+                        }
                     }  
-                    else 
-                        createSubset(cRefs, t, name);
+                    else {
+                        Subset s = createSubset(cRefs, t, name);
+                        if (s != null)
+                            m_namedTableElements.put(name, s);
+                    }
                 }
             }
         }

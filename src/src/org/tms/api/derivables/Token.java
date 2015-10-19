@@ -446,6 +446,8 @@ public class Token implements Labeled
             
             return sb.toString();
         }
+        else if (isBuiltIn())
+            return this.getOperator().getLabel();
         else if (isExpression())
             return getStringValue();
         else if (isString())

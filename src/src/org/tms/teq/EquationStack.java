@@ -247,7 +247,9 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                 }
             }
             
-            String expr = operands.pop().getStringValue();
+            // top of operands stack is our expression
+            Token exprT = operands.pop();           
+            String expr = exprT.toExpressionValue();
             
             while (expr.startsWith("(") && expr.endsWith(")") && isBalancedParens(expr)) 
             {

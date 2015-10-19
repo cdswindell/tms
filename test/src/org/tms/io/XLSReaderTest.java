@@ -190,7 +190,7 @@ public class XLSReaderTest extends BaseTest
     }
     
     @Test
-    public final void testImportSheetComplexEquations() 
+    public final void testImportSheetStatisticEquations() 
     {
         XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3), XlsOptions.Default); 
         assertNotNull(r);
@@ -207,7 +207,8 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, "Mean", 43.825);
             vetCellValue(t, "Median", 43.5);
             vetCellValue(t, "Mode", 36.0);
-            vetCellValue(t, "StDev", 9.776694227);
+            vetCellValue(t, "StDev.S", 9.776694227);
+            vetCellValue(t, "Var.S", 95.58375);
             vetCellValue(t, "Min", 33);
             vetCellValue(t, "Max", 54);
             vetCellValue(t, "Skew", -0.014171252);
@@ -218,6 +219,16 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, "SecondQ", 43.5);
             //vetCellValue(t, "ThirdQ", 52.4625);
             vetCellValue(t, "ForthQ", 54);
+            
+            // string functions
+            vetCellValue(t, "UPPERCASE", "YELLOW");
+            vetCellValue(t, "LOWERCASE", "cyan");
+            vetCellValue(t, "YellowLen", 6.0);
+            Cell cell = vetCellValue(t, "YellowTrim", "Yellow");
+            assertThat(cell.isDerived(), is(true));
+            String deriv = cell.getDerivation().getAsEnteredExpression();
+            assertNotNull(deriv);
+            assertThat(deriv, is("trim((row 7 + \"   \"))"));
         }
         catch (IOException e)
         {

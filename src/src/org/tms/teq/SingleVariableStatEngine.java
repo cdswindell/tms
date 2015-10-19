@@ -283,6 +283,38 @@ public class SingleVariableStatEngine
             case MedianOper:
                 value = calcMedian();
                 break;
+                
+            case QuartileOper:
+                if (params == null || params.length != 1 || !params[0].isNumeric())
+                    throw new UnimplementedException("Invalid statistic params: " + stat);  
+                else {
+                    int quartile = params[0].getNumericValue().intValue();
+                    switch(quartile) {
+                        case 0:
+                            value = calcStatistic(BuiltinOperator.MinOper);
+                            break;
+                            
+                        case 1:
+                            value = calcStatistic(BuiltinOperator.FirstQuartileOper);
+                            break;
+                            
+                        case 2:
+                            value = calcStatistic(BuiltinOperator.MedianOper);
+                            break;
+                            
+                        case 3:
+                            value = calcStatistic(BuiltinOperator.ThirdQuartileOper);
+                            break;
+                            
+                        case 4:
+                            value = calcStatistic(BuiltinOperator.MaxOper);
+                            break;
+                            
+                        default:
+                            throw new UnimplementedException(String.format("Invalid statistic param: %s -> %d ", stat, quartile));  
+                    }
+                }
+                break;    
             
             case FirstQuartileOper:
                 value = calcFirstQuartile();
