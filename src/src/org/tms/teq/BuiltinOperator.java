@@ -126,6 +126,9 @@ public enum BuiltinOperator implements Labeled, Operator
     
     // String functions
     LenOper("len", TokenType.UnaryFunc, 5, MathUtil.class, "length", String.class),
+    LeftOper("left", TokenType.BinaryFunc, 5, MathUtil.class, "instrLeft", String.class, int.class),
+    RightOper("right", TokenType.BinaryFunc, 5, MathUtil.class, "instrRight", String.class, int.class),
+    MidOper("mid", TokenType.GenericFunc, 5, MathUtil.class, "instrMid", String.class, int.class, int.class),
     toLowerOper("toLower", TokenType.UnaryFunc, 5, MathUtil.class, "toLower", String.class),
     toUpperOper("toUpper", TokenType.UnaryFunc, 5, MathUtil.class, "toUpper", String.class),
     trimOper("trim", TokenType.UnaryFunc, 5, MathUtil.class, "trim", String.class),

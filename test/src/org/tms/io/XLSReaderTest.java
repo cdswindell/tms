@@ -221,9 +221,23 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, "ForthQ", 54);
             
             // string functions
+            vetCellValue(t, "PiVal", Math.PI);
             vetCellValue(t, "UPPERCASE", "YELLOW");
             vetCellValue(t, "LOWERCASE", "cyan");
             vetCellValue(t, "YellowLen", 6.0);
+            vetCellValue(t, "YellowCyan", "YellowCyanBlue");
+            vetCellValue(t, "ManyCyan", "CyanCyanCyan");
+            vetCellValue(t, "IsTextVal", true);
+            vetCellValue(t, "IsNumberVal", false);
+            vetCellValue(t, "IsLogicalVal", true);
+            vetCellValue(t, "IsErrorVal", true);
+            vetCellValue(t, "IsErrVal", true);
+            vetCellValue(t, "IsSameValStr", false);
+            vetCellValue(t, "PiValStr", 3.141592654);
+            vetCellValue(t, "LeftVal", "Yell");
+            vetCellValue(t, "RightVal", "low");
+            vetCellValue(t, "MidVal", "ell");
+            vetCellValue(t, "YeyanVal", "Yeyan");
             Cell cell = vetCellValue(t, "YellowTrim", "Yellow");
             assertThat(cell.isDerived(), is(true));
             String deriv = cell.getDerivation().getAsEnteredExpression();

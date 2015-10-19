@@ -24,6 +24,7 @@ import org.apache.poi.ss.formula.ptg.AddPtg;
 import org.apache.poi.ss.formula.ptg.AreaPtgBase;
 import org.apache.poi.ss.formula.ptg.AttrPtg;
 import org.apache.poi.ss.formula.ptg.BoolPtg;
+import org.apache.poi.ss.formula.ptg.ConcatPtg;
 import org.apache.poi.ss.formula.ptg.ControlPtg;
 import org.apache.poi.ss.formula.ptg.DividePtg;
 import org.apache.poi.ss.formula.ptg.EqualPtg;
@@ -86,6 +87,7 @@ public class XlsReader extends BaseReader<XlsOptions>
     
     static {
         sf_OperatorMap.put(AddPtg.class, BuiltinOperator.PlusOper);
+        sf_OperatorMap.put(ConcatPtg.class, BuiltinOperator.PlusOper);
         sf_OperatorMap.put(SubtractPtg.class, BuiltinOperator.MinusOper);
         sf_OperatorMap.put(DividePtg.class, BuiltinOperator.DivOper);
         sf_OperatorMap.put(MultiplyPtg.class, BuiltinOperator.MultOper);
@@ -110,6 +112,22 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_FunctionMap.put("LEN",  BuiltinOperator.LenOper);
         sf_FunctionMap.put("TRIM",  BuiltinOperator.trimOper);
         sf_FunctionMap.put("CONCATENATE",  BuiltinOperator.PlusOper);
+        sf_FunctionMap.put("REPT",  BuiltinOperator.MultOper);
+        sf_FunctionMap.put("EXACT", BuiltinOperator.EqOper);
+        sf_FunctionMap.put("VALUE", BuiltinOperator.toNumberOper);
+        sf_FunctionMap.put("LEFT", BuiltinOperator.LeftOper);
+        sf_FunctionMap.put("RIGHT", BuiltinOperator.RightOper);
+        sf_FunctionMap.put("MID", BuiltinOperator.MidOper);
+        
+        sf_FunctionMap.put("ISTEXT",  BuiltinOperator.IsTextOper);
+        sf_FunctionMap.put("ISNUMBER",  BuiltinOperator.IsNumberOper);
+        sf_FunctionMap.put("ISTEXT",  BuiltinOperator.IsTextOper);
+        sf_FunctionMap.put("ISLOGICAL",  BuiltinOperator.IsLogicalOper);
+        sf_FunctionMap.put("ISBLANK", BuiltinOperator.IsNullOper);
+        sf_FunctionMap.put("ISERR", BuiltinOperator.IsErrorOper);
+        sf_FunctionMap.put("ISERROR", BuiltinOperator.IsErrorOper);
+        
+        sf_FunctionMap.put("IF", BuiltinOperator.IfOper);
         
         sf_FunctionMap.put("AVERAGE", BuiltinOperator.MeanOper);
         sf_FunctionMap.put("MEDIAN", BuiltinOperator.MedianOper);
@@ -123,11 +141,7 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_FunctionMap.put("SUMSQ", BuiltinOperator.Sum2Oper);
         sf_FunctionMap.put("KURT", BuiltinOperator.KurtosisOper);
         sf_FunctionMap.put("DEVSQ", BuiltinOperator.SumSqD2Oper);
-        sf_FunctionMap.put("QUARTILE", BuiltinOperator.QuartileOper);
-        
-        sf_FunctionMap.put("ISBLANK", BuiltinOperator.IsNullOper);
-        
-        sf_FunctionMap.put("IF", BuiltinOperator.IfOper);
+        sf_FunctionMap.put("QUARTILE", BuiltinOperator.QuartileOper);        
     }
     
     private Map<String, DerivationScope> m_derivCache = null;

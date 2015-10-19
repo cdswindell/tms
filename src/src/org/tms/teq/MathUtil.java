@@ -1,6 +1,7 @@
 package org.tms.teq;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
@@ -247,12 +248,53 @@ public class MathUtil
         return arg != null ? arg.length() : 0;
     }   
     
+    static final public String instrMid(String arg, int firstChar, int numChars)
+    {
+        if (arg != null && firstChar > 0 && numChars >= 0) {
+            int argLen = arg.length();            
+            if (firstChar > argLen)
+                return null;
+            else
+                return arg.substring(firstChar - 1, Math.min(firstChar - 1 + numChars, argLen));
+        }
+        else
+            return null;
+    }
+    
+    static final public String instrLeft(String arg, int numChars)
+    {
+        if (arg != null && numChars >= 0) {
+            if (numChars > arg.length())
+                return arg;
+            else
+                return arg.substring(0, numChars);
+        }
+        else
+            return null;
+    }
+    
+    static final public String instrRight(String arg, int numChars)
+    {
+        if (arg != null && numChars >= 0) {
+            if (numChars > arg.length())
+                return arg;
+            else
+                return arg.substring(arg.length() - numChars);
+        }
+        else
+            return null;
+    }
+    
     static final public double toNumber(Object arg)
     {
         if (arg instanceof Number)
             return (Double)arg;
         else if (arg instanceof Boolean) 
             return ((Boolean)arg).booleanValue() ? 1 : 0;
+        else if (arg instanceof BigDecimal) 
+            return ((BigDecimal)arg).doubleValue();
+        else if (arg instanceof Date) 
+            return ((Date)arg).getTime();
         else if (arg instanceof String) {
             try {
                 double d = Double.valueOf((String)arg);
