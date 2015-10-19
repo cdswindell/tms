@@ -365,6 +365,11 @@ public class Token implements Labeled
         return getTokenType() != null && getTokenType().isReference() && getValue() != null && getValue() instanceof TableElement;
     }
     
+    public boolean isBuiltIn()
+    {
+        return getTokenType() != null && getTokenType().isBuiltIn();
+    }
+    
     public boolean isNull() 
     {
         return (getTokenType() == TokenType.NullValue) || (getTokenType() == TokenType.Operand && getValue() == null);

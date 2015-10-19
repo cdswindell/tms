@@ -354,7 +354,7 @@ public class SingleVariableStatEngine
             if (count == null) 
                 frequencies.put(d, 1);
             else
-                count++;
+                frequencies.put(d, count + 1);
         }
         
         // now invert the map and tabulate the the frequencies        

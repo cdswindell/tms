@@ -146,6 +146,7 @@ public enum BuiltinOperator implements Labeled, Operator
     CombOper(TokenType.BinaryFunc, 5, MathUtil.class, "numCombinations", "comb", "nCk", "nChooseK"),    
 
     // Builtin functions
+    NullOper(TokenType.BuiltIn, 5, "null"),
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
     EOper(TokenType.BuiltIn, 5, MathUtil.class, "e"),
     RandOper(TokenType.BuiltIn, 5, Math.class, "random"),
@@ -158,6 +159,7 @@ public enum BuiltinOperator implements Labeled, Operator
     SumSqD2Oper(TokenType.StatOp, 5, "sumOfSquaredDeviates", "ss", "ssd"),
     MeanOper(TokenType.StatOp, 5, "mean", "average", "avg"),
     MedianOper(TokenType.StatOp, 5, "median"),
+    QuartileOper(TokenType.StatOp, 5, "quartile"),
     FirstQuartileOper(TokenType.StatOp, 5, "firstQuartile", "firstQ"),
     ThirdQuartileOper(TokenType.StatOp, 5, "thirdQuartile", "thirdQ"),
     ModeOper(TokenType.StatOp, 5, "mode"),
@@ -471,6 +473,10 @@ public enum BuiltinOperator implements Labeled, Operator
                     m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
                     break;
                 
+                case QuartileOper:
+                    m_methodArgs = new Class<?>[]{TableElement.class, int.class};
+                    break;
+                    
                 default:
                     TokenType tt = getPrimaryTokenType();
                     int numArgs = tt != null ? tt.numArgs() : 0;

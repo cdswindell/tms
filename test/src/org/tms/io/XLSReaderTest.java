@@ -199,6 +199,25 @@ public class XLSReaderTest extends BaseTest
         {
             Table t = r.parse();
             assertNotNull(t);
+            
+            // validate basic stat calculations
+            vetCellValue(t, "Count", 6.0);
+            vetCellValue(t, "Range", 21.0);
+            vetCellValue(t, "Sum", 262.95);
+            vetCellValue(t, "Mean", 43.825);
+            vetCellValue(t, "Median", 43.5);
+            vetCellValue(t, "Mode", 36.0);
+            vetCellValue(t, "StDev", 9.776694227);
+            vetCellValue(t, "Min", 33);
+            vetCellValue(t, "Max", 54);
+            vetCellValue(t, "Skew", -0.014171252);
+            vetCellValue(t, "SumSq", 12001.7025);
+            vetCellValue(t, "Kurtosis", -3.067931799);
+            vetCellValue(t, "DevSq", 477.91875);
+            vetCellValue(t, "FirstQ", 36.0);
+            vetCellValue(t, "SecondQ", 43.5);
+            //vetCellValue(t, "ThirdQ", 52.4625);
+            vetCellValue(t, "ForthQ", 54);
         }
         catch (IOException e)
         {

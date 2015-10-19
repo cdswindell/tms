@@ -186,7 +186,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             Iterator<Token> di = this.descendingIterator();
             while (di != null && di.hasNext()) {
                 Token t = di.next();
-                if (t.isOperand() || t.isReference()) {
+                if (t.isOperand() || t.isReference() || t.isBuiltIn()) {
                     operands.push(t);
                     continue;
                 }
@@ -241,7 +241,10 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                     }
                     
                     operands.push(new Token(TokenType.Expression, expr.toString()));
-                }                    
+                }  
+                else {
+                    throw new IllegalStateException(String.format("Unhandled token: %s Cannot convert %s stack to %s", t, this.getStackType(), type));
+                }
             }
             
             String expr = operands.pop().getStringValue();

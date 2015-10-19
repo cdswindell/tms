@@ -32,6 +32,7 @@ import org.apache.poi.ss.formula.ptg.GreaterThanPtg;
 import org.apache.poi.ss.formula.ptg.IntPtg;
 import org.apache.poi.ss.formula.ptg.LessEqualPtg;
 import org.apache.poi.ss.formula.ptg.LessThanPtg;
+import org.apache.poi.ss.formula.ptg.MissingArgPtg;
 import org.apache.poi.ss.formula.ptg.MultiplyPtg;
 import org.apache.poi.ss.formula.ptg.NotEqualPtg;
 import org.apache.poi.ss.formula.ptg.NumberPtg;
@@ -103,10 +104,25 @@ public class XlsReader extends BaseReader<XlsOptions>
     static {
         sf_FunctionMap.put("AVERAGE", BuiltinOperator.MeanOper);
         sf_FunctionMap.put("MEDIAN", BuiltinOperator.MedianOper);
+        sf_FunctionMap.put("MODE", BuiltinOperator.ModeOper);
+        sf_FunctionMap.put("STDEV", BuiltinOperator.StDevSampleOper);
+        sf_FunctionMap.put("MIN", BuiltinOperator.MinOper);
+        sf_FunctionMap.put("MAX", BuiltinOperator.MaxOper);
+        sf_FunctionMap.put("COUNT", BuiltinOperator.CountOper);
+        sf_FunctionMap.put("SKEW", BuiltinOperator.SkewOper);
+        sf_FunctionMap.put("SUMSQ", BuiltinOperator.Sum2Oper);
+        sf_FunctionMap.put("KURT", BuiltinOperator.KurtosisOper);
+        sf_FunctionMap.put("DEVSQ", BuiltinOperator.SumSqD2Oper);
+        sf_FunctionMap.put("QUARTILE", BuiltinOperator.QuartileOper);
+        
+        sf_FunctionMap.put("ISBLANK", BuiltinOperator.IsNullOper);
+        
+        sf_FunctionMap.put("IF", BuiltinOperator.IfOper);
     }
     
     private Map<String, DerivationScope> m_derivCache = null;
     private Map<org.tms.api.Cell, String> m_derivedCells = null;
+    private Table m_table;
     
     public XlsReader(String fileName, XlsOptions format)
     {
@@ -126,10 +142,21 @@ public class XlsReader extends BaseReader<XlsOptions>
             throw new IllegalArgumentException("XlsOptions required");
     }
 
+    public TableElement getTmsColumn(int excelColNo)
+    {
+        return m_table.getColumn(excelColNo + 1 - (XlsReader.this.options().isRowNames() ? 1 : 0));
+    }
+
+    public TableElement getTmsRow(int excelRowNo)
+    {
+        return m_table.getRow(excelRowNo + 1 - (XlsReader.this.options().isColumnNames() ? 1 : 0));
+    }
+
     public Table parse() throws IOException
     {
         // create the table scaffold
         Table t = TableFactory.createTable(getTableContext());
+        m_table = t;
         Workbook wb = null;
         try
         {
@@ -227,6 +254,10 @@ public class XlsReader extends BaseReader<XlsOptions>
         return t;
     }
 
+    /**
+     * For each Excel formula discovered, create a TMS-style infix formula
+     * and cache it along with the TMS cell it is associated with
+     */
     private void processEquations(Workbook wb, Sheet sheet, String sheetName, int asi, 
             List<ParsedFormula> parsedFormulas, Table t)
     {
@@ -235,9 +266,8 @@ public class XlsReader extends BaseReader<XlsOptions>
                 EquationStack es = EquationStack.createPostfixStack();
                 for (Ptg eT : pf.getTokens()) {
                     Token tmsT = excelToken2TmsToken(pf, eT);
-                    if (tmsT != null) {
+                    if (tmsT != null) 
                         es.push(tmsT);
-                    }
                 }
                 
                 // we now have a post fix stack in TMS form
@@ -302,6 +332,10 @@ public class XlsReader extends BaseReader<XlsOptions>
                 AttrPtg etA = (AttrPtg)eT;
                 if (etA.isSum()) // very special case
                     return new Token(BuiltinOperator.SumOper);
+                if (etA.isOptimizedIf()) // very special case
+                    return null;
+                if (etA.isSkip()) // very special case
+                    return null;
             }           
         }
         else if (eT instanceof ScalarConstantPtg) 
@@ -353,15 +387,31 @@ public class XlsReader extends BaseReader<XlsOptions>
         
         if (numCols == 1 && rngColNo == eCCol) {
             if (rangeIsColumn(rngRowNo, eT.getLastRow(), rngColNo, eT, pf))
-                return new Token(TokenType.ColumnRef, pf.getTmsColumn(rngColNo));
+                return new Token(TokenType.ColumnRef, getTmsColumn(rngColNo));
         }
         
         if (numRows == 1 && rngRowNo == eCRow) {
             if (rangeIsRow(rngColNo, eT.getLastColumn(), rngRowNo, eT, pf))
-                return new Token(TokenType.RowRef, pf.getTmsRow(rngRowNo));
+                return new Token(TokenType.RowRef, getTmsRow(rngRowNo));
         }
         
-        return null;
+        // create subset, if needed
+        Table t = pf.getTable();
+        String label = "excel_" + eT.toFormulaString();
+        Subset subset = t.getSubset(Access.ByLabel, label);
+        
+        if (subset == null) {
+            subset = t.addSubset(Access.ByLabel, label);
+            for (int colIdx = rngColNo; colIdx <= eT.getLastColumn(); colIdx++) {
+                subset.add(getTmsColumn(colIdx));
+            }
+            
+            for (int rowIdx = rngRowNo; rowIdx <= eT.getLastRow(); rowIdx++) {
+                subset.add(getTmsRow(rowIdx));
+            }
+        }
+        
+        return new Token(TokenType.SubsetRef, subset);
     }
 
     /**
@@ -474,10 +524,16 @@ public class XlsReader extends BaseReader<XlsOptions>
             return new Token(TokenType.Operand, ((IntPtg)eT).getValue());
         else if (eT instanceof BoolPtg)
             return new Token(TokenType.Operand, ((BoolPtg)eT).getValue());
-        else if (eT instanceof StringPtg)
-            return new Token(TokenType.Operand, ((StringPtg)eT).getValue());
         else if (eT instanceof NumberPtg)
             return new Token(TokenType.Operand, ((NumberPtg)eT).getValue());
+        else if (eT instanceof StringPtg) {
+            String val = ((StringPtg)eT).getValue();
+            if (options().isBlanksAsNull() && val != null && val.length() == 0)
+                return new Token(BuiltinOperator.NullOper);
+            return new Token(TokenType.Operand, ((StringPtg)eT).getValue());
+        }
+        else if (eT instanceof MissingArgPtg)
+            return Token.createNullToken();
         
         // if we get here, we don't support this excel token
         throw new UnimplementedException(eT.getClass().getSimpleName());            
@@ -667,14 +723,9 @@ public class XlsReader extends BaseReader<XlsOptions>
             m_tokens = tokens;
         }
         
-        public TableElement getTmsColumn(int excelColNo)
+        public Table getTable()
         {
-            return m_tmsCell.getTable().getColumn(excelColNo + 1 - (XlsReader.this.options().isRowNames() ? 1 : 0));
-        }
-
-        public TableElement getTmsRow(int excelRowNo)
-        {
-            return m_tmsCell.getTable().getRow(excelRowNo + 1 - (XlsReader.this.options().isColumnNames() ? 1 : 0));
+            return m_tmsCell.getTable();
         }
 
         Cell getExcelCell()

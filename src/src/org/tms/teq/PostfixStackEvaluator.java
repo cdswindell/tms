@@ -736,6 +736,35 @@ public class PostfixStackEvaluator
             }
             else if (args.length >= 1 && args[0].isReference()) {
                 if (ref1 != null) {
+                    // special case
+                    if (bio == BuiltinOperator.QuartileOper && args.length == 2 && args[1] != null && args[1].isNumeric()) {
+                        int quartile = args[1].getNumericValue().intValue();
+                        switch(quartile) {
+                            case 0:
+                                bio = BuiltinOperator.MinOper;
+                                break;
+                                
+                            case 1:
+                                bio = BuiltinOperator.FirstQuartileOper;
+                                break;
+                                
+                            case 2:
+                                bio = BuiltinOperator.MedianOper;
+                                break;
+                                
+                            case 3:
+                                bio = BuiltinOperator.ThirdQuartileOper;
+                                break;
+                                
+                            case 4:
+                                bio = BuiltinOperator.MaxOper;
+                                break;
+                                
+                            default:
+                                return Token.createErrorToken(ErrorCode.UnimplementedStatistic);
+                        }
+                    }
+                    
                     SingleVariableStatEngine svse = fetchSVSE(ref1, bio, dc);
                     try {
                         if (args.length > 1)
@@ -877,6 +906,10 @@ public class PostfixStackEvaluator
                         result = Token.createErrorToken(ErrorCode.InvalidTableOperand);
                     else
                         result = new Token(col.getPropertyInt(TableProperty.Index));
+                    break;
+                    
+                case NullOper:
+                    result = Token.createNullToken();
                     break;
                     
                 default:

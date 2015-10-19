@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
@@ -48,6 +49,21 @@ public class BaseTest
     protected Cell vetCellValue(Table t, Row r, Column c, Object cv)
     {
         Cell cell = t.getCell(r, c);
+        assertNotNull(cell);
+        
+        if (cv == null)
+            assertThat(cell.isNull(), is(true));
+        else if (Number.class.isAssignableFrom(cv.getClass()))
+            assertThat(closeTo(cell.getCellValue(), ((Number)cv).doubleValue(), 0.0000001), is(true));
+        else
+            assertThat(cell.getCellValue(), is(cv));
+        
+        return cell;
+    }    
+
+    protected Cell vetCellValue(Table t, String label, Object cv)
+    {
+        Cell cell = t.getCell(Access.ByLabel, label);
         assertNotNull(cell);
         
         if (cv == null)

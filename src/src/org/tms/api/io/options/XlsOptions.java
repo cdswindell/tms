@@ -12,11 +12,12 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
 
     private enum Options implements OptionEnum {
         FileFormat,
+        BlanksAsNull,
     }
 
     private enum ExcelFileFormat  {
         XLS,
-        XLSX;
+        XLSX,
     }
 
     private XlsOptions(final boolean rowNames, 
@@ -30,6 +31,7 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
                 colWidthPx, defaultFontSize, null);
         
         set(Options.FileFormat, ExcelFileFormat.XLSX);
+        set(Options.BlanksAsNull, true);
     }
     
     private XlsOptions (final XlsOptions format)
@@ -66,4 +68,24 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
     {
         return get(Options.FileFormat) == ExcelFileFormat.XLSX;
     }
+    
+    public boolean isBlanksAsNull()
+    {
+        return (Boolean)get(Options.BlanksAsNull);
+    }
+    
+    public XlsOptions withBlanksAsNull()
+    {
+        return withBlanksAsNull(true);
+    }
+    
+    public XlsOptions withBlanksAsNull(boolean b)
+    {
+        XlsOptions newOptions = clone(this);
+        newOptions.set(Options.BlanksAsNull, b);
+        return newOptions;
+    }
+    
+    
+    
 }

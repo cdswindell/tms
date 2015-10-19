@@ -80,6 +80,7 @@ public enum TokenType implements Labeled
             case TransformOp:
             case BinaryFunc:
             case UnaryFunc: 
+            case GenericFunc:
                 return true;
              
             default:
@@ -128,6 +129,11 @@ public enum TokenType implements Labeled
         return this == Operand || this == Expression;
 	}
 
+    public boolean isBuiltIn()
+    {
+        return this == BuiltIn;
+    }
+    
 	public int numArgs() 
 	{
 		return m_numArgs;
