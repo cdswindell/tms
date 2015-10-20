@@ -23,6 +23,12 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
         return s;
     }
     
+    static public EquationStack createOpStack()
+    {
+        EquationStack s = new EquationStack(StackType.Op );
+        return s;
+    }
+    
     private static final long serialVersionUID = 112242556423961843L;
     
     static Pattern sf_FuncPattern = Pattern.compile("^[a-zA-Z]+[a-zA-Z0-9]*\\(");
@@ -30,7 +36,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 
 	private TokenMapper m_tokenMapper;
 
-    protected EquationStack(StackType st) 
+    EquationStack(StackType st) 
     {
         super();
         m_stackType = st;
@@ -329,4 +335,19 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 	{
 		return m_stackType;
 	}
+
+    public void reverse(int numArgs)
+    {
+        if (numArgs > 0 && numArgs <= this.size()) {
+            Token [] args = new Token [numArgs];
+            
+            for (int i = 0; i < numArgs; i++) {
+                args[i] = this.pop();
+            }
+            
+            for (int i = 0; i < numArgs; i++) {
+                this.push(args[i]);
+            }
+        }       
+    }
 }

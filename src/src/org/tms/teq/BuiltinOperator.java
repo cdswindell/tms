@@ -229,7 +229,8 @@ public enum BuiltinOperator implements Labeled, Operator
     // Two Variable Stat Functions
     LinearSlopeOper("slope", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
     LinearInterceptOper("intercept", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
-    LinearCorrelationOper("r2", TokenType.StatOp, 5, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
+    LinearROper(TokenType.StatOp, 5, "correlation", "ccr", "correl"),
+    LinearR2Oper(TokenType.StatOp, 5, "correlation2", "ccr2", "r2", "rsq"),
     LinearComputeXOper(TokenType.GenericFunc, 5, MathUtil.class, "lrComputeX", "computeX", "lrComputeX"),
     LinearComputeYOper(TokenType.GenericFunc, 5, MathUtil.class, "lrComputeY", "computeY", "lrComputeY"),
     
@@ -456,6 +457,11 @@ public enum BuiltinOperator implements Labeled, Operator
                     
                 case TwoSampleTTestOper:
                     m_methodArgs = new Class<?>[]{TableRowColumnElement.class, TableRowColumnElement.class, double.class};
+                    break;
+                    
+                case LinearROper:
+                case LinearR2Oper:
+                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, TableRowColumnElement.class};
                     break;
                     
                 case LinearComputeXOper:

@@ -59,7 +59,7 @@ public class TwoVariableStatEngineTest extends BaseTest
         
         assertThat(closeTo(te.calcStatistic(BuiltinOperator.LinearInterceptOper),-0.216216, 0.000001), is(true));
         assertThat(closeTo(te.calcStatistic(BuiltinOperator.LinearSlopeOper), 1.1486486, 0.000001), is(true));
-        assertThat(closeTo(te.calcStatistic(BuiltinOperator.LinearCorrelationOper), 0.9881049, 0.000001), is(true));      
+        assertThat(closeTo(te.calcStatistic(BuiltinOperator.LinearROper), 0.9881049, 0.000001), is(true));      
     }
     
     @Test
@@ -95,7 +95,7 @@ public class TwoVariableStatEngineTest extends BaseTest
         Cell cR2C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn()).setDerivation("intercept(col Data::X, col Data::Y)");
         assertThat(closeTo(cR2C1.getCellValue(), -0.216216, 0.000001), is(true));
         
-        Cell cR3C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn()).setDerivation("r2(col Data::X, col Data::Y)");
+        Cell cR3C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn()).setDerivation("ccr(col Data::X, col Data::Y)");
         assertThat(closeTo(cR3C1.getCellValue(), 0.9881049, 0.000001), is(true));
         
         Cell cR4C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn());

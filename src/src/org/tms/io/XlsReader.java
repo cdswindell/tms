@@ -37,6 +37,7 @@ import org.apache.poi.ss.formula.ptg.LessThanPtg;
 import org.apache.poi.ss.formula.ptg.MissingArgPtg;
 import org.apache.poi.ss.formula.ptg.MultiplyPtg;
 import org.apache.poi.ss.formula.ptg.NamePtg;
+import org.apache.poi.ss.formula.ptg.NameXPxg;
 import org.apache.poi.ss.formula.ptg.NotEqualPtg;
 import org.apache.poi.ss.formula.ptg.NumberPtg;
 import org.apache.poi.ss.formula.ptg.OperandPtg;
@@ -127,11 +128,13 @@ public class XlsReader extends BaseReader<XlsOptions>
         
         sf_FunctionMap.put("ISTEXT",  BuiltinOperator.IsTextOper);
         sf_FunctionMap.put("ISNUMBER",  BuiltinOperator.IsNumberOper);
-        sf_FunctionMap.put("ISTEXT",  BuiltinOperator.IsTextOper);
         sf_FunctionMap.put("ISLOGICAL",  BuiltinOperator.IsLogicalOper);
         sf_FunctionMap.put("ISBLANK", BuiltinOperator.IsNullOper);
         sf_FunctionMap.put("ISERR", BuiltinOperator.IsErrorOper);
         sf_FunctionMap.put("ISERROR", BuiltinOperator.IsErrorOper);
+        
+        sf_FunctionMap.put("ISEVEN", BuiltinOperator.IsEvenOper);
+        sf_FunctionMap.put("ISODD", BuiltinOperator.IsOddOper);
 
         sf_FunctionMap.put("AND", BuiltinOperator.AndOper);
         sf_FunctionMap.put("OR", BuiltinOperator.OrOper);
@@ -154,15 +157,33 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_FunctionMap.put("SUMSQ", BuiltinOperator.Sum2Oper);
         sf_FunctionMap.put("KURT", BuiltinOperator.KurtosisOper);
         sf_FunctionMap.put("DEVSQ", BuiltinOperator.SumSqD2Oper);
-        sf_FunctionMap.put("QUARTILE", BuiltinOperator.QuartileOper);        
+        sf_FunctionMap.put("QUARTILE", BuiltinOperator.QuartileOper);  
+        
+        sf_FunctionMap.put("SLOPE", BuiltinOperator.LinearSlopeOper);        
+        sf_FunctionMap.put("INTERCEPT", BuiltinOperator.LinearInterceptOper);        
+        sf_FunctionMap.put("CORREL", BuiltinOperator.LinearROper);        
+        sf_FunctionMap.put("RSQ", BuiltinOperator.LinearR2Oper);        
+    }
+    
+    private static final Set<Operator> sf_InvertedArgs 
+        = new HashSet<Operator>();
+    
+    static {
+        sf_InvertedArgs.add(BuiltinOperator.LinearSlopeOper);
+        sf_InvertedArgs.add(BuiltinOperator.LinearInterceptOper);
+        sf_InvertedArgs.add(BuiltinOperator.LinearROper);
+        sf_InvertedArgs.add(BuiltinOperator.LinearR2Oper);
     }
     
     private Map<String, DerivationScope> m_derivCache = null;
     private Map<org.tms.api.Cell, String> m_derivedCells = null;
     private Map<String, TableElement> m_namedTableElements = null;
     private Set<Integer> m_excelEmptyRows = null;
+    private EquationStack m_externalFuncRefStack;
     
     private Table m_table;
+    private int m_maxRows = -1;
+    private int m_maxCols = -1;
     
     public XlsReader(String fileName, XlsOptions format)
     {
@@ -241,7 +262,7 @@ public class XlsReader extends BaseReader<XlsOptions>
             
             List<ParsedFormula> parsedFormulas = new ArrayList<ParsedFormula>();
 
-            Sheet sheet = wb.getSheetAt(asi); 
+            Sheet sheet = wb.getSheetAt(asi);             
             String sheetName = trimString(sheet.getSheetName());
             if (sheetName != null)
                 t.setLabel(sheet.getSheetName());
@@ -364,13 +385,20 @@ public class XlsReader extends BaseReader<XlsOptions>
     private void processEquations(Workbook wb, Sheet sheet, String sheetName, int asi, 
             List<ParsedFormula> parsedFormulas, Table t)
     {
+        m_externalFuncRefStack = EquationStack.createOpStack();
         for (ParsedFormula pf : parsedFormulas) {
             try {
                 EquationStack es = EquationStack.createPostfixStack();
                 for (Ptg eT : pf.getTokens()) {
                     Token tmsT = excelToken2TmsToken(pf, eT);
-                    if (tmsT != null) 
+                    if (tmsT != null) {
+                        // for a few Excel formulas,
+                        // we need to swap the order of
+                        // the operands
+                        if (tmsT.getOperator() != null && sf_InvertedArgs.contains(tmsT.getOperator()))
+                            es.reverse(tmsT.getOperator().numArgs());
                         es.push(tmsT);
+                    }
                 }
                 
                 // we now have a post fix stack in TMS form
@@ -469,10 +497,29 @@ public class XlsReader extends BaseReader<XlsOptions>
                 
             case "NamePtg":
                 return createOperandToken((NamePtg)eT, pf);
+                
+            case "NameXPxg":
+                return createOperandToken((NameXPxg)eT, pf);
         }           
         
         // if we get here, we don't support this excel token
         throw new UnimplementedException(eT.getClass().getSimpleName());            
+    }
+
+    private Token createOperandToken(NameXPxg eT, ParsedFormula pf)
+    {
+        String funcName = trimString(eT.getNameName());
+        if (funcName != null) {
+            Operator op = sf_FunctionMap.get(funcName);
+            if (op != null) {
+                
+                m_externalFuncRefStack.push(op);
+                return null;
+            }
+        }
+        
+        // if we get here, we don't support this excel token
+        throw new UnimplementedException(String.format("%s->%s", eT.getClass().getSimpleName(), funcName));            
     }
 
     private Token createOperandToken(NamePtg eT, ParsedFormula pf)
@@ -512,13 +559,17 @@ public class XlsReader extends BaseReader<XlsOptions>
         int eCCol = pf.getExcelCell().getColumnIndex();
         int eCRow = pf.getExcelCell().getRowIndex();
         
-        if (numCols == 1 && rngColNo == eCCol) {
-            if (rangeIsColumn(rngRowNo, eT.getLastRow(), rngColNo, eT, pf))
+        if (numCols == 1) {
+            if (rngColNo == eCCol && rangeIsColumn(rngRowNo, eT.getLastRow(), rngColNo, eT, pf))
+                return new Token(TokenType.ColumnRef, getTmsColumn(rngColNo));
+            else if (rngRowNo == 0 && numRows > pf.getSheet().getLastRowNum())
                 return new Token(TokenType.ColumnRef, getTmsColumn(rngColNo));
         }
         
-        if (numRows == 1 && rngRowNo == eCRow) {
-            if (rangeIsRow(rngColNo, eT.getLastColumn(), rngRowNo, eT, pf))
+        if (numRows == 1) {
+            if (rngRowNo == eCRow && rangeIsRow(rngColNo, eT.getLastColumn(), rngRowNo, eT, pf))
+                return new Token(TokenType.RowRef, getTmsRow(rngRowNo));
+            else if (rngColNo == 0 && numCols > m_maxCols)
                 return new Token(TokenType.RowRef, getTmsRow(rngRowNo));
         }
         
@@ -634,11 +685,13 @@ public class XlsReader extends BaseReader<XlsOptions>
             Operator op = sf_FunctionMap.get(funcName.toUpperCase());
             
             if (op != null)
-                return new Token(op);            
+                return new Token(op); 
+            else if ("#external#".equals(funcName) && !m_externalFuncRefStack.isEmpty())
+                return m_externalFuncRefStack.pop();
         }
         
         // if we get here, we don't support this excel token
-        throw new UnimplementedException(eT.getClass().getSimpleName());            
+        throw new UnimplementedException(String.format("%s->%s", eT.getClass().getSimpleName(), funcName));            
     }
     
     private Token createOperationToken(OperationPtg eT)
@@ -683,8 +736,8 @@ public class XlsReader extends BaseReader<XlsOptions>
             m_namedTableElements = new HashMap<String, TableElement>(numNamedRegions);
             SpreadsheetVersion ssV = wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;
             
-            int maxRows = activeSheet.getLastRowNum() + 1;
-            int maxCols = getLastColumnNum(activeSheet) + 1;
+            m_maxRows = activeSheet.getLastRowNum() + 1;
+            m_maxCols = getLastColumnNum(activeSheet) + 1;
             
             for (int i = 0; i < numNamedRegions; i++) {
                 Name namedRegion = wb.getNameAt(i);
@@ -707,7 +760,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                         }
                     }  
                     else {
-                        Subset s = createSubset(maxRows, maxCols, cRefs, t, name);
+                        Subset s = createSubset(cRefs, t, name);
                         if (s != null)
                             m_namedTableElements.put(name, s);
                     }
@@ -731,19 +784,19 @@ public class XlsReader extends BaseReader<XlsOptions>
         return maxCol;
     }
 
-    private Subset createSubset(int maxRows, int maxCols, CellReference[] cRefs, Table t, String label)
+    private Subset createSubset(CellReference[] cRefs, Table t, String label)
     {
         // iterate over cell references, abstracting rows and columns
         int totalRowCnt = 0;
         int totalColCnt = 0;
-        Set<TableElement> tmsRows = new HashSet<TableElement>(maxRows);
-        Set<TableElement> tmsCols = new HashSet<TableElement>(maxCols);
+        Set<TableElement> tmsRows = new HashSet<TableElement>(m_maxRows);
+        Set<TableElement> tmsCols = new HashSet<TableElement>(m_maxCols);
         
         for (CellReference cRef : cRefs) {
             int excelRowNo = cRef.getRow();
             int excelColNo = cRef.getCol();
 
-            if (excelColNo > -1 && excelColNo < maxCols) {
+            if (excelColNo > -1 && excelColNo < m_maxCols) {
                 TableElement col = getTmsColumn(excelColNo);
                 if (col != null) {
                     if (tmsCols.add(col))
@@ -751,7 +804,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                 }
             }
 
-            if (excelRowNo > -1 && excelRowNo < maxRows) {
+            if (excelRowNo > -1 && excelRowNo < m_maxRows) {
                 TableElement row = getTmsRow(excelRowNo);
                 if (row != null) {
                     if (tmsRows.add(row))
@@ -912,6 +965,11 @@ public class XlsReader extends BaseReader<XlsOptions>
             m_tokens = tokens;
         }
         
+        public Sheet getSheet()
+        {
+            return m_excelCell.getSheet();
+        }
+
         public Table getTable()
         {
             return m_tmsCell.getTable();

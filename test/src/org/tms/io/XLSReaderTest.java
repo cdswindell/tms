@@ -119,6 +119,41 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, t.getRow(2), cLt, true);
             vetCellValue(t, t.getRow(3), cLt, false);
             vetCellValue(t, t.getRow(4), cLt, false);           
+            
+            Column cGe = t.getColumn(Access.ByLabel, "GREATER EQUAL");
+            assertNotNull(cGe);
+            vetCellValue(t, t.getRow(1), cGe, false);
+            vetCellValue(t, t.getRow(2), cGe, false);
+            vetCellValue(t, t.getRow(3), cGe, true);
+            vetCellValue(t, t.getRow(4), cGe, true);           
+            
+            Column cLE = t.getColumn(Access.ByLabel, "LESS EQUAL");
+            assertNotNull(cLE);
+            vetCellValue(t, t.getRow(1), cLE, true);
+            vetCellValue(t, t.getRow(2), cLE, true);
+            vetCellValue(t, t.getRow(3), cLE, false);
+            vetCellValue(t, t.getRow(4), cLE, false);           
+            
+            Column cEven = t.getColumn(Access.ByLabel, "IS EVEN");
+            assertNotNull(cEven);
+            vetCellValue(t, t.getRow(1), cEven, false);
+            vetCellValue(t, t.getRow(2), cEven, true);
+            vetCellValue(t, t.getRow(3), cEven, false);
+            vetCellValue(t, t.getRow(4), cEven, true);           
+            
+            Column cOdd = t.getColumn(Access.ByLabel, "IS ODD");
+            assertNotNull(cOdd);
+            vetCellValue(t, t.getRow(1), cOdd, true);
+            vetCellValue(t, t.getRow(2), cOdd, false);
+            vetCellValue(t, t.getRow(3), cOdd, true);
+            vetCellValue(t, t.getRow(4), cOdd, false);           
+            
+            Column cLr = t.getColumn(Access.ByLabel, "LINEAR REGRESSION");
+            assertNotNull(cLr);
+            vetCellValue(t, t.getRow(1), cLr, 0.584184279);
+            vetCellValue(t, t.getRow(2), cLr, 1.684223858);
+            vetCellValue(t, t.getRow(3), cLr, 0.97405606);
+            vetCellValue(t, t.getRow(4), cLr, 0.948785207);
         }
         catch (IOException e)
         {

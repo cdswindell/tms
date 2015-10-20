@@ -13,6 +13,7 @@ public class TwoVariableStatEngine
     private double m_sumOE2divE;
     private double m_slope = Double.MIN_VALUE; 
     private double m_intercept = Double.MIN_VALUE; 
+    private double m_r = Double.MIN_VALUE;
     private double m_r2 = Double.MIN_VALUE;
     private int m_n;
     private boolean m_nonUniform;
@@ -34,7 +35,7 @@ public class TwoVariableStatEngine
         m_n = 0;
         m_nonUniform = false;
         
-        m_slope = m_intercept = m_r2 = Double.MIN_VALUE;
+        m_slope = m_intercept = m_r = m_r2 = Double.MIN_VALUE;
     }
     
     public int enter(double x, double y)
@@ -55,7 +56,7 @@ public class TwoVariableStatEngine
         else
             m_numErrors++;
         
-        m_slope = m_intercept = m_r2 = Double.MIN_VALUE;
+        m_slope = m_intercept = m_r = Double.MIN_VALUE;
         return m_n;
     }
 
@@ -86,8 +87,11 @@ public class TwoVariableStatEngine
             case LinearInterceptOper:
                 return calculateIntercept();
                 
-            case LinearCorrelationOper:
-                return calculateCorrelation();
+            case LinearROper:
+                return calculateR();
+                
+            case LinearR2Oper:
+                return calculateR2();
                 
             case TwoSamplePValueOper:
                 if (m_n < 2 )
@@ -138,18 +142,26 @@ public class TwoVariableStatEngine
         }
     }
 
-    private double calculateCorrelation()
+    private double calculateR()
     {
-        if (m_r2 == Double.MIN_VALUE) {
+        if (m_r == Double.MIN_VALUE) {
             double sumX = (double)m_statX.calcStatistic(BuiltinOperator.SumOper);
             double sumY = (double)m_statY.calcStatistic(BuiltinOperator.SumOper);
             double sumX2 = (double)m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
             double sumY2 = (double)m_statY.calcStatistic(BuiltinOperator.Sum2Oper);
-            return m_r2 = (m_sumXY - sumX*sumY/m_n)/
+            return m_r = (m_sumXY - sumX*sumY/m_n)/
                     Math.sqrt((sumX2 - sumX*sumX/m_n)*(sumY2 - sumY*sumY/m_n));
         }
         else 
-            return m_r2;
+            return m_r;
+    }
+
+    private double calculateR2()
+    {
+        if (m_r2 == Double.MIN_VALUE)
+            m_r2 = calculateR() * calculateR();
+        
+        return m_r2;
     }
 
     private double calculateIntercept()
