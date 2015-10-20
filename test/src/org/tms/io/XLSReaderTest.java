@@ -21,8 +21,11 @@ import org.tms.api.io.options.XlsOptions;
 public class XLSReaderTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.xlsx";
+    private static final String SAMPLE1XLS = "sample1.xls";
     private static final String SAMPLE2 = "sample2.xlsx";
+    private static final String SAMPLE2XLS = "sample2.xls";
     private static final String SAMPLE3 = "sample3.xlsx";
+    private static final String SAMPLE3XLS = "sample3.xls";
     
     @Test
     public final void testXlsReaderConstructor()
@@ -40,6 +43,20 @@ public class XLSReaderTest extends BaseTest
         XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1), XlsOptions.Default); 
         assertNotNull(r);
         
+        simpleFileTester(r);
+    }
+
+    @Test
+    public final void testImportSimpleSheetXls() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1XLS), XlsOptions.Default); 
+        assertNotNull(r);
+        
+        simpleFileTester(r);
+    }
+
+    private void simpleFileTester(XlsReader r)
+    {
         try
         {
             Table t = r.parse();
@@ -74,6 +91,20 @@ public class XLSReaderTest extends BaseTest
         XlsReader r = new XlsReader(qualifiedFileName(SAMPLE2), XlsOptions.Default); 
         assertNotNull(r);
         
+        testSheetWithRangesNotesEquations(r);
+    }
+
+    @Test
+    public final void testImportSheetWithRangesNotesEquationsXls() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE2XLS), XlsOptions.Default); 
+        assertNotNull(r);
+        
+        testSheetWithRangesNotesEquations(r);
+    }
+
+    private void testSheetWithRangesNotesEquations(XlsReader r)
+    {
         try
         {
             Table t = r.parse();
@@ -195,6 +226,20 @@ public class XLSReaderTest extends BaseTest
         XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3), XlsOptions.Default); 
         assertNotNull(r);
         
+        testImportSheetStatisticEquations(r);
+    }
+
+    @Test
+    public final void testImportSheetStatisticEquationsXls() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3XLS), XlsOptions.Default); 
+        assertNotNull(r);
+        
+        testImportSheetStatisticEquations(r);
+    }
+
+    private void testImportSheetStatisticEquations(XlsReader r)
+    {
         try
         {
             Table t = r.parse();
@@ -241,11 +286,22 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, "BasicMathVal", 4.0);
             vetCellValue(t, "PowerVal", 81.0);
             vetCellValue(t, "ComplexPowerVal", 64.0);
-            vetCellValue(t, "PercentageVal", 2.0);
-            vetCellValue(t, "FactorialVal", 24.0);
-            Cell cell = vetCellValue(t, "YellowTrim", "Yellow");
+            
+            Cell cell = vetCellValue(t, "PercentageVal", 2.0);
             assertThat(cell.isDerived(), is(true));
             String deriv = cell.getDerivation().getAsEnteredExpression();
+            assertNotNull(deriv);
+            assertThat(deriv, is("cell \"BasicMathVal\" * 50.0%"));
+            
+            cell = vetCellValue(t, "FactorialVal", 24.0);
+            assertThat(cell.isDerived(), is(true));
+            deriv = cell.getDerivation().getAsEnteredExpression();
+            assertNotNull(deriv);
+            assertThat(deriv, is("factorial(cell \"BasicMathVal\")"));
+            
+            cell = vetCellValue(t, "YellowTrim", "Yellow");
+            assertThat(cell.isDerived(), is(true));
+            deriv = cell.getDerivation().getAsEnteredExpression();
             assertNotNull(deriv);
             assertThat(deriv, is("trim((row 7 + \"   \"))"));
         }

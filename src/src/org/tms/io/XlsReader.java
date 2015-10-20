@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -174,12 +175,20 @@ public class XlsReader extends BaseReader<XlsOptions>
 
     public TableElement getTmsColumn(int excelColNo)
     {
-        return m_table.getColumn(excelColNo + 1 - (XlsReader.this.options().isRowNames() ? 1 : 0));
+        int idx = excelColNo + 1 - (XlsReader.this.options().isRowNames() ? 1 : 0);
+        if (idx >= 1 && idx <= m_table.getNumColumns())
+            return m_table.getColumn(idx);
+        else
+            return null;
     }
 
     public TableElement getTmsRow(int excelRowNo)
     {
-        return m_table.getRow(excelRowNo + 1 - (XlsReader.this.options().isColumnNames() ? 1 : 0));
+        int idx = excelRowNo + 1 - (XlsReader.this.options().isColumnNames() ? 1 : 0);
+        if (idx >= 1 && idx <= m_table.getNumRows())
+            return m_table.getRow(idx);
+        else
+            return null;
     }
 
     public Table parse() throws IOException
@@ -599,6 +608,10 @@ public class XlsReader extends BaseReader<XlsOptions>
         if (numNamedRegions > 0) {
             m_namedTableElements = new HashMap<String, TableElement>(numNamedRegions);
             SpreadsheetVersion ssV = wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;
+            
+            int maxRows = activeSheet.getLastRowNum() + 1;
+            int maxCols = getLastColumnNum(activeSheet) + 1;
+            
             for (int i = 0; i < numNamedRegions; i++) {
                 Name namedRegion = wb.getNameAt(i);
                 if (namedRegion != null && (sheetName == null || sheetName.equals(namedRegion.getSheetName()))) {
@@ -620,7 +633,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                         }
                     }  
                     else {
-                        Subset s = createSubset(cRefs, t, name);
+                        Subset s = createSubset(maxRows, maxCols, cRefs, t, name);
                         if (s != null)
                             m_namedTableElements.put(name, s);
                     }
@@ -629,23 +642,63 @@ public class XlsReader extends BaseReader<XlsOptions>
         }
     }
 
-    private Subset createSubset(CellReference[] cRefs, Table t, String label)
+    private int getLastColumnNum(Sheet activeSheet)
     {
-        // assume success
-        Subset s = t.addSubset(Access.ByLabel, label);
+        int maxCol = 0;
+        Iterator<Row> rowIter = activeSheet.rowIterator();
+        while(rowIter != null && rowIter.hasNext()) {
+            Row r = rowIter.next();
+            int lastCol = r.getLastCellNum();
+            
+            if (lastCol > maxCol)
+                maxCol = lastCol;
+        }
+        
+        return maxCol;
+    }
 
+    private Subset createSubset(int maxRows, int maxCols, CellReference[] cRefs, Table t, String label)
+    {
         // iterate over cell references, abstracting rows and columns
+        int totalRowCnt = 0;
+        int totalColCnt = 0;
+        Set<TableElement> tmsRows = new HashSet<TableElement>(maxRows);
+        Set<TableElement> tmsCols = new HashSet<TableElement>(maxCols);
+        
         for (CellReference cRef : cRefs) {
             int excelRowNo = cRef.getRow();
             int excelColNo = cRef.getCol();
 
-            if (excelColNo >= 0)
-                s.add(t.getColumn(excelColNo + 1 - (options().isRowNames() ? 1 : 0)));
+            if (excelColNo > -1 && excelColNo < maxCols) {
+                TableElement col = getTmsColumn(excelColNo);
+                if (col != null) {
+                    if (tmsCols.add(col))
+                        totalColCnt++;
+                }
+            }
 
-            if (excelRowNo >= 0)
-                s.add(t.getRow(excelRowNo + 1 - (options().isColumnNames() ? 1 : 0)));           
+            if (excelRowNo > -1 && excelRowNo < maxRows) {
+                TableElement row = getTmsRow(excelRowNo);
+                if (row != null) {
+                    if (tmsRows.add(row))
+                        totalRowCnt++;
+                }
+            }
         }
+        
+        // create the subset success
+        Subset s = t.addSubset(Access.ByLabel, label);
+        
+        // xls and xlsx formats differ in how they express "whole column" and "whole row"
+        // ranges; if a subset contains all columns (or rows) in the table, then only add
+        // the rows (or columns), as TMS handles the concept of "all" itself...
 
+        if (totalColCnt > 0 && totalColCnt < t.getNumColumns())
+            s.add(tmsCols.toArray(new TableElement[] {}));
+        
+        if (totalRowCnt > 0 && totalRowCnt < t.getNumRows())
+            s.add(tmsRows.toArray(new TableElement[] {}));
+        
         return s;
     }
 
