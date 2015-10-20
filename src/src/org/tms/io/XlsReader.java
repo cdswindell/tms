@@ -132,6 +132,13 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_FunctionMap.put("ISBLANK", BuiltinOperator.IsNullOper);
         sf_FunctionMap.put("ISERR", BuiltinOperator.IsErrorOper);
         sf_FunctionMap.put("ISERROR", BuiltinOperator.IsErrorOper);
+
+        sf_FunctionMap.put("AND", BuiltinOperator.AndOper);
+        sf_FunctionMap.put("OR", BuiltinOperator.OrOper);
+        sf_FunctionMap.put("NOT", BuiltinOperator.NotOper);
+        sf_FunctionMap.put("XOR", BuiltinOperator.XorOper);
+        sf_FunctionMap.put("TRUE", BuiltinOperator.TrueOper);
+        sf_FunctionMap.put("FALSE", BuiltinOperator.FalseOper);
         
         sf_FunctionMap.put("IF", BuiltinOperator.IfOper);
         
@@ -847,12 +854,15 @@ public class XlsReader extends BaseReader<XlsOptions>
         String cellFormula = eC.getCellFormula();
         switch (cellFormula) {
             case "TRUE":
+            case "TRUE()":
                 return true;
 
             case "FALSE":
+            case "FALSE()":
                 return false;
 
             case "NOW":
+            case "NOW()":
                 return new Date();
         }
 

@@ -883,6 +883,14 @@ public class PostfixStackEvaluator
                     result = Token.createNullToken();
                     break;
                     
+                case TrueOper:
+                    result = new Token(true);
+                    break;
+                    
+                case FalseOper:
+                    result = new Token(false);
+                    break;
+                    
                 default:
                     break;
             }

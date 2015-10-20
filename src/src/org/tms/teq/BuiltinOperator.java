@@ -152,6 +152,8 @@ public enum BuiltinOperator implements Labeled, Operator
     // Builtin functions
     NullOper(TokenType.BuiltIn, 5, "null"),
     PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
+    TrueOper(TokenType.BuiltIn, 5, "true"),
+    FalseOper(TokenType.BuiltIn, 5, "false"),
     EOper(TokenType.BuiltIn, 5, MathUtil.class, "e"),
     RandOper(TokenType.BuiltIn, 5, Math.class, "random"),
     ColumnIndexOper(TokenType.BuiltIn, 5, "ColumnIndexOper", "cidx"),
@@ -159,8 +161,8 @@ public enum BuiltinOperator implements Labeled, Operator
 
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 5, "sum"),
-    Sum2Oper(TokenType.StatOp, 5, "sumOfSquares", "sumSqs", "ss"),
-    SumSqD2Oper(TokenType.StatOp, 5, "sumOfSquaredDeviates", "ss", "ssd"),
+    Sum2Oper(TokenType.StatOp, 5, "sumOfSquares", "sumSqs", "ss", "sumsq"),
+    SumSqD2Oper(TokenType.StatOp, 5, "sumOfSquaredDeviates", "ss", "ssd", "devsq"),
     MeanOper(TokenType.StatOp, 5, "mean", "average", "avg"),
     MedianOper(TokenType.StatOp, 5, "median"),
     QuartileOper(TokenType.StatOp, 5, "quartile"),

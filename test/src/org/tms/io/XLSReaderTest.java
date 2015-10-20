@@ -27,6 +27,7 @@ public class XLSReaderTest extends BaseTest
     private static final String SAMPLE3 = "sample3.xlsx";
     private static final String SAMPLE3EmptyRows = "sample3WithEmptyRows.xlsx";
     private static final String SAMPLE3XLS = "sample3.xls";
+    private static final String SAMPLELogical = "sampleLogical.xlsx";
     
     @Test
     public final void testXlsReaderConstructor()
@@ -36,6 +37,93 @@ public class XLSReaderTest extends BaseTest
         assertThat(r.getFileName(), is(SAMPLE1));
         assertThat(r.isRowNames(), is(true));
         assertThat(r.isColumnNames(), is(true));
+    }
+
+    @Test
+    public final void testImportLogicalSheet() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLELogical), XlsOptions.Default.withRowNames(false)); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            Column x = t.getColumn(Access.ByLabel, "X");
+            assertNotNull(x);
+            vetCellValue(t, t.getRow(1), x, true);
+            vetCellValue(t, t.getRow(2), x, true);
+            vetCellValue(t, t.getRow(3), x, false);
+            vetCellValue(t, t.getRow(4), x, false);
+            
+            Column y = t.getColumn(Access.ByLabel, "Y");
+            assertNotNull(y);
+            vetCellValue(t, t.getRow(1), y, true);
+            vetCellValue(t, t.getRow(2), y, false);
+            vetCellValue(t, t.getRow(3), y, true);
+            vetCellValue(t, t.getRow(4), y, false);
+            
+            Column cAnd = t.getColumn(Access.ByLabel, "AND");
+            assertNotNull(cAnd);
+            vetCellValue(t, t.getRow(1), cAnd, true);
+            vetCellValue(t, t.getRow(2), cAnd, false);
+            vetCellValue(t, t.getRow(3), cAnd, false);
+            vetCellValue(t, t.getRow(4), cAnd, false);
+            
+            Column cOr = t.getColumn(Access.ByLabel, "OR");
+            assertNotNull(cOr);
+            vetCellValue(t, t.getRow(1), cOr, true);
+            vetCellValue(t, t.getRow(2), cOr, true);
+            vetCellValue(t, t.getRow(3), cOr, true);
+            vetCellValue(t, t.getRow(4), cOr, false);
+            
+            Column cNot = t.getColumn(Access.ByLabel, "NOT");
+            assertNotNull(cNot);
+            vetCellValue(t, t.getRow(1), cNot, false);
+            vetCellValue(t, t.getRow(2), cNot, false);
+            vetCellValue(t, t.getRow(3), cNot, true);
+            vetCellValue(t, t.getRow(4), cNot, true);
+            
+            Column cEq = t.getColumn(Access.ByLabel, "EQUALS");
+            assertNotNull(cEq);
+            vetCellValue(t, t.getRow(1), cEq, true);
+            vetCellValue(t, t.getRow(2), cEq, false);
+            vetCellValue(t, t.getRow(3), cEq, false);
+            vetCellValue(t, t.getRow(4), cEq, true);
+            
+            Column cNEq = t.getColumn(Access.ByLabel, "NOT EQUALS");
+            assertNotNull(cNEq);
+            vetCellValue(t, t.getRow(1), cNEq, false);
+            vetCellValue(t, t.getRow(2), cNEq, true);
+            vetCellValue(t, t.getRow(3), cNEq, true);
+            vetCellValue(t, t.getRow(4), cNEq, false);
+            
+            Column cMisc = t.getColumn(Access.ByLabel, "MISC");
+            assertNotNull(cMisc);
+            vetCellValue(t, t.getRow(1), cMisc, true);
+            vetCellValue(t, t.getRow(2), cMisc, false);
+            vetCellValue(t, t.getRow(3), cMisc, true);
+            vetCellValue(t, t.getRow(4), cMisc, false);
+            
+            Column cGt = t.getColumn(Access.ByLabel, "GREATER THAN");
+            assertNotNull(cGt);
+            vetCellValue(t, t.getRow(1), cGt, false);
+            vetCellValue(t, t.getRow(2), cGt, false);
+            vetCellValue(t, t.getRow(3), cGt, true);
+            vetCellValue(t, t.getRow(4), cGt, true);           
+            
+            Column cLt = t.getColumn(Access.ByLabel, "LESS THAN");
+            assertNotNull(cLt);
+            vetCellValue(t, t.getRow(1), cLt, true);
+            vetCellValue(t, t.getRow(2), cLt, true);
+            vetCellValue(t, t.getRow(3), cLt, false);
+            vetCellValue(t, t.getRow(4), cLt, false);           
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
     }
 
     @Test
