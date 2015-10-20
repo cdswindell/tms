@@ -242,7 +242,8 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportSheetStatisticEquationsWithEmptyRows() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3EmptyRows), XlsOptions.Default.withIgnoreEmptyRows()); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3EmptyRows), 
+                XlsOptions.Default.withIgnoreEmptyRows().withIgnoreEmptyColumns()); 
         assertNotNull(r);
         
         testImportSheetStatisticEquations(r);
@@ -254,6 +255,8 @@ public class XLSReaderTest extends BaseTest
         {
             Table t = r.parse();
             assertNotNull(t);
+            
+            assertThat(t.getNumColumns(), is(4));
             
             // validate basic stat calculations
             vetCellValue(t, "Count", 6.0);
