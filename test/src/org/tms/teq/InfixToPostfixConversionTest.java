@@ -14,7 +14,7 @@ public class InfixToPostfixConversionTest extends BaseTest
     public final void testOperatorAssociations() 
     throws PendingDerivationException, BlockedDerivationException
     {
-        InfixExpressionParser iep = new InfixExpressionParser("5 % mod((2 + 7), 5)");
+        InfixExpressionParser iep = new InfixExpressionParser("mod(5, mod((2 + 7), 5))");
         assertThat(iep, notNullValue());
         
         ParseResult pr = iep.validateExpression();
@@ -190,7 +190,7 @@ public class InfixToPostfixConversionTest extends BaseTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getNumericValue(), is(232.0));
 
-        iep = new InfixExpressionParser("11 % 6 % 3");
+        iep = new InfixExpressionParser("mod(mod(11, 6),  3)");
         assertThat(iep, notNullValue());
         
         pr = iep.validateExpression();

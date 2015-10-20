@@ -671,7 +671,7 @@ public class InfixExpressionParser
         	ifs.push(tt, oper, value);
         }
         else {
-        	if (!(tt == TokenType.BinaryOp || (tt == TokenType.UnaryTrailingOp && oper == BuiltinOperator.FactOper)) ) {
+        	if (!(tt == TokenType.BinaryOp || (tt == TokenType.UnaryTrailingOp)) ) {
         		if (pr != null)
         			pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos, tt.toString());
         		return 0;

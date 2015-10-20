@@ -238,6 +238,11 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, "RightVal", "low");
             vetCellValue(t, "MidVal", "ell");
             vetCellValue(t, "YeyanVal", "Yeyan");
+            vetCellValue(t, "BasicMathVal", 4.0);
+            vetCellValue(t, "PowerVal", 81.0);
+            vetCellValue(t, "ComplexPowerVal", 64.0);
+            vetCellValue(t, "PercentageVal", 2.0);
+            vetCellValue(t, "FactorialVal", 24.0);
             Cell cell = vetCellValue(t, "YellowTrim", "Yellow");
             assertThat(cell.isDerived(), is(true));
             String deriv = cell.getDerivation().getAsEnteredExpression();

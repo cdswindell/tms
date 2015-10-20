@@ -41,6 +41,7 @@ import org.apache.poi.ss.formula.ptg.NumberPtg;
 import org.apache.poi.ss.formula.ptg.OperandPtg;
 import org.apache.poi.ss.formula.ptg.OperationPtg;
 import org.apache.poi.ss.formula.ptg.ParenthesisPtg;
+import org.apache.poi.ss.formula.ptg.PercentPtg;
 import org.apache.poi.ss.formula.ptg.PowerPtg;
 import org.apache.poi.ss.formula.ptg.Ptg;
 import org.apache.poi.ss.formula.ptg.RefPtgBase;
@@ -91,7 +92,8 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_OperatorMap.put(SubtractPtg.class, BuiltinOperator.MinusOper);
         sf_OperatorMap.put(DividePtg.class, BuiltinOperator.DivOper);
         sf_OperatorMap.put(MultiplyPtg.class, BuiltinOperator.MultOper);
-        sf_OperatorMap.put(PowerPtg.class, BuiltinOperator.PowerOper);
+        sf_OperatorMap.put(PowerPtg.class, BuiltinOperator.PowerFuncOper);
+        sf_OperatorMap.put(PercentPtg.class, BuiltinOperator.PercentOper);
         
         sf_OperatorMap.put(EqualPtg.class, BuiltinOperator.EqOper);
         sf_OperatorMap.put(NotEqualPtg.class, BuiltinOperator.NEqOper);
@@ -105,7 +107,10 @@ public class XlsReader extends BaseReader<XlsOptions>
         = new HashMap<String, Operator>();
 
     static {
+        sf_FunctionMap.put("FACT", BuiltinOperator.FactFuncOper);
         sf_FunctionMap.put("PI", BuiltinOperator.PiOper);
+        sf_FunctionMap.put("MOD", BuiltinOperator.ModFuncOper);
+        sf_FunctionMap.put("POWER", BuiltinOperator.PowerFuncOper);
         
         sf_FunctionMap.put("UPPER",  BuiltinOperator.toUpperOper);
         sf_FunctionMap.put("LOWER",  BuiltinOperator.toLowerOper);

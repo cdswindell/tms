@@ -2,6 +2,7 @@ package org.tms.teq;
 
 import java.util.ArrayDeque;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
@@ -24,6 +25,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     
     private static final long serialVersionUID = 112242556423961843L;
     
+    static Pattern sf_FuncPattern = Pattern.compile("^[a-zA-Z]+[a-zA-Z0-9]*\\(");
     private StackType m_stackType;
 
 	private TokenMapper m_tokenMapper;
@@ -201,6 +203,11 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                         expr.append(op.getLabel());                            
                         expr.append(x.toExpressionValue());
                     }
+                    else if (t.getTokenType() == TokenType.UnaryTrailingOp) {
+                        Token x = operands.pop();
+                        expr.append(x.toExpressionValue());
+                        expr.append(op.getLabel());                            
+                    }
                     else if (t.getTokenType() == TokenType.BinaryOp) {
                         Token y = operands.pop();
                         Token x = operands.pop();
@@ -287,7 +294,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     private boolean putInParens(Token token)
     {
         return token.isExpression() && 
-               !token.toExpressionValue().startsWith("(");
+               !token.toExpressionValue().startsWith("(") ;        
     }
 
     public String toString()

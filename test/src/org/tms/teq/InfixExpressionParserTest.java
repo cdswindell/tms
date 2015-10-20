@@ -79,7 +79,7 @@ public class InfixExpressionParserTest
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(true));
 
-        iep = new InfixExpressionParser("2 + 3^5 - 6 % 4*3 *(2+6)");
+        iep = new InfixExpressionParser("2 + 3^5 - mod(6, 4*3 *(2+6))");
         assertThat(iep, notNullValue());
         
         pr = iep.validateExpression();
@@ -160,14 +160,14 @@ public class InfixExpressionParserTest
     @Test
     public final void testAlaisedOperastors()
     {
-        InfixExpressionParser iep = new InfixExpressionParser("5 % 2 + mod(7,5)");
+        InfixExpressionParser iep = new InfixExpressionParser("mod(5, 2) + mod(7,5)");
         assertThat(iep, notNullValue());
         
         ParseResult pr = iep.validateExpression();
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(true));
-        assertThat(iep.getInfixStack().size(), is(10));
-        assertThat(iep.parsedInfixExpression(), is("5.0 % 2.0 + mod ( 7.0 , 5.0 )"));
+        assertThat(iep.getInfixStack().size(), is(13));
+        assertThat(iep.parsedInfixExpression(), is("mod ( 5.0 , 2.0 ) + mod ( 7.0 , 5.0 )"));
     }  
     
     @Test

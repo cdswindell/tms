@@ -93,30 +93,30 @@ public class PostfixExpressionParserTest
     @Test
     public final void testConvertInfixToPostfixEquationStackEquationStack()
     {
-        InfixExpressionParser iep = new InfixExpressionParser("5 % 2 + mod(7,5)");
+        InfixExpressionParser iep = new InfixExpressionParser("mod(5, 2) + mod(7,5)");
         assertThat(iep, notNullValue());
         
         ParseResult pr = iep.validateExpression();
         assertThat(pr, notNullValue());
         assertThat(pr.isSuccess(), is(true));
-        assertThat(iep.parsedInfixExpression(), is("5.0 % 2.0 + mod ( 7.0 , 5.0 )"));
+        assertThat(iep.parsedInfixExpression(), is("mod ( 5.0 , 2.0 ) + mod ( 7.0 , 5.0 )"));
         
         EquationStack ifs = iep.getInfixStack();
         assertThat(ifs, notNullValue());
-        assertThat(ifs.size(), is(10));
+        assertThat(ifs.size(), is(13));
               
         PostfixStackGenerator pfp = new PostfixStackGenerator(ifs, null);
         assertThat(pfp, notNullValue());
         
         EquationStack pfs = pfp.getPostfixStack();
         assertThat(pfs, notNullValue());        
-        assertThat(pfs.toExpression(), is("5.0 2.0 % 7.0 5.0 mod +"));
+        assertThat(pfs.toExpression(), is("5.0 2.0 mod 7.0 5.0 mod +"));
         assertThat(pfs, notNullValue());   
         
         String infixExpr = pfs.toExpression(StackType.Infix);
-        assertThat(infixExpr, is("5.0 % 2.0 + mod(7.0, 5.0)") );
+        assertThat(infixExpr, is("mod(5.0, 2.0) + mod(7.0, 5.0)") );
         
-        iep = new InfixExpressionParser("5 % mod((2 + 7), 5)");
+        iep = new InfixExpressionParser("mod(5, mod((2 + 7), 5))");
         assertThat(iep, notNullValue());
         
         pr = iep.validateExpression();
@@ -125,18 +125,18 @@ public class PostfixExpressionParserTest
         
         ifs = iep.getInfixStack();
         assertThat(ifs, notNullValue());
-        assertThat(ifs.size(), is(12));
-        assertThat(ifs.toExpression(), is("5.0 % mod ( ( 2.0 + 7.0 ) , 5.0 )"));
+        assertThat(ifs.size(), is(15));
+        assertThat(ifs.toExpression(), is("mod ( 5.0 , mod ( ( 2.0 + 7.0 ) , 5.0 ) )"));
               
         pfp = new PostfixStackGenerator(ifs, null);
         assertThat(pfp, notNullValue());
         
         pfs = pfp.getPostfixStack();
-        assertThat(pfs.toExpression(), is("5.0 2.0 7.0 + 5.0 mod %"));
+        assertThat(pfs.toExpression(), is("5.0 2.0 7.0 + 5.0 mod mod"));
         assertThat(pfs, notNullValue());   
         
         infixExpr = pfs.toExpression(StackType.Infix);
-        assertThat(infixExpr, is("5.0 % mod((2.0 + 7.0), 5.0)") );
+        assertThat(infixExpr, is("mod(5.0, (mod((2.0 + 7.0), 5.0)))") );
         
         iep = new InfixExpressionParser("5 * 3 + 2 / 7");
         assertThat(iep, notNullValue());

@@ -69,7 +69,8 @@ public class BaseTest
         if (cv == null)
             assertThat("cell is not null", cell.isNull(), is(true));
         else if (Number.class.isAssignableFrom(cv.getClass()))
-            assertThat("cell value not within tolerance",closeTo(cell.getCellValue(), ((Number)cv).doubleValue(), 0.0000001), is(true));
+            assertThat(String.format("cell value (%f) not within tolerance of expected (%f)", (Double)cell.getCellValue(), ((Number)cv).doubleValue()),
+                    closeTo(cell.getCellValue(), ((Number)cv).doubleValue(), 0.0000001), is(true));
         else
             assertThat(cell.getCellValue(), is(cv));
         

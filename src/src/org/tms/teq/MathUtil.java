@@ -16,21 +16,21 @@ import org.tms.api.TableElement;
 public class MathUtil
 {
 
-    static final public double pmt(double ipt, int nPer, double pv, double fv)
+    static final public double pmt(final double ipt, final int nPer, final double pv, final double fv)
     {
         double tmp = Math.exp(nPer*Math.log1p(ipt));
         double pmt = ((pv*tmp + fv)*ipt)/(1.0 - tmp);      
         return pmt;
     }
     
-    static final public double fv(double ipt, int nPer, double pmt, double pv)
+    static final public double fv(final double ipt, final int nPer, final double pmt, final double pv)
     {
         double tmp = Math.exp(nPer*Math.log1p(ipt));
         double fv = -pv * tmp - pmt * ((tmp - 1.0)/ipt);      
         return fv;
     }
     
-    static final public double pv(double ipt, int nPer, double pmt, double fv)
+    static final public double pv(final double ipt, final int nPer, final double pmt, final double fv)
     {
         double tmp = Math.exp(nPer*Math.log1p(ipt));
         double pv = (-fv - pmt * ((tmp - 1.0)/ipt))/tmp;      
@@ -193,12 +193,12 @@ public class MathUtil
         return Math.toDegrees(Math.asin(arg));
     }
 
-    static final public double acosD(double arg)
+    static final public double acosD(final double arg)
     {
         return Math.toDegrees(Math.acos(arg));
     }   
 
-    static final public double atanD(double arg)
+    static final public double atanD(final double arg)
     {
         // handle special cases first
         if (Double.POSITIVE_INFINITY == arg)
@@ -208,6 +208,11 @@ public class MathUtil
         else
             return Math.toDegrees(Math.atan(arg));
     } 
+    
+    static final public double percent(final double arg)
+    {
+        return arg / 100.0;
+    }
     
     static final public String toLower(String arg)
     {

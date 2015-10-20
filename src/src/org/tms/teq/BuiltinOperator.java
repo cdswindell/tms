@@ -62,11 +62,12 @@ public enum BuiltinOperator implements Labeled, Operator
     RowRefOper("rowRef", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Object.class),
     
     // Special math operators, implemented in Java Math class
-    ModOper(TokenType.BinaryOp, 4, MathUtil.class, "mod", "%"),  
-    PowerOper(TokenType.BinaryOp, 4, Math.class, "pow", "^"),
+    ModOper(TokenType.BinaryOp, 4, MathUtil.class, "mod", "mod"),  
+    PowerOper(TokenType.BinaryOp, 5, Math.class, "pow", "^"),
     
     // Factorial operator, implemented in code
     FactOper(TokenType.UnaryTrailingOp, 4, MathUtil.class, "fact", "!"),
+    PercentOper(TokenType.UnaryTrailingOp, 4, MathUtil.class, "percent", "%"),
     
     // Unary functions, mostly supported in Java Math
     FracOper("frac", TokenType.UnaryFunc, 5, MathUtil.class),
