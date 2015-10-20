@@ -267,7 +267,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
                 else if (tce instanceof CellImpl)
                     removedAny = m_cells.remove((CellImpl)tce) ? true : removedAny;
                 
-                // remove the  from the corresponding object
+                // remove the from the corresponding object
                 if (removedAny)
                     ((TableElementImpl)tce).remove(this);
             }

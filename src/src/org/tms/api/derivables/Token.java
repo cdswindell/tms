@@ -352,6 +352,11 @@ public class Token implements Labeled
         return false;
     }
     
+    public boolean isBasicOperator()
+    {
+        return getTokenType() != null ? getTokenType().isBasicOperator() : false;
+    }
+    
     public boolean isFunction()
     {
         if (this.getTokenType() != null) 
@@ -453,6 +458,6 @@ public class Token implements Labeled
         else if (isString())
             return "\"" +getStringValue() + "\"";
         else
-            return null;
+            return this.toString();
     }
 }

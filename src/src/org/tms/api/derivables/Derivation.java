@@ -22,6 +22,7 @@ public interface Derivation
     Table getTable();
     TableContext getTableContext();
 
+    public String getExpression();
     public String getAsEnteredExpression();
     public String getPostfixExpression();
     public String getInfixExpression();

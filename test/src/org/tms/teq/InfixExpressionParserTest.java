@@ -168,6 +168,7 @@ public class InfixExpressionParserTest
         assertThat(pr.isSuccess(), is(true));
         assertThat(iep.getInfixStack().size(), is(13));
         assertThat(iep.parsedInfixExpression(), is("mod ( 5.0 , 2.0 ) + mod ( 7.0 , 5.0 )"));
+        assertThat(iep.getInfixStack().toExpression(false), is("mod(5.0, 2.0) + mod(7.0, 5.0)"));
     }  
     
     @Test

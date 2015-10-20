@@ -1,7 +1,11 @@
 package org.tms.io;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.tms.api.Column;
+import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.io.options.IOOptions;
 
@@ -57,6 +61,7 @@ abstract class BaseReader<E extends IOOptions> extends BaseIO
     {
         return m_options.isRowNames();
     }
+    
     /**
      * Return {@code true} if the Default file contains column names.
      * @return true if the Default file contains column names
@@ -64,5 +69,26 @@ abstract class BaseReader<E extends IOOptions> extends BaseIO
     public boolean isColumnNames()
     {
         return m_options.isColumnNames();
+    }
+    
+    /**
+     * Prune empty columns from imported table, if so directed
+     * @param t
+     */
+    protected void pruneEmptyColumns(Table t)
+    {
+        if (options().isIgnoreEmptyColumns()) {
+            Set<Column> emptyCols = null;
+            for (Column c : t.getColumns()) {
+                if (c != null && c.isNull()) {
+                    if (emptyCols == null)
+                        emptyCols = new HashSet<Column>();
+                    emptyCols.add(c);
+                }
+            }
+            
+            if (emptyCols != null)
+                t.delete(emptyCols.toArray(new Column [] {}));
+        }
     }
 }

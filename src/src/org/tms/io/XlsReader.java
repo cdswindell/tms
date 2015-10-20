@@ -153,6 +153,8 @@ public class XlsReader extends BaseReader<XlsOptions>
     private Map<String, DerivationScope> m_derivCache = null;
     private Map<org.tms.api.Cell, String> m_derivedCells = null;
     private Map<String, TableElement> m_namedTableElements = null;
+    private Set<Integer> m_excelEmptyRows = null;
+    
     private Table m_table;
     
     public XlsReader(String fileName, XlsOptions format)
@@ -173,22 +175,50 @@ public class XlsReader extends BaseReader<XlsOptions>
             throw new IllegalArgumentException("XlsOptions required");
     }
 
-    public TableElement getTmsColumn(int excelColNo)
+    public int getTmsColumnIdx(int excelColNo)
     {
-        int idx = excelColNo + 1 - (XlsReader.this.options().isRowNames() ? 1 : 0);
+        return excelColNo + 1 - (options().isRowNames() ? 1 : 0);
+    }
+
+    public org.tms.api.Column getTmsColumn(int excelColNo)
+    {
+        int idx = getTmsColumnIdx(excelColNo);        
         if (idx >= 1 && idx <= m_table.getNumColumns())
             return m_table.getColumn(idx);
         else
             return null;
     }
 
-    public TableElement getTmsRow(int excelRowNo)
+    public int getTmsRowIdx(int excelRowNo)
     {
-        int idx = excelRowNo + 1 - (XlsReader.this.options().isColumnNames() ? 1 : 0);
+        int idx = excelRowNo + 1 - (options().isColumnNames() ? 1 : 0);
+        if (options().isIgnoreEmptyRows() && m_excelEmptyRows != null)
+            idx -= accountForMissingElements(excelRowNo, m_excelEmptyRows);
+        
+        return idx;
+    }
+        
+    public org.tms.api.Row getTmsRow(int excelRowNo)
+    {
+        int idx = getTmsRowIdx(excelRowNo);
         if (idx >= 1 && idx <= m_table.getNumRows())
             return m_table.getRow(idx);
         else
             return null;
+    }
+
+    private int accountForMissingElements(int excelRowNo, Set<Integer> emptyElemIndexes)
+    {
+        int offset = 0;
+        
+        for (Integer emptyIdx : emptyElemIndexes) {
+            if (excelRowNo > emptyIdx)
+                offset++;
+            else if (excelRowNo < emptyIdx)
+                break;
+        }
+        
+        return offset;
     }
 
     public Table parse() throws IOException
@@ -209,6 +239,9 @@ public class XlsReader extends BaseReader<XlsOptions>
             if (sheetName != null)
                 t.setLabel(sheet.getSheetName());
 
+            if (options().isIgnoreEmptyRows())
+                m_excelEmptyRows = new LinkedHashSet<Integer>();
+            
             // handle column headings
             int rowNum = 0;
             if (isColumnNames()) {
@@ -231,21 +264,27 @@ public class XlsReader extends BaseReader<XlsOptions>
             }
 
             // handle row data
+            Set<org.tms.api.Row> emptyRows = new HashSet<org.tms.api.Row>();
             while (rowNum <= sheet.getLastRowNum()) {
                 Row eR = sheet.getRow(rowNum++);
-                if (eR != null) {
+                if (eR != null && eR.getPhysicalNumberOfCells() > 0) {
                     org.tms.api.Row tR = t.addRow();
                     org.tms.api.Column tC = t.getColumn(Access.First);
+                    boolean rowIsEffectivelyNull = true;
                     for (short i = 0; i < eR.getLastCellNum(); i++) {
                         Cell eC = eR.getCell(i, Row.RETURN_BLANK_AS_NULL);
                         Object cv = fetchCellValue(eC);
                         String note = fetchCellComment(eC, true);
                         if (i == 0 && isRowNames()) {
-                            if (note != null)
+                            if (note != null) {
                                 tR.setDescription(note);
+                                rowIsEffectivelyNull = false;
+                            }
 
-                            if (cv != null)                       
+                            if (cv != null) {                   
                                 tR.setLabel(cv.toString());
+                                rowIsEffectivelyNull = false;
+                            }
                         }
                         else {
                             if (tC == null)
@@ -253,17 +292,22 @@ public class XlsReader extends BaseReader<XlsOptions>
 
                             if (eC != null || cv != null) {
                                 org.tms.api.Cell tCell = t.getCell(tR, tC);
-                                if (note != null)
+                                if (note != null) {
                                     tCell.setDescription(note);
+                                    rowIsEffectivelyNull = false;
+                                }
 
-                                if (cv != null)
+                                if (cv != null) {
                                     tCell.setCellValue(cv);
+                                    rowIsEffectivelyNull = false;
+                                }
 
                                 // record presence of cell formula; we will process
                                 // once all of table is imported
                                 if (eC.getCellType() == Cell.CELL_TYPE_FORMULA) {
                                     ParsedFormula pf = processExcelFormula(wb, sheet, asi, eC, tCell);
                                     parsedFormulas.add(pf);
+                                    rowIsEffectivelyNull = false;
                                 }
                             }
 
@@ -271,11 +315,18 @@ public class XlsReader extends BaseReader<XlsOptions>
                             tC = t.getColumn(Access.Next);
                         }
                     }
+                    
+                    if (rowIsEffectivelyNull)
+                        emptyRows.add(tR);
                 }
-                else if (!options().isIgnoreEmptyRows()) {
-                    // excel row is empty and we don't want to ignore empty rows
-                    // add a new row
-                    t.addRow();
+                else {
+                    if (options().isIgnoreEmptyRows()) 
+                        m_excelEmptyRows.add(rowNum - 1);
+                    else {
+                        // excel row is empty and we don't want to ignore empty rows
+                        // add a new row
+                        t.addRow();
+                    }
                 }
             }
 
@@ -284,6 +335,12 @@ public class XlsReader extends BaseReader<XlsOptions>
             
             // handle equations
             processEquations(wb, sheet, sheetName, asi, parsedFormulas, t);
+            
+            // prune empty rows and columns
+            if (options().isIgnoreEmptyRows() && !emptyRows.isEmpty())
+                t.delete(emptyRows.toArray(new TableElement[] {}));
+            
+            pruneEmptyColumns(t);
         }
         catch (EncryptedDocumentException | InvalidFormatException e)
         {
@@ -522,6 +579,8 @@ public class XlsReader extends BaseReader<XlsOptions>
         }
         
         for (int i = rngLstColNo + 1; i < lastCol; i++) {
+            if (isExcludedRow(i))
+                continue;
             Cell cell = row.getCell(i, Row.RETURN_BLANK_AS_NULL);
             if (cell == null || cell.getCellType() != Cell.CELL_TYPE_FORMULA)
                 return false;
@@ -530,11 +589,19 @@ public class XlsReader extends BaseReader<XlsOptions>
         return true;
     }
 
+    private boolean isExcludedRow(int rowNo)
+    {
+        if (m_excelEmptyRows != null)
+            return m_excelEmptyRows.contains(rowNo);
+        else
+            return false;
+    }
+
     private Token createOperandToken(RefPtgBase eT, ParsedFormula pf)
     {
         // determine tms-based indices of reference
-        int rowRef = eT.getRow() + 1 - (options().isColumnNames() ? 1 : 0);
-        int colRef = eT.getColumn() + 1 - (options().isRowNames() ? 1 : 0);
+        int rowRef = getTmsRowIdx(eT.getRow());
+        int colRef = getTmsColumnIdx(eT.getColumn());
         
         // if the reference is in the same row or column as the tms target cell, 
         // return a column or row reference
@@ -709,8 +776,7 @@ public class XlsReader extends BaseReader<XlsOptions>
         int excelColNo = cRefs[0].getCol();
 
         // now, return cell, correcting for 1-based TMS row/column indexes
-        return t.getCell(t.getRow(excelRowNo + 1 - (options().isColumnNames() ? 1 : 0)), 
-                t.getColumn(excelColNo + 1 - (options().isRowNames() ? 1 : 0)));
+        return t.getCell(getTmsRow(excelRowNo), getTmsColumn(excelColNo));
     }
 
     private boolean isSingleCell(CellReference[] cRefs)

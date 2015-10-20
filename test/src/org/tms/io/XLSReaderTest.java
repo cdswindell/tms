@@ -25,6 +25,7 @@ public class XLSReaderTest extends BaseTest
     private static final String SAMPLE2 = "sample2.xlsx";
     private static final String SAMPLE2XLS = "sample2.xls";
     private static final String SAMPLE3 = "sample3.xlsx";
+    private static final String SAMPLE3EmptyRows = "sample3WithEmptyRows.xlsx";
     private static final String SAMPLE3XLS = "sample3.xls";
     
     @Test
@@ -238,6 +239,15 @@ public class XLSReaderTest extends BaseTest
         testImportSheetStatisticEquations(r);
     }
 
+    @Test
+    public final void testImportSheetStatisticEquationsWithEmptyRows() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3EmptyRows), XlsOptions.Default.withIgnoreEmptyRows()); 
+        assertNotNull(r);
+        
+        testImportSheetStatisticEquations(r);
+    }
+
     private void testImportSheetStatisticEquations(XlsReader r)
     {
         try
@@ -289,19 +299,19 @@ public class XLSReaderTest extends BaseTest
             
             Cell cell = vetCellValue(t, "PercentageVal", 2.0);
             assertThat(cell.isDerived(), is(true));
-            String deriv = cell.getDerivation().getAsEnteredExpression();
+            String deriv = cell.getDerivation().getExpression();
             assertNotNull(deriv);
             assertThat(deriv, is("cell \"BasicMathVal\" * 50.0%"));
             
             cell = vetCellValue(t, "FactorialVal", 24.0);
             assertThat(cell.isDerived(), is(true));
-            deriv = cell.getDerivation().getAsEnteredExpression();
+            deriv = cell.getDerivation().getExpression();
             assertNotNull(deriv);
             assertThat(deriv, is("factorial(cell \"BasicMathVal\")"));
             
             cell = vetCellValue(t, "YellowTrim", "Yellow");
             assertThat(cell.isDerived(), is(true));
-            deriv = cell.getDerivation().getAsEnteredExpression();
+            deriv = cell.getDerivation().getExpression();
             assertNotNull(deriv);
             assertThat(deriv, is("trim((row 7 + \"   \"))"));
         }

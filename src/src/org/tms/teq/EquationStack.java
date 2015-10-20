@@ -150,6 +150,11 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     
     public String toExpression()
     {
+        return toExpression(true);
+    }
+    
+    public String toExpression(boolean addExtraSpaces)
+    {
         if (isEmpty())
             return null;
         else {
@@ -157,14 +162,19 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             
             Iterator<Token> di = this.descendingIterator();
             boolean addLeadingSpace = false;
+            TokenType lastTT = null;
             while (di != null && di.hasNext()) {
-                if (addLeadingSpace) sb.append(' ');
                 Token t = di.next();
+                TokenType tt = t.getTokenType();
                 
-                if (t.isString()) sb.append('"');
-                sb.append(t.toString());
-                if (t.isString()) sb.append('"');
+                if ((addExtraSpaces && addLeadingSpace) || (lastTT == TokenType.UnaryFunc && tt != TokenType.LeftParen)) sb.append(' ');
+                
+                if (!addExtraSpaces && t.isBasicOperator()) sb.append(' ');                
+                sb.append(t.toExpressionValue());
+                if (!addExtraSpaces && (t.isBasicOperator() || tt == TokenType.Comma )) sb.append(' ');
+                
                 addLeadingSpace = true;
+                lastTT = tt;
             }
             
             return sb.toString();

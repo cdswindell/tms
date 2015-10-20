@@ -286,7 +286,7 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
              * if the subset contains the element, use the subset method to do all the work
              * TableSliceElementImpl.remove will be called again to finish up
              */
-        	if (r.contains(this))
+        	if (r.contains(this)) 
         		r.remove(this);
         	
         	return m_subsets.remove(r);
@@ -298,7 +298,11 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     protected void removeFromAllSubsets()
     {
     	// remove this table slice element from all subsets
-    	m_subsets.forEach(r -> {if (r != null) r.remove(this);});
+        if (!m_subsets.isEmpty()) {
+            List<SubsetImpl> tmp = new ArrayList<SubsetImpl>(m_subsets);
+            m_subsets.clear();
+            tmp.forEach(r -> {if (r != null) r.remove(this);});
+        }
     }
     
     protected CellReference getCurrent()

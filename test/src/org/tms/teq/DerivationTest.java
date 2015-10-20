@@ -89,6 +89,7 @@ public class DerivationTest
         assertThat(d.isConverted(), is(true));
 
         assertThat(d.getAsEnteredExpression(), is("10+11"));
+        assertThat(d.getExpression(), is("10.0 + 11.0"));
         assertThat(d.getInfixExpression(), is("10.0 + 11.0"));
         assertThat(d.getPostfixExpression(), is("10.0 11.0 +"));
     }

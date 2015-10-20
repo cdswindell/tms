@@ -767,12 +767,21 @@ public final class DerivationImpl implements Derivation
     }
     
     @Override
+    public String getExpression()
+    {
+        if (m_ifs != null)
+            return m_ifs.toExpression(false);
+        else
+            return null;
+    }
+
+    @Override
     public String getAsEnteredExpression()
     {
         if (m_asEntered != null)
             return m_asEntered;
         else if (m_ifs != null)
-            return m_ifs.toExpression();
+            return m_ifs.toExpression(false);
         else
             return null;
     }

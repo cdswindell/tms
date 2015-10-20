@@ -73,6 +73,17 @@ public enum TokenType implements Labeled
         return isFunction() || isTransform() || (this == BinaryOp) || (this == UnaryOp) || (this == UnaryTrailingOp);
     }
     
+    public boolean isBasicOperator()
+    {
+        switch (this) {
+            case BinaryOp:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+    
     public boolean isFunction()
     {
         switch (this) {

@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -97,19 +95,7 @@ public class CSVReader extends BaseReader<CSVOptions>
             }
             
             // if we're ignoring extra columns, we have one more check
-            if (options().isIgnoreEmptyColumns()) {
-                Set<Column> emptyCols = null;
-                for (Column c : t.getColumns()) {
-                    if (c != null && c.isNull()) {
-                        if (emptyCols == null)
-                            emptyCols = new HashSet<Column>();
-                        emptyCols.add(c);
-                    }
-                }
-                
-                if (emptyCols != null)
-                    t.delete(emptyCols.toArray(new Column [] {}));
-            }
+            pruneEmptyColumns(t);
             
             return t;
         }
