@@ -47,7 +47,7 @@ public class XLSReaderTest extends BaseTest
         
         try
         {
-            Table t = r.parse();
+            Table t = r.parseActiveSheet();
             assertNotNull(t);
             
             Column x = t.getColumn(Access.ByLabel, "X");
@@ -183,7 +183,7 @@ public class XLSReaderTest extends BaseTest
     {
         try
         {
-            Table t = r.parse();
+            Table t = r.parseActiveSheet();
             assertNotNull(t);
             
             assertThat(t.getNumRows(), is(4));
@@ -231,7 +231,7 @@ public class XLSReaderTest extends BaseTest
     {
         try
         {
-            Table t = r.parse();
+            Table t = r.parseActiveSheet();
             assertNotNull(t);
             
             assertThat(t.getNumRows(), is(4));
@@ -376,7 +376,7 @@ public class XLSReaderTest extends BaseTest
     {
         try
         {
-            Table t = r.parse();
+            Table t = r.parseActiveSheet();
             assertNotNull(t);
             
             assertThat(t.getNumColumns(), is(4));

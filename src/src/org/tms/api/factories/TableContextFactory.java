@@ -1,6 +1,11 @@
 package org.tms.api.factories;
 
+import java.io.IOException;
+
 import org.tms.api.TableContext;
+import org.tms.api.exceptions.TableIOException;
+import org.tms.api.io.options.XlsOptions;
+import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
 
 public class TableContextFactory
@@ -23,6 +28,37 @@ public class TableContextFactory
         TableContext tc = ContextImpl.fetchDefaultContext();
         return tc;
     }   
+    
+    static public TableContext importWorkbook(String fileName, XlsOptions format)
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        try {
+            importWorkbook(fileName, format, tc);
+        }
+        finally {
+            
+        }
+        
+        return tc;
+    }
+        
+    static public TableContext importWorkbook(String fileName, XlsOptions format, TableContext tc)
+    {
+        if (format == null)
+            format = XlsOptions.Default;
+        
+        try
+        {
+            XlsReader r = new XlsReader(fileName, tc, (XlsOptions)format);
+            r.parseWorkbook();
+        }
+        catch (IOException e)
+        {
+            throw new TableIOException(e);
+        }
+        
+        return tc;
+    }
     
     /**
      * Construct a TableContextFactory instance.

@@ -115,7 +115,7 @@ public final class TableFactory
             }
             else if (format.isExcel()) {
                 XlsReader r = new XlsReader(fileName, tc, (XlsOptions)format);
-                return r.parse();
+                return r.parseActiveSheet();
             }
             else if (format.isTMS()) {
                 
