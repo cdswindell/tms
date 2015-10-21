@@ -31,6 +31,7 @@ public class XLSReaderTest extends BaseTest
     private static final String SAMPLE3XLS = "sample3.xls";
     private static final String SAMPLELogical = "sampleLogical.xlsx";
     private static final String SAMPLEMulti = "MultiSheet.xlsx";
+    private static final String SAMPLEMultiXLS = "MultiSheet.xls";
     
     @Test
     public final void testXlsReaderConstructor()
@@ -52,10 +53,34 @@ public class XLSReaderTest extends BaseTest
         XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMulti), tc, XlsOptions.Default.withRowNames(false)); 
         assertNotNull(r);
         
+        testMultiSheetImport(tc, r);
+    }
+
+    @Test
+    public final void testImportMultiSheetXls() 
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        assertNotNull(tc);
+        assertThat(tc.getNumTables(), is(0));
+        
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMultiXLS), tc, XlsOptions.Default.withRowNames(false)); 
+        assertNotNull(r);
+        
+        testMultiSheetImport(tc, r);
+    }
+
+    private void testMultiSheetImport(TableContext tc, XlsReader r)
+    {
         try
         {
             r.parseWorkbook();
             assertThat(tc.getNumTables(), is(3));
+            
+            Table inventory = tc.getTable(Access.ByLabel, "Inventory");
+            assertNotNull(inventory);
+            
+            Table costs = tc.getTable(Access.ByLabel, "Costs");
+            assertNotNull(costs);
             
             Table assets = tc.getTable(Access.ByLabel, "Assets");
             assertNotNull(assets);
