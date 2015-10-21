@@ -1,12 +1,13 @@
 package org.tms.api.derivables;
 
-import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
-import org.tms.api.Subset;
+import org.tms.api.Table;
 import org.tms.api.TableElement;
+import org.tms.api.TableRowColumnElement;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.DerivationImpl;
+import org.tms.teq.InfixExpressionParser;
 import org.tms.teq.PendingState;
 
 
@@ -414,6 +415,11 @@ public class Token implements Labeled
 
     public String toExpressionValue()
     {
+        return toExpressionValue(null);
+    }
+    
+    public String toExpressionValue(Table primaryTable)
+    {
         if (isNumeric())
             return getNumericValue().toString();
         else if (isBoolean())
@@ -422,27 +428,19 @@ public class Token implements Labeled
             StringBuffer sb = new StringBuffer();
             switch (getTokenType()) {
                 case ColumnRef:
-                    sb.append("col ");
-                    sb.append(((Column)getValue()).getIndex());
+                    sb.append(createRef("col", (TableElement)getValue(), primaryTable));
                     break;
                     
                 case RowRef:
-                    sb.append("row ");
-                    sb.append(((Row)getValue()).getIndex());
+                    sb.append(createRef("row", (TableElement)getValue(), primaryTable));
                     break;
                     
                 case CellRef:
-                    sb.append("cell ");
-                    sb.append("\"");
-                    sb.append(((Cell)getValue()).getLabel());
-                    sb.append("\"");
+                    sb.append(createRef("cell", (TableElement)getValue(), primaryTable));
                     break;
                     
                 case SubsetRef:
-                    sb.append("subset ");
-                    sb.append("\"");
-                    sb.append(((Subset)getValue()).getLabel());
-                    sb.append("\"");
+                    sb.append(createRef("subset", (TableElement)getValue(), primaryTable));
                     break;
                     
                 default:
@@ -459,5 +457,50 @@ public class Token implements Labeled
             return "\"" +getStringValue() + "\"";
         else
             return this.toString();
+    }
+
+    private Object createRef(String elemType, TableElement ref, Table primaryTable)
+    {
+        StringBuffer sb = new StringBuffer(elemType + " ");
+        
+        boolean requiresTrailingQuote = false;
+        if (primaryTable != null && primaryTable != ref.getTable()) {
+            requiresTrailingQuote = true;
+            sb.append('"');
+            sb.append(ref.getTable().getLabel());
+            sb.append(InfixExpressionParser.sf_TABLE_REF);
+        }
+        
+        String label = ref.getLabel();
+        if (label == null || label.trim().length() <= 0)
+            label = null;
+        
+        switch (elemType) {
+            case "subset":
+            case "cell":
+                if (!requiresTrailingQuote)
+                    sb.append('"');
+                sb.append(label);
+                requiresTrailingQuote = true;
+                break;
+                
+            case "row":
+            case "col":
+                if (label == null)
+                    sb.append(((TableRowColumnElement)ref).getIndex());
+                else {
+                    if (!requiresTrailingQuote) {
+                        sb.append('"');
+                        requiresTrailingQuote = true;
+                    }
+                    sb.append(label);
+                }
+                break;
+        }
+        
+        if (requiresTrailingQuote)
+            sb.append('"');
+        
+        return sb.toString();
     }
 }

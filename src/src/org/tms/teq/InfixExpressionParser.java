@@ -17,7 +17,7 @@ import org.tms.api.derivables.exceptions.InvalidExpressionException;
 
 public class InfixExpressionParser
 {
-	private static final String sf_TABLE_REF = "::" ;
+	public static final String sf_TABLE_REF = "::" ;
 	
     private String m_expr;
     private Table m_table;
@@ -57,7 +57,7 @@ public class InfixExpressionParser
 
     public String parsedInfixExpression()
     {
-        return m_ifs != null ? m_ifs.toExpression() : null;
+        return m_ifs != null ? m_ifs.toExpression(true, getTable()) : null;
     }
     
     public ParseResult validateExpression()
@@ -756,6 +756,11 @@ public class InfixExpressionParser
                     if (refTable != null) {
                         label = label.substring(tblRefIdx + sf_TABLE_REF.length());
                         col = refTable.getColumn(Access.ByLabel, label);
+                        
+                        // One last attempt; is the label a column index?
+                        int colIdx = -1;
+                        if (col == null && (colIdx = labelToIdx(label)) > 0)
+                            col = refTable.getColumn(colIdx);
                     }
                 }
             }
@@ -769,6 +774,16 @@ public class InfixExpressionParser
         
         // failure
         return 0;
+    }
+
+    private int labelToIdx(String label)
+    {
+        try {
+            return Integer.parseInt(label.trim());
+        }
+        catch (Exception e) {
+            return 0;
+        }
     }
 
     private int parseRowReference(char[] exprChars, int curPos, Table table, Token t) 
@@ -792,6 +807,11 @@ public class InfixExpressionParser
                     if (refTable != null) {
                         label = label.substring(tblRefIdx + sf_TABLE_REF.length());
                         row = refTable.getRow(Access.ByLabel, label);
+                        
+                        // One last attempt; is the label a column index?
+                        int rowIdx = -1;
+                        if (row == null && (rowIdx = labelToIdx(label)) > 0)
+                            row = refTable.getRow(rowIdx);
                     }
                 }
             }

@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+import org.tms.api.Table;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
@@ -35,7 +36,8 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     private StackType m_stackType;
 
 	private TokenMapper m_tokenMapper;
-
+    private Table m_primaryTable;
+	
     EquationStack(StackType st) 
     {
         super();
@@ -48,6 +50,16 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
         m_stackType = eqS.getStackType();
         
         this.addAll(eqS);
+    }
+    
+    public Table getPrimaryTable()
+    {
+        return m_primaryTable;
+    }
+    
+    public void setPrimaryTable(Table primaryTable)
+    {
+        m_primaryTable = primaryTable;
     }
     
 	public TokenMapper getTokenMapper()
@@ -156,10 +168,10 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     
     public String toExpression()
     {
-        return toExpression(true);
+        return toExpression(m_stackType == StackType.Postfix, m_primaryTable);
     }
     
-    public String toExpression(boolean addExtraSpaces)
+    public String toExpression(boolean addExtraSpaces, Table primaryTable)
     {
         if (isEmpty())
             return null;
@@ -176,7 +188,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                 if ((addExtraSpaces && addLeadingSpace) || (lastTT == TokenType.UnaryFunc && tt != TokenType.LeftParen)) sb.append(' ');
                 
                 if (!addExtraSpaces && t.isBasicOperator()) sb.append(' ');                
-                sb.append(t.toExpressionValue());
+                sb.append(t.toExpressionValue(primaryTable));
                 if (!addExtraSpaces && (t.isBasicOperator() || tt == TokenType.Comma )) sb.append(' ');
                 
                 addLeadingSpace = true;
@@ -217,11 +229,11 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                     if (t.getTokenType() == TokenType.UnaryOp) {
                         Token x = operands.pop();
                         expr.append(op.getLabel());                            
-                        expr.append(x.toExpressionValue());
+                        expr.append(x.toExpressionValue(m_primaryTable));
                     }
                     else if (t.getTokenType() == TokenType.UnaryTrailingOp) {
                         Token x = operands.pop();
-                        expr.append(x.toExpressionValue());
+                        expr.append(x.toExpressionValue(m_primaryTable));
                         expr.append(op.getLabel());                            
                     }
                     else if (t.getTokenType() == TokenType.BinaryOp) {
@@ -231,9 +243,9 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                         if (putInParens(priority))
                             expr.append('(');
                             
-                        expr.append(x.toExpressionValue()).append(' ');
+                        expr.append(x.toExpressionValue(m_primaryTable)).append(' ');
                         expr.append(op.getLabel()).append(' ');
-                        expr.append(y.toExpressionValue());
+                        expr.append(y.toExpressionValue(m_primaryTable));
                         
                         if (putInParens(priority))
                             expr.append(')');
@@ -251,7 +263,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                             if (putInParens(args[i]))
                                 expr.append('(');
                             
-                            expr.append(args[i].toExpressionValue());
+                            expr.append(args[i].toExpressionValue(m_primaryTable));
                             
                             if (putInParens(args[i]))
                                 expr.append(')');
@@ -272,7 +284,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             
             // top of operands stack is our expression
             Token exprT = operands.pop();           
-            String expr = exprT.toExpressionValue();
+            String expr = exprT.toExpressionValue(m_primaryTable);
             
             while (expr.startsWith("(") && expr.endsWith(")") && isBalancedParens(expr)) 
             {
@@ -310,7 +322,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
     private boolean putInParens(Token token)
     {
         return token.isExpression() && 
-               !token.toExpressionValue().startsWith("(") ;        
+               !token.toExpressionValue(m_primaryTable).startsWith("(") ;        
     }
 
     public String toString()
@@ -336,6 +348,10 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 		return m_stackType;
 	}
 
+	/**
+	 * Reverse stack elements
+	 * @param numArgs
+	 */
     public void reverse(int numArgs)
     {
         if (numArgs > 0 && numArgs <= this.size()) {

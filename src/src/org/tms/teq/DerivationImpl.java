@@ -752,7 +752,7 @@ public final class DerivationImpl implements Derivation
     public String getInfixExpression()
     {
         if (m_ifs != null)
-            return m_ifs.toExpression();
+            return m_ifs.toExpression(false, getTable());
         else
             return null;
     }
@@ -761,7 +761,7 @@ public final class DerivationImpl implements Derivation
     public String getPostfixExpression()
     {
         if (m_pfs != null)
-            return m_pfs.toExpression();
+            return m_pfs.toExpression(true, getTable());
         else
             return null;
     }
@@ -770,7 +770,7 @@ public final class DerivationImpl implements Derivation
     public String getExpression()
     {
         if (m_ifs != null)
-            return m_ifs.toExpression(false);
+            return m_ifs.toExpression(false, getTable());
         else
             return null;
     }
@@ -781,7 +781,7 @@ public final class DerivationImpl implements Derivation
         if (m_asEntered != null)
             return m_asEntered;
         else if (m_ifs != null)
-            return m_ifs.toExpression(false);
+            return m_ifs.toExpression(false, getTable());
         else
             return null;
     }

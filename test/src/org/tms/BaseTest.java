@@ -46,6 +46,11 @@ public class BaseTest
         return sb.toString();
     }
 
+    protected Cell vetCellValue(Table t, int rIdx, int cIdx, Object cv)
+    {
+        return vetCellValue(t, t.getRow(rIdx), t.getColumn(cIdx), cv);
+    }
+    
     protected Cell vetCellValue(Table t, Row r, Column c, Object cv)
     {
         Cell cell = t.getCell(r, c);
@@ -53,8 +58,9 @@ public class BaseTest
         
         if (cv == null)
             assertThat(cell.isNull(), is(true));
-        else if (Number.class.isAssignableFrom(cv.getClass()))
-            assertThat(closeTo(cell.getCellValue(), ((Number)cv).doubleValue(), 0.0000001), is(true));
+        else if (Number.class.isAssignableFrom(cv.getClass())) 
+            assertThat(String.format("cell value (%f) not within tolerance of expected (%f)", (Double)cell.getCellValue(), ((Number)cv).doubleValue()),
+                    closeTo(cell.getCellValue(), ((Number)cv).doubleValue(), 0.0000001), is(true));
         else
             assertThat(cell.getCellValue(), is(cv));
         

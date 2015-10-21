@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -179,10 +180,14 @@ public class XlsReader extends BaseReader<XlsOptions>
     private Map<org.tms.api.Cell, String> m_derivedCells = null;
     private Map<String, TableElement> m_namedTableElements = null;
     private Map<Sheet, Set<Integer>> m_excludedRowsMap;
+    private Map<Sheet, Table> m_sheetTableMap;
+    private Map<Sheet, List<ParsedFormula>> m_sheetParsedFormulaMap;
+    private Map<Sheet, Integer> m_sheetMaxColMap;
+    private Map<Table, Set<org.tms.api.Row>> m_emptyRowsMap;
     private EquationStack m_externalFuncRefStack;
     
-    private int m_maxRows = -1;
-    private int m_maxCols = -1;
+    private Workbook m_wb;
+    private SpreadsheetVersion m_ssV;
     
     public XlsReader(String fileName, XlsOptions format)
     {
@@ -200,18 +205,44 @@ public class XlsReader extends BaseReader<XlsOptions>
 
         if (!(format instanceof XlsOptions))
             throw new IllegalArgumentException("XlsOptions required");
+        
+        // initialize state variables
+        m_wb = null;
+        m_sheetTableMap = new LinkedHashMap<Sheet, Table>();
+        m_sheetParsedFormulaMap = new LinkedHashMap<Sheet, List<ParsedFormula>>();
+        m_sheetMaxColMap = new HashMap<Sheet, Integer>();
+        m_namedTableElements = new HashMap<String, TableElement>();
     }
 
     public void parseWorkbook() 
     throws IOException
     {
-        Workbook wb = null;       
         try
         {
-            wb = WorkbookFactory.create(getInputFile());
-            int noSheets = wb.getNumberOfSheets();
+            m_wb = WorkbookFactory.create(getInputFile());
+            m_ssV = m_wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;  
+            
+            int noSheets = m_wb.getNumberOfSheets();
+            if (noSheets <= 0)
+                return;
+            
+            List<Table> processedTables = new ArrayList<Table>(noSheets);
+            
             for (int i = 0; i < noSheets; i++) {
-                parseSheet(wb, i);
+                Table t = parseSheet(i);
+                if (t != null)
+                    processedTables.add(t);
+            }
+
+            // handle named ranges
+            processNamedRegions();
+            
+            // handle equations
+            applyDerivations();
+            
+            // for each table, remove empty elements (if requested) and do a final recalc
+            for (Table t : processedTables) {
+                pruneEmptyElements(t);
             }
         }
         catch (EncryptedDocumentException | InvalidFormatException e)
@@ -222,13 +253,22 @@ public class XlsReader extends BaseReader<XlsOptions>
     
     public Table parseActiveSheet() throws IOException
     {
-        Workbook wb = null;       
         try
         {
-            wb = WorkbookFactory.create(getInputFile());
-            int asi = wb.getActiveSheetIndex();
+            m_wb = WorkbookFactory.create(getInputFile());
+            m_ssV = m_wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;     
+            int asi = m_wb.getActiveSheetIndex();
             
-            return parseSheet(wb, asi);
+            Table t = parseSheet(asi);
+            
+            // handle named ranges
+            processNamedRegions();
+            
+            // handle equations
+            applyDerivations();
+            
+            pruneEmptyElements(t);
+            return t;
         }
         catch (EncryptedDocumentException | InvalidFormatException e)
         {
@@ -236,21 +276,27 @@ public class XlsReader extends BaseReader<XlsOptions>
         }
     }
     
-    public Table parseSheet(Workbook wb, int sheetNo) throws IOException
+    public Table parseSheet(int sheetNo) throws IOException
     {
         Set<Integer> excelEmptyRows = null;
         
         // create the table scaffold
         Table t = TableFactory.createTable(getTableContext());
+        List<ParsedFormula> parsedFormulas = new ArrayList<ParsedFormula>();
         try
         {
-            List<ParsedFormula> parsedFormulas = new ArrayList<ParsedFormula>();
-
-            Sheet sheet = wb.getSheetAt(sheetNo);             
+            Sheet sheet = m_wb.getSheetAt(sheetNo);             
             String sheetName = trimString(sheet.getSheetName());
             if (sheetName != null)
                 t.setLabel(sheet.getSheetName());
+            
+            // associate this sheet with its TMS table
+            m_sheetTableMap.put(sheet, t);
+            m_sheetParsedFormulaMap.put(sheet, parsedFormulas);
 
+            // keep track of empty rows, we need to
+            // account for them when we map spreadsheet rows
+            // to tms table rows
             if (options().isIgnoreEmptyRows()) {
                 if (m_excludedRowsMap == null)
                     m_excludedRowsMap = new HashMap<Sheet, Set<Integer>>();
@@ -322,7 +368,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                                 // record presence of cell formula; we will process
                                 // once all of table is imported
                                 if (eC.getCellType() == Cell.CELL_TYPE_FORMULA) {
-                                    ParsedFormula pf = processExcelFormula(wb, sheet, sheetNo, eC, tCell);
+                                    ParsedFormula pf = processExcelFormula(sheet, sheetNo, eC, tCell);
                                     parsedFormulas.add(pf);
                                     rowIsEffectivelyNull = false;
                                 }
@@ -347,18 +393,13 @@ public class XlsReader extends BaseReader<XlsOptions>
                 }
             }
 
-            // handle named ranges
-            processNamedRegions(wb, sheet, sheetName, t);
+            if (options().isIgnoreEmptyRows() && !emptyRows.isEmpty()) {
+                // save empty rows, we will delete them later           
+                if (m_emptyRowsMap == null)
+                    m_emptyRowsMap = new HashMap<Table, Set<org.tms.api.Row>>();
+                m_emptyRowsMap.put(t, emptyRows);
+            }
             
-            // handle equations
-            processEquations(wb, parsedFormulas);
-            t.recalculate();
-            
-            // prune empty rows and columns
-            if (options().isIgnoreEmptyRows() && !emptyRows.isEmpty())
-                t.delete(emptyRows.toArray(new TableElement[] {}));
-            
-            pruneEmptyColumns(t);
         }
         catch (EncryptedDocumentException e)
         {
@@ -368,52 +409,74 @@ public class XlsReader extends BaseReader<XlsOptions>
         return t;
     }
 
+    private void pruneEmptyElements(Table t)
+    {
+        // prune empty rows and columns
+        if (options().isIgnoreEmptyRows() && m_emptyRowsMap != null) {
+            Set<org.tms.api.Row> emptyRows = m_emptyRowsMap.get(t);
+            if (emptyRows != null && !emptyRows.isEmpty())
+                t.delete(emptyRows.toArray(new TableElement[] {}));
+        }
+        
+        pruneEmptyColumns(t);
+        
+        // and finally, recalculate table
+        t.recalculate();
+    }
+
     /**
      * For each Excel formula discovered, create a TMS-style infix formula
      * and cache it along with the TMS cell it is associated with
      */
-    private void processEquations(Workbook wb, List<ParsedFormula> parsedFormulas)
+    private void applyDerivations()
     {
-        m_externalFuncRefStack = EquationStack.createOpStack();
-        for (ParsedFormula pf : parsedFormulas) {
-            try {
-                EquationStack es = EquationStack.createPostfixStack();
-                for (Ptg eT : pf.getTokens()) {
-                    Token tmsT = excelToken2TmsToken(pf, eT);
-                    if (tmsT != null) {
-                        // for a few Excel formulas,
-                        // we need to swap the order of
-                        // the operands
-                        if (tmsT.getOperator() != null && sf_InvertedArgs.contains(tmsT.getOperator()))
-                            es.reverse(tmsT.getOperator().numArgs());
-                        es.push(tmsT);
+        for (List<ParsedFormula> parsedFormulas : m_sheetParsedFormulaMap.values()) {
+            m_externalFuncRefStack = EquationStack.createOpStack();
+            for (ParsedFormula pf : parsedFormulas) {
+                try {
+                    // create an equation stack and set the primary table
+                    // to the destination of the parsedFormula;
+                    // this will cause formulas to generate correct refs
+                    EquationStack es = EquationStack.createPostfixStack();
+                    es.setPrimaryTable(pf.getTable());
+                    
+                    for (Ptg eT : pf.getTokens()) {
+                        Token tmsT = excelToken2TmsToken(pf, eT);
+                        if (tmsT != null) {
+                            // for a few Excel formulas,
+                            // we need to swap the order of
+                            // the operands
+                            if (tmsT.getOperator() != null && sf_InvertedArgs.contains(tmsT.getOperator()))
+                                es.reverse(tmsT.getOperator().numArgs());
+                            es.push(tmsT);
+                        }
                     }
+
+                    // we now have a post fix stack in TMS form
+                    String formula = trimString(es.toExpression(StackType.Infix));
+                    if (formula != null)
+                        cacheDerivation(formula, pf.getTmsCell());
                 }
-                
-                // we now have a post fix stack in TMS form
-                String formula = trimString(es.toExpression(StackType.Infix));
-                if (formula != null)
-                    cacheDerivation(formula, pf.getTmsCell());
-            }
-            catch (UnimplementedException e) {
-                System.out.println(e.getMessage());
-            }
-        } 
-        
-        // with all excel formulas processed and transformed
-        // into tms derivations, apply the derivations to their targets
-        if (m_derivCache != null) {
-            for(Map.Entry<String, DerivationScope> e : m_derivCache.entrySet()) {
-                String deriv = e.getKey();
-                for (Derivable d : e.getValue().getTargets()) {
-                    try {
-                        d.setDerivation(deriv);
-                    }
-                    catch (InvalidExpressionException iee) {
-                        System.out.println(iee.getMessage());
-                    }
+                catch (UnimplementedException e) {
+                    System.out.println(e.getMessage());
                 }
-            }           
+            } 
+
+            // with all excel formulas processed and transformed
+            // into tms derivations, apply the derivations to their targets
+            if (m_derivCache != null) {
+                for(Map.Entry<String, DerivationScope> e : m_derivCache.entrySet()) {
+                    String deriv = e.getKey();
+                    for (Derivable d : e.getValue().getTargets()) {
+                        try {
+                            d.setDerivation(deriv);
+                        }
+                        catch (InvalidExpressionException iee) {
+                            System.out.println(iee.getMessage());
+                        }
+                    }
+                }           
+            }
         }
     }
 
@@ -509,7 +572,7 @@ public class XlsReader extends BaseReader<XlsOptions>
     private Token createOperandToken(NamePtg eT, ParsedFormula pf)
     {
         if (m_namedTableElements != null) {
-            Name namedRange = pf.getExcelCell().getSheet().getWorkbook().getNameAt(eT.getIndex());
+            Name namedRange = m_wb.getNameAt(eT.getIndex());
             
             if (namedRange != null) {
                 String refName = namedRange.getNameName();
@@ -519,6 +582,10 @@ public class XlsReader extends BaseReader<XlsOptions>
                         return new Token(TokenType.CellRef, te);
                     else if (te instanceof Subset)
                         return new Token(TokenType.SubsetRef, te);
+                    else if (te instanceof org.tms.api.Row)
+                        return new Token(TokenType.RowRef, te);
+                    else if (te instanceof org.tms.api.Column)
+                        return new Token(TokenType.ColumnRef, te);
                 }
             }
         }
@@ -554,7 +621,7 @@ public class XlsReader extends BaseReader<XlsOptions>
         if (numRows == 1) {
             if (rngRowNo == eCRow && rangeIsRow(rngColNo, eT.getLastColumn(), rngRowNo, eT, pf))
                 return new Token(TokenType.RowRef, getTmsRow(t, pf.getSheet(), rngRowNo));
-            else if (rngColNo == 0 && numCols > m_maxCols)
+            else if (rngColNo == 0 && numCols > getNumColumns(pf.getSheet()))
                 return new Token(TokenType.RowRef, getTmsRow(t, pf.getSheet(), rngRowNo));
         }
         
@@ -596,11 +663,17 @@ public class XlsReader extends BaseReader<XlsOptions>
         for (int i = rngLstRowNo + 1; i < lastRow; i++) {
             Row r = sheet.getRow(i);
             Cell cell = r.getCell(colNo, Row.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellType() != Cell.CELL_TYPE_FORMULA)
+            if (cell == null || cell.getCellType() != Cell.CELL_TYPE_FORMULA || !isSameRange(cell, rng))
                 return false;
         }
         
         return true;
+    }
+
+    private boolean isSameRange(Cell cell, AreaPtgBase rng)
+    {
+        String rngAsString = rng.toFormulaString();
+        return cell.getCellFormula().indexOf(rngAsString) > -1;
     }
 
     /**
@@ -716,19 +789,24 @@ public class XlsReader extends BaseReader<XlsOptions>
         throw new UnimplementedException(eT.getClass().getSimpleName());            
     }
 
-    private void processNamedRegions(Workbook wb, Sheet activeSheet, String sheetName, Table t)
+    private void processNamedRegions()
     {
-        int numNamedRegions = wb.getNumberOfNames();
-        if (numNamedRegions > 0) {
-            m_namedTableElements = new HashMap<String, TableElement>(numNamedRegions);
-            SpreadsheetVersion ssV = wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;
-            
-            m_maxRows = activeSheet.getLastRowNum() + 1;
-            m_maxCols = getLastColumnNum(activeSheet) + 1;
-            
+        int numNamedRegions = m_wb.getNumberOfNames();
+        if (numNamedRegions > 0) {            
             for (int i = 0; i < numNamedRegions; i++) {
-                Name namedRegion = wb.getNameAt(i);
-                if (namedRegion != null && (sheetName == null || sheetName.equals(namedRegion.getSheetName()))) {
+                Name namedRegion = m_wb.getNameAt(i);
+                if (namedRegion != null) {
+                    Sheet sheet = m_wb.getSheet(namedRegion.getSheetName());
+                    
+                    // if we didn't create a table corresponding to this sheet,
+                    // don't bother to process the named region
+                    Table t = m_sheetTableMap.get(sheet);
+                    if (t == null)
+                        continue;
+                    
+                    int maxRows = sheet.getLastRowNum() + 1;
+                    int maxCols = getNumColumns(sheet);
+                                       
                     // get the region name and encoded region reference
                     String name = namedRegion.getNameName();
                     String regionRef = namedRegion.getRefersToFormula();
@@ -736,54 +814,65 @@ public class XlsReader extends BaseReader<XlsOptions>
                     // use the helper classes AreaRef and CellReference to
                     // decode region reference
                     // Note: we cannot rely on aref.isSingleCell 
-                    AreaReference aref = new AreaReference(regionRef, ssV);
+                    AreaReference aref = new AreaReference(regionRef, m_ssV);
                     CellReference[] cRefs = aref.getAllReferencedCells();
 
                     if (isSingleCell(cRefs)) {
-                        org.tms.api.Cell tCell = getSingleCell(activeSheet, cRefs, t);
+                        org.tms.api.Cell tCell = getSingleCell(sheet, cRefs, t);
                         if (tCell != null) {
                             tCell.setLabel(name);
                             m_namedTableElements.put(name, tCell);
                         }
                     }  
                     else {
-                        Subset s = createSubset(activeSheet, cRefs, t, name);
-                        if (s != null)
-                            m_namedTableElements.put(name, s);
+                        TableElement te = createTableElementFromNamedRegion(sheet, maxRows, maxCols, cRefs, t, name);
+                        if (te != null)
+                            m_namedTableElements.put(name, te);
                     }
                 }
             }
         }
     }
 
-    private int getLastColumnNum(Sheet activeSheet)
+    private int getNumColumns(Sheet activeSheet)
     {
-        int maxCol = 0;
+        // use cached value, if it exists
+        if (m_sheetMaxColMap.containsKey(activeSheet))
+            return m_sheetMaxColMap.get(activeSheet);
+        
+        int numCols = 0;
         Iterator<Row> rowIter = activeSheet.rowIterator();
         while(rowIter != null && rowIter.hasNext()) {
             Row r = rowIter.next();
             int lastCol = r.getLastCellNum();
             
-            if (lastCol > maxCol)
-                maxCol = lastCol;
+            if (lastCol > numCols)
+                numCols = lastCol;
         }
         
-        return maxCol;
+        // increment to get total column count
+        numCols++;
+        
+        // and save for later
+        m_sheetMaxColMap.put(activeSheet, numCols);
+        
+        return numCols;
     }
 
-    private Subset createSubset(Sheet sheet, CellReference[] cRefs, Table t, String label)
+    private TableElement createTableElementFromNamedRegion(Sheet sheet, int maxRows, int maxCols, 
+            CellReference[] cRefs, Table t, String label)
     {
         // iterate over cell references, abstracting rows and columns
         int totalRowCnt = 0;
         int totalColCnt = 0;
-        Set<TableElement> tmsRows = new HashSet<TableElement>(m_maxRows);
-        Set<TableElement> tmsCols = new HashSet<TableElement>(m_maxCols);
+        Set<TableElement> tmsRows = new HashSet<TableElement>(maxRows);
+        Set<TableElement> tmsCols = new HashSet<TableElement>(maxCols);
         
         for (CellReference cRef : cRefs) {           
             int excelRowNo = cRef.getRow();
             int excelColNo = cRef.getCol();
 
-            if (excelColNo > -1 && excelColNo < m_maxCols) {
+            if (excelColNo > -1 && excelColNo < maxCols) {
                 TableElement col = getTmsColumn(t, excelColNo);
                 if (col != null) {
                     if (tmsCols.add(col))
@@ -791,7 +880,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                 }
             }
 
-            if (excelRowNo > -1 && excelRowNo < m_maxRows) {
+            if (excelRowNo > -1 && excelRowNo < maxRows) {
                 TableElement row = getTmsRow(t, sheet, excelRowNo);
                 if (row != null) {
                     if (tmsRows.add(row))
@@ -799,6 +888,13 @@ public class XlsReader extends BaseReader<XlsOptions>
                 }
             }
         }
+        
+        // check if we have a solitary row/col, and if so, return that
+        if (totalRowCnt == 0 && totalColCnt == 1)
+            return tmsCols.toArray(new TableElement[] {})[0];
+        
+        if (totalRowCnt == 1 && totalColCnt == 0)
+            return tmsRows.toArray(new TableElement[] {})[0];
         
         // create the subset success
         Subset s = t.addSubset(Access.ByLabel, label);
@@ -980,12 +1076,12 @@ public class XlsReader extends BaseReader<XlsOptions>
         return offset;
     }
 
-    private ParsedFormula processExcelFormula(Workbook wb, Sheet sheet, int asi, Cell eC, org.tms.api.Cell tCell)
+    private ParsedFormula processExcelFormula(Sheet sheet, int asi, Cell eC, org.tms.api.Cell tCell)
     {
         // parse the formula
         String formula = eC.getCellFormula();
-        FormulaParsingWorkbook fpWb = wb instanceof HSSFWorkbook ? 
-                HSSFEvaluationWorkbook.create((HSSFWorkbook)wb) : XSSFEvaluationWorkbook.create((XSSFWorkbook)wb);
+        FormulaParsingWorkbook fpWb = m_wb instanceof HSSFWorkbook ? 
+                HSSFEvaluationWorkbook.create((HSSFWorkbook)m_wb) : XSSFEvaluationWorkbook.create((XSSFWorkbook)m_wb);
 
         Ptg [] tokens = FormulaParser.parse(formula, fpWb, FormulaType.NAMEDRANGE, asi);
         return new ParsedFormula(eC, tCell, tokens);

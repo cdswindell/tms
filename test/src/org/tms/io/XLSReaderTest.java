@@ -16,6 +16,8 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
+import org.tms.api.TableContext;
+import org.tms.api.factories.TableContextFactory;
 import org.tms.api.io.options.XlsOptions;
 
 public class XLSReaderTest extends BaseTest
@@ -28,6 +30,7 @@ public class XLSReaderTest extends BaseTest
     private static final String SAMPLE3EmptyRows = "sample3WithEmptyRows.xlsx";
     private static final String SAMPLE3XLS = "sample3.xls";
     private static final String SAMPLELogical = "sampleLogical.xlsx";
+    private static final String SAMPLEMulti = "MultiSheet.xlsx";
     
     @Test
     public final void testXlsReaderConstructor()
@@ -39,6 +42,72 @@ public class XLSReaderTest extends BaseTest
         assertThat(r.isColumnNames(), is(true));
     }
 
+    @Test
+    public final void testImportMultiSheet() 
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        assertNotNull(tc);
+        assertThat(tc.getNumTables(), is(0));
+        
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMulti), tc, XlsOptions.Default.withRowNames(false)); 
+        assertNotNull(r);
+        
+        try
+        {
+            r.parseWorkbook();
+            assertThat(tc.getNumTables(), is(3));
+            
+            Table assets = tc.getTable(Access.ByLabel, "Assets");
+            assertNotNull(assets);
+            assertThat(assets.getNumRows(), is(7));
+            assertThat(assets.getNumColumns(), is(4));
+            
+            Cell cell = vetCellValue(assets, 1, 2, 23.0);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("cell \"Inventory::Rabbits\""));
+            
+            cell = vetCellValue(assets, 2, 2, 2.0);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("cell \"Inventory::Dogs\""));
+            
+            cell = vetCellValue(assets, 3, 2, 10.0);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("cell \"Inventory::Cats\""));
+            
+            cell = vetCellValue(assets, 4, 2, 5.0);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("cell \"Inventory::Fish\""));
+            
+            cell = vetCellValue(assets, 5, 2, 40.0);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("sum(subset \"excel_B2:B5\")"));
+            
+            cell = vetCellValue(assets, 6, 2, 10.0);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("mean(col \"Inventory::Units\")"));
+            
+            cell = vetCellValue(assets, 7, 2, 45.875);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("mean(col \"Costs::Price\")"));
+            
+            vetCellValue(assets, 1, 3, 23.50);
+            vetCellValue(assets, 2, 3, 100.0);
+            vetCellValue(assets, 3, 3, 50.0);
+            vetCellValue(assets, 4, 3, 10.0);
+            vetCellValue(assets, 5, 3, 183.50);
+
+            vetCellValue(assets, 1, 4, 540.50);
+            vetCellValue(assets, 2, 4, 200.0);
+            vetCellValue(assets, 3, 4, 500.0);
+            vetCellValue(assets, 4, 4, 50.0);
+            vetCellValue(assets, 5, 4, 1290.50 );
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
+    
     @Test
     public final void testImportLogicalSheet() 
     {
@@ -255,7 +324,7 @@ public class XLSReaderTest extends BaseTest
             assertNotNull(c4);           
             assertThat(c4.getLabel(), is ("Col 4"));
             assertThat(c4.isDerived(), is(true));
-            assertThat(c4.getDerivation().getAsEnteredExpression(), is("col 1 * 3.0"));
+            assertThat(c4.getDerivation().getAsEnteredExpression(), is("col \"Abc\" * 3.0"));
             
             Row r1 = t.getRow(1);
             assertNotNull(r1);
@@ -298,34 +367,7 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, r4, c4, 52.95);
             
             // check subsets
-            Subset s = t.getSubset(Access.ByLabel, "Booleans");
-            assertNotNull(s);
-            assertNotNull(s.getColumns());
-            assertThat(s.getNumColumns(), is(1));
-            assertThat(s.contains(c1), is(false));
-            assertThat(s.contains(c2), is(false));
-            assertThat(s.contains(c3), is(true));
-            assertThat(s.contains(c4), is(false));
-            assertThat(s.getNumRows(), is(0));
-            assertThat(s.contains(r1), is(false));
-            assertThat(s.contains(r2), is(false));
-            assertThat(s.contains(r3), is(false));
-            assertThat(s.contains(r4), is(false));
-
-            s = t.getSubset(Access.ByLabel, "YellowRow");
-            assertNotNull(s);
-            assertThat(s.getNumColumns(), is(0));
-            assertThat(s.contains(c1), is(false));
-            assertThat(s.contains(c2), is(false));
-            assertThat(s.contains(c3), is(false));
-            assertThat(s.contains(c4), is(false));
-            assertThat(s.getNumRows(), is(1));
-            assertThat(s.contains(r1), is(false));
-            assertThat(s.contains(r2), is(false));
-            assertThat(s.contains(r3), is(true));
-            assertThat(s.contains(r4), is(false));
-
-            s = t.getSubset(Access.ByLabel, "Subset");
+            Subset s = t.getSubset(Access.ByLabel, "Subset");
             assertNotNull(s);
             assertThat(s.getNumColumns(), is(3));
             assertThat(s.contains(c1), is(true));
@@ -439,7 +481,7 @@ public class XLSReaderTest extends BaseTest
             assertThat(cell.isDerived(), is(true));
             deriv = cell.getDerivation().getExpression();
             assertNotNull(deriv);
-            assertThat(deriv, is("trim((row 7 + \"   \"))"));
+            assertThat(deriv, is("trim((row \"Yellow Row\" + \"   \"))"));
         }
         catch (IOException e)
         {
