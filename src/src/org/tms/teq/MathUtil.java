@@ -155,6 +155,13 @@ public class MathUtil
         return 1 + Math.floor(d * Math.random());
     }
     
+    static final public int randomBetween(double arg1, double arg2)
+    {
+        int i1 = (int)Math.ceil(arg1 < arg2 ? arg1 : arg2);
+        int i2 = (int)Math.ceil(arg2 > arg1 ? arg2 : arg1);
+        return i1 + (int)((i2 - i1) * Math.random() + 0.5);
+    }
+    
     static final public double e()
     {
         return Math.E;

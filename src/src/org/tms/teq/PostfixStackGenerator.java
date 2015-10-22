@@ -82,7 +82,7 @@ public class PostfixStackGenerator
     
     protected ParseResult convertInfixToPostfix()
     {
-        m_pfs = EquationStack.createPostfixStack();
+        m_pfs = EquationStack.createPostfixStack(m_table);
         return convertInfixToPostfix(m_ifs, m_pfs);
     }
     
@@ -180,7 +180,8 @@ public class PostfixStackGenerator
                     if (!ops.isEmpty()) {
                         t = ops.peek();
                         if (t != null && (t.isFunction() && 
-                                         (t.getOperator() != null ? t.getOperator().numArgs() : t.getTokenType().numArgs()) > 1)) 
+                                         ((t.getOperator() != null ? t.getOperator().numArgs() : t.getTokenType().numArgs()) > 1) ||
+                                           t.getOperator() == BuiltinOperator.NegOper)) 
                         {
                             ops.pop(); // remove the element, as we are about to process it
                             pfs.push(t);

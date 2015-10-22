@@ -85,10 +85,31 @@ public class PostfixExpressionParserTest
         pfs = pep.getPostfixStack();
         assertThat(pfs, notNullValue());
         assertThat(pfs.isEmpty(), is(false));
-        assertThat(pfs.size(), is(17));
-        
+        assertThat(pfs.size(), is(17));      
     }
 
+    @Test
+    public final void testConvertInfixToPostfixWithNeg()
+    {
+        PostfixStackGenerator pep = new PostfixStackGenerator("randomBetween(-5.0, 20.0)", null); 
+        assertThat(pep, notNullValue());
+        
+        EquationStack ifs = pep.getInfixStack();
+        assertThat(ifs, notNullValue());
+        assertThat(ifs.isEmpty(), is(false));
+        assertThat(ifs.size(), is(7));
+        
+        ParseResult pr = pep.convertInfixToPostfix();
+        assertThat(pr, notNullValue());
+        assertThat(pr.isSuccess(), is(true));
+        
+        EquationStack pfs = pep.getPostfixStack();
+        assertThat(pfs, notNullValue());
+        assertThat(pfs.isEmpty(), is(false));
+        assertThat(pfs.size(), is(4));
+        assertThat(pfs.toExpression(), is("5.0 - 20.0 randomBetween"));
+    }    
+        
     
     @Test
     public final void testConvertInfixToPostfixEquationStackEquationStack()
@@ -191,17 +212,17 @@ public class PostfixExpressionParserTest
         
         ifs = iep.getInfixStack();
         assertThat(ifs, notNullValue());
-        assertThat(ifs.toExpression(true, null), is("( neg 5.0 + 3.0 ) * ( 2.0 - 7.0 )"));
-        assertThat(ifs.toExpression(), is("(neg 5.0 + 3.0) * (2.0 - 7.0)"));
+        assertThat(ifs.toExpression(true, null), is("( - 5.0 + 3.0 ) * ( 2.0 - 7.0 )"));
+        assertThat(ifs.toExpression(), is("(-5.0 + 3.0) * (2.0 - 7.0)"));
               
         pfp = new PostfixStackGenerator(ifs, null);
         assertThat(pfp, notNullValue());
         
         pfs = pfp.getPostfixStack();
-        assertThat(pfs.toExpression(), is("5.0 neg 3.0 + 2.0 7.0 - *"));
+        assertThat(pfs.toExpression(), is("5.0 - 3.0 + 2.0 7.0 - *"));
         assertThat(pfs, notNullValue());   
         
         infixExpr = pfs.toExpression(StackType.Infix);
-        assertThat(infixExpr, is("(neg(5.0) + 3.0) * (2.0 - 7.0)") );
+        assertThat(infixExpr, is("(-5.0 + 3.0) * (2.0 - 7.0)") );
     }  
 }

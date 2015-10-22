@@ -10,7 +10,11 @@ import org.tms.teq.DerivationImpl;
 import org.tms.teq.InfixExpressionParser;
 import org.tms.teq.PendingState;
 
-
+/**
+ * The Token class is used by the Derivation engine to represent discrete
+ * elements in a TableElement derivation. Although the class provides public
+ * constructors, it is not intended to be consumed by TMS end users.
+ */
 public class Token implements Labeled
 {
 	public static Token createNullToken()
@@ -45,16 +49,29 @@ public class Token implements Labeled
     private Operator m_oper;
     private Object m_value;
     
+    /**
+     * Create an Operand {@code Token}
+     * @param val the operand value
+     */
     public Token(Object val)
     {
         this(TokenType.Operand, val);
     }
 
-    public Token(TokenType tt)
+    /**
+     * Create a {@code Token} with the specified {@link TokenType}.
+     * @param tokenType the TokenType to create this Token with
+     */
+    public Token(TokenType tokenType)
     {
-        setTokenType(tt);
+        setTokenType(tokenType);
     }
 
+    /**
+     * 
+     * @param tt
+     * @param value
+     */
     public Token(TokenType tt, Object value)
     {
         if (value == null && tt != TokenType.Pending) {
@@ -455,6 +472,8 @@ public class Token implements Labeled
             return getStringValue();
         else if (isString())
             return "\"" +getStringValue() + "\"";
+        else if (this.getOperator() == BuiltinOperator.NegOper)
+            return "-";
         else
             return this.toString();
     }

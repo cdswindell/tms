@@ -115,6 +115,37 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_FunctionMap.put("MOD", BuiltinOperator.ModFuncOper);
         sf_FunctionMap.put("POWER", BuiltinOperator.PowerFuncOper);
         
+        sf_FunctionMap.put("RAND", BuiltinOperator.RandOper);
+        sf_FunctionMap.put("RANDBETWEEN", BuiltinOperator.RandBetweenOper);
+        sf_FunctionMap.put("ABS", BuiltinOperator.AbsOper);
+        sf_FunctionMap.put("SQRT", BuiltinOperator.SqrtOper);
+        sf_FunctionMap.put("SIGN", BuiltinOperator.SignOper);
+        sf_FunctionMap.put("INT", BuiltinOperator.FloorOper);
+        sf_FunctionMap.put("TRUNC", BuiltinOperator.FloorOper);
+        sf_FunctionMap.put("GCD", BuiltinOperator.GcdOper);
+        sf_FunctionMap.put("LCM", BuiltinOperator.LcmOper);
+        
+        sf_FunctionMap.put("COMBIN", BuiltinOperator.CombOper);
+        sf_FunctionMap.put("PERMUT", BuiltinOperator.PermOper);
+        
+        sf_FunctionMap.put("EXP", BuiltinOperator.ExpOper);
+        sf_FunctionMap.put("LN", BuiltinOperator.LogOper);
+        sf_FunctionMap.put("LOG", BuiltinOperator.Log10Oper);
+        sf_FunctionMap.put("LOG10", BuiltinOperator.Log10Oper);
+        
+        sf_FunctionMap.put("DEGREES", BuiltinOperator.toDegreesOper);
+        sf_FunctionMap.put("ACOS", BuiltinOperator.ACosOper);
+        sf_FunctionMap.put("ASIN", BuiltinOperator.ASinOper);
+        sf_FunctionMap.put("ATAN", BuiltinOperator.ATanOper);
+
+        sf_FunctionMap.put("COS", BuiltinOperator.CosOper);
+        sf_FunctionMap.put("SIN", BuiltinOperator.SinOper);
+        sf_FunctionMap.put("TAN", BuiltinOperator.TanOper);
+               
+        sf_FunctionMap.put("SINH", BuiltinOperator.SinHOper);
+        sf_FunctionMap.put("COSH", BuiltinOperator.CosHOper);
+        sf_FunctionMap.put("TANH", BuiltinOperator.TanHOper);
+        
         sf_FunctionMap.put("UPPER",  BuiltinOperator.toUpperOper);
         sf_FunctionMap.put("LOWER",  BuiltinOperator.toLowerOper);
         sf_FunctionMap.put("LEN",  BuiltinOperator.LenOper);
@@ -424,6 +455,51 @@ public class XlsReader extends BaseReader<XlsOptions>
         t.recalculate();
     }
 
+    private void processNamedRegions()
+    {
+        int numNamedRegions = m_wb.getNumberOfNames();
+        if (numNamedRegions > 0) {            
+            for (int i = 0; i < numNamedRegions; i++) {
+                Name namedRegion = m_wb.getNameAt(i);
+                if (namedRegion != null) {
+                    Sheet sheet = m_wb.getSheet(namedRegion.getSheetName());
+                    
+                    // if we didn't create a table corresponding to this sheet,
+                    // don't bother to process the named region
+                    Table t = m_sheetTableMap.get(sheet);
+                    if (t == null)
+                        continue;
+                    
+                    int maxRows = sheet.getLastRowNum() + 1;
+                    int maxCols = getNumColumns(sheet);
+                                       
+                    // get the region name and encoded region reference
+                    String name = namedRegion.getNameName();
+                    String regionRef = namedRegion.getRefersToFormula();
+
+                    // use the helper classes AreaRef and CellReference to
+                    // decode region reference
+                    // Note: we cannot rely on aref.isSingleCell 
+                    AreaReference aref = new AreaReference(regionRef, m_ssV);
+                    CellReference[] cRefs = aref.getAllReferencedCells();
+
+                    if (isSingleCell(cRefs)) {
+                        org.tms.api.Cell tCell = getSingleCell(sheet, cRefs, t);
+                        if (tCell != null) {
+                            tCell.setLabel(name);
+                            m_namedTableElements.put(name, tCell);
+                        }
+                    }  
+                    else {
+                        TableElement te = createTableElementFromNamedRegion(sheet, maxRows, maxCols, cRefs, t, name);
+                        if (te != null)
+                            m_namedTableElements.put(name, te);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * For each Excel formula discovered, create a TMS-style infix formula
      * and cache it along with the TMS cell it is associated with
@@ -437,8 +513,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                     // create an equation stack and set the primary table
                     // to the destination of the parsedFormula;
                     // this will cause formulas to generate correct refs
-                    EquationStack es = EquationStack.createPostfixStack();
-                    es.setPrimaryTable(pf.getTable());
+                    EquationStack es = EquationStack.createPostfixStack(pf.getTable());
                     
                     for (Ptg eT : pf.getTokens()) {
                         Token tmsT = excelToken2TmsToken(pf, eT);
@@ -789,51 +864,6 @@ public class XlsReader extends BaseReader<XlsOptions>
         throw new UnimplementedException(eT.getClass().getSimpleName());            
     }
 
-    private void processNamedRegions()
-    {
-        int numNamedRegions = m_wb.getNumberOfNames();
-        if (numNamedRegions > 0) {            
-            for (int i = 0; i < numNamedRegions; i++) {
-                Name namedRegion = m_wb.getNameAt(i);
-                if (namedRegion != null) {
-                    Sheet sheet = m_wb.getSheet(namedRegion.getSheetName());
-                    
-                    // if we didn't create a table corresponding to this sheet,
-                    // don't bother to process the named region
-                    Table t = m_sheetTableMap.get(sheet);
-                    if (t == null)
-                        continue;
-                    
-                    int maxRows = sheet.getLastRowNum() + 1;
-                    int maxCols = getNumColumns(sheet);
-                                       
-                    // get the region name and encoded region reference
-                    String name = namedRegion.getNameName();
-                    String regionRef = namedRegion.getRefersToFormula();
-
-                    // use the helper classes AreaRef and CellReference to
-                    // decode region reference
-                    // Note: we cannot rely on aref.isSingleCell 
-                    AreaReference aref = new AreaReference(regionRef, m_ssV);
-                    CellReference[] cRefs = aref.getAllReferencedCells();
-
-                    if (isSingleCell(cRefs)) {
-                        org.tms.api.Cell tCell = getSingleCell(sheet, cRefs, t);
-                        if (tCell != null) {
-                            tCell.setLabel(name);
-                            m_namedTableElements.put(name, tCell);
-                        }
-                    }  
-                    else {
-                        TableElement te = createTableElementFromNamedRegion(sheet, maxRows, maxCols, cRefs, t, name);
-                        if (te != null)
-                            m_namedTableElements.put(name, te);
-                    }
-                }
-            }
-        }
-    }
-
     private int getNumColumns(Sheet activeSheet)
     {
         // use cached value, if it exists
@@ -997,8 +1027,14 @@ public class XlsReader extends BaseReader<XlsOptions>
             case "FALSE()":
                 return false;
 
+            case "RAND":
+            case "RAND()":
+                return Math.random();
+
             case "NOW":
             case "NOW()":
+            case "TODAY":
+            case "TODAY()":
                 return new Date();
         }
 

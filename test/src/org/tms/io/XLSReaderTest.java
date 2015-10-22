@@ -32,6 +32,7 @@ public class XLSReaderTest extends BaseTest
     private static final String SAMPLELogical = "sampleLogical.xlsx";
     private static final String SAMPLEMulti = "MultiSheet.xlsx";
     private static final String SAMPLEMultiXLS = "MultiSheet.xls";
+    private static final String SAMPLEMath = "sampleMath.xlsx";
     
     @Test
     public final void testXlsReaderConstructor()
@@ -134,11 +135,86 @@ public class XLSReaderTest extends BaseTest
     }
     
     @Test
+    public final void testImportMathSheet() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMath), XlsOptions.Default.withRowNames(false)); 
+        assertNotNull(r);
+        
+        testImportMathSheet(r);
+    }
+
+    private void testImportMathSheet(XlsReader r)
+    {
+        try
+        {
+            Table t = r.parseActiveSheet();
+            assertNotNull(t);
+            
+            Column valCol = t.getColumn(Access.ByLabel, "Value");
+            assertNotNull(valCol);
+            
+            Cell cell = t.getCell(Access.ByLabel, "RandVal");
+            assertNotNull(cell);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("random"));
+            assertThat((double)cell.getCellValue() >= 0 && (double)cell.getCellValue() < 1, is(true));
+            
+            cell = t.getCell(Access.ByLabel, "RandBetweenVal");
+            assertNotNull(cell);
+            assertThat(cell.isDerived(), is(true));
+            assertThat(cell.getDerivation().getExpression(), is("randomBetween(-5.0, 20.0)"));
+            assertThat(cell.getCellValue().toString(), (double)cell.getCellValue() >= -5 && (double)cell.getCellValue() <= 20, is(true));
+            
+            vetCellValue(t, "AbsVal", 5.0, "abs(-5.0)");
+            vetCellValue(t, "SqrtVal", 8.0, "sqrt(64.0)");
+            vetCellValue(t, "SignVal", -1.0, "sign(-10.0)");
+            
+            vetCellValue(t, "ACosVal", 2.094395102, "acos(-0.5)");
+            vetCellValue(t, "ACosDVal", 120.0, "toDegrees(acos(-0.5))");
+            vetCellValue(t, "ASinVal", 0.523598776, "asin(0.5)");
+            vetCellValue(t, "ASinDVal", 30.0, "toDegrees(asin(0.5))");
+            vetCellValue(t, "ATanVal", 0.785398163, "atan(1.0)");
+            vetCellValue(t, "ATanDVal", 45.0, "toDegrees(atan(1.0))");
+            
+            vetCellValue(t, "CosVal", -0.5, "cos(cell \"ACosVal\")");
+            vetCellValue(t, "SinVal", 0.5, "sin(cell \"ASinVal\")");
+            vetCellValue(t, "TanVal", 1.0, "tan(cell \"ATanVal\")");
+            
+            vetCellValue(t, "SinHVal", 1.175201194, "sinh(1.0)");
+            vetCellValue(t, "CosHVal", 1.543080635, "cosh(1.0)");
+            vetCellValue(t, "TanHVal", 0.761594156, "tanh(1.0)");
+            
+            vetCellValue(t, "ExpVal", 2.718281828, "exp(1.0)");
+            vetCellValue(t, "LnVal", 1.0, "ln(cell \"ExpVal\")");
+            vetCellValue(t, "Log10Val", 2.0, "log(100.0)");
+            vetCellValue(t, "LogVal", 1.0, "log(10.0)");
+            
+            vetCellValue(t, "IntVal", 18.0, "roundDown(18.7)");
+            vetCellValue(t, "TruncVal", 18.0, "roundDown(18.7)");
+            
+            vetCellValue(t, "CombinVal", 20.0, "comb(6.0, 3.0)");
+            vetCellValue(t, "PermutVal", 120.0, "perm(6.0, 3.0)");
+            
+            vetCellValue(t, "GcdVal", 7, "gcd(56.0, 21.0)");
+            vetCellValue(t, "LcmVal", 72, "lcm(24.0, 36.0)");
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public final void testImportLogicalSheet() 
     {
         XlsReader r = new XlsReader(qualifiedFileName(SAMPLELogical), XlsOptions.Default.withRowNames(false)); 
         assertNotNull(r);
         
+        testImportLogicalSheet(r);
+    }
+
+    private void testImportLogicalSheet(XlsReader r)
+    {
         try
         {
             Table t = r.parseActiveSheet();

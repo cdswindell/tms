@@ -61,7 +61,7 @@ public final class DerivationImpl implements Derivation
      * Creates a DerivationImpl from the provided expression and assigns it to the specified TableElement.
      * The expression is parsed into an infix expression, then converted to postfix notation to
      * ease execution.
-     * @param expr Expression touse as the basis for the DerivationImpl
+     * @param expr Expression to use as the basis for the DerivationImpl
      * @param elem TableElement that will receive the derivation
      * @return
      * @throws InvalidExpressionException if the expression cannot be parsed
@@ -567,7 +567,7 @@ public final class DerivationImpl implements Derivation
         // Shut down/clear any async operators
         if (m_cachedAwaitingStates != null) {
             for (AwaitingState ps : m_cachedAwaitingStates) {
-                // don't reprocess invalidated pending states
+                // don't re-process invalidated pending states
                 if (!ps.isValid())
                     continue;
 
@@ -612,7 +612,7 @@ public final class DerivationImpl implements Derivation
             for (Entry<TableElement, PendingStatistic> e : m_cachedPendingStats.entrySet()) {
                 PendingStatistic ps = e.getValue();
 
-                // don't reprocess invalidated pending states
+                // don't re-process invalidated pending states
                 if (ps == null || !ps.isValid())
                     continue;
 
@@ -781,7 +781,7 @@ public final class DerivationImpl implements Derivation
         if (m_asEntered != null)
             return m_asEntered;
         else if (m_ifs != null)
-            return m_ifs.toExpression(false, getTable());
+            return getInfixExpression();
         else
             return null;
     }

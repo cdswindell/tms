@@ -75,25 +75,19 @@ public class InfixExpressionParser
 
     public ParseResult parseInfixExpression()
     {
-        m_ifs = EquationStack.createInfixStack();
+        m_ifs = EquationStack.createInfixStack(m_table);
         return parseInfixExpression(m_ifs, m_table);
     }
     
     public ParseResult parseInfixExpression(Derivable target)
     {
-        m_ifs = EquationStack.createInfixStack();
+        m_ifs = EquationStack.createInfixStack(target.getTable());
         return parseInfixExpression(m_ifs, m_table, target);
     }
     
     protected ParseResult parseInfixExpression(Table table)
     {
-        m_ifs = EquationStack.createInfixStack();
-        return parseInfixExpression(m_ifs, table);
-    }
-    
-    protected ParseResult parseInfixExpression(Table table, Derivable target)
-    {
-        m_ifs = EquationStack.createInfixStack();
+        m_ifs = EquationStack.createInfixStack(table);
         return parseInfixExpression(m_ifs, table);
     }
     
@@ -320,6 +314,9 @@ public class InfixExpressionParser
             Token t = iter.next();
             TokenType tt = t.getTokenType();
             Operator oper = t.getOperator();
+            
+            if (oper == BuiltinOperator.NegOper)
+                continue; // allow these almost anywhere
             
             switch (tt) {
                 case RightParen:

@@ -69,6 +69,11 @@ public class BaseTest
 
     protected Cell vetCellValue(Table t, String label, Object cv)
     {
+        return vetCellValue(t, label, cv, null);
+    }
+    
+    protected Cell vetCellValue(Table t, String label, Object cv, String deriv)
+    {
         Cell cell = t.getCell(Access.ByLabel, label);
         assertNotNull("Cell \"" + label + "\" not found", cell);
         
@@ -80,6 +85,11 @@ public class BaseTest
         else
             assertThat(cell.getCellValue(), is(cv));
         
+        if (deriv != null) {
+            assertThat(cell.isDerived(), is(true));
+            assertThat(String.format("Expected: %s; observed: %s", deriv, cell.getDerivation().getExpression()),
+                    cell.getDerivation().getExpression(), is(deriv));
+        }
         return cell;
     }    
 }

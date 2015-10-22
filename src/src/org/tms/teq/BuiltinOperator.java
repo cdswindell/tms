@@ -79,7 +79,9 @@ public enum BuiltinOperator implements Labeled, Operator
     ExpOper(TokenType.UnaryFunc, 5, Math.class, "exp"),
     LogOper(TokenType.UnaryFunc, 5, Math.class, "log", "ln", "loge"),
     Log10Oper(TokenType.UnaryFunc, 5, Math.class, "log10", "log", "log10"),
+    RandOper(TokenType.BuiltIn, 5, Math.class, "random"),
     RandIntOper(TokenType.UnaryFunc, 5, MathUtil.class, "randomInt", "randomInt", "randInt"),
+    RandBetweenOper(TokenType.BinaryFunc, 5, MathUtil.class, "randomBetween", "randomBetween", "randBetween"),
 
     // TVM Calculations
     PmtOper("pmt", TokenType.GenericFunc, 5, MathUtil.class, "pmt", double.class, int.class, double.class, double.class),
@@ -111,8 +113,8 @@ public enum BuiltinOperator implements Labeled, Operator
     TanHOper("tanh", TokenType.UnaryFunc, 5, Math.class),
 
     FactFuncOper(TokenType.UnaryFunc, 5, MathUtil.class, "fact", "factorial"),
-    FloorOper(TokenType.UnaryFunc, 5, Math.class, "floor", "rounddown"),
-    CeilOper(TokenType.UnaryFunc, 5, Math.class, "ceil", "roundup"),
+    FloorOper(TokenType.UnaryFunc, 5, Math.class, "floor", "roundDown", "floor"),
+    CeilOper(TokenType.UnaryFunc, 5, Math.class, "ceil", "roundUp", "ceil"),
     SignOper(TokenType.UnaryFunc, 5, Math.class, "signum", "sign", "signum"),
     RoundOper("round", TokenType.UnaryFunc, 5, Math.class),
     
@@ -155,7 +157,6 @@ public enum BuiltinOperator implements Labeled, Operator
     TrueOper(TokenType.BuiltIn, 5, "true"),
     FalseOper(TokenType.BuiltIn, 5, "false"),
     EOper(TokenType.BuiltIn, 5, MathUtil.class, "e"),
-    RandOper(TokenType.BuiltIn, 5, Math.class, "random"),
     ColumnIndexOper(TokenType.BuiltIn, 5, "ColumnIndexOper", "cidx"),
     RowIndexOper(TokenType.BuiltIn, 5, "RowIndexOper", "ridx"),
 
