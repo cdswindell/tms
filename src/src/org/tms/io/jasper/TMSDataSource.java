@@ -17,7 +17,7 @@ import org.tms.io.options.IOOptions;
 public class TMSDataSource implements JRDataSource, JRRewindableDataSource
 {
     private TMSReport m_report;
-    private BaseWriter m_writer;
+    private BaseWriter<?> m_writer;
     private TableExportAdapter m_exportAdapter;
     private IOOptions m_options;
     

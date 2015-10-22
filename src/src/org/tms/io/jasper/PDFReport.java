@@ -15,7 +15,7 @@ import org.tms.io.BaseWriter;
 
 public class PDFReport extends TMSReport
 {
-    public PDFReport(BaseWriter w)
+    public PDFReport(BaseWriter<?> w)
     {
         super(w);
     }

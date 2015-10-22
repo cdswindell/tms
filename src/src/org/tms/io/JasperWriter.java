@@ -9,11 +9,11 @@ import org.tms.io.jasper.HTMLReport;
 import org.tms.io.jasper.PDFReport;
 import org.tms.io.jasper.RTFReport;
 import org.tms.io.jasper.TMSReport;
-import org.tms.io.options.IOOptions;
+import org.tms.io.options.TitledPageOptions;
 
-public class JasperWriter extends BaseWriter
+public class JasperWriter extends BaseWriter<TitledPageOptions<?>>
 {
-    public static void export(TableExportAdapter tw, OutputStream out, IOOptions options)
+    public static void export(TableExportAdapter tw, OutputStream out, TitledPageOptions<?> options)
     throws IOException
     {
         JasperWriter writer = new JasperWriter(tw, out, options);
@@ -47,7 +47,7 @@ public class JasperWriter extends BaseWriter
     
     private TMSReport m_report;
     
-    private JasperWriter(TableExportAdapter t, OutputStream out, IOOptions options)
+    private JasperWriter(TableExportAdapter t, OutputStream out, TitledPageOptions<?> options)
     {
         super(t, out, options);
     }

@@ -89,7 +89,7 @@ abstract public class TMSReport
     private static final int sf_PageTopMargin = 50;
     private static final int sf_PageBottomMargin = 30;
     
-    private BaseWriter m_writer;
+    private BaseWriter<?> m_writer;
     private Table m_table;
     private IOOptions m_options;
     
@@ -99,14 +99,14 @@ abstract public class TMSReport
     private List<JasperDesign> m_jrDesigns;
     private List<JasperPrint> m_jrPrints;
     
-    TMSReport(BaseWriter w)
+    TMSReport(BaseWriter<?> w)
     {
         m_writer = w;
         m_table = w.getTable();
         m_options = w.options();
     }
     
-    BaseWriter getWriter()
+    BaseWriter<?> getWriter()
     {
         return m_writer;
     }

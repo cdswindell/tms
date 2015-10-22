@@ -14,6 +14,7 @@ import org.tms.api.io.options.CSVOptions;
 import org.tms.api.io.options.TMSOptions;
 import org.tms.api.io.options.XlsOptions;
 import org.tms.io.options.IOOptions;
+import org.tms.io.options.TitledPageOptions;
 
 public class TableExportAdapter
 {
@@ -110,7 +111,7 @@ public class TableExportAdapter
             case RTF:
             case HTML:
             case WORD:
-                JasperWriter.export(this, m_output, m_options);
+                JasperWriter.export(this, m_output, (TitledPageOptions<?>)m_options);
                 break;
                 
             default:

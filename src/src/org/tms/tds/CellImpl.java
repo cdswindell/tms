@@ -24,6 +24,7 @@ import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
+import org.tms.api.utils.Taggable;
 import org.tms.io.Printable;
 import org.tms.teq.DerivationImpl;
 
@@ -609,6 +610,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
 	/*
 	 * DerivationImpl-related methods
 	 */
+    
 	@Override
     public DerivationImpl getDerivation()
     {
@@ -629,7 +631,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
             
             // mark the rows/columns that impact the deriv, and evaluate values
             if (deriv != null && deriv.isConverted()) {
-                for (TableElement d : deriv.getAffectedBy()) {
+                for (Taggable d : deriv.getAffectedBy()) {
                     ((TableElementImpl)d).registerAffects(this);
                 }
                 
@@ -650,7 +652,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         DerivationImpl deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null) {
             Derivable elem = deriv.getTarget();
-            for (TableElement d : deriv.getAffectedBy()) {
+            for (Taggable d : deriv.getAffectedBy()) {
                 TableElementImpl tse = (TableElementImpl)d;
                 tse.deregisterAffects(elem);
             }

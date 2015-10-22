@@ -16,7 +16,7 @@ import org.tms.io.BaseWriter;
 
 public class DocXReport extends TMSReport
 {
-    public DocXReport(BaseWriter w)
+    public DocXReport(BaseWriter<?> w)
     {
         super(w);
     }

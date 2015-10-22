@@ -36,4 +36,9 @@ public interface Operator extends Labeled
     {
         return BuiltinOperator.NULL_operator;
     }
+
+    default boolean isVariableArgs()
+    {
+        return false;
+    }
 }

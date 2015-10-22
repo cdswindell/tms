@@ -67,7 +67,7 @@ public class XLSXWriterTest extends BaseTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        t.export(bos, XlsOptions.Default
+        t.export("foo.xlsx", XlsOptions.Default
                 .withColumnNames(true)
                 .withColumnWidthInInches(1.5)
                 .withRowNameColumnWidthInInches(1)

@@ -117,7 +117,7 @@ public enum BuiltinOperator implements Labeled, Operator
     CeilOper(TokenType.UnaryFunc, 5, Math.class, "ceil", "roundUp", "ceil"),
     SignOper(TokenType.UnaryFunc, 5, Math.class, "signum", "sign", "signum"),
     RoundOper("round", TokenType.UnaryFunc, 5, Math.class),
-    
+  
     // Useful functions from Apache Math Commons
     IsPrimeOper("isPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "isPrime", int.class),
     NextPrimeOper("nextPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "nextPrime", int.class),
@@ -236,9 +236,9 @@ public enum BuiltinOperator implements Labeled, Operator
     LinearComputeYOper(TokenType.GenericFunc, 5, MathUtil.class, "lrComputeY", "computeY", "lrComputeY"),
     
     // Transformation Functions
-    MeanCenterOper(TokenType.TransformOp, 5, "meanCenter"),
-    NormalizeOper(TokenType.TransformOp, 5, "normalize", "standardize"),    
-    ScaleOper("scale", TokenType.TransformOp, 5, MathUtil.class, "scale", TableElement.class, double.class, double.class),
+    MeanCenterOper(TokenType.TransformOp, 5, new String [] {"meanCenter"}, null),
+    NormalizeOper(TokenType.TransformOp, 5, new String [] {"normalize", "standardize"}, null),    
+    ScaleOper(TokenType.TransformOp, 5, new String []{"scale"}, new Class<?>[]{TableElement.class, double.class, double.class}, MathUtil.class, null ),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.SubsetRef, TokenType.CellRef, TokenType.TableRef),
@@ -261,6 +261,36 @@ public enum BuiltinOperator implements Labeled, Operator
         m_priority = 0;
         m_tokenTypes = new LinkedHashSet<TokenType>();
         m_aliases = new LinkedHashSet<String>();
+    }
+    
+    private BuiltinOperator(TokenType tt, int priority, String labels[], Class<? extends Object > args[])
+    {
+        this(tt, priority, labels, args, null, null);
+    }
+    
+    private BuiltinOperator(TokenType tt, int priority, String labels[], Class<? extends Object > args[], Class<? extends Object> clazz, String methodName)
+    {
+        this();
+        m_tokenTypes.add(tt);
+        m_priority = priority;
+        
+        if (labels != null && labels.length > 0) {
+            for (String label : labels) {
+                if (m_label == null)
+                    m_label = label;
+                m_aliases.add(label.toLowerCase());
+            }
+        }
+        else {
+            m_label = methodName;
+            m_aliases.add(methodName.toLowerCase());
+        }
+        
+        m_methodArgs = args;
+        
+        m_clazz = clazz;
+        if (clazz != null)
+            m_methodName = methodName != null ? methodName : m_label;
     }
     
     private BuiltinOperator(int priority)
@@ -674,6 +704,8 @@ public enum BuiltinOperator implements Labeled, Operator
         switch (this) {
             case ColumnIndexOper:
             case RowIndexOper:
+            case RandIntOper:
+            case RandBetweenOper:
                 return int.class;
                 
             case PiOper:
@@ -709,6 +741,15 @@ public enum BuiltinOperator implements Labeled, Operator
                 
             default:
                 return Object.class;
+        }
+    }
+    
+    @Override
+    public boolean isVariableArgs()
+    {
+        switch (this) {
+            default:
+                return false;
         }
     }
 }

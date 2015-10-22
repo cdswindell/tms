@@ -14,7 +14,7 @@ import org.tms.io.BaseWriter;
 
 public class RTFReport extends TMSReport
 {
-    public RTFReport(BaseWriter w)
+    public RTFReport(BaseWriter<?> w)
     {
         super(w);
     }

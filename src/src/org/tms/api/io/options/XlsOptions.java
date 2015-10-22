@@ -13,6 +13,7 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
     private enum Options implements OptionEnum {
         FileFormat,
         BlanksAsNull,
+        Descriptions,        
     }
 
     private enum ExcelFileFormat  {
@@ -32,6 +33,7 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
         
         set(Options.FileFormat, ExcelFileFormat.XLSX);
         set(Options.BlanksAsNull, true);
+        set(Options.Descriptions, true);
     }
     
     private XlsOptions (final XlsOptions format)
@@ -86,6 +88,20 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
         return newOptions;
     }
     
+    public boolean isDescriptions()
+    {
+        return (Boolean)get(Options.Descriptions);
+    }
     
+    public XlsOptions withDescriptions()
+    {
+        return withDescriptions(true);
+    }
     
+    public XlsOptions withDescriptions(boolean b)
+    {
+        XlsOptions newOptions = clone(this);
+        newOptions.set(Options.Descriptions, b);
+        return newOptions;
+    }
 }

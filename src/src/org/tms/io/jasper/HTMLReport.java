@@ -15,7 +15,7 @@ import org.tms.io.BaseWriter;
 
 public class HTMLReport extends TMSReport
 {
-    public HTMLReport(BaseWriter w)
+    public HTMLReport(BaseWriter<?> w)
     {
         super(w);
     }

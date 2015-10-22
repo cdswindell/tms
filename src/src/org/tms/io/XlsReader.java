@@ -86,7 +86,7 @@ import org.tms.teq.StackType;
 
 public class XlsReader extends BaseReader<XlsOptions>
 {
-    private static final Map<Class<? extends OperationPtg>, Operator> sf_OperatorMap 
+    static final Map<Class<? extends OperationPtg>, Operator> sf_OperatorMap 
         = new HashMap<Class<? extends OperationPtg>, Operator>();
     
     static {
@@ -106,8 +106,7 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_OperatorMap.put(LessThanPtg.class, BuiltinOperator.LtOper);
     }
     
-    private static final Map<String, Operator> sf_FunctionMap 
-        = new HashMap<String, Operator>();
+    static final Map<String, Operator> sf_FunctionMap = new HashMap<String, Operator>();
 
     static {
         sf_FunctionMap.put("FACT", BuiltinOperator.FactFuncOper);
@@ -197,8 +196,7 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_FunctionMap.put("RSQ", BuiltinOperator.LinearR2Oper);        
     }
     
-    private static final Set<Operator> sf_InvertedArgs 
-        = new HashSet<Operator>();
+    static final Set<Operator> sf_InvertedArgs = new HashSet<Operator>();
     
     static {
         sf_InvertedArgs.add(BuiltinOperator.LinearSlopeOper);
@@ -347,10 +345,12 @@ public class XlsReader extends BaseReader<XlsOptions>
                     Column tC= t.addColumn(); // add the TMS column
                     Cell eC = eR.getCell(i, Row.RETURN_BLANK_AS_NULL);
                     Object cv = fetchCellValue(eC);
-                    String note = fetchCellComment(eC, true);
-
-                    if (note != null)
-                        tC.setDescription(note);
+                    
+                    if (options().isDescriptions()) {
+                        String note = fetchCellComment(eC, true);
+                        if (note != null)
+                            tC.setDescription(note);
+                    }
 
                     if (cv != null)                       
                         tC.setLabel(cv.toString());
@@ -370,7 +370,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                         Object cv = fetchCellValue(eC);
                         String note = fetchCellComment(eC, true);
                         if (i == 0 && isRowNames()) {
-                            if (note != null) {
+                            if (options().isDescriptions() && note != null) {
                                 tR.setDescription(note);
                                 rowIsEffectivelyNull = false;
                             }
@@ -386,7 +386,7 @@ public class XlsReader extends BaseReader<XlsOptions>
 
                             if (eC != null || cv != null) {
                                 org.tms.api.Cell tCell = t.getCell(tR, tC);
-                                if (note != null) {
+                                if (options().isDescriptions() && note != null) {
                                     tCell.setDescription(note);
                                     rowIsEffectivelyNull = false;
                                 }

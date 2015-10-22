@@ -15,11 +15,11 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.io.options.IOOptions;
 
-public abstract class BaseWriter extends BaseIO
+public abstract class BaseWriter<E extends IOOptions> extends BaseIO
 {
     private TableExportAdapter m_tableExportAdapter;
     private OutputStream m_outStream;
-    private IOOptions m_baseOptions;
+    private E m_baseOptions;
     
     private int m_nCols;
     private int m_nConsumableColumns;
@@ -28,7 +28,7 @@ public abstract class BaseWriter extends BaseIO
     
     abstract protected void export() throws IOException;
     
-    protected BaseWriter(TableExportAdapter tw, OutputStream out, IOOptions options)
+    protected BaseWriter(TableExportAdapter tw, OutputStream out, E options)
     {
         m_tableExportAdapter = tw;
         m_outStream = out;
@@ -38,7 +38,7 @@ public abstract class BaseWriter extends BaseIO
         m_nConsumableColumns = -1; // to be initialized later
     }
 
-    protected BaseWriter(TableExportAdapter tw, File f, IOOptions options) 
+    protected BaseWriter(TableExportAdapter tw, File f, E options) 
     throws IOException
     {
         this(tw, new FileOutputStream(f), options);
@@ -52,7 +52,7 @@ public abstract class BaseWriter extends BaseIO
     /*
      * Publicly available methods for use outside of package
      */
-    public IOOptions options()
+    public E options()
     {
         return m_baseOptions;
     }

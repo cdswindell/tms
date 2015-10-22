@@ -15,7 +15,7 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.io.options.CSVOptions;
 
-public class CSVWriter extends BaseWriter
+public class CSVWriter extends BaseWriter<CSVOptions>
 {
     public static void export(TableExportAdapter tea, OutputStream out, CSVOptions options) 
     throws IOException 

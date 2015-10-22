@@ -259,6 +259,13 @@ public class Token implements Labeled
                 (targetClazz == Long.class || (isFuzzy && targetClazz == Double.class)) && dataType == long.class ||
                 targetClazz == Boolean.class && dataType == boolean.class)
                 return true;
+        }       
+        else if (targetClazz.isPrimitive() && dataType.isPrimitive()) {
+            if (targetClazz == double.class && (dataType == float.class || dataType == long.class || dataType == int.class || dataType == short.class || dataType == byte.class || dataType == char.class)  ||
+               (targetClazz == long.class && (dataType == int.class || dataType == short.class || dataType == byte.class || dataType == char.class)) ||
+               (targetClazz == int.class && (dataType == short.class || dataType == byte.class || dataType == char.class)) 
+                )
+                return true;
         }
         
         return false;

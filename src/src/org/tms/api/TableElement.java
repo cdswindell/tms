@@ -4,8 +4,9 @@ import java.util.List;
 
 import org.tms.api.derivables.Derivable;
 import org.tms.api.events.Listenable;
+import org.tms.api.utils.Taggable;
 
-public interface TableElement extends BaseElement, Listenable
+public interface TableElement extends BaseElement, Listenable, Taggable
 {
     /**
      * Returns the parent {@link TableContext}.

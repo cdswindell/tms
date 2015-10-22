@@ -289,4 +289,10 @@ abstract class TableCellsElementImpl extends TableElementImpl
         else
             return fetchListeners().hasListeners(evTs);
     }
+    
+    public boolean tag(String... tags) { return false;}    
+    public boolean untag(String... tags){ return false;}     
+    public boolean replaceTags(String... tags){ return false;}     
+    public String [] getTags(){ return null;}  
+
 }

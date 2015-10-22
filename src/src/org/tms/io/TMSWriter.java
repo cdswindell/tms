@@ -7,7 +7,7 @@ import java.io.OutputStream;
 
 import org.tms.api.io.options.TMSOptions;
 
-public class TMSWriter extends BaseWriter
+public class TMSWriter extends BaseWriter<TMSOptions>
 {
     public static void export(TableExportAdapter tableExportAdapter, OutputStream out, TMSOptions options) 
     throws IOException
