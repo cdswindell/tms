@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
+import org.tms.api.TableProperty;
 import org.tms.api.factories.TableFactory;
 
 public class TagTest extends BaseTest
@@ -48,9 +49,11 @@ public class TagTest extends BaseTest
        
         tbl.setTags("tms");
         assertThat(tbl.getTags(), is(new String []{"tms"}));
+        assertThat(tbl.getProperty(TableProperty.Tags), is(new String []{"tms"}));
         assertThat(tbl.isTagged(), is (true));
         assertThat(tbl.isTagged("tms"), is (true));
         assertThat(tbl.isTagged("tms", "abc"), is (false));
+        assertThat(tbl.isTagged("xxx", "abyyyyc"), is (false));
         assertThat(tc.getGlobalTagCache().size(), is(4));
         
         tbl.setTags();

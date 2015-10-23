@@ -1070,7 +1070,9 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
             return true;
         
         // otherwise, encode tags and use set math to return answer
-        Set<Tag> queryTags = Tag.encodeTags(tags, getTableContext(), false);            
+        Set<Tag> queryTags = Tag.encodeTags(tags, getTableContext(), false); 
+        if (queryTags == null || queryTags.isEmpty())
+            return false;
         
         return curTags.containsAll(queryTags);
     }
