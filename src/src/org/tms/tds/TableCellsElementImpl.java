@@ -293,6 +293,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
             return fetchListeners().hasListeners(evTs);
     }
     
+    @Override
     public boolean tag(String... tags) 
     { 
         if (tags != null && tags.length > 0) {
@@ -313,11 +314,12 @@ abstract class TableCellsElementImpl extends TableElementImpl
         return false;
     }
     
+    @Override
     public boolean untag(String... tags)
     { 
         if (tags != null && tags.length > 0) {
             ContextImpl tc = getTableContext();            
-            Set<Tag> oldTags = Tag.encodeTags(tags, tc);
+            Set<Tag> oldTags = Tag.encodeTags(tags, tc, false);
             
             @SuppressWarnings("unchecked")
             Set<Tag> curTags = (Set<Tag>)getPropertyInternal(TableProperty.Tags);
@@ -331,7 +333,8 @@ abstract class TableCellsElementImpl extends TableElementImpl
         return false;
     }     
     
-    public void replaceTags(String... tags)
+    @Override
+    public void setTags(String... tags)
     { 
         if (tags != null && tags.length > 0) {
             ContextImpl tc = getTableContext();            
@@ -343,6 +346,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
             clearProperty(TableProperty.Tags);
     }
     
+    @Override
     public String [] getTags()
     { 
         @SuppressWarnings("unchecked")
@@ -350,4 +354,24 @@ abstract class TableCellsElementImpl extends TableElementImpl
         
         return Tag.decodeTags(curTags);
     }  
+    
+    @Override
+    public boolean isTagged(String... tags)
+    {
+        @SuppressWarnings("unchecked")
+        Set<Tag> curTags = getTable() != null ? (Set<Tag>)getPropertyInternal(TableProperty.Tags) : null;
+        if (curTags == null || curTags.isEmpty())
+            return false;
+        
+        // if param arg is null or empty, return true, 
+        // as this element is tagged
+        
+        if (tags == null || tags.length == 0)
+            return true;
+        
+        // otherwise, encode tags and use set math to return answer
+        Set<Tag> queryTags = Tag.encodeTags(tags, getTableContext(), false);            
+        
+        return curTags.containsAll(queryTags);
+    }
 }

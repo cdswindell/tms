@@ -6,11 +6,9 @@ public interface Taggable
      * Tagging
      */
     public boolean tag(String... tags);
-
     public boolean untag(String... tags);
-
-    public void replaceTags(String... tags);
-
+    public boolean isTagged(String... tags);
+    public void setTags(String... tags);
     public String[] getTags();
 
 }

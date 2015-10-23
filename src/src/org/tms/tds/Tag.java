@@ -27,12 +27,17 @@ public class Tag implements Serializable
     
     static Set<Tag> encodeTags(String [] tags, ContextImpl tc)
     {
+        return encodeTags(tags, tc, true);
+    }
+    
+    static Set<Tag> encodeTags(String [] tags, ContextImpl tc, boolean createIfMissing)
+    {
         if (tags == null || tags.length == 0)
             return Collections.emptySet();
         
         Set<Tag> tagObjs = new HashSet<Tag>(tags != null ? tags.length : 0);
         for (String t : tags) {
-            Tag tagObj = tc.fetchTag(t);
+            Tag tagObj = tc.fetchTag(t, createIfMissing);
             if (tagObj != null)
                 tagObjs.add(tagObj);
         }

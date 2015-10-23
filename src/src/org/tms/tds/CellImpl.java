@@ -1030,7 +1030,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     {
         boolean removedAny = false;
         if (tags != null && tags.length > 0) {
-            Set<Tag> oldTags = Tag.encodeTags(tags, getTableContext());            
+            Set<Tag> oldTags = Tag.encodeTags(tags, getTableContext(), false);            
             Set<Tag> curTags = getTable() != null ? getTable().getCellTags(this) : null;            
             if (curTags != null) 
                 removedAny = curTags.removeAll(oldTags);
@@ -1040,7 +1040,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     }
 
     @Override
-    public void replaceTags(String... tags)
+    public void setTags(String... tags)
     {
         Set<Tag> newTags = null;
         if (tags != null && tags.length > 0) 
@@ -1054,5 +1054,24 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     public String[] getTags()
     {
         return Tag.decodeTags(getTable() != null ? getTable().getCellTags(this) : null);
+    }
+    
+    @Override
+    public boolean isTagged(String... tags)
+    {
+        Set<Tag> curTags = getTable() != null ? getTable().getCellTags(this) : null;
+        if (curTags == null || curTags.isEmpty())
+            return false;
+        
+        // if param arg is null or empty, return true, 
+        // as this element is tagged
+        
+        if (tags == null || tags.length == 0)
+            return true;
+        
+        // otherwise, encode tags and use set math to return answer
+        Set<Tag> queryTags = Tag.encodeTags(tags, getTableContext(), false);            
+        
+        return curTags.containsAll(queryTags);
     }
 }

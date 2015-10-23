@@ -975,16 +975,21 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         return allTables;
     }
 
+    Tag fetchTag(String tag)
+    {
+        return fetchTag(tag, true);
+    }
+    
     /**
      * Convert a string into a Tag for use within TMS
      * @param t
      * @return
      */
-    Tag fetchTag(String tag)
+    Tag fetchTag(String tag, boolean createIfMissing)
     {
         if (tag != null && (tag = tag.trim().toLowerCase()).length() > 0) {
             Tag  tObj = m_globalTagCache.get(tag);
-            if (tObj == null) {
+            if (tObj == null && createIfMissing) {
                 // minimize object creation
                 tag = tag.intern();
                 
@@ -996,5 +1001,13 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         }
         else
             return null;
+    }
+    
+    /*
+     * For unit tests only!!
+     */
+    Map<String, Tag> getGlobalTagCache()
+    {
+        return m_globalTagCache;
     }
 }
