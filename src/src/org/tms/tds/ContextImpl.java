@@ -136,12 +136,16 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
 
     private Map<String, Object> m_elemProperties;
     
+    private Map<String, Tag> m_globalTagCache;
+    
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {
-        super();      
+        super();  
+        
         set(sf_IS_DEFAULT_FLAG, isDefault);
         m_registeredNonpersistantTables = new WeakHashSet<TableImpl>();
         m_registeredPersistantTables = new HashSet<TableImpl>();
+        m_globalTagCache = new HashMap<String, Tag>();
         
         // initialize from default context, unless this the default
         if (otherContext != null && !(otherContext instanceof ContextImpl))
@@ -480,6 +484,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     {
         return ElementType.TableContext;
     }
+    
     @Override
     protected boolean isNull()
     {
@@ -968,5 +973,28 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         allTables.addAll(m_registeredNonpersistantTables);
         
         return allTables;
+    }
+
+    /**
+     * Convert a string into a Tag for use within TMS
+     * @param t
+     * @return
+     */
+    Tag fetchTag(String tag)
+    {
+        if (tag != null && (tag = tag.trim().toLowerCase()).length() > 0) {
+            Tag  tObj = m_globalTagCache.get(tag);
+            if (tObj == null) {
+                // minimize object creation
+                tag = tag.intern();
+                
+                tObj = new Tag(tag);
+                m_globalTagCache.put(tag, tObj);
+            }
+            
+            return tObj;
+        }
+        else
+            return null;
     }
 }

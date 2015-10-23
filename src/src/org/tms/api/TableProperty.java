@@ -11,7 +11,8 @@ public enum TableProperty implements Comparable<TableProperty>
 {
     // Base Element Properties
     Label,
-    Description,  
+    Description,
+    Tags,
     isNull(true, false, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
     isReadOnly(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column),
     isSupportsNull(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),

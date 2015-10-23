@@ -1,16 +1,50 @@
 package org.tms.tds;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Tag implements Serializable
 {
-    private static final long serialVersionUID = -2947388357311876386L;
+    private static final long serialVersionUID = -8379517266723894527L;
+
+    static String [] decodeTags(Set<Tag> tags)
+    {
+        List<String> strTags = new ArrayList<String>(tags != null ? tags.size() : 0);
+        if (tags != null) {
+            for (Tag t : tags) {
+                strTags.add(t.getLabel());
+            }
+            
+            Collections.sort(strTags);
+        }
+        
+        return strTags.toArray(new String [] {});
+    }  
+    
+    static Set<Tag> encodeTags(String [] tags, ContextImpl tc)
+    {
+        if (tags == null || tags.length == 0)
+            return Collections.emptySet();
+        
+        Set<Tag> tagObjs = new HashSet<Tag>(tags != null ? tags.length : 0);
+        for (String t : tags) {
+            Tag tagObj = tc.fetchTag(t);
+            if (tagObj != null)
+                tagObjs.add(tagObj);
+        }
+        
+        return tagObjs;
+    }  
     
     private String m_label;
     
     public Tag(String label)
     {
-        m_label = label;
+        m_label = label.trim().toLowerCase();
     }
     
     public String getLabel()
@@ -36,15 +70,23 @@ public class Tag implements Serializable
     @Override
     public boolean equals(Object obj)
     {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (!(obj instanceof Tag)) return false;
+        if (this == obj) 
+            return true;
+        
+        if (obj == null) 
+            return false;
+        
+        if (!(obj instanceof Tag)) 
+            return false;
+        
         Tag other = (Tag) obj;
-        if (m_label == null)
-        {
-            if (other.m_label != null) return false;
+        if (m_label == null) {
+            if (other.m_label != null) 
+                return false;
         }
-        else if (!m_label.equals(other.m_label)) return false;
+        else if (!m_label.equals(other.m_label)) 
+            return false;
+        
         return true;
-    }  
+    }
 }

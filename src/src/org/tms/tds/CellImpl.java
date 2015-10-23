@@ -1001,4 +1001,55 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     {
         return isBooleanValue();
     }
+
+    @Override
+    public boolean tag(String... tags)
+    {
+        boolean anyAdded = false;
+        if (tags != null && tags.length > 0) {
+            Set<Tag> newTags = Tag.encodeTags(tags, getTableContext());            
+            Set<Tag> curTags = getTable() != null ? getTable().getCellTags(this) : null;            
+            if (curTags != null) 
+                anyAdded = curTags.addAll(newTags);
+            else {
+                if (getTable() != null) {
+                    anyAdded = true;
+                    getTable().setCellTags(this, newTags);
+                }
+            }
+        }
+        
+        return anyAdded;
+    }
+
+    @Override
+    public boolean untag(String... tags)
+    {
+        boolean removedAny = false;
+        if (tags != null && tags.length > 0) {
+            Set<Tag> oldTags = Tag.encodeTags(tags, getTableContext());            
+            Set<Tag> curTags = getTable() != null ? getTable().getCellTags(this) : null;            
+            if (curTags != null) 
+                removedAny = curTags.removeAll(oldTags);
+        }
+        
+        return removedAny;
+    }
+
+    @Override
+    public void replaceTags(String... tags)
+    {
+        Set<Tag> newTags = null;
+        if (tags != null && tags.length > 0) 
+            newTags = Tag.encodeTags(tags, getTableContext());            
+        
+        if (getTable() != null)
+            getTable().setCellTags(this, newTags);
+    }
+
+    @Override
+    public String[] getTags()
+    {
+        return Tag.decodeTags(getTable() != null ? getTable().getCellTags(this) : null);
+    }
 }

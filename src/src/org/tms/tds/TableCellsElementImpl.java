@@ -290,9 +290,61 @@ abstract class TableCellsElementImpl extends TableElementImpl
             return fetchListeners().hasListeners(evTs);
     }
     
-    public boolean tag(String... tags) { return false;}    
-    public boolean untag(String... tags){ return false;}     
-    public boolean replaceTags(String... tags){ return false;}     
-    public String [] getTags(){ return null;}  
-
+    public boolean tag(String... tags) 
+    { 
+        if (tags != null && tags.length > 0) {
+            ContextImpl tc = getTableContext();            
+            Set<Tag> newTags = Tag.encodeTags(tags, tc);
+            
+            @SuppressWarnings("unchecked")
+            Set<Tag> curTags = (Set<Tag>)getProperty(TableProperty.Tags);
+            
+            if (curTags == null) {
+                setProperty(TableProperty.Tags, newTags);
+                return true;
+            }
+            else
+                return curTags.addAll(newTags);
+        }
+        
+        return false;
+    }
+    
+    public boolean untag(String... tags)
+    { 
+        if (tags != null && tags.length > 0) {
+            ContextImpl tc = getTableContext();            
+            Set<Tag> oldTags = Tag.encodeTags(tags, tc);
+            
+            @SuppressWarnings("unchecked")
+            Set<Tag> curTags = (Set<Tag>)getProperty(TableProperty.Tags);
+            
+            if (curTags == null) 
+                return false;
+            else
+                return curTags.removeAll(oldTags);
+        }
+        
+        return false;
+    }     
+    
+    public void replaceTags(String... tags)
+    { 
+        if (tags != null && tags.length > 0) {
+            ContextImpl tc = getTableContext();            
+            Set<Tag> newTags = Tag.encodeTags(tags, tc);
+            
+            setProperty(TableProperty.Tags, newTags);
+        }
+        else
+            clearProperty(TableProperty.Tags);
+    }
+    
+    public String [] getTags()
+    { 
+        @SuppressWarnings("unchecked")
+        Set<Tag> curTags = (Set<Tag>)getProperty(TableProperty.Tags);
+        
+        return Tag.decodeTags(curTags);
+    }  
 }

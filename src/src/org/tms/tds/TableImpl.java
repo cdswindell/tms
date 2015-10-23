@@ -142,6 +142,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     private Map<CellImpl, Set<Derivable>> m_cellAffects;
     private Map<CellImpl, TableElementListeners> m_cellListeners;
     private Map<CellImpl, Map<String, Object>> m_cellElemProperties;
+    private Map<CellImpl, Set<Tag>> m_cellTags;
     
     private JustInTimeSet<SubsetImpl> m_subsets;
     
@@ -228,6 +229,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         m_derivedCells = new HashMap<CellImpl, DerivationImpl>(expectedNoOfDerivedCells);
         m_cellAffects = new HashMap<CellImpl, Set<Derivable>>(expectedNoOfDerivedCells);
         m_cellListeners = new ConcurrentHashMap<CellImpl, TableElementListeners>();
+        m_cellTags = new HashMap<CellImpl, Set<Tag>>();
         set(sf_AUTO_RECALCULATE_DISABLED_FLAG, false);
         
         m_cellElemProperties = new ConcurrentHashMap<CellImpl, Map<String, Object>>();
@@ -2243,6 +2245,20 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     int getNumDerivedCells()
     {
         return m_derivedCells.size();
+    }
+    
+
+    Set<Tag> getCellTags(CellImpl cell)
+    {
+        return m_cellTags.get(cell);
+    }
+    
+    void setCellTags(CellImpl cell, Set<Tag> tags)
+    {
+        if (tags == null)
+            m_cellTags.remove(cell);
+        else
+            m_cellTags.put(cell,  tags);
     }
     
     @Override
