@@ -542,6 +542,9 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
             case Derivation:
                 return getDerivation();
                 
+            case Tags:
+                return getTags();
+                
             default:
                 return super.getProperty(key);
         }

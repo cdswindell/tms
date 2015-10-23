@@ -96,6 +96,9 @@ abstract class TableCellsElementImpl extends TableElementImpl
         // Some properties are built into the base Table Element object
         switch (key)
         {
+            case Tags:
+                return getTags();
+                
             default:
                 return super.getProperty(key);
         }
@@ -297,7 +300,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
             Set<Tag> newTags = Tag.encodeTags(tags, tc);
             
             @SuppressWarnings("unchecked")
-            Set<Tag> curTags = (Set<Tag>)getProperty(TableProperty.Tags);
+            Set<Tag> curTags = (Set<Tag>)getPropertyInternal(TableProperty.Tags);
             
             if (curTags == null) {
                 setProperty(TableProperty.Tags, newTags);
@@ -317,7 +320,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
             Set<Tag> oldTags = Tag.encodeTags(tags, tc);
             
             @SuppressWarnings("unchecked")
-            Set<Tag> curTags = (Set<Tag>)getProperty(TableProperty.Tags);
+            Set<Tag> curTags = (Set<Tag>)getPropertyInternal(TableProperty.Tags);
             
             if (curTags == null) 
                 return false;
@@ -343,7 +346,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
     public String [] getTags()
     { 
         @SuppressWarnings("unchecked")
-        Set<Tag> curTags = (Set<Tag>)getProperty(TableProperty.Tags);
+        Set<Tag> curTags = (Set<Tag>)getPropertyInternal(TableProperty.Tags);
         
         return Tag.decodeTags(curTags);
     }  

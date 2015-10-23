@@ -266,6 +266,17 @@ abstract public class BaseElementImpl implements BaseElement
         }      
     }
     
+    protected Object getPropertyInternal(TableProperty key)
+    {
+        if (!key.isImplementedBy(this))
+            throw new UnimplementedException(this, key);
+        
+        if (key.isOptional())
+            return getProperty(sf_RESERVED_PROPERTY_PREFIX + key.name(), false);
+        else
+            throw new UnimplementedException(this, key);
+    }
+        
     public Object getProperty(String key)
     {
         return getProperty(key, true);
