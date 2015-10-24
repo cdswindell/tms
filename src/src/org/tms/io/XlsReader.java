@@ -243,6 +243,35 @@ public class XlsReader extends BaseReader<XlsOptions>
         m_namedTableElements = new HashMap<String, TableElement>();
     }
 
+    public void close()
+    {
+        m_wb = null;
+        m_ssV = null;
+        
+        m_sheetTableMap.clear();
+        m_sheetParsedFormulaMap.clear();
+        m_sheetMaxColMap.clear();
+        m_namedTableElements.clear();
+        
+        if (m_externalFuncRefStack != null)
+            m_externalFuncRefStack.clear();
+        
+        if (m_derivCache != null)
+            m_derivCache.clear();
+        
+        if (m_derivedCells != null)
+            m_derivedCells.clear();
+        
+        if (m_excludedRowsMap != null)
+            m_excludedRowsMap.clear();
+            
+        if (m_emptyRowsMap != null)
+            m_emptyRowsMap.clear();
+            
+        if (m_externalFuncRefStack != null)
+            m_externalFuncRefStack.clear();
+    }
+    
     public void parseWorkbook() 
     throws IOException
     {
@@ -259,8 +288,10 @@ public class XlsReader extends BaseReader<XlsOptions>
             
             for (int i = 0; i < noSheets; i++) {
                 Table t = parseSheet(i);
-                if (t != null)
+                if (t != null) {
                     processedTables.add(t);
+                    t.setPersistant(true);
+                }
             }
 
             // handle named ranges
@@ -273,10 +304,16 @@ public class XlsReader extends BaseReader<XlsOptions>
             for (Table t : processedTables) {
                 pruneEmptyElements(t);
             }
+            
+            // release resources
+            processedTables.clear();
         }
         catch (EncryptedDocumentException | InvalidFormatException e)
         {
             throw new TableIOException(e);
+        }
+        finally {
+            close();
         }
     }
     
@@ -302,6 +339,9 @@ public class XlsReader extends BaseReader<XlsOptions>
         catch (EncryptedDocumentException | InvalidFormatException e)
         {
             throw new TableIOException(e);
+        }
+        finally {
+            close();
         }
     }
     

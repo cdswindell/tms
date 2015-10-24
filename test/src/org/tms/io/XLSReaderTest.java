@@ -45,7 +45,7 @@ public class XLSReaderTest extends BaseTest
     }
 
     @Test
-    public final void testImportMultiSheet() 
+    public final void testImportMultiSheet() throws InterruptedException 
     {
         TableContext tc = TableContextFactory.createTableContext();
         assertNotNull(tc);
@@ -58,7 +58,7 @@ public class XLSReaderTest extends BaseTest
     }
 
     @Test
-    public final void testImportMultiSheetXls() 
+    public final void testImportMultiSheetXls() throws InterruptedException 
     {
         TableContext tc = TableContextFactory.createTableContext();
         assertNotNull(tc);
@@ -70,7 +70,7 @@ public class XLSReaderTest extends BaseTest
         testMultiSheetImport(tc, r);
     }
 
-    private void testMultiSheetImport(TableContext tc, XlsReader r)
+    private void testMultiSheetImport(TableContext tc, XlsReader r) throws InterruptedException
     {
         try
         {
@@ -79,12 +79,15 @@ public class XLSReaderTest extends BaseTest
             
             Table inventory = tc.getTable(Access.ByLabel, "Inventory");
             assertNotNull(inventory);
+            assertThat(inventory.isPersistant(), is(true));
             
             Table costs = tc.getTable(Access.ByLabel, "Costs");
             assertNotNull(costs);
+            assertThat(costs.isPersistant(), is(true));
             
             Table assets = tc.getTable(Access.ByLabel, "Assets");
             assertNotNull(assets);
+            assertThat(assets.isPersistant(), is(true));
             assertThat(assets.getNumRows(), is(7));
             assertThat(assets.getNumColumns(), is(4));
             

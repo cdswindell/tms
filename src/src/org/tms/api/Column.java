@@ -14,8 +14,17 @@ import org.tms.api.derivables.Derivable;
  */
 public interface Column extends TableElement, Derivable, TableRowColumnElement
 {
-
+    /**
+     * Return the data type associated with this {@code column}. Returns {@code null} if no data type
+     * has been assigned.
+     * @return the data type associated with this column or none if no data type has been assigned
+     */
     public Class<?> getDataType();
 
+    /**
+     * Assign a primary data type to this {@code column}. Assigning a data type to a {@code column}
+     * allows column cells to be constrained to that data type.
+     * @param dataType the Java data type to assign to this column
+     */
     public void setDataType(Class<? extends Object> dataType);
 }

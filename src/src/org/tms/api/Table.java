@@ -285,7 +285,7 @@ public interface Table extends TableElement, InitializableTableProperties
      * table's current row and column to these values. If {@code row} and/or
      * {@code col} are {@code null}, {@code null} is returned.
      * @param row the table row containing the desired cell
-     * @param col the table cell containing the desired cell
+     * @param col the table column containing the desired cell
      * @return the table cell referenced by {@code row} and {@code col}, or {@code null} if row and/or col are null
      * @throws org.tms.api.exceptions.DeletedElementException if this table or the specified row or column has been deleted
      * @throws org.tms.api.exceptions.InvalidParentException if the specified row or column are not a part of this table
@@ -310,7 +310,7 @@ public interface Table extends TableElement, InitializableTableProperties
      * table's current row and column to these values. If {@code row} and/or
      * {@code col} are {@code null}, {@code null} is returned.
      * @param row the table row containing the desired cell
-     * @param col the table cell containing the desired cell
+     * @param col the table column containing the desired cell
      * @return the value in the table cell referenced by {@code row} and {@code col}, or {@code null} if row and/or col are null
      * @throws org.tms.api.exceptions.DeletedElementException if this table or the specified row or column has been deleted
      * @throws org.tms.api.exceptions.InvalidParentException if the specified row or column are not a part of this table
@@ -320,7 +320,7 @@ public interface Table extends TableElement, InitializableTableProperties
     /**
      * 
      * @param row the table row containing the desired cell
-     * @param col the table cell containing the desired cell
+     * @param col the table column containing the desired cell
      * @return the formatted cell value
      * @throws org.tms.api.exceptions.DeletedElementException if this table or the specified row or column has been deleted
      * @throws org.tms.api.exceptions.InvalidParentException if the specified row or column are not a part of this table
@@ -331,7 +331,7 @@ public interface Table extends TableElement, InitializableTableProperties
      * Sets the value of the {@link Table} {@link Cell} at the intersection of {@link Row} {@code row} and {@link Column} {@code col} 
      * to {@code newValue} and returns {@code true} if the cell value was changed.
      * @param row the table row containing the desired cell to set the value of
-     * @param col the table cell containing the desired cell to set the value of
+     * @param col the table column containing the desired cell to set the value of
      * @param newValue the new value to assign to the table cell at the specified row/column position
      * @return {@code true} if the cell value was not equal to {@code newValue}
      * @throws org.tms.api.exceptions.DeletedElementException if this table or the specified row or column has been deleted
@@ -425,5 +425,25 @@ public interface Table extends TableElement, InitializableTableProperties
         export(fileName, null);
     }
 
-    public boolean isCellDefined(Row rowRef, Column colRef);
+    /**
+     * Returns {@code true} if the specified {@link Cell} has been created. In sparse tables, cells
+     * are only created when they are referenced.
+     * @param row the table row containing the desired cell
+     * @param col the table column containing the desired cell
+     * @return true if the specified cell has been created
+     */
+    public boolean isCellDefined(Row row, Column col);
+
+    /**
+     * Returns {@code true} if this table has been marked as persistent and will survive 
+     * subsequent garbage collections
+     * @return true if this table is marked as persistent
+     */
+    boolean isPersistant();
+
+    /**
+     * 
+     * @param persistent set to true to make this table survive garbage collections
+     */
+    void setPersistant(boolean persistent);
 }

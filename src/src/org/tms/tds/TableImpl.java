@@ -999,11 +999,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         }       
     }
     
+    @Override
     public boolean isPersistant()
     {
         return isSet(sf_IS_TABLE_PERSISTANT_FLAG);
     }
     
+    @Override
     public void setPersistant(boolean persistant)
     {
         vetElement();
@@ -1041,7 +1043,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         vetParent(r);
         
         boolean processed = m_subsets.add(r);
-        if (processed) setDirty(true);
+        if (processed) 
+            setDirty(true);
+        
         return processed;
     }
     

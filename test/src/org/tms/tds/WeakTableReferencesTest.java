@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.Column;
+import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.events.TableElementEventType;
@@ -30,8 +31,10 @@ public class WeakTableReferencesTest
         
         assertThat(tc, notNullValue());
         
+        for (int i = 0; i < 4; i++) {
         System.gc();
         Thread.sleep(500);
+        }
         
         assertThat(tc.getNumTables(), is(0));      
     }
@@ -97,6 +100,9 @@ public class WeakTableReferencesTest
         
         c1.setDerivation("ridx");
         c2.setDerivation("4 + CoL 1");
+        
+        Subset s = t.addSubset(Access.ByLabel, "Subset");
+        s.add(c1);
         
         assertThat(c1, notNullValue());
     }    

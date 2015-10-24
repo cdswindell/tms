@@ -166,32 +166,32 @@ public class Token implements Labeled
 
     public Column getColumnValue()
     {
-        if (m_value != null && m_value instanceof Column)
-            return (Column)m_value;
+        if (getValue() != null && getValue() instanceof Column)
+            return (Column)getValue();
         else
             return null;
     }
     
     public Row getRowValue()
     {
-        if (m_value != null && m_value instanceof Row)
-            return (Row)m_value;
+        if (getValue() != null && getValue() instanceof Row)
+            return (Row)getValue();
         else
             return null;
     }
     
     public TableElement getTableElementValue()
     {
-        if (m_value != null && m_value instanceof TableElement)
-            return (TableElement)m_value;
+        if (getValue() != null && getValue() instanceof TableElement)
+            return (TableElement)getValue();
         else
             return null;
     }
     
     public TableElement getReferenceValue()
     {
-        if (m_value != null && m_value instanceof TableElement)
-            return (TableElement)m_value;
+        if (getValue() != null && getValue() instanceof TableElement)
+            return (TableElement)getValue();
         else
             return null;
     }
@@ -299,8 +299,8 @@ public class Token implements Labeled
     
     public String toString()
     {
-        if (m_value != null)
-            return m_value.toString();
+        if (getValue() != null)
+            return getValue().toString();
         else if (isLabeled())
             return getLabel();
         else if (getTokenType() != null && getTokenType().getLabel() != null) 
