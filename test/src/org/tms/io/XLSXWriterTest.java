@@ -44,6 +44,7 @@ public class XLSXWriterTest extends BaseTest
         
         Column dCol = t.addColumn();
         dCol.setDerivation("col 1 * 3");
+        dCol.setDescription("This is dCol");
         
         Column eCol = t.addColumn();        
         Row r1 = t.getRow(1);
@@ -51,6 +52,7 @@ public class XLSXWriterTest extends BaseTest
         cell.setDerivation("col 1 / 0");
         
         Row r2 = t.getRow(2);
+        r2.setDescription("This is TMS Row 2");
         cell = t.getCell(r2,  eCol);
         cell.setCellValue(Double.NaN);
         
@@ -65,12 +67,17 @@ public class XLSXWriterTest extends BaseTest
         Row r5 = t.addRow(5);
         r5.setDerivation("sum(colRef(cidx))");
         
+        Cell tCell = t.getCell(r1, eCol);
+        tCell.setLabel("DivByZero");
+        tCell.setDescription("This cell has intensionally been set to an error");
+        
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         t.export("foo.xlsx", XlsOptions.Default
                 .withColumnNames(true)
                 .withColumnWidthInInches(1.5)
-                .withRowNameColumnWidthInInches(1)
+                .withRowNameColumnWidthInInches(1.25)
+                .withCommentAuthor("TMS via POI")
                 );
         bos.close();
 

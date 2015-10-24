@@ -10,25 +10,32 @@ import java.util.Map;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.tms.api.Column;
 import org.tms.api.Table;
-import org.tms.api.TableElement;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.io.options.XlsOptions;
 
 public class XlsWriter extends BaseWriter<XlsOptions>
 {
-    private XlsOptions m_options;
     private Map<String, CellStyle> m_styleCache;
     private Map<Sheet, Map<org.tms.api.Row, Row>> m_rowMap;
     private Map<Sheet, Map<org.tms.api.Column, Integer>> m_colMap;
+    private CreationHelper m_wbHelper = null;
 
     public static void export(TableExportAdapter tea, OutputStream output, XlsOptions options) 
             throws IOException
@@ -40,7 +47,6 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     private XlsWriter(TableExportAdapter tw, OutputStream out, XlsOptions options)
     {
         super(tw, out, options);        
-        m_options = options;   
         m_styleCache = new HashMap<String, CellStyle>();
         m_rowMap = new HashMap<Sheet, Map<org.tms.api.Row, Row>>();
         m_colMap = new HashMap<Sheet, Map<org.tms.api.Column, Integer>>();
@@ -49,7 +55,8 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     @Override
     protected void export() throws IOException
     {
-        Workbook wb = m_options.isXlsXFormat() ? new XSSFWorkbook() : new HSSFWorkbook(); 
+        Workbook wb = options().isXlsXFormat() ? new XSSFWorkbook() : new HSSFWorkbook(); 
+        m_wbHelper = wb.getCreationHelper();
         
         // perform the export
         export(wb, getTable());
@@ -64,15 +71,21 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         String tableLabel = trimString(t.getLabel());
         Sheet sheet = tableLabel != null ? wb.createSheet(tableLabel) : wb.createSheet();
 
-        int cellFontSize = m_options.getDefaultFontSize();
-        int headerFontSize = m_options.getHeadingFontSize();
+        int cellFontSize = options().getDefaultFontSize();
+        int commentFontSize = options().getDefaultFontSize() - 3;
+        int headerFontSize = options().getHeadingFontSize();
         
-        int colWidthPx = m_options.getColumnWidth();
+        int colWidthPx = options().getColumnWidth();
         int colWidth = colWidthPx > 0 ? (int)((colWidthPx - 5)/6.0) : 8;        
         sheet.setDefaultColumnWidth(colWidth);
         
-        CellStyle headingStyle = getCachedCellStyle("heading", wb, headerFontSize);
-        CellStyle cellStyle = getCachedCellStyle("default", wb, cellFontSize);
+        CellStyle cellStyle = getCachedCellStyle("default", wb, cellFontSize, false);
+        CellStyle headingStyle = getCachedCellStyle("heading", wb, headerFontSize, false);
+        
+        // make the comment styles, we may or may not need them, but this 
+        // saves us from having to cache the comment font size
+        getCachedCellStyle("comment", wb, commentFontSize, false);
+        getCachedCellStyle("author", wb, commentFontSize, true);
                
         int firstActiveRow = 0;
         int firstActiveCol = 0;
@@ -85,7 +98,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             Cell headerCell = null;
 
             short colCnt = (short)0;
-            if (m_options.isRowNames()) {
+            if (options().isRowNames()) {
                 firstActiveCol = 1;
                 headerCell = headerRow.createCell(colCnt++);
                 headerCell.setCellStyle(headingStyle);
@@ -101,23 +114,29 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                 headerCell.setCellValue(label);
                 headerCell.setCellStyle(headingStyle);
                 
-                if (m_options.isDescriptions())
-                    applyComment(c, headerCell);
+                if (options().isDescriptions())
+                    applyComment(headerCell, c.getDescription());
 
                 colCnt++;
             }
+            
+            // set print headings
+            sheet.setRepeatingRows(CellRangeAddress.valueOf("$1:$1"));
         }
 
         if (options().isRowNames()) {
             firstActiveCol = 1;
-            int rnColWidthPx = m_options.getRowNameColumnWidth();
+            int rnColWidthPx = options().getRowNameColumnWidth();
             int rnColWidth = rnColWidthPx > 0 ? (int)(0.5 + (((rnColWidthPx)/6.0) * 256)) : 10 * 256;        
             sheet.setColumnWidth(0, rnColWidth);
+            
+            // set print headings
+            sheet.setRepeatingColumns(CellRangeAddress.valueOf("$A:$A"));
         }
         
         // Fill data cells
         for (org.tms.api.Row tr : this.getRows()) {
-            if (m_options.isIgnoreEmptyRows() && tr.isNull())
+            if (options().isIgnoreEmptyRows() && tr.isNull())
                 continue;
 
             short colCnt = 0;
@@ -132,21 +151,19 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                 headerCell.setCellValue(label);
                 headerCell.setCellStyle(headingStyle);
                 
-                if (m_options.isDescriptions())
-                    applyComment(tr, headerCell);
+                if (options().isDescriptions())
+                    applyComment(headerCell, tr.getDescription());
             }
 
             for (Column tc : this.getActiveColumns()) {
                 if (rowNum < 3)
                     cacheColAssociation(sheet, tc, colCnt);
-                org.tms.api.Cell tCell = t.getCell(tr, tc);
+                org.tms.api.Cell tCell = t.isCellDefined(tr, tc) ? t.getCell(tr, tc) : null;
                 if (tCell != null) {
-                    if (tCell.isErrorValue()) {
-                        Cell excelC = r.createCell(colCnt);
+                    Cell excelC  = r.createCell(colCnt);
+                    if (tCell.isErrorValue()) 
                         excelC.setCellErrorValue(toExcelErrorValue(tCell));
-                    }
                     else if (!tCell.isNull()) {
-                        Cell excelC = r.createCell(colCnt);
                         excelC.setCellStyle(cellStyle);
                         Object cv = tCell.getCellValue();
                         if (tCell.isNumericValue()) {
@@ -166,13 +183,13 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                     }
                     
                     String label = trimString(tCell.getLabel());
-                    if (label != null) {
-                        
-                    }
+                    if (label != null) 
+                        createNamedCell(tCell, label, wb, sheet, excelC);
                     
-                    String desc = trimString(tCell.getDescription());
-                    if (desc != null) {
-                        
+                    if (options().isDescriptions()) {
+                        String desc = trimString(tCell.getDescription());
+                        if (desc != null) 
+                            applyComment(excelC, desc);
                     }
                     
                     Derivation deriv = getDerivation(tCell);
@@ -185,20 +202,83 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             }
         }
 
-        
+        // Freeze pains        
+        if (options().isRowNames() && options().isColumnNames())
+            sheet.createFreezePane( 1, 1, 1, 1 );
+        else if (options().isColumnNames())
+            sheet.createFreezePane( 0, 1, 0, 1 );
+        else if (options().isRowNames())
+            sheet.createFreezePane( 1, 0, 1, 0 );
+
         // set active cell
         Row r = sheet.getRow(firstActiveRow);
         Cell activeCell = r.getCell(firstActiveCol);
-        activeCell.setAsActiveCell();
-        
+        activeCell.setAsActiveCell();        
     }
 
-    private void applyComment(TableElement te, Cell cell)
+    private void createNamedCell(org.tms.api.Cell tCell, String label, Workbook wb, Sheet sheet, Cell excelC)
     {
-        String desc = trimString(te.getDescription());
-        if (desc != null) {
+        CellReference cr = new CellReference(excelC.getRowIndex(), excelC.getColumnIndex(), true, true) ;
+        
+        Name namedCell = wb.createName();
+        namedCell.setNameName(label);
+        
+        StringBuffer sb = new StringBuffer();
+        String sn = sheet.getSheetName();
+        boolean snNeedsQuote = sn.indexOf(' ') > -1 || sn.indexOf("'") > -1;
+        
+        if (snNeedsQuote)
+            sb.append("'");
+        sb.append(sn);
+        if (snNeedsQuote)
+            sb.append("'");
+        sb.append('!');
+        
+        sb.append(cr.formatAsString()); // area reference
+        namedCell.setRefersToFormula(sb.toString());      
+    }
+
+    private void applyComment(Cell excelC, String comment)
+    {
+        comment = trimString(comment);
+        if (comment != null) {
+            Sheet sheet = excelC.getSheet();
+            Drawing dp = sheet.createDrawingPatriarch();
             
-        }        
+            // create the anchor object and associate it with the cell
+            ClientAnchor anchor = m_wbHelper.createClientAnchor();
+            anchor.setCol1(excelC.getColumnIndex());
+            anchor.setCol2(excelC.getColumnIndex()+1);
+            anchor.setRow1(excelC.getRowIndex());
+            anchor.setRow2(excelC.getRowIndex()+3);
+            
+            // create the comment structure
+            Comment eComment = dp.createCellComment(anchor);            
+            RichTextString str = m_wbHelper.createRichTextString(comment);
+            
+            int authorLen = -1;
+            if (options().isCommentAuthor()) {
+                String author = options().getCommentAuthor();
+                eComment.setAuthor(author);
+                str = m_wbHelper.createRichTextString(author + ":\n" + str.getString());
+                authorLen = author.length() + 1; // account for colon
+            }
+            
+            // format the comment text
+            short commentFont  = this.getCachedCellFontIndex("comment");
+            str.applyFont(commentFont);
+            
+            if (authorLen > -1) {
+                short authorFont  = this.getCachedCellFontIndex("author");
+                str.applyFont(0, authorLen, authorFont);
+            }
+            
+            // finally, assign the text to the comment
+            eComment.setString(str);
+            
+           // Assign the comment to the cell
+            excelC.setCellComment(eComment);
+        }
     }
 
     public Derivation getDerivation(org.tms.api.Cell tCell)
@@ -234,16 +314,27 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         colMap.put(tmsC, excelC);
     }
 
-    private CellStyle getCachedCellStyle(String styleName, Workbook wb, int fontSize)
+    private short getCachedCellFontIndex(String styleName)
+    {
+        CellStyle cs = m_styleCache.get(styleName);
+        if (cs != null)
+            return cs.getFontIndex();
+        else
+            return 0;
+    }
+    
+    private CellStyle getCachedCellStyle(String styleName, Workbook wb, int fontSize, boolean isBold)
     {
         if (!m_styleCache.containsKey(styleName)) {
             switch(styleName) {
                 case "heading":
-                    m_styleCache.put(styleName, createHeadingStyle(wb, fontSize));
+                    m_styleCache.put(styleName, createHeadingStyle(wb, fontSize, isBold));
                     break;
                     
+                case "comment":
+                case "author":
                 case "default":
-                    m_styleCache.put(styleName, createDefaultStyle(wb, fontSize));
+                    m_styleCache.put(styleName, createDefaultStyle(wb, fontSize, isBold));
                     break;
             }
         }
@@ -251,11 +342,12 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         return m_styleCache.get(styleName);
     }
 
-    private CellStyle createHeadingStyle(Workbook wb, int fontSize) 
+    private CellStyle createHeadingStyle(Workbook wb, int fontSize, boolean isBold) 
     {
         Font monthFont = wb.createFont();
         monthFont.setFontHeightInPoints((short)fontSize);
         monthFont.setColor(IndexedColors.WHITE.getIndex());
+        monthFont.setBold(isBold);
         CellStyle headingStyle = wb.createCellStyle();
         
         headingStyle.setAlignment(CellStyle.ALIGN_CENTER);
@@ -268,10 +360,12 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         return headingStyle;
     }
     
-    private CellStyle createDefaultStyle(Workbook wb, int fontSize)
+    private CellStyle createDefaultStyle(Workbook wb, int fontSize, boolean isBold)
     {
         Font cellFont = wb.createFont();
         cellFont.setFontHeightInPoints((short)fontSize);
+        cellFont.setBold(isBold);
+        
         CellStyle cellStyle = wb.createCellStyle();
         cellStyle.setFont(cellFont);
         cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);

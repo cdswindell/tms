@@ -13,7 +13,8 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
     private enum Options implements OptionEnum {
         FileFormat,
         BlanksAsNull,
-        Descriptions,        
+        Descriptions, 
+        CommentAuthor
     }
 
     private enum ExcelFileFormat  {
@@ -102,6 +103,23 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
     {
         XlsOptions newOptions = clone(this);
         newOptions.set(Options.Descriptions, b);
+        return newOptions;
+    }
+    
+    public boolean isCommentAuthor()
+    {
+        return get(Options.CommentAuthor) != null;
+    }
+    
+    public String getCommentAuthor()
+    {
+        return (String)get(Options.CommentAuthor);
+    }
+    
+    public XlsOptions withCommentAuthor(String author)
+    {
+        XlsOptions newOptions = clone(this);
+        newOptions.set(Options.CommentAuthor, author);
         return newOptions;
     }
 }
