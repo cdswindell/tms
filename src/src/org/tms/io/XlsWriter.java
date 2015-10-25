@@ -48,11 +48,14 @@ import org.tms.api.io.options.XlsOptions;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.EquationStack;
 import org.tms.teq.InfixExpressionParser;
+import org.tms.teq.PostfixStackGenerator;
+import org.tms.teq.StackType;
 import org.tms.util.Tuple;
 
 public class XlsWriter extends BaseWriter<XlsOptions>
 {
     static final Map<Operator, String> sf_tmsToExcelFunctionMap = new HashMap<Operator, String>();
+    static final Map<BuiltinOperator, Operator> sf_builtInToExcelMap = new HashMap<BuiltinOperator, Operator>();
     
     static {
         for (Map.Entry<String, Operator> e : XlsReader.sf_FunctionMap.entrySet()) {
@@ -63,9 +66,36 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                 sf_tmsToExcelFunctionMap.put(oper, excelFunc);
         }
         
+        ExcelOp eOp = new ExcelOp(BuiltinOperator.AndOper, "and");
+        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        sf_tmsToExcelFunctionMap.put(eOp, eOp.getLabel());     
+        
+        eOp = new ExcelOp(BuiltinOperator.OrOper, "or");
+        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+
+        eOp = new ExcelOp(BuiltinOperator.NotOper, "not");
+        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+
+        eOp = new ExcelOp(BuiltinOperator.XorOper, "xor");
+        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        
+        eOp = new ExcelOp(BuiltinOperator.PowerOper, "pow");
+        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        
+        eOp = new ExcelOp(BuiltinOperator.FactOper, "fact");
+        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        
         // some additional items
         sf_tmsToExcelFunctionMap.put(BuiltinOperator.SumOper, "sum");
         sf_tmsToExcelFunctionMap.put(BuiltinOperator.PercentOper, "%");
+        
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.PiOper, "pi()");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.RandOper, "rand()");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.TrueOper, "true()");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.FalseOper, "false()");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.EOper, String.valueOf(Math.E));
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.ColumnIndexOper, "column()");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.RowIndexOper, "row()");
         
         sf_tmsToExcelFunctionMap.put(BuiltinOperator.EqOper, "=");
         sf_tmsToExcelFunctionMap.put(BuiltinOperator.NEqOper, "<>");
@@ -80,7 +110,8 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     private Map<Sheet, Map<TableRowColumnElement, Integer>> m_colMap;
     private Map<Cell, CachedDerivation> m_cachedDerivations;
     private Map<TableElement, String> m_cachedRangeRef;
-    private Map<Derivation, EquationStack> m_eqStkCache;
+    private Map<Derivation, EquationStack> m_infixCache;
+    private Map<Derivation, EquationStack> m_postfixCache;
     
     private CreationHelper m_wbHelper = null;
 
@@ -98,7 +129,8 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         m_rowMap = new HashMap<Sheet, Map<TableRowColumnElement, Integer>>();
         m_colMap = new HashMap<Sheet, Map<TableRowColumnElement, Integer>>();
         m_cachedDerivations = new LinkedHashMap<Cell, CachedDerivation>();
-        m_eqStkCache = new HashMap<Derivation, EquationStack>();
+        m_infixCache = new HashMap<Derivation, EquationStack>();
+        m_postfixCache = new HashMap<Derivation, EquationStack>();
         m_cachedRangeRef = new HashMap<TableElement, String>();
     }
 
@@ -303,8 +335,8 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     private String derivationToFormula(Workbook wb, Sheet sheet, int maxCol, CachedDerivation cd)
     {
         try {
-            EquationStack es = cd.getInfixEquationStack();
-            return equationStackToFormula(es, cd, wb, sheet, maxCol);
+            EquationStack ifs = cd.getInfixEquationStack();
+            return equationStackToFormula(ifs, cd, wb, sheet, maxCol);
         }
         catch (Exception e) {
             return null;
@@ -343,6 +375,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                 case BinaryFunc:
                 case UnaryFunc:
                 case GenericFunc:
+                case BuiltIn:
                     eRef = xlateTmsFunc(t, cd);
                     if (eRef == null)
                         throw new UnimplementedException("Reference: " + t);
@@ -924,14 +957,48 @@ public class XlsWriter extends BaseWriter<XlsOptions>
 
         public EquationStack getInfixEquationStack()
         {
-            EquationStack es = XlsWriter.this.m_eqStkCache.get(getDerivation());
+            EquationStack es = XlsWriter.this.m_infixCache.get(getDerivation());
             if (es == null) {
                 String exp = getDerivation().getExpression();
                 
                 InfixExpressionParser iep = new InfixExpressionParser(exp, getTmsTable()); 
+                PostfixStackGenerator psg = new PostfixStackGenerator(iep);
+                EquationStack pfs = psg.getPostfixStack();
+                
+                // traverse the postfix stack and translate operators
+                // that need to be modified to work with excel
+                for (Token t : pfs.toArray(new Token[] {})) {
+                    Operator op = t.getOperator();
+                    if (op != null) {
+                        Operator eOp = sf_builtInToExcelMap.get(op);
+                        if (eOp != null) {
+                            t.setOperator(eOp);
+                            t.setTokenType(eOp.getTokenType());
+                        }
+                    }
+                }
+                
+                // modified Infix Expression
+                String modExp = pfs.toExpression(StackType.Infix);
+                iep = new InfixExpressionParser(modExp, getTmsTable()); 
                 es = iep.getInfixStack();
                 
-                m_eqStkCache.put(getDerivation(), es);
+                XlsWriter.this.m_infixCache.put(getDerivation(), es);
+            }
+            
+            return es;
+        }
+
+        public EquationStack getPostfixEquationStack()
+        {
+            EquationStack es = XlsWriter.this.m_postfixCache.get(getDerivation());
+            if (es == null) {
+                EquationStack ifs = getInfixEquationStack();
+                
+                PostfixStackGenerator psg = new PostfixStackGenerator(ifs, getTmsTable());
+                es = psg.getPostfixStack();
+                
+                XlsWriter.this.m_postfixCache.put(getDerivation(), es);
             }
             
             return es;
@@ -956,5 +1023,62 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         {
             return m_derivation;
         }
+    }
+    
+    static class ExcelOp implements Operator
+    {
+        private BuiltinOperator m_tmsOp;
+        private String m_label;
+        
+        ExcelOp(BuiltinOperator op)
+        {
+            m_tmsOp = op;
+            m_label = op.getLabel();
+        }
+        
+        ExcelOp(BuiltinOperator op, String label)
+        {
+            this(op);
+            m_label = label;
+        }
+        
+        BuiltinOperator getTmsOp()
+        {
+            return m_tmsOp;
+        }
+        
+        @Override
+        public String getLabel()
+        {
+            return m_label;
+        }
+
+        @Override
+        public TokenType getTokenType()
+        {
+            switch (m_tmsOp.getTokenType()) {
+                case BinaryOp:
+                    return TokenType.BinaryFunc;
+                    
+                case UnaryOp:
+                case UnaryTrailingOp:
+                    return TokenType.UnaryFunc;
+                    
+                default:
+                    return m_tmsOp.getTokenType();
+            }
+        }
+
+        @Override
+        public Class<?>[] getArgTypes()
+        {
+            return m_tmsOp.getArgTypes();
+        }
+
+        @Override
+        public Token evaluate(Token... args)
+        {
+            return null;
+        }        
     }
 }

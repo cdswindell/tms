@@ -112,7 +112,7 @@ public enum BuiltinOperator implements Labeled, Operator
     CosHOper("cosh", TokenType.UnaryFunc, 5, Math.class),
     TanHOper("tanh", TokenType.UnaryFunc, 5, Math.class),
 
-    FactFuncOper(TokenType.UnaryFunc, 5, MathUtil.class, "fact", "factorial"),
+    FactFuncOper(TokenType.UnaryFunc, 5, MathUtil.class, "fact", "factorial", "fact"),
     FloorOper(TokenType.UnaryFunc, 5, Math.class, "floor", "roundDown", "floor"),
     CeilOper(TokenType.UnaryFunc, 5, Math.class, "ceil", "roundUp", "ceil"),
     SignOper(TokenType.UnaryFunc, 5, Math.class, "signum", "sign", "signum"),
@@ -159,6 +159,7 @@ public enum BuiltinOperator implements Labeled, Operator
     EOper(TokenType.BuiltIn, 5, MathUtil.class, "e"),
     ColumnIndexOper(TokenType.BuiltIn, 5, "columnIndex", "cidx"),
     RowIndexOper(TokenType.BuiltIn, 5, "rowIndex", "ridx"),
+    NowOper(TokenType.BuiltIn, 5, "now"),
 
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 5, "sum"),
@@ -712,6 +713,9 @@ public enum BuiltinOperator implements Labeled, Operator
             case EOper:
             case RandOper:
                 return double.class;
+                
+            case NowOper:
+                return java.util.Date.class;
                 
             case AndOper:
             case OrOper:

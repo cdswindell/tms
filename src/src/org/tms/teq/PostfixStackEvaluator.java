@@ -2,6 +2,7 @@ package org.tms.teq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -889,6 +890,10 @@ public class PostfixStackEvaluator
                     
                 case FalseOper:
                     result = new Token(false);
+                    break;
+                    
+                case NowOper:
+                    result = new Token(new Date());
                     break;
                     
                 default:

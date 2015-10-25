@@ -91,12 +91,13 @@ public class XlsReader extends BaseReader<XlsOptions>
     
     static {
         sf_OperatorMap.put(AddPtg.class, BuiltinOperator.PlusOper);
-        sf_OperatorMap.put(ConcatPtg.class, BuiltinOperator.PlusOper);
         sf_OperatorMap.put(SubtractPtg.class, BuiltinOperator.MinusOper);
         sf_OperatorMap.put(DividePtg.class, BuiltinOperator.DivOper);
         sf_OperatorMap.put(MultiplyPtg.class, BuiltinOperator.MultOper);
-        sf_OperatorMap.put(PowerPtg.class, BuiltinOperator.PowerFuncOper);
+        
         sf_OperatorMap.put(PercentPtg.class, BuiltinOperator.PercentOper);
+        sf_OperatorMap.put(PowerPtg.class, BuiltinOperator.PowerFuncOper);
+        sf_OperatorMap.put(ConcatPtg.class, BuiltinOperator.PlusOper);
         
         sf_OperatorMap.put(EqualPtg.class, BuiltinOperator.EqOper);
         sf_OperatorMap.put(NotEqualPtg.class, BuiltinOperator.NEqOper);
@@ -136,6 +137,7 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_FunctionMap.put("LOG10", BuiltinOperator.Log10Oper);
         
         sf_FunctionMap.put("DEGREES", BuiltinOperator.toDegreesOper);
+        sf_FunctionMap.put("RADIANS", BuiltinOperator.toRadiansOper);
         sf_FunctionMap.put("ACOS", BuiltinOperator.ACosOper);
         sf_FunctionMap.put("ASIN", BuiltinOperator.ASinOper);
         sf_FunctionMap.put("ATAN", BuiltinOperator.ATanOper);

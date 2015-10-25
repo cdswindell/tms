@@ -47,9 +47,18 @@ public class XLSXWriterTest extends BaseTest
         Column dCol = t.addColumn();
         dCol.setDerivation("col 1 * 3");
         dCol.setDescription("This is dCol");
+        dCol.setLabel("D Col");
         
         Column d2Col = t.addColumn();
         d2Col.setDerivation("col 1 * 10%");
+        d2Col.setLabel("D2 Col");
+        
+        Column d3Col = t.addColumn();
+        d3Col.setDerivation("pi + ridx + cidx + randBetween(1,8)! + rIdx^2");
+        d3Col.setLabel("D3 Col");
+        
+        Column d4Col = t.addColumn();
+        d4Col.setDerivation("(col 1 > 10) && (col \"D3 Col\" < 100)");
         
         Column eCol = t.addColumn();        
         Row r1 = t.getRow(1);
