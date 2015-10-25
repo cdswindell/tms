@@ -106,13 +106,16 @@ public class XlsReader extends BaseReader<XlsOptions>
         sf_OperatorMap.put(LessThanPtg.class, BuiltinOperator.LtOper);
     }
     
-    static final Map<String, Operator> sf_FunctionMap = new HashMap<String, Operator>();
+    static final Map<String, Operator> sf_FunctionMap = new LinkedHashMap<String, Operator>();
 
     static {
         sf_FunctionMap.put("FACT", BuiltinOperator.FactFuncOper);
         sf_FunctionMap.put("PI", BuiltinOperator.PiOper);
         sf_FunctionMap.put("MOD", BuiltinOperator.ModFuncOper);
         sf_FunctionMap.put("POWER", BuiltinOperator.PowerFuncOper);
+        
+        sf_FunctionMap.put("COLUMN", BuiltinOperator.ColumnIndexOper);
+        sf_FunctionMap.put("ROW", BuiltinOperator.RowIndexOper);
         
         sf_FunctionMap.put("RAND", BuiltinOperator.RandOper);
         sf_FunctionMap.put("RANDBETWEEN", BuiltinOperator.RandBetweenOper);
@@ -438,7 +441,7 @@ public class XlsReader extends BaseReader<XlsOptions>
 
                                 // record presence of cell formula; we will process
                                 // once all of table is imported
-                                if (eC.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                                if (options().isDerivations() && eC.getCellType() == Cell.CELL_TYPE_FORMULA) {
                                     ParsedFormula pf = processExcelFormula(sheet, sheetNo, eC, tCell);
                                     parsedFormulas.add(pf);
                                     rowIsEffectivelyNull = false;
@@ -510,30 +513,33 @@ public class XlsReader extends BaseReader<XlsOptions>
                     if (t == null)
                         continue;
                     
-                    int maxRows = sheet.getLastRowNum() + 1;
-                    int maxCols = getNumColumns(sheet);
-                                       
-                    // get the region name and encoded region reference
-                    String name = namedRegion.getNameName();
-                    String regionRef = namedRegion.getRefersToFormula();
+                    // don't process deleted named ranges
+                    if (!namedRegion.isDeleted()) {
+                        // get the region name and encoded region reference
+                        String name = namedRegion.getNameName();
+                        String regionRef = namedRegion.getRefersToFormula();
 
-                    // use the helper classes AreaRef and CellReference to
-                    // decode region reference
-                    // Note: we cannot rely on aref.isSingleCell 
-                    AreaReference aref = new AreaReference(regionRef, m_ssV);
-                    CellReference[] cRefs = aref.getAllReferencedCells();
+                        int maxRows = sheet.getLastRowNum() + 1;
+                        int maxCols = getNumColumns(sheet);
 
-                    if (isSingleCell(cRefs)) {
-                        org.tms.api.Cell tCell = getSingleCell(sheet, cRefs, t);
-                        if (tCell != null) {
-                            tCell.setLabel(name);
-                            m_namedTableElements.put(name, tCell);
+                        // use the helper classes AreaRef and CellReference to
+                        // decode region reference
+                        // Note: we cannot rely on aref.isSingleCell 
+                        AreaReference aref = new AreaReference(regionRef, m_ssV);
+                        CellReference[] cRefs = aref.getAllReferencedCells();
+
+                        if (isSingleCell(cRefs)) {
+                            org.tms.api.Cell tCell = getSingleCell(sheet, cRefs, t);
+                            if (tCell != null) {
+                                tCell.setLabel(name);
+                                m_namedTableElements.put(name, tCell);
+                            }
+                        }  
+                        else {
+                            TableElement te = createTableElementFromNamedRegion(sheet, maxRows, maxCols, cRefs, t, name);
+                            if (te != null)
+                                m_namedTableElements.put(name, te);
                         }
-                    }  
-                    else {
-                        TableElement te = createTableElementFromNamedRegion(sheet, maxRows, maxCols, cRefs, t, name);
-                        if (te != null)
-                            m_namedTableElements.put(name, te);
                     }
                 }
             }
@@ -546,6 +552,9 @@ public class XlsReader extends BaseReader<XlsOptions>
      */
     private void applyDerivations()
     {
+        if (!options().isDerivations())
+            return;
+
         for (List<ParsedFormula> parsedFormulas : m_sheetParsedFormulaMap.values()) {
             m_externalFuncRefStack = EquationStack.createOpStack();
             for (ParsedFormula pf : parsedFormulas) {

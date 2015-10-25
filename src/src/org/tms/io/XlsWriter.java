@@ -2,10 +2,17 @@ package org.tms.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -22,19 +29,59 @@ import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.tms.api.Column;
+import org.tms.api.Subset;
 import org.tms.api.Table;
+import org.tms.api.TableElement;
+import org.tms.api.TableRowColumnElement;
+import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenType;
+import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.options.XlsOptions;
+import org.tms.teq.BuiltinOperator;
+import org.tms.teq.EquationStack;
+import org.tms.teq.InfixExpressionParser;
+import org.tms.util.Tuple;
 
 public class XlsWriter extends BaseWriter<XlsOptions>
 {
+    static final Map<Operator, String> sf_tmsToExcelFunctionMap = new HashMap<Operator, String>();
+    
+    static {
+        for (Map.Entry<String, Operator> e : XlsReader.sf_FunctionMap.entrySet()) {
+            Operator oper = e.getValue();
+            String excelFunc = e.getKey().toLowerCase();
+            
+            if (!sf_tmsToExcelFunctionMap.containsKey(oper))
+                sf_tmsToExcelFunctionMap.put(oper, excelFunc);
+        }
+        
+        // some additional items
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.SumOper, "sum");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.PercentOper, "%");
+        
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.EqOper, "=");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.NEqOper, "<>");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.GtEOper, ">=");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.LtEOper, "<=");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.GtOper, ">");
+        sf_tmsToExcelFunctionMap.put(BuiltinOperator.LtOper, "<");
+    }
+
     private Map<String, CellStyle> m_styleCache;
-    private Map<Sheet, Map<org.tms.api.Row, Row>> m_rowMap;
-    private Map<Sheet, Map<org.tms.api.Column, Integer>> m_colMap;
+    private Map<Sheet, Map<TableRowColumnElement, Integer>> m_rowMap;
+    private Map<Sheet, Map<TableRowColumnElement, Integer>> m_colMap;
+    private Map<Cell, CachedDerivation> m_cachedDerivations;
+    private Map<TableElement, String> m_cachedRangeRef;
+    private Map<Derivation, EquationStack> m_eqStkCache;
+    
     private CreationHelper m_wbHelper = null;
 
     public static void export(TableExportAdapter tea, OutputStream output, XlsOptions options) 
@@ -48,8 +95,11 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     {
         super(tw, out, options);        
         m_styleCache = new HashMap<String, CellStyle>();
-        m_rowMap = new HashMap<Sheet, Map<org.tms.api.Row, Row>>();
-        m_colMap = new HashMap<Sheet, Map<org.tms.api.Column, Integer>>();
+        m_rowMap = new HashMap<Sheet, Map<TableRowColumnElement, Integer>>();
+        m_colMap = new HashMap<Sheet, Map<TableRowColumnElement, Integer>>();
+        m_cachedDerivations = new LinkedHashMap<Cell, CachedDerivation>();
+        m_eqStkCache = new HashMap<Derivation, EquationStack>();
+        m_cachedRangeRef = new HashMap<TableElement, String>();
     }
 
     @Override
@@ -91,6 +141,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         int firstActiveCol = 0;
         
         int rowNum = 0;
+        int maxExcelCol = 0;
         if (options().isColumnNames()) {
             firstActiveRow = 1;
             Row headerRow = sheet.createRow(rowNum++);
@@ -120,6 +171,9 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                 colCnt++;
             }
             
+            if ((colCnt - 1) > maxExcelCol)
+                maxExcelCol = colCnt - 1;
+            
             // set print headings
             sheet.setRepeatingRows(CellRangeAddress.valueOf("$1:$1"));
         }
@@ -135,6 +189,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         }
         
         // Fill data cells
+        boolean processedAllColumns = false;
         for (org.tms.api.Row tr : this.getRows()) {
             if (options().isIgnoreEmptyRows() && tr.isNull())
                 continue;
@@ -156,15 +211,17 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             }
 
             for (Column tc : this.getActiveColumns()) {
-                if (rowNum < 3)
+                if (!processedAllColumns) {
+                    sheet.setDefaultColumnStyle(colCnt, cellStyle);
                     cacheColAssociation(sheet, tc, colCnt);
+                }
+                
                 org.tms.api.Cell tCell = t.isCellDefined(tr, tc) ? t.getCell(tr, tc) : null;
                 if (tCell != null) {
                     Cell excelC  = r.createCell(colCnt);
                     if (tCell.isErrorValue()) 
                         excelC.setCellErrorValue(toExcelErrorValue(tCell));
                     else if (!tCell.isNull()) {
-                        excelC.setCellStyle(cellStyle);
                         Object cv = tCell.getCellValue();
                         if (tCell.isNumericValue()) {
                             Number nv = (Number)cv;
@@ -181,10 +238,12 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                                 excelC.setCellValue((String)cv);
                         }
                     }
+                    else 
+                        excelC.setCellType(Cell.CELL_TYPE_BLANK);
                     
                     String label = trimString(tCell.getLabel());
                     if (label != null) 
-                        createNamedCell(tCell, label, wb, sheet, excelC);
+                        applyName(tCell, label, wb, sheet, excelC);
                     
                     if (options().isDescriptions()) {
                         String desc = trimString(tCell.getDescription());
@@ -192,15 +251,28 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                             applyComment(excelC, desc);
                     }
                     
-                    Derivation deriv = getDerivation(tCell);
-                    if (deriv != null) {
-                        System.out.println(tCell);
+                    if (options().isDerivations()) {
+                        Derivation deriv = getDerivation(tCell);
+                        if (deriv != null) {
+                            CachedDerivation cd = new CachedDerivation(tCell, deriv, excelC);
+                            m_cachedDerivations.put(excelC, cd);
+                        }
                     }
                 }
 
                 colCnt++;   
-            }
-        }
+            } // of columns
+            
+            processedAllColumns = true;
+            if ((colCnt - 1) > maxExcelCol)
+                maxExcelCol = colCnt - 1;
+        } // of rows
+        
+        // process TMS subsets
+        processSubsets(t, wb, sheet, maxExcelCol);
+        
+        // process derivations
+        processDerivations(t, wb, sheet, maxExcelCol);
 
         // Freeze pains        
         if (options().isRowNames() && options().isColumnNames())
@@ -216,13 +288,426 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         activeCell.setAsActiveCell();        
     }
 
-    private void createNamedCell(org.tms.api.Cell tCell, String label, Workbook wb, Sheet sheet, Cell excelC)
+    private void processDerivations(Table t, Workbook wb, Sheet sheet, int maxExcelCol)
+    {
+       for (Map.Entry<Cell, CachedDerivation> e : m_cachedDerivations.entrySet()) {
+           Cell eCell = e.getKey();
+           CachedDerivation cd = e.getValue();
+           
+           String formula = trimString(derivationToFormula(wb, sheet, maxExcelCol, cd));
+           if (formula != null)
+               eCell.setCellFormula(formula);
+       }       
+    }
+
+    private String derivationToFormula(Workbook wb, Sheet sheet, int maxCol, CachedDerivation cd)
+    {
+        try {
+            EquationStack es = cd.getInfixEquationStack();
+            return equationStackToFormula(es, cd, wb, sheet, maxCol);
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String equationStackToFormula(EquationStack es, CachedDerivation cd, Workbook wb, Sheet sheet, int maxCol)
+    {
+        // translate tokens to Excel form
+        StringBuffer sb = new StringBuffer();
+        Iterator<Token> iter = es.descendingIterator();
+        boolean foundStatOp = false;
+        while (iter != null && iter.hasNext()) {
+            Token t = iter.next();
+            if (addLeadingSpace(t))
+                sb.append(' ');
+            
+            String eRef = null;
+            
+            TokenType tt = t.getTokenType();
+            switch (tt) {
+                case RowRef:
+                case CellRef:
+                case ColumnRef:
+                    eRef = xlateTmsRef(t, foundStatOp, cd, sheet, maxCol);
+                    if (eRef == null)
+                        throw new UnimplementedException("Reference: " + t);
+                    sb.append(eRef);
+                    foundStatOp = false;
+                    break;
+                 
+                case StatOp:
+                case TransformOp:
+                     foundStatOp = true;
+                    
+                case BinaryFunc:
+                case UnaryFunc:
+                case GenericFunc:
+                    eRef = xlateTmsFunc(t, cd);
+                    if (eRef == null)
+                        throw new UnimplementedException("Reference: " + t);
+                    sb.append(eRef);
+                    break;
+                    
+                default:
+                    sb.append(t.toExpressionValue(cd.getTmsTable()));
+                    break;
+            }
+            
+            if (addTrailingSpace(t))
+                sb.append(' ');
+        }
+        
+        return sb.toString();
+    }
+
+    private String xlateTmsFunc(Token t, CachedDerivation cd)
+    {
+        Operator op = t.getOperator();
+        if (op != null) {
+            return sf_tmsToExcelFunctionMap.get(op);
+        }
+        
+        return null;
+    }
+
+    private String xlateTmsRef(Token t, boolean foundStatOp, CachedDerivation cd, Sheet sheet, int maxCol)
+    {
+        Cell cell = cd.getExcelCell();
+        int targetRowNum = cell.getRowIndex();
+        int targetColNum = cell.getColumnIndex();
+        
+        TableElement te = t.getReferenceValue();
+        int xlatedRefRowNum = -1;
+        int xlatedRefColNum = -1;
+        
+        if (te instanceof org.tms.api.Cell) {
+            xlatedRefRowNum = m_rowMap.get(sheet).get(((org.tms.api.Cell)te).getRow());
+            xlatedRefColNum = m_colMap.get(sheet).get(((org.tms.api.Cell)te).getColumn());
+        }        
+        else if (te instanceof org.tms.api.Row) {
+            if (foundStatOp)
+                return tmsRowAsRange(te, sheet, maxCol);
+            xlatedRefRowNum = m_rowMap.get(sheet).get(te);
+            xlatedRefColNum = targetColNum;
+        }
+        else if (te instanceof org.tms.api.Column) {
+            if (foundStatOp)
+                return tmsColAsRange(te, sheet);
+            xlatedRefRowNum = targetRowNum;
+            xlatedRefColNum = m_colMap.get(sheet).get(te);
+        }  
+        
+        CellReference cr = new CellReference(xlatedRefRowNum, xlatedRefColNum, false, false);
+        return cr.formatAsString();
+    }
+
+    private String tmsColAsRange(TableElement te, Sheet sheet)
+    {
+        // try from cache
+        String ref = m_cachedRangeRef.get(te);
+        if (ref == null) {
+            Map<TableRowColumnElement, Integer> rowMap = m_rowMap.get(sheet);
+            Map<TableRowColumnElement, Integer> colMap = m_colMap.get(sheet);
+
+            Column c = (Column)te;
+            Integer colIdx = colMap.get(c);
+            if (colIdx == null)
+                return null;
+
+            Set<Derivable> affects = new HashSet<Derivable>(c.getAffects());
+            List<Integer> rangeCells = new ArrayList<Integer>(te.getTable().getNumColumns());
+
+            for (org.tms.api.Cell tCell : c.cells()) {
+                if (affects.contains(tCell))
+                    continue;
+
+                Integer rowNum = rowMap.get(tCell.getRow());
+                if (rowNum != null)
+                    rangeCells.add(rowNum); 
+            }
+
+            if (rangeCells.isEmpty())
+                return null;
+
+            // we need the references to be ascending
+            Collections.sort(rangeCells);
+
+            // now build range formula; it may not be continuous
+            Integer firstIdx = null;
+            Integer prevIdx = null;
+            StringBuffer sb = new StringBuffer();
+            boolean isContinuous = true;
+            for (int i : rangeCells) {
+                if (firstIdx == null)
+                    firstIdx = i;
+                else {
+                    if (i > prevIdx + 1) {
+                        if (!isContinuous)
+                            sb.append(',');
+                        sb.append(makeAreaRef(firstIdx, colIdx, prevIdx, colIdx, false).formatAsString());
+                        firstIdx = i;
+                        isContinuous = false;
+                    }
+                }
+
+                // always save the last element idx, it is used to look for gaps
+                prevIdx = i;
+            }
+
+            // write out last reference
+            if (!isContinuous)
+                sb.append(',');
+            sb.append(makeAreaRef(firstIdx, colIdx, prevIdx, colIdx, false).formatAsString());        
+
+            ref = sb.toString();
+            m_cachedRangeRef.put(te, ref);    
+        }
+        
+        return ref;
+    }
+
+    private String tmsRowAsRange(TableElement te, Sheet sheet, int maxCol)
+    {
+        String ref = m_cachedRangeRef.get(te);
+        if (ref == null) {
+            Map<TableRowColumnElement, Integer> rowMap = m_rowMap.get(sheet);
+            Map<TableRowColumnElement, Integer> colMap = m_colMap.get(sheet);
+
+            org.tms.api.Row r = (org.tms.api.Row)te;
+            Integer rowIdx = rowMap.get(r);
+            if (rowIdx == null)
+                return null;
+
+            Set<Derivable> affects = new HashSet<Derivable>(r.getAffects());
+            List<Integer> rangeCells = new ArrayList<Integer>(te.getTable().getNumRows());
+
+            for (org.tms.api.Cell tCell : r.cells()) {
+                if (affects.contains(tCell))
+                    continue;
+
+                Integer colNum = colMap.get(tCell.getColumn());
+                if (colNum != null)
+                    rangeCells.add(colNum); 
+            }
+
+            if (rangeCells.isEmpty())
+                return null;
+
+            // we need the references to be ascending
+            Collections.sort(rangeCells);
+
+            // now build range formula; it may not be continuous
+            Integer firstIdx = null;
+            Integer prevIdx = null;
+            StringBuffer sb = new StringBuffer();
+            boolean isContinuous = true;
+            for (int i : rangeCells) {
+                if (firstIdx == null)
+                    firstIdx = i;
+                else {
+                    if (i > prevIdx + 1) {
+                        if (!isContinuous)
+                            sb.append(',');
+                        sb.append(makeAreaRef(rowIdx, firstIdx, rowIdx, prevIdx, false).formatAsString());
+                        firstIdx = i;
+                        isContinuous = false;
+                    }
+                }
+
+                // always save the last element idx, it is used to look for gaps
+                prevIdx = i;
+            }
+
+            // write out last reference
+            if (!isContinuous)
+                sb.append(',');
+            sb.append(makeAreaRef(rowIdx, firstIdx, rowIdx, prevIdx, false).formatAsString());
+
+            ref = sb.toString();
+            m_cachedRangeRef.put(te, ref);    
+        }
+        
+        return ref;
+    }
+
+    private AreaReference makeAreaRef(int trIdx, int lcIdx, int brIdx, int rcIdx, boolean isRelative)
+    {
+        CellReference topLeft = new CellReference(trIdx, lcIdx, isRelative, isRelative);
+        CellReference bottomRight = new CellReference(brIdx, rcIdx, isRelative, isRelative);
+        
+        AreaReference ar = new AreaReference(topLeft, bottomRight);
+        return ar;
+    }
+
+    private boolean addLeadingSpace(Token t)
+    {
+        switch (t.getTokenType()) {
+            case BinaryOp:
+                return true;
+                
+            default: 
+                return false;
+        }
+    }
+
+    private boolean addTrailingSpace(Token t)
+    {
+        switch (t.getTokenType()) {
+            case BinaryOp:
+            case Comma:
+                return true;
+                
+            default: 
+                return false;
+        }
+    }
+
+    private void processSubsets(Table t, Workbook wb, Sheet sheet, int maxExcelCol)
+    {
+        // We only handle at the moment continuous ranges, eg, col 1 - 3
+        // or col 2-5, row 3 - 7
+        int subsetIdx = 0;
+        for (Subset s : t.subsets()) {
+            subsetIdx++;
+            AreaReference ar = xlateSubsetToAreaRef(s, sheet, maxExcelCol);
+            if (ar != null) {
+                String label = trimString(s.getLabel());
+                if (label == null)
+                    label = String.format("TMS_Subset_%d", subsetIdx);
+                
+                Name namedRange = wb.createName();
+                namedRange.setNameName(toExcelName(label));
+                
+                StringBuffer sb = new StringBuffer();
+                sb.append(applySheetName(sheet));
+                sb.append('!');
+                sb.append(ar.formatAsString());
+    
+                namedRange.setRefersToFormula(sb.toString());
+            }
+        }        
+    }
+
+    private AreaReference xlateSubsetToAreaRef(Subset s, Sheet sheet, int maxExcelCol)
+    {
+        int numRows = s.getNumRows();
+        int numCols = s.getNumColumns();
+        boolean processable = numRows > 0 || numCols > 0;
+        if (processable) {
+            // now check for contiguous range
+            Tuple<TableRowColumnElement> colBounds = null;
+            if (numCols > 1) {
+                Map<TableRowColumnElement, Integer> usedColsMap = m_colMap.get(sheet);
+                if (usedColsMap == null)
+                    return null;                
+                
+                List<org.tms.api.Column> subsetCols = s.getColumns();                
+                colBounds = isContinuousElems(subsetCols, usedColsMap);
+                if (colBounds == null)
+                    numCols = 0;
+                else if (colBounds.getSecondElement() == null)
+                    return null; // indicates non-contiguous region
+            }
+            
+            Tuple<TableRowColumnElement> rowBounds = null;
+            if (numRows > 1) {
+                Map<TableRowColumnElement, Integer> usedRowsMap = m_rowMap.get(sheet);
+                if (usedRowsMap == null)
+                    return null;                
+                
+                List<org.tms.api.Row> subsetRows = s.getRows();                
+                rowBounds = isContinuousElems(subsetRows, usedRowsMap);
+                if (rowBounds == null)
+                    numRows = 0;
+                else if (rowBounds.getSecondElement() == null)
+                    return null; // indicates non-contiguous region
+            }
+                       
+            // repeat calculation, as we may have found that subset consisted of 
+            // only excluded rows and cols
+            if (rowBounds != null || colBounds != null) {
+                Map<TableRowColumnElement, Integer> rowMap = m_rowMap.get(sheet);
+                Map<TableRowColumnElement, Integer> colMap = m_colMap.get(sheet);
+                
+                int topLeftRowNum = rowBounds != null ? rowMap.get(rowBounds.getFirstElement()) : options().isColumnNames() ? 1 : 0;
+                int topLeftColNum = colBounds != null ? colMap.get(colBounds.getFirstElement()) : options().isRowNames() ? 1 : 0;
+                CellReference topLeft = new CellReference(topLeftRowNum, topLeftColNum, true, true);
+
+                
+                int bottomRightRowNum = rowBounds != null ? rowMap.get(rowBounds.getSecondElement()) : sheet.getLastRowNum();
+                int bottomRightColNum = colBounds != null ? colMap.get(colBounds.getSecondElement()) : maxExcelCol;
+                CellReference bottomRight = new CellReference(bottomRightRowNum, bottomRightColNum, true, true);
+                
+                AreaReference ar = new AreaReference(topLeft, bottomRight);
+                return ar;
+            }
+        }
+        
+        return null;
+    }
+
+    private Tuple<TableRowColumnElement> isContinuousElems(List<? extends TableRowColumnElement> subsetElems, 
+                                 Map<TableRowColumnElement, ? extends Object> usedMap)
+    {
+        // Columns have to be in ascending order; use Java 8
+        // closure syntax to specify index comparator
+        Collections.sort(subsetElems, 
+                (TableRowColumnElement c1, TableRowColumnElement c2) -> (c1.getIndex() > c2.getIndex() ? 1 : c1.getIndex() < c2.getIndex() ? -1 : 0));
+        int lastElemIdx = 0;
+        boolean isRow = false;
+        TableRowColumnElement firstElem = null;
+        TableRowColumnElement lastElem = null;
+        for (TableRowColumnElement te : subsetElems) {
+            if (usedMap.containsKey(te)) {
+                if (firstElem == null) {
+                    firstElem = te;
+                    
+                    if (te instanceof org.tms.api.Row)
+                        isRow = true;
+                }
+            }
+            
+            if (lastElemIdx == 0) 
+                lastElemIdx = te.getIndex();
+            else {
+                // is there a break in continuity?
+                if (te.getIndex() > lastElemIdx + 1) {
+                    for (int i = lastElemIdx + 1; i < te.getIndex(); i++) {
+                        TableRowColumnElement excluded = isRow ? getTable().getRow(i) : getTable().getColumn(i);
+                        if (te == null || usedMap.containsKey(excluded))
+                            return new Tuple<TableRowColumnElement>(firstElem, null);
+                    }
+                }
+                
+                lastElemIdx = te.getIndex();
+                lastElem = te;
+            }
+        }
+        
+        if (firstElem != null && lastElem != null)
+            return new Tuple<TableRowColumnElement>(firstElem, lastElem);
+        else
+            return null;
+    }
+
+    private void applyName(org.tms.api.Cell tCell, String label, Workbook wb, Sheet sheet, Cell excelC)
     {
         CellReference cr = new CellReference(excelC.getRowIndex(), excelC.getColumnIndex(), true, true) ;
         
         Name namedCell = wb.createName();
-        namedCell.setNameName(label);
+        namedCell.setNameName(toExcelName(label));
         
+        StringBuffer sb = new StringBuffer();
+        sb.append(applySheetName(sheet));
+        sb.append('!');
+        
+        sb.append(cr.formatAsString()); // area reference
+        namedCell.setRefersToFormula(sb.toString());      
+    }
+
+    private StringBuffer applySheetName(Sheet sheet)
+    {
         StringBuffer sb = new StringBuffer();
         String sn = sheet.getSheetName();
         boolean snNeedsQuote = sn.indexOf(' ') > -1 || sn.indexOf("'") > -1;
@@ -232,10 +717,8 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         sb.append(sn);
         if (snNeedsQuote)
             sb.append("'");
-        sb.append('!');
         
-        sb.append(cr.formatAsString()); // area reference
-        namedCell.setRefersToFormula(sb.toString());      
+        return sb;
     }
 
     private void applyComment(Cell excelC, String comment)
@@ -294,20 +777,20 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     
     private void cacheRowAssociation(Sheet sheet, org.tms.api.Row tmsR, Row excelR)
     {
-        Map<org.tms.api.Row, Row> rowMap = m_rowMap.get(sheet);
+        Map<TableRowColumnElement, Integer> rowMap = m_rowMap.get(sheet);
         if (rowMap == null) {
-            rowMap = new HashMap<org.tms.api.Row, Row>(tmsR.getTable().getNumRows());
+            rowMap = new HashMap<TableRowColumnElement, Integer>(tmsR.getTable().getNumRows());
             m_rowMap.put(sheet,  rowMap);
         }
         
-        rowMap.put(tmsR, excelR);
+        rowMap.put(tmsR, excelR.getRowNum());
     }
 
     private void cacheColAssociation(Sheet sheet, org.tms.api.Column tmsC, int excelC)
     {
-        Map<org.tms.api.Column, Integer> colMap = m_colMap.get(sheet);
+        Map<TableRowColumnElement, Integer> colMap = m_colMap.get(sheet);
         if (colMap == null) {
-            colMap = new HashMap<org.tms.api.Column, Integer>(tmsC.getTable().getNumColumns());
+            colMap = new HashMap<TableRowColumnElement, Integer>(tmsC.getTable().getNumColumns());
             m_colMap.put(sheet,  colMap);
         }
         
@@ -389,6 +872,89 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             
             default:
                  return FormulaError.NA.getCode();   
+        }
+    }
+    
+    /**
+     * Translate EMS names into allowable Excel names
+     * (translate any non alpha or digit character to "_")
+     * @param label
+     * @return
+     */
+    private String toExcelName(String label) 
+    {
+        StringBuffer sb = new StringBuffer();
+        
+        boolean isFirstChar = true;
+        for (char c : label.toCharArray()) {
+            if (isFirstChar) {
+                // first character has to be a letter, _, or \
+                if (isValidExcelNameChar(c) && (Character.isDigit(c) || c == '.'))
+                    sb.append('_');
+            }
+            
+            if (isValidExcelNameChar(c))
+                sb.append(c);
+            else
+                sb.append('_');
+            
+            isFirstChar = false;
+        }
+        
+        return sb.toString();
+    }
+    
+    private boolean isValidExcelNameChar(char c)
+    {
+        return Character.isLetterOrDigit(c) || c == '.' || c == '_' || c == '\\';
+    }
+    
+    class CachedDerivation
+    {
+        private org.tms.api.Cell m_tmsCell;
+        private Cell m_excelCell;
+        private Derivation m_derivation;
+        
+        CachedDerivation(org.tms.api.Cell tmsCell, Derivation deriv, Cell excelCell)
+        {
+            m_tmsCell = tmsCell;
+            m_derivation = deriv;
+            m_excelCell = excelCell;
+        }
+
+        public EquationStack getInfixEquationStack()
+        {
+            EquationStack es = XlsWriter.this.m_eqStkCache.get(getDerivation());
+            if (es == null) {
+                String exp = getDerivation().getExpression();
+                
+                InfixExpressionParser iep = new InfixExpressionParser(exp, getTmsTable()); 
+                es = iep.getInfixStack();
+                
+                m_eqStkCache.put(getDerivation(), es);
+            }
+            
+            return es;
+        }
+
+        org.tms.api.Cell getTmsCell()
+        {
+            return m_tmsCell;
+        }
+
+        Table getTmsTable()
+        {
+            return m_tmsCell.getTable();
+        }
+
+        Cell getExcelCell()
+        {
+            return m_excelCell;
+        }
+        
+        Derivation getDerivation()
+        {
+            return m_derivation;
         }
     }
 }

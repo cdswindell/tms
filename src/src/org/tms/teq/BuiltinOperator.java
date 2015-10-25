@@ -157,8 +157,8 @@ public enum BuiltinOperator implements Labeled, Operator
     TrueOper(TokenType.BuiltIn, 5, "true"),
     FalseOper(TokenType.BuiltIn, 5, "false"),
     EOper(TokenType.BuiltIn, 5, MathUtil.class, "e"),
-    ColumnIndexOper(TokenType.BuiltIn, 5, "ColumnIndexOper", "cidx"),
-    RowIndexOper(TokenType.BuiltIn, 5, "RowIndexOper", "ridx"),
+    ColumnIndexOper(TokenType.BuiltIn, 5, "columnIndex", "cidx"),
+    RowIndexOper(TokenType.BuiltIn, 5, "rowIndex", "ridx"),
 
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 5, "sum"),

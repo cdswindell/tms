@@ -44,7 +44,7 @@ public class InfixExpressionParser
         return m_expr;
     }
     
-    EquationStack getInfixStack()
+    public EquationStack getInfixStack()
     {
         if (m_ifs == null) {
             ParseResult pr = parseInfixExpression();

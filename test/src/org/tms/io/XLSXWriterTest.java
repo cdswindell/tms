@@ -12,9 +12,11 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 import org.tms.BaseTest;
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.derivables.ErrorCode;
 import org.tms.api.factories.TableFactory;
@@ -46,6 +48,9 @@ public class XLSXWriterTest extends BaseTest
         dCol.setDerivation("col 1 * 3");
         dCol.setDescription("This is dCol");
         
+        Column d2Col = t.addColumn();
+        d2Col.setDerivation("col 1 * 10%");
+        
         Column eCol = t.addColumn();        
         Row r1 = t.getRow(1);
         Cell cell = t.getCell(r1,  eCol);
@@ -65,11 +70,32 @@ public class XLSXWriterTest extends BaseTest
         cell.setCellValue(ErrorCode.ReferenceRequired);
         
         Row r5 = t.addRow(5);
-        r5.setDerivation("sum(colRef(cidx))");
+        r5.setLabel("Sum");
+        
+        Row r6 = t.addRow(6);
+        r6.setLabel("Mean");
+        for (Column c = t.getColumn(Access.First); c != null; c = t.getColumn(Access.Next)) {
+            t.getCell(r5,  c).setDerivation("sum(col " + c.getIndex() + ")");
+            t.getCell(r6,  c).setDerivation("mean(col " + c.getIndex() + ")");
+        }
         
         Cell tCell = t.getCell(r1, eCol);
-        tCell.setLabel("DivByZero");
-        tCell.setDescription("This cell has intensionally been set to an error");
+        tCell.setLabel("Div By Zero");
+        tCell.setDescription("This cell has intentionality been set to an error");
+        
+        // create a subset that should be exported
+        Subset s = t.addSubset(Access.ByLabel, "1st Valid Subset");
+        s.add(r2, r3, r4, t.getColumn(2), t.getColumn(3));
+        
+        // create a subset that should be exported
+        Subset sv2 = t.addSubset(Access.ByLabel, "2nd Valid Subset");
+        sv2.add(r2, r3);
+        
+        Subset s2 = t.addSubset(Access.ByLabel, "InValid Subset");
+        s2.add(s, tCell);
+        
+        Subset s3 = t.addSubset(Access.ByLabel, "InValid Subset 2");
+        s3.add(r2, r4, r5);
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();

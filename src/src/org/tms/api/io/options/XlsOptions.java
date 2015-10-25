@@ -13,6 +13,7 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
     private enum Options implements OptionEnum {
         FileFormat,
         BlanksAsNull,
+        Derivations,
         Descriptions, 
         CommentAuthor
     }
@@ -34,6 +35,7 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
         
         set(Options.FileFormat, ExcelFileFormat.XLSX);
         set(Options.BlanksAsNull, true);
+        set(Options.Derivations, true);
         set(Options.Descriptions, true);
     }
     
@@ -86,6 +88,23 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
     {
         XlsOptions newOptions = clone(this);
         newOptions.set(Options.BlanksAsNull, b);
+        return newOptions;
+    }
+    
+    public boolean isDerivations()
+    {
+        return (Boolean)get(Options.Descriptions);
+    }
+    
+    public XlsOptions withDerivations()
+    {
+        return withDescriptions(true);
+    }
+    
+    public XlsOptions withDerivations(boolean b)
+    {
+        XlsOptions newOptions = clone(this);
+        newOptions.set(Options.Derivations, b);
         return newOptions;
     }
     
