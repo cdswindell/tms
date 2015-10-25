@@ -56,6 +56,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
 {
     static final Map<Operator, String> sf_tmsToExcelFunctionMap = new HashMap<Operator, String>();
     static final Map<BuiltinOperator, Operator> sf_builtInToExcelMap = new HashMap<BuiltinOperator, Operator>();
+    static final Set<Operator> sf_specialOps = new HashSet<Operator>();
     
     static {
         for (Map.Entry<String, Operator> e : XlsReader.sf_FunctionMap.entrySet()) {
@@ -84,10 +85,13 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         eOp = new ExcelOp(BuiltinOperator.FactOper, "fact");
         sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
         
-        eOp = new ExcelOp(BuiltinOperator.PlusOper, "&", TokenType.BinaryOp);
+        eOp = new ExcelOp(BuiltinOperator.PlusOper, "&", TokenType.BinaryOp, String.class);
         sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
         
-        eOp = new ExcelOp(BuiltinOperator.MultOper, "rept");
+        eOp = new ExcelOp(BuiltinOperator.MultOper, "rept", String.class);
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
+        
+        eOp = new ExcelOp(BuiltinOperator.toStringOper, "", String.class );
         sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
         
         // some additional items
@@ -108,6 +112,11 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         sf_tmsToExcelFunctionMap.put(BuiltinOperator.LtEOper, "<=");
         sf_tmsToExcelFunctionMap.put(BuiltinOperator.GtOper, ">");
         sf_tmsToExcelFunctionMap.put(BuiltinOperator.LtOper, "<");
+        
+        sf_specialOps.add(BuiltinOperator.PlusOper);
+        sf_specialOps.add(BuiltinOperator.MultOper);
+        sf_specialOps.add(BuiltinOperator.MinusOper);
+        sf_specialOps.add(BuiltinOperator.DivOper);
     }
 
     private Map<String, CellStyle> m_styleCache;
@@ -938,17 +947,12 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                 
                 // traverse the postfix stack and translate operators
                 // that need to be modified to work with excel
-                Set<Operator> specialOps = new HashSet<Operator>();
-                specialOps.add(BuiltinOperator.PlusOper);
-                specialOps.add(BuiltinOperator.MultOper);
-                specialOps.add(BuiltinOperator.MinusOper);
-                specialOps.add(BuiltinOperator.DivOper);
                 Token [] tokens = pfs.toArray(new Token[] {});
                 for (int i = tokens.length - 1; i >= 0; i--) {
                     Token t = tokens[i];
                     Operator op = t.getOperator();
                     if (op != null && op != BuiltinOperator.NOP) {
-                        Operator eOp = specialOps.contains(op) ? null : sf_builtInToExcelMap.get(op);
+                        Operator eOp = sf_specialOps.contains(op) ? null : sf_builtInToExcelMap.get(op);
                         if (eOp != null) {
                             t.setOperator(eOp);
                             t.setTokenType(eOp.getTokenType());
@@ -957,17 +961,17 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                         // replace token with ExcelOpToken
                         // this will allow us to map
                         // function names into excel space
-                        if (specialOps.contains(op)) {
+                        if (sf_specialOps.contains(op)) {
                             if (op == BuiltinOperator.PlusOper) {
                                 // check for string concatenation
-                                if (tokens[i + 1].isString() || tokens[i + 2].isString()) {
+                                if (tokens[i + 1].isEvaluatesToString() || tokens[i + 2].isEvaluatesToString()) {
                                     eOp = sf_builtInToExcelMap.get(op);
                                     t.setOperator(eOp);
                                     t.setTokenType(eOp.getTokenType());
                                 }
                             }
                             else if (op == BuiltinOperator.MultOper) {
-                                if (tokens[i + 2].isString()) {
+                                if (tokens[i + 2].isEvaluatesToString()) {
                                     eOp = sf_builtInToExcelMap.get(op);
                                     t.setOperator(eOp);
                                     t.setTokenType(eOp.getTokenType());
@@ -1071,6 +1075,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         private Operator m_tmsOp;
         private String m_label;
         private TokenType m_tokenType;
+        private Class<?> m_resultType;
         
         ExcelOp(Operator op)
         {
@@ -1083,6 +1088,18 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         {
             this(op);
             m_label = label;
+        }
+        
+        ExcelOp(Operator op, String label, Class<?> resultType)
+        {
+            this(op, label);
+            m_resultType = resultType;
+        }
+        
+        ExcelOp(Operator op, String label, TokenType tt, Class<?> resultType)
+        {
+            this(op, label, tt);
+            m_resultType = resultType;
         }
         
         ExcelOp(Operator op, String label, TokenType tt)
@@ -1102,6 +1119,15 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             return m_label;
         }
 
+        @Override
+        public Class<?> getResultType()
+        {
+            if (m_resultType != null)
+                return m_resultType;
+            else
+                return m_tmsOp.getResultType();
+        }
+        
         @Override
         public TokenType getTokenType()
         {

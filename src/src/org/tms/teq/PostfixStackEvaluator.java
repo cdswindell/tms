@@ -1130,9 +1130,6 @@ public class PostfixStackEvaluator
     private Token doBuiltInOp(BuiltinOperator bio, String s1, Double n2)
     {
         switch (bio) {
-            case PlusOper:
-                return new Token(TokenType.Operand, s1 + n2);
-                
             case MultOper:
                 if (n2 >= 0.5) {
                     StringBuffer sb = new StringBuffer();

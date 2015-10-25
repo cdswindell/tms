@@ -365,6 +365,17 @@ public class Token implements Labeled
         return false;
     }
     
+    public boolean isEvaluatesToString()
+    {
+        boolean result = isString();
+        if (!result) {
+            if (getOperator() != null && getOperator().getResultType() != null)
+                return String.class.isAssignableFrom(getOperator().getResultType());
+        }
+        
+        return result;
+    }
+    
     public boolean isBoolean()
     {
         if (isOperand()) {

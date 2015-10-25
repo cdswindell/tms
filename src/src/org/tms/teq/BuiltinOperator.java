@@ -128,16 +128,16 @@ public enum BuiltinOperator implements Labeled, Operator
     LcmOper("lcm", TokenType.BinaryFunc, 5, org.apache.commons.math3.util.ArithmeticUtils.class, "lcm", long.class, long.class),
     
     // String functions
-    LenOper("len", TokenType.UnaryFunc, 5, MathUtil.class, "length", String.class),
-    LeftOper("left", TokenType.BinaryFunc, 5, MathUtil.class, "instrLeft", String.class, int.class),
-    RightOper("right", TokenType.BinaryFunc, 5, MathUtil.class, "instrRight", String.class, int.class),
-    MidOper("mid", TokenType.GenericFunc, 5, MathUtil.class, "instrMid", String.class, int.class, int.class),
-    toLowerOper("toLower", TokenType.UnaryFunc, 5, MathUtil.class, "toLower", String.class),
-    toUpperOper("toUpper", TokenType.UnaryFunc, 5, MathUtil.class, "toUpper", String.class),
-    trimOper("trim", TokenType.UnaryFunc, 5, MathUtil.class, "trim", String.class),
-    reverseOper("reverse", TokenType.UnaryFunc, 5, MathUtil.class, "reverse", String.class),
-    toStringOper("toString", TokenType.UnaryFunc, 5, MathUtil.class, "toString", Object.class),
-    toNumberOper("toNumber", TokenType.UnaryFunc, 5, MathUtil.class, "toNumber", Object.class),
+    LenOper(TokenType.UnaryFunc, 5, new String [] {"len", "length"}, new Class<?>[]{String.class}, int.class, MathUtil.class, "length"),
+    LeftOper(TokenType.BinaryFunc, 5, new String [] {"left", "instrLeft"}, new Class<?>[]{String.class, int.class}, String.class, MathUtil.class, "instrLeft"),
+    RightOper(TokenType.BinaryFunc, 5, new String [] {"right", "instrRight"}, new Class<?>[]{String.class, int.class}, String.class, MathUtil.class, "instrRight"),
+    MidOper(TokenType.GenericFunc, 5, new String [] {"mid", "instrMid"}, new Class<?>[]{String.class, int.class, int.class}, String.class, MathUtil.class, "instrMid"),
+    toLowerOper(TokenType.UnaryFunc, 5, new String [] {"toLower"}, new Class<?>[]{String.class}, String.class, MathUtil.class, "toLower"),
+    toUpperOper(TokenType.UnaryFunc, 5, new String [] {"toUpper"}, new Class<?>[]{String.class}, String.class, MathUtil.class, "toUpper"),
+    trimOper(TokenType.UnaryFunc, 5, new String [] {"trim"}, new Class<?>[]{String.class}, String.class, MathUtil.class, "trim"),
+    reverseOper(TokenType.UnaryFunc, 5, new String [] {"reverse"}, new Class<?>[]{String.class}, String.class, MathUtil.class, "reverse"),
+    toStringOper(TokenType.UnaryFunc, 5, new String [] {"toString"}, new Class<?>[]{Object.class}, String.class, MathUtil.class, "toString"),
+    toNumberOper(TokenType.UnaryFunc, 5, new String [] {"toNumber"}, new Class<?>[]{Object.class}, double.class, MathUtil.class, "toNumber"),
    
     // Binary functions, mostly supported in Java Math
     ReminderFuncOper(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "remainder"),
@@ -237,9 +237,9 @@ public enum BuiltinOperator implements Labeled, Operator
     LinearComputeYOper(TokenType.GenericFunc, 5, MathUtil.class, "lrComputeY", "computeY", "lrComputeY"),
     
     // Transformation Functions
-    MeanCenterOper(TokenType.TransformOp, 5, new String [] {"meanCenter"}, null),
-    NormalizeOper(TokenType.TransformOp, 5, new String [] {"normalize", "standardize"}, null),    
-    ScaleOper(TokenType.TransformOp, 5, new String []{"scale"}, new Class<?>[]{TableElement.class, double.class, double.class}, MathUtil.class, null ),
+    MeanCenterOper(TokenType.TransformOp, 5, new String [] {"meanCenter"}, new Class<?>[]{TableElement.class}, null),
+    NormalizeOper(TokenType.TransformOp, 5, new String [] {"normalize", "standardize"}, new Class<?>[]{TableElement.class}, null),    
+    ScaleOper(TokenType.TransformOp, 5, new String []{"scale"}, new Class<?>[]{TableElement.class, double.class, double.class}, null, MathUtil.class, null ),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.SubsetRef, TokenType.CellRef, TokenType.TableRef),
@@ -256,6 +256,8 @@ public enum BuiltinOperator implements Labeled, Operator
     private String m_methodName;
     private Method m_method;
     private Class<?>[] m_methodArgs;
+
+    private Class<? extends Object> m_resultType;
     
     private BuiltinOperator()
     {
@@ -264,12 +266,22 @@ public enum BuiltinOperator implements Labeled, Operator
         m_aliases = new LinkedHashSet<String>();
     }
     
-    private BuiltinOperator(TokenType tt, int priority, String labels[], Class<? extends Object > args[])
+    private BuiltinOperator(TokenType tt, 
+                            int priority, 
+                            String labels[], 
+                            Class<? extends Object > args[], 
+                            Class<? extends Object> resultType)
     {
-        this(tt, priority, labels, args, null, null);
+        this(tt, priority, labels, args, resultType, (Class<?>)null, (String)null);
     }
     
-    private BuiltinOperator(TokenType tt, int priority, String labels[], Class<? extends Object > args[], Class<? extends Object> clazz, String methodName)
+    private BuiltinOperator(TokenType tt, 
+                            int priority, 
+                            String labels[], 
+                            Class<? extends Object > args[], 
+                            Class<? extends Object> resultType, 
+                            Class<? extends Object> clazz, 
+                            String methodName)
     {
         this();
         m_tokenTypes.add(tt);
@@ -287,6 +299,7 @@ public enum BuiltinOperator implements Labeled, Operator
             m_aliases.add(methodName.toLowerCase());
         }
         
+        m_resultType = resultType;
         m_methodArgs = args;
         
         m_clazz = clazz;
@@ -702,6 +715,9 @@ public enum BuiltinOperator implements Labeled, Operator
     @Override
     public Class<?> getResultType()
     {
+        if (m_resultType != null)
+            return m_resultType;
+        
         switch (this) {
             case ColumnIndexOper:
             case RowIndexOper:
