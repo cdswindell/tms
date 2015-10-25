@@ -250,7 +250,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
             Iterator<Token> di = this.descendingIterator();
             while (di != null && di.hasNext()) {
                 Token t = di.next();
-                if (t.isOperand() || t.isReference() || t.isBuiltIn()) {
+                if (t.isOperand() || t.isReference() || t.isBuiltIn() || t.isExpression()) {
                     operands.push(t);
                     continue;
                 }

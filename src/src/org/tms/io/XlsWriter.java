@@ -67,23 +67,28 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         }
         
         ExcelOp eOp = new ExcelOp(BuiltinOperator.AndOper, "and");
-        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
-        sf_tmsToExcelFunctionMap.put(eOp, eOp.getLabel());     
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
         
         eOp = new ExcelOp(BuiltinOperator.OrOper, "or");
-        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
 
         eOp = new ExcelOp(BuiltinOperator.NotOper, "not");
-        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
 
         eOp = new ExcelOp(BuiltinOperator.XorOper, "xor");
-        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
         
-        eOp = new ExcelOp(BuiltinOperator.PowerOper, "pow");
-        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        eOp = new ExcelOp(BuiltinOperator.PowerOper, "power");
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
         
         eOp = new ExcelOp(BuiltinOperator.FactOper, "fact");
-        sf_builtInToExcelMap.put(eOp.getTmsOp(), eOp);
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
+        
+        eOp = new ExcelOp(BuiltinOperator.PlusOper, "&", TokenType.BinaryOp);
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
+        
+        eOp = new ExcelOp(BuiltinOperator.MultOper, "rept");
+        sf_builtInToExcelMap.put((BuiltinOperator)eOp.getTmsOp(), eOp);
         
         // some additional items
         sf_tmsToExcelFunctionMap.put(BuiltinOperator.SumOper, "sum");
@@ -111,7 +116,6 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     private Map<Cell, CachedDerivation> m_cachedDerivations;
     private Map<TableElement, String> m_cachedRangeRef;
     private Map<Derivation, EquationStack> m_infixCache;
-    private Map<Derivation, EquationStack> m_postfixCache;
     
     private CreationHelper m_wbHelper = null;
 
@@ -130,7 +134,6 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         m_colMap = new HashMap<Sheet, Map<TableRowColumnElement, Integer>>();
         m_cachedDerivations = new LinkedHashMap<Cell, CachedDerivation>();
         m_infixCache = new HashMap<Derivation, EquationStack>();
-        m_postfixCache = new HashMap<Derivation, EquationStack>();
         m_cachedRangeRef = new HashMap<TableElement, String>();
     }
 
@@ -335,8 +338,8 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     private String derivationToFormula(Workbook wb, Sheet sheet, int maxCol, CachedDerivation cd)
     {
         try {
-            EquationStack ifs = cd.getInfixEquationStack();
-            return equationStackToFormula(ifs, cd, wb, sheet, maxCol);
+            EquationStack pfs = cd.getPostfixEquationStack();
+            return equationStackToFormula(pfs, cd, wb, sheet, maxCol);
         }
         catch (Exception e) {
             return null;
@@ -346,65 +349,56 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     private String equationStackToFormula(EquationStack es, CachedDerivation cd, Workbook wb, Sheet sheet, int maxCol)
     {
         // translate tokens to Excel form
-        StringBuffer sb = new StringBuffer();
+        EquationStack excelPfs = EquationStack.createPostfixStack(cd.getTmsTable());
         Iterator<Token> iter = es.descendingIterator();
-        boolean foundStatOp = false;
         while (iter != null && iter.hasNext()) {
-            Token t = iter.next();
-            if (addLeadingSpace(t))
-                sb.append(' ');
-            
+            Token t = iter.next();           
+            TokenType tt = t.getTokenType();
             String eRef = null;
             
-            TokenType tt = t.getTokenType();
             switch (tt) {
                 case RowRef:
                 case CellRef:
                 case ColumnRef:
-                    eRef = xlateTmsRef(t, foundStatOp, cd, sheet, maxCol);
+                    eRef = xlateTmsRef(t, cd, sheet, maxCol);
                     if (eRef == null)
                         throw new UnimplementedException("Reference: " + t);
-                    sb.append(eRef);
-                    foundStatOp = false;
+                    excelPfs.push(new Token(TokenType.Expression, eRef));
                     break;
                  
                 case StatOp:
                 case TransformOp:
-                     foundStatOp = true;
-                    
                 case BinaryFunc:
                 case UnaryFunc:
                 case GenericFunc:
                 case BuiltIn:
-                    eRef = xlateTmsFunc(t, cd);
-                    if (eRef == null)
+                    if (!isValidExcelOp(t))
                         throw new UnimplementedException("Reference: " + t);
-                    sb.append(eRef);
-                    break;
                     
                 default:
-                    sb.append(t.toExpressionValue(cd.getTmsTable()));
+                    excelPfs.push(t);
                     break;
             }
-            
-            if (addTrailingSpace(t))
-                sb.append(' ');
         }
         
-        return sb.toString();
+        String excelFormula = excelPfs.toExpression(StackType.Infix);
+        return excelFormula;
     }
 
-    private String xlateTmsFunc(Token t, CachedDerivation cd)
+    private boolean isValidExcelOp(Token t)
     {
         Operator op = t.getOperator();
         if (op != null) {
-            return sf_tmsToExcelFunctionMap.get(op);
+            if (op instanceof ExcelOp)
+                return true;
+            else
+                return sf_tmsToExcelFunctionMap.containsKey(op);
         }
-        
-        return null;
+        else
+            return false;
     }
 
-    private String xlateTmsRef(Token t, boolean foundStatOp, CachedDerivation cd, Sheet sheet, int maxCol)
+    private String xlateTmsRef(Token t, CachedDerivation cd, Sheet sheet, int maxCol)
     {
         Cell cell = cd.getExcelCell();
         int targetRowNum = cell.getRowIndex();
@@ -419,13 +413,13 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             xlatedRefColNum = m_colMap.get(sheet).get(((org.tms.api.Cell)te).getColumn());
         }        
         else if (te instanceof org.tms.api.Row) {
-            if (foundStatOp)
+            if (t instanceof ReferenceToken)
                 return tmsRowAsRange(te, sheet, maxCol);
             xlatedRefRowNum = m_rowMap.get(sheet).get(te);
             xlatedRefColNum = targetColNum;
         }
         else if (te instanceof org.tms.api.Column) {
-            if (foundStatOp)
+            if (t instanceof ReferenceToken)
                 return tmsColAsRange(te, sheet);
             xlatedRefRowNum = targetRowNum;
             xlatedRefColNum = m_colMap.get(sheet).get(te);
@@ -571,29 +565,6 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         
         AreaReference ar = new AreaReference(topLeft, bottomRight);
         return ar;
-    }
-
-    private boolean addLeadingSpace(Token t)
-    {
-        switch (t.getTokenType()) {
-            case BinaryOp:
-                return true;
-                
-            default: 
-                return false;
-        }
-    }
-
-    private boolean addTrailingSpace(Token t)
-    {
-        switch (t.getTokenType()) {
-            case BinaryOp:
-            case Comma:
-                return true;
-                
-            default: 
-                return false;
-        }
     }
 
     private void processSubsets(Table t, Workbook wb, Sheet sheet, int maxExcelCol)
@@ -955,7 +926,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             m_excelCell = excelCell;
         }
 
-        public EquationStack getInfixEquationStack()
+        public EquationStack getPostfixEquationStack()
         {
             EquationStack es = XlsWriter.this.m_infixCache.get(getDerivation());
             if (es == null) {
@@ -967,38 +938,64 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                 
                 // traverse the postfix stack and translate operators
                 // that need to be modified to work with excel
-                for (Token t : pfs.toArray(new Token[] {})) {
+                Set<Operator> specialOps = new HashSet<Operator>();
+                specialOps.add(BuiltinOperator.PlusOper);
+                specialOps.add(BuiltinOperator.MultOper);
+                specialOps.add(BuiltinOperator.MinusOper);
+                specialOps.add(BuiltinOperator.DivOper);
+                Token [] tokens = pfs.toArray(new Token[] {});
+                for (int i = tokens.length - 1; i >= 0; i--) {
+                    Token t = tokens[i];
                     Operator op = t.getOperator();
-                    if (op != null) {
-                        Operator eOp = sf_builtInToExcelMap.get(op);
+                    if (op != null && op != BuiltinOperator.NOP) {
+                        Operator eOp = specialOps.contains(op) ? null : sf_builtInToExcelMap.get(op);
                         if (eOp != null) {
                             t.setOperator(eOp);
                             t.setTokenType(eOp.getTokenType());
                         }
+                        
+                        // replace token with ExcelOpToken
+                        // this will allow us to map
+                        // function names into excel space
+                        if (specialOps.contains(op)) {
+                            if (op == BuiltinOperator.PlusOper) {
+                                // check for string concatenation
+                                if (tokens[i + 1].isString() || tokens[i + 2].isString()) {
+                                    eOp = sf_builtInToExcelMap.get(op);
+                                    t.setOperator(eOp);
+                                    t.setTokenType(eOp.getTokenType());
+                                }
+                            }
+                            else if (op == BuiltinOperator.MultOper) {
+                                if (tokens[i + 2].isString()) {
+                                    eOp = sf_builtInToExcelMap.get(op);
+                                    t.setOperator(eOp);
+                                    t.setTokenType(eOp.getTokenType());
+                                }
+                            }
+                        }
+                        else {
+                            tokens[i] = new ExcelOpToken(t);
+                        
+                            // do some processing for stat ops
+                            if (t.hasReferenceArg()) {
+                                int numArgs = t.getOperator().numArgs();
+                                for (int argIdx = 1; argIdx <= numArgs; argIdx++) {
+                                    if (tokens[i + argIdx].isReference())
+                                        tokens[i + argIdx] = new ReferenceToken(tokens[i + argIdx]);
+                                }
+                            }
+                        }
                     }
                 }
                 
-                // modified Infix Expression
-                String modExp = pfs.toExpression(StackType.Infix);
-                iep = new InfixExpressionParser(modExp, getTmsTable()); 
-                es = iep.getInfixStack();
+                // Save the modified postfix stack               
+                es = EquationStack.createPostfixStack(getTmsTable());
+                for (Token t : tokens) {
+                    es.add(t);
+                }
                 
                 XlsWriter.this.m_infixCache.put(getDerivation(), es);
-            }
-            
-            return es;
-        }
-
-        public EquationStack getPostfixEquationStack()
-        {
-            EquationStack es = XlsWriter.this.m_postfixCache.get(getDerivation());
-            if (es == null) {
-                EquationStack ifs = getInfixEquationStack();
-                
-                PostfixStackGenerator psg = new PostfixStackGenerator(ifs, getTmsTable());
-                es = psg.getPostfixStack();
-                
-                XlsWriter.this.m_postfixCache.put(getDerivation(), es);
             }
             
             return es;
@@ -1025,24 +1022,76 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         }
     }
     
+    static class ReferenceToken extends Token
+    {
+        ReferenceToken(Token t) 
+        {
+            super(t);
+        }
+    }
+    
+    static class ExcelOpToken extends Token
+    {
+        private Operator m_excelOp;
+        
+        ExcelOpToken(Token t) 
+        {
+            super(t);
+        }
+        
+        @Override
+        public String getLabel()
+        {
+            Operator op = getOperator();
+            if (op instanceof ExcelOp)
+                return getOperator().getLabel();
+            else if (sf_tmsToExcelFunctionMap.containsKey(op))
+                return sf_tmsToExcelFunctionMap.get(op).toLowerCase();
+            else
+                return super.getLabel();
+        }
+        
+        @Override
+        public Operator getOperator()
+        {
+            if (m_excelOp == null) {
+                Operator superOp = super.getOperator();
+                if (sf_tmsToExcelFunctionMap.containsKey(super.getOperator()))
+                    m_excelOp = new ExcelOp(superOp, sf_tmsToExcelFunctionMap.get(superOp).toLowerCase());
+                else
+                    m_excelOp = superOp;
+            }
+            
+            return m_excelOp;
+        }
+    }
+    
     static class ExcelOp implements Operator
     {
-        private BuiltinOperator m_tmsOp;
+        private Operator m_tmsOp;
         private String m_label;
+        private TokenType m_tokenType;
         
-        ExcelOp(BuiltinOperator op)
+        ExcelOp(Operator op)
         {
             m_tmsOp = op;
             m_label = op.getLabel();
+            m_tokenType = null;
         }
         
-        ExcelOp(BuiltinOperator op, String label)
+        ExcelOp(Operator op, String label)
         {
             this(op);
             m_label = label;
         }
         
-        BuiltinOperator getTmsOp()
+        ExcelOp(Operator op, String label, TokenType tt)
+        {
+            this(op, label);
+            m_tokenType = tt;
+        }
+        
+        Operator getTmsOp()
         {
             return m_tmsOp;
         }
@@ -1056,6 +1105,9 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         @Override
         public TokenType getTokenType()
         {
+            if (m_tokenType != null)
+                return m_tokenType;
+            
             switch (m_tmsOp.getTokenType()) {
                 case BinaryOp:
                     return TokenType.BinaryFunc;

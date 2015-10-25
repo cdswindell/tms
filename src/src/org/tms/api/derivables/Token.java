@@ -58,6 +58,14 @@ public class Token implements Labeled
         this(TokenType.Operand, val);
     }
 
+    protected Token(Token t)
+    {
+        m_label = t.m_label;
+        m_tokenType = t.m_tokenType;
+        m_oper = t.m_oper;
+        m_value = t.m_value;
+    }
+    
     /**
      * Create a {@code Token} with the specified {@link TokenType}.
      * @param tokenType the TokenType to create this Token with
@@ -357,7 +365,6 @@ public class Token implements Labeled
         return false;
     }
     
-
     public boolean isBoolean()
     {
         if (isOperand()) {
@@ -398,6 +405,22 @@ public class Token implements Labeled
     public boolean isBuiltIn()
     {
         return getTokenType() != null && getTokenType().isBuiltIn();
+    }   
+
+    public boolean hasReferenceArg()
+    {
+        Operator op = getOperator();
+        if (op != null) {
+            Class<?> [] argTypes = op.getArgTypes();
+            if (argTypes != null) {
+                for (Class<?> argType : argTypes) {
+                    if (TableElement.class.isAssignableFrom(argType))
+                        return true;
+                }
+            }
+        }
+        
+        return false;
     }
     
     public boolean isNull() 

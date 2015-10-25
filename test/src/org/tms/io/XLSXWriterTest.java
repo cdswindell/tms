@@ -60,6 +60,9 @@ public class XLSXWriterTest extends BaseTest
         Column d4Col = t.addColumn();
         d4Col.setDerivation("(col 1 > 10) && (col \"D3 Col\" < 100)");
         
+        Column d5Col = t.addColumn();
+        d5Col.setDerivation("\"Row: \" + ridx + \" \" + '*' * ridx" );
+        
         Column eCol = t.addColumn();        
         Row r1 = t.getRow(1);
         Cell cell = t.getCell(r1,  eCol);
