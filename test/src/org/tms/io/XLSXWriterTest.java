@@ -5,7 +5,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -61,7 +64,10 @@ public class XLSXWriterTest extends BaseTest
         d4Col.setDerivation("(col 1 > 10) && (col \"D3 Col\" < 100)");
         
         Column d5Col = t.addColumn();
-        d5Col.setDerivation(" 1 + 2 + \" Row: \" + toString(ridx) + \" \" + '*' * ridx" );
+        d5Col.setDerivation("(col 1 > 10) || (col \"D3 Col\" < 100)");
+        
+        Column d6Col = t.addColumn();
+        d6Col.setDerivation(" 1 + 2 + \" Row: \" + toString(ridx) + \" \" + '*' * ridx" );
         
         Column eCol = t.addColumn();        
         Row r1 = t.getRow(1);
@@ -111,7 +117,7 @@ public class XLSXWriterTest extends BaseTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        t.export("foo.xlsx", XlsOptions.Default
+        t.export(bos, XlsOptions.Default
                 .withColumnNames(true)
                 .withColumnWidthInInches(1.5)
                 .withRowNameColumnWidthInInches(1.25)
@@ -136,5 +142,21 @@ public class XLSXWriterTest extends BaseTest
 
         // there will be failures, as new documents have date/time stamped into them
         System.out.println("Export Table to XlsX, Failures: " + failures);
+        
+        // now compare exported file to expected
+        File outFile = null;
+        try {
+            outFile  = File.createTempFile("tmsExcelExportTest", "xlsx");
+            OutputStream outputStream = new FileOutputStream (outFile); 
+            bos.writeTo(outputStream);    
+            outputStream.close();
+            
+            // open workbook
+            //Workbook = WorkbookFactory.create(outFile);
+
+        }
+        finally {
+            outFile.delete();
+        }        
     }
 }
