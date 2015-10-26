@@ -18,6 +18,7 @@ import org.tms.api.derivables.Labeled;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
+import org.tms.api.exceptions.IllegalTableStateException;
 
 public enum BuiltinOperator implements Labeled, Operator
 {
@@ -30,36 +31,36 @@ public enum BuiltinOperator implements Labeled, Operator
     DivOper("/", TokenType.BinaryOp, 4),
     
     // boolean comparison operators
-    EqOper(TokenType.BinaryOp, 4, "=", "==", "EQ"),
-    NEqOper(TokenType.BinaryOp, 4, "!=", "<>", "NE"),
-    GtOper(TokenType.BinaryOp, 4, ">", "GT"),
-    LtOper(TokenType.BinaryOp, 4, "<", "LT"),
-    GtEOper(TokenType.BinaryOp, 4, ">=", "GE"),
-    LtEOper(TokenType.BinaryOp, 4,"<=", "LE"),
+    EqOper(TokenType.BinaryOp, 4, new String [] {"=", "==", "EQ"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    NEqOper(TokenType.BinaryOp, 4, new String [] {"!=", "<>", "NE"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    GtOper(TokenType.BinaryOp, 4, new String [] {">", "GT"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    LtOper(TokenType.BinaryOp, 4, new String [] {"<", "LT"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    GtEOper(TokenType.BinaryOp, 4, new String [] {">=", "GE"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    LtEOper(TokenType.BinaryOp, 4, new String [] {"<=", "LE"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
     
     // Logical Operators
-    AndOper(TokenType.BinaryOp, 4,"&&", "and"),
-    OrOper(TokenType.BinaryOp, 4,"||", "or"),
-    XorOper(TokenType.BinaryOp, 4, "xor"),
-    NotOper(TokenType.UnaryOp, 4,"~", "not"),
+    AndOper(TokenType.BinaryOp, 5,new String [] {"&&", "and"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    OrOper(TokenType.BinaryOp, 5,new String [] {"||", "or"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    XorOper(TokenType.BinaryOp, 5, new String [] {"xor"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    NotOper(TokenType.UnaryOp, 5, new String [] {"~", "not"}, new Class<?>[] {Object.class}, boolean.class),
     
     // Unary is tests
-    IsEvenOper("isEven", TokenType.UnaryFunc),
-    IsOddOper("isOdd", TokenType.UnaryFunc),
+    IsEvenOper(TokenType.UnaryFunc, 5, new String [] {"isEven"}, new Class<?>[] {Object.class}, boolean.class),
+    IsOddOper(TokenType.UnaryFunc, 5, new String [] {"isOdd"}, new Class<?>[] {Object.class}, boolean.class),
     
-    IsErrorOper("isError", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
-    IsNumberOper("isNumber", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
-    IsTextOper("isText", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
-    IsLogicalOper("isLogical", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
+    IsErrorOper(TokenType.UnaryFunc, 5, new String [] {"isError"}, new Class<?> [] {Object.class}, boolean.class),
+    IsNumberOper(TokenType.UnaryFunc, 5, new String [] {"isNumber"}, new Class<?> [] {Object.class}, boolean.class),
+    IsTextOper(TokenType.UnaryFunc, 5, new String [] {"isText"}, new Class<?> [] {Object.class}, boolean.class),
+    IsLogicalOper(TokenType.UnaryFunc, 5, new String [] {"isLogical"}, new Class<?> [] {Object.class}, boolean.class),
     
     // special isNull operator, which is somewhat out of bounds
-    IsNullOper("isNull", TokenType.UnaryFunc, 5, (Class<?>)null, (String)null, Object.class),
+    IsNullOper(TokenType.UnaryFunc, 5, new String [] {"isNull"}, new Class<?> [] {Object.class}, boolean.class),
     
     // special "if" operator
     IfOper("if", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
     
-    ColRefOper("colRef", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Object.class),
-    RowRefOper("rowRef", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Object.class),
+    ColRefOper(TokenType.GenericFunc, 5, new String [] {"colRef"}, new Class<?>[] {Object.class}, Column.class),
+    RowRefOper(TokenType.GenericFunc, 5, new String [] {"rowRef"}, new Class<?>[] {Object.class}, Row.class),
     
     // Special math operators, implemented in Java Math class
     ModOper(TokenType.BinaryOp, 4, MathUtil.class, "mod", "mod"),  
@@ -79,16 +80,16 @@ public enum BuiltinOperator implements Labeled, Operator
     ExpOper(TokenType.UnaryFunc, 5, Math.class, "exp"),
     LogOper(TokenType.UnaryFunc, 5, Math.class, "log", "ln", "loge"),
     Log10Oper(TokenType.UnaryFunc, 5, Math.class, "log10", "log", "log10"),
-    RandOper(TokenType.BuiltIn, 5, Math.class, "random"),
-    RandIntOper(TokenType.UnaryFunc, 5, MathUtil.class, "randomInt", "randomInt", "randInt"),
-    RandBetweenOper(TokenType.BinaryFunc, 5, MathUtil.class, "randomBetween", "randomBetween", "randBetween"),
+    RandOper(TokenType.BuiltIn, 5, new String [] {"random", "rand"}, null, double.class, Math.class),
+    RandIntOper(TokenType.UnaryFunc, 5, new String [] {"randomInt", "randomInt", "randInt"}, new Class<?>[] {double.class}, int.class, MathUtil.class),
+    RandBetweenOper(TokenType.BinaryFunc, 5, new String [] {"randomBetween", "randomBetween", "randBetween"}, new Class<?>[] {double.class, double.class}, int.class, MathUtil.class),
 
     // TVM Calculations
-    PmtOper("pmt", TokenType.GenericFunc, 5, MathUtil.class, "pmt", double.class, int.class, double.class, double.class),
-    FvOper("fv", TokenType.GenericFunc, 5, MathUtil.class, "fv", double.class, int.class, double.class, double.class),
-    PvOper("pv", TokenType.GenericFunc, 5, MathUtil.class, "pv", double.class, int.class, double.class, double.class),
-    NPerOper("nper", TokenType.GenericFunc, 5, MathUtil.class, "nper", double.class, double.class, double.class, double.class),
-    RateOper("rate", TokenType.GenericFunc, 5, MathUtil.class, "rate", int.class, double.class, double.class, double.class),
+    PmtOper(TokenType.GenericFunc, 5, new String [] {"pmt", "paymentPerTerm"}, new Class<?>[] {double.class, int.class, double.class, double.class}, double.class, MathUtil.class),
+    FvOper(TokenType.GenericFunc, 5, new String [] {"fv", "futureValue"}, new Class<?>[] {double.class, int.class, double.class, double.class}, double.class, MathUtil.class),
+    PvOper(TokenType.GenericFunc, 5, new String [] {"pv", "presentValue"}, new Class<?>[] {double.class, int.class, double.class, double.class}, double.class, MathUtil.class),
+    NPerOper(TokenType.GenericFunc, 5, new String [] {"nper", "numPeriods"}, new Class<?>[] {double.class, double.class, double.class, double.class}, double.class, MathUtil.class),
+    RateOper(TokenType.GenericFunc, 5, new String [] {"rate", "interestRate"}, new Class<?>[] {int.class, double.class, double.class, double.class}, double.class, MathUtil.class),
     
     // trig functions, radians
     toDegreesOper("toDegrees", TokenType.UnaryFunc, 5, Math.class),
@@ -119,7 +120,7 @@ public enum BuiltinOperator implements Labeled, Operator
     RoundOper("round", TokenType.UnaryFunc, 5, Math.class),
   
     // Useful functions from Apache Math Commons
-    IsPrimeOper("isPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "isPrime", int.class),
+    IsPrimeOper(TokenType.UnaryFunc, 5, new String [] {"isPrime"}, new Class<?> [] {int.class}, boolean.class, org.apache.commons.math3.primes.Primes.class),    
     NextPrimeOper("nextPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "nextPrime", int.class),
     PrimeFactorsOper("primeFactors", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "primeFactors", int.class),
     PowerOf2Oper("isPowerOfTwo", TokenType.UnaryFunc, 5, org.apache.commons.math3.util.ArithmeticUtils.class, "isPowerOfTwo", long.class),
@@ -132,12 +133,12 @@ public enum BuiltinOperator implements Labeled, Operator
     LeftOper(TokenType.BinaryFunc, 5, new String [] {"left", "instrLeft"}, new Class<?>[]{String.class, int.class}, String.class, MathUtil.class, "instrLeft"),
     RightOper(TokenType.BinaryFunc, 5, new String [] {"right", "instrRight"}, new Class<?>[]{String.class, int.class}, String.class, MathUtil.class, "instrRight"),
     MidOper(TokenType.GenericFunc, 5, new String [] {"mid", "instrMid"}, new Class<?>[]{String.class, int.class, int.class}, String.class, MathUtil.class, "instrMid"),
-    toLowerOper(TokenType.UnaryFunc, 5, new String [] {"toLower"}, new Class<?>[]{String.class}, String.class, MathUtil.class, "toLower"),
-    toUpperOper(TokenType.UnaryFunc, 5, new String [] {"toUpper"}, new Class<?>[]{String.class}, String.class, MathUtil.class, "toUpper"),
-    trimOper(TokenType.UnaryFunc, 5, new String [] {"trim"}, new Class<?>[]{String.class}, String.class, MathUtil.class, "trim"),
-    reverseOper(TokenType.UnaryFunc, 5, new String [] {"reverse"}, new Class<?>[]{String.class}, String.class, MathUtil.class, "reverse"),
-    toStringOper(TokenType.UnaryFunc, 5, new String [] {"toString"}, new Class<?>[]{Object.class}, String.class, MathUtil.class, "toString"),
-    toNumberOper(TokenType.UnaryFunc, 5, new String [] {"toNumber"}, new Class<?>[]{Object.class}, double.class, MathUtil.class, "toNumber"),
+    toLowerOper(TokenType.UnaryFunc, 5, new String [] {"toLower"}, new Class<?>[]{String.class}, String.class, MathUtil.class),
+    toUpperOper(TokenType.UnaryFunc, 5, new String [] {"toUpper"}, new Class<?>[]{String.class}, String.class, MathUtil.class),
+    trimOper(TokenType.UnaryFunc, 5, new String [] {"trim"}, new Class<?>[]{String.class}, String.class, MathUtil.class),
+    reverseOper(TokenType.UnaryFunc, 5, new String [] {"reverse"}, new Class<?>[]{String.class}, String.class, MathUtil.class),
+    toStringOper(TokenType.UnaryFunc, 5, new String [] {"toString"}, new Class<?>[]{Object.class}, String.class, MathUtil.class),
+    toNumberOper(TokenType.UnaryFunc, 5, new String [] {"toNumber"}, new Class<?>[]{Object.class}, double.class, MathUtil.class),
    
     // Binary functions, mostly supported in Java Math
     ReminderFuncOper(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "remainder"),
@@ -153,13 +154,14 @@ public enum BuiltinOperator implements Labeled, Operator
 
     // Builtin functions
     NullOper(TokenType.BuiltIn, 5, "null"),
-    PiOper(TokenType.BuiltIn, 5, MathUtil.class, "pi"),
     TrueOper(TokenType.BuiltIn, 5, "true"),
     FalseOper(TokenType.BuiltIn, 5, "false"),
-    EOper(TokenType.BuiltIn, 5, MathUtil.class, "e"),
-    ColumnIndexOper(TokenType.BuiltIn, 5, "columnIndex", "cidx"),
-    RowIndexOper(TokenType.BuiltIn, 5, "rowIndex", "ridx"),
-    NowOper(TokenType.BuiltIn, 5, "now"),
+    EOper(TokenType.BuiltIn, 5, new String [] {"e"}, null, double.class, MathUtil.class),
+    PiOper(TokenType.BuiltIn, 5, new String [] {"pi"}, null, double.class, MathUtil.class),
+    ColumnIndexOper(TokenType.BuiltIn, 5, new String [] {"columnIndex", "cidx"}, null, int.class),
+    RowIndexOper(TokenType.BuiltIn, 5, new String [] {"rowIndex", "ridx"}, null, int.class),
+    
+    NowOper(TokenType.BuiltIn, 5, new String [] {"now"}, null, java.util.Date.class),
 
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 5, "sum"),
@@ -167,7 +169,7 @@ public enum BuiltinOperator implements Labeled, Operator
     SumSqD2Oper(TokenType.StatOp, 5, "sumOfSquaredDeviates", "ss", "ssd", "devsq"),
     MeanOper(TokenType.StatOp, 5, "mean", "average", "avg"),
     MedianOper(TokenType.StatOp, 5, "median"),
-    QuartileOper(TokenType.StatOp, 5, "quartile"),
+    QuartileOper(TokenType.StatOp, 5, new String [] {"quartile"}, new Class<?>[]{TableElement.class, int.class}, double.class),
     FirstQuartileOper(TokenType.StatOp, 5, "firstQuartile", "firstQ"),
     ThirdQuartileOper(TokenType.StatOp, 5, "thirdQuartile", "thirdQ"),
     ModeOper(TokenType.StatOp, 5, "mode"),
@@ -239,7 +241,7 @@ public enum BuiltinOperator implements Labeled, Operator
     // Transformation Functions
     MeanCenterOper(TokenType.TransformOp, 5, new String [] {"meanCenter"}, new Class<?>[]{TableElement.class}, null),
     NormalizeOper(TokenType.TransformOp, 5, new String [] {"normalize", "standardize"}, new Class<?>[]{TableElement.class}, null),    
-    ScaleOper(TokenType.TransformOp, 5, new String []{"scale"}, new Class<?>[]{TableElement.class, double.class, double.class}, null, MathUtil.class, null ),
+    ScaleOper(TokenType.TransformOp, 5, new String []{"scale"}, new Class<?>[]{TableElement.class, double.class, double.class}, null),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.SubsetRef, TokenType.CellRef, TokenType.TableRef),
@@ -280,6 +282,16 @@ public enum BuiltinOperator implements Labeled, Operator
                             String labels[], 
                             Class<? extends Object > args[], 
                             Class<? extends Object> resultType, 
+                            Class<? extends Object> clazz)
+    {
+        this(tt, priority, labels, args, resultType, clazz, null);
+    }
+    
+    private BuiltinOperator(TokenType tt, 
+                            int priority, 
+                            String labels[], 
+                            Class<? extends Object > args[], 
+                            Class<? extends Object> resultType, 
                             Class<? extends Object> clazz, 
                             String methodName)
     {
@@ -300,7 +312,7 @@ public enum BuiltinOperator implements Labeled, Operator
         }
         
         m_resultType = resultType;
-        m_methodArgs = args;
+        m_methodArgs = args == null ? new Class<?> [] {} : args;
         
         m_clazz = clazz;
         if (clazz != null)
@@ -472,9 +484,6 @@ public enum BuiltinOperator implements Labeled, Operator
             // handle special case operators first, then
             // use primary token type to resolve
             switch (this) {
-                case AndOper:
-                case OrOper:
-                case XorOper:
                 case PlusOper:
                 case MinusOper:
                 case MultOper:
@@ -482,10 +491,6 @@ public enum BuiltinOperator implements Labeled, Operator
                     m_methodArgs = new Class<?>[]{Object.class, Object.class};
                     break;
                     
-                case NotOper:
-                    m_methodArgs = new Class<?>[]{Object.class};
-                    break;
-                
                 case PValueOper:
                 case TValueOper:
                     m_methodArgs = new Class<?>[]{TableRowColumnElement.class, double.class};
@@ -531,10 +536,6 @@ public enum BuiltinOperator implements Labeled, Operator
                     m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
                     break;
                 
-                case QuartileOper:
-                    m_methodArgs = new Class<?>[]{TableElement.class, int.class};
-                    break;
-                    
                 default:
                     TokenType tt = getPrimaryTokenType();
                     int numArgs = tt != null ? tt.numArgs() : 0;
@@ -576,7 +577,7 @@ public enum BuiltinOperator implements Labeled, Operator
             }
             catch (NoSuchMethodException | SecurityException e)
             {
-                e.printStackTrace();
+                throw new IllegalTableStateException(e);
             }
         }
         
@@ -717,51 +718,8 @@ public enum BuiltinOperator implements Labeled, Operator
     {
         if (m_resultType != null)
             return m_resultType;
-        
-        switch (this) {
-            case ColumnIndexOper:
-            case RowIndexOper:
-            case RandIntOper:
-            case RandBetweenOper:
-                return int.class;
-                
-            case PiOper:
-            case EOper:
-            case RandOper:
-                return double.class;
-                
-            case NowOper:
-                return java.util.Date.class;
-                
-            case AndOper:
-            case OrOper:
-            case XorOper:
-            case NotOper:
-            case IsEvenOper:
-            case IsOddOper:
-            case IsPrimeOper:
-            case IsNumberOper:
-            case IsLogicalOper:
-            case IsTextOper:
-            case IsErrorOper:
-            case IsNullOper:
-            case EqOper:
-            case NEqOper:
-            case GtOper:
-            case LtOper:
-            case GtEOper:
-            case LtEOper:               
-                return boolean.class;
-                
-            case ColRefOper:
-                return Column.class;
-                
-            case RowRefOper:
-                return Row.class;
-                
-            default:
-                return Object.class;
-        }
+        else
+            return Object.class;
     }
     
     @Override

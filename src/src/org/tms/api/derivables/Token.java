@@ -354,6 +354,17 @@ public class Token implements Labeled
         return false;
     }
     
+    public boolean isEvaluatesToNumeric()
+    {
+        boolean result = isNumeric();
+        if (!result) {
+            if (getOperator() != null && getOperator().getResultType() != null)
+                return Number.class.isAssignableFrom(getOperator().getResultType());
+        }
+        
+        return result;
+    }
+    
     public boolean isString()
     {
         if (isOperand()) {
@@ -387,6 +398,17 @@ public class Token implements Labeled
         return false;
     }
 
+    public boolean isEvaluatesToBoolean()
+    {
+        boolean result = isBoolean();
+        if (!result) {
+            if (getOperator() != null && getOperator().getResultType() != null)
+                return Boolean.class.isAssignableFrom(getOperator().getResultType());
+        }
+        
+        return result;
+    }
+    
     public boolean isPending()
     {
         if (this.getTokenType() != null) 
@@ -411,6 +433,17 @@ public class Token implements Labeled
     public boolean isReference()
     {
         return getTokenType() != null && getTokenType().isReference() && getValue() != null && getValue() instanceof TableElement;
+    }
+    
+    public boolean isEvaluatesToReference()
+    {
+        boolean result = isReference();
+        if (!result) {
+            if (getOperator() != null && getOperator().getResultType() != null)
+                return TableElement.class.isAssignableFrom(getOperator().getResultType());
+        }
+        
+        return result;
     }
     
     public boolean isBuiltIn()

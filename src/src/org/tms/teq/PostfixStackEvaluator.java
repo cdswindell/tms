@@ -1080,6 +1080,7 @@ public class PostfixStackEvaluator
 	                    return t;
 	                }
 	            }
+	            
 	            switch (bio) {
 	                case PlusOper:
 	                case MinusOper:
