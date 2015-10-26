@@ -181,6 +181,12 @@ public class XlsReader extends BaseReader<XlsOptions>
         
         sf_FunctionMap.put("IF", BuiltinOperator.IfOper);
         
+        sf_FunctionMap.put("PV", BuiltinOperator.PvOper);
+        sf_FunctionMap.put("FV", BuiltinOperator.FvOper);
+        sf_FunctionMap.put("PMT", BuiltinOperator.PmtOper);
+        sf_FunctionMap.put("NPER", BuiltinOperator.NPerOper);
+        sf_FunctionMap.put("RATE", BuiltinOperator.RateOper);
+        
         sf_FunctionMap.put("AVERAGE", BuiltinOperator.MeanOper);
         sf_FunctionMap.put("MEDIAN", BuiltinOperator.MedianOper);
         sf_FunctionMap.put("MODE", BuiltinOperator.ModeOper);
