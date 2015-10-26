@@ -14,8 +14,8 @@ public interface Derivable extends TableElement
     
     /**
      * Get the derivation assigned to this element, if one exists.
-     * @param expression
-     * @return
+     * @param expression the element's derivation, as an algebraic string
+     * @return this Derivable element
      */
     public Derivable setDerivation(String expression);
     public Derivable clearDerivation();

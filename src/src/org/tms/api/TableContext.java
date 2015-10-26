@@ -41,7 +41,7 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      * Loads the JDBC database driver class named {@code driverClassName} and maintains an index of 
      * loaded class names. 
      * <p>
-     * The default implementation throws {@link org.tms.exceptions.UnsupportedImplementationException UnsupportedImplementationException}. 
+     * The default implementation throws {@link org.tms.api.exceptions.UnsupportedImplementationException UnsupportedImplementationException}. 
      * @param driverClassName the JDBC driver class name to load
      * @throws ClassNotFoundException if the named JDBC driver class cannot be loaded
      * @throws UnsupportedImplementationException if this method is called on a TableContext that uses the default implementation
@@ -54,8 +54,8 @@ public interface TableContext extends BaseElement, InitializableTableProperties
     /**
      * Returns true if the JDBC driver class named {@code driverClassName} has been loaded and initialized.
      * <p>
-     * The default implementation throws {@link org.tms.exceptions.UnsupportedImplementationException UnsupportedImplementationException}. 
-     * @param driverClassName
+     * The default implementation throws {@link org.tms.api.exceptions.UnsupportedImplementationException UnsupportedImplementationException}. 
+     * @param driverClassName String name of the JDBC driver class
      * @return true if driverClassName has been loaded
      * @throws UnsupportedImplementationException if this method is called on a TableContext that uses the default implementation
      */

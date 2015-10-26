@@ -76,9 +76,9 @@ public class Token implements Labeled
     }
 
     /**
-     * 
-     * @param tt
-     * @param value
+     * Create a new {@code Token} given a {@link TokenType} and an operand
+     * @param tt the TokenType
+     * @param value the Operand
      */
     public Token(TokenType tt, Object value)
     {
