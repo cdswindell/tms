@@ -35,7 +35,7 @@ public class HTMLWriterTest extends BaseTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(ExportTableGold);
+        Path path = Paths.get(qualifiedFileName(ExportTableGold));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
@@ -75,7 +75,7 @@ public class HTMLWriterTest extends BaseTest
     @Test
     public final void testExportSubset() throws IOException
     {
-        Path path = Paths.get(ExportSubsetGold);
+        Path path = Paths.get(qualifiedFileName(ExportSubsetGold));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
@@ -105,7 +105,7 @@ public class HTMLWriterTest extends BaseTest
     @Test
     public final void testExportRow() throws IOException
     {
-        Path path = Paths.get(ExportRowGold);
+        Path path = Paths.get(qualifiedFileName(ExportRowGold));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
@@ -134,7 +134,7 @@ public class HTMLWriterTest extends BaseTest
     @Test
     public final void testExportColumn() throws IOException
     {
-        Path path = Paths.get(ExportColumnGold);
+        Path path = Paths.get(qualifiedFileName(ExportColumnGold));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);

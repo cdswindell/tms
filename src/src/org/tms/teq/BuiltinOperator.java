@@ -31,36 +31,36 @@ public enum BuiltinOperator implements Labeled, Operator
     DivOper("/", TokenType.BinaryOp, 4),
     
     // boolean comparison operators
-    EqOper(TokenType.BinaryOp, 4, new String [] {"=", "==", "EQ"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
-    NEqOper(TokenType.BinaryOp, 4, new String [] {"!=", "<>", "NE"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
-    GtOper(TokenType.BinaryOp, 4, new String [] {">", "GT"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
-    LtOper(TokenType.BinaryOp, 4, new String [] {"<", "LT"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
-    GtEOper(TokenType.BinaryOp, 4, new String [] {">=", "GE"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
-    LtEOper(TokenType.BinaryOp, 4, new String [] {"<=", "LE"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
+    EqOper(TokenType.BinaryOp, 4, toLabels("=", "==", "EQ"), toArgs(Object.class, Object.class), boolean.class),
+    NEqOper(TokenType.BinaryOp, 4, toLabels("!=", "<>", "NE"), toArgs(Object.class, Object.class), boolean.class),
+    GtOper(TokenType.BinaryOp, 4, toLabels(">", "GT"), toArgs(Object.class, Object.class), boolean.class),
+    LtOper(TokenType.BinaryOp, 4, toLabels("<", "LT"), toArgs(Object.class, Object.class), boolean.class),
+    GtEOper(TokenType.BinaryOp, 4, toLabels(">=", "GE"), toArgs(Object.class, Object.class), boolean.class),
+    LtEOper(TokenType.BinaryOp, 4, toLabels("<=", "LE"), toArgs(Object.class, Object.class), boolean.class),
     
     // Logical Operators
-    AndOper(TokenType.BinaryOp, 5,new String [] {"&&", "and"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
-    OrOper(TokenType.BinaryOp, 5,new String [] {"||", "or"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
-    XorOper(TokenType.BinaryOp, 5, new String [] {"xor"}, new Class<?>[] {Object.class, Object.class}, boolean.class),
-    NotOper(TokenType.UnaryOp, 5, new String [] {"~", "not"}, new Class<?>[] {Object.class}, boolean.class),
+    AndOper(TokenType.BinaryOp, 5,toLabels("&&", "and"), toArgs(Object.class, Object.class), boolean.class),
+    OrOper(TokenType.BinaryOp, 5,toLabels("||", "or"), toArgs(Object.class, Object.class), boolean.class),
+    XorOper(TokenType.BinaryOp, 5, toLabels("xor"), toArgs(Object.class, Object.class), boolean.class),
+    NotOper(TokenType.UnaryOp, 5, toLabels("~", "not"), toArgs(Object.class), boolean.class),
     
     // Unary is tests
-    IsEvenOper(TokenType.UnaryFunc, 5, new String [] {"isEven"}, new Class<?>[] {Object.class}, boolean.class),
-    IsOddOper(TokenType.UnaryFunc, 5, new String [] {"isOdd"}, new Class<?>[] {Object.class}, boolean.class),
+    IsEvenOper(TokenType.UnaryFunc, 5, toLabels("isEven"), toArgs(Object.class), boolean.class),
+    IsOddOper(TokenType.UnaryFunc, 5, toLabels("isOdd"), toArgs(Object.class), boolean.class),
     
-    IsErrorOper(TokenType.UnaryFunc, 5, new String [] {"isError"}, new Class<?> [] {Object.class}, boolean.class),
-    IsNumberOper(TokenType.UnaryFunc, 5, new String [] {"isNumber"}, new Class<?> [] {Object.class}, boolean.class),
-    IsTextOper(TokenType.UnaryFunc, 5, new String [] {"isText"}, new Class<?> [] {Object.class}, boolean.class),
-    IsLogicalOper(TokenType.UnaryFunc, 5, new String [] {"isLogical"}, new Class<?> [] {Object.class}, boolean.class),
+    IsErrorOper(TokenType.UnaryFunc, 5, toLabels("isError"), toArgs(Object.class), boolean.class),
+    IsNumberOper(TokenType.UnaryFunc, 5, toLabels("isNumber"), toArgs(Object.class), boolean.class),
+    IsTextOper(TokenType.UnaryFunc, 5, toLabels("isText"), toArgs(Object.class), boolean.class),
+    IsLogicalOper(TokenType.UnaryFunc, 5, toLabels("isLogical"), toArgs(Object.class), boolean.class),
     
     // special isNull operator, which is somewhat out of bounds
-    IsNullOper(TokenType.UnaryFunc, 5, new String [] {"isNull"}, new Class<?> [] {Object.class}, boolean.class),
+    IsNullOper(TokenType.UnaryFunc, 5, toLabels("isNull"), toArgs(Object.class), boolean.class),
     
     // special "if" operator
     IfOper("if", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
     
-    ColRefOper(TokenType.GenericFunc, 5, new String [] {"colRef"}, new Class<?>[] {Object.class}, Column.class),
-    RowRefOper(TokenType.GenericFunc, 5, new String [] {"rowRef"}, new Class<?>[] {Object.class}, Row.class),
+    ColRefOper(TokenType.GenericFunc, 5, toLabels("colRef"), toArgs(Object.class), Column.class),
+    RowRefOper(TokenType.GenericFunc, 5, toLabels("rowRef"), toArgs(Object.class), Row.class),
     
     // Special math operators, implemented in Java Math class
     ModOper(TokenType.BinaryOp, 4, MathUtil.class, "mod", "mod"),  
@@ -80,16 +80,16 @@ public enum BuiltinOperator implements Labeled, Operator
     ExpOper(TokenType.UnaryFunc, 5, Math.class, "exp"),
     LogOper(TokenType.UnaryFunc, 5, Math.class, "log", "ln", "loge"),
     Log10Oper(TokenType.UnaryFunc, 5, Math.class, "log10", "log", "log10"),
-    RandOper(TokenType.BuiltIn, 5, new String [] {"random", "rand"}, null, double.class, Math.class),
-    RandIntOper(TokenType.UnaryFunc, 5, new String [] {"randomInt", "randomInt", "randInt"}, new Class<?>[] {double.class}, int.class, MathUtil.class),
-    RandBetweenOper(TokenType.BinaryFunc, 5, new String [] {"randomBetween", "randomBetween", "randBetween"}, new Class<?>[] {double.class, double.class}, int.class, MathUtil.class),
+    RandOper(TokenType.BuiltIn, 5, toLabels("random", "rand"), null, double.class, Math.class),
+    RandIntOper(TokenType.UnaryFunc, 5, toLabels("randomInt", "randomInt", "randInt"), toArgs(double.class), int.class, MathUtil.class),
+    RandBetweenOper(TokenType.BinaryFunc, 5, toLabels("randomBetween", "randomBetween", "randBetween"), toArgs(double.class, double.class), int.class, MathUtil.class),
 
     // TVM Calculations
-    PmtOper(TokenType.GenericFunc, 5, new String [] {"pmt", "paymentPerTerm"}, new Class<?>[] {double.class, int.class, double.class, double.class}, double.class, MathUtil.class),
-    FvOper(TokenType.GenericFunc, 5, new String [] {"fv", "futureValue"}, new Class<?>[] {double.class, int.class, double.class, double.class}, double.class, MathUtil.class),
-    PvOper(TokenType.GenericFunc, 5, new String [] {"pv", "presentValue"}, new Class<?>[] {double.class, int.class, double.class, double.class}, double.class, MathUtil.class),
-    NPerOper(TokenType.GenericFunc, 5, new String [] {"nper", "numPeriods"}, new Class<?>[] {double.class, double.class, double.class, double.class}, double.class, MathUtil.class),
-    RateOper(TokenType.GenericFunc, 5, new String [] {"rate", "interestRate"}, new Class<?>[] {int.class, double.class, double.class, double.class}, double.class, MathUtil.class),
+    PmtOper(TokenType.GenericFunc, 5, toLabels("pmt", "paymentPerTerm"), toArgs(double.class, int.class, double.class, double.class), double.class, MathUtil.class),
+    FvOper(TokenType.GenericFunc, 5, toLabels("fv", "futureValue"), toArgs(double.class, int.class, double.class, double.class), double.class, MathUtil.class),
+    PvOper(TokenType.GenericFunc, 5, toLabels("pv", "presentValue"), toArgs(double.class, int.class, double.class, double.class), double.class, MathUtil.class),
+    NPerOper(TokenType.GenericFunc, 5, toLabels("nper", "numPeriods"), toArgs(double.class, double.class, double.class, double.class), double.class, MathUtil.class),
+    RateOper(TokenType.GenericFunc, 5, toLabels("rate", "interestRate"), toArgs(int.class, double.class, double.class, double.class), double.class, MathUtil.class),
     
     // trig functions, radians
     toDegreesOper("toDegrees", TokenType.UnaryFunc, 5, Math.class),
@@ -120,7 +120,7 @@ public enum BuiltinOperator implements Labeled, Operator
     RoundOper("round", TokenType.UnaryFunc, 5, Math.class),
   
     // Useful functions from Apache Math Commons
-    IsPrimeOper(TokenType.UnaryFunc, 5, new String [] {"isPrime"}, new Class<?> [] {int.class}, boolean.class, org.apache.commons.math3.primes.Primes.class),    
+    IsPrimeOper(TokenType.UnaryFunc, 5, toLabels("isPrime"), toArgs(int.class), boolean.class, org.apache.commons.math3.primes.Primes.class),    
     NextPrimeOper("nextPrime", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "nextPrime", int.class),
     PrimeFactorsOper("primeFactors", TokenType.UnaryFunc, 5, org.apache.commons.math3.primes.Primes.class, "primeFactors", int.class),
     PowerOf2Oper("isPowerOfTwo", TokenType.UnaryFunc, 5, org.apache.commons.math3.util.ArithmeticUtils.class, "isPowerOfTwo", long.class),
@@ -129,16 +129,16 @@ public enum BuiltinOperator implements Labeled, Operator
     LcmOper("lcm", TokenType.BinaryFunc, 5, org.apache.commons.math3.util.ArithmeticUtils.class, "lcm", long.class, long.class),
     
     // String functions
-    LenOper(TokenType.UnaryFunc, 5, new String [] {"len", "length"}, new Class<?>[]{String.class}, int.class, MathUtil.class, "length"),
-    LeftOper(TokenType.BinaryFunc, 5, new String [] {"left", "instrLeft"}, new Class<?>[]{String.class, int.class}, String.class, MathUtil.class, "instrLeft"),
-    RightOper(TokenType.BinaryFunc, 5, new String [] {"right", "instrRight"}, new Class<?>[]{String.class, int.class}, String.class, MathUtil.class, "instrRight"),
-    MidOper(TokenType.GenericFunc, 5, new String [] {"mid", "instrMid"}, new Class<?>[]{String.class, int.class, int.class}, String.class, MathUtil.class, "instrMid"),
-    toLowerOper(TokenType.UnaryFunc, 5, new String [] {"toLower"}, new Class<?>[]{String.class}, String.class, MathUtil.class),
-    toUpperOper(TokenType.UnaryFunc, 5, new String [] {"toUpper"}, new Class<?>[]{String.class}, String.class, MathUtil.class),
-    trimOper(TokenType.UnaryFunc, 5, new String [] {"trim"}, new Class<?>[]{String.class}, String.class, MathUtil.class),
-    reverseOper(TokenType.UnaryFunc, 5, new String [] {"reverse"}, new Class<?>[]{String.class}, String.class, MathUtil.class),
-    toStringOper(TokenType.UnaryFunc, 5, new String [] {"toString"}, new Class<?>[]{Object.class}, String.class, MathUtil.class),
-    toNumberOper(TokenType.UnaryFunc, 5, new String [] {"toNumber"}, new Class<?>[]{Object.class}, double.class, MathUtil.class),
+    LenOper(TokenType.UnaryFunc, 5, toLabels("len", "length"), toArgs(String.class), int.class, MathUtil.class, "length"),
+    LeftOper(TokenType.BinaryFunc, 5, toLabels("left", "instrLeft"), toArgs(String.class, int.class), String.class, MathUtil.class, "instrLeft"),
+    RightOper(TokenType.BinaryFunc, 5, toLabels("right", "instrRight"), toArgs(String.class, int.class), String.class, MathUtil.class, "instrRight"),
+    MidOper(TokenType.GenericFunc, 5, toLabels("mid", "instrMid"), toArgs(String.class, int.class, int.class), String.class, MathUtil.class, "instrMid"),
+    toLowerOper(TokenType.UnaryFunc, 5, toLabels("toLower"), toArgs(String.class), String.class, MathUtil.class),
+    toUpperOper(TokenType.UnaryFunc, 5, toLabels("toUpper"), toArgs(String.class), String.class, MathUtil.class),
+    trimOper(TokenType.UnaryFunc, 5, toLabels("trim"), toArgs(String.class), String.class, MathUtil.class),
+    reverseOper(TokenType.UnaryFunc, 5, toLabels("reverse"), toArgs(String.class), String.class, MathUtil.class),
+    toStringOper(TokenType.UnaryFunc, 5, toLabels("toString"), toArgs(Object.class), String.class, MathUtil.class),
+    toNumberOper(TokenType.UnaryFunc, 5, toLabels("toNumber"), toArgs(Object.class), double.class, MathUtil.class),
    
     // Binary functions, mostly supported in Java Math
     ReminderFuncOper(TokenType.BinaryFunc, 5, Math.class, "IEEEremainder", "remainder"),
@@ -156,12 +156,12 @@ public enum BuiltinOperator implements Labeled, Operator
     NullOper(TokenType.BuiltIn, 5, "null"),
     TrueOper(TokenType.BuiltIn, 5, "true"),
     FalseOper(TokenType.BuiltIn, 5, "false"),
-    EOper(TokenType.BuiltIn, 5, new String [] {"e"}, null, double.class, MathUtil.class),
-    PiOper(TokenType.BuiltIn, 5, new String [] {"pi"}, null, double.class, MathUtil.class),
-    ColumnIndexOper(TokenType.BuiltIn, 5, new String [] {"columnIndex", "cidx"}, null, int.class),
-    RowIndexOper(TokenType.BuiltIn, 5, new String [] {"rowIndex", "ridx"}, null, int.class),
+    EOper(TokenType.BuiltIn, 5, toLabels("e"), null, double.class, MathUtil.class),
+    PiOper(TokenType.BuiltIn, 5, toLabels("pi"), null, double.class, MathUtil.class),
+    ColumnIndexOper(TokenType.BuiltIn, 5, toLabels("columnIndex", "cidx"), null, int.class),
+    RowIndexOper(TokenType.BuiltIn, 5, toLabels("rowIndex", "ridx"), null, int.class),
     
-    NowOper(TokenType.BuiltIn, 5, new String [] {"now"}, null, java.util.Date.class),
+    NowOper(TokenType.BuiltIn, 5, toLabels("now"), null, java.util.Date.class),
 
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 5, "sum"),
@@ -169,7 +169,7 @@ public enum BuiltinOperator implements Labeled, Operator
     SumSqD2Oper(TokenType.StatOp, 5, "sumOfSquaredDeviates", "ss", "ssd", "devsq"),
     MeanOper(TokenType.StatOp, 5, "mean", "average", "avg"),
     MedianOper(TokenType.StatOp, 5, "median"),
-    QuartileOper(TokenType.StatOp, 5, new String [] {"quartile"}, new Class<?>[]{TableElement.class, int.class}, double.class),
+    QuartileOper(TokenType.StatOp, 5, toLabels("quartile"), toArgs(TableElement.class, int.class), double.class),
     FirstQuartileOper(TokenType.StatOp, 5, "firstQuartile", "firstQ"),
     ThirdQuartileOper(TokenType.StatOp, 5, "thirdQuartile", "thirdQ"),
     ModeOper(TokenType.StatOp, 5, "mode"),
@@ -239,14 +239,24 @@ public enum BuiltinOperator implements Labeled, Operator
     LinearComputeYOper(TokenType.GenericFunc, 5, MathUtil.class, "lrComputeY", "computeY", "lrComputeY"),
     
     // Transformation Functions
-    MeanCenterOper(TokenType.TransformOp, 5, new String [] {"meanCenter"}, new Class<?>[]{TableElement.class}, null),
-    NormalizeOper(TokenType.TransformOp, 5, new String [] {"normalize", "standardize"}, new Class<?>[]{TableElement.class}, null),    
-    ScaleOper(TokenType.TransformOp, 5, new String []{"scale"}, new Class<?>[]{TableElement.class, double.class, double.class}, null),
+    MeanCenterOper(TokenType.TransformOp, 5, toLabels("meanCenter"), toArgs(TableElement.class), null),
+    NormalizeOper(TokenType.TransformOp, 5, toLabels("normalize", "standardize"), toArgs(TableElement.class), null),    
+    ScaleOper(TokenType.TransformOp, 5, toLabels("scale"), toArgs(TableElement.class, double.class, double.class), null),
 
     Paren(6, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.SubsetRef, TokenType.CellRef, TokenType.TableRef),
 
     LAST_operator;
+    
+    static private String [] toLabels(String... labels)
+    {
+        return labels;        
+    }
+    
+    static private Class<?> [] toArgs(Class<?>... args)
+    {
+        return args;        
+    }
     
     static final public int MAX_PRIORITY = 6;
     

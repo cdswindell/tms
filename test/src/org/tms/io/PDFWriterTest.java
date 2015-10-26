@@ -29,7 +29,7 @@ public class PDFWriterTest extends BaseTest
     @Test
     public final void testExportTable() throws IOException
     {
-        Path path = Paths.get(ExportTableGold);
+        Path path = Paths.get(qualifiedFileName(ExportTableGold));
         byte[] gold = Files.readAllBytes(path);  
         
         assertNotNull(gold);

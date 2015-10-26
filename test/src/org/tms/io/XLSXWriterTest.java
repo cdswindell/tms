@@ -3,6 +3,7 @@ package org.tms.io;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -13,6 +14,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
@@ -37,7 +42,7 @@ public class XLSXWriterTest extends BaseTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(ExportTableGold);
+        Path path = Paths.get(qualifiedFileName(ExportTableGold));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
@@ -152,8 +157,12 @@ public class XLSXWriterTest extends BaseTest
             outputStream.close();
             
             // open workbook
-            //Workbook = WorkbookFactory.create(outFile);
+            Workbook wb = WorkbookFactory.create(outFile);
 
+        }
+        catch (EncryptedDocumentException | InvalidFormatException e)
+        {
+            fail(e.getMessage());
         }
         finally {
             outFile.delete();

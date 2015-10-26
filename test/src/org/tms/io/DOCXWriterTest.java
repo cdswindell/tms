@@ -28,7 +28,7 @@ public class DOCXWriterTest extends BaseTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(ExportTableGold);
+        Path path = Paths.get(qualifiedFileName(ExportTableGold));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
