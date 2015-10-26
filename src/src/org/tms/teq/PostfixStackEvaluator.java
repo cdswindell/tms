@@ -935,7 +935,7 @@ public class PostfixStackEvaluator
                 case AndOper:
                 case OrOper:
                 case XorOper:
-                    result = doBuiltInOp(bio, x, y);
+                    result = doBuiltInBinaryOp(bio, x, y);
                     break;
                     
     			default:
@@ -1048,7 +1048,7 @@ public class PostfixStackEvaluator
         return t;
     }
     
-	private Token doBuiltInOp(BuiltinOperator bio, Token x, Token y)
+	private Token doBuiltInBinaryOp(BuiltinOperator bio, Token x, Token y)
     {
 	    switch (bio) {
 	        case GtOper:
@@ -1062,24 +1062,27 @@ public class PostfixStackEvaluator
 	            // custom operator registered if the tokens are not comparators
 	            
 	        default:
+                // if a token mapper exists, look for a supporting overload
+                TokenMapper tm = m_pfs.getTokenMapper();
+                if (tm != null) {
+                    Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
+                    if (oper != null) {
+                        Token t = oper.evaluate(x, y);
+                        return t;
+                    }
+                }
+                
+                // otherwise, handle the built-in support we have
 	            if (x.isNumeric() && y.isNumeric())
 	                return doBuiltInOp(bio, x.getNumericValue(), y.getNumericValue());        
 	            else if (x.isString() && y.isString())
 	                return doBuiltInOp(bio, x.getStringValue(), y.getStringValue());       
                 else if (x.isString() && y.isNumeric())
                     return doBuiltInOp(bio, x.getStringValue(), y.getNumericValue());
+                else if (x.isNumeric() && y.isString())
+                    return doBuiltInOp(bio, x.getNumericValue(), y.getStringValue());
                 else if (x.isBoolean() && y.isBoolean())
                     return doBuiltInOp(bio, x.getBooleanValue(), y.getBooleanValue());
-	            
-	            // if a token mapper exists, look for a supporting overload
-	            TokenMapper tm = m_pfs.getTokenMapper();
-	            if (tm != null) {
-	                Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
-	                if (oper != null) {
-	                    Token t = oper.evaluate(x, y);
-	                    return t;
-	                }
-	            }
 	            
 	            switch (bio) {
 	                case PlusOper:
@@ -1113,17 +1116,6 @@ public class PostfixStackEvaluator
                 return new Token(TokenType.Operand, xV ^ yV);
                 
             default:
-                // if a token mapper exists, look for a supporting overload
-                TokenMapper tm = m_pfs.getTokenMapper();
-                if (tm != null) {
-                    Token x = new Token(TokenType.Operand, xV);
-                    Token y = new Token(TokenType.Operand, yV);
-                    Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
-                    if (oper != null) {
-                        Token t = oper.evaluate(x, y);
-                        return t;
-                    }
-                }
                 throw new UnimplementedException("Unimplemented built in Boolean/Boolean operator: " + bio);    
         }               
     }
@@ -1131,6 +1123,10 @@ public class PostfixStackEvaluator
     private Token doBuiltInOp(BuiltinOperator bio, String s1, Double n2)
     {
         switch (bio) {
+            case PlusOper:
+            case MinusOper:
+                return doBuiltInOp(bio, s1, String.valueOf(n2));
+                
             case MultOper:
                 if (n2 >= 0.5) {
                     StringBuffer sb = new StringBuffer();
@@ -1145,17 +1141,17 @@ public class PostfixStackEvaluator
                    return Token.createErrorToken(ErrorCode.InvalidOperand);
                 
             default:
-                // if a token mapper exists, look for a supporting overload
-                TokenMapper tm = m_pfs.getTokenMapper();
-                if (tm != null) {
-                	Token x = new Token(TokenType.Operand, s1);
-                	Token y = new Token(TokenType.Operand, n2);
-                	Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
-                	if (oper != null) {
-                		Token t = oper.evaluate(x, y);
-                		return t;
-                	}
-                }
+                throw new UnimplementedException("Unimplemented built in String/Numeric operator: " + bio);    
+        }               
+    }
+
+    private Token doBuiltInOp(BuiltinOperator bio, Double n1, String s2)
+    {
+        switch (bio) {
+            case PlusOper:
+                return doBuiltInOp(bio, String.valueOf(n1), s2);
+                
+            default:
                 throw new UnimplementedException("Unimplemented built in String/Numeric operator: " + bio);    
         }               
     }
@@ -1170,17 +1166,6 @@ public class PostfixStackEvaluator
                 return new Token(TokenType.Operand, s1.replace(s2, ""));
                 
             default:
-                // if a token mapper exists, look for a supporting overload
-                TokenMapper tm = m_pfs.getTokenMapper();
-                if (tm != null) {
-                	Token x = new Token(TokenType.Operand, s1);
-                	Token y = new Token(TokenType.Operand, s2);
-                	Operator oper = tm.fetchOverload(bio.getLabel(), new Class<?>[] {x.getDataType(), y.getDataType()});
-                	if (oper != null) {
-                		Token t = oper.evaluate(x, y);
-                		return t;
-                	}
-                }
                 throw new UnimplementedException("Unimplemented built in String operator: " + bio);    
         }               
     }
@@ -1241,7 +1226,7 @@ public class PostfixStackEvaluator
                 case IsLogicalOper:
                 case IsErrorOper:
                 case NotOper:
-                    result = doBuiltInOp(bio, x);
+                    result = doBuiltInUnaryOp(bio, x);
                     break;
                     
                 default:
@@ -1257,16 +1242,9 @@ public class PostfixStackEvaluator
 		return val;
 	}
 
-    private Token doBuiltInOp(BuiltinOperator bio, Token x)
+    private Token doBuiltInUnaryOp(BuiltinOperator bio, Token x)
     {
         Token result = null;
-        if (x.isNumeric())
-            result = doBuiltInOp(bio, x.getNumericValue());        
-        else if (x.isBoolean())
-            result = doBuiltInOp(bio, x.getBooleanValue());
-        
-        if (result != null)
-            return result;
         
         // if a token mapper exists, look for a supporting overload
         TokenMapper tm = m_pfs.getTokenMapper();
@@ -1278,6 +1256,14 @@ public class PostfixStackEvaluator
                 return result;
             }
         }
+        
+        if (x.isNumeric())
+            result = doBuiltInOp(bio, x.getNumericValue());        
+        else if (x.isBoolean())
+            result = doBuiltInOp(bio, x.getBooleanValue());
+        
+        if (result != null)
+            return result;
         
         switch (bio) {
             case IsErrorOper:
@@ -1329,5 +1315,5 @@ public class PostfixStackEvaluator
             default:
                 return null;                
         }
-    }   
+    }  
 }

@@ -689,10 +689,37 @@ public enum BuiltinOperator implements Labeled, Operator
         return labels;
     }
     
+    static public final Set<String> unaryOpLabels()
+    {
+        Set<String> labels = new HashSet<String>();
+        
+        for (BuiltinOperator o : BuiltinOperator.values()) {
+            if (o.getTokenType() == TokenType.UnaryOp) {
+                for (String s : o.getAliases()) {
+                    labels.add(s.toLowerCase());
+                }
+            }
+        }
+        
+        return labels;
+    }
+    
     static public final boolean isValidBinaryOp(String label) 
     {
-        if (label != null)
-            return binaryOpLabels().contains(label.trim().toLowerCase());
+        if (label != null) {
+            String key = label.trim().toLowerCase();
+            return binaryOpLabels().contains(key);
+        }
+        else
+            return false;
+    }
+
+    static public final boolean isValidUnaryOp(String label) 
+    {
+        if (label != null) {
+            String key = label.trim().toLowerCase();
+            return unaryOpLabels().contains(key);
+        }
         else
             return false;
     }

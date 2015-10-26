@@ -140,7 +140,7 @@ public class XLSXWriterTest extends BaseTest
         // test byte streams are the same, more or less
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
-        assertThat(this.closeTo(gold.length, output.length, 5), is(true));
+        assertThat(this.closeTo(gold.length, output.length, 100), is(true));
         
         // now compare exported file to expected
         File outFile = null;

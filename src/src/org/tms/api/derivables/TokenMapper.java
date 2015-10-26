@@ -182,24 +182,14 @@ public class TokenMapper
 
     public void overloadOperator(String theOp, Operator oper)
     {
-        if (theOp == null || theOp.trim().length() == 0)
-            throw new IllegalTableStateException("+, -, *, or / required");
-        
-        theOp = theOp.trim();
-        if (theOp != "+" && theOp != "-" && theOp != "*" && theOp != "/")
-            throw new IllegalTableStateException("+, -, *, or / required");
-        
-        if (oper == null)
-            throw new IllegalTableStateException("Operator required");
-        
-        if (oper.numArgs() != 2)
-            throw new IllegalTableStateException("Operator must take exactly 2 arguments");
+        validateOverload(theOp, oper);
         
         TokenType tt = oper.getTokenType();
         if (tt == null)
             throw new IllegalTableStateException("Operator TokenType required");
                 
         switch(tt) {
+            case UnaryOp:
             case BinaryOp:
                 break;
                 
@@ -207,7 +197,7 @@ public class TokenMapper
                 throw new IllegalTableStateException("TokenType not supported");
         }
         
-        Token t = new Token(theOp, tt, oper);
+        Token t = new Token(theOp.trim(), tt, oper);
         OverloadKey key = new OverloadKey(theOp, oper.getArgTypes());
         
         m_userOverloadedOps.put(key, t);
@@ -215,20 +205,7 @@ public class TokenMapper
     
     public boolean unOverloadOperator(String theOp, Operator oper)
     {
-    	if (theOp == null || theOp.trim().length() == 0)
-    		throw new IllegalTableStateException("+, -, *, or / required");
-
-    	theOp = theOp.trim();
-    	if (theOp != "+" && theOp != "-" && theOp != "*" && theOp != "/")
-    		throw new IllegalTableStateException("+, -, *, or / required");
-
-    	if (oper == null)
-    		throw new IllegalTableStateException("Operator required");
-
-    	if (oper.numArgs() != 2)
-    		throw new IllegalTableStateException("Operator must take exactly 2 arguments");
-
-
+        validateOverload(theOp, oper);
     	OverloadKey key = new OverloadKey(theOp, oper.getArgTypes());
 
     	Token t =  m_userOverloadedOps.remove(key);
@@ -242,19 +219,8 @@ public class TokenMapper
 
     public Operator fetchOverload(String theOp, Class<?>... paramTypes) 
     {
-    	if (theOp == null || theOp.trim().length() == 0)
-    		throw new IllegalTableStateException("+, -, *, or / required");
-
-    	theOp = theOp.trim();
-    	if (!BuiltinOperator.isValidBinaryOp(theOp))
-    		throw new IllegalTableStateException("+, -, *, or / required");
-
-    	if (paramTypes == null)
-    		throw new IllegalTableStateException("Parameter types required");
-
-    	if (paramTypes.length != 2)
-    		throw new IllegalTableStateException("Must specify 2 parameter types");
-
+    	validateOverload(theOp, paramTypes);
+    	
     	OverloadKey key = new OverloadKey(theOp, paramTypes);
     	Token t = m_userOverloadedOps.get(key);
     	
@@ -262,6 +228,37 @@ public class TokenMapper
     		return t.getOperator();
     	else
     		return null;   	
+    }
+
+    protected void validateOverload(String theOp, Class<?>... paramTypes)
+    {
+        validateOverload(theOp);
+        
+    	if (paramTypes == null)
+    		throw new IllegalTableStateException("Parameter type(s) required");
+
+    	if (paramTypes.length < 1 || paramTypes.length > 2)
+    		throw new IllegalTableStateException("Must specify 1 or 2 parameter types");
+    }
+    
+    private void validateOverload(String theOp, Operator oper)
+    {
+        validateOverload(theOp);
+        
+        if (oper == null)
+            throw new IllegalTableStateException("Operator required");
+
+        if (oper.numArgs() < 1 || oper.numArgs() > 2)
+            throw new IllegalTableStateException("Operator must take exactly 1 or 2 arguments");
+    }
+
+    protected void validateOverload(String theOp)
+    {
+        if (theOp == null || (theOp = theOp.trim()).length() == 0)
+            throw new IllegalTableStateException("+, -, *, or / required");
+
+        if (!(BuiltinOperator.isValidBinaryOp(theOp) || BuiltinOperator.isValidUnaryOp(theOp)))
+            throw new IllegalTableStateException("+, -, *, or / required");
     }
     
     static private class OverloadKey 
@@ -271,7 +268,7 @@ public class TokenMapper
     	
     	private OverloadKey(String theOp, Class<?>... paramTypes)
     	{
-    		m_op = theOp;
+    		m_op = theOp.trim();
     		m_argTypes = new ArrayList<Class<?>>();
     		
     		if (paramTypes != null) {

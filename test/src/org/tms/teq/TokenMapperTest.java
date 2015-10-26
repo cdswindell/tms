@@ -93,6 +93,14 @@ public class TokenMapperTest
     public final void testOverloadOperator()
     throws PendingDerivationException, BlockedDerivationException
     {
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("'5' + 6 * 2 + ('2' + 1)", null);
+        assertThat(pse, notNullValue());
+        
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.getValue(), is("512.021.0"));
+        
         TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
         assertThat(tm, notNullValue());
         assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
@@ -101,10 +109,10 @@ public class TokenMapperTest
 		AddStringNum plusOverload = new AddStringNum();
         tm.overloadOperator("+", plusOverload);
         
-        PostfixStackEvaluator pse = new PostfixStackEvaluator("'5' + 6 * 2 + ('2' + 1)", null);
+        pse = new PostfixStackEvaluator("'5' + 6 * 2 + ('2' + 1)", null);
         assertThat(pse, notNullValue());
         
-        Token t = pse.evaluate();
+        t = pse.evaluate();
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(20.0));
