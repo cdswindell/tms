@@ -5,7 +5,7 @@ import org.tms.api.derivables.ErrorCode;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 
-/*
+/**
  * A {@link Table} cell. Cells contain
  * user data, as set by the variety of TMS {@link Table}, {@link Row}, {@link Column}, {@link Subset}, and {@code Cell} methods.
  * Cells can also be set through derivations.
