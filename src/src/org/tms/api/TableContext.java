@@ -6,7 +6,7 @@ import org.tms.api.events.EventProcessorThreadPool;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 
 /**
- * A collection of {@link Table}, initializable {@link TableProperty}s, and optional thread pools. Tables that share the same {@code TableContext}
+ * A collection of {@link Table}s, initializable {@link TableProperty}s, and optional thread pools. Tables that share the same {@code TableContext}
  * can reference one another in {@link Column}, {@link Row}, and {@link Cell} {@link org.tms.api.derivables.Derivation Derivation}s.
  * <p>
  * See {@link IndexableTableElements} and {@link InitializableTableProperties} for additional methods that affect {@code TableContext}s.

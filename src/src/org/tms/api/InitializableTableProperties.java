@@ -3,8 +3,8 @@ package org.tms.api;
 import java.util.List;
 
 /**
- * This interface the methods that are common to {@link TableContext} and {@link Table} instances, each of which have several
- * {@link TableProperty}s that can be initialized automatically from a template object when creating new {@link TableContext}s and {@link Table}s.
+ * This interface defines the methods that are common to {@link TableContext} and {@link Table} instances, each of which have several
+ * {@link TableProperty}s that can be initialized automatically from a template instance when creating new {@link TableContext}s and {@link Table}s.
  * When these methods are invoked on {@link TableContext}s, they get and set the values for all initializable {@link TableProperty}s, and
  * establish the initial values that new {@link Table}s will have when created with that {@link TableContext} as a parent.
  * <p>

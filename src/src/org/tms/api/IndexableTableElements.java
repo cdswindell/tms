@@ -1,9 +1,9 @@
 package org.tms.api;
 
 /**
- * This interface the methods that are common to {@link TableContext} and {@link Table} instances that allow 
+ * This interface defines the methods that are common to {@link TableContext} and {@link Table} instances that allow 
  * {@link Row}, {@link Column}, {@link Cell}, and {@link Subset}, labels to be indexed.
- * When invoked on a {@link TableContext}, these methods establish the defaults that are used to construct new tables in that
+ * When called on a {@link TableContext}, these methods establish the defaults that are used to construct new tables in that
  * {@code TableContext}. When invoked on a specific {@link Table}, they affect that table immediately.
  * <p>
  * When invoked on a specific {@link Table}, they get and set the values for that specific {@code Table}.

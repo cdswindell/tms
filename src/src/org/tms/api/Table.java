@@ -11,7 +11,7 @@ import org.tms.io.options.IOOptions;
 /**
  * A standard two dimensional table consisting of {@link Row}s, {@link Column}s, and {@link Cell}s, 
  * and, optionally, {@link Subset}s.
- * Tables are the key element in the Default subsystem and only through table instance objects 
+ * Tables are the key element in the TMS subsystem and only through table instance objects 
  * is it possible to create rows, columns, cells, and subsets.
  * <p>
  * The {@code Table} interface defines the methods available to operate on tables, including adding and 
