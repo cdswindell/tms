@@ -1,9 +1,12 @@
 package org.tms.api;
 
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.events.EventProcessorThreadPool;
 import org.tms.api.exceptions.UnsupportedImplementationException;
@@ -89,8 +92,80 @@ public interface TableContext extends BaseElement, InitializableTableProperties
         return this instanceof EventProcessorThreadPool;
     }
 
+    /**
+     * Registers a new {@code BinaryOp} {@link org.tms.api.derivables.Operator Operator} using the supplied
+     * {@link java.util.function.BiFunction BiFunction} to compute the return value. As {@link java.util.function.BiFunction BiFunction}
+     * is a {@link java.lang.FunctionalInterface FunctionalInterface}, a lambda expression can be provided
+     * to perform the calculation. 
+     * @param <T> the class of the function's first argument
+     * @param <S> the class of the function's second argument
+     * @param <R> the class of the function's return type
+     * @param label the function label, which is used to reference this Operator in a Derivable expression
+     * @param argTypeX the class of the first argument
+     * @param argTypeY the class of the second argument
+     * @param resultType the class of the return type
+     * @param biOp the BiFunction used to compute the return value of this Operator
+     */
     public <T, S, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, 
                 Class<?> resultType, BiFunction<T, S, R> biOp);
 
-    public <T, R> void registerOperator(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp);   
+    /**
+     * Registers a new {@code UnaryOp} {@link org.tms.api.derivables.Operator Operator} using the supplied
+     * {@link java.util.function.Function Function} to compute the return value. As {@link java.util.function.Function Function}
+     * is a {@link java.lang.FunctionalInterface FunctionalInterface}, a lambda expression can be provided
+     * to perform the calculation. 
+     * @param <T> the class of the function's argument
+     * @param <R> the class of the function's return type
+     * @param label the function label, which is used to reference this Operator in a Derivable expression
+     * @param argType the class of the function's argument
+     * @param resultType the class of the return type
+     * @param uniOp the Function used to compute the return value of this Operator
+     */
+    public <T, R> void registerOperator(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp);
+
+    public void registerNumericOperator(String label, UnaryOperator<Double> uniOp);
+
+    public void registerNumericOperator(String label, BinaryOperator<Double> biOp);
+
+    /**
+     * Registers the supplied {@link org.tms.api.derivables.Operator Operator} {@code oper} 
+     * with this {@code TableContext}. {@link org.tms.api.derivables.Operator Operator}s are used in
+     * {@link org.tms.api.derivables.Derivable Derivable} expressions assigned to {@link TableElement}s
+     * to perform calculations within the TMS Framework.
+     * @param oper the labeled Operator to register with this TableContext
+     */
+    public void registerOperator(Operator oper);
+
+    /**
+     * Deregisters the supplied {@link org.tms.api.derivables.Operator Operator} {@code oper} 
+     * from this {@code TableContext}.
+     * <p>
+     * <b>Note:</b>Deregistering {@link org.tms.api.derivables.Operator Operator}s only prevents them from being used
+     * as a new {@link org.tms.api.derivables.Derivable Derivable} expression, it does not invalidate them in
+     * existing derivations.
+     * @param oper the Operator to deregister from this TableContext
+     * @return true if an Operator with the supplied label was found (and deregistered)
+     */
+    public boolean deregisterOperator(Operator oper);
+
+    /**
+     * Deregisters the {@link org.tms.api.derivables.Operator Operator} with the supplied {@code label} 
+     * from this {@code TableContext}.
+     * <p>
+     * <b>Note:</b>Deregistering {@link org.tms.api.derivables.Operator Operator}s only prevents them from being used
+     * as a new {@link org.tms.api.derivables.Derivable Derivable} expression, it does not invalidate them in
+     * existing derivations.
+     * @param label the label associated with the Operator to deregister
+     * @return true if an Operator with the supplied label was found (and deregistered)
+     */
+    public boolean deregisterOperator(String label);
+
+    /**
+     * Deregisters all user-defined {@link org.tms.api.derivables.Operator Operator}s from this {@code TableContext}.
+     * <p>
+     * <b>Note:</b>Deregistering {@link org.tms.api.derivables.Operator Operator}s only prevents them from being used
+     * as a new {@link org.tms.api.derivables.Derivable Derivable} expression, it does not invalidate them in
+     * existing derivations.
+     */
+    public void deregisterAllOperators();   
 }

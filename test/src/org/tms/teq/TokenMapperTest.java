@@ -146,7 +146,7 @@ public class TokenMapperTest
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
         }
         
-        // try again with generics
+        // try again with unary function (Function) lambda expression
         TableContext tc = tm.getTableContext();
         tc.registerOperator("square", Double.class, Double.class, (Double x)->String.valueOf(x*x));
         
@@ -158,6 +158,7 @@ public class TokenMapperTest
         assertThat(t.isString(), is(true));
         assertThat(t.getValue(), is("36.0"));
         
+        // Test binary function (BiFunction) lambda expression
         tc.registerOperator("multStr", String.class, String.class, Double.class, (String x, String y)->Double.valueOf(x) * Double.valueOf(y));
         
         pse = new PostfixStackEvaluator("multStr('20', '3')", null);
@@ -169,6 +170,12 @@ public class TokenMapperTest
         assertThat(t.getValue(), is(60.0));
         
         tm.deregisterAllOperators();
+        
+        // reevaluate again, should succeed
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(60.0));
     }
     
     @Test

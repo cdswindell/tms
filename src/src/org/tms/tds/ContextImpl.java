@@ -599,31 +599,37 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         TokenMapper.fetchTokenMapper(this).registerOperator(label, argType, resultType, uniOp);
     }
     
+    @Override
     public void registerNumericOperator(String label, UnaryOperator<Double> uniOp)
     {
         TokenMapper.fetchTokenMapper(this).registerNumericOperator(label, uniOp);
     }
     
+    @Override
     public void registerNumericOperator(String label, BinaryOperator<Double> biOp)
     {
         TokenMapper.fetchTokenMapper(this).registerNumericOperator(label, biOp);
     }
     
+    @Override
     public void registerOperator(Operator oper)
     {
         TokenMapper.fetchTokenMapper(this).registerOperator(oper);
     }
     
+    @Override
     public boolean deregisterOperator(Operator oper)
     {
         return TokenMapper.fetchTokenMapper(this).deregisterOperator(oper);
     }
     
+    @Override
     public boolean deregisterOperator(String label)
     {
         return TokenMapper.fetchTokenMapper(this).deregisterOperator(label);
     }
     
+    @Override
     public void deregisterAllOperators()
     {
         TokenMapper.fetchTokenMapper(this).deregisterAllOperators();
