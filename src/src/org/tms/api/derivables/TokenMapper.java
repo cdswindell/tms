@@ -154,13 +154,13 @@ public class TokenMapper
     
     public void registerNumericOperator(String label, UnaryOperator<Double> uniOp)
     {
-        Operator op = new LamdaUnaryFunc<Double>(label, double.class, uniOp);
+        Operator op = new LamdaUniFunction<Double, Double>(label, double.class, double.class, uniOp);
         registerOperator(op);
     }
     
     public void registerNumericOperator(String label, BinaryOperator<Double> biOp)
     {
-        Operator op = new LamdaBinaryFunc<Double>(label, double.class, biOp);
+        Operator op = new LamdaBiFunction<Double, Double, Double>(label, new Class<?> [] {double.class, double.class}, double.class, biOp);
         registerOperator(op);
     }
     
@@ -364,107 +364,6 @@ public class TokenMapper
                 sf_BuiltInTokenMap.size(), m_userTokenMap.size(), m_userOverloadedOps.size());
     }
     
-    static private class LamdaUnaryFunc<T> implements Operator
-    {
-        private String m_label;
-        private Class<?> m_opType;
-        private Class<?> [] m_argTypes;
-        UnaryOperator<T> m_uniOp;
-        
-        private LamdaUnaryFunc(String label, Class<?> opType, UnaryOperator<T> uniOp)
-        {
-            m_label = label;
-            m_opType = opType;
-            m_argTypes = new Class<?>[] {opType};
-            m_uniOp = uniOp;
-        }
-
-        @Override
-        public String getLabel()
-        {
-            return m_label;
-        }
-
-        @Override
-        public TokenType getTokenType()
-        {
-            return TokenType.UnaryFunc;
-        }
-
-        @Override
-        public Class<?> getResultType()
-        {
-            return m_opType;
-        }
-        
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-            return m_argTypes;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public Token evaluate(Token... args)
-        {
-            T x = (T)args[0].getValue();
-            T result = m_uniOp.apply(x);
-            
-            return new Token(TokenType.Operand, result);
-        }
-    }
-    
-    static private class LamdaBinaryFunc<T> implements Operator
-    {
-        private String m_label;
-        private Class<?> m_opType;
-        private Class<?> [] m_argTypes;
-        BinaryOperator<T> m_biOp;
-        
-        private LamdaBinaryFunc(String label, Class<?> opType, BinaryOperator<T> biOp)
-        {
-            m_label = label;
-            m_opType = opType;
-            m_argTypes = new Class<?>[] {opType, opType};
-            m_biOp = biOp;
-        }
-
-        @Override
-        public String getLabel()
-        {
-            return m_label;
-        }
-
-        @Override
-        public TokenType getTokenType()
-        {
-            return TokenType.BinaryFunc;
-        }
-
-        @Override
-        public Class<?> getResultType()
-        {
-            return m_opType;
-        }
-        
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-            return m_argTypes;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public Token evaluate(Token... args)
-        {
-            T x = (T)args[0].getValue();
-            T y = (T)args[1].getValue();
-            T result = m_biOp.apply(x, y);
-            
-            return new Token(TokenType.Operand, result);
-        }
-    }
-        
     static private class LamdaUniFunction<T, R> implements Operator
     {
         private String m_label;
