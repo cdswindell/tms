@@ -5,7 +5,7 @@ package org.tms.api;
  * be assigned and removed from {@code TableElement}s to classify, identify, and otherwise differentiate tables, rows, columns, subsets, 
  * and cells.
  * 
- * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
+ * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
 public interface Taggable

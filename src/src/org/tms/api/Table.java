@@ -30,7 +30,7 @@ import org.tms.io.options.IOOptions;
  * <li>have rows, columns, and multiple sheets,</li>
  * <li>allow table cells to contain data of different types (e.g., A1 is a number, B1 is a String), as well as 
  * contain the result of a calculation (known as a {@link org.tms.api.derivables.Derivation} in Default),</li>
- * <li>automatically recalculate formulas when the data (table cells) on which they depend change, </li>
+ * <li>automatically recalculate derivations when the data (table cells) on which they depend change, </li>
  * <li>allow rows, columns, and cell ranges to be grouped into {@link Subset}s, </li>
  * <li>support formatting,</li>
  * <li> are sortable. </li>
@@ -40,7 +40,7 @@ import org.tms.io.options.IOOptions;
  * <ul>
  * <li>cells can contain any valid Java class instance, including those defined by the JDK (String, Integer, etc.), 
  * as well as custom classes your application provides,</li>
- * <li>formulas (derivations) can be assigned to columns and rows, as well as to specific cells; 
+ * <li>derivations (formulas) can be assigned to columns and rows, as well as to specific cells; 
  * whenever cells are modified that affect the column (row) derivation, the appropriate cells 
  * in the column (row) are recalculated as well,</li>
  * <li>new functions can be registered (see {@link org.tms.api.derivables.Operator}) that can be used in 

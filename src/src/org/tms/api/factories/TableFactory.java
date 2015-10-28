@@ -16,6 +16,13 @@ import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
 
+/**
+ * The class {@code TableFactory} contains methods to construct {@link Table} objects as well as to import
+ * data in other formats (e.g., CSV, Microsoft Excel) into {@link Table}s
+ * <p>
+ * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ */
 public final class TableFactory 
 {
     static public Table createTable()

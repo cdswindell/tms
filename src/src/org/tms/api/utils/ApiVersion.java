@@ -2,13 +2,16 @@ package org.tms.api.utils;
 
 public final class ApiVersion
 {
-    public static final String INITIAL_VERSION_STR = "1.0";
-    public static final String CURRENT_VERSION_STR = "1.0";
-
-    protected static final ApiVersion INITIAL_VERSION = new ApiVersion(1,0,0,0, "");
+    protected static final ApiVersion IO_ENHANCEMENTS_VERSION = new ApiVersion(1,1,0,0, "IO Enhancements");
+    protected static final ApiVersion INITIAL_VERSION = new ApiVersion(1,0,0,0, "Initial Version");
     
-    public static final ApiVersion CURRENT_VERSION = INITIAL_VERSION;
+    public static final ApiVersion CURRENT_VERSION = IO_ENHANCEMENTS_VERSION;
             
+    public static final String IO_ENHANCEMENTS_STR = "1.1";
+    public static final String INITIAL_VERSION_STR = "1.0";    
+    
+    public static final String CURRENT_VERSION_STR = IO_ENHANCEMENTS_STR;
+
     private int m_epoch;
     private int m_major;
     private int m_minor;
@@ -31,4 +34,7 @@ public final class ApiVersion
     public String getLabel() { return m_label; }
     
     public String toString() { return String.format("%d.%d.%d.%d", m_epoch, m_major, m_minor, m_build); }
+    
+    public String toVersionString() { return String.format("%d.%d", m_epoch, m_major); }
+
 }
