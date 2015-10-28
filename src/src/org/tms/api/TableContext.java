@@ -1,5 +1,8 @@
 package org.tms.api;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.events.EventProcessorThreadPool;
@@ -35,6 +38,10 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      */
     public int getNumTables();
     
+    /**
+     * Returns the {@link org.tms.api.derivables.TokenMapper TokenMapper} associated with this {@code TableContext}.
+     * @return the TokenMapper associated with this TableContext.
+     */
     public TokenMapper getTokenMapper();
     
     /**
@@ -80,5 +87,10 @@ public interface TableContext extends BaseElement, InitializableTableProperties
     default public boolean isEventProcessorThreadPool()
     {
         return this instanceof EventProcessorThreadPool;
-    }   
+    }
+
+    public <T, S, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, 
+                Class<?> resultType, BiFunction<T, S, R> biOp);
+
+    public <T, R> void registerOperator(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp);   
 }

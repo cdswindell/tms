@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.tms.api.Table;
@@ -138,27 +140,27 @@ public class TokenMapper
         return m_context;
     }
     
+    public <T, S, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, Class<?> resultType, BiFunction<T, S, R> biOp)
+    {
+        Operator op = new LamdaBiFunction<T, S, R>(label, new Class<?> [] {argTypeX, argTypeY}, resultType, biOp);
+        registerOperator(op);
+    }
+    
+    public <T, R> void registerOperator(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp)
+    {
+        Operator op = new LamdaUniFunction<T, R>(label, argType, resultType, uniOp);
+        registerOperator(op);
+    }
+    
     public void registerNumericOperator(String label, UnaryOperator<Double> uniOp)
     {
         Operator op = new LamdaUnaryFunc<Double>(label, double.class, uniOp);
         registerOperator(op);
     }
     
-    public void registerStringOperator(String label, UnaryOperator<String> uniOp)
-    {
-        Operator op = new LamdaUnaryFunc<String>(label, String.class, uniOp);
-        registerOperator(op);
-    }
-    
     public void registerNumericOperator(String label, BinaryOperator<Double> biOp)
     {
         Operator op = new LamdaBinaryFunc<Double>(label, double.class, biOp);
-        registerOperator(op);
-    }
-    
-    public void registerStringOperator(String label, BinaryOperator<String> biOp)
-    {
-        Operator op = new LamdaBinaryFunc<String>(label, String.class, biOp);
         registerOperator(op);
     }
     
@@ -458,6 +460,107 @@ public class TokenMapper
             T x = (T)args[0].getValue();
             T y = (T)args[1].getValue();
             T result = m_biOp.apply(x, y);
+            
+            return new Token(TokenType.Operand, result);
+        }
+    }
+        
+    static private class LamdaUniFunction<T, R> implements Operator
+    {
+        private String m_label;
+        private Class<?> m_resType;
+        private Class<?> [] m_argTypes;
+        Function<T, R> m_uniOp;
+        
+        private LamdaUniFunction(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp)
+        {
+            m_label = label;
+            m_resType = resultType;
+            m_argTypes = new Class<?> [] {argType};
+            m_uniOp = uniOp;
+        }
+
+        @Override
+        public String getLabel()
+        {
+            return m_label;
+        }
+
+        @Override
+        public TokenType getTokenType()
+        {
+            return TokenType.UnaryFunc;
+        }
+
+        @Override
+        public Class<?> getResultType()
+        {
+            return m_resType;
+        }
+        
+        @Override
+        public Class<?>[] getArgTypes()
+        {
+            return m_argTypes;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Token evaluate(Token... args)
+        {
+            T x = (T)args[0].getValue();
+            R result = m_uniOp.apply(x);
+            
+            return new Token(TokenType.Operand, result);
+        }
+    }
+    
+    static private class LamdaBiFunction<T, S, R> implements Operator
+    {
+        private String m_label;
+        private Class<?> m_resType;
+        private Class<?> [] m_argTypes;
+        BiFunction<T, S, R> m_biOp;
+        
+        private LamdaBiFunction(String label, Class<?>[] argTypes, Class<?> resultType, BiFunction<T, S, R> biOp)
+        {
+            m_label = label;
+            m_resType = resultType;
+            m_argTypes = argTypes;
+            m_biOp = biOp;
+        }
+
+        @Override
+        public String getLabel()
+        {
+            return m_label;
+        }
+
+        @Override
+        public TokenType getTokenType()
+        {
+            return TokenType.BinaryFunc;
+        }
+
+        @Override
+        public Class<?> getResultType()
+        {
+            return m_resType;
+        }
+        
+        @Override
+        public Class<?>[] getArgTypes()
+        {
+            return m_argTypes;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Token evaluate(Token... args)
+        {
+            T x = (T)args[0].getValue();
+            S y = (S)args[1].getValue();
+            R result = m_biOp.apply(x, y);
             
             return new Token(TokenType.Operand, result);
         }

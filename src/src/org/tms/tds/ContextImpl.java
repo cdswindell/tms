@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.tms.api.Access;
 import org.tms.api.ElementType;
@@ -14,6 +18,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.PendingDerivationExecutor;
 import org.tms.api.derivables.Precisionable;
 import org.tms.api.derivables.TokenMapper;
@@ -580,6 +585,48 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
             tm = TokenMapper.fetchTokenMapper(this);
         
         m_tokenMapper = tm;
+    }
+        
+    @Override
+    public <T, S, U> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, Class<?> resultType, BiFunction<T, S, U> biOp)
+    {
+        TokenMapper.fetchTokenMapper(this).registerOperator(label, argTypeX, argTypeY, resultType, biOp);
+    }
+    
+    @Override
+    public <T, R> void registerOperator(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp)
+    {
+        TokenMapper.fetchTokenMapper(this).registerOperator(label, argType, resultType, uniOp);
+    }
+    
+    public void registerNumericOperator(String label, UnaryOperator<Double> uniOp)
+    {
+        TokenMapper.fetchTokenMapper(this).registerNumericOperator(label, uniOp);
+    }
+    
+    public void registerNumericOperator(String label, BinaryOperator<Double> biOp)
+    {
+        TokenMapper.fetchTokenMapper(this).registerNumericOperator(label, biOp);
+    }
+    
+    public void registerOperator(Operator oper)
+    {
+        TokenMapper.fetchTokenMapper(this).registerOperator(oper);
+    }
+    
+    public boolean deregisterOperator(Operator oper)
+    {
+        return TokenMapper.fetchTokenMapper(this).deregisterOperator(oper);
+    }
+    
+    public boolean deregisterOperator(String label)
+    {
+        return TokenMapper.fetchTokenMapper(this).deregisterOperator(label);
+    }
+    
+    public void deregisterAllOperators()
+    {
+        TokenMapper.fetchTokenMapper(this).deregisterAllOperators();
     }
     
     public int getRowCapacityIncr()

@@ -112,8 +112,9 @@ public class TokenMapperTest
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
         }
         
-        // register new operator
+        // register new operators
         tm.registerNumericOperator("square", (x)->x*x);
+        tm.registerNumericOperator("cube", (x)->x*x*x);
         
         // reparse expression
         pse = new PostfixStackEvaluator("square(-6)", null);
@@ -123,6 +124,15 @@ public class TokenMapperTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(36.0));
+        
+        // try cube
+        pse = new PostfixStackEvaluator("cube(-3)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(-27.0));
         
         // remove operator and reparse
         tm.deregisterAllOperators();
@@ -135,6 +145,30 @@ public class TokenMapperTest
             assertThat(pr, notNullValue());
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
         }
+        
+        // try again with generics
+        TableContext tc = tm.getTableContext();
+        tc.registerOperator("square", Double.class, Double.class, (Double x)->String.valueOf(x*x));
+        
+        pse = new PostfixStackEvaluator("square(-6)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isString(), is(true));
+        assertThat(t.getValue(), is("36.0"));
+        
+        tc.registerOperator("multStr", String.class, String.class, Double.class, (String x, String y)->Double.valueOf(x) * Double.valueOf(y));
+        
+        pse = new PostfixStackEvaluator("multStr('20', '3')", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(60.0));
+        
+        tm.deregisterAllOperators();
     }
     
     @Test
