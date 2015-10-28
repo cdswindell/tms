@@ -272,6 +272,5 @@ public class EvTableImpl extends TableImpl implements EventProcessorThreadPool, 
     {
         if (m_eventThreadPool != null)
             m_eventThreadPool.shutdownEventProcessorThreadPool();
-    }
-    
+    }   
 }

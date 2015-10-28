@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.tms.api.derivables.Derivable;
 import org.tms.api.events.Listenable;
-import org.tms.api.utils.Taggable;
 
 /**
  * 

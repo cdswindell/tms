@@ -13,6 +13,7 @@ import org.tms.api.ElementType;
 import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.Taggable;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.ErrorCode;
 import org.tms.api.derivables.Token;
@@ -24,7 +25,6 @@ import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
-import org.tms.api.utils.Taggable;
 import org.tms.io.Printable;
 import org.tms.teq.DerivationImpl;
 

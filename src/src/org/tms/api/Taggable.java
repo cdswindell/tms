@@ -1,4 +1,4 @@
-package org.tms.api.utils;
+package org.tms.api;
 
 /**
  * Methods that allow {@link org.tms.api.TableElement TableElement}s to be selectively tagged. Tags are short strings that can 

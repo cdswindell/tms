@@ -75,6 +75,8 @@ public class TokenMapperTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(36.0));
         
+        tm.deregisterOperator(sOp);
+        
         // register new operator
         Add3 add3 = new Add3();
         tm.registerOperator(add3);
@@ -87,6 +89,52 @@ public class TokenMapperTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(6.0));
+        
+        tm.deregisterAllOperators();
+    }
+    
+    @Test
+    public final void testLamdaRegisterOperator()
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        assertThat(tm, notNullValue());
+        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+        
+        PostfixStackEvaluator pse = null;
+        try {
+            pse = new PostfixStackEvaluator("square(-6)", null);
+            fail("square operator resolved");
+        }
+        catch (InvalidExpressionException e) {
+            ParseResult pr = e.getParseResult();
+            assertThat(pr, notNullValue());
+            assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
+        }
+        
+        // register new operator
+        tm.registerNumericOperator("square", (x)->x*x);
+        
+        // reparse expression
+        pse = new PostfixStackEvaluator("square(-6)", null);
+        assertThat(pse, notNullValue());
+        
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(36.0));
+        
+        // remove operator and reparse
+        tm.deregisterAllOperators();
+        try {
+            pse = new PostfixStackEvaluator("square(-6)", null);
+            fail("square operator resolved");
+        }
+        catch (InvalidExpressionException e) {
+            ParseResult pr = e.getParseResult();
+            assertThat(pr, notNullValue());
+            assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
+        }
     }
     
     @Test
