@@ -393,7 +393,7 @@ public class PostfixStackEvaluator
     private Token doGenericOp(Operator oper, Token... args)
     {
         // process builtins first
-        BuiltinOperator biOper = oper.getBuiltinOperator();
+        BuiltinOperator biOper = oper instanceof BuiltinOperator ? (BuiltinOperator)oper : null;
         if (biOper != null) {
             switch (biOper) {
                 case IfOper:
@@ -714,7 +714,7 @@ public class PostfixStackEvaluator
     throws BlockedDerivationException
     {
         Token result = null;
-        BuiltinOperator bio = oper.getBuiltinOperator();
+        BuiltinOperator bio = oper instanceof BuiltinOperator ? (BuiltinOperator)oper : null;
         if (bio != null) {
             Token [] params = null;
             TableElement ref1 = args[0].getReferenceValue();           
@@ -779,7 +779,7 @@ public class PostfixStackEvaluator
             excludeCheckElement = curRow;
         }
         
-        BuiltinOperator bio = oper.getBuiltinOperator();
+        BuiltinOperator bio = oper instanceof BuiltinOperator ? (BuiltinOperator)oper : null;
         if (bio != null) {   
             if (ref != null) {
                 SingleVariableStatEngine svse = fetchSVSE(ref, bio, dc); 
@@ -863,7 +863,7 @@ public class PostfixStackEvaluator
             return Token.createErrorToken(ErrorCode.StackOverflow);
 	    
 	    Token result = null;
-        BuiltinOperator bio = oper.getBuiltinOperator();
+        BuiltinOperator bio = oper instanceof BuiltinOperator ? (BuiltinOperator)oper : null;
         if (bio != null) {
             switch (bio) {
                 case RowIndexOper:
@@ -919,7 +919,7 @@ public class PostfixStackEvaluator
             return Token.createNullToken();
         
 		Token result = null;	
-		BuiltinOperator bio = oper.getBuiltinOperator();
+        BuiltinOperator bio = oper instanceof BuiltinOperator ? (BuiltinOperator)oper : null;
 		if (bio != null) {
     		switch (bio) {
     			case PlusOper:
@@ -1216,7 +1216,7 @@ public class PostfixStackEvaluator
 			return Token.createNullToken();
 		
         Token result = null;    
-        BuiltinOperator bio = oper.getBuiltinOperator();
+        BuiltinOperator bio = oper instanceof BuiltinOperator ? (BuiltinOperator)oper : null;
         if (bio != null) {
             switch (bio) {
                 case IsEvenOper:

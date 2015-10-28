@@ -1,7 +1,12 @@
 package org.tms.api.derivables;
 
-import org.tms.teq.BuiltinOperator;
-
+/**
+ * A class implements the {@code Operator} interface to allow it to function as an operator in a calculation
+ * expression assigned to a {@link org.tms.api.derivables.Derivable Derivable} object. 
+ * <p>
+ * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ */
 public interface Operator extends Labeled
 {
     public TokenType getTokenType();
@@ -30,11 +35,6 @@ public interface Operator extends Labeled
     default boolean isRightAssociative() 
     {
         return false;
-    }
-
-    default BuiltinOperator getBuiltinOperator() 
-    {
-        return BuiltinOperator.NULL_operator;
     }
 
     default boolean isVariableArgs()

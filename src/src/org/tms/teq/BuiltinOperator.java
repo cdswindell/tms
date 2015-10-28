@@ -572,12 +572,6 @@ public enum BuiltinOperator implements Labeled, Operator
         return m_methodArgs;
     }
     
-	@Override
-    public BuiltinOperator getBuiltinOperator()
-	{
-	    return this;
-	}
-
     Method getMethod()
     {
         if (m_method == null && this.m_clazz != null) {

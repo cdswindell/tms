@@ -15,7 +15,8 @@ import org.tms.teq.BuiltinOperator;
 
 public class TokenMapper
 {
-    static final private Map<String, Token> sf_BuiltInTokenMap = new HashMap<String, Token>();    
+    static final private Map<String, Token> sf_BuiltInTokenMap = new HashMap<String, Token>();  
+    
     static {
         for (BuiltinOperator o : BuiltinOperator.values()) {
             if (o.isLabeled()) {

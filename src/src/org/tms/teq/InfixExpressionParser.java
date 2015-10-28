@@ -210,20 +210,20 @@ public class InfixExpressionParser
                     return 0;
                     
                 case BinaryOp:
-                    switch (oper.getBuiltinOperator()) {
-                        case PlusOper: // ignore
+                    if (oper instanceof BuiltinOperator) {
+                        BuiltinOperator bOper = (BuiltinOperator)oper;
+                        if (bOper == BuiltinOperator.PlusOper)
                             break;
-
-                        case MinusOper:     /* negation operator */
+                        else if (bOper == BuiltinOperator.MinusOper) {
                             ifs.push(BuiltinOperator.NegOper);
                             break;
-
-                        default:
-                            if (pr != null)
-                                pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos);
-                            return 0;
+                        }
                     }
-                    break;
+                    
+                    // otherwise, this is an invalid location for the oper
+                    if (pr != null)
+                        pr.addIssue(ParserStatusCode.InvalidOperatorLocation, curPos);
+                    return 0;
                 
                 case Comma:
                     if (pr != null)

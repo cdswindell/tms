@@ -224,7 +224,7 @@ public class PostfixStackGenerator
             TokenType tt = t.getTokenType();
             Operator oper = t.getOperator();
             Class<?> returnType = oper != null ? oper.getResultType() : Object.class;
-            BuiltinOperator bio = oper != null ? oper.getBuiltinOperator() : null;
+            BuiltinOperator bio = oper != null && oper instanceof BuiltinOperator ? (BuiltinOperator)oper : null;
             boolean isMathOper = bio != null ? bio.isMathOper() : false;
             Class<?> firstArgType = null;
             Token x;

@@ -31,13 +31,12 @@ public enum TokenType implements Labeled
     UnaryOp(true, 1),
     UnaryFunc(true, 1), 
     UnaryTrailingOp(false, 1),
+    GenericFunc(true),
     
     Comma(true, ","),
     LeftParen(true, "("),
     RightParen(false, ")"),
-    
-    GenericFunc(true),
-    
+       
     NullOpValue(false),
     LAST_TokenType(false);
     
