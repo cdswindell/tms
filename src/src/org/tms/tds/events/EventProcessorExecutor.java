@@ -1,9 +1,8 @@
-package org.tms.api.derivables;
+package org.tms.tds.events;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
@@ -11,34 +10,35 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.tms.api.events.EventProcessorThreadPool;
+import org.tms.api.events.Listenable;
+import org.tms.api.events.TableElementEvent;
+import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
-import org.tms.teq.DerivationImpl;
 import org.tms.util.ThreadLocalUtils;
 
-public class PendingDerivationExecutor extends ThreadPoolExecutor implements Runnable, DerivableThreadPool
+public class EventProcessorExecutor extends ThreadPoolExecutor implements Runnable, EventProcessorThreadPool
 {
-    private Map<Runnable, UUID> m_runnableUuidMap;
-    private Map<UUID, Runnable> m_uuidRunnableMap;    
-    private BlockingQueue<Runnable> m_queuedRunnables;
+    private BlockingQueue<TableElementEvent> m_queuedEvents;
     private boolean m_continueDraining;
     private Thread m_drainThread = null;
     
-    public PendingDerivationExecutor()
+    public EventProcessorExecutor()
     {
-        this(5, 100, 30, TimeUnit.SECONDS);
+        this(1, 5, 30, TimeUnit.SECONDS);
     }
     
-    public PendingDerivationExecutor(int corePoolSize, int maximumPoolSize)
+    public EventProcessorExecutor(int corePoolSize, int maximumPoolSize)
     {
         this(corePoolSize, maximumPoolSize, 30, TimeUnit.SECONDS);
     }
     
-    public PendingDerivationExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit)
+    public EventProcessorExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit)
     {
         this(corePoolSize, maximumPoolSize, keepAliveTime, unit, true);
     }
     
-    public PendingDerivationExecutor(int corePoolSize, int maximumPoolSize, 
+    public EventProcessorExecutor(int corePoolSize, int maximumPoolSize, 
                                      long keepAliveTime, TimeUnit unit, boolean timeOutCores)
     {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, 
@@ -46,12 +46,12 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
               new PendingThreadFactory(),
               new ThreadPoolExecutor.AbortPolicy());
         
-        m_queuedRunnables = new LinkedBlockingQueue<Runnable>();
-        m_continueDraining = true;      
-        m_runnableUuidMap = new ConcurrentHashMap<Runnable, UUID>(1024);
-        m_uuidRunnableMap = new ConcurrentHashMap<UUID, Runnable>(1024);
-               
+        m_queuedEvents = new LinkedBlockingQueue<TableElementEvent>();
+        m_continueDraining = true;  
+        
+        prestartAllCoreThreads();
         allowCoreThreadTimeOut(timeOutCores);
+        
         setRejectedExecutionHandler(new RejectedExecutionHandler() {
             public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
                // this will block if the queue is full
@@ -66,43 +66,30 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         // start the drainer thread
         m_drainThread = new Thread(this);
         m_drainThread.setDaemon(true);
-        m_drainThread.setName("PendingQueueDrainer");
+        m_drainThread.setName("EventDrainer");
         m_drainThread.start();
     }
 
     @Override
-    public void submitCalculation(UUID transactionId, Runnable r)
+    public void submitEvents(Collection<TableElementEvent> events)
     {
         if (isShutdown())
-            throw new IllegalTableStateException("Pending Derivation Thread pool has been shutdown...");
+            throw new IllegalTableStateException("Event Processor Thread pool has been shutdown...");
         
-        if (transactionId != null && r != null) {
-            m_runnableUuidMap.put(r,  transactionId);
-            m_uuidRunnableMap.put(transactionId, r);
-            m_queuedRunnables.add(r);
-        }
+        if (events != null) 
+            m_queuedEvents.addAll(events);
         else
-            throw new NullPointerException("TransactionId and Runnable are required.");
+            throw new NullPointerException("Collection<TableElementEvent> required.");
     }
 
     @Override
-    public boolean remove(UUID transactionId)
+    public boolean remove(TableElementEvent e)
     {
-        if (transactionId == null)
+        if (e == null)
             return false;
         
-        // backing derivation is being cleared, we don't 
-        // want running threads to report back a result
-        Runnable r = m_uuidRunnableMap.remove(transactionId);
-        if (r != null) {
-            m_runnableUuidMap.remove(r);
-            
-            // runnable could be in the executors queue, the unbounded queue, or already running
-            return getQueue().remove(r) ||
-                   m_queuedRunnables.remove(r);
-        }
-        else
-            return false;
+        // can only remove events from queue
+        return m_queuedEvents.remove(e);
     }
     
     @Override
@@ -111,7 +98,9 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
         while (m_continueDraining) {
             try
             {
-                Runnable r = m_queuedRunnables.take();
+                TableElementEvent e = m_queuedEvents.take();
+                
+                Runnable r = new EventRunner(e);
                 
                 // offer the runnable to the Executor, 
                 // blocking if necessary
@@ -123,41 +112,31 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
             }
         }
         
-        m_queuedRunnables.clear();
+        m_queuedEvents.clear();
     }
     
     @Override
     protected void beforeExecute(Thread t, Runnable r)
     {
-        // if the UUID is not found, the backing derivation is
-        // in the process of being cleared
-        UUID transactId = m_runnableUuidMap.remove(r);
-        if (transactId != null) {
-            m_uuidRunnableMap.remove(transactId);
-            DerivationImpl.associateTransactionID(t.getId(), transactId);    
-        }
-        
         super.beforeExecute(t, r);  
     }
 
     @Override
     protected void afterExecute(Runnable r, Throwable t) 
     {
-        super.afterExecute(r, t);
-        
+        super.afterExecute(r, t);       
         ThreadLocalUtils.resetThreadLocal(this);
     }
     
     @Override
-    public void shutdownDerivableThreadPool()
+    public void shutdownEventProcessorThreadPool()
     {
         super.shutdown();
         
-        m_drainThread.interrupt();
         m_continueDraining = false;
-        m_queuedRunnables.clear(); 
-        m_runnableUuidMap.clear();
-        m_uuidRunnableMap.clear();
+        m_drainThread.interrupt();
+        
+        m_queuedEvents.clear();       
     }
     
     protected static class PendingThreadFactory implements ThreadFactory
@@ -170,8 +149,29 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
             Thread t = new Thread(r);
             
             t.setDaemon(true);
-            t.setName("PendingCalculationThread-" + (m_threadNo++));
+            t.setName("EventProcessorThread-" + (m_threadNo++));
             return t;
         }        
+    }
+    
+    protected static class EventRunner implements Runnable
+    {
+        private TableElementEvent m_event;
+        
+        public EventRunner(TableElementEvent e)
+        {
+            m_event = e;
+        }
+
+        @Override
+        public void run()
+        {
+            List<TableElementListener> listeners = ((Listenable) m_event.getSource()).getListeners(m_event.getType());
+            if (listeners != null) {
+                for (TableElementListener listener : listeners) {
+                    listener.eventOccured(m_event);
+                }
+            }
+        }       
     }
 }

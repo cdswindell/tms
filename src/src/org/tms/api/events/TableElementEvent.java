@@ -13,7 +13,7 @@ abstract public class TableElementEvent extends EventObject
     private long m_assemblyId;
     private Listenable m_trigger;
     
-    public TableElementEvent(TableElementEventType evT, Listenable source, Listenable trigger)
+    protected TableElementEvent(TableElementEventType evT, Listenable source, Listenable trigger)
     {
         super(source);
         m_trigger = trigger;
@@ -21,12 +21,12 @@ abstract public class TableElementEvent extends EventObject
         m_timeStamp = System.currentTimeMillis();
     }
 
-    public TableElementEvent(TableElementEventType evT, Listenable source)
+    protected TableElementEvent(TableElementEventType evT, Listenable source)
     {
         this(evT, source, null);
     }
 
-    TableElementEvent(TableElementEventType evT, Listenable source, Listenable trigger, long assemblyId)
+    protected TableElementEvent(TableElementEventType evT, Listenable source, Listenable trigger, long assemblyId)
     {
         this(evT, source, trigger);
         m_assemblyId = assemblyId;

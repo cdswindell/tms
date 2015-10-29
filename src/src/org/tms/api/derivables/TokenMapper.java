@@ -142,13 +142,13 @@ public class TokenMapper
     
     public <T, R> void registerOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)
     {
-        Operator op = new UnaryFunc1ArgOp<T, R>(label, p1Type, resultType, uniOp);
+        Operator op = new UnaryFunc1ArgOp<T, R>(label, TokenType.UnaryFunc, p1Type, resultType, uniOp);
         registerOperator(op);
     }
     
     public <T, U, R> void registerOperator(String label, Class<?> p1Type, Class<?> p2Type, Class<?> resultType, BiFunction<T, U, R> biOp)
     {
-        Operator op = new BinaryFunc2ArgOp<T, U, R>(label, new Class<?> [] {p1Type, p2Type}, resultType, biOp);
+        Operator op = new BinaryFunc2ArgOp<T, U, R>(label, TokenType.BinaryFunc, new Class<?> [] {p1Type, p2Type}, resultType, biOp);
         registerOperator(op);
     }
     
@@ -178,13 +178,14 @@ public class TokenMapper
 
     public void registerNumericOperator(String label, UnaryOperator<Double> uniOp)
     {
-        Operator op = new UnaryFunc1ArgOp<Double, Double>(label, double.class, double.class, uniOp);
+        Operator op = new UnaryFunc1ArgOp<Double, Double>(label, TokenType.UnaryFunc, double.class, double.class, uniOp);
         registerOperator(op);
     }
     
     public void registerNumericOperator(String label, BinaryOperator<Double> biOp)
     {
-        Operator op = new BinaryFunc2ArgOp<Double, Double, Double>(label, new Class<?> [] {double.class, double.class}, double.class, biOp);
+        Operator op = new BinaryFunc2ArgOp<Double, Double, Double>(label, TokenType.BinaryFunc, 
+                            new Class<?> [] {double.class, double.class}, double.class, biOp);
         registerOperator(op);
     }
     
@@ -238,7 +239,19 @@ public class TokenMapper
     {
     	m_userTokenMap.clear();
     }
-
+   
+    public <T, R> void overloadOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> unOp)
+    {
+        Operator op = new UnaryFunc1ArgOp<T, R>(label, TokenType.UnaryOp, p1Type, resultType, unOp);
+        overloadOperator(label, op);
+    }
+        
+    public <T, U, R> void overloadOperator(String label, Class<?> p1Type, Class<?> p2Type, Class<?> resultType, BiFunction<T, U, R> biOp)
+    {
+        Operator op = new BinaryFunc2ArgOp<T, U, R>(label, TokenType.BinaryOp, new Class<?> [] {p1Type, p2Type}, resultType, biOp);
+        overloadOperator(label, op);
+    }
+        
     public void overloadOperator(String theOp, Operator oper)
     {
         validateOverload(theOp, oper);
@@ -253,7 +266,7 @@ public class TokenMapper
                 break;
                 
             default:
-                throw new IllegalTableStateException("TokenType not supported");
+                throw new IllegalTableStateException("Overload: TokenType not supported");
         }
         
         Token t = new Token(theOp.trim(), tt, oper);
@@ -291,7 +304,7 @@ public class TokenMapper
 
     protected void validateOverload(String theOp, Class<?>... paramTypes)
     {
-        validateOverload(theOp);
+        validateOverload(theOp, (TokenType) null);
         
     	if (paramTypes == null)
     		throw new IllegalTableStateException("Parameter type(s) required");
@@ -302,21 +315,28 @@ public class TokenMapper
     
     private void validateOverload(String theOp, Operator oper)
     {
-        validateOverload(theOp);
-        
         if (oper == null)
             throw new IllegalTableStateException("Operator required");
 
-        if (oper.numArgs() < 1 || oper.numArgs() > 2)
-            throw new IllegalTableStateException("Operator must take exactly 1 or 2 arguments");
+        TokenType tt = oper.getTokenType();
+        validateOverload(theOp, tt);
+        
+        if (tt == TokenType.UnaryOp && oper.numArgs() != 1)
+            throw new IllegalTableStateException("Operator must take exactly 1 argument");
+        else if (tt == TokenType.BinaryOp && oper.numArgs() != 2)
+            throw new IllegalTableStateException("Operator must take exactly 2 arguments");
     }
 
-    protected void validateOverload(String theOp)
+    protected void validateOverload(String theOp, TokenType tt)
     {
         if (theOp == null || (theOp = theOp.trim()).length() == 0)
-            throw new IllegalTableStateException("+, -, *, or / required");
+            throw new IllegalTableStateException("Valid " + (tt == null ? "UnaryOp or BinaryOp" : tt) + " required");
 
-        if (!(BuiltinOperator.isValidBinaryOp(theOp) || BuiltinOperator.isValidUnaryOp(theOp)))
+        if (tt == TokenType.UnaryOp && !BuiltinOperator.isValidUnaryOp(theOp))
+            throw new IllegalTableStateException("UnaryOp required");
+        else if (tt == TokenType.BinaryOp && !BuiltinOperator.isValidBinaryOp(theOp))
+            throw new IllegalTableStateException("+, -, *, or / required");
+        else if (!(BuiltinOperator.isValidBinaryOp(theOp) || BuiltinOperator.isValidUnaryOp(theOp)))
             throw new IllegalTableStateException("+, -, *, or / required");
     }
     
@@ -432,9 +452,9 @@ public class TokenMapper
     {
         private Function<T, R> m_uniOp;
         
-        private UnaryFunc1ArgOp(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)
+        private UnaryFunc1ArgOp(String label, TokenType tt, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)
         {
-            super(label, TokenType.UnaryFunc, new Class<?>[] {p1Type}, resultType);
+            super(label, tt, new Class<?>[] {p1Type}, resultType);
             m_uniOp = uniOp;
         }
 
@@ -453,9 +473,9 @@ public class TokenMapper
     {
         BiFunction<T, S, R> m_biOp;
         
-        private BinaryFunc2ArgOp(String label, Class<?>[] argTypes, Class<?> resultType, BiFunction<T, S, R> biOp)
+        private BinaryFunc2ArgOp(String label, TokenType tt, Class<?>[] argTypes, Class<?> resultType, BiFunction<T, S, R> biOp)
         {
-            super(label, TokenType.BinaryFunc, argTypes, resultType);
+            super(label, tt, argTypes, resultType);
             m_biOp = biOp;
         }
 
