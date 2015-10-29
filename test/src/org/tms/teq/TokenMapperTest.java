@@ -205,6 +205,19 @@ public class TokenMapperTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(20.0));
+        
+        // overload operator using Lambda
+        tm.unOverloadOperator("+", plusOverload);
+        tm.overloadOperator("+", String.class, Double.class, Double.class,
+                (String x, Double y)->Double.valueOf(x) + y);
+        
+        pse = new PostfixStackEvaluator("'5' + 6 * 2 + ('2' + 1)", null);       
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(20.0));
     }
         
     public class Square implements Operator
