@@ -5,9 +5,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
-import org.tms.api.events.EventProcessorThreadPool;
 import org.tms.api.events.TableElementEvent;
 import org.tms.tds.events.EventProcessorExecutor;
+import org.tms.tds.events.EventProcessorThreadPool;
+import org.tms.tds.events.EventsProcessorThreadPoolCreator;
 
 public class EvTableImpl extends TableImpl implements EventProcessorThreadPool, EventsProcessorThreadPoolCreator
 {

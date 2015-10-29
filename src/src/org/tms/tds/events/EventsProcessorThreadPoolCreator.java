@@ -1,6 +1,6 @@
-package org.tms.tds;
+package org.tms.tds.events;
 
-interface EventsProcessorThreadPoolCreator 
+public interface EventsProcessorThreadPoolCreator 
 {
 	public void createEventProcessorThreadPool();
     public boolean isEventsNotifyInSameThread();

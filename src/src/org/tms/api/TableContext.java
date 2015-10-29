@@ -8,8 +8,8 @@ import java.util.function.UnaryOperator;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.TokenMapper;
-import org.tms.api.events.EventProcessorThreadPool;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.tds.events.EventProcessorThreadPool;
 
 /**
  * A collection of {@link Table}s, initializable {@link TableProperty}s, and optional thread pools. Tables that share the same {@code TableContext}

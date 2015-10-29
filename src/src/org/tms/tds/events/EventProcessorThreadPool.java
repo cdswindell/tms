@@ -1,6 +1,8 @@
-package org.tms.api.events;
+package org.tms.tds.events;
 
 import java.util.Collection;
+
+import org.tms.api.events.TableElementEvent;
 
 public interface EventProcessorThreadPool
 {

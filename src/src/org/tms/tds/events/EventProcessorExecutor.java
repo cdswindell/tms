@@ -10,7 +10,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.tms.api.events.EventProcessorThreadPool;
 import org.tms.api.events.Listenable;
 import org.tms.api.events.TableElementEvent;
 import org.tms.api.events.TableElementListener;

@@ -39,7 +39,6 @@ import org.tms.api.derivables.Precisionable;
 import org.tms.api.derivables.Token;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
-import org.tms.api.events.TableElementListeners;
 import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
@@ -49,6 +48,7 @@ import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.io.TableExportAdapter;
 import org.tms.io.options.IOOptions;
+import org.tms.tds.events.TableElementListeners;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 

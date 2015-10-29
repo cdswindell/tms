@@ -1,4 +1,4 @@
-package org.tms.api.events;
+package org.tms.tds.events;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,8 +18,11 @@ import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
+import org.tms.api.events.Listenable;
+import org.tms.api.events.TableElementEvent;
+import org.tms.api.events.TableElementEventType;
+import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.tds.events.EventProcessorExecutor;
 
 public class TableElementListeners implements Listenable
 {
