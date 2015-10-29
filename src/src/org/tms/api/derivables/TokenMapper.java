@@ -140,27 +140,51 @@ public class TokenMapper
         return m_context;
     }
     
-    public <T, S, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, Class<?> resultType, BiFunction<T, S, R> biOp)
+    public <T, R> void registerOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)
     {
-        Operator op = new LamdaBiFunction<T, S, R>(label, new Class<?> [] {argTypeX, argTypeY}, resultType, biOp);
+        Operator op = new UnaryFunc1ArgOp<T, R>(label, p1Type, resultType, uniOp);
         registerOperator(op);
     }
     
-    public <T, R> void registerOperator(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp)
+    public <T, U, R> void registerOperator(String label, Class<?> p1Type, Class<?> p2Type, Class<?> resultType, BiFunction<T, U, R> biOp)
     {
-        Operator op = new LamdaUniFunction<T, R>(label, argType, resultType, uniOp);
+        Operator op = new BinaryFunc2ArgOp<T, U, R>(label, new Class<?> [] {p1Type, p2Type}, resultType, biOp);
         registerOperator(op);
     }
     
+    public <T, U, V, R> void registerOperator(String label, 
+                                Class<?> p1Type, Class<?> p2Type, Class<?> p3Type, Class<?> resultType, 
+                                GenericFunc3Arg<T, U, V, R> gfOp)
+    {
+        Operator op = new GenericFunc3ArgOp<T, U, V, R>(label, new Class<?> [] {p1Type, p2Type, p3Type}, resultType, gfOp);
+        registerOperator(op);
+    }
+    
+    public <T, U, V, W, R> void registerOperator(String label, 
+                                    Class<?> p1Type, Class<?> p2Type, Class<?> p3Type, Class<?> p4Type, Class<?> resultType, 
+                                    GenericFunc4Arg<T, U, V, W, R> gfOp)
+    {
+        Operator op = new GenericFunc4ArgOp<T, U, V, W, R>(label, new Class<?> [] {p1Type, p2Type, p3Type, p4Type}, resultType, gfOp);
+        registerOperator(op);
+    }
+
+    public <T, U, V, W, X, R> void registerOperator(String label, 
+            Class<?> p1Type, Class<?> p2Type, Class<?> p3Type, Class<?> p4Type, Class<?> p5Type, Class<?> resultType, 
+            GenericFunc5Arg<T, U, V, W, X, R> gfOp)
+    {
+        Operator op = new GenericFunc5ArgOp<T, U, V, W, X, R>(label, new Class<?> [] {p1Type, p2Type, p3Type, p4Type, p5Type}, resultType, gfOp);
+        registerOperator(op);
+    }
+
     public void registerNumericOperator(String label, UnaryOperator<Double> uniOp)
     {
-        Operator op = new LamdaUniFunction<Double, Double>(label, double.class, double.class, uniOp);
+        Operator op = new UnaryFunc1ArgOp<Double, Double>(label, double.class, double.class, uniOp);
         registerOperator(op);
     }
     
     public void registerNumericOperator(String label, BinaryOperator<Double> biOp)
     {
-        Operator op = new LamdaBiFunction<Double, Double, Double>(label, new Class<?> [] {double.class, double.class}, double.class, biOp);
+        Operator op = new BinaryFunc2ArgOp<Double, Double, Double>(label, new Class<?> [] {double.class, double.class}, double.class, biOp);
         registerOperator(op);
     }
     
@@ -364,19 +388,19 @@ public class TokenMapper
                 sf_BuiltInTokenMap.size(), m_userTokenMap.size(), m_userOverloadedOps.size());
     }
     
-    static private class LamdaUniFunction<T, R> implements Operator
+    static abstract private class LamdaOp implements Operator
     {
         private String m_label;
+        private TokenType m_tokenType;
         private Class<?> m_resType;
         private Class<?> [] m_argTypes;
-        Function<T, R> m_uniOp;
         
-        private LamdaUniFunction(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp)
+        private LamdaOp(String label, TokenType tt, Class<?> [] argTypes, Class<?> resultType)
         {
             m_label = label;
+            m_tokenType = tt;
             m_resType = resultType;
-            m_argTypes = new Class<?> [] {argType};
-            m_uniOp = uniOp;
+            m_argTypes = argTypes;
         }
 
         @Override
@@ -388,7 +412,7 @@ public class TokenMapper
         @Override
         public TokenType getTokenType()
         {
-            return TokenType.UnaryFunc;
+            return m_tokenType;
         }
 
         @Override
@@ -401,6 +425,17 @@ public class TokenMapper
         public Class<?>[] getArgTypes()
         {
             return m_argTypes;
+        }
+    }
+    
+    static private class UnaryFunc1ArgOp<T, R> extends LamdaOp
+    {
+        private Function<T, R> m_uniOp;
+        
+        private UnaryFunc1ArgOp(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)
+        {
+            super(label, TokenType.UnaryFunc, new Class<?>[] {p1Type}, resultType);
+            m_uniOp = uniOp;
         }
 
         @SuppressWarnings("unchecked")
@@ -414,43 +449,14 @@ public class TokenMapper
         }
     }
     
-    static private class LamdaBiFunction<T, S, R> implements Operator
+    static private class BinaryFunc2ArgOp<T, S, R> extends LamdaOp
     {
-        private String m_label;
-        private Class<?> m_resType;
-        private Class<?> [] m_argTypes;
         BiFunction<T, S, R> m_biOp;
         
-        private LamdaBiFunction(String label, Class<?>[] argTypes, Class<?> resultType, BiFunction<T, S, R> biOp)
+        private BinaryFunc2ArgOp(String label, Class<?>[] argTypes, Class<?> resultType, BiFunction<T, S, R> biOp)
         {
-            m_label = label;
-            m_resType = resultType;
-            m_argTypes = argTypes;
+            super(label, TokenType.BinaryFunc, argTypes, resultType);
             m_biOp = biOp;
-        }
-
-        @Override
-        public String getLabel()
-        {
-            return m_label;
-        }
-
-        @Override
-        public TokenType getTokenType()
-        {
-            return TokenType.BinaryFunc;
-        }
-
-        @Override
-        public Class<?> getResultType()
-        {
-            return m_resType;
-        }
-        
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-            return m_argTypes;
         }
 
         @SuppressWarnings("unchecked")
@@ -460,6 +466,78 @@ public class TokenMapper
             T x = (T)args[0].getValue();
             S y = (S)args[1].getValue();
             R result = m_biOp.apply(x, y);
+            
+            return new Token(TokenType.Operand, result);
+        }
+    }
+    
+    static private class GenericFunc3ArgOp<T, U, V, R>extends LamdaOp
+    {
+        GenericFunc3Arg<T, U, V, R> m_gfOp;
+        
+        private GenericFunc3ArgOp(String label, Class<?>[] argTypes, Class<?> resultType, GenericFunc3Arg<T, U, V, R> gfOp)
+        {
+            super(label, TokenType.GenericFunc, argTypes, resultType);
+            m_gfOp = gfOp;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Token evaluate(Token... args)
+        {
+            T x = (T)args[0].getValue();
+            U y = (U)args[1].getValue();
+            V z = (V)args[2].getValue();
+            R result = m_gfOp.apply(x, y, z);
+            
+            return new Token(TokenType.Operand, result);
+        }
+    }
+    
+    static private class GenericFunc4ArgOp<T, U, V, W, R>extends LamdaOp
+    {
+        GenericFunc4Arg<T, U, V, W, R> m_gfOp;
+        
+        private GenericFunc4ArgOp(String label, Class<?>[] argTypes, Class<?> resultType, GenericFunc4Arg<T, U, V, W, R> gfOp)
+        {
+            super(label, TokenType.GenericFunc, argTypes, resultType);
+            m_gfOp = gfOp;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Token evaluate(Token... args)
+        {
+            T x = (T)args[0].getValue();
+            U y = (U)args[1].getValue();
+            V z = (V)args[2].getValue();
+            W w = (W)args[3].getValue();
+            R result = m_gfOp.apply(x, y, z, w);
+            
+            return new Token(TokenType.Operand, result);
+        }
+    }
+    
+    static private class GenericFunc5ArgOp<T, U, V, W, X, R>extends LamdaOp
+    {
+        GenericFunc5Arg<T, U, V, W, X, R> m_gfOp;
+        
+        private GenericFunc5ArgOp(String label, Class<?>[] argTypes, Class<?> resultType, GenericFunc5Arg<T, U, V, W, X, R> gfOp)
+        {
+            super(label, TokenType.GenericFunc, argTypes, resultType);
+            m_gfOp = gfOp;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Token evaluate(Token... args)
+        {
+            T p1 = (T)args[0].getValue();
+            U p2 = (U)args[1].getValue();
+            V p3 = (V)args[2].getValue();
+            W p4 = (W)args[3].getValue();
+            X p5 = (X)args[4].getValue();
+            R result = m_gfOp.apply(p1, p2, p3, p4, p5);
             
             return new Token(TokenType.Operand, result);
         }
