@@ -1,4 +1,4 @@
-package org.tms.api.event;
+package org.tms.tds.events;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
