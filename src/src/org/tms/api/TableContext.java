@@ -123,8 +123,22 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      */
     public <T, R> void registerOperator(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp);
 
+    /**
+     * Simplified call to define a new {@code UnaryFunc} {@link org.tms.api.derivables.Operator Operator} 
+     * using the supplied {@link java.util.function.Function Function} that operates on a {@code double} 
+     * and returns a {@code double}.
+     * @param label the function label, which is used to reference this Operator in a Derivable expression
+     * @param uniOp UnaryOperator closure containing function logic
+     */
     public void registerNumericOperator(String label, UnaryOperator<Double> uniOp);
 
+    /**
+     * Simplified call to define a new {@code BinaryFunc} {@link org.tms.api.derivables.Operator Operator} 
+     * using the supplied {@link java.util.function.BinaryOperator BinaryOperator} that takes 2 {@code double} 
+     * arguments and returns a {@code double}.
+     * @param label the function label, which is used to reference this Operator in a Derivable expression
+     * @param biOp BinaryOperator closure containing function logic
+     */
     public void registerNumericOperator(String label, BinaryOperator<Double> biOp);
 
     /**
@@ -148,8 +162,38 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      */
     public boolean deregisterOperator(Operator oper);
 
+    /**
+     * Registers a new {@link org.tms.api.derivables.Operator Operator} that uses the Groovy code
+     * specified in {@code fileName} to perform the calculation.
+     * @param label the function label, which is used to reference this {@code Operator} in a {@code Derivable} expression
+     * @param pTypes array specifying the classes of the input arguments
+     * @param resultType the class of the return type
+     * @param fileName fully-qualified file name containing the Groovy class containing the function logic
+     * @param methodName the method name containing the Groovy code containing the function logic
+     */
     public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName);
+    
+    /**
+     * Loads and compiles the Groovy class contained in {@code fileName}. {@link org.tms.api.derivables.Operator Operator}s
+     * are created from each {@code public} method that return a value found in the compiled class. The class itself must be concrete
+     * and instantiatable.
+     * 
+     * @param fileName fully-qualified file name containing the Groovy class to compile and parse
+     */
     public void registerGroovyOperators(String fileName);
+    
+    /**
+     * Registers a new {@code BinaryOp} {@link org.tms.api.derivables.Operator Operator} as an overloaded operator that uses the Groovy code
+     * specified in {@code fileName} to perform the calculation. Any valid {@link org.tms.api.derivables.Derivation Derivation} operator, such as 
+     * {@code +}, {@code -}, {@code *}, and {@code /} can be overloaded. Overloads take into account the class types of the participating
+     * operands to select the correct {@link org.tms.api.derivables.Operator Operator} to execute.
+     * @param label the overloaded operator name, which is used to reference this {@code Operator} in a {@code Derivable} expression
+     * @param pType1 the class of the first operand
+     * @param pType2 the class of the second operand
+     * @param resultType the class of the return type
+     * @param fileName fully-qualified file name containing the Groovy class containing the function logic
+     * @param methodName the method name containing the Groovy code containing the function logic
+     */
     public void registerGroovyOverload(String label, Class<?> pType1, Class<?> pType2, Class<?> resultType, String fileName, String methodName);
     
     /**
