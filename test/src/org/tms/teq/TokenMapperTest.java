@@ -315,16 +315,16 @@ public class TokenMapperTest extends BaseTest
         assertThat(list.contains(7), is(true));
         assertThat(list.contains(13), is(true));
         
-        tm.registerGroovyOperators("class myMath { double addIt(double x, double y){x + y}\n double subIt(double x, double y){x - y} }");
+        tm.registerGroovyOperators("class myMath { double addIt(double x, double y, double z){x + y + z}\n double subIt(double x, double y){x - y} }");
 
-        pse = new PostfixStackEvaluator("addIt(3, 4) + subIt(5, 7)", null);
+        pse = new PostfixStackEvaluator("addIt(3, 4, 2) + subIt(5, 7)", null);
         assertThat(pse, notNullValue());
         
         t = pse.evaluate();
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.isString(), is(false));
-        assertThat(t.getValue(), is(5.0));        
+        assertThat(t.getValue(), is(7.0));        
     }
         
     public class Square implements Operator
