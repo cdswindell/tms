@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.tms.api.derivables.Token;
@@ -18,12 +18,7 @@ import org.tms.api.derivables.exceptions.InvalidOperatorException;
 
 public class GroovyOp extends BaseOp
 {   
-    static final private Set<String> m_ignoredMethods = new HashSet<String>();
-    static {
-        m_ignoredMethods.add("getMetaClass");
-        m_ignoredMethods.add("getProperty");
-        
-    }
+    static final private Map<Class<?>, Object> m_instanceCache = new ConcurrentHashMap<Class<?>, Object>();
     
     public static void registerAllOps(TokenMapper tokenMapper, String text)
     {
@@ -59,11 +54,14 @@ public class GroovyOp extends BaseOp
         }        
     }
     
+    /*
+     * Instance properties and methods 
+     */
+    
     private File m_file;
     private String m_methodName;
     private Class<?> m_groovyClazz;
     private Method m_method;
-    private Object m_groovyInst;
     
     public GroovyOp(String label, Class<?> [] pTypes, Class<?> resultType, String fileName)
     {
@@ -107,8 +105,11 @@ public class GroovyOp extends BaseOp
                 m_method = m_groovyClazz.getDeclaredMethod(m_methodName, getArgTypes());
             
             // and create an instance object from the class 
-            if (m_groovyInst == null)
-            m_groovyInst = m_groovyClazz.newInstance() ;
+            Object groovyInst = m_instanceCache.get(m_groovyClazz);
+            if (groovyInst == null) {
+                groovyInst = m_groovyClazz.newInstance() ;
+                m_instanceCache.put(m_groovyClazz, groovyInst);
+            }
 
             // Transfer the args from the TMS system into
             // an array to set up for the method call
@@ -117,11 +118,15 @@ public class GroovyOp extends BaseOp
                 mArgs[i] = args[i].getValue();
             }
             
-            // Invoke the method on the Groovy object, with args
-            Object result = m_method.invoke(m_groovyInst, mArgs);
-            
-            // and return the result
-            return new Token(TokenType.Operand, result);
+            // we want to make sure only one thread at a time can access
+            // the Groovy instance object
+            synchronized (groovyInst) {
+                // Invoke the method on the Groovy object, with args
+                Object result = m_method.invoke(groovyInst, mArgs);
+                
+                // and return the result
+                return new Token(TokenType.Operand, result);
+            }
         }
         catch (CompilationFailedException | IOException | InstantiationException | 
                IllegalAccessException | NoSuchMethodException | SecurityException | 

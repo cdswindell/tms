@@ -308,7 +308,7 @@ public class TokenMapperTest extends BaseTest
         
         t = pse.evaluate();
         assertThat(t, notNullValue());
-        assertThat(List.class.isAssignableFrom(t.getDataType()), is(true));
+        assertThat(t.isA(List.class), is(true));
         
         @SuppressWarnings("unchecked")
         List<Integer> list = (List<Integer>)t.getValue();
