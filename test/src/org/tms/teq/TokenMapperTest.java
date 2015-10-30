@@ -6,6 +6,8 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
@@ -270,6 +272,49 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.isString(), is(false));
         assertThat(t.getValue(), is(10.0));        
+        
+        pse = new PostfixStackEvaluator("circumference(2)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.getValue(), is(2 * Math.PI));      
+        
+        
+        tm.registerGroovyOperators(qualifiedFileName("factors.groovy"));
+
+        pse = new PostfixStackEvaluator("firstFactor(91)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.getValue(), is(7.0));        
+
+        pse = new PostfixStackEvaluator("lastFactor(91)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.getValue(), is(13.0));
+        
+        pse = new PostfixStackEvaluator("allFactors(91)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(List.class.isAssignableFrom(t.getDataType()), is(true));
+        
+        @SuppressWarnings("unchecked")
+        List<Integer> list = (List<Integer>)t.getValue();
+        assertThat(list.size(), is(2));
+        assertThat(list.contains(7), is(true));
+        assertThat(list.contains(13), is(true));
     }
         
     public class Square implements Operator
