@@ -163,4 +163,21 @@ public enum TokenType implements Labeled
     {
         return this == Pending;
     }
+
+    public static TokenType numArgsToTokenType(int argCnt)
+    {
+        switch(argCnt) {
+            case 0:
+                return BuiltIn;
+                
+            case 1: 
+                return UnaryFunc;
+                
+            case 2:
+                return BinaryFunc;
+                
+            default:
+                return GenericFunc;
+        }
+    }
 }

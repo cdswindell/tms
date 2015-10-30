@@ -16,6 +16,8 @@ import org.tms.api.TableContext;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.teq.BuiltinOperator;
+import org.tms.teq.ops.BaseOp;
+import org.tms.teq.ops.GroovyOp;
 
 public class TokenMapper
 {
@@ -138,6 +140,17 @@ public class TokenMapper
     public TableContext getTableContext()
     {
         return m_context;
+    }
+    
+    public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName)
+    {
+        Operator op = new GroovyOp(label, pTypes, resultType, fileName);
+        registerOperator(op);
+    }
+    
+    public void registerGroovyOperators(String fileName)
+    {
+        GroovyOp.registerAllOps(this, fileName);
     }
     
     public <T, R> void registerOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)
@@ -408,47 +421,9 @@ public class TokenMapper
                 sf_BuiltInTokenMap.size(), m_userTokenMap.size(), m_userOverloadedOps.size());
     }
     
-    static abstract private class LamdaOp implements Operator
-    {
-        private String m_label;
-        private TokenType m_tokenType;
-        private Class<?> m_resType;
-        private Class<?> [] m_argTypes;
-        
-        private LamdaOp(String label, TokenType tt, Class<?> [] argTypes, Class<?> resultType)
-        {
-            m_label = label;
-            m_tokenType = tt;
-            m_resType = resultType;
-            m_argTypes = argTypes;
-        }
-
-        @Override
-        public String getLabel()
-        {
-            return m_label;
-        }
-
-        @Override
-        public TokenType getTokenType()
-        {
-            return m_tokenType;
-        }
-
-        @Override
-        public Class<?> getResultType()
-        {
-            return m_resType;
-        }
-        
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-            return m_argTypes;
-        }
-    }
     
-    static private class UnaryFunc1ArgOp<T, R> extends LamdaOp
+    
+    static private class UnaryFunc1ArgOp<T, R> extends BaseOp
     {
         private Function<T, R> m_uniOp;
         
@@ -469,7 +444,7 @@ public class TokenMapper
         }
     }
     
-    static private class BinaryFunc2ArgOp<T, S, R> extends LamdaOp
+    static private class BinaryFunc2ArgOp<T, S, R> extends BaseOp
     {
         BiFunction<T, S, R> m_biOp;
         
@@ -491,7 +466,7 @@ public class TokenMapper
         }
     }
     
-    static private class GenericFunc3ArgOp<T, U, V, R>extends LamdaOp
+    static private class GenericFunc3ArgOp<T, U, V, R>extends BaseOp
     {
         GenericFunc3Arg<T, U, V, R> m_gfOp;
         
@@ -514,7 +489,7 @@ public class TokenMapper
         }
     }
     
-    static private class GenericFunc4ArgOp<T, U, V, W, R>extends LamdaOp
+    static private class GenericFunc4ArgOp<T, U, V, W, R>extends BaseOp
     {
         GenericFunc4Arg<T, U, V, W, R> m_gfOp;
         
@@ -538,7 +513,7 @@ public class TokenMapper
         }
     }
     
-    static private class GenericFunc5ArgOp<T, U, V, W, X, R>extends LamdaOp
+    static private class GenericFunc5ArgOp<T, U, V, W, X, R>extends BaseOp
     {
         GenericFunc5Arg<T, U, V, W, X, R> m_gfOp;
         

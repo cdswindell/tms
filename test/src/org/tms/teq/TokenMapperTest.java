@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.tms.BaseTest;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.derivables.Operator;
@@ -16,7 +17,7 @@ import org.tms.api.derivables.TokenType;
 import org.tms.api.derivables.exceptions.InvalidExpressionException;
 import org.tms.api.factories.TableContextFactory;
 
-public class TokenMapperTest
+public class TokenMapperTest extends BaseTest
 {
 
     @Test
@@ -218,6 +219,48 @@ public class TokenMapperTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(20.0));
+    }
+        
+    @Test
+    public final void testGroovyOperator()
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        assertThat(tm, notNullValue());
+        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+        
+        // register new operator
+        tm.registerGroovyOperator("greet", new Class<?>[]{String.class}, String.class, qualifiedFileName("person.groovy"));
+        
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("greet(\"Dave\")", null);
+        assertThat(pse, notNullValue());
+        
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(false));
+        assertThat(t.isString(), is(true));
+        assertThat(t.getValue(), is("Hello Dave!!!")); 
+        
+        // register new operator
+        tm.registerGroovyOperators(qualifiedFileName("geomFuncs.groovy"));
+        
+        pse = new PostfixStackEvaluator("volume(2, 3, 4)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.getValue(), is(24.0));        
+        
+        pse = new PostfixStackEvaluator("area(2, 3)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isString(), is(false));
+        assertThat(t.getValue(), is(6.0));        
     }
         
     public class Square implements Operator
