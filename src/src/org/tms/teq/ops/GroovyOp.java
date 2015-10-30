@@ -72,7 +72,12 @@ public class GroovyOp extends BaseOp
     
     public GroovyOp(String label, Class<?> [] pTypes, Class<?> resultType, String fileName, String methodName)
     {
-        super(label, TokenType.numArgsToTokenType(pTypes != null ? pTypes.length : 0), pTypes, resultType);
+        this(label, TokenType.numArgsToTokenType(pTypes != null ? pTypes.length : 0), pTypes, resultType, fileName, methodName);
+    }
+
+    public GroovyOp(String label, TokenType tt, Class<?> [] pTypes, Class<?> resultType, String fileName, String methodName)
+    {
+        super(label, tt, pTypes, resultType);
         m_file = new File(fileName);
         m_methodName = methodName;
     }

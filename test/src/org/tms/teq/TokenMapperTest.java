@@ -269,7 +269,7 @@ public class TokenMapperTest extends BaseTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.isString(), is(false));
-        assertThat(t.getValue(), is(12.0));        
+        assertThat(t.getValue(), is(10.0));        
     }
         
     public class Square implements Operator

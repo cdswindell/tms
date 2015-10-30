@@ -144,8 +144,19 @@ public class TokenMapper
     
     public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName)
     {
-        Operator op = new GroovyOp(label, pTypes, resultType, fileName);
+        registerGroovyOperator(label, pTypes, resultType, fileName, label);
+    }
+    
+    public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName)
+    {
+        Operator op = new GroovyOp(label, pTypes, resultType, fileName, methodName);
         registerOperator(op);
+    }
+    
+    public void registerGroovyOverload(String label, Class<?> pType1, Class<?> pType2, Class<?> resultType, String fileName, String methodName)
+    {
+        Operator op = new GroovyOp(label, TokenType.BinaryOp, new Class<?>[] {pType1, pType2}, resultType, fileName, methodName);
+        overloadOperator(label, op);
     }
     
     public void registerGroovyOperators(String fileName)

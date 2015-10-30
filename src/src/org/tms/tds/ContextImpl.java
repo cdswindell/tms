@@ -589,7 +589,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     }
         
     @Override
-    public <T, S, U> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, Class<?> resultType, BiFunction<T, S, U> biOp)
+    public <T, U, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, Class<?> resultType, BiFunction<T, U, R> biOp)
     {
         TokenMapper.fetchTokenMapper(this).registerOperator(label, argTypeX, argTypeY, resultType, biOp);
     }
@@ -616,6 +616,24 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     public void registerOperator(Operator oper)
     {
         TokenMapper.fetchTokenMapper(this).registerOperator(oper);
+    }
+    
+    @Override
+    public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName)
+    {
+        TokenMapper.fetchTokenMapper(this).registerGroovyOperator(label, pTypes, resultType, fileName, methodName);
+    }
+    
+    @Override
+    public void registerGroovyOperators(String fileName)
+    {
+        TokenMapper.fetchTokenMapper(this).registerGroovyOperators(fileName);
+    }
+    
+    @Override
+    public void registerGroovyOverload(String label, Class<?> pType1, Class<?> pType2, Class<?> resultType, String fileName, String methodName)
+    {
+        TokenMapper.fetchTokenMapper(this).registerGroovyOverload(label, pType1, pType2, resultType, fileName, methodName);
     }
     
     @Override

@@ -98,7 +98,7 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      * is a {@link java.lang.FunctionalInterface FunctionalInterface}, a lambda expression can be provided
      * to perform the calculation. 
      * @param <T> the class of the function's first argument
-     * @param <S> the class of the function's second argument
+     * @param <U> the class of the function's second argument
      * @param <R> the class of the function's return type
      * @param label the function label, which is used to reference this Operator in a Derivable expression
      * @param argTypeX the class of the first argument
@@ -106,8 +106,8 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      * @param resultType the class of the return type
      * @param biOp the BiFunction used to compute the return value of this Operator
      */
-    public <T, S, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, 
-                Class<?> resultType, BiFunction<T, S, R> biOp);
+    public <T, U, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, 
+                Class<?> resultType, BiFunction<T, U, R> biOp);
 
     /**
      * Registers a new {@code UnaryOp} {@link org.tms.api.derivables.Operator Operator} using the supplied
@@ -148,6 +148,10 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      */
     public boolean deregisterOperator(Operator oper);
 
+    public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName);
+    public void registerGroovyOperators(String fileName);
+    public void registerGroovyOverload(String label, Class<?> pType1, Class<?> pType2, Class<?> resultType, String fileName, String methodName);
+    
     /**
      * Deregisters the {@link org.tms.api.derivables.Operator Operator} with the supplied {@code label} 
      * from this {@code TableContext}.
