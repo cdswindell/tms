@@ -1,10 +1,11 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOConstants;
 import org.tms.io.options.OptionEnum;
 
 public class CSVOptions extends IOOptions
 {
-    public static final CSVOptions Default = new CSVOptions(true, true, false, false, COMMA, DOUBLE_QUOTE_CHAR, true);
+    public static final CSVOptions Default = new CSVOptions(true, true, false, false, IOConstants.COMMA, IOConstants.DOUBLE_QUOTE_CHAR, true);
 
     private enum Options implements OptionEnum 
     {
