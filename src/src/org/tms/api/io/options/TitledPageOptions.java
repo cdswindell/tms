@@ -1,7 +1,7 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOFileFormat;
 import org.tms.io.options.OptionEnum;
-import org.tms.io.options.TitleableOption;
 
 public abstract class TitledPageOptions<E extends TitledPageOptions<E>> 
     extends StyledPageOptions<E>
@@ -15,7 +15,7 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
     
     protected abstract E clone(TitledPageOptions<E> model);
     
-    protected TitledPageOptions(final org.tms.api.io.options.IOOptions.FileFormat format,
+    protected TitledPageOptions(final IOFileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 

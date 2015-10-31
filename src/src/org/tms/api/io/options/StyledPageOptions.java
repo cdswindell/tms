@@ -1,15 +1,15 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOFileFormat;
 import org.tms.io.options.OptionEnum;
-import org.tms.io.options.StyleableOption;
 
 public abstract class StyledPageOptions<S extends StyledPageOptions<S>> 
     extends IOOptions 
     implements StyleableOption
 {
-    public static final int DefaultColumnWidthPx = 65;
-    public static final int DefaultFontSizePx = 8;
-    public static final String DefaultFontFamily = "SansSerif";
+    static final int DefaultColumnWidthPx = 65;
+    static final int DefaultFontSizePx = 8;
+    static final String DefaultFontFamily = "SansSerif";
     
     private enum Options implements OptionEnum 
     {
@@ -22,7 +22,7 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
 
     protected abstract S clone(StyledPageOptions<S> model);
     
-    protected StyledPageOptions(final IOOptions.FileFormat format,
+    protected StyledPageOptions(final IOFileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 

@@ -1,5 +1,7 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOFileFormat;
+
 
 public class PDFOptions extends FormattedPageOptions<PDFOptions> 
 {
@@ -24,7 +26,7 @@ public class PDFOptions extends FormattedPageOptions<PDFOptions>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(org.tms.api.io.options.IOOptions.FileFormat.PDF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(IOFileFormat.PDF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
                 stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }

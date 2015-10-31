@@ -1,5 +1,7 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOFileFormat;
+
 
 public class DocOptions extends FormattedPageOptions<DocOptions> 
 {
@@ -22,7 +24,7 @@ public class DocOptions extends FormattedPageOptions<DocOptions>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(org.tms.api.io.options.IOOptions.FileFormat.WORD, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(IOFileFormat.WORD, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
                 stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }

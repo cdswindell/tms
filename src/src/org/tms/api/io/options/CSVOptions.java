@@ -1,5 +1,6 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOFileFormat;
 import org.tms.io.options.OptionEnum;
 
 public class CSVOptions extends IOOptions
@@ -21,7 +22,7 @@ public class CSVOptions extends IOOptions
                       final Character quoteCharacter,
                       final boolean ignoreSurroundingSpaces)
     {
-        super(org.tms.api.io.options.IOOptions.FileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(IOFileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
         set(Options.DelimiterChar, delimiter);
         set(Options.QuoteChar, quoteCharacter);
         set(Options.IsIgnoreSurrountingSpaces, ignoreSurroundingSpaces);

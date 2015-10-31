@@ -15,6 +15,7 @@ import org.tms.api.io.options.IOOptions;
 import org.tms.api.io.options.TMSOptions;
 import org.tms.api.io.options.TitledPageOptions;
 import org.tms.api.io.options.XlsOptions;
+import org.tms.io.options.IOFileFormat;
 
 public class TableExportAdapter
 {
@@ -42,7 +43,7 @@ public class TableExportAdapter
         
         // select default options, if none provided
         if (options == null) {
-            m_options = IOOptions.generateOptionsFromFileExtension(m_file);
+            m_options = IOFileFormat.generateOptionsFromFileExtension(m_file);
             
             if (m_options == null)
                 throw new UnimplementedException(String.format("No support for writting %s", fileName));

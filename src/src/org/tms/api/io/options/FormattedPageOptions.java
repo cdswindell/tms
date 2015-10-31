@@ -1,8 +1,7 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.DateTimeFormatOption;
+import org.tms.io.options.IOFileFormat;
 import org.tms.io.options.OptionEnum;
-import org.tms.io.options.PageableOption;
 
 public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
     extends TitledPageOptions<FormattedPageOptions<E>> 
@@ -25,7 +24,7 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
 
     protected abstract E clone(FormattedPageOptions<E> model);
     
-    protected FormattedPageOptions(final org.tms.api.io.options.IOOptions.FileFormat format,
+    protected FormattedPageOptions(final IOFileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 

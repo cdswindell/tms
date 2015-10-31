@@ -1,5 +1,7 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.IOFileFormat;
+
 
 public class HTMLOptions extends TitledPageOptions<HTMLOptions> 
 {
@@ -16,7 +18,7 @@ public class HTMLOptions extends TitledPageOptions<HTMLOptions>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(org.tms.api.io.options.IOOptions.FileFormat.HTML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(IOFileFormat.HTML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
               colWidthPx, defaultFontSize, defaultFontFamily);
     }
 
