@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.tms.io.options.IOConstants;
 import org.tms.io.options.OptionEnum;
 
-public abstract class IOOptions extends Constants
+public abstract class IOOptions extends IOConstants
 {      
     public static IOOptions generateOptionsFromFileExtension(File file)
     {

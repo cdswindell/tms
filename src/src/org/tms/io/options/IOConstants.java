@@ -1,6 +1,6 @@
-package org.tms.api.io.options;
+package org.tms.io.options;
 
-class Constants
+public class IOConstants
 {
     protected static final char BACKSPACE = '\b';
     protected static final char COMMA = ',';

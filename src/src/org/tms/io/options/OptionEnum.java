@@ -5,5 +5,4 @@ package org.tms.io.options;
  */
 public interface OptionEnum
 {
-
 }
