@@ -22,7 +22,7 @@ public enum IOFileFormat
     EXCEL(true, "xlsx", "xls"), 
     HTML(false, "htm", "html"),
     PDF(false, "pdf"),
-    JSON(true, "json"),
+    JSON(true, "json", "jsn"),
     RTF(false, "rtf"),
     XML(true, "xml"),
     TMS(true, "tms");
