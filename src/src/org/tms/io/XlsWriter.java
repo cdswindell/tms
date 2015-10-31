@@ -169,7 +169,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         int commentFontSize = options().getDefaultFontSize() - 3;
         int headerFontSize = options().getHeadingFontSize();
         
-        int colWidthPx = options().getColumnWidth();
+        int colWidthPx = options().getDefaultColumnWidth();
         int colWidth = colWidthPx > 0 ? (int)((colWidthPx - 5)/6.0) : 8;        
         sheet.setDefaultColumnWidth(colWidth);
         
@@ -224,7 +224,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
 
         if (options().isRowLabels()) {
             firstActiveCol = 1;
-            int rnColWidthPx = options().getRowNameColumnWidth();
+            int rnColWidthPx = options().getRowLabelColumnWidth();
             int rnColWidth = rnColWidthPx > 0 ? (int)(0.5 + (((rnColWidthPx)/6.0) * 256)) : 10 * 256;        
             sheet.setColumnWidth(0, rnColWidth);
             

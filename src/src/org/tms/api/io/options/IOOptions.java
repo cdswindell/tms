@@ -239,6 +239,7 @@ public abstract class IOOptions
     {
         set(BaseOptions.IsIgnoreEmptyColumns, b);
     }
+    
     protected Object get(OptionEnum key) 
     {
         return m_options.get(key);

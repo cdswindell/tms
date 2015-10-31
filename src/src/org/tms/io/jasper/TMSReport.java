@@ -359,11 +359,11 @@ abstract public class TMSReport
         int tfY = 2;
         m_colFieldMap = new HashMap<Column, JRField>(nCols);
         
-        int fieldWidth = (m_options instanceof StyleableOption) && ((StyleableOption)m_options).getColumnWidth() > 0 ?
-                ((StyleableOption)m_options).getColumnWidth() : sf_StringColWidth;
+        int fieldWidth = (m_options instanceof StyleableOption) && ((StyleableOption)m_options).getDefaultColumnWidth() > 0 ?
+                ((StyleableOption)m_options).getDefaultColumnWidth() : sf_StringColWidth;
                 
-        int rowNameColWidth =  (m_options instanceof StyleableOption) && ((StyleableOption)m_options).getRowNameColumnWidth() > 0 ?
-                ((StyleableOption)m_options).getRowNameColumnWidth() : sf_RowNameColWidth;
+        int rowNameColWidth =  (m_options instanceof StyleableOption) && ((StyleableOption)m_options).getRowLabelColumnWidth() > 0 ?
+                ((StyleableOption)m_options).getRowLabelColumnWidth() : sf_RowNameColWidth;
         
         tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, 
                           headingFontSize, rowNameColWidth);

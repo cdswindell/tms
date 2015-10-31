@@ -3,8 +3,11 @@ package org.tms.api.io.options;
 /**
  * An {@link IOOptions} where the output can be titled.
  * <p>
+ * <b>Note</b>: {@code TitleableOption} methods only affect export operations.
+ * <p>
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ * @see TitledPageOptions
  */
 public interface TitleableOption
 {

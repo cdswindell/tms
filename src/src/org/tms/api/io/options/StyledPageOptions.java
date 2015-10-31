@@ -2,6 +2,26 @@ package org.tms.api.io.options;
 
 import org.tms.io.options.OptionEnum;
 
+/**
+ * The base class which {@link IOOptions} that support display styling extend.
+ * Style elements
+ * that are supported include:
+ * <ul>
+ * <li>column widths,</li> 
+ * <li>row label column widths,</li>
+ * <li>table cell value font size,</li>
+ * <li>heading font size, and</li>
+ * <li>font family.</li>
+ * </ul>
+ * All widths and sizes are in pixels, unless otherwise noted.
+ * <p>
+ * <b>Note</b>: {@code StyleableOption} methods only affect export operations.
+ * <p>
+ * @param <S> the type of {@link IOOptions} in this {@code StyledPageOptions}
+ * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ * @see StyleableOption
+ */
 public abstract class StyledPageOptions<S extends StyledPageOptions<S>> 
     extends IOOptions 
     implements StyleableOption
@@ -44,12 +64,19 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
         super(format);
     }
 
+    /**
+     * {@inheritDoc} 
+     * @return a new {@link StyledPageOptions} with row labels enabled
+     */
     public S withRowLabels()
     {
         return withRowLabels(true);
     }
 
-    @Override
+    /**
+     * {@inheritDoc} 
+     * @return a new {@link StyledPageOptions} with row labels enabled or disabled
+     */
     public S withRowLabels(final boolean b)
     {
         S newOptions = clone(this);
@@ -57,13 +84,19 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
         return newOptions;
     }
 
-    @Override
+    /**
+     * {@inheritDoc} 
+     * @return a new {@link StyledPageOptions} with column labels enabled
+     */
     public S withColumnLabels()
     {
         return withColumnNames(true);
     }
 
-    @Override
+    /**
+     * {@inheritDoc} 
+     * @return a new {@link StyledPageOptions} with column labels enabled or disabled
+     */
     public S withColumnNames(final boolean b)
     {
         S newOptions = clone(this);
@@ -71,13 +104,19 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
         return newOptions;
     }
 
-    @Override
+    /**
+     * {@inheritDoc} 
+     * @return a new {@link StyledPageOptions} where empty rows are ignored
+     */
     public S withIgnoreEmptyRows()
     {
         return withIgnoreEmptyRows(true);
     }
 
-    @Override
+    /**
+     * {@inheritDoc} 
+     * @return a new {@link StyledPageOptions} where empty rows are or are not ignored
+     */
     public S withIgnoreEmptyRows(final boolean b)
     {
         S newOptions = clone(this);
@@ -85,13 +124,19 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
         return newOptions;
     } 
 
-    @Override
+    /**
+     * {@inheritDoc} 
+     * @return a new {@link StyledPageOptions} where empty columns are ignored
+     */
     public S withIgnoreEmptyColumns()
     {
         return withIgnoreEmptyColumns(true);
     }
 
-    @Override
+    /**
+     * {@inheritDoc} 
+     * @return a new {@link StyledPageOptions} where empty columns are or are not ignored
+     */
     public S withIgnoreEmptyColumns(final boolean b)
     {
         S newOptions = clone(this);
@@ -100,7 +145,10 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     } 
 
     @Override
-    public int getColumnWidth()
+    /**
+     * {@inheritDoc} 
+     */
+    public int getDefaultColumnWidth()
     {
         Object d = get(Options.ColumnWidth);
         return d != null ? (int)d : 0;
@@ -124,7 +172,10 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     }
     
     @Override
-    public int getRowNameColumnWidth()
+    /**
+     * {@inheritDoc} 
+     */
+    public int getRowLabelColumnWidth()
     {
         Object d = get(Options.RowNameColumnWidth);
         return d != null ? (int)d : 0;
@@ -148,6 +199,9 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     }
     
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public int getDefaultFontSize()
     {
         Object d = get(Options.DefaultFontSize);
@@ -170,6 +224,9 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     }
 
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public int getHeadingFontSize()
     {
         Object d = get(Options.HeadingFontSize);
@@ -192,6 +249,9 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     }
 
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public String getFontFamily()
     {
         return (String)get(Options.FontFamily);

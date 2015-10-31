@@ -3,12 +3,14 @@ package org.tms.api.io.options;
 import org.tms.io.options.OptionEnum;
 
 /**
- * An {@link IOOptions} where the output can be titled.
- * 
- * @param <E> the type of {@link IOOptions} in this {@code TitledPageOptions}
+ * The base class which {@link IOOptions} that support titles extend.
  * <p>
+ * <b>Note</b>: {@code TitledPageOptions} methods only affect export operations.
+ * <p>
+ * @param <E> the type of {@link IOOptions} in this {@code TitledPageOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ * @see TitleableOption
  */
 public abstract class TitledPageOptions<E extends TitledPageOptions<E>> 
     extends StyledPageOptions<E>
