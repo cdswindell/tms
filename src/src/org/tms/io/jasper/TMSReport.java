@@ -45,6 +45,7 @@ import org.tms.api.io.options.PageableOption;
 import org.tms.api.io.options.StyleableOption;
 import org.tms.api.io.options.TitleableOption;
 import org.tms.io.BaseWriter;
+import org.tms.io.options.IOFileFormat;
 
 
 abstract public class TMSReport
@@ -104,6 +105,11 @@ abstract public class TMSReport
         m_writer = w;
         m_table = w.getTable();
         m_options = w.options();
+    }
+    
+    boolean isPDF()
+    {
+        return m_options.getFileFormat() == IOFileFormat.PDF;
     }
     
     BaseWriter<?> getWriter()
@@ -623,7 +629,7 @@ abstract public class TMSReport
         JRDesignStyle style = new JRDesignStyle();
         style.setName(name);
         style.setDefault(isDefault);
-        if (m_options.isPDF()) {
+        if (isPDF()) {
             style.setFontName(sf_DefaultFontFamily);
             String ff = getFontFamily();
             if (!isLogicalFontFamily(ff))

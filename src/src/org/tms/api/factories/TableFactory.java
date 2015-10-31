@@ -116,19 +116,29 @@ public final class TableFactory
         
         try
         {
-            if (format.isCSV()) {
-                CSVReader r = new CSVReader(fileName, tc, (CSVOptions)format);
-                return r.parse();
-            }
-            else if (format.isExcel()) {
-                XlsReader r = new XlsReader(fileName, tc, (XlsOptions)format);
-                return r.parseActiveSheet();
-            }
-            else if (format.isTMS()) {
+            switch (format.getFileFormat()) {
+                case CSV:
+                {
+                    CSVReader r = new CSVReader(fileName, tc, (CSVOptions)format);
+                    return r.parse();
+                }
+                    
+                case EXCEL:
+                {
+                    XlsReader r = new XlsReader(fileName, tc, (XlsOptions)format);
+                    return r.parseActiveSheet();
+                }
                 
+                case TMS:
+                case XML:
+                case JSON:
+                {
+                    return null;
+                }
+                    
+                default:    
+                    throw new UnimplementedException("No support for file format:" + format.getFileFormat());                    
             }
-            
-            throw new UnimplementedException("No support for file format:" + format.getFileFormat());
         }
         catch (IOException e)
         {

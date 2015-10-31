@@ -57,36 +57,6 @@ public abstract class IOOptions extends IOConstants
         }        
     }
                   
-    public boolean isTMS()
-    {
-        return IOFileFormat.TMS == getFileFormat();
-    }
-
-    public boolean isCSV()
-    {
-        return IOFileFormat.CSV == getFileFormat();
-    }
-
-    public boolean isPDF()
-    {
-        return IOFileFormat.PDF == getFileFormat();
-    }
-
-    public boolean isExcel()
-    {
-        return IOFileFormat.EXCEL == getFileFormat();
-    }
-
-    public boolean isHtml()
-    {
-        return IOFileFormat.HTML == getFileFormat();
-    }
-
-    public boolean isRTF()
-    {
-        return IOFileFormat.RTF == getFileFormat();
-    }
-
     public IOFileFormat getFileFormat()
     {
         return (IOFileFormat)m_options.get(BaseOptions.FileFormat);
