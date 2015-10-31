@@ -20,13 +20,30 @@ import org.tms.io.options.IOOptions;
  */
 public interface Subset extends TableElement
 {
-    
+    /**
+     * Return the number of {@link Column}s in this {@code Subset}.
+     * @return the number of {@code Column}s in this {@code Subset}
+     */
     public int getNumColumns();
+    
+    /**
+     * Return the number of {@link Row}s in this {@code Subset}.
+     * @return the number of {@code Row}s in this {@code Subset}
+     */
     public int getNumRows();
     
-    public List<Row> getRows();
+    /**
+     * Returns the table {@link Column}s in this {@code Subset}.
+     * @return the {@code Column}s in this {@code Subset}
+     */    
     public List<Column> getColumns();
  
+    /**
+     * Returns the table {@link Row}s in this {@code Subset}.
+     * @return the {@code Row}s in this {@code Subset}
+     */
+    public List<Row> getRows();
+    
     /**
      * Add {@link TableElement}s to this {@code Subset}. Returns {@code true} if this {@code Subset} did not contain some or all
      * of the {@link TableElement}s specified in {@code tableElements}, or {@code false} if {@code tableElements} is {@code null} or
@@ -70,6 +87,5 @@ public interface Subset extends TableElement
     throws IOException;
     
     public void export(OutputStream out, IOOptions options) 
-    throws IOException;
-    
+    throws IOException;    
 }

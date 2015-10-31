@@ -75,8 +75,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         }
         else if (isBooleanValue()) 
             return (Boolean)getCellValue() ? "Yes" : "No";
-        
-        
+                
         return getCellValue().toString();
     }   
     
@@ -330,7 +329,6 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
             clearProperty(TableProperty.DisplayFormat);        
     }
 
-    @Override
     public boolean isFormatted()
     {
         return getFormatString() != null;
@@ -443,7 +441,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     @Override
     public Class<? extends Object> getDataType()
     {
-        if (getCellValue() != null)
+        if (getCellValue() != null && !isErrorValue())
             return getCellValue().getClass();
         else
             return null;

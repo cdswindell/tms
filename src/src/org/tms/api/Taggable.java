@@ -11,36 +11,36 @@ package org.tms.api;
 public interface Taggable
 {
     /**
-     * Tags this object with the specified tags.
+     * Tags this object with the specified tag(s).
      * @param tags String array of tags to apply to this {@code Taggable} element.
      * @return true if any supplied tags are new
      */
     public boolean tag(String... tags);
     
     /**
-     * Removes the specified tags from this {@code Taggable} element.
+     * Removes the specified tag(s) from this {@code Taggable} element.
      * @param tags the tag(s) to remove from this element
      * @return true if any of the supplied tags were present
      */
     public boolean untag(String... tags);
     
     /**
-     * Returns {@code true} if this taggable table element is tagged with the specified tags. If 
+     * Returns {@code true} if this taggable table element is tagged with the specified tag(s). If 
      * {@code tags} is {@code null}, returns {@code true} if the element contains any tags.
-     * @param tags the specified tags to check for, or null
-     * @return true if the TableElement is tagged with the specified tags
+     * @param tags the specified tag(s) to check for, or null
+     * @return true if the TableElement is tagged with the specified tag(s)
      */
     public boolean isTagged(String... tags);
     
     /**
-     * Replaces the tags on this {@code Taggable} element with those supplied. If {@code tags}
+     * Replaces the tag(s) on this {@code Taggable} element with those supplied. If {@code tags}
      * is {@code null}, all tags are removed.
      * @param tags the new set of tags to apply to this {@code Taggable} element
      */
     public void setTags(String... tags);
     
     /**
-     * Returns the tags assigned to this {@code Taggable} element.
+     * Returns the tag(s) assigned to this {@code Taggable} element.
      * @return String array of tags that have been applied to this {@code Taggable} element
      */
     public String[] getTags();

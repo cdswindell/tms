@@ -45,33 +45,74 @@ public interface Cell extends TableElement, Derivable
      * @return true if this cell's value is a String
      */
     public boolean isStringValue();
-    
-    
+        
     /**
-     * Returns {@code true} if this {@code Cell}'s value is a {@link boolean} 
-     * ({@code true} or {@code false}. 
-     * @return true if this cell's value is a String
+     * Returns {@code true} if this {@code Cell}'s value is a {@link Boolean} 
+     * ({@code true} or {@code false}). 
+     * @return {@code true} if this cell's value is a String
      */
     public boolean isBooleanValue();
     
+    /**
+     * Returns {@code true} if this cell value represents an error condition.
+     * @return {@code true} if this cell value represents an error condition
+     */
     public boolean isErrorValue();
+    
+    /**
+     * Return the {@link ErrorCode} associated to this {@code Cell}, if its cell value
+     * represents an error condition.
+     * @return the {@code ErrorCode} associated to this Cell
+     */
     public ErrorCode getErrorCode();
     
+    /**
+     * Returns {@code true} if this {@code Cell} or the containing {@link Row}, {@link Column}, or 
+     * {@link Table} is marked as Read-Only
+     * @return {@code true} if this cell or the containing row, column, or table is marked as Read-Only
+     */
     public boolean isWriteProtected();
+    
+    /**
+     * Returns {@code true} if this {@code Cell} is marked as Read-Only.
+     * @return {@code true} if this {@code Cell} is marked as Read-Only
+     */
     public boolean isReadOnly();
     
+    /**
+     * Returns the {@link Class} of this {@code Cell} value.
+     * @return the class of this {@code Cell} value
+     */
     public Class<? extends Object> getDataType();
     
+    /**
+     * Returns the table {@link Row} containing this {@code Cell}.
+     * @return the table {@code Row} containing this {@code Cell}
+     */
     public Row getRow();
+    
+    /**
+     * Returns the table {@link Column} containing this {@code Cell}.
+     * @return the table {@code Column} containing this {@code Cell}
+     */
     public Column getColumn();
     
+    /**
+     * Returns the Units label assigned to this {@code Cell}.
+     * @return the Units label assigned to this {@code Cell}
+     */
     public String getUnits();
+    
+    /**
+     * Set the Units label to assign to this {@code Cell}. The Units label
+     * is for annotation purposes only and is not used for any calculative purpose.
+     * @param units the Units label to assign to this {@code Cell}
+     */
     public void setUnits(String units);
 
+    public String getFormattedCellValue();
     public String getDisplayFormat();
     public void setDisplayFormat(String format);
-    public boolean isFormatted();
-    public String getFormattedCellValue();
 
     public TableCellValidator getValidator();
     public void setValidator(TableCellValidator validator);

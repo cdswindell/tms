@@ -22,9 +22,9 @@ public interface Column extends TableElement, Derivable, TableRowColumnElement
     public Class<?> getDataType();
 
     /**
-     * Assign a primary data type to this {@code column}. Assigning a data type to a {@code column}
+     * Assign a primary data type ({@link Class}) to this {@code Column}. Assigning a data type to a {@code Column}
      * allows column cells to be constrained to that data type.
-     * @param dataType the Java data type to assign to this column
+     * @param dataType the Java {@code Class} to assign to this column
      */
     public void setDataType(Class<? extends Object> dataType);
 }
