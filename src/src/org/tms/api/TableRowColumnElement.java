@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Comparator;
 
+import org.tms.api.io.options.IOOptions;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
-import org.tms.io.options.IOOptions;
 
 public interface TableRowColumnElement extends TableElement
 {

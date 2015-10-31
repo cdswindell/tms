@@ -1,6 +1,5 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.FormattedPageOptions;
 
 public class RTFOptions extends FormattedPageOptions<RTFOptions> 
 {
@@ -23,7 +22,7 @@ public class RTFOptions extends FormattedPageOptions<RTFOptions>
             final int defaultFontSize,
             final String defaultFontFamily)
     {
-        super(org.tms.io.options.IOOptions.FileFormat.RTF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(org.tms.api.io.options.IOOptions.FileFormat.RTF, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 dateTimeFormat, paged, pageNumbers, pageWidthPx, pageHeightPx, colWidthPx,
                 stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }

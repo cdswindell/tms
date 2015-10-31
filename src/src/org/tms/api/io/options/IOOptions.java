@@ -1,4 +1,4 @@
-package org.tms.io.options;
+package org.tms.api.io.options;
 
 import java.io.File;
 import java.util.HashMap;
@@ -7,13 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.tms.api.io.options.CSVOptions;
-import org.tms.api.io.options.HTMLOptions;
-import org.tms.api.io.options.PDFOptions;
-import org.tms.api.io.options.RTFOptions;
-import org.tms.api.io.options.TMSOptions;
-import org.tms.api.io.options.XMLOptions;
-import org.tms.api.io.options.XlsOptions;
+import org.tms.io.options.OptionEnum;
 
 public abstract class IOOptions extends Constants
 {      

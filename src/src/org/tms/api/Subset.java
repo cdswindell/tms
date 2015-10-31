@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.tms.io.options.IOOptions;
+import org.tms.api.io.options.IOOptions;
 
 /**
  * A {@link Table} subset, containing a collection of rows, columns, cells and other subsets. 

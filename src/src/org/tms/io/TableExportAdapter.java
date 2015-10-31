@@ -11,10 +11,10 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.options.CSVOptions;
+import org.tms.api.io.options.IOOptions;
 import org.tms.api.io.options.TMSOptions;
+import org.tms.api.io.options.TitledPageOptions;
 import org.tms.api.io.options.XlsOptions;
-import org.tms.io.options.IOOptions;
-import org.tms.io.options.TitledPageOptions;
 
 public class TableExportAdapter
 {

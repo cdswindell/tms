@@ -142,7 +142,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     public ErrorCode getErrorCode()
     {
         vetElement();
-        if (getDataType() == Double.class) {
+        if (getDataTypeInternal() == Double.class) {
             if ((double) getCellValue() == Double.NaN)
                 return ErrorCode.NaN;
             else if ((double)getCellValue() == Double.POSITIVE_INFINITY)
@@ -441,7 +441,15 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     @Override
     public Class<? extends Object> getDataType()
     {
-        if (getCellValue() != null && !isErrorValue())
+        if (!isErrorValue())
+            return getDataTypeInternal();
+        else
+            return null;
+    }
+
+    Class<? extends Object> getDataTypeInternal()
+    {
+        if (getCellValue() != null)
             return getCellValue().getClass();
         else
             return null;

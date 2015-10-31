@@ -10,9 +10,9 @@ import net.sf.jasperreports.engine.JRRewindableDataSource;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.io.options.IOOptions;
 import org.tms.io.BaseWriter;
 import org.tms.io.TableExportAdapter;
-import org.tms.io.options.IOOptions;
 
 public class TMSDataSource implements JRDataSource, JRRewindableDataSource
 {

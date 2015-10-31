@@ -1,7 +1,6 @@
 package org.tms.api.io.options;
 
 import org.tms.io.options.OptionEnum;
-import org.tms.io.options.StyledPageOptions;
 
 public class XlsOptions extends StyledPageOptions<XlsOptions>
 {
@@ -30,7 +29,7 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
                       final int colWidthPx,
                       final int defaultFontSize)
     {
-        super(org.tms.io.options.IOOptions.FileFormat.EXCEL, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
+        super(org.tms.api.io.options.IOOptions.FileFormat.EXCEL, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols,
                 colWidthPx, defaultFontSize, null);
         
         set(Options.FileFormat, ExcelFileFormat.XLSX);

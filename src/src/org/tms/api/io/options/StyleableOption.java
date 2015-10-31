@@ -1,4 +1,4 @@
-package org.tms.io.options;
+package org.tms.api.io.options;
 
 public interface StyleableOption
 {
@@ -9,5 +9,4 @@ public interface StyleableOption
     public int getHeadingFontSize();
     
     public String getFontFamily();
-
 }

@@ -7,7 +7,7 @@ import java.util.Set;
 import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
-import org.tms.io.options.IOOptions;
+import org.tms.api.io.options.IOOptions;
 
 abstract class BaseReader<E extends IOOptions> extends BaseIO
 {

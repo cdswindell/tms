@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 import org.tms.api.derivables.DerivableThreadPool;
-import org.tms.io.options.IOOptions;
+import org.tms.api.io.options.IOOptions;
 import org.tms.tds.events.EventProcessorThreadPool;
 
 /**
