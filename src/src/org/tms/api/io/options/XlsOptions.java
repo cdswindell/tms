@@ -4,12 +4,13 @@ import org.tms.io.options.OptionEnum;
 
 public class XlsOptions extends StyledPageOptions<XlsOptions>
 {
-    public static final int DefaultColumnWidthPx = 65;
-    public static final int DefaultFontSizePx = 12;
+    static final int DefaultColumnWidthPx = 65;
+    static final int DefaultFontSizePx = 12;
     
     public static final XlsOptions Default = new XlsOptions(true, true, false, false, DefaultColumnWidthPx, DefaultFontSizePx);
 
-    private enum Options implements OptionEnum {
+    private enum Options implements OptionEnum 
+    {
         FileFormat,
         BlanksAsNull,
         Derivations,
@@ -17,7 +18,8 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
         CommentAuthor
     }
 
-    private enum ExcelFileFormat  {
+    private enum ExcelFileFormat  
+    {
         XLS,
         XLSX,
     }

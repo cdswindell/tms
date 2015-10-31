@@ -102,7 +102,8 @@ public abstract class IOOptions extends IOConstants
     
     protected Map<OptionEnum, Object> m_options;
     
-    private enum BaseOptions implements OptionEnum {
+    private enum BaseOptions implements OptionEnum 
+    {
         FileFormat,
         IsRowNames,
         IsColumnNames,

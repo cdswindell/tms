@@ -3,7 +3,7 @@ package org.tms.api.io.options;
 
 public class HTMLOptions extends TitledPageOptions<HTMLOptions> 
 {
-    public static final int DefaultHTMLFontSizePx = 12;
+    static final int DefaultHTMLFontSizePx = 12;
     
     public static final HTMLOptions Default = new HTMLOptions(true, true, false, false,
                                                               DefaultColumnWidthPx, DefaultHTMLFontSizePx, "Arial");

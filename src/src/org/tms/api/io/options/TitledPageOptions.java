@@ -1,12 +1,14 @@
 package org.tms.api.io.options;
 
 import org.tms.io.options.OptionEnum;
+import org.tms.io.options.TitleableOption;
 
 public abstract class TitledPageOptions<E extends TitledPageOptions<E>> 
     extends StyledPageOptions<E>
     implements TitleableOption
 {
-    private enum Options implements OptionEnum {
+    private enum Options implements OptionEnum 
+    {
         Title,
         TitleFontSize,
     }

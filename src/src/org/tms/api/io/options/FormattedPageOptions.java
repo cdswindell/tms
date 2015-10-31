@@ -1,16 +1,19 @@
 package org.tms.api.io.options;
 
+import org.tms.io.options.DateTimeFormatOption;
 import org.tms.io.options.OptionEnum;
+import org.tms.io.options.PageableOption;
 
 public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
     extends TitledPageOptions<FormattedPageOptions<E>> 
     implements DateTimeFormatOption, PageableOption
 {
-    public static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
-    public static final int DefaultPageWidthPx = (int) (8.5 * 72);
-    public static final int DefaultPageHeightPx = (int) (11 * 72);
+    static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
+    static final int DefaultPageWidthPx = (int) (8.5 * 72);
+    static final int DefaultPageHeightPx = (int) (11 * 72);
 
-    private enum Options implements OptionEnum {
+    private enum Options implements OptionEnum 
+    {
         DateTimeFormat,
         IsPaged,
         IsPageNumbers,

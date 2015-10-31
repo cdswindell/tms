@@ -3,7 +3,6 @@ package org.tms.api.io.options;
 
 public class XMLOptions extends IOOptions
 {
-
     public static final XMLOptions Default = new XMLOptions(true, true, false, false);
 
     private XMLOptions(final boolean rowNames, 

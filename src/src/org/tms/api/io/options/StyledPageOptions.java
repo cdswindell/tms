@@ -1,6 +1,7 @@
 package org.tms.api.io.options;
 
 import org.tms.io.options.OptionEnum;
+import org.tms.io.options.StyleableOption;
 
 public abstract class StyledPageOptions<S extends StyledPageOptions<S>> 
     extends IOOptions 
