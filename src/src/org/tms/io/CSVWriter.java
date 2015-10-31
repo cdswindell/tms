@@ -57,8 +57,8 @@ public class CSVWriter extends BaseWriter<CSVOptions>
             List<Object> emptyRow = null;
             
             List<Object> record = new ArrayList<Object>(getNumConsumableColumns());
-            if (options().isColumnNames()) {
-                if (options().isRowNames())
+            if (options().isColumnLabels()) {
+                if (options().isRowLabels())
                     record.add(null);
                 
                 for (Column c : getActiveColumns()) {
@@ -101,7 +101,7 @@ public class CSVWriter extends BaseWriter<CSVOptions>
                     }
                 }
                 
-                if (options().isRowNames())
+                if (options().isRowLabels())
                   if (r == null)
                       record.add(0, null);
                   else

@@ -4,21 +4,82 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.options.CSVOptions;
+import org.tms.api.io.options.HTMLOptions;
+import org.tms.api.io.options.IOFileFormat;
 import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.PDFOptions;
+import org.tms.api.io.options.RTFOptions;
 import org.tms.api.io.options.TMSOptions;
 import org.tms.api.io.options.TitledPageOptions;
+import org.tms.api.io.options.XMLOptions;
 import org.tms.api.io.options.XlsOptions;
-import org.tms.io.options.IOFileFormat;
 
 public class TableExportAdapter
 {
+    public static IOOptions generateOptionsFromFileExtension(File file)
+    {
+        if (sf_FileFormatMap.isEmpty()) {
+            for (IOFileFormat ff : IOFileFormat.values()) {
+                for (String ext : ff.getFileExtensions()) {
+                    sf_FileFormatMap.put(ext, ff);                    
+                }
+            }
+        }
+        
+        String fileName = file.getName();
+        int idx = fileName.lastIndexOf('.');
+        if (idx >= -1) {
+            String ext = fileName.substring(idx + 1).trim().toLowerCase();
+            IOFileFormat fmt = sf_FileFormatMap.get(ext);
+            if (fmt != null) {
+                switch (fmt) {
+                    case TMS:
+                        return TMSOptions.Default;
+                        
+                    case CSV:
+                        return CSVOptions.Default;
+                        
+                    case HTML:
+                        return HTMLOptions.Default;
+                        
+                    case RTF:
+                        return RTFOptions.Default;
+                        
+                    case PDF:
+                        return PDFOptions.Default;
+                        
+                    case XML:
+                        return XMLOptions.Default;
+                        
+                    case EXCEL:
+                        // if xls file, return modified option
+                        if ("xls".equalsIgnoreCase(ext))
+                            return XlsOptions.Default.withXlsFormat();
+                        else
+                            return XlsOptions.Default;
+                        
+                    default:
+                        break;
+                }
+            }
+            
+            return null;
+        }
+        else
+            return TMSOptions.Default;
+    }
+    
+    private static final Map<String, IOFileFormat> sf_FileFormatMap = new HashMap<String, IOFileFormat>();
+    
     private Table m_table;
     private IOOptions m_options;
     private File m_file;
@@ -43,7 +104,7 @@ public class TableExportAdapter
         
         // select default options, if none provided
         if (options == null) {
-            m_options = IOFileFormat.generateOptionsFromFileExtension(m_file);
+            m_options = TableExportAdapter.generateOptionsFromFileExtension(m_file);
             
             if (m_options == null)
                 throw new UnimplementedException(String.format("No support for writting %s", fileName));

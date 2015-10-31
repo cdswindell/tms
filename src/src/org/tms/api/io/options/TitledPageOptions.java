@@ -1,8 +1,15 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.IOFileFormat;
 import org.tms.io.options.OptionEnum;
 
+/**
+ * An {@link IOOptions} where the output can be titled.
+ * 
+ * @param <E> the type of {@link IOOptions} in this {@code TitledPageOptions}
+ * <p>
+ * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ */
 public abstract class TitledPageOptions<E extends TitledPageOptions<E>> 
     extends StyledPageOptions<E>
     implements TitleableOption
@@ -28,7 +35,7 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
               ignoreEmptyRows, ignoreEmptyCols, colWidthPx, defaultFontSize, defaultFontFamily);
     }
 
-    public TitledPageOptions(final TitledPageOptions<E> format)
+    protected TitledPageOptions(final TitledPageOptions<E> format)
     {
         super(format);
     }
@@ -40,6 +47,9 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
     }
 
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public String getTitle()
     {
         return (String)get(Options.Title);
@@ -51,20 +61,31 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
     }
 
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public boolean hasTitle()
     {
         String title = getTitle();
         return title != null && title.trim().length() > 0;
     }
 
-    public E withTitle(String t)
+    /**
+     * Assign a title string to display in the output on export.
+     * @param title the title string to display in the output
+     * @return a new {@code TitledPageOptions} with the specified title string
+     */
+    public E withTitle(String title)
     {
         E newOption = clone(this);
-        newOption.set(Options.Title, t);
+        newOption.set(Options.Title, title);
         return newOption;
     }
     
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public int getTitleFontSize()
     {
         Object d = get(Options.TitleFontSize);
@@ -79,6 +100,11 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
         set(Options.TitleFontSize, i);
     }
     
+    /**
+     * Set the font size, in pixels, to use when drawing the title string on export.
+     * @param f the new title font size, in pixels
+     * @return a new {@code TitledPageOptions} with the specified title font size
+     */
     public E withTitleFontSize(int f)
     {
         E newOptions = clone(this);

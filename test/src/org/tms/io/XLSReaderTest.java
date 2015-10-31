@@ -51,7 +51,7 @@ public class XLSReaderTest extends BaseTest
         assertNotNull(tc);
         assertThat(tc.getNumTables(), is(0));
         
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMulti), tc, XlsOptions.Default.withRowNames(false)); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMulti), tc, XlsOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         testMultiSheetImport(tc, r);
@@ -64,7 +64,7 @@ public class XLSReaderTest extends BaseTest
         assertNotNull(tc);
         assertThat(tc.getNumTables(), is(0));
         
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMultiXLS), tc, XlsOptions.Default.withRowNames(false)); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMultiXLS), tc, XlsOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         testMultiSheetImport(tc, r);
@@ -140,7 +140,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportMathSheet() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMath), XlsOptions.Default.withRowNames(false)); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMath), XlsOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         testImportMathSheet(r);
@@ -210,7 +210,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportLogicalSheet() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLELogical), XlsOptions.Default.withRowNames(false)); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLELogical), XlsOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         testImportLogicalSheet(r);

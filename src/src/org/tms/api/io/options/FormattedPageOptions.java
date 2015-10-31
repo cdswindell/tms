@@ -1,6 +1,5 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.IOFileFormat;
 import org.tms.io.options.OptionEnum;
 
 public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
@@ -145,18 +144,18 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
     }
 
     @Override
-    protected void setRowNames(final boolean b)
+    protected void setRowLabels(final boolean b)
     {
-        super.setRowNames(b);
+        super.setRowLabels(b);
         
         if (!b)
             set(Options.IsStickyRowNames, false);
     }
     
     @Override
-    protected void setColumnNames(final boolean b)
+    protected void setColumnLabels(final boolean b)
     {
-        super.setColumnNames(b);
+        super.setColumnLabels(b);
         
         if (!b)
             set(Options.IsStickyColumnNames, false);
@@ -237,7 +236,7 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
     {
         set(Options.IsStickyRowNames, b);
         if (b)
-            setRowNames(true);
+            setRowLabels(true);
     }
 
     @Override
@@ -250,7 +249,7 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
     {
         set(Options.IsStickyColumnNames, b);
         if (b)
-            setColumnNames(true);
+            setColumnLabels(true);
     }
 
 }

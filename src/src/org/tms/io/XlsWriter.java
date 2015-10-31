@@ -186,14 +186,14 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         
         int rowNum = 0;
         int maxExcelCol = 0;
-        if (options().isColumnNames()) {
+        if (options().isColumnLabels()) {
             firstActiveRow = 1;
             Row headerRow = sheet.createRow(rowNum++);
             headerRow.setHeightInPoints(30);
             Cell headerCell = null;
 
             short colCnt = (short)0;
-            if (options().isRowNames()) {
+            if (options().isRowLabels()) {
                 firstActiveCol = 1;
                 headerCell = headerRow.createCell(colCnt++);
                 headerCell.setCellStyle(headingStyle);
@@ -222,7 +222,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             sheet.setRepeatingRows(CellRangeAddress.valueOf("$1:$1"));
         }
 
-        if (options().isRowNames()) {
+        if (options().isRowLabels()) {
             firstActiveCol = 1;
             int rnColWidthPx = options().getRowNameColumnWidth();
             int rnColWidth = rnColWidthPx > 0 ? (int)(0.5 + (((rnColWidthPx)/6.0) * 256)) : 10 * 256;        
@@ -241,7 +241,7 @@ public class XlsWriter extends BaseWriter<XlsOptions>
             short colCnt = 0;
             Row r = sheet.createRow(rowNum++);
             cacheRowAssociation(sheet, tr, r);
-            if (options().isRowNames()) {
+            if (options().isRowLabels()) {
                 String label = trimString(tr.getLabel());
                 if (label == null)
                     label = String.format("Row %d", rowNum - firstActiveRow);
@@ -319,11 +319,11 @@ public class XlsWriter extends BaseWriter<XlsOptions>
         processDerivations(t, wb, sheet, maxExcelCol);
 
         // Freeze pains        
-        if (options().isRowNames() && options().isColumnNames())
+        if (options().isRowLabels() && options().isColumnLabels())
             sheet.createFreezePane( 1, 1, 1, 1 );
-        else if (options().isColumnNames())
+        else if (options().isColumnLabels())
             sheet.createFreezePane( 0, 1, 0, 1 );
-        else if (options().isRowNames())
+        else if (options().isRowLabels())
             sheet.createFreezePane( 1, 0, 1, 0 );
 
         // set active cell
@@ -643,8 +643,8 @@ public class XlsWriter extends BaseWriter<XlsOptions>
                 Map<TableRowColumnElement, Integer> rowMap = m_rowMap.get(sheet);
                 Map<TableRowColumnElement, Integer> colMap = m_colMap.get(sheet);
                 
-                int topLeftRowNum = rowBounds != null ? rowMap.get(rowBounds.getFirstElement()) : options().isColumnNames() ? 1 : 0;
-                int topLeftColNum = colBounds != null ? colMap.get(colBounds.getFirstElement()) : options().isRowNames() ? 1 : 0;
+                int topLeftRowNum = rowBounds != null ? rowMap.get(rowBounds.getFirstElement()) : options().isColumnLabels() ? 1 : 0;
+                int topLeftColNum = colBounds != null ? colMap.get(colBounds.getFirstElement()) : options().isRowLabels() ? 1 : 0;
                 CellReference topLeft = new CellReference(topLeftRowNum, topLeftColNum, true, true);
 
                 

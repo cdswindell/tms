@@ -1,6 +1,5 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.IOFileFormat;
 
 
 public class XMLOptions extends IOOptions
@@ -21,40 +20,58 @@ public class XMLOptions extends IOOptions
     }
     
     @Override
-    public XMLOptions withRowNames()
+    /**
+     * {@inheritDoc} 
+     */
+    public XMLOptions withRowLabels()
     {
-        return withRowNames(true);
+        return withRowLabels(true);
     }
     
     @Override
-    public XMLOptions withRowNames(final boolean b)
+    /**
+     * {@inheritDoc} 
+     */
+    public XMLOptions withRowLabels(final boolean b)
     {
         XMLOptions newOptions = new XMLOptions(this);
-        newOptions.setRowNames(b);
+        newOptions.setRowLabels(b);
         return newOptions;
     }
     
     @Override
-    public XMLOptions withColumnNames()
+    /**
+     * {@inheritDoc} 
+     */
+    public XMLOptions withColumnLabels()
     {
         return withColumnNames(true);
     }
     
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public XMLOptions withColumnNames(final boolean b)
     {
         XMLOptions newOptions = new XMLOptions(this);
-        newOptions.setColumnNames(b);
+        newOptions.setColumnLabels(b);
         return newOptions;
     }
 
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public XMLOptions withIgnoreEmptyRows()
     {
         return withIgnoreEmptyRows(true);
     }
     
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public XMLOptions withIgnoreEmptyRows(final boolean b)
     {
         XMLOptions newOptions = new XMLOptions(this);
@@ -63,12 +80,18 @@ public class XMLOptions extends IOOptions
     } 
 
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public XMLOptions withIgnoreEmptyColumns()
     {
         return withIgnoreEmptyColumns(true);
     }
 
     @Override
+    /**
+     * {@inheritDoc} 
+     */
     public XMLOptions withIgnoreEmptyColumns(final boolean b)
     {
         XMLOptions newOptions = new XMLOptions(this);

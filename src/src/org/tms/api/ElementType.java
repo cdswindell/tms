@@ -32,7 +32,7 @@ public enum ElementType
     
     /**
      * Returns a {@link List} of {@link TableProperty}s that relate to this {@code ElementType}.
-     * @return a {@code List} of {code TableProperty}s that relate to this {@code ElementType}
+     * @return a {@code List} of {@code TableProperty}s that relate to this {@code ElementType}
      */
     public List<TableProperty> getProperties()
     {
@@ -50,7 +50,7 @@ public enum ElementType
      * Returns a {@link List} of the optional {@link TableProperty}s that relate to this {@code ElementType}.
      * Optional properties <em>may</em> but do not have to be implemented by 
      * implementations of this {@code ElementType}.
-     * @return a {@code List} of the optional {code TableProperty}s that relate to this {@code ElementType}
+     * @return a {@code List} of the optional {@code TableProperty}s that relate to this {@code ElementType}
      */
     public List<TableProperty> getOptionalProperties()
     {
@@ -68,7 +68,7 @@ public enum ElementType
      * Returns a {@link List} of the non-optional (required) {@link TableProperty}s that 
      * relate to this {@code ElementType}. Non-optional properties <em>must</em> be implemented
      * by implementations of this {@code ElementType}.
-     * @return a {@code List} of the non-optional (required) {code TableProperty}s that 
+     * @return a {@code List} of the non-optional (required) {@code TableProperty}s that 
      * relate to this {@code ElementType}
      */
     public List<TableProperty> getNonOptionalProperties()
@@ -87,7 +87,7 @@ public enum ElementType
      * Returns a {@link List} of the initializable (required) {@link TableProperty}s that 
      * relate to this {@code ElementType}. Initializable properties are have their values set
      * when the {@code ElementType} is created from a template or from the parent {@link TableContext}.
-     * @return a {@code List} of the initializable {code TableProperty}s that 
+     * @return a {@code List} of the initializable {@code TableProperty}s that 
      * relate to this {@code ElementType}
      */
     public List<TableProperty> getInitializableProperties()
@@ -106,7 +106,7 @@ public enum ElementType
      * Returns a {@link List} of the read-only {@link TableProperty}s that 
      * relate to this {@code ElementType}. Read-only properties may be queried but their values
      * cannot be changed.
-     * @return a {@code List} of the read-only {code TableProperty}s that 
+     * @return a {@code List} of the read-only {@code TableProperty}s that 
      * relate to this {@code ElementType}
      */
     public List<TableProperty> getReadOnlyProperties()

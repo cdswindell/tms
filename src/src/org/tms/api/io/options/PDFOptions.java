@@ -1,6 +1,5 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.IOFileFormat;
 
 
 public class PDFOptions extends FormattedPageOptions<PDFOptions> 

@@ -1,6 +1,5 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.IOFileFormat;
 import org.tms.io.options.OptionEnum;
 
 public abstract class StyledPageOptions<S extends StyledPageOptions<S>> 
@@ -45,21 +44,21 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
         super(format);
     }
 
-    public S withRowNames()
+    public S withRowLabels()
     {
-        return withRowNames(true);
+        return withRowLabels(true);
     }
 
     @Override
-    public S withRowNames(final boolean b)
+    public S withRowLabels(final boolean b)
     {
         S newOptions = clone(this);
-        newOptions.setRowNames(b);
+        newOptions.setRowLabels(b);
         return newOptions;
     }
 
     @Override
-    public S withColumnNames()
+    public S withColumnLabels()
     {
         return withColumnNames(true);
     }
@@ -68,7 +67,7 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     public S withColumnNames(final boolean b)
     {
         S newOptions = clone(this);
-        newOptions.setColumnNames(b);
+        newOptions.setColumnLabels(b);
         return newOptions;
     }
 

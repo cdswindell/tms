@@ -1,12 +1,16 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.IOFileFormat;
 
-
+/**
+ * 
+ */
 public class HTMLOptions extends TitledPageOptions<HTMLOptions> 
 {
     static final int DefaultHTMLFontSizePx = 12;
     
+    /**
+     * 
+     */
     public static final HTMLOptions Default = new HTMLOptions(true, true, false, false,
                                                               DefaultColumnWidthPx, DefaultHTMLFontSizePx, "Arial");
     

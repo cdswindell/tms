@@ -58,7 +58,7 @@ public class CSVReader extends BaseReader<CSVOptions>
             // and fill the table with it
             boolean firstRow = true;;
             for (CSVRecord csvRec : parser) {
-                if (options().isColumnNames() && firstRow)
+                if (options().isColumnLabels() && firstRow)
                     parseColumnHeaders(t, csvRec);
                 else {
                     if (options().isIgnoreEmptyRows() && isEmpty(csvRec))
@@ -114,7 +114,7 @@ public class CSVReader extends BaseReader<CSVOptions>
         if (csvRec != null) {
             boolean firstCol = true;
             for (String s : csvRec) {
-                if (firstCol && options().isRowNames())
+                if (firstCol && options().isRowLabels())
                     ; // noop
                 else {
                     // if s isn't null or empty, the record isn't empty

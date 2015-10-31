@@ -40,12 +40,12 @@ import net.sf.jasperreports.export.SimpleExporterInputItem;
 import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.api.io.options.DateTimeFormatOption;
+import org.tms.api.io.options.IOFileFormat;
 import org.tms.api.io.options.IOOptions;
 import org.tms.api.io.options.PageableOption;
 import org.tms.api.io.options.StyleableOption;
 import org.tms.api.io.options.TitleableOption;
 import org.tms.io.BaseWriter;
-import org.tms.io.options.IOFileFormat;
 
 
 abstract public class TMSReport
@@ -266,7 +266,7 @@ abstract public class TMSReport
             int detailBandHeight, JRDesignStyle boldStyle, float headingFontSize, int rowNameColWidth) 
     throws JRException
     {
-        if (m_options.isRowNames()) {
+        if (m_options.isRowLabels()) {
             JRDesignField jrField = new JRDesignField();
             jrField.setName(sf_RowNameFieldName);
             jrField.setValueClass(String.class);
@@ -294,7 +294,7 @@ abstract public class TMSReport
         ((JRDesignSection)jrDesign.getDetailSection()).addBand(detailBand);    
         
         //Column header
-        if (m_options.isColumnNames()) {
+        if (m_options.isColumnLabels()) {
             if (paginated && !((PageableOption)m_options).isStickyColumnNames()) {
                 JRDesignExpression firstPageOnly = new JRDesignExpression();
                 firstPageOnly.setText("$V{PAGE_NUMBER} == 1");               
@@ -424,7 +424,7 @@ abstract public class TMSReport
             detailBand.addElement(tf);
             
             // now add column heading, if one is defined
-            if (m_options.isColumnNames()) {
+            if (m_options.isColumnLabels()) {
                 String label = col.getLabel();
                 if (label == null || (label = label.trim()).length() <= 0)
                     label = String.format("Column %d", col.getIndex());

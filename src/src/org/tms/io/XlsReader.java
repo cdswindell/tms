@@ -782,7 +782,7 @@ public class XlsReader extends BaseReader<XlsOptions>
     private boolean rangeIsColumn(int rng1stRowNo, int rngLstRowNo, int colNo, AreaPtgBase rng, ParsedFormula pF)
     {
         Sheet sheet = pF.getExcelCell().getSheet();
-        int firstEffectiveRow = 0 + (options().isColumnNames() ? 1 : 0);
+        int firstEffectiveRow = 0 + (options().isColumnLabels() ? 1 : 0);
         int lastRow = sheet.getLastRowNum();
         
         for (int i = firstEffectiveRow; i < rng1stRowNo; i++) {
@@ -815,7 +815,7 @@ public class XlsReader extends BaseReader<XlsOptions>
     private boolean rangeIsRow(int rng1stColNo, int rngLstColNo, int rowNo, AreaPtgBase rng, ParsedFormula pF)
     {
         Sheet sheet = pF.getExcelCell().getSheet();
-        int firstEffectiveCol = 0 + (options().isRowNames() ? 1 : 0);
+        int firstEffectiveCol = 0 + (options().isRowLabels() ? 1 : 0);
         Row row = sheet.getRow(rowNo);
         int lastCol = row.getLastCellNum();
         
@@ -1020,8 +1020,8 @@ public class XlsReader extends BaseReader<XlsOptions>
                 cRefs[0].getRow() > -1 &&
                 cRefs[0].isColAbsolute() &&
                 cRefs[0].isRowAbsolute() &&
-                (!options().isColumnNames() || cRefs[0].getRow() > 0) &&
-                (!options().isRowNames() || cRefs[0].getCol() > 0);
+                (!options().isColumnLabels() || cRefs[0].getRow() > 0) &&
+                (!options().isRowLabels() || cRefs[0].getCol() > 0);
     }
 
     private String fetchCellComment(Cell eC, boolean removeAuthors)
@@ -1119,7 +1119,7 @@ public class XlsReader extends BaseReader<XlsOptions>
 
     private int getTmsColumnIdx(int excelColNo)
     {
-        return excelColNo + 1 - (options().isRowNames() ? 1 : 0);
+        return excelColNo + 1 - (options().isRowLabels() ? 1 : 0);
     }
 
     private org.tms.api.Column getTmsColumn(Table t, int excelColNo)
@@ -1133,7 +1133,7 @@ public class XlsReader extends BaseReader<XlsOptions>
 
     private int getTmsRowIdx(Sheet sheet, int excelRowNo)
     {
-        int idx = excelRowNo + 1 - (options().isColumnNames() ? 1 : 0);
+        int idx = excelRowNo + 1 - (options().isColumnLabels() ? 1 : 0);
         if (options().isIgnoreEmptyRows() && m_excludedRowsMap != null)
             idx -= accountForMissingElements(sheet, excelRowNo);
         

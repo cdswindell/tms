@@ -59,7 +59,7 @@ abstract class BaseReader<E extends IOOptions> extends BaseIO
      */
     public boolean isRowNames()
     {
-        return m_options.isRowNames();
+        return m_options.isRowLabels();
     }
     
     /**
@@ -68,7 +68,7 @@ abstract class BaseReader<E extends IOOptions> extends BaseIO
      */
     public boolean isColumnNames()
     {
-        return m_options.isColumnNames();
+        return m_options.isColumnLabels();
     }
     
     /**

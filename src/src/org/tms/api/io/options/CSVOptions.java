@@ -1,6 +1,5 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.IOFileFormat;
 import org.tms.io.options.OptionEnum;
 
 public class CSVOptions extends IOOptions
@@ -34,21 +33,21 @@ public class CSVOptions extends IOOptions
     }
     
     @Override
-    public CSVOptions withRowNames()
+    public CSVOptions withRowLabels()
     {
-        return withRowNames(true);
+        return withRowLabels(true);
     }
     
     @Override
-    public CSVOptions withRowNames(final boolean b)
+    public CSVOptions withRowLabels(final boolean b)
     {
         CSVOptions newOptions = new CSVOptions(this);
-        newOptions.setRowNames(b);
+        newOptions.setRowLabels(b);
         return newOptions;
     }
     
     @Override
-    public CSVOptions withColumnNames()
+    public CSVOptions withColumnLabels()
     {
         return withColumnNames(true);
     }
@@ -57,7 +56,7 @@ public class CSVOptions extends IOOptions
     public CSVOptions withColumnNames(final boolean b)
     {
         CSVOptions newOptions = new CSVOptions(this);
-        newOptions.setColumnNames(b);
+        newOptions.setColumnLabels(b);
         return newOptions;
     }
 

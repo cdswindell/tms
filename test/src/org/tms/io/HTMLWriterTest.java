@@ -119,7 +119,7 @@ public class HTMLWriterTest extends BaseTest
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         r.export(bos, HTMLOptions.Default
                 .withColumnNames(false)
-                .withRowNames(false)
+                .withRowLabels(false)
                 .withColumnWidthInInches(1)
                 .withFontFamily("Courier")
                 .withTitle("Row 2"));

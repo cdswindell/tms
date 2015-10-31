@@ -1,6 +1,5 @@
 package org.tms.api.io.options;
 
-import org.tms.io.options.IOFileFormat;
 
 
 public class TMSOptions extends IOOptions
@@ -22,21 +21,21 @@ public class TMSOptions extends IOOptions
     }
     
     @Override
-    public TMSOptions withRowNames()
+    public TMSOptions withRowLabels()
     {
-        return withRowNames(true);
+        return withRowLabels(true);
     }
     
     @Override
-    public TMSOptions withRowNames(final boolean b)
+    public TMSOptions withRowLabels(final boolean b)
     {
         TMSOptions newOptions = new TMSOptions(this);
-        newOptions.setRowNames(b);
+        newOptions.setRowLabels(b);
         return newOptions;
     }
     
     @Override
-    public TMSOptions withColumnNames()
+    public TMSOptions withColumnLabels()
     {
         return withColumnNames(true);
     }
@@ -45,7 +44,7 @@ public class TMSOptions extends IOOptions
     public TMSOptions withColumnNames(final boolean b)
     {
         TMSOptions newOptions = new TMSOptions(this);
-        newOptions.setColumnNames(b);
+        newOptions.setColumnLabels(b);
         return newOptions;
     }
 
