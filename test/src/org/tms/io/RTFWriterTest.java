@@ -44,7 +44,7 @@ public class RTFWriterTest extends BaseTest
                 .withPageNumbers(true)
                 .withDateTimeFormat(null)
                 .withIgnoreEmptyColumns()
-                .withStickyColumnNames(true)
+                .withStickyColumnLabels(true)
                 .withDefaultColumnWidthInInches(2.8)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
         bos.close();

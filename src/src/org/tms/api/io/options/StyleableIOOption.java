@@ -12,7 +12,7 @@ package org.tms.api.io.options;
  * </ul>
  * All widths and sizes are in pixels, unless otherwise noted.
  * <p>
- * <b>Note</b>: {@code StyleableOption} methods only affect export operations.
+ * <b>Note</b>: {@code StyleableIOOption} methods only affect export operations.
  * <p>
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}

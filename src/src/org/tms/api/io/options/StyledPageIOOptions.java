@@ -15,7 +15,7 @@ import org.tms.io.options.OptionEnum;
  * </ul>
  * All widths and sizes are in pixels, unless otherwise noted.
  * <p>
- * <b>Note</b>: {@code StyleableOption} methods only affect export operations.
+ * <b>Note</b>: {@code StyleableIOOption} methods only affect export operations.
  * <p>
  * @param <T> the type of {@link BaseIOOptions} in this {@code StyledPageIOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}

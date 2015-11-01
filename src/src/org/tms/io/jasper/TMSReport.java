@@ -295,7 +295,7 @@ abstract public class TMSReport
         
         //Column header
         if (m_options.isColumnLabels()) {
-            if (paginated && !((PageableIOOption)m_options).isStickyColumnNames()) {
+            if (paginated && !((PageableIOOption)m_options).isStickyColumnLabels()) {
                 JRDesignExpression firstPageOnly = new JRDesignExpression();
                 firstPageOnly.setText("$V{PAGE_NUMBER} == 1");               
                 colHeaderBand.setPrintWhenExpression(firstPageOnly);
@@ -390,7 +390,7 @@ abstract public class TMSReport
                 
                 // reset starting point for next band
                 tfX = 0;
-                if (paginated && ((PageableIOOption)m_options).isStickyRowNames()) 
+                if (paginated && ((PageableIOOption)m_options).isStickyRowLabels()) 
                     tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, 
                                       headingFontSize, rowNameColWidth);
             }

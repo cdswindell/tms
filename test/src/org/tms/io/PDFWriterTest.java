@@ -85,7 +85,7 @@ public class PDFWriterTest extends BaseTest
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
-                .withStickyColumnNames(false)
+                .withStickyColumnLabels(false)
                 .withDefaultColumnWidthInInches(2.8)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
                 .withPages(true));
@@ -111,7 +111,7 @@ public class PDFWriterTest extends BaseTest
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns(true)
-                .withStickyColumnNames(true)
+                .withStickyColumnLabels(true)
                 .withDefaultColumnWidthInInches(1)
                 .withTitle("Only Row 3")
                 .withPages(true));
@@ -137,7 +137,7 @@ public class PDFWriterTest extends BaseTest
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
-                .withStickyColumnNames(true)
+                .withStickyColumnLabels(true)
                 .withDefaultColumnWidthInInches(1)
                 .withTitle("Only Column 2")
                 .withPages(true));
