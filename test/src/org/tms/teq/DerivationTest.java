@@ -15,8 +15,8 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
-import org.tms.api.derivables.exceptions.InvalidExpressionException;
 import org.tms.api.factories.TableFactory;
+import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class DerivationTest
 {
@@ -124,7 +124,7 @@ public class DerivationTest
             c8.setDerivation("col 1");
             fail("circular derivation allowed");
         }
-        catch (InvalidExpressionException e) {
+        catch (InvalidExpressionExceptionImpl e) {
             ParseResult pr = e.getParseResult();
             assertThat(pr, notNullValue());
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.CircularReference));

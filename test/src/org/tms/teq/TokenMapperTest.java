@@ -16,8 +16,8 @@ import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
-import org.tms.api.derivables.exceptions.InvalidExpressionException;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class TokenMapperTest extends BaseTest
 {
@@ -59,7 +59,7 @@ public class TokenMapperTest extends BaseTest
             pse = new PostfixStackEvaluator("square(-6)", null);
             fail("square operator resolved");
         }
-        catch (InvalidExpressionException e) {
+        catch (InvalidExpressionExceptionImpl e) {
             ParseResult pr = e.getParseResult();
             assertThat(pr, notNullValue());
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
@@ -109,7 +109,7 @@ public class TokenMapperTest extends BaseTest
             pse = new PostfixStackEvaluator("square(-6)", null);
             fail("square operator resolved");
         }
-        catch (InvalidExpressionException e) {
+        catch (InvalidExpressionExceptionImpl e) {
             ParseResult pr = e.getParseResult();
             assertThat(pr, notNullValue());
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));
@@ -143,7 +143,7 @@ public class TokenMapperTest extends BaseTest
             pse = new PostfixStackEvaluator("square(-6)", null);
             fail("square operator resolved");
         }
-        catch (InvalidExpressionException e) {
+        catch (InvalidExpressionExceptionImpl e) {
             ParseResult pr = e.getParseResult();
             assertThat(pr, notNullValue());
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.NoSuchOperator));

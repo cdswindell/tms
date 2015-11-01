@@ -13,7 +13,7 @@ import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
-import org.tms.api.derivables.exceptions.InvalidExpressionException;
+import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class InfixExpressionParser
 {
@@ -49,7 +49,7 @@ public class InfixExpressionParser
         if (m_ifs == null) {
             ParseResult pr = parseInfixExpression();
             if (pr != null && pr.isFailure()) 
-                throw new InvalidExpressionException(pr);
+                throw new InvalidExpressionExceptionImpl(pr);
         }
         
         return m_ifs;

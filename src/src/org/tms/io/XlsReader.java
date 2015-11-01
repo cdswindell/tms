@@ -74,7 +74,6 @@ import org.tms.api.derivables.ErrorCode;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
-import org.tms.api.derivables.exceptions.InvalidExpressionException;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.factories.TableContextFactory;
@@ -83,6 +82,7 @@ import org.tms.api.io.options.XlsOptions;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.EquationStack;
 import org.tms.teq.StackType;
+import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class XlsReader extends BaseReader<XlsOptions>
 {
@@ -603,7 +603,7 @@ public class XlsReader extends BaseReader<XlsOptions>
                         try {
                             d.setDerivation(deriv);
                         }
-                        catch (InvalidExpressionException iee) {
+                        catch (InvalidExpressionExceptionImpl iee) {
                             System.out.println(iee.getMessage());
                         }
                     }

@@ -9,10 +9,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.codehaus.groovy.control.CompilationFailedException;
+import org.tms.api.derivables.InvalidOperatorException;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
-import org.tms.api.derivables.exceptions.InvalidOperatorException;
 
 public class GroovyOp extends BaseOp
 {   

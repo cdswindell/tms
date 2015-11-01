@@ -15,9 +15,9 @@ import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.ErrorCode;
-import org.tms.api.derivables.exceptions.InvalidExpressionException;
 import org.tms.api.factories.TableFactory;
 import org.tms.tds.TableImpl;
+import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class SubsetRefTest extends BaseTest
 {
@@ -148,7 +148,7 @@ public class SubsetRefTest extends BaseTest
             c.setDerivation("normalize(set 'rng1')");
             fail("Derivation succeeded");
         }
-        catch (InvalidExpressionException e) {
+        catch (InvalidExpressionExceptionImpl e) {
             ParseResult pr = e.getParseResult();
             assertThat(pr, notNullValue());
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidFunctionTarget));
@@ -159,7 +159,7 @@ public class SubsetRefTest extends BaseTest
             c.setDerivation("normalize(col 8)");
             fail("Derivation succeeded");
         }
-        catch (InvalidExpressionException e) {
+        catch (InvalidExpressionExceptionImpl e) {
             ParseResult pr = e.getParseResult();
             assertThat(pr, notNullValue());
             assertThat(pr.getParserStatusCode(), is(ParserStatusCode.InvalidFunctionTarget));

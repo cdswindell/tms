@@ -1,4 +1,4 @@
-package org.tms.api.derivables.exceptions;
+package org.tms.api.derivables;
 
 import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.exceptions.TableException;
