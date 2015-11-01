@@ -216,7 +216,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseNoColumnNames() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.Default.withColumnNames(false)); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.Default.withColumnLabels(false)); 
         assertNotNull(r);
         
         try

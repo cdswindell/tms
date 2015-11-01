@@ -22,7 +22,7 @@ public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>>
         TitleFontSize,
     }
     
-    protected abstract T clone(TitledPageIOOptions<T> model);
+    protected abstract T clone(final TitledPageIOOptions<T> model);
     
     protected TitledPageIOOptions(final IOFileFormat format,
             final boolean rowNames, 
@@ -57,7 +57,7 @@ public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>>
         return (String)get(Options.Title);
     }
 
-    protected void setTitle(String t)
+    protected void setTitle(final String t)
     {
         set(Options.Title, t);
     }
@@ -68,18 +68,18 @@ public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>>
      */
     public boolean hasTitle()
     {
-        String title = getTitle();
+        final String title = getTitle();
         return title != null && title.trim().length() > 0;
     }
 
     /**
      * Assign a title string to display in the output on export.
      * @param title the title string to display in the output
-     * @return a new {@code T} with the specified title string
+     * @return a new {@link T} with the specified title string
      */
     public T withTitle(String title)
     {
-        T newOption = clone(this);
+        final T newOption = clone(this);
         newOption.set(Options.Title, title);
         return newOption;
     }
@@ -90,7 +90,7 @@ public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>>
      */
     public int getTitleFontSize()
     {
-        Object d = get(Options.TitleFontSize);
+        final Object d = get(Options.TitleFontSize);
         return d != null ? (int)d : (int)(getDefaultFontSize() * 2);
     }
 
@@ -104,13 +104,13 @@ public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>>
     
     /**
      * Set the font size, in pixels, to use when drawing the title string on export.
-     * @param f the new title font size, in pixels
-     * @return a new {@code T} with the specified title font size
+     * @param fontSize the new title font size, in pixels
+     * @return a new {@link T} with the specified title font size
      */
-    public T withTitleFontSize(int f)
+    public T withTitleFontSize(int fontSize)
     {
-        T newOptions = clone(this);
-        newOptions.setTitleFontSize(f);
+        final T newOptions = clone(this);
+        newOptions.setTitleFontSize(fontSize);
         return newOptions;
     }
 }

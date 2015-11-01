@@ -38,7 +38,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
         IsIgnoreEmptyColumns;        
     }
     
-    protected abstract T clone(BaseIOOptions<T> model);
+    protected abstract T clone(final BaseIOOptions<T> model);
     
     protected BaseIOOptions(final IOFileFormat format, 
                      final boolean rowNames, 
@@ -120,7 +120,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
      */
     public T withColumnLabels()
     {
-        return withColumnNames(true);
+        return withColumnLabels(true);
     }
        
     /**
@@ -130,13 +130,13 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
      * column labels in the exported table are ignored and are not included in the output.
      * When importing, this means that when enabled, column labels assigned to the data in the import file
      * will be assigned to the {@link org.tms.api.Column Column}s read from the file.
-     * @param b {@code true} to include {@code Column} labels, {@code false} to ignore them
+     * @param enabled {@code true} to include {@code Column} labels, {@code false} to ignore them
      * @return a new {@link T} with column labels enabled or disabled
      */
-    public T withColumnNames(final boolean b)
+    public T withColumnLabels(final boolean enabled)
     {
-        T newOptions = clone(this);
-        newOptions.setColumnLabels(b);
+        final T newOptions = clone(this);
+        newOptions.setColumnLabels(enabled);
         return newOptions;
     }
     
@@ -150,9 +150,9 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
         return isTrue(BaseOptions.IsRowLabels);
     }
     
-    protected void setRowLabels(boolean b)
+    protected void setRowLabels(boolean enabled)
     {
-        set(BaseOptions.IsRowLabels, b);
+        set(BaseOptions.IsRowLabels, enabled);
     }
         
     /**
@@ -176,13 +176,13 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
      * row labels in the exported table are ignored and are not included in the output.
      * When importing, this means that when enabled, row labels assigned to the data in the import file
      * will be assigned to the {@link org.tms.api.Row Row}s read from the file.
-     * @param b {@code true} to include {@code Row} labels, {@code false} to ignore them
+     * @param enabled {@code true} to include {@code Row} labels, {@code false} to ignore them
      * @return a new {@link T} with row labels enabled or disabled
      */
-    public T withRowLabels(final boolean b)
+    public T withRowLabels(final boolean enabled)
     {
-        T newOptions = clone(this);
-        newOptions.setRowLabels(b);
+        final T newOptions = clone(this);
+        newOptions.setRowLabels(enabled);
         return newOptions;
     }
 
@@ -220,13 +220,13 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
      * When set to {@code false}, empty rows are included in the exported file, in a file-format-appropriate
      * manner. On import, empty {@link org.tms.api.Row Row}s are inserted into the new {@link org.tms.api.Table Table}
      * when encountered in the imported file.
-     * @param b {@code true} to import/export empty {@code Row}s, {@code false} to ignore them
+     * @param enabled {@code true} to import/export empty {@code Row}s, {@code false} to ignore them
      * @return a new {@link T} where empty rows are or are not ignored
      */
-    public T withIgnoreEmptyRows(final boolean b)
+    public T withIgnoreEmptyRows(final boolean enabled)
     {
-        T newOptions = clone(this);
-        newOptions.setIgnoreEmptyRows(b);
+        final T newOptions = clone(this);
+        newOptions.setIgnoreEmptyRows(enabled);
         return newOptions;
     } 
 
@@ -264,13 +264,13 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
      * When set to {@code false}, empty columns are included in the exported file, in a file-format-appropriate
      * manner. On import, empty {@link org.tms.api.Column Column}s are inserted into the new {@link org.tms.api.Table Table}
      * when encountered in the imported file.
-     * @param b {@code true} to import/export empty {@code Column}s, {@code false} to ignore them
+     * @param enabled {@code true} to import/export empty {@code Column}s, {@code false} to ignore them
      * @return a new {@link T} where empty columns are or are not ignored
      */
-    public T withIgnoreEmptyColumns(final boolean b)
+    public T withIgnoreEmptyColumns(final boolean enabled)
     {
-        T newOptions = clone(this);
-        newOptions.setIgnoreEmptyColumns(b);
+        final T newOptions = clone(this);
+        newOptions.setIgnoreEmptyColumns(enabled);
         return newOptions;
     } 
     
@@ -281,7 +281,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
     
     protected Object set(OptionEnum key, Object value) 
     {
-        Object oldValue = get(key);
+        final Object oldValue = get(key);
         if (value == null)
             m_options.remove(key);
         else
@@ -297,7 +297,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
     
     protected boolean isTrue(OptionEnum key) 
     {
-        Object value = get(key);
+        final Object value = get(key);
         if (value != null && Boolean.class.isAssignableFrom(value.getClass()))
             return ((Boolean)value).booleanValue();
         else

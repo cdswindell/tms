@@ -3,12 +3,12 @@ package org.tms.api.io.options;
 import org.tms.io.options.OptionEnum;
 
 /**
- * The base class that {@link BaseIOOptions} that support formatted and paged output extend.
+ * The base class that {@link BaseIOOptions} that support formatted and paged export output.
  * Format and paging elements
  * that are supported include:
  * <ul>
- * <li>page widths,</li> 
- * <li>page heights,</li>
+ * <li>page width,</li> 
+ * <li>page height,</li>
  * <li>page numbers,</li>
  * <li>paging,</li>
  * <li>sticky row labels,</li>
@@ -41,7 +41,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         IsStickyColumnLabels,
     }
 
-    protected abstract T clone(FormattedPageIOOptions<T> model);
+    protected abstract T clone(final FormattedPageIOOptions<T> model);
     
     protected FormattedPageIOOptions(final IOFileFormat format,
             final boolean rowLabels, 
@@ -79,7 +79,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
     }
 
     @Override
-    protected T clone(TitledPageIOOptions<FormattedPageIOOptions<T>> model)
+    protected T clone(final TitledPageIOOptions<FormattedPageIOOptions<T>> model)
     {
         return clone((FormattedPageIOOptions<T>)model);
     }
@@ -101,7 +101,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return dateTimeFormat != null && dateTimeFormat.trim().length() > 0;
     }
 
-    protected void setDateTimeFormat(String t)
+    protected void setDateTimeFormat(final String t)
     {
         set(Options.DateTimeFormat, t);
     }
@@ -119,7 +119,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
      */
     public T withDateTimeFormat(String pattern)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setDateTimeFormat(pattern);
         return newOptions;
     }
@@ -165,7 +165,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
      */
     public T withPages(boolean enabled)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setPaged(enabled);
         return newOptions;
     }
@@ -178,10 +178,10 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return isTrue(Options.IsPageNumbers);
     }
 
-    protected void setPageNumbers(Boolean b)
+    protected void setPageNumbers(boolean enabled)
     {
-        set(Options.IsPageNumbers, b);
-        if (b) 
+        set(Options.IsPageNumbers, enabled);
+        if (enabled) 
             setPaged(true);      
     }
 
@@ -201,7 +201,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
      */
     public T withPageNumbers(boolean enabled)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setPageNumbers(enabled);
         return newOptions;
     }
@@ -237,7 +237,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
      */
     public T withPageWidthInPx(int width)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setPageWidth(width);
         return newOptions;
     }
@@ -273,7 +273,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
      */
     public T withPageHeightInPx(int height)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setPageHeight(height);
         return newOptions;
     }
@@ -322,7 +322,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
      */
     public T withStickyRowLabels(boolean sticky)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setStickyRowLabels(sticky);
         return newOptions;
     }
@@ -376,7 +376,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
      */
     public T withStickyColumnLabels(boolean sticky)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setStickyColumnLabels(sticky);
         return newOptions;
     }

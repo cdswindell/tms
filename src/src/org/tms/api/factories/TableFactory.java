@@ -103,7 +103,7 @@ public final class TableFactory
      */    
     static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders)
     {
-        return importFile(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.Default.withRowLabels(hasRowNames).withColumnNames(hasColumnHeaders));
+        return importFile(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.Default.withRowLabels(hasRowNames).withColumnLabels(hasColumnHeaders));
     }
     
     static public Table importFile(String fileName, TableContext tc, BaseIOOptions<?> format)

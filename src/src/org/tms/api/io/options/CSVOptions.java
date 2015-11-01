@@ -56,11 +56,11 @@ public class CSVOptions extends BaseIOOptions<CSVOptions>
     @Override
     public CSVOptions withColumnLabels()
     {
-        return withColumnNames(true);
+        return withColumnLabels(true);
     }
     
     @Override
-    public CSVOptions withColumnNames(final boolean b)
+    public CSVOptions withColumnLabels(final boolean b)
     {
         CSVOptions newOptions = new CSVOptions(this);
         newOptions.setColumnLabels(b);

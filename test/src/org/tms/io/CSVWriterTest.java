@@ -306,7 +306,7 @@ public class CSVWriterTest extends BaseTest
         
         // export the file, ignoring empty rows and columns    
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        t.export(bos, CSVOptions.Default.withColumnNames(false));
+        t.export(bos, CSVOptions.Default.withColumnLabels(false));
         
         byte [] csv = bos.toByteArray();
         assertNotNull(csv);

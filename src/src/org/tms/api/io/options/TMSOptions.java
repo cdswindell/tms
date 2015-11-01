@@ -43,11 +43,11 @@ public class TMSOptions extends BaseIOOptions<TMSOptions>
     @Override
     public TMSOptions withColumnLabels()
     {
-        return withColumnNames(true);
+        return withColumnLabels(true);
     }
     
     @Override
-    public TMSOptions withColumnNames(final boolean b)
+    public TMSOptions withColumnLabels(final boolean b)
     {
         TMSOptions newOptions = new TMSOptions(this);
         newOptions.setColumnLabels(b);

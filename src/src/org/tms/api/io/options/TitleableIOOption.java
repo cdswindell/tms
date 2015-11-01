@@ -25,7 +25,7 @@ public interface TitleableIOOption
     
     /**
      * Returns the font size, in pixels, to use to display the title string in the output.
-     * @return the title font size
+     * @return the title font size, in pixels
      */
     public int getTitleFontSize();
 }

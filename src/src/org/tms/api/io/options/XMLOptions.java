@@ -51,14 +51,14 @@ public class XMLOptions extends BaseIOOptions<XMLOptions>
      */
     public XMLOptions withColumnLabels()
     {
-        return withColumnNames(true);
+        return withColumnLabels(true);
     }
     
     @Override
     /**
      * {@inheritDoc} 
      */
-    public XMLOptions withColumnNames(final boolean b)
+    public XMLOptions withColumnLabels(final boolean b)
     {
         XMLOptions newOptions = new XMLOptions(this);
         newOptions.setColumnLabels(b);

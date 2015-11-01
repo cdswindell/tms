@@ -39,7 +39,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         FontFamily;
     }
 
-    protected abstract T clone(StyledPageIOOptions<T> model);
+    protected abstract T clone(final StyledPageIOOptions<T> model);
     
     protected StyledPageIOOptions(final IOFileFormat format,
             final boolean rowNames, 
@@ -65,7 +65,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
     }
 
     @Override
-    protected T clone(BaseIOOptions<T> model)
+    protected T clone(final BaseIOOptions<T> model)
     {
         return clone((StyledPageIOOptions<T>) model);
     }
@@ -75,7 +75,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public int getDefaultColumnWidth()
     {
-        Object d = get(Options.ColumnWidth);
+        final Object d = get(Options.ColumnWidth);
         return d != null ? (int)d : 0;
     }
 
@@ -101,7 +101,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public T withDefaultColumnWidthInPx(int colWidth)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setColumnWidth(colWidth);
         return newOptions;
     }
@@ -112,7 +112,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public int getRowLabelColumnWidth()
     {
-        Object d = get(Options.RowLabelColumnWidth);
+        final Object d = get(Options.RowLabelColumnWidth);
         return d != null ? (int)d : 0;
     }
 
@@ -138,7 +138,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public T withRowLabelColumnWidthInPx(int colWidth)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setRowLabelColumnWidth(colWidth);
         return newOptions;
     }
@@ -148,7 +148,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public int getDefaultFontSize()
     {
-        Object d = get(Options.DefaultFontSize);
+        final Object d = get(Options.DefaultFontSize);
         return d != null ? (int)d : DefaultFontSizePx;
     }
 
@@ -167,7 +167,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public T withDefaultFontSize(int fontSize)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setDefaultFontSize(fontSize);
         return newOptions;
     }
@@ -177,7 +177,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public int getHeadingFontSize()
     {
-        Object d = get(Options.HeadingFontSize);
+        final Object d = get(Options.HeadingFontSize);
         return d != null ? (int)d : (int)(getDefaultFontSize() * 1.2);
     }
 
@@ -196,7 +196,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public T withHeadingFontSize(int fontSize)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setHeadingFontSize(fontSize);
         return newOptions;
     }
@@ -228,7 +228,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
      */
     public T withFontFamily(String fontFamily)
     {
-        T newOptions = clone(this);
+        final T newOptions = clone(this);
         newOptions.setFontFamily(fontFamily);
         return newOptions;
     }

@@ -90,7 +90,7 @@ public class HTMLWriterTest extends BaseTest
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         s.export(bos, HTMLOptions.Default
                 .withIgnoreEmptyColumns()
-                .withColumnNames(false)
+                .withColumnLabels(false)
                 .withRowLabelColumnWidthInInches(1.1)
                 .withDefaultColumnWidthInInches(2)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
@@ -118,7 +118,7 @@ public class HTMLWriterTest extends BaseTest
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         r.export(bos, HTMLOptions.Default
-                .withColumnNames(false)
+                .withColumnLabels(false)
                 .withRowLabels(false)
                 .withDefaultColumnWidthInInches(1)
                 .withFontFamily("Courier")
