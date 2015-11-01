@@ -106,7 +106,7 @@ public final class TableFactory
         return importFile(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.Default.withRowLabels(hasRowNames).withColumnNames(hasColumnHeaders));
     }
     
-    static public Table importFile(String fileName, TableContext tc, IOOptions format)
+    static public Table importFile(String fileName, TableContext tc, IOOptions<?> format)
     {
         if (format == null)
             throw new IllegalArgumentException("Format argument cannot be null");

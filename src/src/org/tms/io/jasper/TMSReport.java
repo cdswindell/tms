@@ -92,7 +92,7 @@ abstract public class TMSReport
     
     private BaseWriter<?> m_writer;
     private Table m_table;
-    private IOOptions m_options;
+    private IOOptions<?> m_options;
     
     private Map<Column, JRField> m_colFieldMap;
     private Map<String, Object> m_jrParams;
@@ -139,7 +139,7 @@ abstract public class TMSReport
         return m_table;
     }
     
-    IOOptions getOptions()
+    IOOptions<?> getOptions()
     {
         return m_options;
     }

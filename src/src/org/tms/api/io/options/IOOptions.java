@@ -21,97 +21,12 @@ import org.tms.io.options.OptionEnum;
  * Each concrete class implementing {@code IOOptions} or one of its super-classes defines
  * a {@code public static} instance named {@code Default} which can be further modified, as needed.
  * <p>
+ * @param <T> the type of {@link IOOptions} in this {@code IOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public abstract class IOOptions
+public abstract class IOOptions<T extends IOOptions<T>>
 {          
-    /**
-     * Returns a new {@link IOOptions} with row labels enabled. When
-     * exporting, this means that labels assigned to the {@link org.tms.api.Row Row}s
-     * in the exported {@link org.tms.api.Table Table} will be included in the output.
-     * When importing, this means that row labels assigned to the data in the import file
-     * will be assigned to the {@link org.tms.api.Row Row}s read from the file.
-     * @return a new {@link IOOptions} with row labels enabled
-     */
-    abstract public IOOptions withRowLabels();
-    
-    /**
-     * Returns a new {@link IOOptions} with row labels enabled or disabled, as per the
-     * supplied parameter {@code b}. When
-     * exporting, this means that when enabled, labels assigned to the {@link org.tms.api.Row Row}s
-     * in the exported {@link org.tms.api.Table Table} will be included in the output. When disabled,
-     * row labels in the exported table are ignored and are not included in the output.
-     * When importing, this means that when enabled, row labels assigned to the data in the import file
-     * will be assigned to the {@link org.tms.api.Row Row}s read from the file.
-     * @param b {@code true} to include {@code Row} labels, {@code false} to ignore them
-     * @return a new {@link IOOptions} with row labels enabled or disabled
-     */
-    abstract public IOOptions withRowLabels(final boolean b);
-    
-    /**
-     * Returns a new {@link IOOptions} with column labels enabled. When
-     * exporting, this means that labels assigned to the {@link org.tms.api.Column Column}s
-     * in the exported {@link org.tms.api.Table Table} will be included in the output.
-     * When importing, this means that column labels assigned to the data in the import file
-     * will be assigned to the {@link org.tms.api.Column Column}s read from the file.
-     * @return a new {@link IOOptions} with column labels enabled
-     */
-    abstract public IOOptions withColumnLabels();
-        
-    /**
-     * Returns a new {@link IOOptions} with column labels enabled or disabled, as per the
-     * supplied parameter {@code b}. When
-     * exporting, this means that when enabled, labels assigned to the {@link org.tms.api.Column Column}s
-     * in the exported {@link org.tms.api.Table Table} will be included in the output. When disabled,
-     * column labels in the exported table are ignored and are not included in the output.
-     * When importing, this means that when enabled, column labels assigned to the data in the import file
-     * will be assigned to the {@link org.tms.api.Column Column}s read from the file.
-     * @param b {@code true} to include {@code Column} labels, {@code false} to ignore them
-     * @return a new {@link IOOptions} with column labels enabled or disabled
-     */
-    abstract public IOOptions withColumnNames(final boolean b);
-    
-    /**
-     * Returns a new {@link IOOptions} where empty rows in the imported file are ignored, and where
-     * empty {@link org.tms.api.Row Row}s in a {@link org.tms.api.Table Table} are ignored and not
-     * included in the export file. 
-     * @return a new {@link IOOptions} where empty rows are ignored
-     */
-    abstract public IOOptions withIgnoreEmptyRows();
-    
-    /**
-     * Sets the behavior this {@link IOOptions} uses to handle empty rows. When set to {@code true},
-     * empty rows in the source {@link org.tms.api.Table Table} are ignored (not written to the output file). 
-     * On import, empty rows in the source file are ignored.
-     * When set to {@code false}, empty rows are included in the exported file, in a file-format-appropriate
-     * manner. On import, empty {@link org.tms.api.Row Row}s are inserted into the new {@link org.tms.api.Table Table}
-     * when encountered in the imported file.
-     * @param b {@code true} to import/export empty {@code Row}s, {@code false} to ignore them
-     * @return a new {@link IOOptions} where empty rows are or are not ignored
-     */
-    abstract public IOOptions withIgnoreEmptyRows(final boolean b);
-    
-    /**
-     * Returns a new {@link IOOptions} where empty columns in the imported file are ignored, and where
-     * empty {@link org.tms.api.Column Column}s in a {@link org.tms.api.Table Table} are ignored and not
-     * included in the export file. 
-     * @return a new {@link IOOptions} where empty columns are ignored
-     */
-    abstract public IOOptions withIgnoreEmptyColumns();
-    
-    /**
-     * Sets the behavior this {@link IOOptions} uses to handle empty columns. When set to {@code true},
-     * empty columns in the source {@link org.tms.api.Table Table} are ignored (not written to the output file). 
-     * On import, empty columns in the source file are ignored.
-     * When set to {@code false}, empty columns are included in the exported file, in a file-format-appropriate
-     * manner. On import, empty {@link org.tms.api.Column Column}s are inserted into the new {@link org.tms.api.Table Table}
-     * when encountered in the imported file.
-     * @param b {@code true} to import/export empty {@code Column}s, {@code false} to ignore them
-     * @return a new {@link IOOptions} where empty columns are or are not ignored
-     */
-    abstract public IOOptions withIgnoreEmptyColumns(final boolean b);
-    
     protected Map<OptionEnum, Object> m_options;
     
     private enum BaseOptions implements OptionEnum 
@@ -122,6 +37,8 @@ public abstract class IOOptions
         IsIgnoreEmptyRows,
         IsIgnoreEmptyColumns;        
     }
+    
+    protected abstract T clone(IOOptions<T> model);
     
     protected IOOptions(final IOFileFormat format, 
                      final boolean rowNames, 
@@ -138,7 +55,7 @@ public abstract class IOOptions
         set(BaseOptions.IsIgnoreEmptyColumns, ignoreEmptyColumns);
     }
     
-    protected IOOptions(final IOOptions format)
+    protected IOOptions(final IOOptions<T> format)
     {
         m_options = new HashMap<OptionEnum, Object>();
         for (Entry<OptionEnum, Object> e : format.m_options.entrySet()) {
@@ -148,8 +65,8 @@ public abstract class IOOptions
     
     /**
      * Return the {@link IOFileFormat} enum representing the file format associated with this
-     * {@code IOOptions}. 
-     * @return the {@code IOFileFormat} associated with this {@code IOOptions}
+     * {@code T}. 
+     * @return the {@code IOFileFormat} associated with this {@code T}
      */
     public IOFileFormat getFileFormat()
     {
@@ -157,12 +74,12 @@ public abstract class IOOptions
     }
     
     /**
-     * Returns {@code true} if this {@code IOOptions} supports import. Currently,
+     * Returns {@code true} if this {@code T} supports import. Currently,
      * {@link CSVOptions}, {@link XlsOptions}, and {@link XMLOptions} all support import, 
      * meaning that TMS {@link org.tms.api.Table Table}s can be imported from
      * comma separated value (CSV) files, Excel files (both xls and xlsx formatsare supported),
      * and XML documents.
-     * @return {@code true} if this {@code IOOptions} supports import
+     * @return {@code true} if this {@code T} supports import
      */
     public boolean canImport()
     {
@@ -170,8 +87,8 @@ public abstract class IOOptions
     }
     
     /**
-     * Returns {@code true} if this {@code IOOptions} supports export.
-     * @return {@code true} if this {@code IOOptions} supports export
+     * Returns {@code true} if this {@code T} supports export.
+     * @return {@code true} if this {@code T} supports export
      */
     public boolean canExport()
     {
@@ -179,9 +96,9 @@ public abstract class IOOptions
     }
     
     /**
-     * Returns {@code true} if this {@code IOOptions} is configured to import or export
+     * Returns {@code true} if this {@code T} is configured to import or export
      * TMS {@link org.tms.api.Column Column} labels.
-     * @return {@code true} if this {@code IOOptions} imports/export {@code Column} labels
+     * @return {@code true} if this {@code T} imports/export {@code Column} labels
      */
     public boolean isColumnLabels()
     {
@@ -194,9 +111,39 @@ public abstract class IOOptions
     }
     
     /**
-     * Returns {@code true} if this {@code IOOptions} is configured to import or export
+     * Returns a new {@link T} with column labels enabled. When
+     * exporting, this means that labels assigned to the {@link org.tms.api.Column Column}s
+     * in the exported {@link org.tms.api.Table Table} will be included in the output.
+     * When importing, this means that column labels assigned to the data in the import file
+     * will be assigned to the {@link org.tms.api.Column Column}s read from the file.
+     * @return a new {@link T} with column labels enabled
+     */
+    public T withColumnLabels()
+    {
+        return withColumnNames(true);
+    }
+       
+    /**
+     * Returns a new {@link T} with column labels enabled or disabled. When
+     * exporting, this means that when enabled, labels assigned to the {@link org.tms.api.Column Column}s
+     * in the exported {@link org.tms.api.Table Table} will be included in the output. When disabled,
+     * column labels in the exported table are ignored and are not included in the output.
+     * When importing, this means that when enabled, column labels assigned to the data in the import file
+     * will be assigned to the {@link org.tms.api.Column Column}s read from the file.
+     * @param b {@code true} to include {@code Column} labels, {@code false} to ignore them
+     * @return a new {@link T} with column labels enabled or disabled
+     */
+    public T withColumnNames(final boolean b)
+    {
+        T newOptions = clone(this);
+        newOptions.setColumnLabels(b);
+        return newOptions;
+    }
+    
+    /**
+     * Returns {@code true} if this {@code T} is configured to import or export
      * TMS {@link org.tms.api.Row Row} labels.
-     * @return {@code true} if this {@code IOOptions} imports/export {@code Row} labels
+     * @return {@code true} if this {@code T} imports/export {@code Row} labels
      */
     public boolean isRowLabels()
     {
@@ -207,9 +154,40 @@ public abstract class IOOptions
     {
         set(BaseOptions.IsRowLabels, b);
     }
-    
+        
     /**
-     * Returns {@code true} if this {@code IOOptions} is configured to ignore empty 
+     * Returns a new {@link T} with row labels enabled. When
+     * exporting, this means that labels assigned to the {@link org.tms.api.Row Row}s
+     * in the exported {@link org.tms.api.Table Table} will be included in the output.
+     * When importing, this means that row labels assigned to the data in the import file
+     * will be assigned to the {@link org.tms.api.Row Row}s read from the file.
+     * @return a new {@link T} with row labels enabled
+     */
+    public T withRowLabels()
+    {
+        return withRowLabels(true);
+    }
+
+    /**
+     * Returns a new {@link T} with row labels enabled or disabled, as per the
+     * supplied parameter {@code b}. When
+     * exporting, this means that when enabled, labels assigned to the {@link org.tms.api.Row Row}s
+     * in the exported {@link org.tms.api.Table Table} will be included in the output. When disabled,
+     * row labels in the exported table are ignored and are not included in the output.
+     * When importing, this means that when enabled, row labels assigned to the data in the import file
+     * will be assigned to the {@link org.tms.api.Row Row}s read from the file.
+     * @param b {@code true} to include {@code Row} labels, {@code false} to ignore them
+     * @return a new {@link T} with row labels enabled or disabled
+     */
+    public T withRowLabels(final boolean b)
+    {
+        T newOptions = clone(this);
+        newOptions.setRowLabels(b);
+        return newOptions;
+    }
+
+    /**
+     * Returns {@code true} if this {@code T} is configured to ignore empty 
      * {@link org.tms.api.Row Row}s
      * when importing/exporting TMS {@link org.tms.api.Table Table}s.
      * @return {@code true} if empty {@code Row}s are ignored on import/export
@@ -225,7 +203,35 @@ public abstract class IOOptions
     }
     
     /**
-     * Returns {@code true} if this {@code IOOptions} is configured to ignore empty 
+     * Returns a new {@link T} where empty rows in the imported file are ignored, and where
+     * empty {@link org.tms.api.Row Row}s in a {@link org.tms.api.Table Table} are ignored and not
+     * included in the export file. 
+     * @return a new {@link T} where empty rows are ignored
+     */
+    public T withIgnoreEmptyRows()
+    {
+        return withIgnoreEmptyRows(true);
+    }
+    
+    /**
+     * Sets the behavior this {@link T} uses to handle empty rows. When set to {@code true},
+     * empty rows in the source {@link org.tms.api.Table Table} are ignored (not written to the output file). 
+     * On import, empty rows in the source file are ignored.
+     * When set to {@code false}, empty rows are included in the exported file, in a file-format-appropriate
+     * manner. On import, empty {@link org.tms.api.Row Row}s are inserted into the new {@link org.tms.api.Table Table}
+     * when encountered in the imported file.
+     * @param b {@code true} to import/export empty {@code Row}s, {@code false} to ignore them
+     * @return a new {@link T} where empty rows are or are not ignored
+     */
+    public T withIgnoreEmptyRows(final boolean b)
+    {
+        T newOptions = clone(this);
+        newOptions.setIgnoreEmptyRows(b);
+        return newOptions;
+    } 
+
+    /**
+     * Returns {@code true} if this {@code T} is configured to ignore empty 
      * {@link org.tms.api.Column Column}s
      * when importing/exporting TMS {@link org.tms.api.Table Table}s.
      * @return {@code true} if empty {@code Column}s are ignored on import/export
@@ -239,6 +245,34 @@ public abstract class IOOptions
     {
         set(BaseOptions.IsIgnoreEmptyColumns, b);
     }
+    
+    /**
+     * Returns a new {@link T} where empty columns in the imported file are ignored, and where
+     * empty {@link org.tms.api.Column Column}s in a {@link org.tms.api.Table Table} are ignored and not
+     * included in the export file. 
+     * @return a new {@link T} where empty columns are ignored
+     */
+    public T withIgnoreEmptyColumns()
+    {
+        return withIgnoreEmptyColumns(true);
+    }
+    
+    /**
+     * Sets the behavior this {@link T} uses to handle empty columns. When set to {@code true},
+     * empty columns in the source {@link org.tms.api.Table Table} are ignored (not written to the output file). 
+     * On import, empty columns in the source file are ignored.
+     * When set to {@code false}, empty columns are included in the exported file, in a file-format-appropriate
+     * manner. On import, empty {@link org.tms.api.Column Column}s are inserted into the new {@link org.tms.api.Table Table}
+     * when encountered in the imported file.
+     * @param b {@code true} to import/export empty {@code Column}s, {@code false} to ignore them
+     * @return a new {@link T} where empty columns are or are not ignored
+     */
+    public T withIgnoreEmptyColumns(final boolean b)
+    {
+        T newOptions = clone(this);
+        newOptions.setIgnoreEmptyColumns(b);
+        return newOptions;
+    } 
     
     protected Object get(OptionEnum key) 
     {

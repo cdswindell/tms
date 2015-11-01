@@ -152,7 +152,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
      */    
 
     @Override
-    public void export(String fileName, IOOptions options) 
+    public void export(String fileName, IOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new ColumnExportAdapter(this, fileName, options);
@@ -160,7 +160,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     }
 
     @Override
-    public void export(OutputStream out, IOOptions options) 
+    public void export(OutputStream out, IOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new ColumnExportAdapter(this, out, options);

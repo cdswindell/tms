@@ -13,14 +13,14 @@ public class RowExportAdapter extends TableExportAdapter
 {
     private Row m_row;
     
-    public RowExportAdapter(Row r, String fileName, IOOptions options) 
+    public RowExportAdapter(Row r, String fileName, IOOptions<?> options) 
     throws IOException
     {
         super(r.getTable(), fileName, options);
         m_row = r;
     }
 
-    public RowExportAdapter(Row r, OutputStream out, IOOptions options) 
+    public RowExportAdapter(Row r, OutputStream out, IOOptions<?> options) 
     throws IOException
     {
         super(r.getTable(), out, options);

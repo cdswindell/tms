@@ -13,14 +13,14 @@ public class ColumnExportAdapter extends TableExportAdapter
 {
     private Column m_col;
     
-    public ColumnExportAdapter(Column c, String fileName, IOOptions options) 
+    public ColumnExportAdapter(Column c, String fileName, IOOptions<?> options) 
     throws IOException
     {
         super(c.getTable(), fileName, options);
         m_col = c;
     }
 
-    public ColumnExportAdapter(Column c, OutputStream out, IOOptions options) 
+    public ColumnExportAdapter(Column c, OutputStream out, IOOptions<?> options) 
     throws IOException
     {
         super(c.getTable(), out, options);

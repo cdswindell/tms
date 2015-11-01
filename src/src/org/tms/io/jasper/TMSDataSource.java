@@ -19,7 +19,7 @@ public class TMSDataSource implements JRDataSource, JRRewindableDataSource
     private TMSReport m_report;
     private BaseWriter<?> m_writer;
     private TableExportAdapter m_exportAdapter;
-    private IOOptions m_options;
+    private IOOptions<?> m_options;
     
     private int m_maxRows;
     private int m_rowIndex;

@@ -76,7 +76,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
      * Class-specific methods
      */   
     @Override
-    public void export(String fileName, IOOptions options) 
+    public void export(String fileName, IOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new RowExportAdapter(this, fileName, options);
@@ -84,7 +84,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
     }
 
     @Override
-    public void export(OutputStream out, IOOptions options) 
+    public void export(OutputStream out, IOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new RowExportAdapter(this, out, options);

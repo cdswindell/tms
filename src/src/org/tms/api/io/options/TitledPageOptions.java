@@ -7,13 +7,13 @@ import org.tms.io.options.OptionEnum;
  * <p>
  * <b>Note</b>: {@code TitledPageOptions} methods only affect export operations.
  * <p>
- * @param <E> the type of {@link IOOptions} in this {@code TitledPageOptions}
+ * @param <T> the type of {@link IOOptions} in this {@code TitledPageOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  * @see TitleableOption
  */
-public abstract class TitledPageOptions<E extends TitledPageOptions<E>> 
-    extends StyledPageOptions<E>
+public abstract class TitledPageOptions<T extends TitledPageOptions<T>> 
+    extends StyledPageOptions<T>
     implements TitleableOption
 {
     private enum Options implements OptionEnum 
@@ -22,7 +22,7 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
         TitleFontSize,
     }
     
-    protected abstract E clone(TitledPageOptions<E> model);
+    protected abstract T clone(TitledPageOptions<T> model);
     
     protected TitledPageOptions(final IOFileFormat format,
             final boolean rowNames, 
@@ -37,15 +37,15 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
               ignoreEmptyRows, ignoreEmptyCols, colWidthPx, defaultFontSize, defaultFontFamily);
     }
 
-    protected TitledPageOptions(final TitledPageOptions<E> format)
+    protected TitledPageOptions(final TitledPageOptions<T> format)
     {
         super(format);
     }
 
     @Override
-    protected E clone(StyledPageOptions<E> model)
+    protected T clone(StyledPageOptions<T> model)
     {
-        return clone((TitledPageOptions<E>) model);
+        return clone((TitledPageOptions<T>) model);
     }
 
     @Override
@@ -75,11 +75,11 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
     /**
      * Assign a title string to display in the output on export.
      * @param title the title string to display in the output
-     * @return a new {@code TitledPageOptions} with the specified title string
+     * @return a new {@code T} with the specified title string
      */
-    public E withTitle(String title)
+    public T withTitle(String title)
     {
-        E newOption = clone(this);
+        T newOption = clone(this);
         newOption.set(Options.Title, title);
         return newOption;
     }
@@ -105,11 +105,11 @@ public abstract class TitledPageOptions<E extends TitledPageOptions<E>>
     /**
      * Set the font size, in pixels, to use when drawing the title string on export.
      * @param f the new title font size, in pixels
-     * @return a new {@code TitledPageOptions} with the specified title font size
+     * @return a new {@code T} with the specified title font size
      */
-    public E withTitleFontSize(int f)
+    public T withTitleFontSize(int f)
     {
-        E newOptions = clone(this);
+        T newOptions = clone(this);
         newOptions.setTitleFontSize(f);
         return newOptions;
     }

@@ -174,14 +174,14 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
      * Class-specific methods
      */
     @Override
-    public void export(String fileName, IOOptions options) throws IOException
+    public void export(String fileName, IOOptions<?> options) throws IOException
     {
         TableExportAdapter writer = new SubsetExportAdapter(this, fileName, options);
         writer.export();
     }
     
     @Override
-    public void export(OutputStream out, IOOptions options) 
+    public void export(OutputStream out, IOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new SubsetExportAdapter(this, out, options);

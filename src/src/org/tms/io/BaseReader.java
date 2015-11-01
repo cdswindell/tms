@@ -9,7 +9,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.io.options.IOOptions;
 
-abstract class BaseReader<E extends IOOptions> extends BaseIO
+abstract class BaseReader<E extends IOOptions<?>> extends BaseIO
 {
     private File m_inputFile;
     private E m_options;

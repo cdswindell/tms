@@ -25,7 +25,7 @@ import org.tms.api.io.options.XlsOptions;
 
 public class TableExportAdapter
 {
-    public static IOOptions generateOptionsFromFileExtension(File file)
+    public static IOOptions<?> generateOptionsFromFileExtension(File file)
     {
         if (sf_FileFormatMap.isEmpty()) {
             for (IOFileFormat ff : IOFileFormat.values()) {
@@ -81,12 +81,12 @@ public class TableExportAdapter
     private static final Map<String, IOFileFormat> sf_FileFormatMap = new HashMap<String, IOFileFormat>();
     
     private Table m_table;
-    private IOOptions m_options;
+    private IOOptions<?> m_options;
     private File m_file;
     private OutputStream m_output;
     private boolean m_isFileBased;
     
-    public TableExportAdapter(Table t, String fileName, IOOptions options) 
+    public TableExportAdapter(Table t, String fileName, IOOptions<?> options) 
     throws IOException
     {
         if (t == null)
@@ -120,7 +120,7 @@ public class TableExportAdapter
         m_isFileBased = true;
     }
 
-    public TableExportAdapter(Table t, OutputStream out, IOOptions options) 
+    public TableExportAdapter(Table t, OutputStream out, IOOptions<?> options) 
     throws IOException
     {
         if (options == null)

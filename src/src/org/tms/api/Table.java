@@ -407,10 +407,10 @@ public interface Table extends TableElement, InitializableTableProperties
      * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
      * @throws IOException if {@code fileName} cannot be created
      */
-    public void export(String fileName, IOOptions options) 
+    public void export(String fileName, IOOptions<?> options) 
     throws IOException;
     
-    public void export(OutputStream out, IOOptions options) 
+    public void export(OutputStream out, IOOptions<?> options) 
     throws IOException;
     
     /**

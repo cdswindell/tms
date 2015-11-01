@@ -348,7 +348,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
      */
     
     @Override
-    public void export(String fileName, IOOptions options) 
+    public void export(String fileName, IOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new TableExportAdapter(this, fileName, options);
@@ -356,7 +356,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
 
     @Override
-    public void export(OutputStream out, IOOptions options) 
+    public void export(OutputStream out, IOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new TableExportAdapter(this, out, options);

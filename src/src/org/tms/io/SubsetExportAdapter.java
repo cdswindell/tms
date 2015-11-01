@@ -13,14 +13,14 @@ public class SubsetExportAdapter extends TableExportAdapter
 {
     private Subset m_subset;
     
-    public SubsetExportAdapter(Subset s, String fileName, IOOptions options) 
+    public SubsetExportAdapter(Subset s, String fileName, IOOptions<?> options) 
     throws IOException
     {
         super(s.getTable(), fileName, options);
         m_subset = s;
     }
 
-    public SubsetExportAdapter(Subset s, OutputStream out, IOOptions options) 
+    public SubsetExportAdapter(Subset s, OutputStream out, IOOptions<?> options) 
     throws IOException
     {
         super(s.getTable(), out, options);

@@ -2,7 +2,7 @@ package org.tms.api.io.options;
 
 
 
-public class XMLOptions extends IOOptions
+public class XMLOptions extends IOOptions<XMLOptions>
 {
     public static final XMLOptions Default = new XMLOptions(true, true, false, false);
 
@@ -17,6 +17,12 @@ public class XMLOptions extends IOOptions
     private XMLOptions (final XMLOptions format)
     {
         super(format);
+    }
+    
+    @Override
+    protected XMLOptions clone(final IOOptions<XMLOptions> model)
+    {
+        return new XMLOptions((XMLOptions)model);
     }
     
     @Override

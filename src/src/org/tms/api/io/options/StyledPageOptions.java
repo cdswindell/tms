@@ -17,13 +17,13 @@ import org.tms.io.options.OptionEnum;
  * <p>
  * <b>Note</b>: {@code StyleableOption} methods only affect export operations.
  * <p>
- * @param <S> the type of {@link IOOptions} in this {@code StyledPageOptions}
+ * @param <T> the type of {@link IOOptions} in this {@code StyledPageOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  * @see StyleableOption
  */
-public abstract class StyledPageOptions<S extends StyledPageOptions<S>> 
-    extends IOOptions 
+public abstract class StyledPageOptions<T extends StyledPageOptions<T>> 
+    extends IOOptions<T> 
     implements StyleableOption
 {
     static final int DefaultColumnWidthPx = 65;
@@ -39,7 +39,7 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
         FontFamily;
     }
 
-    protected abstract S clone(StyledPageOptions<S> model);
+    protected abstract T clone(StyledPageOptions<T> model);
     
     protected StyledPageOptions(final IOFileFormat format,
             final boolean rowNames, 
@@ -59,90 +59,16 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
         set(Options.DefaultFontSize, defaultFontSize);
     }
 
-    protected StyledPageOptions(final StyledPageOptions<S> format)
+    protected StyledPageOptions(final StyledPageOptions<T> format)
     {
         super(format);
     }
 
-    /**
-     * {@inheritDoc} 
-     * @return a new {@link StyledPageOptions} with row labels enabled
-     */
-    public S withRowLabels()
+    @Override
+    protected T clone(IOOptions<T> model)
     {
-        return withRowLabels(true);
+        return clone((StyledPageOptions<T>) model);
     }
-
-    /**
-     * {@inheritDoc} 
-     * @return a new {@link StyledPageOptions} with row labels enabled or disabled
-     */
-    public S withRowLabels(final boolean b)
-    {
-        S newOptions = clone(this);
-        newOptions.setRowLabels(b);
-        return newOptions;
-    }
-
-    /**
-     * {@inheritDoc} 
-     * @return a new {@link StyledPageOptions} with column labels enabled
-     */
-    public S withColumnLabels()
-    {
-        return withColumnNames(true);
-    }
-
-    /**
-     * {@inheritDoc} 
-     * @return a new {@link StyledPageOptions} with column labels enabled or disabled
-     */
-    public S withColumnNames(final boolean b)
-    {
-        S newOptions = clone(this);
-        newOptions.setColumnLabels(b);
-        return newOptions;
-    }
-
-    /**
-     * {@inheritDoc} 
-     * @return a new {@link StyledPageOptions} where empty rows are ignored
-     */
-    public S withIgnoreEmptyRows()
-    {
-        return withIgnoreEmptyRows(true);
-    }
-
-    /**
-     * {@inheritDoc} 
-     * @return a new {@link StyledPageOptions} where empty rows are or are not ignored
-     */
-    public S withIgnoreEmptyRows(final boolean b)
-    {
-        S newOptions = clone(this);
-        newOptions.setIgnoreEmptyRows(b);
-        return newOptions;
-    } 
-
-    /**
-     * {@inheritDoc} 
-     * @return a new {@link StyledPageOptions} where empty columns are ignored
-     */
-    public S withIgnoreEmptyColumns()
-    {
-        return withIgnoreEmptyColumns(true);
-    }
-
-    /**
-     * {@inheritDoc} 
-     * @return a new {@link StyledPageOptions} where empty columns are or are not ignored
-     */
-    public S withIgnoreEmptyColumns(final boolean b)
-    {
-        S newOptions = clone(this);
-        newOptions.setIgnoreEmptyColumns(b);
-        return newOptions;
-    } 
 
     /**
      * {@inheritDoc} 
@@ -161,9 +87,9 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     /**
      * Set the default width, in inches, used to display table column data in exports
      * @param colWidth the new default column width, in inches
-     * @return a new {@link StyledPageOptions} with the default column width set
+     * @return a new {@link T} with the default column width set
      */
-    public S withDefaultColumnWidthInInches(double colWidth)
+    public T withDefaultColumnWidthInInches(double colWidth)
     {
         return withDefaultColumnWidthInPx((int)(colWidth * 72));
     }
@@ -171,11 +97,11 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     /**
      * Set the default width, in pixels, used to display table column data in exports
      * @param colWidth the new default column width, in pixels
-     * @return a new {@link StyledPageOptions} with the default column width set
+     * @return a new {@link T} with the default column width set
      */
-    public S withDefaultColumnWidthInPx(int colWidth)
+    public T withDefaultColumnWidthInPx(int colWidth)
     {
-        S newOptions = clone(this);
+        T newOptions = clone(this);
         newOptions.setColumnWidth(colWidth);
         return newOptions;
     }
@@ -198,9 +124,9 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     /**
      * Set the width, in inches, used to display row labels in exports.
      * @param colWidth the new row label column width, in inches
-     * @return a new {@link StyledPageOptions} with the row label column width set
+     * @return a new {@link T} with the row label column width set
      */
-    public S withRowLabelColumnWidthInInches(double colWidth)
+    public T withRowLabelColumnWidthInInches(double colWidth)
     {
         return withRowLabelColumnWidthInPx((int)(colWidth * 72));
     }
@@ -208,11 +134,11 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     /**
      * Set the width, in pixels, used to display row labels in exports.
      * @param colWidth the new row label column width, in pixels
-     * @return a new {@link StyledPageOptions} with the row label column width set
+     * @return a new {@link T} with the row label column width set
      */
-    public S withRowLabelColumnWidthInPx(int colWidth)
+    public T withRowLabelColumnWidthInPx(int colWidth)
     {
-        S newOptions = clone(this);
+        T newOptions = clone(this);
         newOptions.setRowLabelColumnWidth(colWidth);
         return newOptions;
     }
@@ -237,11 +163,11 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     /**
      * Set the default font size, in pixels, used to display table data in exports.
      * @param fontSize the new default font size, in pixels
-     * @return a new {@link StyledPageOptions} with the default font size set
+     * @return a new {@link T} with the default font size set
      */
-    public S withDefaultFontSize(int fontSize)
+    public T withDefaultFontSize(int fontSize)
     {
-        S newOptions = clone(this);
+        T newOptions = clone(this);
         newOptions.setDefaultFontSize(fontSize);
         return newOptions;
     }
@@ -266,11 +192,11 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
     /**
      * Set the font size, in pixels, used to display row and column labels in exports.
      * @param fontSize the new heading font size, in pixels
-     * @return a new {@link StyledPageOptions} with the heading font size set
+     * @return a new {@link T} with the heading font size set
      */
-    public S withHeadingFontSize(int fontSize)
+    public T withHeadingFontSize(int fontSize)
     {
-        S newOptions = clone(this);
+        T newOptions = clone(this);
         newOptions.setHeadingFontSize(fontSize);
         return newOptions;
     }
@@ -296,11 +222,11 @@ public abstract class StyledPageOptions<S extends StyledPageOptions<S>>
      * it is the responsibility of the caller to specify a correct value for each export format.
      * 
      * @param fontFamily the name of the font family used to display table data in exports
-     * @return a new {@link StyledPageOptions} with the font family size set
+     * @return a new {@link T} with the font family size set
      */
-    public S withFontFamily(String fontFamily)
+    public T withFontFamily(String fontFamily)
     {
-        S newOptions = clone(this);
+        T newOptions = clone(this);
         newOptions.setFontFamily(fontFamily);
         return newOptions;
     }
