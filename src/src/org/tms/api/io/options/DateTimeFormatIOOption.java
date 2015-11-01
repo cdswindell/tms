@@ -1,6 +1,6 @@
 package org.tms.api.io.options;
 
-public interface DateTimeFormatOption
+public interface DateTimeFormatIOOption
 {
     public String getDateTimeFormat();
     public boolean hasDateTimeFormat();

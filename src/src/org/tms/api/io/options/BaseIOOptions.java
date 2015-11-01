@@ -21,11 +21,11 @@ import org.tms.io.options.OptionEnum;
  * Each concrete class implementing {@code IOOptions} or one of its super-classes defines
  * a {@code public static} instance named {@code Default} which can be further modified, as needed.
  * <p>
- * @param <T> the type of {@link IOOptions} in this {@code IOOptions}
+ * @param <T> the type of {@link BaseIOOptions} in this {@code IOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public abstract class IOOptions<T extends IOOptions<T>>
+public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
 {          
     protected Map<OptionEnum, Object> m_options;
     
@@ -38,9 +38,9 @@ public abstract class IOOptions<T extends IOOptions<T>>
         IsIgnoreEmptyColumns;        
     }
     
-    protected abstract T clone(IOOptions<T> model);
+    protected abstract T clone(BaseIOOptions<T> model);
     
-    protected IOOptions(final IOFileFormat format, 
+    protected BaseIOOptions(final IOFileFormat format, 
                      final boolean rowNames, 
                      final boolean columnNames, 
                      final boolean ignoreEmptyRows,
@@ -55,7 +55,7 @@ public abstract class IOOptions<T extends IOOptions<T>>
         set(BaseOptions.IsIgnoreEmptyColumns, ignoreEmptyColumns);
     }
     
-    protected IOOptions(final IOOptions<T> format)
+    protected BaseIOOptions(final BaseIOOptions<T> format)
     {
         m_options = new HashMap<OptionEnum, Object>();
         for (Entry<OptionEnum, Object> e : format.m_options.entrySet()) {

@@ -1,15 +1,15 @@
 package org.tms.api.io.options;
 
 /**
- * An {@link IOOptions} where the output can be titled.
+ * An {@link BaseIOOptions} where the output can be titled.
  * <p>
- * <b>Note</b>: {@code TitleableOption} methods only affect export operations.
+ * <b>Note</b>: {@code TitleableIOOption} methods only affect export operations.
  * <p>
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
- * @see TitledPageOptions
+ * @see TitledPageIOOptions
  */
-public interface TitleableOption
+public interface TitleableIOOption
 {
     /**
      * Return the title string to apply to the output.
@@ -18,8 +18,8 @@ public interface TitleableOption
     public String getTitle();
     
     /**
-     * Returns  {@code true} if this {@link IOOptions} has been assigned a title string.
-     * @return {@code true} if this {@code IOOptions} has been assigned a title string
+     * Returns  {@code true} if this {@link BaseIOOptions} has been assigned a title string.
+     * @return {@code true} if this {@code BaseIOOptions} has been assigned a title string
      */
     public boolean hasTitle();
     

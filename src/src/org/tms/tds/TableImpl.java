@@ -46,7 +46,7 @@ import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
-import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.BaseIOOptions;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.events.TableElementListeners;
 import org.tms.teq.DerivationImpl;
@@ -348,7 +348,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
      */
     
     @Override
-    public void export(String fileName, IOOptions<?> options) 
+    public void export(String fileName, BaseIOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new TableExportAdapter(this, fileName, options);
@@ -356,7 +356,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
 
     @Override
-    public void export(OutputStream out, IOOptions<?> options) 
+    public void export(OutputStream out, BaseIOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new TableExportAdapter(this, out, options);

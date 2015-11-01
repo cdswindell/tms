@@ -1,6 +1,6 @@
 package org.tms.api.io.options;
 
-public interface PageableOption
+public interface PageableIOOption
 {
     public boolean isPaged();
     public boolean isPageNumbers();

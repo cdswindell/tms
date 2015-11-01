@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.options.TitledPageOptions;
+import org.tms.api.io.options.TitledPageIOOptions;
 import org.tms.io.jasper.DocXReport;
 import org.tms.io.jasper.HTMLReport;
 import org.tms.io.jasper.PDFReport;
 import org.tms.io.jasper.RTFReport;
 import org.tms.io.jasper.TMSReport;
 
-public class JasperWriter extends BaseWriter<TitledPageOptions<?>>
+public class JasperWriter extends BaseWriter<TitledPageIOOptions<?>>
 {
-    public static void export(TableExportAdapter tw, OutputStream out, TitledPageOptions<?> options)
+    public static void export(TableExportAdapter tw, OutputStream out, TitledPageIOOptions<?> options)
     throws IOException
     {
         JasperWriter writer = new JasperWriter(tw, out, options);
@@ -47,7 +47,7 @@ public class JasperWriter extends BaseWriter<TitledPageOptions<?>>
     
     private TMSReport m_report;
     
-    private JasperWriter(TableExportAdapter t, OutputStream out, TitledPageOptions<?> options)
+    private JasperWriter(TableExportAdapter t, OutputStream out, TitledPageIOOptions<?> options)
     {
         super(t, out, options);
     }

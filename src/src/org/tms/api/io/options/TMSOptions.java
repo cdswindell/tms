@@ -2,7 +2,7 @@ package org.tms.api.io.options;
 
 
 
-public class TMSOptions extends IOOptions<TMSOptions>
+public class TMSOptions extends BaseIOOptions<TMSOptions>
 {
 
     public static final TMSOptions Default = new TMSOptions(true, true, false, false);
@@ -21,7 +21,7 @@ public class TMSOptions extends IOOptions<TMSOptions>
     }    
 
     @Override
-    protected TMSOptions clone(final IOOptions<TMSOptions> model)
+    protected TMSOptions clone(final BaseIOOptions<TMSOptions> model)
     {
         return new TMSOptions((TMSOptions)model);
     }

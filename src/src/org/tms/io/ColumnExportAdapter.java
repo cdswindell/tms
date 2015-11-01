@@ -7,20 +7,20 @@ import java.util.List;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
-import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.BaseIOOptions;
 
 public class ColumnExportAdapter extends TableExportAdapter
 {
     private Column m_col;
     
-    public ColumnExportAdapter(Column c, String fileName, IOOptions<?> options) 
+    public ColumnExportAdapter(Column c, String fileName, BaseIOOptions<?> options) 
     throws IOException
     {
         super(c.getTable(), fileName, options);
         m_col = c;
     }
 
-    public ColumnExportAdapter(Column c, OutputStream out, IOOptions<?> options) 
+    public ColumnExportAdapter(Column c, OutputStream out, BaseIOOptions<?> options) 
     throws IOException
     {
         super(c.getTable(), out, options);

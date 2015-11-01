@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Comparator;
 
-import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.BaseIOOptions;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 
@@ -32,14 +32,14 @@ public interface TableRowColumnElement extends TableElement
     /**
      * Exports this {@link TableRowColumnElement} to the specified file format using the export options given in {@code options}.
      * @param fileName the file name where the row/column is written to
-     * @param options the {@link IOOptions} that specifies the output file format as well as any specific export options
+     * @param options the {@link BaseIOOptions} that specifies the output file format as well as any specific export options
      * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
      * @throws IOException if {@code fileName} cannot be created
      */
-    public void export(String fileName, IOOptions<?> options) 
+    public void export(String fileName, BaseIOOptions<?> options) 
     throws IOException;
     
-    public void export(OutputStream out, IOOptions<?> options) 
+    public void export(OutputStream out, BaseIOOptions<?> options) 
     throws IOException;
     
     /**

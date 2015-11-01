@@ -2,7 +2,7 @@ package org.tms.api.io.options;
 
 import org.tms.io.options.OptionEnum;
 
-public class XlsOptions extends StyledPageOptions<XlsOptions>
+public class XlsOptions extends StyledPageIOOptions<XlsOptions>
 {
     static final int DefaultColumnWidthPx = 65;
     static final int DefaultFontSizePx = 12;
@@ -46,7 +46,7 @@ public class XlsOptions extends StyledPageOptions<XlsOptions>
     }
     
     @Override
-    protected XlsOptions clone(final StyledPageOptions<XlsOptions> model)
+    protected XlsOptions clone(final StyledPageIOOptions<XlsOptions> model)
     {
         return new XlsOptions((XlsOptions)model);
     }

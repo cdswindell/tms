@@ -2,7 +2,7 @@ package org.tms.api.io.options;
 
 
 
-public class DocOptions extends FormattedPageOptions<DocOptions> 
+public class DocOptions extends FormattedPageIOOptions<DocOptions> 
 {
     public static final DocOptions Default = new DocOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
@@ -34,7 +34,7 @@ public class DocOptions extends FormattedPageOptions<DocOptions>
     }
 
     @Override
-    protected DocOptions clone(final FormattedPageOptions<DocOptions> model)
+    protected DocOptions clone(final FormattedPageIOOptions<DocOptions> model)
     {
         return new DocOptions((DocOptions)model);
     }

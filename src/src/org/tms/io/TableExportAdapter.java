@@ -15,17 +15,17 @@ import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.options.CSVOptions;
 import org.tms.api.io.options.HTMLOptions;
 import org.tms.api.io.options.IOFileFormat;
-import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.BaseIOOptions;
 import org.tms.api.io.options.PDFOptions;
 import org.tms.api.io.options.RTFOptions;
 import org.tms.api.io.options.TMSOptions;
-import org.tms.api.io.options.TitledPageOptions;
+import org.tms.api.io.options.TitledPageIOOptions;
 import org.tms.api.io.options.XMLOptions;
 import org.tms.api.io.options.XlsOptions;
 
 public class TableExportAdapter
 {
-    public static IOOptions<?> generateOptionsFromFileExtension(File file)
+    public static BaseIOOptions<?> generateOptionsFromFileExtension(File file)
     {
         if (sf_FileFormatMap.isEmpty()) {
             for (IOFileFormat ff : IOFileFormat.values()) {
@@ -81,12 +81,12 @@ public class TableExportAdapter
     private static final Map<String, IOFileFormat> sf_FileFormatMap = new HashMap<String, IOFileFormat>();
     
     private Table m_table;
-    private IOOptions<?> m_options;
+    private BaseIOOptions<?> m_options;
     private File m_file;
     private OutputStream m_output;
     private boolean m_isFileBased;
     
-    public TableExportAdapter(Table t, String fileName, IOOptions<?> options) 
+    public TableExportAdapter(Table t, String fileName, BaseIOOptions<?> options) 
     throws IOException
     {
         if (t == null)
@@ -120,7 +120,7 @@ public class TableExportAdapter
         m_isFileBased = true;
     }
 
-    public TableExportAdapter(Table t, OutputStream out, IOOptions<?> options) 
+    public TableExportAdapter(Table t, OutputStream out, BaseIOOptions<?> options) 
     throws IOException
     {
         if (options == null)
@@ -173,7 +173,7 @@ public class TableExportAdapter
             case RTF:
             case HTML:
             case WORD:
-                JasperWriter.export(this, m_output, (TitledPageOptions<?>)m_options);
+                JasperWriter.export(this, m_output, (TitledPageIOOptions<?>)m_options);
                 break;
                 
             default:

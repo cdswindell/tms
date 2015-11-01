@@ -18,7 +18,7 @@ import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
-import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.BaseIOOptions;
 import org.tms.io.ColumnExportAdapter;
 import org.tms.io.TableExportAdapter;
 
@@ -152,7 +152,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
      */    
 
     @Override
-    public void export(String fileName, IOOptions<?> options) 
+    public void export(String fileName, BaseIOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new ColumnExportAdapter(this, fileName, options);
@@ -160,7 +160,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     }
 
     @Override
-    public void export(OutputStream out, IOOptions<?> options) 
+    public void export(OutputStream out, BaseIOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new ColumnExportAdapter(this, out, options);

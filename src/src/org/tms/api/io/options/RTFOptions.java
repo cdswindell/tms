@@ -2,7 +2,7 @@ package org.tms.api.io.options;
 
 
 
-public class RTFOptions extends FormattedPageOptions<RTFOptions> 
+public class RTFOptions extends FormattedPageIOOptions<RTFOptions> 
 {
     public static final RTFOptions Default = new RTFOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
@@ -34,7 +34,7 @@ public class RTFOptions extends FormattedPageOptions<RTFOptions>
     }
 
     @Override
-    protected RTFOptions clone(final FormattedPageOptions<RTFOptions> model)
+    protected RTFOptions clone(final FormattedPageIOOptions<RTFOptions> model)
     {
         return new RTFOptions((RTFOptions)model);
     }

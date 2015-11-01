@@ -4,7 +4,7 @@ package org.tms.api.io.options;
 /**
  * 
  */
-public class HTMLOptions extends TitledPageOptions<HTMLOptions> 
+public class HTMLOptions extends TitledPageIOOptions<HTMLOptions> 
 {
     static final int DefaultHTMLFontSizePx = 12;
     
@@ -32,7 +32,7 @@ public class HTMLOptions extends TitledPageOptions<HTMLOptions>
     }
 
     @Override
-    protected HTMLOptions clone(final TitledPageOptions<HTMLOptions> model)
+    protected HTMLOptions clone(final TitledPageIOOptions<HTMLOptions> model)
     {
         return new HTMLOptions((HTMLOptions)model);
     }

@@ -2,9 +2,9 @@ package org.tms.api.io.options;
 
 import org.tms.io.options.OptionEnum;
 
-public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
-    extends TitledPageOptions<FormattedPageOptions<E>> 
-    implements DateTimeFormatOption, PageableOption
+public abstract class FormattedPageIOOptions<E extends FormattedPageIOOptions<E>>
+    extends TitledPageIOOptions<FormattedPageIOOptions<E>> 
+    implements DateTimeFormatIOOption, PageableIOOption
 {
     static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
     static final int DefaultPageWidthPx = (int) (8.5 * 72);
@@ -21,9 +21,9 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
         IsStickyColumnNames,
     }
 
-    protected abstract E clone(FormattedPageOptions<E> model);
+    protected abstract E clone(FormattedPageIOOptions<E> model);
     
-    protected FormattedPageOptions(final IOFileFormat format,
+    protected FormattedPageIOOptions(final IOFileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
@@ -53,15 +53,15 @@ public abstract class FormattedPageOptions<E extends FormattedPageOptions<E>>
         set(Options.IsStickyColumnNames, stickyColNames);
     }
 
-    protected FormattedPageOptions(final FormattedPageOptions<E> format)
+    protected FormattedPageIOOptions(final FormattedPageIOOptions<E> format)
     {
         super(format);
     }
 
     @Override
-    protected E clone(TitledPageOptions<FormattedPageOptions<E>> model)
+    protected E clone(TitledPageIOOptions<FormattedPageIOOptions<E>> model)
     {
-        return clone((FormattedPageOptions<E>)model);
+        return clone((FormattedPageIOOptions<E>)model);
     }
 
     public E withDateTimeFormat(String t)

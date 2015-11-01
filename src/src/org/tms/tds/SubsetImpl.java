@@ -24,7 +24,7 @@ import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.BaseIOOptions;
 import org.tms.io.SubsetExportAdapter;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.TableImpl.CellReference;
@@ -174,14 +174,14 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
      * Class-specific methods
      */
     @Override
-    public void export(String fileName, IOOptions<?> options) throws IOException
+    public void export(String fileName, BaseIOOptions<?> options) throws IOException
     {
         TableExportAdapter writer = new SubsetExportAdapter(this, fileName, options);
         writer.export();
     }
     
     @Override
-    public void export(OutputStream out, IOOptions<?> options) 
+    public void export(OutputStream out, BaseIOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new SubsetExportAdapter(this, out, options);

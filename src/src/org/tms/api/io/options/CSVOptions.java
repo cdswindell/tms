@@ -3,7 +3,7 @@ package org.tms.api.io.options;
 import org.tms.io.options.IOConstants;
 import org.tms.io.options.OptionEnum;
 
-public class CSVOptions extends IOOptions<CSVOptions>
+public class CSVOptions extends BaseIOOptions<CSVOptions>
 {
     public static final CSVOptions Default = new CSVOptions(true, true, false, false, IOConstants.COMMA, IOConstants.DOUBLE_QUOTE_CHAR, true);
 
@@ -34,7 +34,7 @@ public class CSVOptions extends IOOptions<CSVOptions>
     }
     
     @Override
-    protected CSVOptions clone(final IOOptions<CSVOptions> model)
+    protected CSVOptions clone(final BaseIOOptions<CSVOptions> model)
     {
         return new CSVOptions((CSVOptions)model);
     }

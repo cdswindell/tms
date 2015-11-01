@@ -13,9 +13,9 @@ import java.util.Set;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.BaseIOOptions;
 
-public abstract class BaseWriter<E extends IOOptions<?>> extends BaseIO
+public abstract class BaseWriter<E extends BaseIOOptions<?>> extends BaseIO
 {
     private TableExportAdapter m_tableExportAdapter;
     private OutputStream m_outStream;

@@ -17,7 +17,7 @@ import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.events.exceptions.BlockedRequestException;
 import org.tms.api.exceptions.IllegalTableStateException;
-import org.tms.api.io.options.IOOptions;
+import org.tms.api.io.options.BaseIOOptions;
 import org.tms.io.RowExportAdapter;
 import org.tms.io.TableExportAdapter;
 
@@ -76,7 +76,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
      * Class-specific methods
      */   
     @Override
-    public void export(String fileName, IOOptions<?> options) 
+    public void export(String fileName, BaseIOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new RowExportAdapter(this, fileName, options);
@@ -84,7 +84,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
     }
 
     @Override
-    public void export(OutputStream out, IOOptions<?> options) 
+    public void export(OutputStream out, BaseIOOptions<?> options) 
     throws IOException
     {
         TableExportAdapter writer = new RowExportAdapter(this, out, options);

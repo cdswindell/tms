@@ -3,7 +3,7 @@ package org.tms.api.io.options;
 import org.tms.io.options.OptionEnum;
 
 /**
- * The base class that {@link IOOptions} that support display styling extend.
+ * The base class that {@link BaseIOOptions} that support display styling extend.
  * Style elements
  * that are supported include:
  * <ul>
@@ -17,14 +17,14 @@ import org.tms.io.options.OptionEnum;
  * <p>
  * <b>Note</b>: {@code StyleableOption} methods only affect export operations.
  * <p>
- * @param <T> the type of {@link IOOptions} in this {@code StyledPageOptions}
+ * @param <T> the type of {@link BaseIOOptions} in this {@code StyledPageIOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
- * @see StyleableOption
+ * @see StyleableIOOption
  */
-public abstract class StyledPageOptions<T extends StyledPageOptions<T>> 
-    extends IOOptions<T> 
-    implements StyleableOption
+public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>> 
+    extends BaseIOOptions<T> 
+    implements StyleableIOOption
 {
     static final int DefaultColumnWidthPx = 65;
     static final int DefaultFontSizePx = 8;
@@ -39,9 +39,9 @@ public abstract class StyledPageOptions<T extends StyledPageOptions<T>>
         FontFamily;
     }
 
-    protected abstract T clone(StyledPageOptions<T> model);
+    protected abstract T clone(StyledPageIOOptions<T> model);
     
-    protected StyledPageOptions(final IOFileFormat format,
+    protected StyledPageIOOptions(final IOFileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
@@ -59,15 +59,15 @@ public abstract class StyledPageOptions<T extends StyledPageOptions<T>>
         set(Options.DefaultFontSize, defaultFontSize);
     }
 
-    protected StyledPageOptions(final StyledPageOptions<T> format)
+    protected StyledPageIOOptions(final StyledPageIOOptions<T> format)
     {
         super(format);
     }
 
     @Override
-    protected T clone(IOOptions<T> model)
+    protected T clone(BaseIOOptions<T> model)
     {
-        return clone((StyledPageOptions<T>) model);
+        return clone((StyledPageIOOptions<T>) model);
     }
 
     /**
@@ -218,7 +218,9 @@ public abstract class StyledPageOptions<T extends StyledPageOptions<T>>
      * Sets the font family used to display table data in exports. The font family is
      * expressed as the string name of the font, as it appears or is represented in the 
      * native export format. For example, to use the font "Chalkboard" in MS Word, {@code fontFamily}
-     * is set to {@code "Chalkboard"}. Note that TMS does not provide any font family name translation services;
+     * is set to {@code "Chalkboard"}. 
+     * <p>
+     * Note that TMS does not provide any font family name translation services;
      * it is the responsibility of the caller to specify a correct value for each export format.
      * 
      * @param fontFamily the name of the font family used to display table data in exports

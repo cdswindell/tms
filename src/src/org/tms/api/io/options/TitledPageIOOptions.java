@@ -3,18 +3,18 @@ package org.tms.api.io.options;
 import org.tms.io.options.OptionEnum;
 
 /**
- * The base class that {@link IOOptions} that support titles extend.
+ * The base class that {@link BaseIOOptions} that support titles extend.
  * <p>
- * <b>Note</b>: {@code TitledPageOptions} methods only affect export operations.
+ * <b>Note</b>: {@code TitledPageIOOptions} methods only affect export operations.
  * <p>
- * @param <T> the type of {@link IOOptions} in this {@code TitledPageOptions}
+ * @param <T> the type of {@link BaseIOOptions} in this {@code TitledPageIOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
- * @see TitleableOption
+ * @see TitleableIOOption
  */
-public abstract class TitledPageOptions<T extends TitledPageOptions<T>> 
-    extends StyledPageOptions<T>
-    implements TitleableOption
+public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>> 
+    extends StyledPageIOOptions<T>
+    implements TitleableIOOption
 {
     private enum Options implements OptionEnum 
     {
@@ -22,9 +22,9 @@ public abstract class TitledPageOptions<T extends TitledPageOptions<T>>
         TitleFontSize,
     }
     
-    protected abstract T clone(TitledPageOptions<T> model);
+    protected abstract T clone(TitledPageIOOptions<T> model);
     
-    protected TitledPageOptions(final IOFileFormat format,
+    protected TitledPageIOOptions(final IOFileFormat format,
             final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
@@ -37,15 +37,15 @@ public abstract class TitledPageOptions<T extends TitledPageOptions<T>>
               ignoreEmptyRows, ignoreEmptyCols, colWidthPx, defaultFontSize, defaultFontFamily);
     }
 
-    protected TitledPageOptions(final TitledPageOptions<T> format)
+    protected TitledPageIOOptions(final TitledPageIOOptions<T> format)
     {
         super(format);
     }
 
     @Override
-    protected T clone(StyledPageOptions<T> model)
+    protected T clone(StyledPageIOOptions<T> model)
     {
-        return clone((TitledPageOptions<T>) model);
+        return clone((TitledPageIOOptions<T>) model);
     }
 
     @Override

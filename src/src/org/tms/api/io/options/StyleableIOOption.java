@@ -1,7 +1,7 @@
 package org.tms.api.io.options;
 
 /**
- * An {@link IOOptions} where the output can be Styled. Style elements
+ * An {@link BaseIOOptions} where the output can be Styled. Style elements
  * that are supported include:
  * <ul>
  * <li>column widths,</li> 
@@ -16,9 +16,9 @@ package org.tms.api.io.options;
  * <p>
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
- * @see StyledPageOptions
+ * @see StyledPageIOOptions
  */
-public interface StyleableOption
+public interface StyleableIOOption
 {   
     /**
      * Return the default column width, in pixels, used to display
