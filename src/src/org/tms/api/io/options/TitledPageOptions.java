@@ -3,7 +3,7 @@ package org.tms.api.io.options;
 import org.tms.io.options.OptionEnum;
 
 /**
- * The base class which {@link IOOptions} that support titles extend.
+ * The base class that {@link IOOptions} that support titles extend.
  * <p>
  * <b>Note</b>: {@code TitledPageOptions} methods only affect export operations.
  * <p>

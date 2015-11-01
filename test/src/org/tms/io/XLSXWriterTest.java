@@ -131,8 +131,8 @@ public class XLSXWriterTest extends BaseTest
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         t.export(bos, XlsOptions.Default
                 .withColumnNames(true)
-                .withColumnWidthInInches(1.5)
-                .withRowNameColumnWidthInInches(1.25)
+                .withDefaultColumnWidthInInches(1.5)
+                .withRowLabelColumnWidthInInches(1.25)
                 .withCommentAuthor("TMS via POI")
                 );
         bos.close();

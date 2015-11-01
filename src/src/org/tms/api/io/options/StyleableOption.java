@@ -21,15 +21,15 @@ package org.tms.api.io.options;
 public interface StyleableOption
 {   
     /**
-     * Return the default column width, in pixels, used to format
-     * {link org.tms.api.Column Column} data.
+     * Return the default column width, in pixels, used to display
+     * {@link org.tms.api.Column Column} data.
      * @return the default column width, in pixels
      */
     public int getDefaultColumnWidth();
     
     /**
-     * The default width, in pixels, used to format the column where 
-     * {link org.tms.api.Row Row} labels are displayed in the exportex file.
+     * The default width, in pixels, used to display the column where 
+     * {@link org.tms.api.Row Row} labels are displayed in the exported file.
      * @return the default row label column width, in pixels
      */
     public int getRowLabelColumnWidth();

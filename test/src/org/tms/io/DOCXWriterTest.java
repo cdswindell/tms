@@ -45,7 +45,7 @@ public class DOCXWriterTest extends BaseTest
                 .withDateTimeFormat(null)
                 .withIgnoreEmptyColumns()
                 .withStickyColumnNames(false)
-                .withColumnWidthInInches(2.8)
+                .withDefaultColumnWidthInInches(2.8)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
         bos.close();
 

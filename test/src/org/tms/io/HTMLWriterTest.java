@@ -48,7 +48,7 @@ public class HTMLWriterTest extends BaseTest
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         t.export(bos, HTMLOptions.Default
                 .withIgnoreEmptyColumns()
-                .withColumnWidthInInches(5)
+                .withDefaultColumnWidthInInches(5)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
         bos.close();
 
@@ -91,8 +91,8 @@ public class HTMLWriterTest extends BaseTest
         s.export(bos, HTMLOptions.Default
                 .withIgnoreEmptyColumns()
                 .withColumnNames(false)
-                .withRowNameColumnWidthInInches(1.1)
-                .withColumnWidthInInches(2)
+                .withRowLabelColumnWidthInInches(1.1)
+                .withDefaultColumnWidthInInches(2)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title"));
         bos.close();
 
@@ -120,7 +120,7 @@ public class HTMLWriterTest extends BaseTest
         r.export(bos, HTMLOptions.Default
                 .withColumnNames(false)
                 .withRowLabels(false)
-                .withColumnWidthInInches(1)
+                .withDefaultColumnWidthInInches(1)
                 .withFontFamily("Courier")
                 .withTitle("Row 2"));
         bos.close();
@@ -148,7 +148,7 @@ public class HTMLWriterTest extends BaseTest
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         c.export(bos, HTMLOptions.Default
                 .withFontFamily("Comic Sans MS")
-                .withRowNameColumnWidthInInches(1.25)
+                .withRowLabelColumnWidthInInches(1.25)
                 .withTitle("Column 1"));
         bos.close();
 

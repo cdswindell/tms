@@ -149,7 +149,7 @@ public abstract class IOOptions
     /**
      * Return the {@link IOFileFormat} enum representing the file format associated with this
      * {@code IOOptions}. 
-     * @return the {code IOFileFormat} associated with this {@code IOOptions}
+     * @return the {@code IOFileFormat} associated with this {@code IOOptions}
      */
     public IOFileFormat getFileFormat()
     {

@@ -44,7 +44,7 @@ public class PDFWriterTest extends BaseTest
                 .withPages(false)
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
-                .withColumnWidthInInches(2.8)
+                .withDefaultColumnWidthInInches(2.8)
                 .withDateTimeFormat(null)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
                 .withFontFamily("Helvetica")
@@ -86,7 +86,7 @@ public class PDFWriterTest extends BaseTest
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
                 .withStickyColumnNames(false)
-                .withColumnWidthInInches(2.8)
+                .withDefaultColumnWidthInInches(2.8)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
                 .withPages(true));
         bos.close();
@@ -112,7 +112,7 @@ public class PDFWriterTest extends BaseTest
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns(true)
                 .withStickyColumnNames(true)
-                .withColumnWidthInInches(1)
+                .withDefaultColumnWidthInInches(1)
                 .withTitle("Only Row 3")
                 .withPages(true));
         bos.close();
@@ -138,7 +138,7 @@ public class PDFWriterTest extends BaseTest
                 .withPageNumbers(true)
                 .withIgnoreEmptyColumns()
                 .withStickyColumnNames(true)
-                .withColumnWidthInInches(1)
+                .withDefaultColumnWidthInInches(1)
                 .withTitle("Only Column 2")
                 .withPages(true));
         bos.close();
@@ -161,7 +161,7 @@ public class PDFWriterTest extends BaseTest
                 .withPages(false)
                 .withPageNumbers(false)
                 .withIgnoreEmptyColumns()
-                .withColumnWidthInInches(2)
+                .withDefaultColumnWidthInInches(2)
                 .withDateTimeFormat(null)
                 .withTitle("This is a very long title This is a very long title This is a very long title This is a very long title")
                 .withFontFamily("Helvetica")
