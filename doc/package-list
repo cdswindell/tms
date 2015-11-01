@@ -1,8 +1,6 @@
 org.tms.api
 org.tms.api.derivables
 org.tms.api.events
-org.tms.api.events.exceptions
 org.tms.api.exceptions
-org.tms.api.factories
 org.tms.api.io.options
 org.tms.api.utils
