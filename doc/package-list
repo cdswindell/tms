@@ -2,5 +2,6 @@ org.tms.api
 org.tms.api.derivables
 org.tms.api.events
 org.tms.api.exceptions
+org.tms.api.factories
 org.tms.api.io
 org.tms.api.utils
