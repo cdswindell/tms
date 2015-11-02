@@ -35,7 +35,7 @@ import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.derivables.ErrorCode;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.options.XlsOptions;
+import org.tms.api.io.XLSOptions;
 
 public class XLSXWriterTest extends BaseTest
 {
@@ -129,7 +129,7 @@ public class XLSXWriterTest extends BaseTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        t.export(bos, XlsOptions.Default
+        t.export(bos, XLSOptions.Default
                 .withColumnLabels(true)
                 .withDefaultColumnWidthInInches(1.5)
                 .withRowLabelColumnWidthInInches(1.25)

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
-import org.tms.api.io.XlsOptions;
+import org.tms.api.io.XLSOptions;
 import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
 
@@ -29,7 +29,7 @@ public class TableContextFactory
         return tc;
     }   
     
-    static public TableContext importWorkbook(String fileName, XlsOptions format)
+    static public TableContext importWorkbook(String fileName, XLSOptions format)
     {
         TableContext tc = TableContextFactory.createTableContext();
         try {
@@ -42,14 +42,14 @@ public class TableContextFactory
         return tc;
     }
         
-    static public TableContext importWorkbook(String fileName, XlsOptions format, TableContext tc)
+    static public TableContext importWorkbook(String fileName, XLSOptions format, TableContext tc)
     {
         if (format == null)
-            format = XlsOptions.Default;
+            format = XLSOptions.Default;
         
         try
         {
-            XlsReader r = new XlsReader(fileName, tc, (XlsOptions)format);
+            XlsReader r = new XlsReader(fileName, tc, (XLSOptions)format);
             r.parseWorkbook();
         }
         catch (IOException e)

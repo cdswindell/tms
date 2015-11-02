@@ -36,11 +36,11 @@ public interface TableRowColumnElement extends TableElement
      * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
      * @throws IOException if {@code fileName} cannot be created
      * @see org.tms.api.io.CSVOptions#Default
-     * @see org.tms.api.io.DocOptions#Default
+     * @see org.tms.api.io.DOCOptions#Default
      * @see org.tms.api.io.HTMLOptions#Default
      * @see org.tms.api.io.PDFOptions#Default
      * @see org.tms.api.io.RTFOptions#Default
-     * @see org.tms.api.io.XlsOptions#Default
+     * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
     public void export(String fileName, BaseIOOptions<?> options) 
@@ -54,11 +54,11 @@ public interface TableRowColumnElement extends TableElement
      * @throws IllegalArgumentException if {@code out} or {@code options} are {@code} null
      * @throws IOException if {@code out} cannot be written to
      * @see org.tms.api.io.CSVOptions#Default
-     * @see org.tms.api.io.DocOptions#Default
+     * @see org.tms.api.io.DOCOptions#Default
      * @see org.tms.api.io.HTMLOptions#Default
      * @see org.tms.api.io.PDFOptions#Default
      * @see org.tms.api.io.RTFOptions#Default
-     * @see org.tms.api.io.XlsOptions#Default
+     * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
     public void export(OutputStream out, BaseIOOptions<?> options) 

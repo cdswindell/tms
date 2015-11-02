@@ -78,13 +78,13 @@ import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.XlsOptions;
+import org.tms.api.io.XLSOptions;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.EquationStack;
 import org.tms.teq.StackType;
 import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
-public class XlsReader extends BaseReader<XlsOptions>
+public class XlsReader extends BaseReader<XLSOptions>
 {
     static final Map<Class<? extends OperationPtg>, Operator> sf_OperatorMap 
         = new HashMap<Class<? extends OperationPtg>, Operator>();
@@ -229,21 +229,21 @@ public class XlsReader extends BaseReader<XlsOptions>
     private Workbook m_wb;
     private SpreadsheetVersion m_ssV;
     
-    public XlsReader(String fileName, XlsOptions format)
+    public XlsReader(String fileName, XLSOptions format)
     {
         this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
     }
 
-    public XlsReader(String fileName, TableContext context, XlsOptions format)
+    public XlsReader(String fileName, TableContext context, XLSOptions format)
     {
         this(new File(fileName), context, format);
     }
 
-    public XlsReader(File inputFile, TableContext context, XlsOptions format)
+    public XlsReader(File inputFile, TableContext context, XLSOptions format)
     {
         super(inputFile, context, format);
 
-        if (!(format instanceof XlsOptions))
+        if (!(format instanceof XLSOptions))
             throw new IllegalArgumentException("XlsOptions required");
         
         // initialize state variables

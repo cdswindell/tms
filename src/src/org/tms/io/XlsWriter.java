@@ -44,7 +44,7 @@ import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.XlsOptions;
+import org.tms.api.io.XLSOptions;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.EquationStack;
 import org.tms.teq.InfixExpressionParser;
@@ -52,7 +52,7 @@ import org.tms.teq.PostfixStackGenerator;
 import org.tms.teq.StackType;
 import org.tms.util.Tuple;
 
-public class XlsWriter extends BaseWriter<XlsOptions>
+public class XlsWriter extends BaseWriter<XLSOptions>
 {
     static final Map<Operator, String> sf_tmsToExcelFunctionMap = new HashMap<Operator, String>();
     static final Map<BuiltinOperator, Operator> sf_builtInToExcelMap = new HashMap<BuiltinOperator, Operator>();
@@ -128,14 +128,14 @@ public class XlsWriter extends BaseWriter<XlsOptions>
     
     private CreationHelper m_wbHelper = null;
 
-    public static void export(TableExportAdapter tea, OutputStream output, XlsOptions options) 
+    public static void export(TableExportAdapter tea, OutputStream output, XLSOptions options) 
             throws IOException
     {
         XlsWriter writer = new XlsWriter(tea, output, options);
         writer.export();
     }
 
-    private XlsWriter(TableExportAdapter tw, OutputStream out, XlsOptions options)
+    private XlsWriter(TableExportAdapter tw, OutputStream out, XLSOptions options)
     {
         super(tw, out, options);        
         m_styleCache = new HashMap<String, CellStyle>();

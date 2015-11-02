@@ -21,7 +21,7 @@ import org.tms.api.io.RTFOptions;
 import org.tms.api.io.TMSOptions;
 import org.tms.api.io.TitledPageIOOptions;
 import org.tms.api.io.XMLOptions;
-import org.tms.api.io.XlsOptions;
+import org.tms.api.io.XLSOptions;
 
 public class TableExportAdapter
 {
@@ -63,9 +63,9 @@ public class TableExportAdapter
                     case EXCEL:
                         // if xls file, return modified option
                         if ("xls".equalsIgnoreCase(ext))
-                            return XlsOptions.Default.withXlsFormat();
+                            return XLSOptions.Default.withXlsFormat();
                         else
-                            return XlsOptions.Default;
+                            return XLSOptions.Default;
                         
                     default:
                         break;
@@ -166,7 +166,7 @@ public class TableExportAdapter
                 break;
                 
             case EXCEL:
-                XlsWriter.export(this, m_output, (XlsOptions)m_options);
+                XlsWriter.export(this, m_output, (XLSOptions)m_options);
                 break;
                 
             case PDF:

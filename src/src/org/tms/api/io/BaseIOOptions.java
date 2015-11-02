@@ -75,7 +75,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>>
     
     /**
      * Returns {@code true} if this {@code T} supports import. Currently,
-     * {@link CSVOptions}, {@link XlsOptions}, and {@link XMLOptions} all support import, 
+     * {@link CSVOptions}, {@link XLSOptions}, and {@link XMLOptions} all support import, 
      * meaning that TMS {@link org.tms.api.Table Table}s can be imported from
      * comma separated value (CSV) files, Excel files (both xls and xlsx formatsare supported),
      * and XML documents.

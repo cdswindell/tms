@@ -18,7 +18,7 @@ import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
-import org.tms.api.io.options.XlsOptions;
+import org.tms.api.io.XLSOptions;
 
 public class XLSReaderTest extends BaseTest
 {
@@ -37,7 +37,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testXlsReaderConstructor()
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1), XlsOptions.Default); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1), XLSOptions.Default); 
         assertNotNull(r);
         assertThat(r.getFileName(), is(SAMPLE1));
         assertThat(r.isRowNames(), is(true));
@@ -51,7 +51,7 @@ public class XLSReaderTest extends BaseTest
         assertNotNull(tc);
         assertThat(tc.getNumTables(), is(0));
         
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMulti), tc, XlsOptions.Default.withRowLabels(false)); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMulti), tc, XLSOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         testMultiSheetImport(tc, r);
@@ -64,7 +64,7 @@ public class XLSReaderTest extends BaseTest
         assertNotNull(tc);
         assertThat(tc.getNumTables(), is(0));
         
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMultiXLS), tc, XlsOptions.Default.withRowLabels(false)); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMultiXLS), tc, XLSOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         testMultiSheetImport(tc, r);
@@ -140,7 +140,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportMathSheet() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMath), XlsOptions.Default.withRowLabels(false)); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMath), XLSOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         testImportMathSheet(r);
@@ -210,7 +210,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportLogicalSheet() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLELogical), XlsOptions.Default.withRowLabels(false)); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLELogical), XLSOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         testImportLogicalSheet(r);
@@ -337,7 +337,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportSimpleSheet() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1), XlsOptions.Default); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1), XLSOptions.Default); 
         assertNotNull(r);
         
         simpleFileTester(r);
@@ -346,7 +346,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportSimpleSheetXls() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1XLS), XlsOptions.Default); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE1XLS), XLSOptions.Default); 
         assertNotNull(r);
         
         simpleFileTester(r);
@@ -385,7 +385,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportSheetWithRangesNotesEquations() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE2), XlsOptions.Default); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE2), XLSOptions.Default); 
         assertNotNull(r);
         
         testSheetWithRangesNotesEquations(r);
@@ -394,7 +394,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportSheetWithRangesNotesEquationsXls() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE2XLS), XlsOptions.Default); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE2XLS), XLSOptions.Default); 
         assertNotNull(r);
         
         testSheetWithRangesNotesEquations(r);
@@ -493,7 +493,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportSheetStatisticEquations() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3), XlsOptions.Default); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3), XLSOptions.Default); 
         assertNotNull(r);
         
         testImportSheetStatisticEquations(r);
@@ -502,7 +502,7 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportSheetStatisticEquationsXls() 
     {
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3XLS), XlsOptions.Default); 
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3XLS), XLSOptions.Default); 
         assertNotNull(r);
         
         testImportSheetStatisticEquations(r);
@@ -512,7 +512,7 @@ public class XLSReaderTest extends BaseTest
     public final void testImportSheetStatisticEquationsWithEmptyRows() 
     {
         XlsReader r = new XlsReader(qualifiedFileName(SAMPLE3EmptyRows), 
-                XlsOptions.Default.withIgnoreEmptyRows().withIgnoreEmptyColumns()); 
+                XLSOptions.Default.withIgnoreEmptyRows().withIgnoreEmptyColumns()); 
         assertNotNull(r);
         
         testImportSheetStatisticEquations(r);

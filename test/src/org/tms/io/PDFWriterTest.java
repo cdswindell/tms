@@ -19,7 +19,7 @@ import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.options.PDFOptions;
+import org.tms.api.io.PDFOptions;
 
 public class PDFWriterTest extends BaseTest
 {

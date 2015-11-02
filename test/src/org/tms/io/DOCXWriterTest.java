@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.options.DocOptions;
+import org.tms.api.io.DOCOptions;
 
 public class DOCXWriterTest extends BaseTest
 {
@@ -39,7 +39,7 @@ public class DOCXWriterTest extends BaseTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        t.export(bos, DocOptions.Default
+        t.export(bos, DOCOptions.Default
                 .withPages(true)
                 .withPageNumbers(true)
                 .withDateTimeFormat(null)

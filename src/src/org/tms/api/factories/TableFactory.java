@@ -9,7 +9,7 @@ import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.BaseIOOptions;
 import org.tms.api.io.CSVOptions;
-import org.tms.api.io.XlsOptions;
+import org.tms.api.io.XLSOptions;
 import org.tms.io.CSVReader;
 import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
@@ -130,7 +130,7 @@ public final class TableFactory
                     
                 case EXCEL:
                 {
-                    XlsReader r = new XlsReader(fileName, tc, (XlsOptions)format);
+                    XlsReader r = new XlsReader(fileName, tc, (XLSOptions)format);
                     return r.parseActiveSheet();
                 }
                 

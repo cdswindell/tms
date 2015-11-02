@@ -7,7 +7,7 @@ package org.tms.api.io;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public class DocOptions extends FormattedPageIOOptions<DocOptions> 
+public class DOCOptions extends FormattedPageIOOptions<DOCOptions> 
 {
     /**
      * Constant with the most common MS Word export configuration options already set.
@@ -40,11 +40,11 @@ public class DocOptions extends FormattedPageIOOptions<DocOptions>
      * @see org.tms.api.Subset#export(String, BaseIOOptions) Subset#export(String, BaseIOOptions)
      * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOptions) Subset#export(java.io.OutputStream, BaseIOOptions)
      */
-    public static final DocOptions Default = new DocOptions(true, true, false, false, DateTimeFormatPattern, 
+    public static final DOCOptions Default = new DOCOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
             true, true, DefaultFontSizePx, "Helvetica");
     
-    private DocOptions(final boolean rowNames, 
+    private DOCOptions(final boolean rowNames, 
             final boolean colNames, 
             final boolean ignoreEmptyRows, 
             final boolean ignoreEmptyCols,
@@ -64,14 +64,14 @@ public class DocOptions extends FormattedPageIOOptions<DocOptions>
                 stickyRowNames, stickyColNames, defaultFontSize, defaultFontFamily);
     }
 
-    private DocOptions(final DocOptions format)
+    private DOCOptions(final DOCOptions format)
     {
         super(format);
     }
 
     @Override
-    protected DocOptions clone(final FormattedPageIOOptions<DocOptions> model)
+    protected DOCOptions clone(final FormattedPageIOOptions<DOCOptions> model)
     {
-        return new DocOptions((DocOptions)model);
+        return new DOCOptions((DOCOptions)model);
     }
 }

@@ -18,7 +18,7 @@ import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.options.HTMLOptions;
+import org.tms.api.io.HTMLOptions;
 
 public class HTMLWriterTest extends BaseTest
 {

@@ -2,12 +2,12 @@ package org.tms.api.io;
 
 import org.tms.io.options.OptionEnum;
 
-public class XlsOptions extends StyledPageIOOptions<XlsOptions>
+public class XLSOptions extends StyledPageIOOptions<XLSOptions>
 {
     static final int DefaultColumnWidthPx = 65;
     static final int DefaultFontSizePx = 12;
     
-    public static final XlsOptions Default = new XlsOptions(true, true, false, false, DefaultColumnWidthPx, DefaultFontSizePx);
+    public static final XLSOptions Default = new XLSOptions(true, true, false, false, DefaultColumnWidthPx, DefaultFontSizePx);
 
     private enum Options implements OptionEnum 
     {
@@ -24,7 +24,7 @@ public class XlsOptions extends StyledPageIOOptions<XlsOptions>
         XLSX,
     }
 
-    private XlsOptions(final boolean rowNames, 
+    private XLSOptions(final boolean rowNames, 
                       final boolean colNames, 
                       final boolean ignoreEmptyRows, 
                       final boolean ignoreEmptyCols,
@@ -40,27 +40,27 @@ public class XlsOptions extends StyledPageIOOptions<XlsOptions>
         set(Options.Descriptions, true);
     }
     
-    private XlsOptions (final XlsOptions format)
+    private XLSOptions (final XLSOptions format)
     {
         super(format);
     }
     
     @Override
-    protected XlsOptions clone(final StyledPageIOOptions<XlsOptions> model)
+    protected XLSOptions clone(final StyledPageIOOptions<XLSOptions> model)
     {
-        return new XlsOptions((XlsOptions)model);
+        return new XLSOptions((XLSOptions)model);
     }
     
-    public XlsOptions withXlsFormat()
+    public XLSOptions withXlsFormat()
     {
-        XlsOptions newOptions = clone(this);
+        XLSOptions newOptions = clone(this);
         newOptions.set(Options.FileFormat, ExcelFileFormat.XLS);
         return newOptions;
     }
     
-    public XlsOptions withXlsXFormat()
+    public XLSOptions withXlsXFormat()
     {
-        XlsOptions newOptions = clone(this);
+        XLSOptions newOptions = clone(this);
         newOptions.set(Options.FileFormat, ExcelFileFormat.XLSX);
         return newOptions;
     }
@@ -80,14 +80,14 @@ public class XlsOptions extends StyledPageIOOptions<XlsOptions>
         return (Boolean)get(Options.BlanksAsNull);
     }
     
-    public XlsOptions withBlanksAsNull()
+    public XLSOptions withBlanksAsNull()
     {
         return withBlanksAsNull(true);
     }
     
-    public XlsOptions withBlanksAsNull(boolean b)
+    public XLSOptions withBlanksAsNull(boolean b)
     {
-        XlsOptions newOptions = clone(this);
+        XLSOptions newOptions = clone(this);
         newOptions.set(Options.BlanksAsNull, b);
         return newOptions;
     }
@@ -97,14 +97,14 @@ public class XlsOptions extends StyledPageIOOptions<XlsOptions>
         return (Boolean)get(Options.Descriptions);
     }
     
-    public XlsOptions withDerivations()
+    public XLSOptions withDerivations()
     {
         return withDescriptions(true);
     }
     
-    public XlsOptions withDerivations(boolean b)
+    public XLSOptions withDerivations(boolean b)
     {
-        XlsOptions newOptions = clone(this);
+        XLSOptions newOptions = clone(this);
         newOptions.set(Options.Derivations, b);
         return newOptions;
     }
@@ -114,14 +114,14 @@ public class XlsOptions extends StyledPageIOOptions<XlsOptions>
         return (Boolean)get(Options.Descriptions);
     }
     
-    public XlsOptions withDescriptions()
+    public XLSOptions withDescriptions()
     {
         return withDescriptions(true);
     }
     
-    public XlsOptions withDescriptions(boolean b)
+    public XLSOptions withDescriptions(boolean b)
     {
-        XlsOptions newOptions = clone(this);
+        XLSOptions newOptions = clone(this);
         newOptions.set(Options.Descriptions, b);
         return newOptions;
     }
@@ -136,9 +136,9 @@ public class XlsOptions extends StyledPageIOOptions<XlsOptions>
         return (String)get(Options.CommentAuthor);
     }
     
-    public XlsOptions withCommentAuthor(String author)
+    public XLSOptions withCommentAuthor(String author)
     {
-        XlsOptions newOptions = clone(this);
+        XLSOptions newOptions = clone(this);
         newOptions.set(Options.CommentAuthor, author);
         return newOptions;
     }
