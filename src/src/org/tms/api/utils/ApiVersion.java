@@ -1,5 +1,11 @@
 package org.tms.api.utils;
 
+/**
+ * Chronicles the major releases of the TMS Framework
+ * <p>
+ * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ */
 public final class ApiVersion
 {
     protected static final ApiVersion IO_ENHANCEMENTS_VERSION = new ApiVersion(1,1,0,0, "IO Enhancements");

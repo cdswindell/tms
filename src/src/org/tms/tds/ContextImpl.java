@@ -512,6 +512,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         set(sf_AUTO_RECALCULATE_FLAG, value);
     }
 
+    public boolean isTableLabelsIndexed()
+    {
+        return isSet(sf_TABLE_LABELS_INDEXED_FLAG);
+    }
+
     public boolean isRowLabelsIndexed()
     {
         return isSet(sf_ROW_LABELS_INDEXED_FLAG);

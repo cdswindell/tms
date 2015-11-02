@@ -12,7 +12,7 @@ package org.tms.api;
  * {@link TableProperty} to specify the {@code TableProperty}, and another to specify the 
  * desired {@code TableProperty} value
  * to be used as the {@code TableElement} index.
- * 
+ * <p>
  * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */

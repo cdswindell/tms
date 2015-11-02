@@ -9,10 +9,16 @@ import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.io.options.BaseIOOptions;
 
+/**
+ * Methods common to {@link Table} {@link Row}s and {@link Column}s, 
+ * <p>
+ * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ */
 public interface TableRowColumnElement extends TableElement
 {
     /**
-     * Return the 1-based ordinal index of this Row/Column.
+     * Return the 1-based ordinal index of this {@link Row}/{@link Column}.
      * @return The 1-based ordinal index of this Row/Column
      */
     public int getIndex();
@@ -81,7 +87,17 @@ public interface TableRowColumnElement extends TableElement
      */
     public void sort(Comparator<Cell> cellSorter);
 
+    /**
+     * Return the {@link Cell} identified by {@link Access} {@code mode}/{@code mda}.
+     * @param mode the {@code Access} mode used to identify the {@code Cell}
+     * @param mda optional information determined by {@code mode}
+     * @return the identified {@code Table} {@code Cell}
+     */
     public Cell getCell(Access mode, Object... mda);
     
+    /**
+     * Set this {@link Row} or {@link Column} as current in the parent {@link Table}.
+     * @return the previous current {@code Row}/{@code Column}
+     */
     public TableRowColumnElement setCurrent();
 }

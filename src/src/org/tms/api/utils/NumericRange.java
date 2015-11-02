@@ -2,11 +2,24 @@ package org.tms.api.utils;
 
 import org.tms.api.exceptions.ConstraintViolationException;
 
+/**
+ * {@code NumericRange} demonstrates the use of the {@link TableCellValidator} interface used
+ * to provide data validation for data stored in {@link org.tms.api.Table Table} {@link org.tms.api.Cell Cell}s.
+ * <p>
+ * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
+ */
 public class NumericRange implements TableCellValidator
 {   
     private double m_minValue;
     private double m_maxValue;
     
+    /**
+     * Creates a new {@link NumericRange} instance with the specified minimum and maximum
+     * cell value limits.
+     * @param minValue the minimum value allowed in a cell
+     * @param maxValue the maximum value allowed in a cell
+     */
     public NumericRange(double minValue, double maxValue)
     {
         if (maxValue < minValue)
@@ -17,6 +30,9 @@ public class NumericRange implements TableCellValidator
     }
 
     @Override
+    /**
+     * {@inheritDoc}
+     */
     public void validate(Object newValue) throws ConstraintViolationException
     {
         if (newValue == null)
