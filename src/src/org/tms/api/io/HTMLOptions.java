@@ -1,5 +1,7 @@
 package org.tms.api.io;
 
+import org.tms.io.options.TitledPageIOOptions;
+
 /**
  * {@code HTMLOptions} is a concrete class for representing configuration options to export 
  * {@link org.tms.api.Table Table}s in HTML format.
@@ -7,7 +9,7 @@ package org.tms.api.io;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public class HTMLOptions extends TitledPageIOOptions<HTMLOptions> 
+public class HTMLOptions extends TitledPageIOOptions<HTMLOptions> implements TitleableIOOption<HTMLOptions>, BaseIOOption<HTMLOptions>
 {
     static final int DefaultHTMLFontSizePx = 12;
     
@@ -26,14 +28,14 @@ public class HTMLOptions extends TitledPageIOOptions<HTMLOptions>
      * <p>
      * To include these default values when exporting to HTML, simply include {@code HTMLOptions.Default}
      * in the import factory method or supporting {@link org.tms.api.TableElement TableElement} export method.
-     * @see org.tms.api.Table#export(String, BaseIOOptions) Table#export(String, BaseIOOptions)
-     * @see org.tms.api.Table#export(java.io.OutputStream, BaseIOOptions) Table#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Row#export(String, BaseIOOptions) Row#export(String, BaseIOOptions)
-     * @see org.tms.api.Row#export(java.io.OutputStream, BaseIOOptions) Row#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Column#export(String, BaseIOOptions) Column#export(String, BaseIOOptions)
-     * @see org.tms.api.Column#export(java.io.OutputStream, BaseIOOptions) Column#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Subset#export(String, BaseIOOptions) Subset#export(String, BaseIOOptions)
-     * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOptions) Subset#export(java.io.OutputStream, BaseIOOptions)
+     * @see org.tms.api.Table#export(String, BaseIOOption) Table#export(String, BaseIOOption)
+     * @see org.tms.api.Table#export(java.io.OutputStream, BaseIOOption) Table#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Row#export(String, BaseIOOption) Row#export(String, BaseIOOption)
+     * @see org.tms.api.Row#export(java.io.OutputStream, BaseIOOption) Row#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Column#export(String, BaseIOOption) Column#export(String, BaseIOOption)
+     * @see org.tms.api.Column#export(java.io.OutputStream, BaseIOOption) Column#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Subset#export(String, BaseIOOption) Subset#export(String, BaseIOOption)
+     * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOption) Subset#export(java.io.OutputStream, BaseIOOption)
      */
     public static final HTMLOptions Default = new HTMLOptions(true, true, false, false,
                                                               DefaultColumnWidthPx, DefaultHTMLFontSizePx, "Arial");

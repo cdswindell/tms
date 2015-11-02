@@ -5,7 +5,8 @@ import java.io.OutputStream;
 import java.util.List;
 
 import org.tms.api.derivables.DerivableThreadPool;
-import org.tms.api.io.BaseIOOptions;
+import org.tms.api.io.BaseIOOption;
+import org.tms.io.options.BaseIOOptions;
 import org.tms.tds.events.EventProcessorThreadPool;
 
 /**
@@ -415,7 +416,7 @@ public interface Table extends TableElement, InitializableTableProperties
      * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
-    public void export(String fileName, BaseIOOptions<?> options) 
+    public void export(String fileName, BaseIOOption<?> options) 
     throws IOException;
     
     /**
@@ -433,7 +434,7 @@ public interface Table extends TableElement, InitializableTableProperties
      * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
-    public void export(OutputStream out, BaseIOOptions<?> options) 
+    public void export(OutputStream out, BaseIOOption<?> options) 
     throws IOException;
     
     /**

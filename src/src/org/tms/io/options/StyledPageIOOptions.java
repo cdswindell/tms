@@ -1,6 +1,7 @@
-package org.tms.api.io;
+package org.tms.io.options;
 
-import org.tms.io.options.OptionEnum;
+import org.tms.api.io.IOFileFormat;
+import org.tms.api.io.StyleableIOOption;
 
 /**
  * The base class that {@link BaseIOOptions} that support display styling extend.
@@ -24,11 +25,11 @@ import org.tms.io.options.OptionEnum;
  */
 public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>> 
     extends BaseIOOptions<T> 
-    implements StyleableIOOption
+    implements StyleableIOOption<T>
 {
-    static final int DefaultColumnWidthPx = 65;
-    static final int DefaultFontSizePx = 8;
-    static final String DefaultFontFamily = "SansSerif";
+    protected static final int DefaultColumnWidthPx = 65;
+    protected static final int DefaultFontSizePx = 8;
+    protected static final String DefaultFontFamily = "SansSerif";
     
     private enum Options implements OptionEnum 
     {
@@ -70,9 +71,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         return clone((StyledPageIOOptions<T>) model);
     }
 
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public int getDefaultColumnWidth()
     {
         final Object d = get(Options.ColumnWidth);
@@ -84,32 +83,21 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         set(Options.ColumnWidth, i);
     }
 
-    /**
-     * Set the default width, in inches, used to display table column data in exports
-     * @param colWidth the new default column width, in inches
-     * @return a new {@link T} with the default column width set
-     */
+    @Override
     public T withDefaultColumnWidthInInches(double colWidth)
     {
         return withDefaultColumnWidthInPx((int)(colWidth * 72));
     }
 
-    /**
-     * Set the default width, in pixels, used to display table column data in exports
-     * @param colWidth the new default column width, in pixels
-     * @return a new {@link T} with the default column width set
-     */
+    @Override
     public T withDefaultColumnWidthInPx(int colWidth)
     {
         final T newOptions = clone(this);
         newOptions.setColumnWidth(colWidth);
         return newOptions;
-    }
-    
+    }   
 
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public int getRowLabelColumnWidth()
     {
         final Object d = get(Options.RowLabelColumnWidth);
@@ -121,21 +109,13 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         set(Options.RowLabelColumnWidth, i);
     }
 
-    /**
-     * Set the width, in inches, used to display row labels in exports.
-     * @param colWidth the new row label column width, in inches
-     * @return a new {@link T} with the row label column width set
-     */
+    @Override
     public T withRowLabelColumnWidthInInches(double colWidth)
     {
         return withRowLabelColumnWidthInPx((int)(colWidth * 72));
     }
 
-    /**
-     * Set the width, in pixels, used to display row labels in exports.
-     * @param colWidth the new row label column width, in pixels
-     * @return a new {@link T} with the row label column width set
-     */
+    @Override
     public T withRowLabelColumnWidthInPx(int colWidth)
     {
         final T newOptions = clone(this);
@@ -143,9 +123,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         return newOptions;
     }
     
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public int getDefaultFontSize()
     {
         final Object d = get(Options.DefaultFontSize);
@@ -160,11 +138,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         set(Options.DefaultFontSize, i);
     }
 
-    /**
-     * Set the default font size, in pixels, used to display table data in exports.
-     * @param fontSize the new default font size, in pixels
-     * @return a new {@link T} with the default font size set
-     */
+    @Override
     public T withDefaultFontSize(int fontSize)
     {
         final T newOptions = clone(this);
@@ -172,9 +146,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         return newOptions;
     }
 
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public int getHeadingFontSize()
     {
         final Object d = get(Options.HeadingFontSize);
@@ -189,11 +161,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         set(Options.HeadingFontSize, i);
     }
     
-    /**
-     * Set the font size, in pixels, used to display row and column labels in exports.
-     * @param fontSize the new heading font size, in pixels
-     * @return a new {@link T} with the heading font size set
-     */
+    @Override
     public T withHeadingFontSize(int fontSize)
     {
         final T newOptions = clone(this);
@@ -201,9 +169,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         return newOptions;
     }
 
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public String getFontFamily()
     {
         return (String)get(Options.FontFamily);
@@ -214,18 +180,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
         set(Options.FontFamily, ff);
     }
     
-    /**
-     * Sets the font family used to display table data in exports. The font family is
-     * expressed as the string name of the font, as it appears or is represented in the 
-     * native export format. For example, to use the font "Chalkboard" in MS Word, {@code fontFamily}
-     * is set to {@code "Chalkboard"}. 
-     * <p>
-     * Note that TMS does not provide any font family name translation services;
-     * it is the responsibility of the caller to specify a correct value for each export format.
-     * 
-     * @param fontFamily the name of the font family used to display table data in exports
-     * @return a new {@link T} with the font family size set
-     */
+    @Override
     public T withFontFamily(String fontFamily)
     {
         final T newOptions = clone(this);

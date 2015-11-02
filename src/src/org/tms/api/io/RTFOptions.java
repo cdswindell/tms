@@ -1,5 +1,7 @@
 package org.tms.api.io;
 
+import org.tms.io.options.FormattedPageIOOptions;
+
 /**
  * {@code RTFOptions} is a concrete class for representing configuration options to export 
  * {@link org.tms.api.Table Table}s in Rich Text (RTF) format.
@@ -7,7 +9,7 @@ package org.tms.api.io;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public class RTFOptions extends FormattedPageIOOptions<RTFOptions> 
+public class RTFOptions extends FormattedPageIOOptions<RTFOptions> implements PageableIOOption<RTFOptions>, DateTimeFormatIOOption<RTFOptions>
 {
     /**
      * Constant with the most common RTF export configuration options already set.
@@ -31,14 +33,14 @@ public class RTFOptions extends FormattedPageIOOptions<RTFOptions>
      * <p>
      * To include these default values when exporting to RTF, simply include {@code RTFOptions.Default}
      * in the import factory method or supporting {@link org.tms.api.TableElement TableElement} export method.
-     * @see org.tms.api.Table#export(String, BaseIOOptions) Table#export(String, BaseIOOptions)
-     * @see org.tms.api.Table#export(java.io.OutputStream, BaseIOOptions) Table#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Row#export(String, BaseIOOptions) Row#export(String, BaseIOOptions)
-     * @see org.tms.api.Row#export(java.io.OutputStream, BaseIOOptions) Row#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Column#export(String, BaseIOOptions) Column#export(String, BaseIOOptions)
-     * @see org.tms.api.Column#export(java.io.OutputStream, BaseIOOptions) Column#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Subset#export(String, BaseIOOptions) Subset#export(String, BaseIOOptions)
-     * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOptions) Subset#export(java.io.OutputStream, BaseIOOptions)
+     * @see org.tms.api.Table#export(String, BaseIOOption) Table#export(String, BaseIOOption)
+     * @see org.tms.api.Table#export(java.io.OutputStream, BaseIOOption) Table#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Row#export(String, BaseIOOption) Row#export(String, BaseIOOption)
+     * @see org.tms.api.Row#export(java.io.OutputStream, BaseIOOption) Row#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Column#export(String, BaseIOOption) Column#export(String, BaseIOOption)
+     * @see org.tms.api.Column#export(java.io.OutputStream, BaseIOOption) Column#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Subset#export(String, BaseIOOption) Subset#export(String, BaseIOOption)
+     * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOption) Subset#export(java.io.OutputStream, BaseIOOption)
      */
     public static final RTFOptions Default = new RTFOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,

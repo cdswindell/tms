@@ -1,6 +1,8 @@
-package org.tms.api.io;
+package org.tms.io.options;
 
-import org.tms.io.options.OptionEnum;
+import org.tms.api.io.DateTimeFormatIOOption;
+import org.tms.api.io.IOFileFormat;
+import org.tms.api.io.PageableIOOption;
 
 /**
  * The base class that {@link BaseIOOptions} that support formatted and paged export output.
@@ -21,16 +23,16 @@ import org.tms.io.options.OptionEnum;
  * @param <T> the type of {@link BaseIOOptions} in this {@code FormattedPageIOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
- * @see FormattedPageIOOptions
+ * @see DateTimeFormatIOOption
  * @see PageableIOOption
  */
 public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>>
     extends TitledPageIOOptions<FormattedPageIOOptions<T>> 
-    implements DateTimeFormatIOOption, PageableIOOption
+    implements DateTimeFormatIOOption<T>, PageableIOOption<T>
 {
-    static final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
-    static final int DefaultPageWidthPx = (int) (8.5 * 72);
-    static final int DefaultPageHeightPx = (int) (11 * 72);
+    static protected final String DateTimeFormatPattern = "MM/dd/yyyy hh:mm a";
+    static protected final int DefaultPageWidthPx = (int) (8.5 * 72);
+    static protected final int DefaultPageHeightPx = (int) (11 * 72);
 
     private enum Options implements OptionEnum 
     {
@@ -86,17 +88,13 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return clone((FormattedPageIOOptions<T>)model);
     }
 
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public String getDateTimeFormat()
     {
         return (String)get(Options.DateTimeFormat);
     }
 
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public boolean hasDateTimeFormat()
     {
         String dateTimeFormat = getDateTimeFormat();
@@ -108,17 +106,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         set(Options.DateTimeFormat, t);
     }
 
-    /**
-     * Set the date-time format pattern to use to display the time and date the
-     * in the page footnotes of the export. The date-time format pattern follows the conventions 
-     * described in {@link java.text.SimpleDateFormat SimpleDateFormat}. 
-     * To disable the display of the date-time in page footers, set {@code pattern} to {@code null}.
-     * <p>
-     * The default value is <b>MM/dd/yyyy hh:mm a</b>
-     * @param pattern the new date-time format pattern or {@code null} to disable
-     * @return a new {@link T} with the date-time format pattern set
-     * @see java.text.SimpleDateFormat SimpleDateFormat
-     */
+    @Override
     public T withDateTimeFormat(String pattern)
     {
         final T newOptions = clone(this);
@@ -126,9 +114,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return newOptions;
     }
     
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public boolean isPaged()
     {
         return isTrue(Options.IsPaged);
@@ -139,32 +125,13 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         set(Options.IsPaged, b);
     }
 
-    /**
-     * Enable paged output in exports. {@link org.tms.api.Table Table} data is output in discrete pages,
-     * optionally, with column headings repeated on the top of each page, and page numbers and the date-time
-     * that the export was performed output on the bottom of each page.
-     * @return a new {@link T} with output paging enabled
-     * @see FormattedPageIOOptions#withDateTimeFormat withDateTimeFormat
-     * @see FormattedPageIOOptions#withPageNumbers withPageNumbers
-     * @see FormattedPageIOOptions#withStickyColumnLabels withStickyColumnLabels
-     */
+    @Override
     public T withPages()
     {
         return withPages(true);
     }
 
-    /**
-     * Enable or disable paged output in exports. When {@code true},
-     * {@link org.tms.api.Table Table} data is output in discrete pages,
-     * optionally, with column headings repeated on the top of each page, and page numbers and the date-time
-     * that the export was performed output on the bottom of each page.
-     * When {@code false}, the output is not paged.
-     * @param enabled {@code true} to enable paging, {@code false} to disable paging
-     * @return a new {@link T} with output paging enabled or disabled
-     * @see FormattedPageIOOptions#withDateTimeFormat withDateTimeFormat
-     * @see FormattedPageIOOptions#withPageNumbers withPageNumbers
-     * @see FormattedPageIOOptions#withStickyColumnLabels withStickyColumnLabels
-     */
+    @Override
     public T withPages(boolean enabled)
     {
         final T newOptions = clone(this);
@@ -172,9 +139,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return newOptions;
     }
     
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public boolean isPageNumbers()
     {
         return isTrue(Options.IsPageNumbers);
@@ -187,20 +152,13 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
             setPaged(true);      
     }
 
-    /**
-     * Enable the generation of page numbers in the page footer in the export output.
-     * @return a new {@link T} with page numbers enabled
-     */
+    @Override
     public T withPageNumbers()
     {
         return withPageNumbers(true);
     }
 
-    /**
-     * Enable or disable page numbers in the footer section of generated export output.
-     * @param enabled {@code true} to enable page numbers, {@code false} to disable
-     * @return a new {@link T} with page numbers enabled or disabled
-     */
+    @Override
     public T withPageNumbers(boolean enabled)
     {
         final T newOptions = clone(this);
@@ -208,9 +166,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return newOptions;
     }
     
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public int getPageWidth()
     {
         Object d = get(Options.PageWidth);
@@ -222,21 +178,13 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         set(Options.PageWidth, i);
     }
 
-    /**
-     * Set the page width, in inches, in the generated export output.
-     * @param width the new page width of the export output, in inches
-     * @return a new {@link T} with the specified page width, in inches
-     */
+    @Override
     public T withPageWidthInInches(double width)
     {
         return withPageWidthInPx((int)(width * 72));
     }
 
-    /**
-     * Set the page width, in pixels, in the generated export output.
-     * @param width the new page width of the export output, in pixels
-     * @return a new {@link T} with the specified page width, in pixels
-     */
+    @Override
     public T withPageWidthInPx(int width)
     {
         final T newOptions = clone(this);
@@ -244,9 +192,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return newOptions;
     }
 
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public int getPageHeight()
     {
         Object d = get(Options.PageHeight);
@@ -258,21 +204,13 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         set(Options.PageHeight, i);
     }
 
-    /**
-     * Set the page height, in inches, in the generated export output.
-     * @param height the new page height of the export output, in inches
-     * @return a new {@link T} with the specified page height, in inches
-     */
+    @Override
     public T withPageHeightInInches(double height)
     {
         return withPageHeightInPx((int)(height * 72));
     }
 
-    /**
-     * Set the page height, in pixels, in the generated export output.
-     * @param height the new page height of the export output, in pixels
-     * @return a new {@link T} with the specified page height, in pixels
-     */
+    @Override
     public T withPageHeightInPx(int height)
     {
         final T newOptions = clone(this);
@@ -280,9 +218,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return newOptions;
     }
 
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public boolean isStickyRowLabels()
     {
         return isTrue(Options.IsStickyRowLabels);
@@ -295,7 +231,6 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
             setRowLabels(true);
     }
 
-    @Override
     protected void setRowLabels(final boolean b)
     {
         super.setRowLabels(b);
@@ -304,24 +239,13 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
             set(Options.IsStickyRowLabels, false);
     }
     
-    /**
-     * Enables sticky {@link org.tms.api.Row Row} labels. This causes {@link org.tms.api.Row Row} labels 
-     * to reprint on subsequent export output pages
-     * when column data spans more than one page.
-     * @return a new {@link T} with sticky row labels enabled
-     */
+    @Override
     public T withStickyRowLabels()
     {
         return withStickyRowLabels(true);
     }
 
-    /**
-     * Enables or disables sticky {@link org.tms.api.Row Row} labels. When enabled,
-     * {@link org.tms.api.Row Row} labels are reprinted on subsequent export output pages
-     * when column data spans more than one page.
-     * @param sticky {@code true} to enable sticky row labels, {@code false} to disable
-     * @return a new {@link T} with sticky row labels enabled or disabled
-     */
+    @Override
     public T withStickyRowLabels(boolean sticky)
     {
         final T newOptions = clone(this);
@@ -329,7 +253,6 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
         return newOptions;
     }
 
-    @Override
     protected void setColumnLabels(final boolean b)
     {
         super.setColumnLabels(b);
@@ -338,9 +261,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
             set(Options.IsStickyColumnLabels, false);
     }
     
-    /**
-     * {@inheritDoc} 
-     */
+    @Override
     public boolean isStickyColumnLabels()
     {
         return isTrue(Options.IsStickyColumnLabels);
@@ -358,24 +279,13 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
             setColumnLabels(true);
     }
     
-    /**
-     * Enables sticky {@link org.tms.api.Column Column} labels. This causes {@link org.tms.api.Column Column} labels 
-     * are reprinted at the top of subsequent export output pages
-     * when there are more rows in the exported {@link org.tms.api.Table Table} than can fit on a single page.
-     * @return a new {@link T} with sticky column labels enabled
-     */
+    @Override
     public T withStickyColumnLabels()
     {
         return withStickyColumnLabels(true);
     }
 
-    /**
-     * Enables or disables sticky {@link org.tms.api.Column Column} labels. When enabled,
-     * {@link org.tms.api.Column Column} labels are reprinted at the top of subsequent export output pages
-     * when there are more rows in the exported {@link org.tms.api.Table Table} than can fit on a single page.
-     * @param sticky {@code true} to enable sticky column labels, {@code false} to disable
-     * @return a new {@link T} with sticky column labels enabled or disabled
-     */
+    @Override
     public T withStickyColumnLabels(boolean sticky)
     {
         final T newOptions = clone(this);

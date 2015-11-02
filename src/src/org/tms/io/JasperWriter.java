@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.TitledPageIOOptions;
 import org.tms.io.jasper.DocXReport;
 import org.tms.io.jasper.HTMLReport;
 import org.tms.io.jasper.PDFReport;
 import org.tms.io.jasper.RTFReport;
 import org.tms.io.jasper.TMSReport;
+import org.tms.io.options.TitledPageIOOptions;
 
 public class JasperWriter extends BaseWriter<TitledPageIOOptions<?>>
 {

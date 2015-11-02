@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Comparator;
 
-import org.tms.api.io.BaseIOOptions;
+import org.tms.api.io.BaseIOOption;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
+import org.tms.io.options.BaseIOOptions;
 
 public interface TableRowColumnElement extends TableElement
 {
@@ -43,7 +44,7 @@ public interface TableRowColumnElement extends TableElement
      * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
-    public void export(String fileName, BaseIOOptions<?> options) 
+    public void export(String fileName, BaseIOOption<?> options) 
     throws IOException;
     
     /**
@@ -61,7 +62,7 @@ public interface TableRowColumnElement extends TableElement
      * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
-    public void export(OutputStream out, BaseIOOptions<?> options) 
+    public void export(OutputStream out, BaseIOOption<?> options) 
     throws IOException;
     
     /**

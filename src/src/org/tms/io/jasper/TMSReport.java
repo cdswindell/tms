@@ -39,7 +39,7 @@ import net.sf.jasperreports.export.SimpleExporterInputItem;
 
 import org.tms.api.Column;
 import org.tms.api.Table;
-import org.tms.api.io.BaseIOOptions;
+import org.tms.api.io.BaseIOOption;
 import org.tms.api.io.DateTimeFormatIOOption;
 import org.tms.api.io.IOFileFormat;
 import org.tms.api.io.PageableIOOption;
@@ -92,7 +92,7 @@ abstract public class TMSReport
     
     private BaseWriter<?> m_writer;
     private Table m_table;
-    private BaseIOOptions<?> m_options;
+    private BaseIOOption<?> m_options;
     
     private Map<Column, JRField> m_colFieldMap;
     private Map<String, Object> m_jrParams;
@@ -139,7 +139,7 @@ abstract public class TMSReport
         return m_table;
     }
     
-    BaseIOOptions<?> getOptions()
+    BaseIOOption<?> getOptions()
     {
         return m_options;
     }
@@ -171,13 +171,13 @@ abstract public class TMSReport
         m_jrParams = new HashMap<String, Object>();
         
         if (m_options instanceof TitleableIOOption) {
-            if (((TitleableIOOption)m_options).hasTitle())
-                m_jrParams.put("ReportTitle", ((TitleableIOOption)m_options).getTitle());
+            if (((TitleableIOOption<?>)m_options).hasTitle())
+                m_jrParams.put("ReportTitle", ((TitleableIOOption<?>)m_options).getTitle());
         }
                
         if (m_options instanceof DateTimeFormatIOOption) {
-            if (((DateTimeFormatIOOption)m_options).hasDateTimeFormat()) {
-                SimpleDateFormat sdf = new SimpleDateFormat(((DateTimeFormatIOOption)m_options).getDateTimeFormat());
+            if (((DateTimeFormatIOOption<?>)m_options).hasDateTimeFormat()) {
+                SimpleDateFormat sdf = new SimpleDateFormat(((DateTimeFormatIOOption<?>)m_options).getDateTimeFormat());
                 m_jrParams.put("now", sdf.format(new java.util.Date()));
             }
         }
@@ -193,7 +193,7 @@ abstract public class TMSReport
             buildJasperDesign();
         
         m_jrPrints = new ArrayList<JasperPrint>(m_jrDesigns.size());
-        boolean paginated = (m_options instanceof PageableIOOption) ? ((PageableIOOption)m_options).isPaged() : false;
+        boolean paginated = (m_options instanceof PageableIOOption) ? ((PageableIOOption<?>)m_options).isPaged() : false;
         int pageCnt = 1;
         for (JasperDesign jd : m_jrDesigns) {
             if (paginated) {
@@ -295,7 +295,7 @@ abstract public class TMSReport
         
         //Column header
         if (m_options.isColumnLabels()) {
-            if (paginated && !((PageableIOOption)m_options).isStickyColumnLabels()) {
+            if (paginated && !((PageableIOOption<?>)m_options).isStickyColumnLabels()) {
                 JRDesignExpression firstPageOnly = new JRDesignExpression();
                 firstPageOnly.setText("$V{PAGE_NUMBER} == 1");               
                 colHeaderBand.setPrintWhenExpression(firstPageOnly);
@@ -304,7 +304,7 @@ abstract public class TMSReport
             jrDesign.setColumnHeader(colHeaderBand);
         }
         
-        if (paginated && ((PageableIOOption)m_options).isPageNumbers()) {
+        if (paginated && ((PageableIOOption<?>)m_options).isPageNumbers()) {
             JRDesignBand footerBand = defineFooterBand(jrDesign, normalStyle, printableWidth);
             jrDesign.setPageFooter(footerBand);
         }
@@ -319,7 +319,7 @@ abstract public class TMSReport
         int rptNo = 1;
         
         // Paginated??
-        boolean paginated = (m_options instanceof PageableIOOption) ? ((PageableIOOption)m_options).isPaged() : false;
+        boolean paginated = (m_options instanceof PageableIOOption) ? ((PageableIOOption<?>)m_options).isPaged() : false;
        
         int pageWidth = getPageWidth();
         int colWidth = paginated ? pageWidth - sf_PageLeftMargin - sf_PageRightMargin : pageWidth;
@@ -329,12 +329,12 @@ abstract public class TMSReport
 
         // define font styles
         float defaultFontSize = m_options instanceof StyleableIOOption ?
-                ((StyleableIOOption)m_options).getDefaultFontSize() : sf_StandardFontSize;
+                ((StyleableIOOption<?>)m_options).getDefaultFontSize() : sf_StandardFontSize;
         if (defaultFontSize <= 0)
             defaultFontSize = sf_StandardFontSize;
         
         float headingFontSize = m_options instanceof StyleableIOOption ?
-                ((StyleableIOOption)m_options).getHeadingFontSize() : sf_HeaderFontSize;
+                ((StyleableIOOption<?>)m_options).getHeadingFontSize() : sf_HeaderFontSize;
         if (headingFontSize <= 0)
             headingFontSize = sf_HeaderFontSize;
         
@@ -359,11 +359,11 @@ abstract public class TMSReport
         int tfY = 2;
         m_colFieldMap = new HashMap<Column, JRField>(nCols);
         
-        int fieldWidth = (m_options instanceof StyleableIOOption) && ((StyleableIOOption)m_options).getDefaultColumnWidth() > 0 ?
-                ((StyleableIOOption)m_options).getDefaultColumnWidth() : sf_StringColWidth;
+        int fieldWidth = (m_options instanceof StyleableIOOption) && ((StyleableIOOption<?>)m_options).getDefaultColumnWidth() > 0 ?
+                ((StyleableIOOption<?>)m_options).getDefaultColumnWidth() : sf_StringColWidth;
                 
-        int rowNameColWidth =  (m_options instanceof StyleableIOOption) && ((StyleableIOOption)m_options).getRowLabelColumnWidth() > 0 ?
-                ((StyleableIOOption)m_options).getRowLabelColumnWidth() : sf_RowNameColWidth;
+        int rowNameColWidth =  (m_options instanceof StyleableIOOption) && ((StyleableIOOption<?>)m_options).getRowLabelColumnWidth() > 0 ?
+                ((StyleableIOOption<?>)m_options).getRowLabelColumnWidth() : sf_RowNameColWidth;
         
         tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, 
                           headingFontSize, rowNameColWidth);
@@ -390,7 +390,7 @@ abstract public class TMSReport
                 
                 // reset starting point for next band
                 tfX = 0;
-                if (paginated && ((PageableIOOption)m_options).isStickyRowLabels()) 
+                if (paginated && ((PageableIOOption<?>)m_options).isStickyRowLabels()) 
                     tfX = addRowNames(jrDesign, tfX, tfY, detailBand, detailBandHeight, boldStyle, 
                                       headingFontSize, rowNameColWidth);
             }
@@ -465,8 +465,8 @@ abstract public class TMSReport
         
         // add title, but only on first report
         JRDesignBand titleBand = null;
-        if ((m_options instanceof TitleableIOOption) && ((TitleableIOOption)m_options).hasTitle()) {
-            float titleFontSize = ((TitleableIOOption)m_options).getTitleFontSize();
+        if ((m_options instanceof TitleableIOOption) && ((TitleableIOOption<?>)m_options).hasTitle()) {
+            float titleFontSize = ((TitleableIOOption<?>)m_options).getTitleFontSize();
             if (titleFontSize <= 0)
                 titleFontSize = sf_TitleFontSize;
             
@@ -512,7 +512,7 @@ abstract public class TMSReport
     {
         int pageWidth = 0;
         if ((m_options instanceof PageableIOOption)) 
-            pageWidth = ((PageableIOOption)m_options).getPageWidth();
+            pageWidth = ((PageableIOOption<?>)m_options).getPageWidth();
         
         if (pageWidth <= 0)
             pageWidth = sf_PortraitPageWidth;
@@ -524,7 +524,7 @@ abstract public class TMSReport
     {
         int pageHeight = 0;
         if ((m_options instanceof PageableIOOption)) 
-            pageHeight = ((PageableIOOption)m_options).getPageHeight();
+            pageHeight = ((PageableIOOption<?>)m_options).getPageHeight();
         
         if (pageHeight <= 0)
             pageHeight = sf_PortraitPageHeight;        
@@ -536,7 +536,7 @@ abstract public class TMSReport
     {
         String fontFamily = sf_DefaultFontFamily;
         if ((m_options instanceof StyleableIOOption)) {
-            fontFamily = ((StyleableIOOption)m_options).getFontFamily();
+            fontFamily = ((StyleableIOOption<?>)m_options).getFontFamily();
             if (fontFamily == null || (fontFamily = fontFamily.trim()).length() <= 0)
                 fontFamily = sf_DefaultFontFamily;
         }
@@ -575,7 +575,7 @@ abstract public class TMSReport
 
     private JRDesignBand defineFooterBand(JasperDesign jrDesign, JRDesignStyle normalStyle, int pageWidth)
     {
-        float fontSize = (int)(((StyleableIOOption)m_options).getDefaultFontSize() * .9);
+        float fontSize = (int)(((StyleableIOOption<?>)m_options).getDefaultFontSize() * .9);
         if (fontSize <= 0)
             fontSize = (int)(sf_StandardFontSize * .9);
             
@@ -585,7 +585,7 @@ abstract public class TMSReport
         pageFooter.setHeight(height);
         
         if (m_options instanceof DateTimeFormatIOOption) {
-            if (((DateTimeFormatIOOption)m_options).hasDateTimeFormat()) {
+            if (((DateTimeFormatIOOption<?>)m_options).hasDateTimeFormat()) {
                 JRDesignTextField nowField = new JRDesignTextField();
                 nowField.setStyle(normalStyle);
                 nowField.setFontSize(fontSize);

@@ -10,7 +10,7 @@ import net.sf.jasperreports.engine.JRRewindableDataSource;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
-import org.tms.api.io.BaseIOOptions;
+import org.tms.api.io.BaseIOOption;
 import org.tms.io.BaseWriter;
 import org.tms.io.TableExportAdapter;
 
@@ -19,7 +19,7 @@ public class TMSDataSource implements JRDataSource, JRRewindableDataSource
     private TMSReport m_report;
     private BaseWriter<?> m_writer;
     private TableExportAdapter m_exportAdapter;
-    private BaseIOOptions<?> m_options;
+    private BaseIOOption<?> m_options;
     
     private int m_maxRows;
     private int m_rowIndex;

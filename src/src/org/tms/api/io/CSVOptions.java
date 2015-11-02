@@ -1,5 +1,6 @@
 package org.tms.api.io;
 
+import org.tms.io.options.BaseIOOptions;
 import org.tms.io.options.IOConstants;
 import org.tms.io.options.OptionEnum;
 
@@ -10,7 +11,7 @@ import org.tms.io.options.OptionEnum;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public class CSVOptions extends BaseIOOptions<CSVOptions>
+public class CSVOptions extends BaseIOOptions<CSVOptions> implements BaseIOOption<CSVOptions>
 {
     /**
      * Constant with the most common CSV import and export configuration options already set.
@@ -27,16 +28,16 @@ public class CSVOptions extends BaseIOOptions<CSVOptions>
      * <p>
      * To include these default values when importing or exporting CSV data, simply include {@code CSVOptions.Default}
      * in the import factory method or supporting {@link org.tms.api.TableElement TableElement} export method.
-     * @see org.tms.api.factories.TableFactory#importFile(String, org.tms.api.TableContext, BaseIOOptions) TableFactory#importFile(String, org.tms.api.TableContext, BaseIOOptions)
+     * @see org.tms.api.factories.TableFactory#importFile(String, org.tms.api.TableContext, BaseIOOption) TableFactory#importFile(String, org.tms.api.TableContext, BaseIOOption)
      * @see org.tms.api.factories.TableFactory#importCSV(String, CSVOptions) TableFactory#importCSV(String, CSVOptions)
-     * @see org.tms.api.Table#export(String, BaseIOOptions) Table#export(String, BaseIOOptions)
-     * @see org.tms.api.Table#export(java.io.OutputStream, BaseIOOptions) Table#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Row#export(String, BaseIOOptions) Row#export(String, BaseIOOptions)
-     * @see org.tms.api.Row#export(java.io.OutputStream, BaseIOOptions) Row#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Column#export(String, BaseIOOptions) Column#export(String, BaseIOOptions)
-     * @see org.tms.api.Column#export(java.io.OutputStream, BaseIOOptions) Column#export(java.io.OutputStream, BaseIOOptions)
-     * @see org.tms.api.Subset#export(String, BaseIOOptions) Subset#export(String, BaseIOOptions)
-     * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOptions) Subset#export(java.io.OutputStream, BaseIOOptions)
+     * @see org.tms.api.Table#export(String, BaseIOOption) Table#export(String, BaseIOOptions)
+     * @see org.tms.api.Table#export(java.io.OutputStream, BaseIOOption) Table#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Row#export(String, BaseIOOption) Row#export(String, BaseIOOption)
+     * @see org.tms.api.Row#export(java.io.OutputStream, BaseIOOption) Row#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Column#export(String, BaseIOOption) Column#export(String, BaseIOOption)
+     * @see org.tms.api.Column#export(java.io.OutputStream, BaseIOOption) Column#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Subset#export(String, BaseIOOption) Subset#export(String, BaseIOOption)
+     * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOption) Subset#export(java.io.OutputStream, BaseIOOption)
      */
     public static final CSVOptions Default = new CSVOptions(true, true, false, false, IOConstants.COMMA, IOConstants.DOUBLE_QUOTE_CHAR, true);
 
@@ -67,7 +68,7 @@ public class CSVOptions extends BaseIOOptions<CSVOptions>
     }
     
     @Override
-    protected CSVOptions clone(final BaseIOOptions<CSVOptions> model)
+    protected CSVOptions clone(BaseIOOptions<CSVOptions> model)
     {
         return new CSVOptions((CSVOptions)model);
     }

@@ -1,6 +1,7 @@
-package org.tms.api.io;
+package org.tms.io.options;
 
-import org.tms.io.options.OptionEnum;
+import org.tms.api.io.IOFileFormat;
+import org.tms.api.io.TitleableIOOption;
 
 /**
  * The base class that {@link BaseIOOptions} that support titles extend.
@@ -14,7 +15,7 @@ import org.tms.io.options.OptionEnum;
  */
 public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>> 
     extends StyledPageIOOptions<T>
-    implements TitleableIOOption
+    implements TitleableIOOption<T>
 {
     private enum Options implements OptionEnum 
     {
@@ -73,9 +74,7 @@ public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>>
     }
 
     /**
-     * Assign a title string to display in the output on export.
-     * @param title the title string to display in the output
-     * @return a new {@link T} with the specified title string
+     * {@inheritDoc} 
      */
     public T withTitle(String title)
     {
@@ -103,9 +102,7 @@ public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>>
     }
     
     /**
-     * Set the font size, in pixels, to use when drawing the title string on export.
-     * @param fontSize the new title font size, in pixels
-     * @return a new {@link T} with the specified title font size
+     * {@inheritDoc} 
      */
     public T withTitleFontSize(int fontSize)
     {
