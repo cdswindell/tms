@@ -15,22 +15,22 @@ import java.util.Set;
  */
 public enum IOFileFormat 
 {
-    /** Comma-separated file (CSV) format */
+    /** Comma-separated file (CSV) format, import and export */
     CSV(true, "csv"),
-    /** MS Word file format */
+    /** MS Word file format, export only */
     WORD(false, "docx", "doc"),
-    /** MS Excel (both xls and xlsx) file format*/
+    /** MS Excel (both xls and xlsx) file format, import and export*/
     EXCEL(true, "xlsx", "xls"), 
-    /** HTML file format */
+    /** HTML file format, export only */
     HTML(false, "htm", "html"),
-    /** PDF file format */
+    /** PDF file format, export only */
     PDF(false, "pdf"),
     JSON(true, "json", "jsn"),
-    /** Rich Text File (RTF) file format */
+    /** Rich Text File (RTF) file format, export only */
     RTF(false, "rtf"),
-    /** XML file format */
+    /** XML file format , import and export*/
     XML(true, "xml"),
-    /** Native TMS file format */
+    /** Native TMS file format, import and export */
     TMS(true, "tms");
     
     private boolean m_supportsImport;
