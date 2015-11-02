@@ -5,7 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.tms.api.io.options.TMSOptions;
+import org.tms.api.io.TMSOptions;
 
 public class TMSWriter extends BaseWriter<TMSOptions>
 {

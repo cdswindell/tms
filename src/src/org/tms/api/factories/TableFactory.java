@@ -7,9 +7,9 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.options.CSVOptions;
-import org.tms.api.io.options.BaseIOOptions;
-import org.tms.api.io.options.XlsOptions;
+import org.tms.api.io.BaseIOOptions;
+import org.tms.api.io.CSVOptions;
+import org.tms.api.io.XlsOptions;
 import org.tms.io.CSVReader;
 import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
@@ -104,6 +104,11 @@ public final class TableFactory
     static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders)
     {
         return importFile(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.Default.withRowLabels(hasRowNames).withColumnLabels(hasColumnHeaders));
+    }
+    
+    static public Table importCSV(String csvFileName, CSVOptions format)
+    {
+        return importFile(csvFileName, ContextImpl.fetchDefaultContext(), format);
     }
     
     static public Table importFile(String fileName, TableContext tc, BaseIOOptions<?> format)

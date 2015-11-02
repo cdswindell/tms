@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
-import org.tms.api.io.options.BaseIOOptions;
+import org.tms.api.io.BaseIOOptions;
 
 public class RowExportAdapter extends TableExportAdapter
 {

@@ -18,7 +18,7 @@ import org.tms.api.events.BlockedRequestException;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
-import org.tms.api.io.options.BaseIOOptions;
+import org.tms.api.io.BaseIOOptions;
 import org.tms.io.ColumnExportAdapter;
 import org.tms.io.TableExportAdapter;
 

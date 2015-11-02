@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
-import org.tms.api.io.options.XlsOptions;
+import org.tms.api.io.XlsOptions;
 import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
 

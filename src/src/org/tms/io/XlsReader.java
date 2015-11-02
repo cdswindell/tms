@@ -78,7 +78,7 @@ import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.options.XlsOptions;
+import org.tms.api.io.XlsOptions;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.EquationStack;
 import org.tms.teq.StackType;

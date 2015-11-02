@@ -1,4 +1,4 @@
-package org.tms.api.io.options;
+package org.tms.api.io;
 
 /**
  * An {@link BaseIOOptions} where the output can be Styled. Style elements

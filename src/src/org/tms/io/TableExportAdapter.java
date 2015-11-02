@@ -12,16 +12,16 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.options.CSVOptions;
-import org.tms.api.io.options.HTMLOptions;
-import org.tms.api.io.options.IOFileFormat;
-import org.tms.api.io.options.BaseIOOptions;
-import org.tms.api.io.options.PDFOptions;
-import org.tms.api.io.options.RTFOptions;
-import org.tms.api.io.options.TMSOptions;
-import org.tms.api.io.options.TitledPageIOOptions;
-import org.tms.api.io.options.XMLOptions;
-import org.tms.api.io.options.XlsOptions;
+import org.tms.api.io.BaseIOOptions;
+import org.tms.api.io.CSVOptions;
+import org.tms.api.io.HTMLOptions;
+import org.tms.api.io.IOFileFormat;
+import org.tms.api.io.PDFOptions;
+import org.tms.api.io.RTFOptions;
+import org.tms.api.io.TMSOptions;
+import org.tms.api.io.TitledPageIOOptions;
+import org.tms.api.io.XMLOptions;
+import org.tms.api.io.XlsOptions;
 
 public class TableExportAdapter
 {

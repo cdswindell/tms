@@ -1,4 +1,4 @@
-package org.tms.api.io.options;
+package org.tms.api.io;
 
 import java.util.ArrayList;
 import java.util.Collections;

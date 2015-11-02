@@ -4,5 +4,5 @@
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-package org.tms.api.io.options;
+package org.tms.api.io;
 

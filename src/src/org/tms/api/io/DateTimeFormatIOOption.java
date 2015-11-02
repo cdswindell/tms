@@ -1,4 +1,4 @@
-package org.tms.api.io.options;
+package org.tms.api.io;
 
 /**
  * A {@link BaseIOOptions} where the output can have a date-time displayed in the output footer.

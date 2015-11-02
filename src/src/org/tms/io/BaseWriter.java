@@ -13,7 +13,7 @@ import java.util.Set;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.io.options.BaseIOOptions;
+import org.tms.api.io.BaseIOOptions;
 
 public abstract class BaseWriter<E extends BaseIOOptions<?>> extends BaseIO
 {

@@ -14,7 +14,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.options.CSVOptions;
+import org.tms.api.io.CSVOptions;
 
 public class CSVReader extends BaseReader<CSVOptions>
 {

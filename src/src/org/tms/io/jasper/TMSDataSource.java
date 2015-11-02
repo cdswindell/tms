@@ -10,7 +10,7 @@ import net.sf.jasperreports.engine.JRRewindableDataSource;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
-import org.tms.api.io.options.BaseIOOptions;
+import org.tms.api.io.BaseIOOptions;
 import org.tms.io.BaseWriter;
 import org.tms.io.TableExportAdapter;
 

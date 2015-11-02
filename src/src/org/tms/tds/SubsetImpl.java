@@ -24,7 +24,7 @@ import org.tms.api.events.TableElementEventType;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidParentException;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.options.BaseIOOptions;
+import org.tms.api.io.BaseIOOptions;
 import org.tms.io.SubsetExportAdapter;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.TableImpl.CellReference;

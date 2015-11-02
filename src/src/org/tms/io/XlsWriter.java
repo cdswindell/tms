@@ -44,7 +44,7 @@ import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.options.XlsOptions;
+import org.tms.api.io.XlsOptions;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.EquationStack;
 import org.tms.teq.InfixExpressionParser;

@@ -1,4 +1,4 @@
-package org.tms.api.io.options;
+package org.tms.api.io;
 
 import org.tms.io.options.OptionEnum;
 
@@ -19,6 +19,8 @@ import org.tms.io.options.OptionEnum;
  * <b>Note</b>: {@code FormattedPageIOOptions} methods only affect export operations.
  * <p>
  * @param <T> the type of {@link BaseIOOptions} in this {@code FormattedPageIOOptions}
+ * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
+ * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  * @see FormattedPageIOOptions
  * @see PageableIOOption
  */
