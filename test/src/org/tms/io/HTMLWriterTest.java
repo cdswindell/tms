@@ -121,7 +121,7 @@ public class HTMLWriterTest extends BaseTest
                 .withColumnLabels(false)
                 .withRowLabels(false)
                 .withDefaultColumnWidthInInches(1)
-                .withFontFamily("Courier")
+                .withFontFamily("Courier New")
                 .withTitle("Row 2"));
         bos.close();
 
