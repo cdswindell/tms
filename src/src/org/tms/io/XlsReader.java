@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFEvaluationWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.SpreadsheetVersion;
@@ -62,6 +63,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFEvaluationWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.tms.api.Access;
 import org.tms.api.Column;
@@ -327,7 +329,7 @@ public class XlsReader extends BaseReader<XLSOptions>
             close();
         }
     }
-    
+
     public Table parseActiveSheet() throws IOException
     {
         try
@@ -356,7 +358,7 @@ public class XlsReader extends BaseReader<XLSOptions>
         }
     }
     
-    public Table parseSheet(int sheetNo) throws IOException
+    protected Table parseSheet(int sheetNo) throws IOException
     {
         Set<Integer> excelEmptyRows = null;
         
@@ -491,6 +493,14 @@ public class XlsReader extends BaseReader<XLSOptions>
         return t;
     }
 
+    protected void recalculateAllFormulas()
+    {
+        if (m_ssV == SpreadsheetVersion.EXCEL2007)
+            XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook) m_wb);
+        else
+            HSSFFormulaEvaluator.evaluateAllFormulaCells(m_wb);
+    }
+    
     private void pruneEmptyElements(Table t)
     {
         // prune empty rows and columns
