@@ -29,7 +29,7 @@ public class DOCOptions extends FormattedPageIOOptions<DOCOptions>
      * <li>Sticky Row Labels: <b>{@code true}</b></li>
      * <li>Sticky Column Labels: <b>{@code true}</b></li>
      * <li>Default Font Size: <b>{@code 8px}</b></li>
-     * <li>Default Font Family: <b>{@code Helvetica}</b></li>
+     * <li>Default Font Family: <b>{@code Arial}</b></li>
      * </ul>
      * <p>
      * To include these default values when exporting to MS Word format, simply include {@code DocOptions.Default}
@@ -45,7 +45,7 @@ public class DOCOptions extends FormattedPageIOOptions<DOCOptions>
      */
     public static final DOCOptions Default = new DOCOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-            true, true, DefaultFontSizePx, "Helvetica");
+            true, true, DefaultFontSizePx, "Arial");
     
     private DOCOptions(final boolean rowNames, 
             final boolean colNames, 

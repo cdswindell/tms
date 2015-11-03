@@ -28,7 +28,7 @@ public class RTFOptions extends FormattedPageIOOptions<RTFOptions> implements Pa
      * <li>Sticky Row Labels: <b>{@code true}</b></li>
      * <li>Sticky Column Labels: <b>{@code true}</b></li>
      * <li>Default Font Size: <b>{@code 8px}</b></li>
-     * <li>Default Font Family: <b>{@code Helvetica}</b></li>
+     * <li>Default Font Family: <b>{@code Arial}</b></li>
      * </ul>
      * <p>
      * To include these default values when exporting to RTF, simply include {@code RTFOptions.Default}
@@ -44,7 +44,7 @@ public class RTFOptions extends FormattedPageIOOptions<RTFOptions> implements Pa
      */
     public static final RTFOptions Default = new RTFOptions(true, true, false, false, DateTimeFormatPattern, 
             true, true, DefaultPageWidthPx, DefaultPageHeightPx, DefaultColumnWidthPx,
-            true, true, DefaultFontSizePx, "Helvetica");
+            true, true, DefaultFontSizePx, "Arial");
     
     private RTFOptions(final boolean rowNames, 
             final boolean colNames, 
