@@ -10,19 +10,19 @@ import org.tms.api.io.IOFileFormat;
 /**
  * The base class for all {@code IOOption}, which facilitate the import and export of 
  * {@link org.tms.api.Table Table}s to other file formats. 
- * {@code IOOptions} and its super-classes support methods that determine what and how TMS data
+ * {@code IOOption} and its super-classes support methods that determine what and how TMS data
  * is imported and exported. For example, methods exist to set output titles and font sizes, for
  * formats that support titles.
- * {@code IOOptions} utilize the Builder design pattern, meaning that
- * methods that modify instance objects all return a new {@code IOOptions} instance.
+ * {@code IOOption} utilize the Builder design pattern, meaning that
+ * methods that modify instance objects all return a new {@code IOOption} instance.
  * This allows different methods to be chained together, such as:
   * <blockquote><pre>
  *     PDFOptions.Default.withRowNames(false).withDescriptions(false).withTitle("Active Compounds")
  * </pre></blockquote>
- * Each concrete class implementing {@code IOOptions} or one of its super-classes defines
+ * Each concrete class implementing {@code IOOption} or one of its super-classes defines
  * a {@code public static} instance named {@code Default} which can be further modified, as needed.
  * <p>
- * @param <T> the type of {@link IOOption} in this {@code IOOptions}
+ * @param <T> the type of {@link IOOption} in this {@code IOOption}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
