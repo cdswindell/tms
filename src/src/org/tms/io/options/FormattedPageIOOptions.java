@@ -1,11 +1,12 @@
 package org.tms.io.options;
 
 import org.tms.api.io.DateTimeFormatIOOption;
+import org.tms.api.io.IOOption;
 import org.tms.api.io.IOFileFormat;
 import org.tms.api.io.PageableIOOption;
 
 /**
- * The base class that {@link BaseIOOptions} that support formatted and paged export output.
+ * The base class that {@link IOOption} that support formatted and paged export output.
  * Format and paging elements
  * that are supported include:
  * <ul>
@@ -20,7 +21,7 @@ import org.tms.api.io.PageableIOOption;
  * <p>
  * <b>Note</b>: {@code FormattedPageIOOptions} methods only affect export operations.
  * <p>
- * @param <T> the type of {@link BaseIOOptions} in this {@code FormattedPageIOOptions}
+ * @param <T> the type of {@link IOOption} in this {@code FormattedPageIOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  * @see DateTimeFormatIOOption

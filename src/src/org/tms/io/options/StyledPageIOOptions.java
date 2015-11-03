@@ -2,9 +2,10 @@ package org.tms.io.options;
 
 import org.tms.api.io.IOFileFormat;
 import org.tms.api.io.StyleableIOOption;
+import org.tms.api.io.IOOption;
 
 /**
- * The base class that {@link BaseIOOptions} that support display styling extend.
+ * The base class that {@link IOOption} that support display styling extend.
  * Style elements
  * that are supported include:
  * <ul>
@@ -18,7 +19,7 @@ import org.tms.api.io.StyleableIOOption;
  * <p>
  * <b>Note</b>: {@code StyleableIOOption} methods only affect export operations.
  * <p>
- * @param <T> the type of {@link BaseIOOptions} in this {@code StyledPageIOOptions}
+ * @param <T> the type of {@link IOOption} in this {@code StyledPageIOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  * @see StyleableIOOption

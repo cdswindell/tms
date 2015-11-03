@@ -9,7 +9,7 @@ import org.tms.io.options.TitledPageIOOptions;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public class HTMLOptions extends TitledPageIOOptions<HTMLOptions> implements TitleableIOOption<HTMLOptions>, BaseIOOption<HTMLOptions>
+public class HTMLOptions extends TitledPageIOOptions<HTMLOptions> implements TitleableIOOption<HTMLOptions>, IOOption<HTMLOptions>
 {
     static final int DefaultHTMLFontSizePx = 12;
     
@@ -28,14 +28,14 @@ public class HTMLOptions extends TitledPageIOOptions<HTMLOptions> implements Tit
      * <p>
      * To include these default values when exporting to HTML, simply include {@code HTMLOptions.Default}
      * in the import factory method or supporting {@link org.tms.api.TableElement TableElement} export method.
-     * @see org.tms.api.Table#export(String, BaseIOOption) Table#export(String, BaseIOOption)
-     * @see org.tms.api.Table#export(java.io.OutputStream, BaseIOOption) Table#export(java.io.OutputStream, BaseIOOption)
-     * @see org.tms.api.Row#export(String, BaseIOOption) Row#export(String, BaseIOOption)
-     * @see org.tms.api.Row#export(java.io.OutputStream, BaseIOOption) Row#export(java.io.OutputStream, BaseIOOption)
-     * @see org.tms.api.Column#export(String, BaseIOOption) Column#export(String, BaseIOOption)
-     * @see org.tms.api.Column#export(java.io.OutputStream, BaseIOOption) Column#export(java.io.OutputStream, BaseIOOption)
-     * @see org.tms.api.Subset#export(String, BaseIOOption) Subset#export(String, BaseIOOption)
-     * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOption) Subset#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Table#export(String, IOOption) Table#export(String, IOOption)
+     * @see org.tms.api.Table#export(java.io.OutputStream, IOOption) Table#export(java.io.OutputStream, IOOption)
+     * @see org.tms.api.Row#export(String, IOOption) Row#export(String, IOOption)
+     * @see org.tms.api.Row#export(java.io.OutputStream, IOOption) Row#export(java.io.OutputStream, IOOption)
+     * @see org.tms.api.Column#export(String, IOOption) Column#export(String, IOOption)
+     * @see org.tms.api.Column#export(java.io.OutputStream, IOOption) Column#export(java.io.OutputStream, IOOption)
+     * @see org.tms.api.Subset#export(String, IOOption) Subset#export(String, IOOption)
+     * @see org.tms.api.Subset#export(java.io.OutputStream, IOOption) Subset#export(java.io.OutputStream, IOOption)
      */
     public static final HTMLOptions Default = new HTMLOptions(true, true, false, false,
                                                               DefaultColumnWidthPx, DefaultHTMLFontSizePx, "Arial");

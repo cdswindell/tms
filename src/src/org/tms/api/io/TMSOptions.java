@@ -2,7 +2,7 @@ package org.tms.api.io;
 
 import org.tms.io.options.BaseIOOptions;
 
-public class TMSOptions extends BaseIOOptions<TMSOptions> implements BaseIOOption<TMSOptions>
+public class TMSOptions extends BaseIOOptions<TMSOptions> implements IOOption<TMSOptions>
 {
 
     public static final TMSOptions Default = new TMSOptions(true, true, false, false);

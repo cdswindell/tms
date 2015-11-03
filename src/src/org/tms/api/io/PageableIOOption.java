@@ -1,9 +1,7 @@
 package org.tms.api.io;
 
-import org.tms.io.options.BaseIOOptions;
-
 /**
- * An {@link BaseIOOptions} where the output can be paged.
+ * An {@link IOOption} where the output can be paged.
  * Paging elements
  * that are supported include:
  * <ul>

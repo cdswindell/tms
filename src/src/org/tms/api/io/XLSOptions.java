@@ -33,14 +33,14 @@ public class XLSOptions extends StyledPageIOOptions<XLSOptions> implements Style
      * <p>
      * To include these default values when exporting to MS Excel, simply include {@code XLSOptions.Default}
      * in the import factory method or supporting {@link org.tms.api.TableElement TableElement} export method.
-     * @see org.tms.api.Table#export(String, BaseIOOption) Table#export(String, BaseIOOption)
-     * @see org.tms.api.Table#export(java.io.OutputStream, BaseIOOption) Table#export(java.io.OutputStream, BaseIOOption)
-     * @see org.tms.api.Row#export(String, BaseIOOption) Row#export(String, BaseIOOption)
-     * @see org.tms.api.Row#export(java.io.OutputStream, BaseIOOption) Row#export(java.io.OutputStream, BaseIOOption)
-     * @see org.tms.api.Column#export(String, BaseIOOption) Column#export(String, BaseIOOption)
-     * @see org.tms.api.Column#export(java.io.OutputStream, BaseIOOption) Column#export(java.io.OutputStream, BaseIOOption)
-     * @see org.tms.api.Subset#export(String, BaseIOOption) Subset#export(String, BaseIOOption)
-     * @see org.tms.api.Subset#export(java.io.OutputStream, BaseIOOption) Subset#export(java.io.OutputStream, BaseIOOption)
+     * @see org.tms.api.Table#export(String, IOOption) Table#export(String, IOOption)
+     * @see org.tms.api.Table#export(java.io.OutputStream, IOOption) Table#export(java.io.OutputStream, IOOption)
+     * @see org.tms.api.Row#export(String, IOOption) Row#export(String, IOOption)
+     * @see org.tms.api.Row#export(java.io.OutputStream, IOOption) Row#export(java.io.OutputStream, IOOption)
+     * @see org.tms.api.Column#export(String, IOOption) Column#export(String, IOOption)
+     * @see org.tms.api.Column#export(java.io.OutputStream, IOOption) Column#export(java.io.OutputStream, IOOption)
+     * @see org.tms.api.Subset#export(String, IOOption) Subset#export(String, IOOption)
+     * @see org.tms.api.Subset#export(java.io.OutputStream, IOOption) Subset#export(java.io.OutputStream, IOOption)
      */
     public static final XLSOptions Default = new XLSOptions(true, true, false, false, DefaultColumnWidthPx, DefaultFontSizePx);
 

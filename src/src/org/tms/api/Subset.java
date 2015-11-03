@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.tms.api.io.BaseIOOption;
-import org.tms.io.options.BaseIOOptions;
+import org.tms.api.io.IOOption;
 
 /**
  * A {@link Table} subset, containing a collection of rows, columns, cells and other subsets. 
@@ -80,7 +79,7 @@ public interface Subset extends TableElement
      * If no {@link Row}s are present in the subset, all {@code row}s in the underlying {@link Table} are exported.
      * If no {@link Column}s are present in the subset, all {@code columns}s in the underlying {@link Table} are exported.
      * @param fileName the file name where the subset is written to
-     * @param options the {@link BaseIOOptions} that specifies the output file format as well as any specific export options
+     * @param options the {@link IOOption} that specifies the output file format as well as any specific export options
      * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
      * @throws IOException if {@code fileName} cannot be created
      * @see org.tms.api.io.CSVOptions#Default
@@ -91,14 +90,14 @@ public interface Subset extends TableElement
      * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
-    public void export(String fileName, BaseIOOption<?> options) 
+    public void export(String fileName, IOOption<?> options) 
     throws IOException;
     
     /**
      * Exports this {@link Subset} in the specified file format to the specified {@link OutputStream}
      * using the export options given in {@code options}.
      * @param out the {@code OutputStream} where the {@code Subset} data is exported to
-     * @param options the {@link BaseIOOptions} that specifies the output file format as well as any specific export options
+     * @param options the {@link IOOption} that specifies the output file format as well as any specific export options
      * @throws IllegalArgumentException if {@code out} or {@code options} are {@code} null
      * @throws IOException if {@code out} cannot be written to
      * @see org.tms.api.io.CSVOptions#Default
@@ -109,6 +108,6 @@ public interface Subset extends TableElement
      * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
-    public void export(OutputStream out, BaseIOOption<?> options) 
+    public void export(OutputStream out, IOOption<?> options) 
     throws IOException;    
 }

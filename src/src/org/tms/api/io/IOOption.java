@@ -1,6 +1,6 @@
 package org.tms.api.io;
 
-public interface BaseIOOption<T extends BaseIOOption<T>>
+public interface IOOption<T extends IOOption<T>>
 {
 
     /**

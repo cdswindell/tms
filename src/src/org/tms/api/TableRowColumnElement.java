@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Comparator;
 
-import org.tms.api.io.BaseIOOption;
+import org.tms.api.io.IOOption;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
-import org.tms.io.options.BaseIOOptions;
 
 /**
  * Methods common to {@link Table} {@link Row}s and {@link Column}s, 
@@ -39,7 +38,7 @@ public interface TableRowColumnElement extends TableElement
     /**
      * Exports this {@link TableRowColumnElement} to the specified file format using the export options given in {@code options}.
      * @param fileName the file name where the row/column is written to
-     * @param options the {@link BaseIOOptions} that specifies the output file format as well as any specific export options
+     * @param options the {@link IOOption} that specifies the output file format as well as any specific export options
      * @throws IllegalArgumentException if {@code fileName} or {@code options} are {@code} null
      * @throws IOException if {@code fileName} cannot be created
      * @see org.tms.api.io.CSVOptions#Default
@@ -50,14 +49,14 @@ public interface TableRowColumnElement extends TableElement
      * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
-    public void export(String fileName, BaseIOOption<?> options) 
+    public void export(String fileName, IOOption<?> options) 
     throws IOException;
     
     /**
      * Exports this {@link TableRowColumnElement} in the specified file format to the specified {@link OutputStream}
      * using the export options given in {@code options}.
      * @param out the {@code OutputStream} where the {@code TableRowColumnElement} data is exported to
-     * @param options the {@link BaseIOOptions} that specifies the output file format as well as any specific export options
+     * @param options the {@link IOOption} that specifies the output file format as well as any specific export options
      * @throws IllegalArgumentException if {@code out} or {@code options} are {@code} null
      * @throws IOException if {@code out} cannot be written to
      * @see org.tms.api.io.CSVOptions#Default
@@ -68,7 +67,7 @@ public interface TableRowColumnElement extends TableElement
      * @see org.tms.api.io.XLSOptions#Default
      * @see org.tms.api.io.XMLOptions#Default
      */
-    public void export(OutputStream out, BaseIOOption<?> options) 
+    public void export(OutputStream out, IOOption<?> options) 
     throws IOException;
     
     /**

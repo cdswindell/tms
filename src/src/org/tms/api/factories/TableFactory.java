@@ -7,7 +7,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.BaseIOOption;
+import org.tms.api.io.IOOption;
 import org.tms.api.io.CSVOptions;
 import org.tms.api.io.XLSOptions;
 import org.tms.io.CSVReader;
@@ -111,7 +111,7 @@ public final class TableFactory
         return importFile(csvFileName, ContextImpl.fetchDefaultContext(), format);
     }
     
-    static public Table importFile(String fileName, TableContext tc, BaseIOOption<?> format)
+    static public Table importFile(String fileName, TableContext tc, IOOption<?> format)
     {
         if (format == null)
             throw new IllegalArgumentException("Format argument cannot be null");

@@ -1,10 +1,9 @@
 package org.tms.api.io;
 
-import org.tms.io.options.BaseIOOptions;
 import org.tms.io.options.FormattedPageIOOptions;
 
 /**
- * A {@link BaseIOOptions} where the output can have a date-time displayed in the output footer.
+ * A {@link IOOption} where the output can have a date-time displayed in the output footer.
  * <p>
  * <b>Note</b>: {@code DateTimeFormatIOOption} methods only affect export operations.
  * <p>

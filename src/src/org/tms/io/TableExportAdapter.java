@@ -12,7 +12,7 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.BaseIOOption;
+import org.tms.api.io.IOOption;
 import org.tms.api.io.CSVOptions;
 import org.tms.api.io.HTMLOptions;
 import org.tms.api.io.IOFileFormat;
@@ -25,7 +25,7 @@ import org.tms.io.options.TitledPageIOOptions;
 
 public class TableExportAdapter
 {
-    public static BaseIOOption<?> generateOptionsFromFileExtension(File file)
+    public static IOOption<?> generateOptionsFromFileExtension(File file)
     {
         if (sf_FileFormatMap.isEmpty()) {
             for (IOFileFormat ff : IOFileFormat.values()) {
@@ -81,12 +81,12 @@ public class TableExportAdapter
     private static final Map<String, IOFileFormat> sf_FileFormatMap = new HashMap<String, IOFileFormat>();
     
     private Table m_table;
-    private BaseIOOption<?> m_options;
+    private IOOption<?> m_options;
     private File m_file;
     private OutputStream m_output;
     private boolean m_isFileBased;
     
-    public TableExportAdapter(Table t, String fileName, BaseIOOption<?> options) 
+    public TableExportAdapter(Table t, String fileName, IOOption<?> options) 
     throws IOException
     {
         if (t == null)
@@ -120,7 +120,7 @@ public class TableExportAdapter
         m_isFileBased = true;
     }
 
-    public TableExportAdapter(Table t, OutputStream out, BaseIOOption<?> options) 
+    public TableExportAdapter(Table t, OutputStream out, IOOption<?> options) 
     throws IOException
     {
         if (options == null)
@@ -167,6 +167,10 @@ public class TableExportAdapter
                 
             case EXCEL:
                 XlsWriter.export(this, m_output, (XLSOptions)m_options);
+                break;
+                
+            case XML:
+                XMLWriter.export(this, m_output, (XMLOptions)m_options);
                 break;
                 
             case PDF:

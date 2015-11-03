@@ -2,13 +2,14 @@ package org.tms.io.options;
 
 import org.tms.api.io.IOFileFormat;
 import org.tms.api.io.TitleableIOOption;
+import org.tms.api.io.IOOption;
 
 /**
- * The base class that {@link BaseIOOptions} that support titles extend.
+ * The base class that {@link IOOption} that support titles extend.
  * <p>
  * <b>Note</b>: {@code TitledPageIOOptions} methods only affect export operations.
  * <p>
- * @param <T> the type of {@link BaseIOOptions} in this {@code TitledPageIOOptions}
+ * @param <T> the type of {@link IOOption} in this {@code TitledPageIOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  * @see TitleableIOOption

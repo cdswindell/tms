@@ -39,7 +39,7 @@ import net.sf.jasperreports.export.SimpleExporterInputItem;
 
 import org.tms.api.Column;
 import org.tms.api.Table;
-import org.tms.api.io.BaseIOOption;
+import org.tms.api.io.IOOption;
 import org.tms.api.io.DateTimeFormatIOOption;
 import org.tms.api.io.IOFileFormat;
 import org.tms.api.io.PageableIOOption;
@@ -92,7 +92,7 @@ abstract public class TMSReport
     
     private BaseWriter<?> m_writer;
     private Table m_table;
-    private BaseIOOption<?> m_options;
+    private IOOption<?> m_options;
     
     private Map<Column, JRField> m_colFieldMap;
     private Map<String, Object> m_jrParams;
@@ -139,7 +139,7 @@ abstract public class TMSReport
         return m_table;
     }
     
-    BaseIOOption<?> getOptions()
+    IOOption<?> getOptions()
     {
         return m_options;
     }

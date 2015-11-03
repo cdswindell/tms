@@ -1,13 +1,11 @@
 package org.tms.api.io;
 
-import org.tms.io.options.BaseIOOptions;
-
 /**
- * An {@link BaseIOOptions} where the output can be titled.
+ * An {@link IOOption} where the output can be titled.
  * <p>
  * <b>Note</b>: {@code TitleableIOOption} methods only affect export operations.
  * <p>
- * @param <T> the type of {@link BaseIOOptions} in this {@code TitledPageIOOptions}
+ * @param <T> the type of {@link IOOption} in this {@code TitledPageIOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
@@ -20,8 +18,8 @@ public interface TitleableIOOption<T extends TitleableIOOption<T>> extends Style
     public String getTitle();
     
     /**
-     * Returns  {@code true} if this {@link BaseIOOptions} has been assigned a title string.
-     * @return {@code true} if this {@code BaseIOOptions} has been assigned a title string
+     * Returns  {@code true} if this {@link IOOption} has been assigned a title string.
+     * @return {@code true} if this {@code IOOption} has been assigned a title string
      */
     public boolean hasTitle();
     

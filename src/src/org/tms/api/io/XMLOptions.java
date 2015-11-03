@@ -2,7 +2,7 @@ package org.tms.api.io;
 
 import org.tms.io.options.BaseIOOptions;
 
-public class XMLOptions extends BaseIOOptions<XMLOptions> implements BaseIOOption<XMLOptions>
+public class XMLOptions extends BaseIOOptions<XMLOptions> implements IOOption<XMLOptions>
 {
     public static final XMLOptions Default = new XMLOptions(true, true, false, false);
 

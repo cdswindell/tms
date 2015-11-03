@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.tms.api.io.BaseIOOption;
+import org.tms.api.io.IOOption;
 import org.tms.api.io.IOFileFormat;
 
 /**
- * The base class for all {@code IOOptions}, which facilitate the import and export of 
+ * The base class for all {@code IOOption}, which facilitate the import and export of 
  * {@link org.tms.api.Table Table}s to other file formats. 
  * {@code IOOptions} and its super-classes support methods that determine what and how TMS data
  * is imported and exported. For example, methods exist to set output titles and font sizes, for
@@ -22,11 +22,11 @@ import org.tms.api.io.IOFileFormat;
  * Each concrete class implementing {@code IOOptions} or one of its super-classes defines
  * a {@code public static} instance named {@code Default} which can be further modified, as needed.
  * <p>
- * @param <T> the type of {@link BaseIOOptions} in this {@code IOOptions}
+ * @param <T> the type of {@link IOOption} in this {@code IOOptions}
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements BaseIOOption<T>
+public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements IOOption<T>
 {          
     protected Map<OptionEnum, Object> m_options;
     
@@ -150,7 +150,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements BaseI
     }
     
     /* (non-Javadoc)
-     * @see org.tms.api.io.BaseIOOption#withIgnoreEmptyRows(boolean)
+     * @see org.tms.api.io.IOOption#withIgnoreEmptyRows(boolean)
      */
     @Override
     public T withIgnoreEmptyRows(final boolean enabled)
@@ -161,7 +161,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements BaseI
     } 
 
     /* (non-Javadoc)
-     * @see org.tms.api.io.BaseIOOption#isIgnoreEmptyColumns()
+     * @see org.tms.api.io.IOOption#isIgnoreEmptyColumns()
      */
     @Override
     public boolean isIgnoreEmptyColumns()
@@ -175,7 +175,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements BaseI
     }
     
     /* (non-Javadoc)
-     * @see org.tms.api.io.BaseIOOption#withIgnoreEmptyColumns()
+     * @see org.tms.api.io.IOOption#withIgnoreEmptyColumns()
      */
     @Override
     public T withIgnoreEmptyColumns()
@@ -184,7 +184,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements BaseI
     }
     
     /* (non-Javadoc)
-     * @see org.tms.api.io.BaseIOOption#withIgnoreEmptyColumns(boolean)
+     * @see org.tms.api.io.IOOption#withIgnoreEmptyColumns(boolean)
      */
     @Override
     public T withIgnoreEmptyColumns(final boolean enabled)

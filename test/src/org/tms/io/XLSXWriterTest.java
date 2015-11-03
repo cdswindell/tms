@@ -36,12 +36,24 @@ import org.tms.api.Table;
 import org.tms.api.derivables.ErrorCode;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.XLSOptions;
+import org.tms.api.io.XMLOptions;
 
 public class XLSXWriterTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.csv";
     private static final String ExportTableGold = "testExportTable.xlsx";
 
+    @Test
+    public final void testExportXml() throws IOException
+    {
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        assertNotNull(t);
+        t.setLabel("Test Table");
+        t.tag("red", "green");
+        
+        t.export("foo.xml", XMLOptions.Default);
+    }
+    
     @Test
     public final void testExportTable() throws IOException
     {
