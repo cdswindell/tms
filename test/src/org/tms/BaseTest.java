@@ -37,7 +37,9 @@ public class BaseTest
         sb.append(File.separator);
         
         String packagePath = this.getClass().getPackage().getName();
-        packagePath = packagePath.replaceAll("\\.", File.separator);
+        int perIdx = -1;
+        while ((perIdx = packagePath.indexOf('.')) > -1)
+        	packagePath = packagePath.substring(0, perIdx) + File.separator + packagePath.substring(perIdx + 1);
         
         sb.append(packagePath);
         sb.append(File.separator);
