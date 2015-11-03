@@ -29,6 +29,7 @@ public class TagTest extends BaseTest
         ContextImpl tc = (ContextImpl)tbl.getTableContext();
         assertNotNull(tc);
         
+        tc.clearGlobalTagCache();
         assertThat(tc.getGlobalTagCache().size(), is(0));
 
         tbl.tag("DeF", "aBc");
@@ -60,5 +61,6 @@ public class TagTest extends BaseTest
         assertThat(tbl.isTagged(), is (false));
         assertThat(tbl.getTags(), is(new String []{}));
         assertThat(tc.getGlobalTagCache().size(), is(4));
+        tc.clearGlobalTagCache();
     }
 }

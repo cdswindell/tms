@@ -31,9 +31,9 @@ public class WeakTableReferencesTest
         
         assertThat(tc, notNullValue());
         
-        for (int i = 0; i < 4; i++) {
-        System.gc();
-        Thread.sleep(500);
+        for (int i = 0; i < 5; i++) {
+            System.gc();
+            Thread.sleep(500);
         }
         
         assertThat(tc.getNumTables(), is(0));      

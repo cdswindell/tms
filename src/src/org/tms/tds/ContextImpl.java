@@ -1087,4 +1087,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     {
         return m_globalTagCache;
     }
+    
+    void clearGlobalTagCache()
+    {
+        m_globalTagCache.clear();
+    }
 }

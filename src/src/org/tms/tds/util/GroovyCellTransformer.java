@@ -96,7 +96,11 @@ public class GroovyCellTransformer implements TableCellTransformer
                 // TODO: log validation call error
             }
             catch (InvocationTargetException ve) {
-                throw new ConstraintViolationException(ve.getTargetException().getMessage());
+                Throwable cve = ve.getTargetException();
+                if (cve != null)
+                    throw new ConstraintViolationException(cve.getMessage());
+                else
+                    System.out.println(ve.getMessage());
             }
         }
     }
