@@ -1,4 +1,4 @@
-package org.tms.tds;
+package org.tms.tds.util;
 
 public enum FieldAccess
 {

@@ -1,6 +1,7 @@
 package org.tms.api.utils;
 
 import org.tms.api.exceptions.ConstraintViolationException;
+import org.tms.tds.util.GroovyCellTransformer;
 
 /**
  * Classes that implement {@code TableCellTransformer} can modify values before they are persisted in
@@ -21,6 +22,32 @@ import org.tms.api.exceptions.ConstraintViolationException;
 public interface TableCellTransformer extends TableCellValidator
 {
     /**
+     * Create and return a {@link TableCellTransformer} based on a Groovy implementation. 
+     * The contained Groovy class is inspected for a method that matches the signature
+     * of {@link TableCellTransformer#transform(Object) transform(Object)} and uses it
+     * to perform cell value transformation.
+     * @param fileName file name of the Groovy script
+     * @return a {code TableCellTransformer} based on a Groovy implementation 
+     */
+    static public TableCellTransformer fromGroovy(String fileName)
+    {
+        return new GroovyCellTransformer(fileName, null, null);
+    }
+    
+    /**
+     * Create and return a {@link TableCellTransformer} based on a Groovy implementation. Methods
+     * for both cell value validation as well as transformation can be specified.
+     * @param fileName file name of the Groovy script
+     * @param valName method name of the cell validator
+     * @param transName method name of the cell transformer
+     * @return a {code TableCellTransformer} based on a Groovy implementation 
+     */
+    static public TableCellTransformer fromGroovy(String fileName, String valName, String transName)
+    {
+        return new GroovyCellTransformer(fileName, valName, transName);
+    }
+    
+    /**
      * Validates the candidate cell value according to the rules coded in the implementing method.
      * Implementing classes can override this method so that their class can be used as both
      * {@link TableCellValidator}s as well as {@link TableCellTransformer}s.
@@ -29,7 +56,7 @@ public interface TableCellTransformer extends TableCellValidator
      */
     default public void validate(Object newValue) throws ConstraintViolationException
     {
-        
+        // noop
     }
     
     /**

@@ -102,7 +102,7 @@ public class GroovyOp extends BaseOp
                 m_method = m_groovyClazz.getDeclaredMethod(m_methodName, getArgTypes());
             
             // and create an instance object from the class 
-            m_groovyInst = m_groovyClazz.newInstance() ;
+            m_groovyInst = m_groovyClazz.newInstance();
 
             // Transfer the args from the TMS system into
             // an array to set up for the method call
