@@ -1,8 +1,11 @@
 package org.tms.io;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 
+import org.tms.api.Table;
+import org.tms.api.TableContext;
+import org.tms.api.factories.TableContextFactory;
 import org.tms.api.io.XMLOptions;
 import org.tms.io.xml.CellConverter;
 import org.tms.io.xml.ColumnConverter;
@@ -16,25 +19,27 @@ import org.tms.tds.TableImpl;
 
 import com.thoughtworks.xstream.XStream;
 
-public class XMLWriter extends BaseWriter<XMLOptions>
+public class XMLReader extends BaseReader<XMLOptions>
 {
-    public static void export(TableExportAdapter tea, OutputStream out, XMLOptions options) 
-    throws IOException
+    public XMLReader(String fileName, XMLOptions format)
     {
-        XMLWriter writer = new XMLWriter(tea, out, options);
-        writer.export();        
-    }
-    
-    private XMLWriter(TableExportAdapter t, OutputStream out, XMLOptions options)
-    {
-        super(t, out, options);
+        this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
     }
 
-    @Override
-    protected void export() throws IOException
+    public XMLReader(String fileName, TableContext context, XMLOptions format)
+    {
+        this(new File(fileName), context, format);
+    }
+
+    public XMLReader(File xmlFile, TableContext context, XMLOptions format)
+    {
+        super(xmlFile, context, format);       
+    }
+    
+    public Table parse() throws IOException
     {
         XStream xs = getXStream();
-        xs.toXML(getTable(), this.getOutputStream());
+        return (Table)xs.fromXML(getInputFile());
     }
     
     private XStream getXStream()

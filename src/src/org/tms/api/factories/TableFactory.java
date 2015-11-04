@@ -7,10 +7,12 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.IOOption;
 import org.tms.api.io.CSVOptions;
+import org.tms.api.io.IOOption;
 import org.tms.api.io.XLSOptions;
+import org.tms.api.io.XMLOptions;
 import org.tms.io.CSVReader;
+import org.tms.io.XMLReader;
 import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
@@ -111,6 +113,12 @@ public final class TableFactory
         return importFile(csvFileName, ContextImpl.fetchDefaultContext(), format);
     }
     
+    static public Table importFile(String fileName, IOOption<?> format)
+    {
+        TableContext tc = ContextImpl.fetchDefaultContext();
+        return importFile(fileName, tc, format);
+    }
+    
     static public Table importFile(String fileName, TableContext tc, IOOption<?> format)
     {
         if (format == null)
@@ -134,8 +142,13 @@ public final class TableFactory
                     return r.parseActiveSheet();
                 }
                 
-                case TMS:
                 case XML:
+                {
+                    XMLReader r = new XMLReader(fileName, tc, (XMLOptions)format);
+                    return r.parse();
+                }
+                    
+                case TMS:
                 case JSON:
                 {
                     return null;
