@@ -22,7 +22,7 @@ public class Tag implements Serializable
             Collections.sort(strTags);
         }
         
-        return strTags.toArray(new String [] {});
+        return strTags == null || strTags.size() == 0 ? null : strTags.toArray(new String [] {});
     }  
     
     static Set<Tag> encodeTags(String [] tags, ContextImpl tc)

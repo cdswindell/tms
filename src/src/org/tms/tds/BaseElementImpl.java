@@ -142,12 +142,14 @@ abstract public class BaseElementImpl implements BaseElement
         set(sf_READONLY_FLAG, supportsNulls);
     }
     
+    @Override
     public boolean isEnforceDataType()
     {
         return isSet(sf_ENFORCE_DATATYPE_FLAG);
     }
     
-    protected void setEnforceDataType(boolean dataTypeEnforced)
+    @Override
+    public void setEnforceDataType(boolean dataTypeEnforced)
     {
         set(sf_ENFORCE_DATATYPE_FLAG, dataTypeEnforced);
     }

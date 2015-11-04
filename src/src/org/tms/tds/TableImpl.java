@@ -1025,7 +1025,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
-    protected boolean isDataTypeEnforced()
+    public boolean isDataTypeEnforced()
     {
         return this.isEnforceDataType() || 
                 (getTableContext() != null ? getTableContext().isEnforceDataType() : false);

@@ -1,12 +1,15 @@
 package org.tms.io.xml;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.Table;
+import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Precisionable;
 import org.tms.api.factories.TableFactory;
 import org.tms.io.BaseReader;
@@ -14,6 +17,7 @@ import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
 import org.tms.tds.RowImpl;
+import org.tms.tds.SubsetImpl;
 import org.tms.tds.TableImpl;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -69,6 +73,9 @@ public class TableConverter extends ConverterBase
             writer.endNode();
         }
         
+        // save the active rows, we need them when we're processing the subsets
+        context.put(TMS_ACTIVE_ROWS_KEY,  activeRows);
+        
         // Columns
         if (nCols > 0) {
             writer.startNode("columns");
@@ -79,6 +86,17 @@ public class TableConverter extends ConverterBase
             writer.endNode();
         }
         
+        // Subsets
+        if (t.getNumSubsets() > 0) {
+            writer.startNode("subsets");
+            for (Subset s : t.getSubsets()) {
+                context.convertAnother(s);
+            }
+            
+            writer.endNode();
+        }
+        
+
         // Cells
         if (nRows > 0 && nCols > 0) {
             writer.startNode("cells");
@@ -99,71 +117,63 @@ public class TableConverter extends ConverterBase
     @Override
     public Table unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
-        int nRows = Integer.valueOf(reader.getAttribute("nRows"));
-        int nCols = Integer.valueOf(reader.getAttribute("nCols"));
+        int nRows = readAttributeInteger("nRows", reader);
+        int nCols = readAttributeInteger("nCols", reader);
         
         Table t = TableFactory.createTable(nRows, nCols, getTableContext());
         context.put(TMS_TABLE_KEY, t);
         
         if (t instanceof Precisionable) {
-            int precision = Integer.valueOf(reader.getAttribute("precision"));
-            if (precision > 0)
+            Integer precision = readAttributeInteger("precision", reader);
+            if (precision != null && precision > 0)
                 ((Precisionable)t).setPrecision(precision);
         }
         
         // upon return, we are left in the Rows or Columns or Cells tag
         unmarshalTableElement(t, reader, context);
         
+        // so where are we now?
         String nodeName = reader.getNodeName();
         
         // process rows
-        if ("rows".equals(nodeName)) {
-            while (reader.hasMoreChildren()) {
-                reader.moveDown();
-                context.convertAnother(t, RowImpl.class);  
-                reader.moveUp();
-            }
-            
-            // we're done with rows, so move out of the "rows" tag
-            reader.moveUp();
-            
-            // set up to process remaining elements (columns, subsets, cells)
-            if (reader.hasMoreChildren()) {
-                reader.moveDown();            
-                nodeName = reader.getNodeName();
-            }
-        }
+        if ("rows".equals(nodeName)) 
+            nodeName = processChildren(t,  RowImpl.class, reader, context);
         
-        if ("columns".equals(nodeName)) {
-            while (reader.hasMoreChildren()) {
-                reader.moveDown();
-                context.convertAnother(t, ColumnImpl.class);  
-                reader.moveUp();
-            }
-            
-            // we're done with cols, so move out of the "columns" tag
-            reader.moveUp();
-            
-            // set up to process remaining elements (subsets, cells)
-            if (reader.hasMoreChildren()) {
-                reader.moveDown();            
-                nodeName = reader.getNodeName();
-            }
-        }
+        if ("columns".equals(nodeName)) 
+            nodeName = processChildren(t,  ColumnImpl.class, reader, context);
         
-        // TODO: process subsets, if any exist
+        if ("subsets".equals(nodeName)) 
+            nodeName = processChildren(t,  SubsetImpl.class, reader, context);
         
-        if ("cells".equals(nodeName)) {
-            while (reader.hasMoreChildren()) {
-                reader.moveDown();
-                context.convertAnother(t, CellImpl.class);  
-                reader.moveUp();
-            }
-            
-            // we're done with cells, so move out of the "columns" tag
-            reader.moveUp();
+        if ("cells".equals(nodeName)) 
+            nodeName = processChildren(t,  CellImpl.class, reader, context);
+        
+        // process derivations, if any
+        for (Map.Entry<Derivable, String> e : getDerivationsMap(context).entrySet()) {
+            e.getKey().setDerivation(e.getValue());
         }
         
         return t;
+    }
+    
+    private String processChildren(Table t, Class<?> clazz, HierarchicalStreamReader reader, UnmarshallingContext context)
+    {
+        String nodeName = reader.getNodeName();
+        while (reader.hasMoreChildren()) {
+            reader.moveDown();
+            context.convertAnother(t, clazz);  
+            reader.moveUp();
+        }
+        
+        // we're done with cols, so move out of the "columns" tag
+        reader.moveUp();
+        
+        // set up to process remaining elements (subsets, cells)
+        if (reader.hasMoreChildren()) {
+            reader.moveDown();            
+            nodeName = reader.getNodeName();
+        }
+        
+        return nodeName;
     }
 }

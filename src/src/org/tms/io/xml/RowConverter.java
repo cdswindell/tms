@@ -13,6 +13,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class RowConverter extends ConverterBase
 {
+    static final public String ROW_TAG = "row";
+    
     public RowConverter(BaseWriter<?> writer)
     {
         super(writer);
@@ -34,8 +36,8 @@ public class RowConverter extends ConverterBase
     {
         RowImpl r = (RowImpl)arg;
         
-        writer.startNode("row");                
-        writer.addAttribute("index", String.valueOf(r.getIndex()));
+        writer.startNode(ROW_TAG);                
+        writer.addAttribute(INDEX_ATTR, String.valueOf(r.getIndex()));
         
         marshalTableElement(r, writer, context, options().isRowLabels());
         
@@ -46,7 +48,7 @@ public class RowConverter extends ConverterBase
     public Row unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
         Table t = (Table)context.get(TMS_TABLE_KEY);
-        int rIdx = Integer.valueOf(reader.getAttribute("index"));
+        int rIdx = Integer.valueOf(reader.getAttribute(INDEX_ATTR));
         
         Row r = t.addRow(rIdx);
         

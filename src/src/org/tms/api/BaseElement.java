@@ -32,6 +32,10 @@ public interface BaseElement
 	
     public void setSupportsNull(boolean enabled);
     
+    public boolean isEnforceDataType();   
+    
+    public void setEnforceDataType(boolean enabled);
+    
     /**
      * Return {@code true} if this element supports (has) the specified {@link TableProperty}
      * @param key the TableProperty to check for the existence of

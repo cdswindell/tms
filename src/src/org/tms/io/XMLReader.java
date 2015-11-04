@@ -10,6 +10,7 @@ import org.tms.api.io.XMLOptions;
 import org.tms.io.xml.CellConverter;
 import org.tms.io.xml.ColumnConverter;
 import org.tms.io.xml.RowConverter;
+import org.tms.io.xml.SubsetConverter;
 import org.tms.io.xml.TableConverter;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
@@ -56,6 +57,7 @@ public class XMLReader extends BaseReader<XMLOptions>
         xmlStreamer.registerConverter(new TableConverter(this));
         xmlStreamer.registerConverter(new RowConverter(this));
         xmlStreamer.registerConverter(new ColumnConverter(this));
+        xmlStreamer.registerConverter(new SubsetConverter(this));
         xmlStreamer.registerConverter(new CellConverter(this));
         
         return xmlStreamer;
