@@ -456,6 +456,10 @@ public interface Table extends TableElement, InitializableTableProperties
      * @return true if the specified cell has been created
      */
     public boolean isCellDefined(Row row, Column col);
+    
+    public boolean isRowDefined(Access access, Object... mda);
+
+    public boolean isColumnDefined(Access access, Object... mda);
 
     /**
      * Returns {@code true} if this table has been marked as persistent and will survive 

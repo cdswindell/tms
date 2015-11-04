@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
@@ -71,14 +72,20 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     {
         if (m_nConsumableColumns == -1) {
             m_nConsumableColumns = m_nCols;
-            if (m_baseOptions.isIgnoreEmptyColumns()) {
+            if (m_baseOptions.isIgnoreEmptyColumns()) {               
+                Table t = getTable();
                 m_ignoredColumns = new HashSet<Integer>();
                 int emptyColCnt = 0;
-                for (Column c : m_tableExportAdapter.getColumns()) {
-                    if (c.isNull()) {
-                        emptyColCnt++;
-                        m_ignoredColumns.add(c.getIndex());
+                for (int i = 1; i <= m_nCols; i++) {
+                    if (t.isColumnDefined(Access.ByIndex, i)) {
+                        Column c = t.getColumn(i);
+                        if (c.isNull()) {
+                            emptyColCnt++;
+                            m_ignoredColumns.add(c.getIndex());
+                        }
                     }
+                    else
+                        m_ignoredColumns.add(i);
                 }
                 
                 m_nConsumableColumns -= emptyColCnt;
@@ -127,10 +134,10 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
             if (m_activeCols == null) {                    
                 if (m_activeCols == null) {
                     m_activeCols = new ArrayList<Column>(getNumConsumableColumns());
-                    
-                    for (Column c : m_tableExportAdapter.getColumns()) {
-                        if (c != null && !isIgnoreColumn(c)) 
-                            m_activeCols.add(c);
+                    for (int i = 1; i <= m_nCols; i++) {
+                        if (!isIgnoreColumn(i))
+                            m_activeCols.add(getTable().getColumn(i));
+                                
                     }
                 }               
             }

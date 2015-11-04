@@ -1,27 +1,30 @@
 package org.tms.io;
 
-import java.beans.XMLEncoder;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.tms.api.Access;
-import org.tms.api.Cell;
 import org.tms.api.Column;
-import org.tms.api.ElementType;
 import org.tms.api.Row;
-import org.tms.api.Subset;
-import org.tms.api.Table;
-import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
-import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Derivable;
-import org.tms.api.events.TableElementEventType;
-import org.tms.api.events.TableElementListener;
-import org.tms.api.io.IOOption;
+import org.tms.api.derivables.Derivation;
 import org.tms.api.io.XMLOptions;
+import org.tms.tds.CellImpl;
+import org.tms.tds.ColumnImpl;
+import org.tms.tds.RowImpl;
+import org.tms.tds.SubsetImpl;
+import org.tms.tds.TableImpl;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class XMLWriter extends BaseWriter<XMLOptions>
 {
@@ -40,676 +43,228 @@ public class XMLWriter extends BaseWriter<XMLOptions>
     @Override
     protected void export() throws IOException
     {
-        XMLEncoder e = new XMLEncoder( new BufferedOutputStream(getOutputStream()));  
-        XmlTableWrapper tw = new XmlTableWrapper(getTable(), options());
-        e.writeObject(tw);
-        e.close();      
+        XStream xs = getXStream();
+        xs.toXML(getTable(), this.getOutputStream());
     }
     
-    static public class XmlTableWrapper implements Table
+    private XStream getXStream()
     {
-        public String label;
-        public String [] tags;
+        XStream xmlStreamer = new XStream();
+        xmlStreamer = new XStream();
+            
+        xmlStreamer.alias("table", TableImpl.class);
+        xmlStreamer.alias("row", RowImpl.class);
+        xmlStreamer.alias("column", ColumnImpl.class);
+        xmlStreamer.alias("subset", SubsetImpl.class);
+        xmlStreamer.alias("cell", CellImpl.class);
+            
+        xmlStreamer.registerConverter(new TableConverter());
+        xmlStreamer.registerConverter(new RowConverter());
+        xmlStreamer.registerConverter(new ColumnConverter());
+        xmlStreamer.registerConverter(new CellConverter());
         
-        private Table m_sourceTable;
-        public XmlTableWrapper()
+        return xmlStreamer;
+    }
+    
+    abstract public class ConverteBase implements Converter
+    {
+        public void marshalTableElement(TableElement te, 
+                                        HierarchicalStreamWriter writer, 
+                                        MarshallingContext context, 
+                                        boolean includeLabel)
         {
-            m_sourceTable = this;
-        }
-        
-        public XmlTableWrapper(Table source, XMLOptions options)
-        {
-            m_sourceTable = source;
-        }
-        
-        public String getLabel()
-        {
-            return m_sourceTable == this ? this.label : m_sourceTable.getLabel();
-        }
-        
-        public void setLabel(String s)
-        {
-            this.label = s;
-        }
-        
-        public String [] getTags()
-        {
-            return m_sourceTable == this ? tags : m_sourceTable.getTags();
-        }
-        
-        public void setTags(String... ta)
-        {
-            tags = ta;
-        }
-
-        @Override
-        public TableContext getTableContext()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Table getTable()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void delete()
-        {
-            // TODO Auto-generated method stub
+            if ((te == te.getTable() && te.isReadOnly()) || te.isReadOnly() != te.getTable().isReadOnly())
+                writer.addAttribute("readOnly", "true");
+                
+            if ((te == te.getTable() && !te.isSupportsNull()) || te.isSupportsNull() != te.getTable().isSupportsNull())
+                writer.addAttribute("allowsNulls", "true");            
             
-        }
-
-        @Override
-        public boolean fill(Object value)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean clear()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public int getNumCells()
-        {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public Iterable<Cell> cells()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean isNull()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isInvalid()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isValid()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isPendings()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isLabelIndexed()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public String getDescription()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void setDescription(String description)
-        {
-            // TODO Auto-generated method stub
+            if (includeLabel && te.hasProperty(TableProperty.Label)) {
+                writer.startNode("label");
+                writer.setValue(te.getLabel());
+                writer.endNode();
+            }
             
-        }
-
-        @Override
-        public List<Subset> getSubsets()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Iterable<Subset> subsets()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public int getNumSubsets()
-        {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public List<Derivable> getAffects()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<Derivable> getDerivedElements()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ElementType getElementType()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean isReadOnly()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isSupportsNull()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean hasProperty(TableProperty key)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean hasProperty(String key)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public Object getProperty(TableProperty key)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Object getProperty(String key)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Integer getPropertyInt(TableProperty key)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Long getPropertyLong(TableProperty key)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Double getPropertyDouble(TableProperty key)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public String getPropertyString(TableProperty key)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Boolean getPropertyBoolean(TableProperty key)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean addListeners(TableElementEventType evT, TableElementListener... tel)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean removeListeners(TableElementEventType evT, TableElementListener... tel)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public List<TableElementListener> getListeners(TableElementEventType... evTs)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<TableElementListener> removeAllListeners(TableElementEventType... evTs)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean hasListeners(TableElementEventType... evTs)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean tag(String... tags)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean untag(String... tags)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isTagged(String... tags)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isAutoRecalculate()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void setAutoRecalculate(boolean autoRecalculate)
-        {
-            // TODO Auto-generated method stub
+            if (te.hasProperty(TableProperty.Description)) {
+                writer.startNode("description");
+                writer.setValue(te.getDescription());
+                writer.endNode();
+            }
             
-        }
-
-        @Override
-        public int getRowCapacityIncr()
-        {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public void setRowCapacityIncr(int increment)
-        {
-            // TODO Auto-generated method stub
+            if (te.isTagged()) {
+                writer.startNode("tags");
+                context.convertAnother(te.getTags());
+                writer.endNode();
+            }
             
+            if (te instanceof Derivable && ((Derivable)te).isDerived()) {
+                Derivation d =  ((Derivable)te).getDerivation();
+                writer.startNode("derivation");
+                writer.setValue(d.getExpression());
+                writer.endNode();
+            }
+        }        
+    }
+
+    public class TableConverter extends ConverteBase
+    {
+        @Override
+        public boolean canConvert(@SuppressWarnings("rawtypes") Class arg)
+        {
+            return TableImpl.class.isAssignableFrom(arg);
         }
 
         @Override
-        public int getColumnCapacityIncr()
+        public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
         {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public void setColumnCapacityIncr(int increment)
-        {
-            // TODO Auto-generated method stub
+            TableImpl t = (TableImpl)arg;
+            int nRows = t.getNumRows();
+            int nCols = XMLWriter.this.getNumConsumableColumns();
             
-        }
-
-        @Override
-        public boolean isRowLabelsIndexed()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void setRowLabelsIndexed(boolean isIndexed)
-        {
-            // TODO Auto-generated method stub
+            writer.addAttribute("nRows", String.valueOf(nRows));
+            writer.addAttribute("nCols", String.valueOf(nCols));
+            writer.addAttribute("precision", String.valueOf(t.getPrecision()));
             
-        }
-
-        @Override
-        public boolean isColumnLabelsIndexed()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void setColumnLabelsIndexed(boolean isIndexed)
-        {
-            // TODO Auto-generated method stub
+            marshalTableElement(t, writer, context, true);
             
-        }
-
-        @Override
-        public boolean isCellLabelsIndexed()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void setCellLabelsIndexed(boolean isIndexed)
-        {
-            // TODO Auto-generated method stub
+            // Rows
+            Set<Integer> activeRows = new HashSet<Integer>(nRows);
+            if (nRows > 0) {
+                writer.startNode("rows");
+                for (int i = 1; i <= nRows; i++) { 
+                    if (t.isRowDefined(Access.ByIndex, i)) {
+                        Row r = t.getRow(i);
+                        if (!options().isIgnoreEmptyRows() || !r.isNull()) {
+                            context.convertAnother(t.getRow(i));
+                            activeRows.add(i);
+                        }
+                    }
+                }
+                
+                writer.endNode();
+            }
             
-        }
-
-        @Override
-        public boolean isSubsetLabelsIndexed()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void setSubsetLabelsIndexed(boolean isIndexed)
-        {
-            // TODO Auto-generated method stub
+            // Columns
+            if (nCols > 0) {
+                writer.startNode("columns");
+                context.convertAnother(getActiveColumns().toArray(new Column[] {}));
+                writer.endNode();
+            }
             
+            // Cells
+            if (nRows > 0 && nCols > 0) {
+                writer.startNode("cells");
+                for (Column c : getActiveColumns()) {
+                    for (int rIdx = 1; rIdx <= nRows; rIdx++) {
+                        if (activeRows.contains(rIdx)) {
+                            Row r = t.getRow(rIdx);
+                            if (t.isCellDefined(r, c))
+                                context.convertAnother(t.getCell(r,  c));
+                        }
+                    }
+                }
+                
+                writer.endNode();
+            }
         }
 
         @Override
-        public Row addRow()
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
         {
-            // TODO Auto-generated method stub
             return null;
+        }       
+    }
+    
+    class RowConverter extends ConverteBase
+    {
+        @Override
+        public boolean canConvert(@SuppressWarnings("rawtypes") Class arg)
+        {
+            return RowImpl.class.isAssignableFrom(arg);
         }
 
         @Override
-        public Row addRow(int idx)
+        public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
         {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Row addRow(Access mode, Object... mda)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Row getRow()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Row getRow(int idx)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Row getRow(String label)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Row getRow(Access mode, Object... mda)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<Row> getRows()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Iterable<Row> rows()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public int getNumRows()
-        {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public Column addColumn()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Column addColumn(int idx)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Column addColumn(Access mode, Object... mda)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Column getColumn()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Column getColumn(int idx)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Column getColumn(String label)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Column getColumn(Access mode, Object... mda)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public int getNumColumns()
-        {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public List<Column> getColumns()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Iterable<Column> columns()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Subset addSubset(Access mode, Object... mda)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Subset getSubset(Access mode, Object... mda)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Cell getCell(Row row, Column col)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Cell getCell(Access mode, Object... mda)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Object getCellValue(Row row, Column col)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public String getFormattedCellValue(Row row, Column col)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean setCellValue(Row row, Column col, Object newValue)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void pushCurrent()
-        {
-            // TODO Auto-generated method stub
+            RowImpl r = (RowImpl)arg;
             
-        }
-
-        @Override
-        public void popCurrent()
-        {
-            // TODO Auto-generated method stub
+            writer.startNode("row");                
+            writer.addAttribute("index", String.valueOf(r.getIndex()));
             
-        }
-
-        @Override
-        public void sort(ElementType et, TableProperty tp, TableRowColumnElement... others)
-        {
-            // TODO Auto-generated method stub
+            marshalTableElement(r, writer, context, options().isRowLabels());
             
+            writer.endNode();
         }
 
         @Override
-        public void delete(TableElement... elements)
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext writer)
         {
-            // TODO Auto-generated method stub
+            return null;
+        }        
+    }
+    
+    class ColumnConverter extends ConverteBase
+    {
+        @Override
+        public boolean canConvert(@SuppressWarnings("rawtypes") Class arg)
+        {
+            return ColumnImpl.class.isAssignableFrom(arg);
+        }
+
+        @Override
+        public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
+        {
+            ColumnImpl c = (ColumnImpl)arg;
+            if (options().isIgnoreEmptyColumns() && c.isNull())
+                return;
             
-        }
-
-        @Override
-        public void recalculate()
-        {
-            // TODO Auto-generated method stub
+            writer.startNode("column");                
+            writer.addAttribute("index", String.valueOf(c.getIndex()));
             
-        }
-
-        @Override
-        public void export(String fileName, IOOption<?> options) throws IOException
-        {
-            // TODO Auto-generated method stub
+            marshalTableElement(c, writer, context, options().isColumnLabels());
             
+            writer.endNode();
         }
 
         @Override
-        public void export(OutputStream out, IOOption<?> options) throws IOException
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext writer)
         {
-            // TODO Auto-generated method stub
+            return null;
+        }        
+    }
+    
+    class CellConverter extends ConverteBase
+    {
+        @Override
+        public boolean canConvert(@SuppressWarnings("rawtypes") Class arg)
+        {
+            return CellImpl.class.isAssignableFrom(arg);
+        }
+
+        @Override
+        public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
+        {
+            CellImpl c = (CellImpl)arg;
+            if (c.isNull())
+                return;
             
-        }
-
-        @Override
-        public boolean isCellDefined(Row row, Column col)
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean isPersistant()
-        {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void setPersistant(boolean persistent)
-        {
-            // TODO Auto-generated method stub
+            writer.startNode("cell");                
+            writer.addAttribute("rIdx", String.valueOf(c.getRow().getIndex()));
+            writer.addAttribute("cIdx", String.valueOf(c.getColumn().getIndex()));
             
+            marshalTableElement(c, writer, context, true);
+            
+            writer.startNode("value");                
+            context.convertAnother(c.getCellValue());
+            writer.endNode();
+            
+            writer.endNode();
         }
+
+        @Override
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext writer)
+        {
+            return null;
+        }        
     }
 }

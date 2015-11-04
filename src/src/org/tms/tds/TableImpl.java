@@ -1431,6 +1431,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
+    public boolean isRowDefined(Access mode, Object... mda)
+    {
+        vetElement();
+        return getRowInternal(false, false, mode, mda) != null;
+    }
+
+    @Override
     public RowImpl getRow()
     {
         return getCurrentRow();
@@ -1678,6 +1685,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return getColumnInternal(true, true, mode, mda);
     }
         
+    @Override
+    public boolean isColumnDefined(Access mode, Object... mda)
+    {
+        vetElement();
+        return getColumnInternal(false, false, mode, mda) != null;
+    }
+
     @Override
     public ColumnImpl getColumn()
     {
