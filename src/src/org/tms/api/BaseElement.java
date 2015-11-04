@@ -20,7 +20,9 @@ public interface BaseElement
 	 * be modified.
 	 * @return true if this element has been marked as Read-Only.
 	 */
-    public boolean isReadOnly();
+    public boolean isReadOnly();    
+
+    public void setReadOnly(boolean enabled);
     
     /**
      * Returns {@code true} if the {@link Cell} values in this element can be set to {@code null}.
@@ -28,6 +30,8 @@ public interface BaseElement
      */
     public boolean isSupportsNull();
 	
+    public void setSupportsNull(boolean enabled);
+    
     /**
      * Return {@code true} if this element supports (has) the specified {@link TableProperty}
      * @param key the TableProperty to check for the existence of

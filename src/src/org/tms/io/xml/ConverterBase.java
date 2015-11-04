@@ -14,10 +14,14 @@ import org.tms.io.BaseWriter;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 abstract public class ConverterBase implements Converter
 {
+    static final protected String TMS_TABLE_KEY = "__tms table key__";
+    
     private BaseWriter<?> m_writer;
     private BaseReader<?> m_reader;
     private IOOption<?> m_options;
@@ -90,4 +94,60 @@ abstract public class ConverterBase implements Converter
             writer.endNode();
         }
     }        
+
+    protected void unmarshalTableElement(TableElement t, HierarchicalStreamReader reader,
+            UnmarshallingContext context)
+    {
+        Boolean val = readAttributeBoolean("readOnly", reader);
+        if (val != null)
+            t.setReadOnly(val);
+        
+        val = readAttributeBoolean("allowsNulls", reader);
+        if (val != null)
+            t.setSupportsNull(val);
+        
+        while (reader.hasMoreChildren()) {
+            reader.moveDown();
+            String nodeName = reader.getNodeName();
+            String strVal = null;
+            switch (nodeName) {
+                case "label":
+                    strVal = (String)context.convertAnother(t, String.class);
+                    t.setLabel(strVal);
+                    break;
+                    
+                case "description":
+                    strVal = (String)context.convertAnother(t, String.class);
+                    t.setDescription(strVal);
+                    break;
+                    
+                case "tags":
+                    while (reader.hasMoreChildren()) {
+                        reader.moveDown();
+                        strVal = (String)context.convertAnother(t, String.class);
+                        t.tag(strVal);
+                        reader.moveUp();
+                    }
+                    break;
+                    
+                case "derivation":
+                    strVal = (String)context.convertAnother(t, String.class);
+                    break;
+                    
+                default:
+                    return;
+            }
+            
+            reader.moveUp();
+        }
+    }       
+    
+    protected Boolean readAttributeBoolean(String attrName, HierarchicalStreamReader reader)
+    {
+        String val = reader.getAttribute("attrName");
+        if (val != null) 
+            return Boolean.parseBoolean(val);
+        
+        return null;
+    }
 }

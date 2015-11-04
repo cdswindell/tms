@@ -126,7 +126,7 @@ abstract public class BaseElementImpl implements BaseElement
         return isSet(sf_SUPPORTS_NULL_FLAG);
     }
 
-    protected void setSupportsNull(boolean supportsNulls)
+    public void setSupportsNull(boolean supportsNulls)
     {
         set(sf_SUPPORTS_NULL_FLAG, supportsNulls);
     }
@@ -137,7 +137,7 @@ abstract public class BaseElementImpl implements BaseElement
         return isSet(sf_READONLY_FLAG);
     }
 
-    protected void setReadOnly(boolean supportsNulls)
+    public void setReadOnly(boolean supportsNulls)
     {
         set(sf_READONLY_FLAG, supportsNulls);
     }

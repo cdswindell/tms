@@ -1,5 +1,7 @@
 package org.tms.io.xml;
 
+import org.tms.api.Row;
+import org.tms.api.Table;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.RowImpl;
@@ -41,8 +43,16 @@ public class RowConverter extends ConverterBase
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext writer)
+    public Row unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
-        return null;
+        Table t = (Table)context.get(TMS_TABLE_KEY);
+        int rIdx = Integer.valueOf(reader.getAttribute("index"));
+        
+        Row r = t.addRow(rIdx);
+        
+        // upon return, we are left in the Columns or Cells tag
+        unmarshalTableElement(r, reader, context);
+        
+        return r;
     }        
 }

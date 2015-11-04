@@ -1,5 +1,7 @@
 package org.tms.io.xml;
 
+import org.tms.api.Cell;
+import org.tms.api.Table;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
@@ -40,7 +42,11 @@ public class CellConverter extends ConverterBase
         
         marshalTableElement(c, writer, context, true);
         
-        writer.startNode("value");                
+        writer.startNode("dataType");  
+        context.convertAnother(c.getDataType());
+        writer.endNode();
+        
+        writer.startNode("value");  
         context.convertAnother(c.getCellValue());
         writer.endNode();
         
@@ -48,8 +54,28 @@ public class CellConverter extends ConverterBase
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext writer)
+    public Cell unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
-        return null;
+        Table t = (Table)context.get(TMS_TABLE_KEY);
+        int rIdx = Integer.valueOf(reader.getAttribute("rIdx"));
+        int cIdx = Integer.valueOf(reader.getAttribute("cIdx"));
+        
+        Cell c = t.getCell(t.getRow(rIdx), t.getColumn(cIdx));
+        
+        // upon return, we're left at the value tag
+        unmarshalTableElement(c, reader, context);
+        
+        // get data type
+        Class<?> dataType = (Class<?>)context.convertAnother(t, Class.class);
+        reader.moveUp();
+        
+        // get Cell Value
+        reader.moveDown();
+        Object o = context.convertAnother(t, dataType);        
+        reader.moveUp();
+        
+        c.setCellValue(o);
+        
+        return c;
     }        
 }

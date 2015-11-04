@@ -19,7 +19,7 @@ public interface Precisionable
     public int getPrecision();
     
     /**
-     * Sets he number of significant digits used to post derivation results to derived cells. 
+     * Sets the number of significant digits used to post derivation results to derived cells. 
      * The default precision is {@value org.tms.teq.DerivationImpl#sf_DEFAULT_PRECISION} digits. 
      * @param digits the number of significant digits used to post derivation results
      */

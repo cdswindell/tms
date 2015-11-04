@@ -1,5 +1,7 @@
 package org.tms.io.xml;
 
+import org.tms.api.Column;
+import org.tms.api.Table;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.ColumnImpl;
@@ -43,9 +45,17 @@ public class ColumnConverter extends ConverterBase
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext writer)
+    public Column unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
-        return null;
+        Table t = (Table)context.get(TMS_TABLE_KEY);
+        int cIdx = Integer.valueOf(reader.getAttribute("index"));
+        
+        Column c = t.addColumn(cIdx);
+        
+        // upon return, we are left in the Columns or Cells tag
+        unmarshalTableElement(c, reader, context);
+        
+        return c;
     }        
 }
 

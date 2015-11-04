@@ -7,9 +7,13 @@ import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.derivables.Precisionable;
 import org.tms.api.factories.TableFactory;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
+import org.tms.tds.CellImpl;
+import org.tms.tds.ColumnImpl;
+import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -68,7 +72,10 @@ public class TableConverter extends ConverterBase
         // Columns
         if (nCols > 0) {
             writer.startNode("columns");
-            context.convertAnother(getActiveColumns().toArray(new Column[] {}));
+            for (Column c : getActiveColumns()) {
+                context.convertAnother(c);
+            }
+            
             writer.endNode();
         }
         
@@ -90,15 +97,73 @@ public class TableConverter extends ConverterBase
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
+    public Table unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
         int nRows = Integer.valueOf(reader.getAttribute("nRows"));
         int nCols = Integer.valueOf(reader.getAttribute("nCols"));
         
         Table t = TableFactory.createTable(nRows, nCols, getTableContext());
+        context.put(TMS_TABLE_KEY, t);
         
+        if (t instanceof Precisionable) {
+            int precision = Integer.valueOf(reader.getAttribute("precision"));
+            if (precision > 0)
+                ((Precisionable)t).setPrecision(precision);
+        }
         
+        // upon return, we are left in the Rows or Columns or Cells tag
+        unmarshalTableElement(t, reader, context);
+        
+        String nodeName = reader.getNodeName();
+        
+        // process rows
+        if ("rows".equals(nodeName)) {
+            while (reader.hasMoreChildren()) {
+                reader.moveDown();
+                context.convertAnother(t, RowImpl.class);  
+                reader.moveUp();
+            }
+            
+            // we're done with rows, so move out of the "rows" tag
+            reader.moveUp();
+            
+            // set up to process remaining elements (columns, subsets, cells)
+            if (reader.hasMoreChildren()) {
+                reader.moveDown();            
+                nodeName = reader.getNodeName();
+            }
+        }
+        
+        if ("columns".equals(nodeName)) {
+            while (reader.hasMoreChildren()) {
+                reader.moveDown();
+                context.convertAnother(t, ColumnImpl.class);  
+                reader.moveUp();
+            }
+            
+            // we're done with cols, so move out of the "columns" tag
+            reader.moveUp();
+            
+            // set up to process remaining elements (subsets, cells)
+            if (reader.hasMoreChildren()) {
+                reader.moveDown();            
+                nodeName = reader.getNodeName();
+            }
+        }
+        
+        // TODO: process subsets, if any exist
+        
+        if ("cells".equals(nodeName)) {
+            while (reader.hasMoreChildren()) {
+                reader.moveDown();
+                context.convertAnother(t, CellImpl.class);  
+                reader.moveUp();
+            }
+            
+            // we're done with cells, so move out of the "columns" tag
+            reader.moveUp();
+        }
         
         return t;
-    }       
+    }
 }
