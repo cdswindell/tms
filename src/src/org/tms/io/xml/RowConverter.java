@@ -2,6 +2,7 @@ package org.tms.io.xml;
 
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableProperty;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.RowImpl;
@@ -41,6 +42,9 @@ public class RowConverter extends ConverterBase
         
         marshalTableElement(r, writer, context, options().isRowLabels());
         
+        writeNode(r, TableProperty.Units, UNITS_TAG, writer, context);
+        writeNode(r, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
+        
         writer.endNode();
     }
 
@@ -54,6 +58,34 @@ public class RowConverter extends ConverterBase
         
         // upon return, we are left in the Columns or Cells tag
         unmarshalTableElement(r, reader, context);
+        
+        String nodeName = reader.getNodeName();
+        String strVal;
+        if (UNITS_TAG.equals(nodeName)) {
+            strVal = reader.getValue();
+            if (strVal != null && (strVal = strVal.trim()).length() > 0)
+                r.setUnits(strVal);
+            reader.moveUp();
+            
+            // check next tag
+            if (reader.hasMoreChildren()) {
+                reader.moveDown();
+                nodeName = reader.getNodeName();
+            }
+        }
+        
+        if (FORMAT_TAG.equals(nodeName)) {
+            strVal = reader.getValue();
+            if (strVal != null && (strVal = strVal.trim()).length() > 0)
+                r.setDisplayFormat(strVal);
+            reader.moveUp();
+            
+            // check next tag
+            if (reader.hasMoreChildren()) {
+                reader.moveDown();
+                nodeName = reader.getNodeName();
+            }
+        }
         
         return r;
     }        

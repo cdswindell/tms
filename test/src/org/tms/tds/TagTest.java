@@ -3,15 +3,26 @@ package org.tms.tds;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.hamcrest.core.IsNull.nullValue;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
+import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 
 public class TagTest extends BaseTest
 {
+    @AfterClass
+    static public void cleanup()
+    {
+        TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        TdsUtils.clearGlobalTagCache(tc);
+    }
+    
     @Test
     public final void testConstructor()
     {
@@ -59,7 +70,7 @@ public class TagTest extends BaseTest
         
         tbl.setTags();
         assertThat(tbl.isTagged(), is (false));
-        assertThat(tbl.getTags(), is(new String []{}));
+        assertThat(tbl.getTags(), nullValue());
         assertThat(tc.getGlobalTagCache().size(), is(4));
         tc.clearGlobalTagCache();
     }
