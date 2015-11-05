@@ -49,13 +49,13 @@ public class XLSXWriterTest extends BaseTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(qualifiedFileName(ExportTableGold));
+        Path path = Paths.get(qualifiedFileName(ExportTableGold, "xls"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         t.setLabel("Test Table");
         

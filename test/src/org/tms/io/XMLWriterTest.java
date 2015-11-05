@@ -37,7 +37,7 @@ public class XMLWriterTest extends XMLTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(qualifiedFileName(ExportTableGold));
+        Path path = Paths.get(qualifiedFileName(ExportTableGold, "xml"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
@@ -65,7 +65,7 @@ public class XMLWriterTest extends XMLTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(qualifiedFileName(ExportTableGold2));
+        Path path = Paths.get(qualifiedFileName(ExportTableGold2, "xml"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);

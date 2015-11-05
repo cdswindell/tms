@@ -26,7 +26,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testCSVReaderConstructor()
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.Default); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1, "csv"), CSVOptions.Default); 
         assertNotNull(r);
         assertThat(r.getFileName(), is(SAMPLE1));
         assertThat(r.isRowNames(), is(true));
@@ -36,7 +36,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParse() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.Default); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1, "csv"), CSVOptions.Default); 
         assertNotNull(r);
         
         try
@@ -70,7 +70,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseComplex() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE2), CSVOptions.Default); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE2, "csv"), CSVOptions.Default); 
         assertNotNull(r);
         
         try
@@ -109,7 +109,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseIgnoreEmptyRows() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE2), CSVOptions.Default.withIgnoreEmptyRows()); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE2, "csv"), CSVOptions.Default.withIgnoreEmptyRows()); 
         assertNotNull(r);
         
         try
@@ -148,7 +148,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseIgnoreEmptyCols() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE3), CSVOptions.Default.withIgnoreEmptyColumns()); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE3, "csv"), CSVOptions.Default.withIgnoreEmptyColumns()); 
         assertNotNull(r);
         
         try
@@ -182,7 +182,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseIgnoreEmptyRowsAndCols() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE3), CSVOptions.Default.withIgnoreEmptyRows().withIgnoreEmptyColumns()); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE3, "csv"), CSVOptions.Default.withIgnoreEmptyRows().withIgnoreEmptyColumns()); 
         assertNotNull(r);
         
         try
@@ -216,7 +216,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseNoColumnNames() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.Default.withColumnLabels(false)); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1, "csv"), CSVOptions.Default.withColumnLabels(false)); 
         assertNotNull(r);
         
         try
@@ -257,7 +257,7 @@ public class CSVReaderTest extends BaseTest
     @Test
     public final void testParseNoRowNames() 
     {
-        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1), CSVOptions.Default.withRowLabels(false)); 
+        CSVReader r = new CSVReader(qualifiedFileName(SAMPLE1, "csv"), CSVOptions.Default.withRowLabels(false)); 
         assertNotNull(r);
         
         try
@@ -295,7 +295,7 @@ public class CSVReaderTest extends BaseTest
     {
         try
         {
-            Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true); 
+            Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true); 
             assertNotNull(t);
             
             assertThat(t.getNumRows(), is(4));

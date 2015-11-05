@@ -16,7 +16,7 @@ public class XMLTest extends BaseTest
     
     protected Table getBasicTable()
     {
-        Table gst = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table gst = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(gst);
         gst.setLabel("Test XML & Export Table");
         gst.tag("red", "green");

@@ -31,7 +31,7 @@ public class XMLReaderTest extends XMLTest
     @Test
     public final void testCSVReaderConstructor()
     {
-        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold), XMLOptions.Default); 
+        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold, "xml"), XMLOptions.Default); 
         assertNotNull(r);
         assertThat(r.getFileName(), is(ExportTableGold));
         assertThat(r.isRowNames(), is(true));
@@ -45,7 +45,7 @@ public class XMLReaderTest extends XMLTest
         Table gst = getBasicTable();
         
         // now read the xml
-        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold), XMLOptions.Default); 
+        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold, "xml"), XMLOptions.Default); 
         assertNotNull(r);
         
         try

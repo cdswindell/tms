@@ -35,13 +35,13 @@ public class HTMLWriterTest extends BaseTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(qualifiedFileName(ExportTableGold));
+        Path path = Paths.get(qualifiedFileName(ExportTableGold, "misc"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
 
         // create output stream
@@ -75,13 +75,13 @@ public class HTMLWriterTest extends BaseTest
     @Test
     public final void testExportSubset() throws IOException
     {
-        Path path = Paths.get(qualifiedFileName(ExportSubsetGold));
+        Path path = Paths.get(qualifiedFileName(ExportSubsetGold, "misc"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
 
         Subset s = t.addSubset(Access.ByLabel, "CDS");
@@ -105,13 +105,13 @@ public class HTMLWriterTest extends BaseTest
     @Test
     public final void testExportRow() throws IOException
     {
-        Path path = Paths.get(qualifiedFileName(ExportRowGold));
+        Path path = Paths.get(qualifiedFileName(ExportRowGold, "misc"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
 
         Row r = t.getRow(2);
@@ -134,13 +134,13 @@ public class HTMLWriterTest extends BaseTest
     @Test
     public final void testExportColumn() throws IOException
     {
-        Path path = Paths.get(qualifiedFileName(ExportColumnGold));
+        Path path = Paths.get(qualifiedFileName(ExportColumnGold, "misc"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
 
         Column c = t.getColumn(1);

@@ -30,6 +30,11 @@ public class BaseTest
     
     protected final String qualifiedFileName(String fn)
     {
+        return qualifiedFileName(fn, null);
+    }
+    
+    protected final String qualifiedFileName(String fn, String subDir)
+    {
         StringBuffer sb = new StringBuffer();
         sb.append(System.getProperty("user.dir"));
         sb.append(File.separator);
@@ -43,6 +48,10 @@ public class BaseTest
         
         sb.append(packagePath);
         sb.append(File.separator);
+        
+        if (subDir != null) 
+            sb.append(subDir.trim()).append(File.separator);
+        
         sb.append(fn);
         
         return sb.toString();

@@ -29,13 +29,13 @@ public class PDFWriterTest extends BaseTest
     @Test
     public final void testExportTable() throws IOException
     {
-        Path path = Paths.get(qualifiedFileName(ExportTableGold));
+        Path path = Paths.get(qualifiedFileName(ExportTableGold, "misc"));
         byte[] gold = Files.readAllBytes(path);  
         
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
         
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         
         // create output stream
@@ -74,7 +74,7 @@ public class PDFWriterTest extends BaseTest
     @Test
     public final void testExportSubset() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         
         Subset s = t.addSubset(Access.ByLabel, "CDS");
@@ -100,7 +100,7 @@ public class PDFWriterTest extends BaseTest
     @Test
     public final void testExportRow() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         
         Row r = t.getRow(3);
@@ -126,7 +126,7 @@ public class PDFWriterTest extends BaseTest
     @Test
     public final void testExportColumn() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         
         Column c = t.getColumn(2);
@@ -153,7 +153,7 @@ public class PDFWriterTest extends BaseTest
     @Test
     public final void testExportTablePersistant() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1), true, true);
+        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         
         // Write to file
