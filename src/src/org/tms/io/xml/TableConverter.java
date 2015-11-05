@@ -1,10 +1,7 @@
 package org.tms.io.xml;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
@@ -25,7 +22,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class TableConverter extends ConverterBase
+public class TableConverter extends BaseConverter
 {
     public TableConverter(BaseWriter<?> writer)
     {
@@ -57,24 +54,15 @@ public class TableConverter extends ConverterBase
         marshalTableElement(t, writer, context, true);
         
         // Rows
-        Set<Integer> activeRows = new HashSet<Integer>(nRows);
         if (nRows > 0) {
             writer.startNode("rows");
             for (int i = 1; i <= nRows; i++) { 
-                if (t.isRowDefined(Access.ByIndex, i)) {
-                    Row r = t.getRow(i);
-                    if (!options().isIgnoreEmptyRows() || !r.isNull()) {
-                        context.convertAnother(t.getRow(i));
-                        activeRows.add(i);
-                    }
-                }
+                if (!isIgnoreRow(i)) 
+                    context.convertAnother(t.getRow(i));
             }
             
             writer.endNode();
         }
-        
-        // save the active rows, we need them when we're processing the subsets
-        context.put(TMS_ACTIVE_ROWS_KEY,  activeRows);
         
         // Columns
         if (nCols > 0) {
@@ -102,7 +90,7 @@ public class TableConverter extends ConverterBase
             writer.startNode("cells");
             for (Column c : getActiveColumns()) {
                 for (int rIdx = 1; rIdx <= nRows; rIdx++) {
-                    if (activeRows.contains(rIdx)) {
+                    if (!isIgnoreRow(rIdx)) {
                         Row r = t.getRow(rIdx);
                         if (t.isCellDefined(r, c))
                             context.convertAnother(t.getCell(r,  c));

@@ -13,7 +13,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class CellConverter extends ConverterBase
+public class CellConverter extends BaseConverter
 {
     static final public String CELL_TAG = "cell";
     static final public String VALUE_TAG = "value";
@@ -40,8 +40,8 @@ public class CellConverter extends ConverterBase
         CellImpl c = (CellImpl)arg;
         
         writer.startNode(CELL_TAG);                
-        writer.addAttribute("rIdx", String.valueOf(c.getRow().getIndex()));
-        writer.addAttribute("cIdx", String.valueOf(c.getColumn().getIndex()));
+        writer.addAttribute("rIdx", String.valueOf(getRemappedRowIndex(c.getRow())));
+        writer.addAttribute("cIdx", String.valueOf(getRemappedColumnIndex(c.getColumn())));
         
         marshalTableElement(c, writer, context, true);
         

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableElement;
@@ -21,11 +22,10 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-abstract public class ConverterBase implements Converter
+abstract public class BaseConverter implements Converter
 {
     static final protected String TMS_TABLE_KEY = "__tms table key__";
     static final protected String TMS_DERIVATIONS_KEY = "__tms derivations key__";
-    static final protected String TMS_ACTIVE_ROWS_KEY = "__tms active rows key__";
     
     static final protected String LABEL_TAG = "label";
     static final protected String DESC_TAG = "description";
@@ -45,13 +45,13 @@ abstract public class ConverterBase implements Converter
     private BaseReader<?> m_reader;
     private IOOption<?> m_options;
     
-    public ConverterBase(BaseWriter<?> writer)
+    public BaseConverter(BaseWriter<?> writer)
     {
         m_writer = writer;
         m_options = writer.options();
     }
 
-    public ConverterBase(BaseReader<?> reader)
+    public BaseConverter(BaseReader<?> reader)
     {
         m_reader = reader;
         m_options = reader.options();
@@ -83,6 +83,36 @@ abstract public class ConverterBase implements Converter
     protected boolean isIgnoreColumn(int cIdx) 
     {
         return m_writer.isIgnoreColumn(cIdx);
+    }
+    
+    protected int getRemappedColumnIndex(Column c) 
+    {
+        return m_writer.getRemappedColumnIndex(c);
+    }
+    
+    protected int getRemappedColumnIndex(int idx) 
+    {
+        return m_writer.getRemappedColumnIndex(idx);
+    }
+    
+    protected boolean isIgnoreRow(Row r) 
+    {
+        return m_writer.isIgnoreRow(r);
+    }
+    
+    protected boolean isIgnoreRow(int rIdx) 
+    {
+        return m_writer.isIgnoreRow(rIdx);
+    }
+    
+    protected int getRemappedRowIndex(Row r) 
+    {
+        return m_writer.getRemappedRowIndex(r);
+    }
+    
+    protected int getRemappedRowIndex(int idx) 
+    {
+        return m_writer.getRemappedRowIndex(idx);
     }
     
     protected void writeNode(TableElement te, TableProperty key, String tag, 

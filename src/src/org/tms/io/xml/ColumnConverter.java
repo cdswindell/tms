@@ -12,7 +12,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class ColumnConverter extends ConverterBase
+public class ColumnConverter extends BaseConverter
 {
     static final public String COLUMN_TAG = "column";
     
@@ -36,11 +36,9 @@ public class ColumnConverter extends ConverterBase
     public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         ColumnImpl c = (ColumnImpl)arg;
-        if (options().isIgnoreEmptyColumns() && c.isNull())
-            return;
         
         writer.startNode(COLUMN_TAG);                
-        writer.addAttribute(INDEX_ATTR, String.valueOf(c.getIndex()));
+        writer.addAttribute(INDEX_ATTR, String.valueOf(getRemappedColumnIndex(c)));
         
         marshalTableElement(c, writer, context, options().isColumnLabels());
         

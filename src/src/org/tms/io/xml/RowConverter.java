@@ -12,7 +12,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class RowConverter extends ConverterBase
+public class RowConverter extends BaseConverter
 {
     static final public String ROW_TAG = "row";
     
@@ -38,7 +38,7 @@ public class RowConverter extends ConverterBase
         RowImpl r = (RowImpl)arg;
         
         writer.startNode(ROW_TAG);                
-        writer.addAttribute(INDEX_ATTR, String.valueOf(r.getIndex()));
+        writer.addAttribute(INDEX_ATTR, String.valueOf(getRemappedRowIndex(r)));
         
         marshalTableElement(r, writer, context, options().isRowLabels());
         

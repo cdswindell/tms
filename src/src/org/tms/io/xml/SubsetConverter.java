@@ -1,8 +1,5 @@
 package org.tms.io.xml;
 
-import java.util.Collections;
-import java.util.Set;
-
 import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
@@ -17,7 +14,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class SubsetConverter extends ConverterBase
+public class SubsetConverter extends BaseConverter
 {
     static final public String SUBSET_TAG = "subset";
     static final public String SUBSET_ROWS_TAG = "sRows";
@@ -46,21 +43,17 @@ public class SubsetConverter extends ConverterBase
         
         String rowIdxs = null;
         if (s.getNumRows() > 0) {
-            @SuppressWarnings("unchecked")
-            Set<Integer> activeRows = (Set<Integer>)context.get(TMS_ACTIVE_ROWS_KEY);
-            if (activeRows == null)
-                activeRows = Collections.emptySet();
-
             StringBuffer sb = new StringBuffer();
             boolean needsComma = false;
             for (Row r : s.getRows()) {
                 int idx = r.getIndex();
-                if (activeRows.contains(idx)) {
+                if (!isIgnoreRow(idx)) {
                     if (needsComma) 
                         sb.append(",");
                     else
                         needsComma = true; 
-                    sb.append(idx);
+                    
+                    sb.append(getRemappedRowIndex(idx));
                 }
             }
             
@@ -79,7 +72,7 @@ public class SubsetConverter extends ConverterBase
                     else
                         needsComma = true; 
                     
-                    sb.append(c.getIndex());
+                    sb.append(getRemappedColumnIndex(c));
                 }
             }
             
