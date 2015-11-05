@@ -16,7 +16,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class CellConverter extends BaseConverter
 {
-    static final public String CELL_TAG = "cell";
+    static final public String ELEMENT_TAG = "cell";
+    
     static final public String VALUE_TAG = "value";
     
     public CellConverter(BaseWriter<?> writer)
@@ -35,12 +36,17 @@ public class CellConverter extends BaseConverter
         return CellImpl.class.isAssignableFrom(arg);
     }
 
+    protected String getElementTag()
+    {
+        return CellConverter.ELEMENT_TAG;
+    }
+    
     @Override
     public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         CellImpl c = (CellImpl)arg;
         
-        writer.startNode(CELL_TAG);                
+        writer.startNode(getElementTag());                
         writer.addAttribute("rIdx", String.valueOf(getRemappedRowIndex(c.getRow())));
         writer.addAttribute("cIdx", String.valueOf(getRemappedColumnIndex(c.getColumn())));
         
@@ -78,7 +84,7 @@ public class CellConverter extends BaseConverter
         Cell c = t.getCell(t.getRow(rIdx), t.getColumn(cIdx));
         
         // upon return, we're left at the value tag
-        unmarshalTableElement(c, reader, context);
+        unmarshalTableElement(c, true, reader, context);
         
         // process units and display format tags, if present
         String strVal;

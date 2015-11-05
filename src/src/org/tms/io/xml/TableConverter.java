@@ -24,12 +24,16 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class TableConverter extends BaseConverter
 {
+    static final public String ELEMENT_TAG = "table";
+    
     static final protected String NROWS_ATTR = "nRows";
     static final protected String NCOLS_ATTR = "nCols";
     static final protected String PRECISION_ATTR = "precision";
     
     static final protected String ROWS_TAG = "rows";
     static final protected String COLS_TAG = "columns";
+    static final protected String SUBSETS_TAG = "subsets";
+    static final protected String CELLS_TAG = "subsets";
     
     public TableConverter(BaseWriter<?> writer)
     {
@@ -44,7 +48,7 @@ public class TableConverter extends BaseConverter
     @Override
     public boolean canConvert(@SuppressWarnings("rawtypes") Class arg)
     {
-        return TableImpl.class.isAssignableFrom(arg);
+        return TableImpl.class == arg;
     }
 
     @Override
@@ -83,7 +87,7 @@ public class TableConverter extends BaseConverter
         
         // Subsets
         if (t.getNumSubsets() > 0) {
-            writer.startNode("subsets");
+            writer.startNode(SUBSETS_TAG);
             for (Subset s : t.getSubsets()) {
                 context.convertAnother(s);
             }
@@ -93,7 +97,7 @@ public class TableConverter extends BaseConverter
 
         // Cells
         if (nRows > 0 && nCols > 0) {
-            writer.startNode("cells");
+            writer.startNode(CELLS_TAG);
             for (Column c : getActiveColumns()) {
                 for (int rIdx = 1; rIdx <= nRows; rIdx++) {
                     if (!isIgnoreRow(rIdx)) {
@@ -115,7 +119,6 @@ public class TableConverter extends BaseConverter
         int nCols = readAttributeInteger(NCOLS_ATTR, reader);
         
         Table t = TableFactory.createTable(nRows, nCols, getTableContext());
-        context.put(TMS_TABLE_KEY, t);
         
         if (t instanceof Precisionable) {
             Integer precision = readAttributeInteger(PRECISION_ATTR, reader);
@@ -124,7 +127,10 @@ public class TableConverter extends BaseConverter
         }
         
         // upon return, we are left in the Rows or Columns or Cells tag
-        unmarshalTableElement(t, reader, context);
+        unmarshalTableElement(t, true, reader, context);
+        
+        // save the table for others to access
+        context.put(TMS_TABLE_KEY, t);
         
         // so where are we now?
         String nodeName = reader.getNodeName();
@@ -136,15 +142,19 @@ public class TableConverter extends BaseConverter
         if (COLS_TAG.equals(nodeName)) 
             nodeName = processChildren(t,  ColumnImpl.class, reader, context);
         
-        if ("subsets".equals(nodeName)) 
+        if (SUBSETS_TAG.equals(nodeName)) 
             nodeName = processChildren(t,  SubsetImpl.class, reader, context);
         
-        if ("cells".equals(nodeName)) 
+        if (CELLS_TAG.equals(nodeName)) 
             nodeName = processChildren(t,  CellImpl.class, reader, context);
         
         // process derivations, if any
-        for (Map.Entry<Derivable, String> e : getDerivationsMap(context).entrySet()) {
-            e.getKey().setDerivation(e.getValue());
+        if (options().isDerivations()) {
+            for (Map.Entry<Derivable, String> e : getDerivationsMap(context).entrySet()) {
+                e.getKey().setDerivation(e.getValue());
+            }
+            
+            t.recalculate();
         }
         
         return t;

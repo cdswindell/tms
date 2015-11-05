@@ -1,17 +1,19 @@
 package org.tms.api.io;
 
-import org.tms.io.options.BaseIOOptions;
+import org.tms.io.options.ArchivalIOOptions;
 
-public class XMLOptions extends BaseIOOptions<XMLOptions> implements IOOption<XMLOptions>
+public class XMLOptions extends ArchivalIOOptions<XMLOptions> implements ArchivalIOOption<XMLOptions>
 {
-    public static final XMLOptions Default = new XMLOptions(true, true, false, false);
+    public static final XMLOptions Default = new XMLOptions(true, true, false, false, true, false);
 
     private XMLOptions(final boolean rowNames, 
                        final boolean colNames, 
                        final boolean ignoreEmptyRows, 
-                       final boolean ignoreEmptyCols)
+                       final boolean ignoreEmptyCols,
+                       final boolean withDerivations,
+                       final boolean withValidators)
     {
-        super(IOFileFormat.XML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(IOFileFormat.XML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols, withDerivations, withValidators);
     }
     
     private XMLOptions (final XMLOptions format)
@@ -20,7 +22,7 @@ public class XMLOptions extends BaseIOOptions<XMLOptions> implements IOOption<XM
     }
     
     @Override
-    protected XMLOptions clone(final BaseIOOptions<XMLOptions> model)
+    protected XMLOptions clone(final ArchivalIOOptions<XMLOptions> model)
     {
         return new XMLOptions((XMLOptions)model);
     }    

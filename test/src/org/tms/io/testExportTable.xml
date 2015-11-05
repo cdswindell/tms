@@ -28,7 +28,6 @@
     <column index="3">
       <label>C</label>
     </column>
-    <column index="4"/>
     <column index="5">
       <tags>
         <string>calculated</string>
@@ -40,19 +39,19 @@
   </columns>
   <subsets>
     <subset>
+      <label>Excluded Cols</label>
+      <sCols>4</sCols>
+    </subset>
+    <subset>
       <label>Some Cols</label>
       <tags>
         <string>red</string>
         <string>subset</string>
       </tags>
-      <sCols>5,3,4</sCols>
-    </subset>
-    <subset>
-      <label>Excluded Cols</label>
-      <sCols>4</sCols>
+      <sCols>3,5,4</sCols>
     </subset>
   </subsets>
-  <cells>
+  <subsets>
     <cell rIdx="1" cIdx="1">
       <dataType>java.lang.Integer</dataType>
       <value>12</value>
@@ -118,5 +117,5 @@
       <dataType>java.lang.Double</dataType>
       <value>311.5225</value>
     </cell>
-  </cells>
+  </subsets>
 </table>

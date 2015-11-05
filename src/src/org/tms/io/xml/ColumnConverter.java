@@ -14,7 +14,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class ColumnConverter extends BaseConverter
 {
-    static final public String COLUMN_TAG = "column";
+    static final public String ELEMENT_TAG = "column";
     
     public ColumnConverter(BaseWriter<?> writer)
     {
@@ -32,18 +32,49 @@ public class ColumnConverter extends BaseConverter
         return ColumnImpl.class.isAssignableFrom(arg);
     }
 
+    protected String getElementTag()
+    {
+        return ColumnConverter.ELEMENT_TAG;
+    }
+    
+    /**
+     * Return true of this row should be output
+     */
+    protected boolean isRelevant(Column c)
+    {
+        if (hasValue(c, TableProperty.Units))
+            return true;
+        
+        if (hasValue(c, TableProperty.DisplayFormat))
+            return true;
+        
+        if (hasValue(c, TableProperty.DataType))
+            return true;
+        
+        return super.isRelevant(c);
+    }
+
     @Override
     public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         ColumnImpl c = (ColumnImpl)arg;
         
-        writer.startNode(COLUMN_TAG);                
+        // if the col only has defaults, no need to output it
+        if (!isRelevant(c))
+            return;
+        
+        writer.startNode(getElementTag());                
         writer.addAttribute(INDEX_ATTR, String.valueOf(getRemappedColumnIndex(c)));
         
         marshalTableElement(c, writer, context, options().isColumnLabels());
         
-        writeNode(c, TableProperty.Units, UNITS_TAG, writer, context);
-        writeNode(c, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
+        if (options().isUnits())
+            writeNode(c, TableProperty.Units, UNITS_TAG, writer, context);
+        
+        if (options().isDisplayFormats())
+            writeNode(c, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
+        
+        // we always want to output this, not optional
         writeNode(c, TableProperty.DataType, DATATYPE_TAG, writer, context);
         
         writer.endNode();
@@ -58,14 +89,16 @@ public class ColumnConverter extends BaseConverter
         Column c = t.addColumn(cIdx);
         
         // upon return, we are left in the Columns or Cells tag
-        unmarshalTableElement(c, reader, context);
+        unmarshalTableElement(c, options().isColumnLabels(), reader, context);
         
         String nodeName = reader.getNodeName();
         String strVal;
         if (UNITS_TAG.equals(nodeName)) {
-            strVal = reader.getValue();
-            if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                c.setUnits(strVal);
+            if (options().isUnits()) {
+                strVal = reader.getValue();
+                if (strVal != null && (strVal = strVal.trim()).length() > 0)
+                    c.setUnits(strVal);
+            }
             reader.moveUp();
             
             // check next tag
@@ -76,9 +109,11 @@ public class ColumnConverter extends BaseConverter
         }
         
         if (FORMAT_TAG.equals(nodeName)) {
-            strVal = reader.getValue();
-            if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                c.setDisplayFormat(strVal);
+            if (options().isDisplayFormats()) {
+                strVal = reader.getValue();
+                if (strVal != null && (strVal = strVal.trim()).length() > 0)
+                    c.setDisplayFormat(strVal);
+            }
             reader.moveUp();
             
             // check next tag

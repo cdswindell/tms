@@ -4,16 +4,8 @@
     <string>green</string>
     <string>red</string>
   </tags>
-  <rows>
-    <row index="1"/>
-    <row index="2"/>
-    <row index="3"/>
-    <row index="4"/>
-  </rows>
+  <rows/>
   <columns>
-    <column index="1"/>
-    <column index="2"/>
-    <column index="3"/>
     <column index="4">
       <tags>
         <string>calculated</string>
@@ -30,10 +22,10 @@
         <string>red</string>
         <string>subset</string>
       </tags>
-      <sCols>3,4</sCols>
+      <sCols>4,3</sCols>
     </subset>
   </subsets>
-  <cells>
+  <subsets>
     <cell rIdx="1" cIdx="1">
       <dataType>java.lang.Integer</dataType>
       <value>12</value>
@@ -99,5 +91,5 @@
       <dataType>java.lang.Double</dataType>
       <value>311.5225</value>
     </cell>
-  </cells>
+  </subsets>
 </table>

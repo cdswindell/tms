@@ -171,7 +171,7 @@ public class XLSOptions extends StyledPageIOOptions<XLSOptions> implements Style
      */
     public boolean isDerivations()
     {
-        return (Boolean)get(Options.Descriptions);
+        return (Boolean)get(Options.Derivations);
     }
     
     /**
@@ -218,7 +218,7 @@ public class XLSOptions extends StyledPageIOOptions<XLSOptions> implements Style
     /**
      * Enables the translation of TMS {@link org.tms.api.TableElement TableElement} Description fields to Excel cell comments on export, 
      * and the translation of Excel cell comments to TMS Description fields on import.
-     * @return a new {@link XLSOptions} that is equal to this with Derivation/cell comment support enabled
+     * @return a new {@link XLSOptions} that is equal to this with Description/cell comment support enabled
      */
     public XLSOptions withDescriptions()
     {
@@ -229,7 +229,7 @@ public class XLSOptions extends StyledPageIOOptions<XLSOptions> implements Style
      * Enable or disable the translation of TMS {@link org.tms.api.TableElement TableElement} Description fields to Excel cell comments on export, 
      * and the translation ofExcel cell comments to TMS Description fields on import.
      * @param enabled {@code true} to exchange Descriptions with Excel comments, {@code false} to ignore comments and descriptions
-     * @return a new {@link XLSOptions} that is equal to this with Derivation/cell comment support enabled or disabled
+     * @return a new {@link XLSOptions} that is equal to this with Description/cell comment support enabled or disabled
      */
     public XLSOptions withDescriptions(boolean enabled)
     {

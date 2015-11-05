@@ -14,7 +14,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class RowConverter extends BaseConverter
 {
-    static final public String ROW_TAG = "row";
+    static final public String ELEMENT_TAG = "row";
     
     public RowConverter(BaseWriter<?> writer)
     {
@@ -32,18 +32,44 @@ public class RowConverter extends BaseConverter
         return RowImpl.class.isAssignableFrom(arg);
     }
 
+    protected String getElementTag()
+    {
+        return RowConverter.ELEMENT_TAG;
+    }
+    
+    /**
+     * Return true of this row should be output
+     */
+    protected boolean isRelevant(Row r)
+    {
+        if (hasValue(r, TableProperty.Units))
+            return true;
+        
+        if (hasValue(r, TableProperty.DisplayFormat))
+            return true;
+        
+        return super.isRelevant(r);
+    }
+
     @Override
     public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         RowImpl r = (RowImpl)arg;
         
-        writer.startNode(ROW_TAG);                
+        // if the row only has defaults, no need to output it
+        if (!isRelevant(r))
+            return;
+        
+        writer.startNode(getElementTag());                
         writer.addAttribute(INDEX_ATTR, String.valueOf(getRemappedRowIndex(r)));
         
         marshalTableElement(r, writer, context, options().isRowLabels());
         
-        writeNode(r, TableProperty.Units, UNITS_TAG, writer, context);
-        writeNode(r, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
+        if (options().isUnits())
+            writeNode(r, TableProperty.Units, UNITS_TAG, writer, context);
+        
+        if (options().isDisplayFormats())
+            writeNode(r, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
         
         writer.endNode();
     }
@@ -57,14 +83,16 @@ public class RowConverter extends BaseConverter
         Row r = t.addRow(rIdx);
         
         // upon return, we are left in the Columns or Cells tag
-        unmarshalTableElement(r, reader, context);
+        unmarshalTableElement(r, options().isRowLabels(), reader, context);
         
         String nodeName = reader.getNodeName();
         String strVal;
         if (UNITS_TAG.equals(nodeName)) {
-            strVal = reader.getValue();
-            if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                r.setUnits(strVal);
+            if (options().isUnits()) {
+                strVal = reader.getValue();
+                if (strVal != null && (strVal = strVal.trim()).length() > 0)
+                    r.setUnits(strVal);
+            }
             reader.moveUp();
             
             // check next tag
@@ -75,9 +103,11 @@ public class RowConverter extends BaseConverter
         }
         
         if (FORMAT_TAG.equals(nodeName)) {
-            strVal = reader.getValue();
-            if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                r.setDisplayFormat(strVal);
+            if (options().isDisplayFormats()) {
+                strVal = reader.getValue();
+                if (strVal != null && (strVal = strVal.trim()).length() > 0)
+                    r.setDisplayFormat(strVal);
+            }
             reader.moveUp();
             
             // check next tag

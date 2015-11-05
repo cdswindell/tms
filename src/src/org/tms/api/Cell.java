@@ -2,8 +2,7 @@ package org.tms.api;
 
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.ErrorCode;
-import org.tms.api.utils.TableCellTransformer;
-import org.tms.api.utils.TableCellValidator;
+import org.tms.api.utils.Validatable;
 
 /**
  * A {@link Table} cell. Cells contain
@@ -17,7 +16,7 @@ import org.tms.api.utils.TableCellValidator;
  * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public interface Cell extends TableElement, Derivable
+public interface Cell extends TableElement, Derivable, Validatable
 {
     /**
      * Sets this cell to the specified value.
@@ -113,8 +112,4 @@ public interface Cell extends TableElement, Derivable
     public String getFormattedCellValue();
     public String getDisplayFormat();
     public void setDisplayFormat(String format);
-
-    public TableCellValidator getValidator();
-    public void setValidator(TableCellValidator validator);
-    public void setTransformer(TableCellTransformer transformer);
 }

@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Comparator;
 
+import org.tms.api.derivables.Derivable;
 import org.tms.api.io.IOOption;
-import org.tms.api.utils.TableCellTransformer;
-import org.tms.api.utils.TableCellValidator;
+import org.tms.api.utils.Validatable;
 
 /**
  * Methods common to {@link Table} {@link Row}s and {@link Column}s, 
@@ -14,7 +14,7 @@ import org.tms.api.utils.TableCellValidator;
  * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public interface TableRowColumnElement extends TableElement
+public interface TableRowColumnElement extends TableElement, Derivable, Validatable
 {
     /**
      * Return the 1-based ordinal index of this {@link Row}/{@link Column}.
@@ -31,10 +31,6 @@ public interface TableRowColumnElement extends TableElement
     public String getDisplayFormat();
     public void setDisplayFormat(String format);
 
-    public TableCellValidator getValidator();
-    public void setValidator(TableCellValidator validator);
-    public void setTransformer(TableCellTransformer transformer);
-       
     /**
      * Exports this {@link TableRowColumnElement} to the specified file format using the export options given in {@code options}.
      * @param fileName the file name where the row/column is written to

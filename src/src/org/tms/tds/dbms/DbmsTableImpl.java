@@ -43,6 +43,7 @@ public class DbmsTableImpl extends TableImpl
 
     private String m_connectionUrl;
     private String m_query;
+    private String m_driverClassName;
     
     private ResultSet m_resultSet;
     private PreparedStatement m_statement;
@@ -54,13 +55,13 @@ public class DbmsTableImpl extends TableImpl
     private Set<DbmsRowImpl> m_unprocessedRows;
     private boolean m_processingResultSet = false;
     
-    protected DbmsTableImpl(String connectionUrl, String query)
+    public DbmsTableImpl(String connectionUrl, String query)
     throws SQLException, ClassNotFoundException
     {
         this(connectionUrl, query, null, ContextImpl.fetchDefaultContext());
     }
     
-    protected DbmsTableImpl(String connectionUrl, String query, String driverClassName, ContextImpl tc) 
+    public DbmsTableImpl(String connectionUrl, String query, String driverClassName, ContextImpl tc) 
     throws ClassNotFoundException, SQLException
     {
         // initialize the default table object
@@ -72,10 +73,26 @@ public class DbmsTableImpl extends TableImpl
             tc.loadDatabaseDriver(driverClassName);
         
         // save the connection info
+        m_driverClassName = driverClassName;
         m_connectionUrl = connectionUrl;
         m_query = query;
         
         fetchResultSet(false);
+    }
+    
+    public String getConnectionUrl()
+    {
+        return m_connectionUrl;
+    }
+    
+    public String getQuery()
+    {
+        return m_query;
+    }
+    
+    public String getDriverClassName()
+    {
+        return m_driverClassName;
     }
     
     public int getNumDbmsColumns()

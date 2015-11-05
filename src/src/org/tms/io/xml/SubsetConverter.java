@@ -16,7 +16,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class SubsetConverter extends BaseConverter
 {
-    static final public String SUBSET_TAG = "subset";
+    static final public String ELEMENT_TAG = "subset";
+    
     static final public String SUBSET_ROWS_TAG = "sRows";
     static final public String SUBSET_COLS_TAG = "sCols";
     
@@ -86,7 +87,7 @@ public class SubsetConverter extends BaseConverter
             return;
         
         // write the subset node
-        writer.startNode(SUBSET_TAG);                   
+        writer.startNode(ELEMENT_TAG);                   
         marshalTableElement(s, writer, context, true);
         
         // write rows, if any
@@ -113,7 +114,7 @@ public class SubsetConverter extends BaseConverter
         Subset s = t.addSubset(Access.Next);
         
         // upon return, we are left in the subset tag
-        unmarshalTableElement(s, reader, context);
+        unmarshalTableElement(s, true, reader, context);
         
         String nodeName = reader.getNodeName();
         if (SUBSET_ROWS_TAG.equals(nodeName)) {
