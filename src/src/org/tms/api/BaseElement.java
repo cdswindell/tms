@@ -22,6 +22,11 @@ public interface BaseElement
 	 */
     public boolean isReadOnly();    
 
+    /**
+     * Mark this element as Read-only, which prevents any further changes to be made to cell
+     * values contained within.
+     * @param enabled set to {@code true} to prevent changes to cell values contained within
+     */
     public void setReadOnly(boolean enabled);
     
     /**
@@ -30,6 +35,11 @@ public interface BaseElement
      */
     public boolean isSupportsNull();
 	
+    /**
+     * Set to {@code true} to allow contained cell values to be set to {@code null}. Set to {@code false}
+     * to prevent cell values from being set to {@code null}.
+     * @param enabled allow or prevent cells from being set to {@code null}
+     */
     public void setSupportsNull(boolean enabled);
     
     public boolean isEnforceDataType();   

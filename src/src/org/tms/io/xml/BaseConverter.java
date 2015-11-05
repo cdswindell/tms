@@ -26,6 +26,9 @@ abstract public class BaseConverter implements Converter
 {
     static final protected String TMS_TABLE_KEY = "__tms table key__";
     static final protected String TMS_DERIVATIONS_KEY = "__tms derivations key__";
+    static final protected String TMS_READONLY_KEY  = "__tms read-only key__";
+    static final protected String TMS_ALLOWNULLS_KEY  = "__tms allow nulls key__";
+    static final protected String TMS_ENFORCE_KEY  = "__tms enforce datatype key__";
     
     static final protected String LABEL_TAG = "label";
     static final protected String DESC_TAG = "description";

@@ -7,6 +7,7 @@ import org.tms.api.TableProperty;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
+import org.tms.tds.CellUtils;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -123,8 +124,8 @@ public class CellConverter extends BaseConverter
         
         // get Cell Value
         if (VALUE_TAG.equals(nodeName)) {
-            Object o = context.convertAnother(t, dataType);        
-            c.setCellValue(o);
+            Object o = context.convertAnother(t, dataType);  
+            CellUtils.cellUpdater((CellImpl)c, o);
             reader.moveUp();
             
             // check next tag
