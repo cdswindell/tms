@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
@@ -91,7 +92,7 @@ public class WeakTableReferencesTest
         Column c2 = t.addColumn(Access.ByIndex, 2);
         t.addColumn(Access.ByIndex, cols);
         
-        t.addRow(Access.ByIndex, rows);
+        Row r1 = t.addRow(Access.ByIndex, rows);
         t.addListeners(TableElementEventType.OnNewValue, e -> System.out.println(t + ": " + e));
         t.fill(fillValue);
         
@@ -102,7 +103,7 @@ public class WeakTableReferencesTest
         c2.setDerivation("4 + CoL 1");
         
         Subset s = t.addSubset(Access.ByLabel, "Subset");
-        s.add(c1);
+        s.add(r1, c1, c2);
         
         assertThat(c1, notNullValue());
     }    

@@ -2,6 +2,7 @@ package org.tms.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -244,10 +245,17 @@ public class XlsReader extends BaseReader<XLSOptions>
     public XlsReader(File inputFile, TableContext context, XLSOptions format)
     {
         super(inputFile, context, format);
+        initState();
+    }
 
-        if (!(format instanceof XLSOptions))
-            throw new IllegalArgumentException("XlsOptions required");
-        
+    public XlsReader(InputStream in, TableContext tc, XLSOptions format)
+    {
+        super(in, tc, format);
+        initState();
+    }
+
+    protected void initState()
+    {
         // initialize state variables
         m_wb = null;
         m_sheetTableMap = new LinkedHashMap<Sheet, Table>();
@@ -289,8 +297,8 @@ public class XlsReader extends BaseReader<XLSOptions>
     throws IOException
     {
         try
-        {
-            m_wb = WorkbookFactory.create(getInputFile());
+        {            
+            m_wb = WorkbookFactory.create(getInputStream());
             m_ssV = m_wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;  
             
             int noSheets = m_wb.getNumberOfSheets();
@@ -334,7 +342,7 @@ public class XlsReader extends BaseReader<XLSOptions>
     {
         try
         {
-            m_wb = WorkbookFactory.create(getInputFile());
+            m_wb = WorkbookFactory.create(getInputStream());
             m_ssV = m_wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;     
             int asi = m_wb.getActiveSheetIndex();
             

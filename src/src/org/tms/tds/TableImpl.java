@@ -50,7 +50,6 @@ import org.tms.api.io.IOOption;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.events.TableElementListeners;
 import org.tms.teq.DerivationImpl;
-import org.tms.util.JustInTimeSet;
 
 public class TableImpl extends TableCellsElementImpl implements Table, Precisionable
 {
@@ -144,7 +143,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     private Map<CellImpl, Map<String, Object>> m_cellElemProperties;
     private Map<CellImpl, Set<Tag>> m_cellTags;
     
-    private JustInTimeSet<SubsetImpl> m_subsets;
+    private Set<SubsetImpl> m_subsets;
     
     private ContextImpl m_context;
     
@@ -221,7 +220,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         m_nextCellOffset = 0;
         
         // set all other arrays/sets/maps to null/JustInTime
-        m_subsets = new JustInTimeSet<SubsetImpl>();
+        m_subsets = new HashSet<SubsetImpl>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
         
@@ -662,7 +661,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     synchronized public List<Subset>getSubsets()
     {
         vetElement();
-        return Collections.unmodifiableList(new ArrayList<Subset>(m_subsets.clone()));
+        return Collections.unmodifiableList(new ArrayList<Subset>(m_subsets));
     }
 
     @Override

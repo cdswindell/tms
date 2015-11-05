@@ -40,16 +40,16 @@
   </columns>
   <subsets>
     <subset>
-      <label>Excluded Cols</label>
-      <sCols>4</sCols>
-    </subset>
-    <subset>
       <label>Some Cols</label>
       <tags>
         <string>red</string>
         <string>subset</string>
       </tags>
-      <sCols>5,4,3</sCols>
+      <sCols>5,3,4</sCols>
+    </subset>
+    <subset>
+      <label>Excluded Cols</label>
+      <sCols>4</sCols>
     </subset>
   </subsets>
   <cells>

@@ -1,6 +1,7 @@
 package org.tms.api.factories;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 
 import org.tms.api.Table;
@@ -145,6 +146,51 @@ public final class TableFactory
                 case XML:
                 {
                     XMLReader r = new XMLReader(fileName, tc, (XMLOptions)format);
+                    return r.parse();
+                }
+                    
+                case TMS:
+                case JSON:
+                {
+                    return null;
+                }
+                    
+                default:    
+                    throw new UnimplementedException("No support for file format:" + format.getFileFormat());                    
+            }
+        }
+        catch (IOException e)
+        {
+            throw new TableIOException(e);
+        }
+    }
+    
+    static public Table importFile(InputStream in, TableContext tc, IOOption<?> format)
+    {
+        if (format == null)
+            throw new IllegalArgumentException("Format argument cannot be null");
+        
+        if (!format.canImport())
+            throw new IllegalArgumentException("Format does not support import");
+        
+        try
+        {
+            switch (format.getFileFormat()) {
+                case CSV:
+                {
+                    CSVReader r = new CSVReader(in, tc, (CSVOptions)format);
+                    return r.parse();
+                }
+                    
+                case EXCEL:
+                {
+                    XlsReader r = new XlsReader(in, tc, (XLSOptions)format);
+                    return r.parseActiveSheet();
+                }
+                
+                case XML:
+                {
+                    XMLReader r = new XMLReader(in, tc, (XMLOptions)format);
                     return r.parse();
                 }
                     

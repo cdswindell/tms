@@ -55,8 +55,8 @@ public class SubsetTest
         assert (r != null);
         
         int numRows = r.getPropertyInt(TableProperty.numRows);
-        assertThat(numRows, is(0));
-        assertThat(r.getTable(), is(t));
+        assertThat(0, is(numRows));
+        assertThat(t, is(r.getTable()));
         assertThat(r.getTableContext(), is(t.getTableContext()));
         
         assertThat(t.getPropertyInt(TableProperty.numSubsets), is(1));
@@ -64,15 +64,9 @@ public class SubsetTest
         t.remove(r);
         assertThat(t.getPropertyInt(TableProperty.numSubsets), is(0));
         
-        // test weak reference ability
+        // add it back and check count
         t.add(r);
         assertThat(t.getPropertyInt(TableProperty.numSubsets), is(1));
-        
-        r = null;
-        System.gc();
-        
-        Thread.sleep(1000);
-        assertThat(t.getPropertyInt(TableProperty.numSubsets), is(0));
    }
     
     @Test

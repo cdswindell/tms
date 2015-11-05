@@ -2,6 +2,7 @@ package org.tms.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.tms.api.Table;
 import org.tms.api.TableContext;
@@ -37,10 +38,15 @@ public class XMLReader extends BaseReader<XMLOptions>
         super(xmlFile, context, format);       
     }
     
+    public XMLReader(InputStream in, TableContext context, XMLOptions format)
+    {
+        super(in, context, format);       
+    }
+
     public Table parse() throws IOException
     {
         XStream xs = getXStream();
-        return (Table)xs.fromXML(getInputFile());
+        return (Table)xs.fromXML(getInputStream());
     }
     
     private XStream getXStream()

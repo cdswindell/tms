@@ -24,6 +24,13 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class TableConverter extends BaseConverter
 {
+    static final protected String NROWS_ATTR = "nRows";
+    static final protected String NCOLS_ATTR = "nCols";
+    static final protected String PRECISION_ATTR = "precision";
+    
+    static final protected String ROWS_TAG = "rows";
+    static final protected String COLS_TAG = "columns";
+    
     public TableConverter(BaseWriter<?> writer)
     {
         super(writer);
@@ -47,15 +54,15 @@ public class TableConverter extends BaseConverter
         int nRows = t.getNumRows();
         int nCols = getNumConsumableColumns();
         
-        writer.addAttribute("nRows", String.valueOf(nRows));
-        writer.addAttribute("nCols", String.valueOf(nCols));
-        writer.addAttribute("precision", String.valueOf(t.getPrecision()));
+        writer.addAttribute(NROWS_ATTR, String.valueOf(nRows));
+        writer.addAttribute(NCOLS_ATTR, String.valueOf(nCols));
+        writer.addAttribute(PRECISION_ATTR, String.valueOf(t.getPrecision()));
         
         marshalTableElement(t, writer, context, true);
         
         // Rows
         if (nRows > 0) {
-            writer.startNode("rows");
+            writer.startNode(ROWS_TAG);
             for (int i = 1; i <= nRows; i++) { 
                 if (!isIgnoreRow(i)) 
                     context.convertAnother(t.getRow(i));
@@ -66,7 +73,7 @@ public class TableConverter extends BaseConverter
         
         // Columns
         if (nCols > 0) {
-            writer.startNode("columns");
+            writer.startNode(COLS_TAG);
             for (Column c : getActiveColumns()) {
                 context.convertAnother(c);
             }
@@ -82,8 +89,7 @@ public class TableConverter extends BaseConverter
             }
             
             writer.endNode();
-        }
-        
+        }        
 
         // Cells
         if (nRows > 0 && nCols > 0) {
@@ -105,14 +111,14 @@ public class TableConverter extends BaseConverter
     @Override
     public Table unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
-        int nRows = readAttributeInteger("nRows", reader);
-        int nCols = readAttributeInteger("nCols", reader);
+        int nRows = readAttributeInteger(NROWS_ATTR, reader);
+        int nCols = readAttributeInteger(NCOLS_ATTR, reader);
         
         Table t = TableFactory.createTable(nRows, nCols, getTableContext());
         context.put(TMS_TABLE_KEY, t);
         
         if (t instanceof Precisionable) {
-            Integer precision = readAttributeInteger("precision", reader);
+            Integer precision = readAttributeInteger(PRECISION_ATTR, reader);
             if (precision != null && precision > 0)
                 ((Precisionable)t).setPrecision(precision);
         }
@@ -124,10 +130,10 @@ public class TableConverter extends BaseConverter
         String nodeName = reader.getNodeName();
         
         // process rows
-        if ("rows".equals(nodeName)) 
+        if (ROWS_TAG.equals(nodeName)) 
             nodeName = processChildren(t,  RowImpl.class, reader, context);
         
-        if ("columns".equals(nodeName)) 
+        if (COLS_TAG.equals(nodeName)) 
             nodeName = processChildren(t,  ColumnImpl.class, reader, context);
         
         if ("subsets".equals(nodeName)) 

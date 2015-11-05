@@ -3,6 +3,7 @@ package org.tms.io;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.apache.commons.csv.CSVFormat;
@@ -25,20 +26,31 @@ public class CSVReader extends BaseReader<CSVOptions>
         this(fileName, TableContextFactory.fetchDefaultTableContext(), format);
     }
 
-    public CSVReader(String fileName, TableContext context, CSVOptions format)
+    public CSVReader(String fileName, TableContext context, CSVOptions format)         
     {
         this(new File(fileName), context, format);
     }
 
-    public CSVReader(File csvFile, TableContext context, CSVOptions format)
+    public CSVReader(File csvFile, TableContext context, CSVOptions format) 
     {
-        super(csvFile, context, format);
-        
+        super(csvFile, context, format);        
+        initFormat(format);
+    }
+    
+    public CSVReader(InputStream in, TableContext context, CSVOptions format)
+    {
+        super(in, context, format);
+        initFormat(format);
+    }
+
+    private void initFormat(CSVOptions format)
+    {
         m_csvFormat = CSVFormat.DEFAULT
-                                .withIgnoreEmptyLines(format.isIgnoreEmptyRows())
-                                .withIgnoreSurroundingSpaces(options().isIgnoreSuroundingSpaces())
-                                .withDelimiter(options().getDelimiter())
-                                .withQuote(options().getQuote());
+                .withIgnoreEmptyLines(format.isIgnoreEmptyRows())
+                .withIgnoreSurroundingSpaces(options().isIgnoreSuroundingSpaces())
+                .withDelimiter(options().getDelimiter())
+                .withQuote(options().getQuote());
+
     }
     
     public Table parse() throws IOException

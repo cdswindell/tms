@@ -83,6 +83,6 @@ public class XMLWriterTest extends XMLTest
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
 
-        assertThat(gold.length, is(output.length));       
+        assertThat(String.format("Gold is: %d bos is: %d", gold.length, output.length),output.length, is(gold.length));       
     }
 }
