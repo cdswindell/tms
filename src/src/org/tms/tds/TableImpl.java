@@ -50,6 +50,7 @@ import org.tms.api.io.IOOption;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.events.TableElementListeners;
 import org.tms.teq.DerivationImpl;
+import org.tms.util.JustInTimeSet;
 
 public class TableImpl extends TableCellsElementImpl implements Table, Precisionable
 {
@@ -143,7 +144,8 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     private Map<CellImpl, Map<String, Object>> m_cellElemProperties;
     private Map<CellImpl, Set<Tag>> m_cellTags;
     
-    private Set<SubsetImpl> m_subsets;
+    private JustInTimeSet<SubsetImpl> m_subsets;
+    private Set<SubsetImpl> m_persistentSubsets;
     
     private ContextImpl m_context;
     
@@ -220,7 +222,8 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         m_nextCellOffset = 0;
         
         // set all other arrays/sets/maps to null/JustInTime
-        m_subsets = new HashSet<SubsetImpl>();
+        m_subsets = new JustInTimeSet<SubsetImpl>();
+        m_persistentSubsets = new HashSet<SubsetImpl>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
         
@@ -661,7 +664,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     synchronized public List<Subset>getSubsets()
     {
         vetElement();
-        return Collections.unmodifiableList(new ArrayList<Subset>(m_subsets));
+        return Collections.unmodifiableList(new ArrayList<Subset>(m_subsets.clone()));
     }
 
     @Override
@@ -817,6 +820,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             }
             
         	this.m_subsets.clear();
+            this.m_persistentSubsets.clear();
         	this.m_affects.clear();
         	this.m_cellAffects.clear();
         	this.m_cellOffsetRowMap.clear();
@@ -918,7 +922,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     {
         vetElement();
         if (!subsetLabelsIndexed)
-            m_colLabelIndex.clear();
+            m_subsetLabelIndex.clear();
         else 
             indexLabels(m_subsets, m_subsetLabelIndex, sf_SUBSET_LABELS_INDEXED_FLAG);
         
@@ -1054,6 +1058,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     synchronized protected boolean remove(SubsetImpl r)
     {
         vetParent(r);
+        m_persistentSubsets.remove(r);
         return m_subsets.remove(r);
     }
  
@@ -1302,6 +1307,15 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             if (subset != null)
                 fireEvents(subset, TableElementEventType.OnCreate);
         }
+    }
+    
+
+    void setPersistant(SubsetImpl s, boolean b)
+    {
+        if (b)
+            m_persistentSubsets.add(s);
+        else
+            m_persistentSubsets.remove(s);
     }
     
     public double getFreeSpaceThreshold()

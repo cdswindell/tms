@@ -64,6 +64,15 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return ElementType.Subset;
     }
     
+    public void setLabel(String label)
+    {
+        super.setLabel(label);
+        if (label != null && label.trim().length() > 0)
+            getTable().setPersistant(this, true);
+        else
+            getTable().setPersistant(this, false);
+    }
+    
     @Override
     public List<Row> getRows()
     {
