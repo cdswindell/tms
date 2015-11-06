@@ -118,7 +118,6 @@ public class XMLWriterTest extends BaseArchivalTest
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         gst.export(bos, XMLOptions.Default.withValidators());
-        gst.export("cds.xml", XMLOptions.Default.withValidators());
         bos.close();
 
         // test byte streams are the same

@@ -7,8 +7,10 @@ import java.util.zip.GZIPInputStream;
 
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.io.TMSOptions;
+import org.tms.api.utils.ApiVersion;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -49,20 +51,38 @@ public class TMSReader extends ArchivalReader<TMSOptions>
     private void readHeader() throws IOException
     {
         InputStream in = getInputStream();
+        if (in == null || in.available() < 32)
+            throw new TableIOException("Invalid File Format");
+
         byte [] head = new byte[64];
         in.read(head, 0, 6);
         
         String tmsStr = new String( new byte[] {head[0], head[1], head[2]});
-        if (tmsStr == null || !tmsStr.equalsIgnoreCase("tms"))
-            ;
-        String ver = "";
-        byte [] b = new byte [1];        
-        while (b[0] != ']') {
+        if (tmsStr == null || !tmsStr.equalsIgnoreCase("TMS"))
+            throw new TableIOException("Invalid File Format");
+        
+        String teStr = new String( new byte[] {head[3], head[4]});
+        if (!isValidTableElement(teStr))
+            throw new TableIOException("Invalid File Format: " + teStr);
+
+        String verStr = "";
+        byte [] b = new byte [1];
+        int readBytes = 0;
+        while (readBytes < 32 && (b[0] != ']')) {
             in.read(b);
             if (b[0] != ']')
-                ver += new String(b);
+                verStr += new String(b);
+            readBytes++;
         }
-        System.out.println(ver);
         
+        if (b[0] != ']')
+            throw new TableIOException("Invalid File Format: No Version");
+        
+        ApiVersion ver = ApiVersion.parse(verStr);
+    }
+
+    private boolean isValidTableElement(String teStr)
+    {
+        return teStr != null && (teStr.equalsIgnoreCase("TC") || teStr.equalsIgnoreCase("TB"));
     } 
 }

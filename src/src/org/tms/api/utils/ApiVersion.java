@@ -43,4 +43,10 @@ public final class ApiVersion
     
     public String toVersionString() { return String.format("%d.%d", m_epoch, m_major); }
     public String toFullVersionString() { return toString(); }
+
+    public static ApiVersion parse(String verStr)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
