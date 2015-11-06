@@ -42,5 +42,5 @@ public final class ApiVersion
     public String toString() { return String.format("%d.%d.%d.%d", m_epoch, m_major, m_minor, m_build); }
     
     public String toVersionString() { return String.format("%d.%d", m_epoch, m_major); }
-
+    public String toFullVersionString() { return toString(); }
 }

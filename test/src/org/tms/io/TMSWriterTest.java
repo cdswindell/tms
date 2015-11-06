@@ -58,7 +58,7 @@ public class TMSWriterTest extends BaseArchivalTest
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
 
-        assertThat(output.length, is(gold.length));       
+        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));       
     }
     
     @Test
@@ -95,6 +95,6 @@ public class TMSWriterTest extends BaseArchivalTest
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
 
-        assertThat(output.length, is(gold.length));       
+        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));       
     }
 }

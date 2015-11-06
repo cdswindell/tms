@@ -41,7 +41,28 @@ public class TMSReader extends ArchivalReader<TMSOptions>
 
     public Table parse() throws IOException
     {
+        readHeader();
         XStream xs = super.getXStream(this);
         return (Table)xs.fromXML(new GZIPInputStream(getInputStream()));
+    }
+
+    private void readHeader() throws IOException
+    {
+        InputStream in = getInputStream();
+        byte [] head = new byte[64];
+        in.read(head, 0, 6);
+        
+        String tmsStr = new String( new byte[] {head[0], head[1], head[2]});
+        if (tmsStr == null || !tmsStr.equalsIgnoreCase("tms"))
+            ;
+        String ver = "";
+        byte [] b = new byte [1];        
+        while (b[0] != ']') {
+            in.read(b);
+            if (b[0] != ']')
+                ver += new String(b);
+        }
+        System.out.println(ver);
+        
     } 
 }

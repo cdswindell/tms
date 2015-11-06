@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.tms.api.io.TMSOptions;
+import org.tms.api.utils.ApiVersion;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -33,9 +34,19 @@ public class TMSWriter extends ArchivalWriter<TMSOptions>
     @Override
     protected void export() throws IOException
     {
+        writeHeader();
         XStream xs = getXStream(this);
         GZIPOutputStream gz = new GZIPOutputStream(getOutputStream());
         xs.toXML(getTable(), gz);
         gz.finish();
+    }
+
+    private void writeHeader() throws IOException
+    {
+        OutputStream out = getOutputStream();
+        
+        String head = "TMSTB[" + ApiVersion.CURRENT_VERSION.toFullVersionString() + "]";
+        out.write(head.getBytes());
+        out.flush();
     }   
 }
