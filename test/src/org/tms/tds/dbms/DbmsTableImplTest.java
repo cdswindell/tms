@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -17,6 +18,7 @@ import org.tms.api.factories.TableContextFactory;
 
 public class DbmsTableImplTest extends BaseDbmsTest
 {
+	@Ignore
     @Test
     public final void testCreateDBMSTable() throws ClassNotFoundException, SQLException
     {
