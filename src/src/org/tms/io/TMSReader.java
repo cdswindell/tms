@@ -79,6 +79,8 @@ public class TMSReader extends ArchivalReader<TMSOptions>
             throw new TableIOException("Invalid File Format: No Version");
         
         ApiVersion ver = ApiVersion.parse(verStr);
+        if (ver == null || ver.isUnknown())
+        	throw new TableIOException("Invalid File Format: No Version");
     }
 
     private boolean isValidTableElement(String teStr)
