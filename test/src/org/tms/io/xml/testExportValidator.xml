@@ -1,0 +1,160 @@
+<table nRows="4" nCols="5" precision="15" readOnly="false" allowNulls="true" enforce="false">
+  <label>Test XML &amp; Export Table</label>
+  <tags>
+    <string>green</string>
+    <string>red</string>
+  </tags>
+  <rows>
+    <row index="1">
+      <label>Blue Row</label>
+    </row>
+    <row index="2">
+      <label>Green Row</label>
+    </row>
+    <row index="3">
+      <label>Yellow Row</label>
+    </row>
+    <row index="4">
+      <label>Cyan Row</label>
+    </row>
+  </rows>
+  <columns>
+    <column index="1">
+      <label>A</label>
+      <validator>
+        <valClass>org.tms.io.XMLWriterTest$$Lambda$3/40472007</valClass>
+        <valImpl resolves-to="serialized-lambda">
+          <capturingClass>org.tms.io.XMLWriterTest</capturingClass>
+          <functionalInterfaceClass>org/tms/api/utils/TableCellValidator</functionalInterfaceClass>
+          <functionalInterfaceMethodName>validate</functionalInterfaceMethodName>
+          <functionalInterfaceMethodSignature>(Ljava/lang/Object;)V</functionalInterfaceMethodSignature>
+          <implClass>org/tms/io/XMLWriterTest</implClass>
+          <implMethodName>lambda$0</implMethodName>
+          <implMethodSignature>(Ljava/lang/Object;)V</implMethodSignature>
+          <implMethodKind>6</implMethodKind>
+          <instantiatedMethodType>(Ljava/lang/Object;)V</instantiatedMethodType>
+          <capturedArgs/>
+        </valImpl>
+      </validator>
+    </column>
+    <column index="2">
+      <label>B</label>
+      <validator>
+        <valClass>org.tms.io.XMLWriterTest$$Lambda$4/398110318</valClass>
+        <valImpl resolves-to="serialized-lambda">
+          <capturingClass>org.tms.io.XMLWriterTest</capturingClass>
+          <functionalInterfaceClass>org/tms/api/utils/TableCellTransformer</functionalInterfaceClass>
+          <functionalInterfaceMethodName>transform</functionalInterfaceMethodName>
+          <functionalInterfaceMethodSignature>(Ljava/lang/Object;)Ljava/lang/Object;</functionalInterfaceMethodSignature>
+          <implClass>org/tms/io/XMLWriterTest</implClass>
+          <implMethodName>lambda$1</implMethodName>
+          <implMethodSignature>(Ljava/lang/Object;)Ljava/lang/Object;</implMethodSignature>
+          <implMethodKind>6</implMethodKind>
+          <instantiatedMethodType>(Ljava/lang/Object;)Ljava/lang/Object;</instantiatedMethodType>
+          <capturedArgs/>
+        </valImpl>
+      </validator>
+    </column>
+    <column index="3">
+      <label>C</label>
+    </column>
+    <column index="4">
+      <validator>
+        <valClass>org.tms.api.utils.NumericRange</valClass>
+        <valImpl>
+          <m__minValue>30.0</m__minValue>
+          <m__maxValue>40.0</m__maxValue>
+        </valImpl>
+      </validator>
+    </column>
+    <column index="5">
+      <tags>
+        <string>calculated</string>
+        <string>derived</string>
+        <string>no-user-data</string>
+      </tags>
+      <derivation>col &quot;A&quot; * col &quot;A&quot;</derivation>
+    </column>
+  </columns>
+  <subsets>
+    <subset>
+      <label>Excluded Cols</label>
+      <sCols>4</sCols>
+    </subset>
+    <subset>
+      <label>Some Cols</label>
+      <tags>
+        <string>red</string>
+        <string>subset</string>
+      </tags>
+      <sCols>5,4,3</sCols>
+    </subset>
+  </subsets>
+  <subsets>
+    <cell rIdx="1" cIdx="1">
+      <dataType>java.lang.Integer</dataType>
+      <value>12</value>
+    </cell>
+    <cell rIdx="2" cIdx="1">
+      <dataType>java.lang.Double</dataType>
+      <value>13000.0</value>
+    </cell>
+    <cell rIdx="3" cIdx="1">
+      <dataType>java.lang.Integer</dataType>
+      <value>-12</value>
+    </cell>
+    <cell rIdx="4" cIdx="1">
+      <dataType>java.lang.Double</dataType>
+      <value>17.65</value>
+    </cell>
+    <cell rIdx="1" cIdx="2">
+      <dataType>java.lang.String</dataType>
+      <value>Blue</value>
+    </cell>
+    <cell rIdx="2" cIdx="2">
+      <dataType>java.lang.String</dataType>
+      <value>Green</value>
+    </cell>
+    <cell rIdx="3" cIdx="2">
+      <dataType>java.lang.String</dataType>
+      <value>Yellow</value>
+    </cell>
+    <cell rIdx="4" cIdx="2">
+      <dataType>java.lang.String</dataType>
+      <value>Cyan</value>
+    </cell>
+    <cell rIdx="1" cIdx="3">
+      <label>foo</label>
+      <description>Cell Description</description>
+      <units>mph</units>
+    </cell>
+    <cell rIdx="2" cIdx="3">
+      <dataType>java.lang.Boolean</dataType>
+      <value>false</value>
+    </cell>
+    <cell rIdx="3" cIdx="3">
+      <dataType>java.lang.Boolean</dataType>
+      <value>false</value>
+    </cell>
+    <cell rIdx="4" cIdx="3">
+      <dataType>java.lang.Boolean</dataType>
+      <value>true</value>
+    </cell>
+    <cell rIdx="1" cIdx="5">
+      <dataType>java.lang.Double</dataType>
+      <value>144.0</value>
+    </cell>
+    <cell rIdx="2" cIdx="5">
+      <dataType>java.lang.Double</dataType>
+      <value>1.69E8</value>
+    </cell>
+    <cell rIdx="3" cIdx="5">
+      <dataType>java.lang.Double</dataType>
+      <value>144.0</value>
+    </cell>
+    <cell rIdx="4" cIdx="5">
+      <dataType>java.lang.Double</dataType>
+      <value>311.5225</value>
+    </cell>
+  </subsets>
+</table>

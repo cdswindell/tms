@@ -1,5 +1,7 @@
 package org.tms.api.utils;
 
+import java.io.Serializable;
+
 import org.tms.api.exceptions.ConstraintViolationException;
 
 /**
@@ -18,7 +20,7 @@ import org.tms.api.exceptions.ConstraintViolationException;
  * @see org.tms.api.TableRowColumnElement#setValidator(TableCellValidator) TableRowColumnElement.setValidator(TableCellValidator)
  */
 @FunctionalInterface
-public interface TableCellValidator
+public interface TableCellValidator extends Serializable
 {
     /**
      * Validates the candidate cell value according to the rules coded in the implementing method.

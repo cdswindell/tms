@@ -13,6 +13,8 @@ import org.tms.api.utils.TableCellTransformer;
 
 public class GroovyCellTransformer implements TableCellTransformer
 {
+    private static final long serialVersionUID = -6882519397752443785L;
+    
     private Class<?> m_groovyClazz;
     private Method m_groovyTransformMethod;
     private Method m_groovyValidationMethod;

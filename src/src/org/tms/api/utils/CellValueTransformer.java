@@ -8,6 +8,8 @@ import org.tms.api.exceptions.ConstraintViolationException;
  */
 public class CellValueTransformer implements TableCellValidator
 {
+    private static final long serialVersionUID = -8442377707257020619L;
+
     /**
      * {@inheritDoc}
      */

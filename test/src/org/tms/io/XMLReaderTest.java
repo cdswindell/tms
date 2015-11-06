@@ -9,12 +9,14 @@ import java.io.IOException;
 
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.io.XMLOptions;
+import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TdsUtils;
 
 public class XMLReaderTest extends XMLTest
@@ -27,6 +29,7 @@ public class XMLReaderTest extends XMLTest
     }
     
     private static final String ExportTableGold = "testExportTable.xml";
+    private static final String ExportTableGold3 = "testExportValidator.xml";
     
     @Test
     public final void testCSVReaderConstructor()
@@ -82,4 +85,85 @@ public class XMLReaderTest extends XMLTest
             fail(e.getMessage());
         }
     }    
+    
+    @Test
+    public final void testParseWithValidate() 
+    {
+        // create the reference table
+        Table gst = getBasicTable();
+        assertNotNull(gst);
+        
+        // now read the xml
+        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold3, "xml"), XMLOptions.Default.withValidators()); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            Column c1 = t.getColumn(1);
+            assertNotNull(c1);
+            
+            TableCellValidator v = c1.getValidator();
+            assertNotNull(v);
+            
+            Row r1 = t.getRow(1);
+            Cell cell = t.getCell(r1,  c1);
+            
+            // the following should fail
+            try {
+                cell.setCellValue("abcd");
+                fail("Cell set");
+            }
+            catch (Exception e) {
+                // noop
+            }
+            
+            // clear validator
+            Column c5 = t.getColumn(5);
+            assertNotNull(c5);
+            assertThat(true, is(c5.isDerived()));
+            c5.clearDerivation();
+            
+            // clear the validator, we should now be able to set the cell to a string
+            c1.setValidator(null);
+            cell.setCellValue("abcd");
+            
+            // try the other validators/transformers
+            cell = t.getCell(r1,  t.getColumn(2));
+            assertNotNull(cell);
+            
+            cell.setCellValue(10);
+            assertThat(20.0, is(cell.getCellValue()));
+            
+            // this should succeed
+            cell = t.getCell(r1,  t.getColumn(4));
+            assertNotNull(cell);
+            
+            assertThat(true, is(cell.setCellValue(35)));
+            
+            // the following should fail
+            try {
+                cell.setCellValue(10);
+                fail("Cell set");
+            }
+            catch (Exception e) {
+                // noop
+            }
+            
+            // the following should fail
+            try {
+                cell.setCellValue("abc");
+                fail("Cell set");
+            }
+            catch (Exception e) {
+                // noop
+            }
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
 }

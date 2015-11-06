@@ -37,6 +37,8 @@ abstract public class BaseConverter implements Converter
     static final protected String TAGS_TAG = "tags";
     static final protected String DERIV_TAG = "derivation";
     static final protected String VALIDATOR_TAG = "validator";
+    static final protected String VALIDATOR_CLASS_TAG = "valClass";
+    static final protected String VALIDATOR_IMPL_TAG = "valImpl";
     
     static final public String UNITS_TAG = "units";
     static final public String FORMAT_TAG = "format";
@@ -237,7 +239,15 @@ abstract public class BaseConverter implements Converter
             Object o = v.getValidator();
             if (o != null) {
                 writer.startNode(VALIDATOR_TAG);
-                context.convertAnother(o);               
+                
+                writer.startNode(VALIDATOR_CLASS_TAG);
+                context.convertAnother(o.getClass());              
+                writer.endNode();
+                
+                writer.startNode(VALIDATOR_IMPL_TAG);
+                context.convertAnother(o);              
+                writer.endNode();
+                
                 writer.endNode();
             }
         }
@@ -317,7 +327,20 @@ abstract public class BaseConverter implements Converter
                 case VALIDATOR_TAG:
                     if (options().isValidators() && t instanceof Validatable) {
                         Validatable v = (Validatable)t;
-                        Object o = (String)context.convertAnother(v, TableCellValidator.class);
+                        Class<?> valClass = null;
+                        reader.moveDown();
+                        try {
+                            valClass = (Class<?>)context.convertAnother(v, Class.class);
+                        }
+                        catch (Exception e) {
+                            valClass = TableCellValidator.class;
+                        }
+                        reader.moveUp();
+                        
+                        reader.moveDown();
+                        Object o = context.convertAnother(v, valClass);;
+                        reader.moveUp();
+                        
                         if (o != null)
                             v.setValidator((TableCellValidator)o);
                     }

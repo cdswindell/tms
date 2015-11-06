@@ -11,6 +11,8 @@ import org.tms.api.exceptions.ConstraintViolationException;
  */
 public class NumericRangeRequired extends NumericRange
 {
+    private static final long serialVersionUID = 2756335895312946351L;
+
     /**
      * Creates a new {@link NumericRangeRequired} instance with the specified minimum and maximum
      * cell value limits. In addition to disallowing cell values that do not fall within the range,

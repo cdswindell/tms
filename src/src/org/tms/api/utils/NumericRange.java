@@ -11,6 +11,8 @@ import org.tms.api.exceptions.ConstraintViolationException;
  */
 public class NumericRange implements TableCellValidator
 {   
+    private static final long serialVersionUID = -8715729726175554010L;
+    
     private double m_minValue;
     private double m_maxValue;
     
