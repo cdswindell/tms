@@ -10,7 +10,7 @@ import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
 
-public class XMLTest extends BaseTest
+abstract public class BaseArchivalTest extends BaseTest
 {
     protected static final String SAMPLE1 = "sample1.csv";
     

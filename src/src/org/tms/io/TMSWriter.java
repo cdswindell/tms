@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.tms.api.io.TMSOptions;
 
-public class TMSWriter extends BaseWriter<TMSOptions>
+import com.thoughtworks.xstream.XStream;
+
+public class TMSWriter extends ArchivalWriter<TMSOptions>
 {
     public static void export(TableExportAdapter tableExportAdapter, OutputStream out, TMSOptions options) 
     throws IOException
@@ -30,7 +33,9 @@ public class TMSWriter extends BaseWriter<TMSOptions>
     @Override
     protected void export() throws IOException
     {
-        // TODO Auto-generated method stub
-        
-    }
+        XStream xs = getXStream(this);
+        GZIPOutputStream gz = new GZIPOutputStream(getOutputStream());
+        xs.toXML(getTable(), gz);
+        gz.finish();
+    }   
 }

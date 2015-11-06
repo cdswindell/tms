@@ -1,18 +1,20 @@
 package org.tms.api.io;
 
-import org.tms.io.options.BaseIOOptions;
+import org.tms.io.options.ArchivalIOOptions;
 
-public class TMSOptions extends BaseIOOptions<TMSOptions> implements IOOption<TMSOptions>
+public class TMSOptions extends ArchivalIOOptions<TMSOptions> implements ArchivalIOOption<TMSOptions>
 {
 
-    public static final TMSOptions Default = new TMSOptions(true, true, false, false);
+    public static final TMSOptions Default = new TMSOptions(true, true, false, false, true, true);
 
     private TMSOptions(final boolean rowNames, 
                       final boolean colNames, 
                       final boolean ignoreEmptyRows, 
-                      final boolean ignoreEmptyCols)
+                      final boolean ignoreEmptyCols,
+                      final boolean withDerivations,
+                      final boolean withValidators)
     {
-        super(IOFileFormat.TMS, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
+        super(IOFileFormat.TMS, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols, withDerivations, withValidators);
     }
     
     private TMSOptions (final TMSOptions format)
@@ -21,7 +23,7 @@ public class TMSOptions extends BaseIOOptions<TMSOptions> implements IOOption<TM
     }    
 
     @Override
-    protected TMSOptions clone(final BaseIOOptions<TMSOptions> model)
+    protected TMSOptions clone(final ArchivalIOOptions<TMSOptions> model)
     {
         return new TMSOptions((TMSOptions)model);
     }   

@@ -15,11 +15,11 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
-import org.tms.api.io.XMLOptions;
+import org.tms.api.io.TMSOptions;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TdsUtils;
 
-public class XMLReaderTest extends BaseArchivalTest
+public class TMSReaderTest extends BaseArchivalTest
 {
     @AfterClass
     static public void cleanup()
@@ -28,13 +28,13 @@ public class XMLReaderTest extends BaseArchivalTest
         TdsUtils.clearGlobalTagCache(tc);
     }
     
-    private static final String ExportTableGold = "testExportTable.xml";
-    private static final String ExportTableGold3 = "testExportValidator.xml";
+    private static final String ExportTableGold = "simpleTable.tms";
+    private static final String ExportTableGoldVal = "tableWithValidators.tms";
     
     @Test
     public final void testCSVReaderConstructor()
     {
-        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold, "xml"), XMLOptions.Default); 
+        TMSReader r = new TMSReader(qualifiedFileName(ExportTableGold, "tms"), TMSOptions.Default); 
         assertNotNull(r);
         assertThat(r.getFileName(), is(ExportTableGold));
         assertThat(r.isRowNames(), is(true));
@@ -47,8 +47,8 @@ public class XMLReaderTest extends BaseArchivalTest
         // create the reference table
         Table gst = getBasicTable();
         
-        // now read the xml
-        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold, "xml"), XMLOptions.Default); 
+        // now read the tms
+        TMSReader r = new TMSReader(qualifiedFileName(ExportTableGold, "tms"), TMSOptions.Default); 
         assertNotNull(r);
         
         try
@@ -94,7 +94,7 @@ public class XMLReaderTest extends BaseArchivalTest
         assertNotNull(gst);
         
         // now read the xml
-        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold3, "xml"), XMLOptions.Default.withValidators()); 
+        TMSReader r = new TMSReader(qualifiedFileName(ExportTableGoldVal, "tms"), TMSOptions.Default); 
         assertNotNull(r);
         
         try
