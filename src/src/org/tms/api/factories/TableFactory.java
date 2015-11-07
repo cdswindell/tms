@@ -3,7 +3,11 @@ package org.tms.api.factories;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Map;
 
+import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
@@ -72,6 +76,121 @@ public final class TableFactory
         Table t = null;       
         if (c instanceof ContextImpl)
             t = TableImpl.createTable(nRows, nCols, (ContextImpl)c);
+        
+        return t;
+    }
+
+    static public Table fromCollection(Collection<?> col)
+    {
+        return fromCollection(col, ContextImpl.fetchDefaultContext());
+    }
+    
+    static public Table fromCollection(Collection<?> col, TableContext c)
+    {
+        Table t = null; 
+        if (c instanceof ContextImpl) {
+	    	int nRows = col.size();
+	        Class<?> keyClazz = null;
+	        
+            t = TableImpl.createTable(nRows, 1, (ContextImpl)c);
+            
+            Column keyCol = null;
+            for (Object e : col) {
+            	Row r = t.addRow();
+            	
+            	if (keyCol == null)
+            		keyCol = t.addColumn(1);
+            	
+            	
+            	if (e != null) {
+                	t.setCellValue(r, keyCol, e);
+                	
+                	if (keyClazz == null)
+                		keyClazz = e.getClass();
+                	else {
+                		Class<? extends Object> thisClazz = e.getClass();
+                		if (!(thisClazz == keyClazz || keyClazz.isAssignableFrom(thisClazz))) {
+                			if (thisClazz.isAssignableFrom(keyClazz))
+                				keyClazz = thisClazz;
+                			else
+                				keyClazz = Object.class;
+                		}
+                	}
+            	}
+            }
+            
+            // assign column types
+            if (keyClazz != null && keyClazz != Object.class)
+            	keyCol.setDataType(keyClazz);
+        }
+        
+        return t;
+    }
+    
+    static public Table fromMap(Map<?, ?> map)
+    {
+        return fromMap(map, ContextImpl.fetchDefaultContext());
+    }
+    
+    static public Table fromMap(Map<?, ?> map, TableContext c)
+    {
+        Table t = null; 
+        if (c instanceof ContextImpl) {
+        	int nRows = map.size();
+            Class<?> keyClazz = null;
+            Class<?> valClazz = null;
+            
+            t = TableImpl.createTable(nRows, 2, (ContextImpl)c);
+            
+            Column keyCol = null;
+            Column valCol = null;
+            for (Map.Entry<?, ?> e : map.entrySet()) {
+            	Row r = t.addRow();
+            	
+            	if (keyCol == null)
+            		keyCol = t.addColumn(1);
+            	
+            	if (valCol == null)
+            		valCol = t.addColumn(2);
+            	
+            	t.setCellValue(r, keyCol, e.getKey());
+            	if (keyClazz == null)
+            		keyClazz = e.getKey().getClass();
+            	else {
+            		Class<? extends Object> thisClazz = e.getKey().getClass();
+            		if (!(thisClazz == keyClazz || keyClazz.isAssignableFrom(thisClazz))) {
+            			if (thisClazz.isAssignableFrom(keyClazz))
+            				keyClazz = thisClazz;
+            			else
+            				keyClazz = Object.class;
+            		}
+            	}
+            	
+            	Object val = e.getValue();
+            	if (val != null) {
+                	t.setCellValue(r, valCol, val);
+                	
+                	if (valClazz == null)
+                		valClazz = val.getClass();
+                	else {
+                		Class<? extends Object> thisClazz = e.getKey().getClass();
+                		if (!(thisClazz == valClazz || valClazz.isAssignableFrom(thisClazz))) {
+                			if (thisClazz.isAssignableFrom(valClazz))
+                				valClazz = thisClazz;
+                			else
+                				valClazz = Object.class;
+                		}
+                	}
+            	}
+            }
+            
+            // assign column types
+            if (keyClazz != null && keyClazz != Object.class)
+            	keyCol.setDataType(keyClazz);
+            
+            if (valClazz != null && valClazz != Object.class)
+            	valCol.setDataType(valClazz);
+        }
         
         return t;
     }
