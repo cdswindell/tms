@@ -83,38 +83,52 @@ public class RowConverter extends BaseConverter
         Row r = t.addRow(rIdx);
         
         // upon return, we are left in the Columns or Cells tag
-        unmarshalTableElement(r, options().isRowLabels(), reader, context);
-        
+        unmarshalTableElement(r, options().isRowLabels(), reader, context);        
         String nodeName = reader.getNodeName();
-        String strVal;
-        if (UNITS_TAG.equals(nodeName)) {
-            if (options().isUnits()) {
-                strVal = reader.getValue();
-                if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                    r.setUnits(strVal);
-            }
-            reader.moveUp();
-            
-            // check next tag
-            if (reader.hasMoreChildren()) {
-                reader.moveDown();
-                nodeName = reader.getNodeName();
-            }
-        }
         
-        if (FORMAT_TAG.equals(nodeName)) {
-            if (options().isDisplayFormats()) {
-                strVal = reader.getValue();
-                if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                    r.setDisplayFormat(strVal);
-            }
-            reader.moveUp();
+        String strVal;
+        while (true) {
+            if (ELEMENT_TAG.equals(nodeName)) 
+            	return r;
             
+        	switch (nodeName) {
+        		case UNITS_TAG:
+        		{
+		            if (options().isUnits()) {
+		                strVal = reader.getValue();
+		                if (strVal != null && (strVal = strVal.trim()).length() > 0)
+		                    r.setUnits(strVal);
+		            }
+		            
+		            reader.moveUp();
+        		}
+        		break;
+		            
+		        
+        		case FORMAT_TAG:
+        		{
+		            if (options().isDisplayFormats()) {
+		                strVal = reader.getValue();
+		                if (strVal != null && (strVal = strVal.trim()).length() > 0)
+		                    r.setDisplayFormat(strVal);
+		            }
+		            reader.moveUp();
+		        }
+        		break;
+        		
+        		default:
+        			System.out.println("Unhandled Row Tag: " + nodeName);
+		            reader.moveUp();
+        			break;
+        	}
+        	
             // check next tag
             if (reader.hasMoreChildren()) {
                 reader.moveDown();
                 nodeName = reader.getNodeName();
             }
+            else
+            	break;
         }
         
         return r;

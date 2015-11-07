@@ -114,28 +114,46 @@ public class SubsetConverter extends BaseConverter
         Subset s = t.addSubset(Access.Next);
         
         // upon return, we are left in the subset tag
-        unmarshalTableElement(s, true, reader, context);
-        
+        unmarshalTableElement(s, true, reader, context);        
         String nodeName = reader.getNodeName();
-        if (SUBSET_ROWS_TAG.equals(nodeName)) {
-            String idxs = reader.getValue();
-            addSubsetRows(s, idxs, context);
-            reader.moveUp();
-            
-            // check for "sCols" tag (subset columns)
-            if (reader.hasMoreChildren()) 
-                reader.moveDown();
-        }
         
-        nodeName = reader.getNodeName();
-        if (SUBSET_COLS_TAG.equals(nodeName)) {
-            String idxs = reader.getValue();
-            addSubsetCols(s, idxs, context);
-            reader.moveUp();
+        while (true) {
+            if (ELEMENT_TAG.equals(nodeName)) 
+            	return s;
+            
+        	switch (nodeName) {
+	        	case SUBSET_ROWS_TAG: 
+	        	{
+		            String idxs = reader.getValue();
+		            addSubsetRows(s, idxs, context);
+		            reader.moveUp();
+	        	}
+	        	break;
+        
+	        	case SUBSET_COLS_TAG: 
+	        	{
+		            String idxs = reader.getValue();
+		            addSubsetCols(s, idxs, context);
+		            reader.moveUp();
+		        }
+	        	break;
+		        
+        		default:
+        			System.out.println("Unhandled Subset Tag: " + nodeName);
+		            reader.moveUp();
+        			break;
+        	}
+        	
+            // check next tag
+            if (reader.hasMoreChildren()) {
+                reader.moveDown();
+                nodeName = reader.getNodeName();                
+            }
+            else
+            	break;
         }
         
         // We're all set
-        nodeName = reader.getNodeName();
         return s;
     }
 

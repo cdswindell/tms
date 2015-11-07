@@ -85,60 +85,57 @@ public class CellConverter extends BaseConverter
         
         // upon return, we're left at the value tag
         unmarshalTableElement(c, true, reader, context);
-        
-        // process units and display format tags, if present
-        String strVal;
         String nodeName = reader.getNodeName();
-        if (UNITS_TAG.equals(nodeName)) {
-            strVal = reader.getValue();
-            if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                c.setUnits(strVal);
-            reader.moveUp();
-            
-            // check next tag
-            if (reader.hasMoreChildren()) {
-                reader.moveDown();
-                nodeName = reader.getNodeName();
-            }
-        }
-        
-        if (FORMAT_TAG.equals(nodeName)) {
-            strVal = reader.getValue();
-            if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                c.setDisplayFormat(strVal);
-            reader.moveUp();
-            
-            // check next tag
-            if (reader.hasMoreChildren()) {
-                reader.moveDown();
-                nodeName = reader.getNodeName();
-            }
-        }
         
         // get data type
         Class<?> dataType = col.getDataType();
-        if (DATATYPE_TAG.equals(nodeName)) {
-            dataType = (Class<?>)context.convertAnother(t, Class.class);
-            reader.moveUp();
+        String strVal;
+        while (true) {
+            if (ELEMENT_TAG.equals(nodeName)) 
+            	return c;
             
-            // check next tag
-            if (reader.hasMoreChildren()) {
-                reader.moveDown();
-                nodeName = reader.getNodeName();
-            }
-        }
+        	switch (nodeName) {
+	        	case UNITS_TAG: 
+	        	{
+		            strVal = reader.getValue();
+		            if (strVal != null && (strVal = strVal.trim()).length() > 0)
+		                c.setUnits(strVal);
+		            reader.moveUp();
+	        	}
+	        	break;
         
-        // get Cell Value
-        if (VALUE_TAG.equals(nodeName)) {
-            Object o = context.convertAnother(t, dataType);  
-            CellUtils.cellUpdater((CellImpl)c, o);
-            reader.moveUp();
-            
+	        	case FORMAT_TAG: 
+	        	{
+		            strVal = reader.getValue();
+		            if (strVal != null && (strVal = strVal.trim()).length() > 0)
+		                c.setDisplayFormat(strVal);
+		            reader.moveUp();
+	        	}
+	        	break;
+        
+	        	case DATATYPE_TAG: 
+	        	{
+		            dataType = (Class<?>)context.convertAnother(t, Class.class);
+		            reader.moveUp();
+		        }
+	        	break;
+        
+	        	case VALUE_TAG: 
+	        	{
+		            Object o = context.convertAnother(t, dataType);  
+		            CellUtils.cellUpdater((CellImpl)c, o);
+		            reader.moveUp();
+	        	}
+	        	break;
+        	}
+        	
             // check next tag
             if (reader.hasMoreChildren()) {
                 reader.moveDown();
                 nodeName = reader.getNodeName();
             }
+            else 
+            	break;
         }
         
         return c;

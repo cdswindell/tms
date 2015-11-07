@@ -89,51 +89,62 @@ public class ColumnConverter extends BaseConverter
         Column c = t.addColumn(cIdx);
         
         // upon return, we are left in the Columns or Cells tag
-        unmarshalTableElement(c, options().isColumnLabels(), reader, context);
-        
+        unmarshalTableElement(c, options().isColumnLabels(), reader, context);        
         String nodeName = reader.getNodeName();
+        
         String strVal;
-        if (UNITS_TAG.equals(nodeName)) {
-            if (options().isUnits()) {
-                strVal = reader.getValue();
-                if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                    c.setUnits(strVal);
-            }
-            reader.moveUp();
+        while (true) {
+            if (ELEMENT_TAG.equals(nodeName)) 
+            	return c;
             
+        	switch (nodeName) {
+	        	case UNITS_TAG: 
+	        	{
+		            if (options().isUnits()) {
+		                strVal = reader.getValue();
+		                if (strVal != null && (strVal = strVal.trim()).length() > 0)
+		                    c.setUnits(strVal);
+		            }
+		            
+		            reader.moveUp();		            
+		        }
+	        	break;
+		        
+	        	case FORMAT_TAG: 
+	        	{
+		            if (options().isDisplayFormats()) {
+		                strVal = reader.getValue();
+		                if (strVal != null && (strVal = strVal.trim()).length() > 0)
+		                    c.setDisplayFormat(strVal);
+		            }
+		            
+		            reader.moveUp();
+		        }
+	        	break;
+		        
+	        	case DATATYPE_TAG: 
+	        	{
+		            Class<?>dataType = (Class<?>)context.convertAnother(t, Class.class);
+		            if (dataType != null)
+		                c.setDataType(dataType);
+		            
+		            reader.moveUp();
+		        }
+	        	break;
+	        	
+        		default:
+        			System.out.println("Unhandled Column Tag: " + nodeName);
+		            reader.moveUp();
+        			break;
+        	}
+        	
             // check next tag
             if (reader.hasMoreChildren()) {
                 reader.moveDown();
                 nodeName = reader.getNodeName();
             }
-        }
-        
-        if (FORMAT_TAG.equals(nodeName)) {
-            if (options().isDisplayFormats()) {
-                strVal = reader.getValue();
-                if (strVal != null && (strVal = strVal.trim()).length() > 0)
-                    c.setDisplayFormat(strVal);
-            }
-            reader.moveUp();
-            
-            // check next tag
-            if (reader.hasMoreChildren()) {
-                reader.moveDown();
-                nodeName = reader.getNodeName();
-            }
-        }
-        
-        if (DATATYPE_TAG.equals(nodeName)) {
-            Class<?>dataType = (Class<?>)context.convertAnother(t, Class.class);
-            if (dataType != null)
-                c.setDataType(dataType);
-            reader.moveUp();
-            
-            // check next tag
-            if (reader.hasMoreChildren()) {
-                reader.moveDown();
-                nodeName = reader.getNodeName();
-            }
+            else
+            	break;
         }
         
         return c;
