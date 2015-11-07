@@ -42,6 +42,9 @@ public class ColumnConverter extends BaseConverter
      */
     protected boolean isRelevant(Column c)
     {
+    	if (options().isVerboseState())
+    		return true;
+    	
         if (hasValue(c, TableProperty.Units))
             return true;
         

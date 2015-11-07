@@ -165,6 +165,9 @@ abstract public class BaseConverter implements Converter
 
     protected boolean isRelevant(TableElement te)
     {
+    	if (options().isVerboseState())
+    		return true;
+    	
         if (te == te.getTable())
             return true;
         

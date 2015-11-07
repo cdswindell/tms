@@ -42,6 +42,9 @@ public class RowConverter extends BaseConverter
      */
     protected boolean isRelevant(Row r)
     {
+    	if (options().isVerboseState())
+    		return true;
+    	
         if (hasValue(r, TableProperty.Units))
             return true;
         
