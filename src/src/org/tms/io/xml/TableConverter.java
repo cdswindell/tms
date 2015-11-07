@@ -10,7 +10,6 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Precisionable;
 import org.tms.api.factories.TableFactory;
-import org.tms.api.io.IOFileFormat;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
@@ -66,34 +65,18 @@ public class TableConverter extends BaseConverter
     {
         TableImpl t = (TableImpl)arg;
         
-        if (options().getFileFormat() == IOFileFormat.XML) {
-	        writer.addAttribute(ROWSCAP_ATTR, String.valueOf(t.getNumRows()));
-	        writer.addAttribute(COLSCAP_ATTR, String.valueOf(getNumConsumableColumns()));
-        }
-        else {
+        // if persisting complete state, add attributes for more details
+        if (options().isVerboseState()) {
             writer.addAttribute(ROWSCAP_ATTR, String.valueOf(t.getProperty(TableProperty.numRowsCapacity)));
             writer.addAttribute(COLSCAP_ATTR, String.valueOf(t.getProperty(TableProperty.numColumnsCapacity)));
+            writer.addAttribute(AUTOCALC_ATTR, String.valueOf(t.getProperty(TableProperty.isAutoRecalculate)));
+            writer.addAttribute(PRECISION_ATTR, String.valueOf(t.getPrecision()));
+            writer.addAttribute(FREESPACE_ATTR, String.valueOf(t.getProperty(TableProperty.FreeSpaceThreshold)));
         }
-        	
-        writer.addAttribute(ROWSINCR_ATTR, String.valueOf(t.getProperty(TableProperty.RowCapacityIncr)));
-        writer.addAttribute(COLSINCR_ATTR, String.valueOf(t.getProperty(TableProperty.ColumnCapacityIncr)));
-        writer.addAttribute(FREESPACE_ATTR, String.valueOf(t.getProperty(TableProperty.FreeSpaceThreshold)));
-        
-        writer.addAttribute(AUTOCALC_ATTR, String.valueOf(t.getProperty(TableProperty.isAutoRecalculate)));
-        
-        if (t.isRowLabelsIndexed())
-        	writer.addAttribute(ROWIDX_ATTR, "true");
-        
-        if (t.isColumnLabelsIndexed())
-        	writer.addAttribute(COLIDX_ATTR, "true");
-        
-        if (t.isSubsetLabelsIndexed())
-        	writer.addAttribute(SUBIDX_ATTR, "true");
-        
-        if (t.isCellLabelsIndexed())
-        	writer.addAttribute(CELLIDX_ATTR, "true");
-        
-        writer.addAttribute(PRECISION_ATTR, String.valueOf(t.getPrecision()));
+        else {
+	        writer.addAttribute(ROWSCAP_ATTR, String.valueOf(t.getNumRows()));
+	        writer.addAttribute(COLSCAP_ATTR, String.valueOf(getNumConsumableColumns()));
+        }        
         
         marshalTableElement(t, writer, context, true);
         
@@ -101,6 +84,12 @@ public class TableConverter extends BaseConverter
         int nRows = t.getNumRows();
         if (nRows > 0) {
             writer.startNode(ROWS_TAG);
+            if (options().isVerboseState()) {
+                writer.addAttribute(ROWSINCR_ATTR, String.valueOf(t.getProperty(TableProperty.RowCapacityIncr)));
+                if (t.isRowLabelsIndexed())
+                	writer.addAttribute(ROWIDX_ATTR, "true");
+            }
+            
             for (int i = 1; i <= nRows; i++) { 
                 if (!isIgnoreRow(i)) 
                     context.convertAnother(t.getRow(i));
@@ -113,6 +102,12 @@ public class TableConverter extends BaseConverter
         int nCols = this.getNumConsumableColumns();
         if (nCols > 0) {
             writer.startNode(COLS_TAG);
+            if (options().isVerboseState()) {
+                writer.addAttribute(COLSINCR_ATTR, String.valueOf(t.getProperty(TableProperty.ColumnCapacityIncr)));
+                if (t.isColumnLabelsIndexed())
+                	writer.addAttribute(COLIDX_ATTR, "true");
+            }
+            
             for (Column c : getActiveColumns()) {
                 context.convertAnother(c);
             }
@@ -123,6 +118,11 @@ public class TableConverter extends BaseConverter
         // Subsets
         if (t.getNumSubsets() > 0) {
             writer.startNode(SUBSETS_TAG);
+            if (options().isVerboseState()) {
+                if (t.isSubsetLabelsIndexed())
+                	writer.addAttribute(SUBIDX_ATTR, "true");
+            }
+            
             for (Subset s : t.getSubsets()) {
                 context.convertAnother(s);
             }
@@ -133,6 +133,11 @@ public class TableConverter extends BaseConverter
         // Cells
         if (nRows > 0 && nCols > 0) {
             writer.startNode(CELLS_TAG);
+            if (options().isVerboseState()) {
+                if (t.isCellLabelsIndexed())
+                	writer.addAttribute(CELLIDX_ATTR, "true");
+            }
+            
             for (Column c : getActiveColumns()) {
                 for (int rIdx = 1; rIdx <= nRows; rIdx++) {
                     if (!isIgnoreRow(rIdx)) {
@@ -155,36 +160,21 @@ public class TableConverter extends BaseConverter
         
         TableImpl t = (TableImpl)TableFactory.createTable(rCap, cCap, getTableContext());
         
-        Integer iVal = readAttributeInteger(ROWSINCR_ATTR, reader);
-        if (iVal != null) t.setRowCapacityIncr(iVal);
-        
-        iVal = readAttributeInteger(COLSINCR_ATTR, reader);
-        if (iVal != null) t.setColumnCapacityIncr(iVal);
-        
-        Double dVal = readAttributeDouble(FREESPACE_ATTR, reader);
-        if (dVal != null) t.setFreeSpaceThreshold(dVal);
-        
-        Boolean bVal = readAttributeBoolean(AUTOCALC_ATTR, reader);
-        if (bVal != null) t.setAutoRecalculate(bVal);
-        
-        bVal = readAttributeBoolean(ROWIDX_ATTR, reader);
-        if (bVal != null) t.setRowLabelsIndexed(bVal);
-        
-        bVal = readAttributeBoolean(COLIDX_ATTR, reader);
-        if (bVal != null) t.setColumnLabelsIndexed(bVal);
-        
-        bVal = readAttributeBoolean(SUBIDX_ATTR, reader);
-        if (bVal != null) t.setSubsetLabelsIndexed(bVal);
-        
-        bVal = readAttributeBoolean(CELLIDX_ATTR, reader);
-        if (bVal != null) t.setCellLabelsIndexed(bVal);
-        
-        if (t instanceof Precisionable) {
-            Integer precision = readAttributeInteger(PRECISION_ATTR, reader);
-            if (precision != null && precision > 0)
-                ((Precisionable)t).setPrecision(precision);
+        // if full state was persisted, process more attributes
+        if (options().isVerboseState()) {
+            Double dVal = readAttributeDouble(FREESPACE_ATTR, reader);
+            if (dVal != null) t.setFreeSpaceThreshold(dVal);
+            
+            Boolean bVal = readAttributeBoolean(AUTOCALC_ATTR, reader);
+            if (bVal != null) t.setAutoRecalculate(bVal);
+            
+            if (t instanceof Precisionable) {
+                Integer precision = readAttributeInteger(PRECISION_ATTR, reader);
+                if (precision != null && precision > 0)
+                    ((Precisionable)t).setPrecision(precision);
+            }
         }
-        
+              
         // upon return, we are left in the Rows or Columns or Cells tag
         unmarshalTableElement(t, true, reader, context);
         
@@ -195,17 +185,47 @@ public class TableConverter extends BaseConverter
         String nodeName = reader.getNodeName();
         
         // process rows
-        if (ROWS_TAG.equals(nodeName)) 
+        if (ROWS_TAG.equals(nodeName)) {
+        	if (options().isVerboseState()) {
+	            Integer iVal = readAttributeInteger(ROWSINCR_ATTR, reader);
+	            if (iVal != null) t.setRowCapacityIncr(iVal);
+	            
+	            Boolean bVal = readAttributeBoolean(ROWIDX_ATTR, reader);
+	            if (bVal != null) t.setRowLabelsIndexed(bVal);
+        	}
+            
             nodeName = processChildren(t,  RowImpl.class, reader, context);
+        }
         
-        if (COLS_TAG.equals(nodeName)) 
+        if (COLS_TAG.equals(nodeName)) {
+        	if (options().isVerboseState()) {
+	            Integer iVal = readAttributeInteger(COLSINCR_ATTR, reader);
+	            if (iVal != null) t.setColumnCapacityIncr(iVal);            
+	            
+	            Boolean bVal = readAttributeBoolean(COLIDX_ATTR, reader);
+	            if (bVal != null) t.setColumnLabelsIndexed(bVal);
+        	}
+            
             nodeName = processChildren(t,  ColumnImpl.class, reader, context);
+        }
         
-        if (SUBSETS_TAG.equals(nodeName)) 
+        if (SUBSETS_TAG.equals(nodeName)) {
+        	if (options().isVerboseState()) {
+                Boolean bVal = readAttributeBoolean(SUBIDX_ATTR, reader);
+                if (bVal != null) t.setSubsetLabelsIndexed(bVal);
+        	}
+        	
             nodeName = processChildren(t,  SubsetImpl.class, reader, context);
+        }
         
-        if (CELLS_TAG.equals(nodeName)) 
+        if (CELLS_TAG.equals(nodeName)) {
+        	if (options().isVerboseState()) {
+        		Boolean bVal = readAttributeBoolean(CELLIDX_ATTR, reader);
+                if (bVal != null) t.setCellLabelsIndexed(bVal);
+        	}
+        	
             nodeName = processChildren(t,  CellImpl.class, reader, context);
+        }
         
         // process derivations, if any
         if (options().isDerivations()) {

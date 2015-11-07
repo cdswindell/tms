@@ -1,10 +1,10 @@
-<table rCap="4" cCap="5" rIncr="1024" cIncr="32" fsTh="2.0" autoCalc="true" precision="15" readOnly="false" allowNulls="true" enforce="false">
+<table rCap="1024" cCap="32" autoCalc="true" precision="15" fsTh="2.0" readOnly="false" allowNulls="true" enforce="false">
   <label>Test XML &amp; Export Table</label>
   <tags>
     <string>green</string>
     <string>red</string>
   </tags>
-  <rows>
+  <rows rIncr="1024">
     <row index="1">
       <label>Blue Row</label>
     </row>
@@ -18,7 +18,7 @@
       <label>Cyan Row</label>
     </row>
   </rows>
-  <columns>
+  <columns cIncr="32">
     <column index="1">
       <label>A</label>
       <validator>

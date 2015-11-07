@@ -18,6 +18,10 @@ package org.tms.api.io;
  */
 public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends IOOption<T> 
 {   
+    public boolean isVerboseState();
+    public T withVerboseState();
+    public T withVerboseState(boolean enabled);
+    
     /**
      * Returns {@code true} if TMS {@link org.tms.api.derivables.Derivation Derivation}s are imported or exported. 
      * @return {@code true} if TMS {@code Derivation}s are imported and exported

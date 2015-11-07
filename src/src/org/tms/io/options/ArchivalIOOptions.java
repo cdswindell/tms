@@ -37,6 +37,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         DisplayFormats,
         Units,
         Tags,
+        VerboseState,
     }
 
     protected abstract T clone(final ArchivalIOOptions<T> model);
@@ -47,12 +48,14 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
                                 final boolean ignoreEmptyRows, 
                                 final boolean ignoreEmptyCols,
                                 final boolean withDerivations,
-                                final boolean withValidators)
+                                final boolean withValidators,
+                                final boolean withVerboseState)
     {
         super(format, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
 
         set(Options.Derivations, withDerivations);
         set(Options.Validators, withValidators);
+        set(Options.VerboseState, withVerboseState);
         
         set(Options.Descriptions, true);
         set(Options.DisplayFormats, true);
@@ -71,6 +74,29 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         return clone((ArchivalIOOptions<T>) model);
     }
 
+    public boolean isVerboseState()
+    {
+        return (Boolean)get(Options.VerboseState);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withVerboseState()
+    {
+        return withVerboseState(true);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withVerboseState(boolean enabled)
+    {
+        final T newOptions = clone(this);
+        newOptions.set(Options.VerboseState, enabled);
+        return newOptions;
+    }
+    
     /**
      * {@inheritDoc}
      */
