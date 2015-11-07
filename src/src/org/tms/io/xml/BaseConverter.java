@@ -392,4 +392,16 @@ abstract public class BaseConverter implements Converter
         
         return null;
     }
+    
+    protected Double readAttributeDouble(String attrName, HierarchicalStreamReader reader)
+    {
+        try {
+            String val = reader.getAttribute(attrName);
+            if (val != null)          
+                return Double.parseDouble(val);
+        }
+        catch (Exception e) {}
+        
+        return null;
+    }
 }

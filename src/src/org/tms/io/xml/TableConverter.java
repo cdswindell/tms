@@ -6,9 +6,11 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
+import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Precisionable;
 import org.tms.api.factories.TableFactory;
+import org.tms.api.io.IOFileFormat;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
@@ -26,8 +28,16 @@ public class TableConverter extends BaseConverter
 {
     static final public String ELEMENT_TAG = "table";
     
-    static final protected String NROWS_ATTR = "nRows";
-    static final protected String NCOLS_ATTR = "nCols";
+    static final protected String ROWSCAP_ATTR = "rCap";
+    static final protected String COLSCAP_ATTR = "cCap";
+    static final protected String ROWSINCR_ATTR = "rIncr";
+    static final protected String COLSINCR_ATTR = "cIncr";
+    static final protected String FREESPACE_ATTR = "fsTh";
+    static final protected String AUTOCALC_ATTR = "autoCalc";
+    static final protected String ROWIDX_ATTR = "rlIdx";
+    static final protected String COLIDX_ATTR = "clIdx";
+    static final protected String SUBIDX_ATTR = "slIdx";
+    static final protected String CELLIDX_ATTR = "cllIdx";
     static final protected String PRECISION_ATTR = "precision";
     
     static final protected String ROWS_TAG = "rows";
@@ -55,16 +65,40 @@ public class TableConverter extends BaseConverter
     public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         TableImpl t = (TableImpl)arg;
-        int nRows = t.getNumRows();
-        int nCols = getNumConsumableColumns();
         
-        writer.addAttribute(NROWS_ATTR, String.valueOf(nRows));
-        writer.addAttribute(NCOLS_ATTR, String.valueOf(nCols));
+        if (options().getFileFormat() == IOFileFormat.XML) {
+	        writer.addAttribute(ROWSCAP_ATTR, String.valueOf(t.getNumRows()));
+	        writer.addAttribute(COLSCAP_ATTR, String.valueOf(getNumConsumableColumns()));
+        }
+        else {
+            writer.addAttribute(ROWSCAP_ATTR, String.valueOf(t.getProperty(TableProperty.numRowsCapacity)));
+            writer.addAttribute(COLSCAP_ATTR, String.valueOf(t.getProperty(TableProperty.numColumnsCapacity)));
+        }
+        	
+        writer.addAttribute(ROWSINCR_ATTR, String.valueOf(t.getProperty(TableProperty.RowCapacityIncr)));
+        writer.addAttribute(COLSINCR_ATTR, String.valueOf(t.getProperty(TableProperty.ColumnCapacityIncr)));
+        writer.addAttribute(FREESPACE_ATTR, String.valueOf(t.getProperty(TableProperty.FreeSpaceThreshold)));
+        
+        writer.addAttribute(AUTOCALC_ATTR, String.valueOf(t.getProperty(TableProperty.isAutoRecalculate)));
+        
+        if (t.isRowLabelsIndexed())
+        	writer.addAttribute(ROWIDX_ATTR, "true");
+        
+        if (t.isColumnLabelsIndexed())
+        	writer.addAttribute(COLIDX_ATTR, "true");
+        
+        if (t.isSubsetLabelsIndexed())
+        	writer.addAttribute(SUBIDX_ATTR, "true");
+        
+        if (t.isCellLabelsIndexed())
+        	writer.addAttribute(CELLIDX_ATTR, "true");
+        
         writer.addAttribute(PRECISION_ATTR, String.valueOf(t.getPrecision()));
         
         marshalTableElement(t, writer, context, true);
         
         // Rows
+        int nRows = t.getNumRows();
         if (nRows > 0) {
             writer.startNode(ROWS_TAG);
             for (int i = 1; i <= nRows; i++) { 
@@ -76,6 +110,7 @@ public class TableConverter extends BaseConverter
         }
         
         // Columns
+        int nCols = this.getNumConsumableColumns();
         if (nCols > 0) {
             writer.startNode(COLS_TAG);
             for (Column c : getActiveColumns()) {
@@ -115,10 +150,34 @@ public class TableConverter extends BaseConverter
     @Override
     public Table unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
-        int nRows = readAttributeInteger(NROWS_ATTR, reader);
-        int nCols = readAttributeInteger(NCOLS_ATTR, reader);
+        int rCap = readAttributeInteger(ROWSCAP_ATTR, reader);
+        int cCap = readAttributeInteger(COLSCAP_ATTR, reader);
         
-        Table t = TableFactory.createTable(nRows, nCols, getTableContext());
+        TableImpl t = (TableImpl)TableFactory.createTable(rCap, cCap, getTableContext());
+        
+        Integer iVal = readAttributeInteger(ROWSINCR_ATTR, reader);
+        if (iVal != null) t.setRowCapacityIncr(iVal);
+        
+        iVal = readAttributeInteger(COLSINCR_ATTR, reader);
+        if (iVal != null) t.setColumnCapacityIncr(iVal);
+        
+        Double dVal = readAttributeDouble(FREESPACE_ATTR, reader);
+        if (dVal != null) t.setFreeSpaceThreshold(dVal);
+        
+        Boolean bVal = readAttributeBoolean(AUTOCALC_ATTR, reader);
+        if (bVal != null) t.setAutoRecalculate(bVal);
+        
+        bVal = readAttributeBoolean(ROWIDX_ATTR, reader);
+        if (bVal != null) t.setRowLabelsIndexed(bVal);
+        
+        bVal = readAttributeBoolean(COLIDX_ATTR, reader);
+        if (bVal != null) t.setColumnLabelsIndexed(bVal);
+        
+        bVal = readAttributeBoolean(SUBIDX_ATTR, reader);
+        if (bVal != null) t.setSubsetLabelsIndexed(bVal);
+        
+        bVal = readAttributeBoolean(CELLIDX_ATTR, reader);
+        if (bVal != null) t.setCellLabelsIndexed(bVal);
         
         if (t instanceof Precisionable) {
             Integer precision = readAttributeInteger(PRECISION_ATTR, reader);
