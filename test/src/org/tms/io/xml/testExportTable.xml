@@ -51,7 +51,7 @@
       <sCols>4,5,3</sCols>
     </subset>
   </subsets>
-  <subsets>
+  <cells>
     <cell rIdx="1" cIdx="1">
       <dataType>java.lang.Integer</dataType>
       <value>12</value>
@@ -117,5 +117,5 @@
       <dataType>java.lang.Double</dataType>
       <value>311.5225</value>
     </cell>
-  </subsets>
+  </cells>
 </table>

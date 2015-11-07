@@ -42,7 +42,7 @@ public class TableConverter extends BaseConverter
     static final protected String ROWS_TAG = "rows";
     static final protected String COLS_TAG = "columns";
     static final protected String SUBSETS_TAG = "subsets";
-    static final protected String CELLS_TAG = "subsets";
+    static final protected String CELLS_TAG = "cells";
     
     public TableConverter(BaseWriter<?> writer)
     {
