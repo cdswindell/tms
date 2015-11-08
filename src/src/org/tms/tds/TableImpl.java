@@ -1433,7 +1433,26 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     synchronized public RowImpl addRow(Access mode, Object... mda)
     {
         vetElement();
-        return (RowImpl)add(new RowImpl(this), mode, mda);
+        RowImpl row = (RowImpl)add(new RowImpl(this), mode, mda);
+        
+        // depending on the access used, set the qualifier
+        // we know the mda arhs are present and of the right type at this point
+        if (row != null) {
+	        switch (mode) {
+		    	case ByLabel:
+		    		row.setLabel((String)mda[0]);
+		    		break;
+	        	
+		    	case ByDescription:
+		    		row.setDescription((String)mda[0]);
+		    		break;
+	        	
+	        	default:
+	        		break;
+	        }
+        }
+
+        return row;
     }
     
     @Override
@@ -1685,10 +1704,74 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
-    synchronized public ColumnImpl addColumn(Access mode, Object... md)
+    synchronized public ColumnImpl addColumn(Access mode, Object... mda)
     {
         vetElement();
-        return (ColumnImpl)add(new ColumnImpl(this), mode, md);
+        
+        // in a few cases, we allow adding by a property; we have to check if one already exists 
+        // and disallow, if in exact mode
+        Access insertMode = mode;
+        switch (mode) {
+        	case ByLabel:
+        	case ByDescription:
+        	{
+        		ColumnImpl existingCol = getColumn(mode, mda);
+        		if (existingCol != null) {
+        			boolean allowDups = mda != null && mda.length > 1 && mda[1] != null && mda[1] instanceof Boolean ? (Boolean)mda[1] : false;
+        			if (!allowDups)
+                        throw new InvalidException(this.getElementType(), 
+                                String.format("%s with %s %s exists", ElementType.Column, mode, mda[0]));  
+         		}
+        		
+    		    // reset access mode, add this column at the end
+    			insertMode = Access.Last;
+        	}
+        	break;
+        
+        	case ByDataType:
+        	{
+        		ColumnImpl existingCol = getColumn(mode, mda);
+        		if (existingCol != null) {
+        			boolean allowDups = mda != null && mda.length > 2 && mda[2] != null && mda[2] instanceof Boolean ? (Boolean)mda[2] : false;
+        			if (!allowDups)
+                        throw new InvalidException(this.getElementType(), 
+                                String.format("%s with %s %s exists", ElementType.Column, mode, mda[0]));  
+         		}
+        		
+    		    // reset access mode, add this column at the end
+    			insertMode = Access.Last;       		
+        	}
+        	
+        	break;
+        	
+        	default:
+        		break;
+        }
+        
+        ColumnImpl col = (ColumnImpl)add(new ColumnImpl(this), insertMode, mda);
+        
+        // depending on the access used, set the qualifier
+        // we know the mda args are present and of the right type at this point
+        if (col != null) {
+	        switch (mode) {
+		    	case ByDataType:
+		    		col.setDataType((Class<?>)mda[0]);
+		    		break;
+		    		
+		    	case ByLabel:
+		    		col.setLabel((String)mda[0]);
+		    		break;
+	        	
+		    	case ByDescription:
+		    		col.setDescription((String)mda[0]);
+		    		break;
+	        	
+	        	default:
+	        		break;
+	        }
+        }
+
+        return col;
     }
     
     @Override
@@ -1742,25 +1825,6 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             
             // add the column to the Columns array at the correct index
             getColumnsInternal().set(colIdx,  r);
-        }
-        
-        // depending on the access used, set the qualifier
-        // we know the mda arhs are present and of the right type at this point
-        switch (mode) {
-	    	case ByDataType:
-	    		r.setDataType((Class<?>)mda[0]);
-	    		break;
-	    		
-	    	case ByLabel:
-	    		r.setLabel((String)mda[0]);
-	    		break;
-        	
-	    	case ByDescription:
-	    		r.setDescription((String)mda[0]);
-	    		break;
-        	
-        	default:
-        		break;
         }
         
         if (setCurrent && r != null)
@@ -1979,7 +2043,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                 
                 // indexes are 1-based; element arrays are 0-based
                 TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Label, md);
-                if (target != null)
+                if (target != null) 
                     return target.getIndex() - 1;
                 break;
             }
@@ -1990,9 +2054,10 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Description, md);
+                
                 // indexes are 1-based; element arrays are 0-based
-                if (target != null)
+                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Description, md);
+                if (target != null) 
                     return target.getIndex() - 1;
                 break;
             }
@@ -2024,27 +2089,25 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             case ByDataType:
             	if (et == ElementType.Column) {
                     Object md = mda != null && mda.length > 0 ? mda[0] : null;
-                    if (md == null || !(md instanceof Class))
+                    if (isAdding || md == null || !(md instanceof Class))
                         throw new InvalidException(this.getElementType(), 
                                 String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));
-                    if (isAdding)
-                        return numSlices == 0 ? 0 : numSlices;
-                    else {
-                    	Class<?> queryClass = (Class<?>)md;
-                    	boolean isExact = mda.length == 1 || 
-                    					  mda[1] == null || 
-                    					  !(boolean.class.isAssignableFrom(mda[1].getClass())) 
-                    					  ? true : (boolean)mda[1];
-                    	
-                    	// look for a column with a datatype of queryClass
-                        for (ColumnImpl col : m_cols) {
-                            if (col != null && ((col.getDataType() == queryClass) || (!isExact && queryClass.isAssignableFrom(col.getDataType())))) 
-                            	return col.getIndex();
-                        }
-                        
-                        // if we get here, no column found
-                        return -1;
+                    
+                	Class<?> queryClass = (Class<?>)md;
+                	boolean isExact = mda == null ||
+                					  mda.length == 1 || 
+                					  mda[1] == null || 
+                					  !(boolean.class.isAssignableFrom(mda[1].getClass())) 
+                					  ? true : (boolean)mda[1];
+                	
+                	// look for a column with a datatype of queryClass
+                    for (ColumnImpl col : m_cols) {
+                        if (col != null && ((col.getDataType() == queryClass) || (!isExact && queryClass.isAssignableFrom(col.getDataType())))) 
+                        	return col.getIndex() - 1;
                     }
+                    
+                    // if we get here, no column found
+                    return -1;
             	}
             	else
                     throw new InvalidException(this.getElementType(), "ByDataType only valid for Column");

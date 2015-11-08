@@ -315,4 +315,53 @@ public class ColumnTest
         assertThat(t.getNumCells(), is(16));       
     }
         
+    @Test
+    public void testAddColumns()
+    {
+        TableImpl t = new TableImpl(10, 10);
+        assertThat(t, notNullValue());
+        
+        Column c = t.addColumn(Access.ByLabel, "Test Col");
+        assertThat(c, notNullValue());
+        
+        assertThat(1, is(c.getIndex()));
+        assertThat("Test Col", is(c.getLabel()));
+        
+        c = t.getColumn(Access.ByLabel, "Test Col");
+        assertThat(c, notNullValue());
+        
+        try {
+        	//this should fail
+        	c = t.addColumn(Access.ByLabel, "Test Col");
+        	fail("Collumn added");
+        }
+        catch (Exception e) {}
+        
+    	//this should sucseed
+    	c = t.addColumn(Access.ByLabel, "Test Col", true);
+        assertThat(c, notNullValue());        
+        assertThat(2, is(c.getIndex()));   
+        
+        // ByDataType
+        c = t.addColumn(Access.ByDataType, String.class);
+        assertThat(c, notNullValue());
+        
+        assertThat(3, is(c.getIndex()));
+        assertThat(c.getDataType() == String.class, is(true));
+        
+        c = t.getColumn(Access.ByDataType, String.class);
+        assertThat(c, notNullValue());
+        
+        try {
+        	//this should fail
+            c = t.addColumn(Access.ByDataType, String.class);
+        	fail("Collumn added");
+        }
+        catch (Exception e) {}
+        
+    	//this should sucseed
+        c = t.addColumn(Access.ByDataType, String.class, true, true);
+        assertThat(c, notNullValue());        
+        assertThat(4, is(c.getIndex()));        
+    }
 }
