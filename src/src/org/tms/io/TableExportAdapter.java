@@ -86,6 +86,7 @@ public class TableExportAdapter
     private File m_file;
     private OutputStream m_output;
     private boolean m_isFileBased;
+    private List<Row> m_cachedRows;
     
     public TableExportAdapter(Table t, String fileName, IOOption<?> options) 
     throws IOException
@@ -213,7 +214,10 @@ public class TableExportAdapter
     
     public List<Row> getRows()
     {
-        return m_table.getRows();
+    	if (m_cachedRows == null)
+    		m_cachedRows = m_table.getRows();
+    	
+        return m_cachedRows;
     }
 
     public Table getTable()
