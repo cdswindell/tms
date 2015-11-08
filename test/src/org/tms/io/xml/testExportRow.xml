@@ -1,0 +1,48 @@
+<table rCap="4" cCap="5" readOnly="false" allowNulls="true" enforce="false">
+  <label>Test XML &amp; Export Table Row</label>
+  <tags>
+    <string>green</string>
+    <string>red</string>
+  </tags>
+  <rows>
+    <row index="1">
+      <label>Cyan Row</label>
+    </row>
+  </rows>
+  <columns>
+    <column index="1">
+      <label>A</label>
+    </column>
+    <column index="2">
+      <label>B</label>
+    </column>
+    <column index="3">
+      <label>C</label>
+    </column>
+    <column index="5">
+      <tags>
+        <string>calculated</string>
+        <string>derived</string>
+        <string>no-user-data</string>
+      </tags>
+    </column>
+  </columns>
+  <cells>
+    <cell rIdx="1" cIdx="1">
+      <dataType>java.lang.Double</dataType>
+      <value>17.65</value>
+    </cell>
+    <cell rIdx="1" cIdx="2">
+      <dataType>java.lang.String</dataType>
+      <value>Cyan</value>
+    </cell>
+    <cell rIdx="1" cIdx="3">
+      <dataType>java.lang.Boolean</dataType>
+      <value>true</value>
+    </cell>
+    <cell rIdx="1" cIdx="5">
+      <dataType>java.lang.Double</dataType>
+      <value>311.5225</value>
+    </cell>
+  </cells>
+</table>

@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.tms.api.Access;
 import org.tms.api.Column;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.io.IOOption;
@@ -33,7 +34,9 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     private int m_nRows;
     private int m_nConsumableRows;
     private Set<Integer> m_ignoredRows;
+    private List<Row> m_activeRows;
     private Map<Integer, Integer> m_rowIndexMap;
+    private Map<Integer, Row> m_effRowIndexMap;
 
     abstract protected void export() throws IOException;
     
@@ -72,6 +75,11 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     public Table getTable()
     {
         return m_tableExportAdapter.getTable();
+    }
+    
+    public ElementType getTableElementType()
+    {
+        return m_tableExportAdapter.getTableElementType();
     }
     
     public TableExportAdapter getExportAdapter()
@@ -175,9 +183,6 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         if (col == null)
             return -1;
         
-        if (!m_baseOptions.isIgnoreEmptyColumns())
-            return col.getIndex();
-        
         return getRemappedColumnIndex(col.getIndex());
     }
     
@@ -204,15 +209,33 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     public int getNumConsumableRows()
     {
         if (m_nConsumableRows == -1) {
-            m_nConsumableRows = m_nRows;
+            m_nConsumableRows = getNumRows();
             if (m_baseOptions.isIgnoreEmptyRows()) {               
                 Table t = getTable();
                 m_ignoredRows = new HashSet<Integer>();
                 int emptyRowCnt = 0;
                 int remappedIdx = 0;
-                for (int i = 1; i <= m_nRows; i++) {
-                    if (t.isRowDefined(Access.ByIndex, i)) {
-                        Row r = t.getRow(i);
+                if (getTableElementType() == ElementType.Table) {
+	                for (int i = 1; i <= m_nRows; i++) {
+	                    if (t.isRowDefined(Access.ByIndex, i)) {
+	                        Row r = t.getRow(i);
+	                        if (r.isNull()) {
+	                            emptyRowCnt++;
+	                            m_ignoredRows.add(r.getIndex());
+	                        }
+	                        else {
+	                            if (m_rowIndexMap == null)
+	                                m_rowIndexMap = new HashMap<Integer, Integer>(m_nRows);
+	                            
+	                            m_rowIndexMap.put(r.getIndex(), ++remappedIdx);
+	                        }
+	                    }
+	                    else
+	                        m_ignoredRows.add(i);
+	                }
+                }
+                else {
+                	for (Row r : getRows()) {
                         if (r.isNull()) {
                             emptyRowCnt++;
                             m_ignoredRows.add(r.getIndex());
@@ -220,17 +243,39 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
                         else {
                             if (m_rowIndexMap == null)
                                 m_rowIndexMap = new HashMap<Integer, Integer>(m_nRows);
+                            
+                            if (m_effRowIndexMap == null)
+                            	m_effRowIndexMap = new HashMap<Integer, Row>(m_nRows);
+                            
                             m_rowIndexMap.put(r.getIndex(), ++remappedIdx);
-                        }
-                    }
-                    else
-                        m_ignoredRows.add(i);
+                            m_effRowIndexMap.put(remappedIdx, r);
+                        }                		
+                	}
                 }
                 
                 m_nConsumableRows -= emptyRowCnt;
             }
             else {
-                m_ignoredRows = Collections.emptySet();
+                if (getTableElementType() == ElementType.Table)
+                	m_ignoredRows = Collections.emptySet();
+                else {
+                    m_ignoredRows = new HashSet<Integer>();
+                    int remappedIdx = 0;
+                	for (Row r : getRows()) {
+                        if (r != null) {
+                            if (m_rowIndexMap == null)
+                                m_rowIndexMap = new HashMap<Integer, Integer>(m_nRows);
+                            
+                            if (m_effRowIndexMap == null)
+                            	m_effRowIndexMap = new HashMap<Integer, Row>(m_nRows);
+                            
+                            m_rowIndexMap.put(r.getIndex(), ++remappedIdx);
+                            m_effRowIndexMap.put(remappedIdx, r);
+                        }                		
+                	}
+                	
+                	m_nConsumableRows = remappedIdx;
+                }
             }
         }
         
@@ -261,15 +306,12 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         if (row == null)
             return -1;
         
-        if (!m_baseOptions.isIgnoreEmptyRows())
-            return row.getIndex();
-        
         return getRemappedRowIndex(row.getIndex());
     }
     
     public int getRemappedRowIndex(int rowIdx)
     {
-        if (!m_baseOptions.isIgnoreEmptyRows())
+        if (!m_baseOptions.isIgnoreEmptyRows() && getTableElementType() == ElementType.Table)
             return rowIdx;
         
         // make sure we have the info computed
@@ -289,6 +331,29 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     
     public List<Row> getRows()
     {
-        return m_tableExportAdapter.getRows();
+    	m_activeRows = m_tableExportAdapter.getRows();
+        return m_activeRows;
     }
+    
+    public int getNumRows()
+    {
+        return m_tableExportAdapter.getNumRows();
+    }
+
+	public Row getRow(int rowIdx) 
+	{
+		rowIdx = getRemappedRowIndex(rowIdx);
+		if (rowIdx > -1)
+			return getRows().get(rowIdx - 1);
+		else
+			return null;
+	}
+
+	public Row getRowByEffectiveIndex(int i) 
+	{
+		if (m_effRowIndexMap == null)
+			return getRow(i);
+		
+		return m_effRowIndexMap.get(i);
+	}
 }

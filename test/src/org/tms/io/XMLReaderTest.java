@@ -30,6 +30,7 @@ public class XMLReaderTest extends BaseArchivalTest
     
     private static final String ExportTableGold = "testExportTable.xml";
     private static final String ExportTableGold3 = "testExportValidator.xml";
+    private static final String ExportTableGold4 = "testExportRow.xml";
     
     @Test
     public final void testCSVReaderConstructor()
@@ -41,6 +42,44 @@ public class XMLReaderTest extends BaseArchivalTest
         assertThat(r.isColumnNames(), is(true));
     }
 
+    @Test
+    public final void testParseRow() 
+    {
+        // create the reference table
+        Table gst = getBasicTable();
+        
+        // now read the xml
+        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold4, "xml"), XMLOptions.Default); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            assertThat(t.getNumRows(), is(1));
+            assertThat(t.getNumColumns(), is(gst.getNumColumns()));
+            assertThat(t.getNumCells(), is(4));
+            
+            assertThat(t.getColumn(1).getLabel(), is("A"));
+            assertThat(t.getColumn(2).getLabel(), is("B"));
+            assertThat(t.getColumn(3).getLabel(), is("C"));
+            
+            Column c1 = t.getColumn(1);
+            Column c2 = t.getColumn(2);
+            Column c3 = t.getColumn(3);
+            for (Row row : t.rows()) {
+                assertThat(Number.class.isAssignableFrom(t.getCellValue(row, c1).getClass()), is(true));
+                assertThat(row.getLabel(), is(t.getCellValue(row, c2) + " Row"));
+                assertThat(Boolean.class.isAssignableFrom(t.getCellValue(row, c3).getClass()), is(true));
+           }
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }    
+    
     @Test
     public final void testParse() 
     {

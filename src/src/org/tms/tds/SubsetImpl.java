@@ -18,6 +18,7 @@ import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.events.BlockedRequestException;
 import org.tms.api.events.TableElementEventType;
@@ -76,7 +77,10 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     @Override
     public List<Row> getRows()
     {
-       return new ArrayList<Row>(((JustInTimeSet<RowImpl>)m_rows).clone());
+    	List<Row> sortedRows = new ArrayList<Row>(((JustInTimeSet<RowImpl>)m_rows).clone());
+    	Collections.sort(sortedRows, 
+                (TableRowColumnElement r1, TableRowColumnElement r2) -> (r1.getIndex() > r2.getIndex() ? 1 : r1.getIndex() < r2.getIndex() ? -1 : 0));
+        return sortedRows;
     }
     
     protected List<RowImpl> getRowsInternal()
@@ -131,7 +135,11 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     @Override
     public List<Column> getColumns()
     {
-        return new ArrayList<Column>(((JustInTimeSet<ColumnImpl>)m_cols).clone());
+    	List<Column> sortedCols = new ArrayList<Column>(((JustInTimeSet<ColumnImpl>)m_cols).clone());
+    	Collections.sort(sortedCols, 
+                (TableRowColumnElement r1, TableRowColumnElement r2) -> (r1.getIndex() > r2.getIndex() ? 1 : r1.getIndex() < r2.getIndex() ? -1 : 0));
+
+    	return sortedCols;
     }
 
     protected List<ColumnImpl> getColumnsInternal()

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.tms.api.Column;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.UnimplementedException;
@@ -130,6 +131,11 @@ public class TableExportAdapter
         m_output = out;
         m_options = options;
         m_isFileBased = false;
+    }
+    
+    public ElementType getTableElementType()
+    {
+    	return ElementType.Table;
     }
     
     private boolean canWrite()

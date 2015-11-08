@@ -47,11 +47,9 @@ import org.tms.api.io.StyleableIOOption;
 import org.tms.api.io.TitleableIOOption;
 import org.tms.io.BaseWriter;
 
-
 abstract public class TMSReport
 {
     static final String sf_RowNameFieldName = "__ROW_NAME__";
-    static final String sf_RowIndexFieldName = "__ROW_INDEX__";
     
     static final Set<String> sf_JavaLogicalFonts = new HashSet<String>();
     {

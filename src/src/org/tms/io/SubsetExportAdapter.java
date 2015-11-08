@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 import org.tms.api.Column;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.io.IOOption;
@@ -27,6 +28,11 @@ public class SubsetExportAdapter extends TableExportAdapter
         m_subset = s;
     }
 
+    public ElementType getTableElementType()
+    {
+    	return ElementType.Subset;
+    }
+    
     @Override
     public int getNumRows()
     {

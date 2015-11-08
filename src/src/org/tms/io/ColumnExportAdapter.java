@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.tms.api.Column;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.io.IOOption;
 
@@ -27,6 +28,11 @@ public class ColumnExportAdapter extends TableExportAdapter
         m_col = c;
     }
 
+    public ElementType getTableElementType()
+    {
+    	return ElementType.Column;
+    }
+    
     @Override
     public int getNumRows()
     {

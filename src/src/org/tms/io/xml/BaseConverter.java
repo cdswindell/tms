@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.tms.api.Column;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
@@ -123,6 +124,31 @@ abstract public class BaseConverter implements Converter
         return m_writer.getRemappedRowIndex(idx);
     }
     
+    protected int getNumConsumableRows()
+    {
+        return m_writer.getNumConsumableRows();
+    }
+
+    protected int getNumRows()
+    {
+        return m_writer.getNumRows();
+    }
+
+    protected Row getRow(int i) 
+    {
+    	return m_writer.getRow(i);
+	}
+
+    protected Row getRowByEffectiveIndex(int i) 
+    {
+    	return m_writer.getRowByEffectiveIndex(i);
+	}
+
+    protected ElementType getTableElementType()
+    {
+    	return m_writer.getTableElementType();
+    }
+    
     protected void writeNode(TableElement te, TableProperty key, String tag, 
             HierarchicalStreamWriter writer, MarshallingContext context)
     {
@@ -194,7 +220,9 @@ abstract public class BaseConverter implements Converter
         if (options().isDescriptions() && hasValue(te, TableProperty.Description)) 
             return true;
         
-        if (options().isDerivations() && hasValue(te, TableProperty.Derivation))
+        if (options().isDerivations() && 
+        		getTableElementType() == ElementType.Table &&
+        		hasValue(te, TableProperty.Derivation))
             return true;
         
         if (options().isValidators() && hasValue(te, TableProperty.Validator))
@@ -230,7 +258,9 @@ abstract public class BaseConverter implements Converter
         if (options().isTags())
                 writeNode(te, TableProperty.Tags, TAGS_TAG, writer, context);
 
-        if (options().isDerivations() && te instanceof Derivable && ((Derivable)te).isDerived()) {
+        if (options().isDerivations() && getTableElementType() == ElementType.Table &&
+        		te instanceof Derivable && ((Derivable)te).isDerived()) 
+        {
             Derivation d =  ((Derivable)te).getDerivation();
             writer.startNode(DERIV_TAG);
             writer.setValue(d.getExpression());

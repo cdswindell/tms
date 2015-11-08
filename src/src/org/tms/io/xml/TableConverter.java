@@ -3,6 +3,7 @@ package org.tms.io.xml;
 import java.util.Map;
 
 import org.tms.api.Column;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
@@ -81,7 +82,7 @@ public class TableConverter extends BaseConverter
         marshalTableElement(t, writer, context, true);
         
         // Rows
-        int nRows = t.getNumRows();
+        int nRows = getNumConsumableRows();
         if (nRows > 0) {
             writer.startNode(ROWS_TAG);
             if (options().isVerboseState()) {
@@ -91,8 +92,9 @@ public class TableConverter extends BaseConverter
             }
             
             for (int i = 1; i <= nRows; i++) { 
-                if (!isIgnoreRow(i)) 
-                    context.convertAnother(t.getRow(i));
+            	Row r = getRowByEffectiveIndex(i);
+            	if (r != null)
+            		context.convertAnother(r);
             }
             
             writer.endNode();
@@ -116,7 +118,7 @@ public class TableConverter extends BaseConverter
         }
         
         // Subsets
-        if (t.getNumSubsets() > 0) {
+        if (t.getNumSubsets() > 0 && getTableElementType() == ElementType.Table) {
             writer.startNode(SUBSETS_TAG);
             if (options().isVerboseState()) {
                 if (t.isSubsetLabelsIndexed())
@@ -141,7 +143,7 @@ public class TableConverter extends BaseConverter
             for (Column c : getActiveColumns()) {
                 for (int rIdx = 1; rIdx <= nRows; rIdx++) {
                     if (!isIgnoreRow(rIdx)) {
-                        Row r = t.getRow(rIdx);
+                        Row r = getRowByEffectiveIndex(rIdx);
                         if (t.isCellDefined(r, c))
                             context.convertAnother(t.getCell(r,  c));
                     }
@@ -152,7 +154,7 @@ public class TableConverter extends BaseConverter
         }
     }
 
-    @Override
+	@Override
     public Table unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
         int rCap = readAttributeInteger(ROWSCAP_ATTR, reader);

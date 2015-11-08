@@ -351,6 +351,7 @@ public class ColumnTest
         
         c = t.getColumn(Access.ByDataType, String.class);
         assertThat(c, notNullValue());
+        assertThat(3, is(c.getIndex()));
         
         try {
         	//this should fail
@@ -362,6 +363,11 @@ public class ColumnTest
     	//this should sucseed
         c = t.addColumn(Access.ByDataType, String.class, true, true);
         assertThat(c, notNullValue());        
-        assertThat(4, is(c.getIndex()));        
+        assertThat(4, is(c.getIndex()));     
+        
+        // retrieve it again, should get the first one
+        c = t.getColumn(Access.ByDataType, String.class);
+        assertThat(c, notNullValue());
+        assertThat(3, is(c.getIndex()));
     }
 }

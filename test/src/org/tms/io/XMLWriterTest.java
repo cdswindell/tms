@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.ConstraintViolationException;
@@ -33,9 +34,40 @@ public class XMLWriterTest extends BaseArchivalTest
     private static final String ExportTableGold = "testExportTable.xml";
     private static final String ExportTableGold2 = "testExportTable2.xml";
     private static final String ExportTableGold3 = "testExportValidator.xml";
+    private static final String ExportTableGold4 = "testExportRow.xml";
     
     @Test
-    public final void testExportXml() throws IOException
+    public final void testExportRowXml() throws IOException
+    {
+        /*
+         * Note: If you change this test, be sure to update
+         * the gold standard file ExportTableGold
+         */
+        Path path = Paths.get(qualifiedFileName(ExportTableGold4, "xml"));
+        byte[] gold = Files.readAllBytes(path);  
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+        
+        // create new XML, it should match the gold standard
+        Table gst = getBasicTable(); 
+        gst.setLabel("Test XML & Export Table Row");
+        Row r = gst.getRow(4);
+        
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        r.export(bos, XMLOptions.Default);
+        bos.close();
+
+        // test byte streams are the same
+        byte [] output =  bos.toByteArray();
+        assertNotNull(output);
+
+        assertThat(gold.length, is(output.length));       
+    }
+    
+    @Test
+    public final void testExportColumnXml() throws IOException
     {
         /*
          * Note: If you change this test, be sure to update
