@@ -1744,6 +1744,25 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             getColumnsInternal().set(colIdx,  r);
         }
         
+        // depending on the access used, set the qualifier
+        // we know the mda arhs are present and of the right type at this point
+        switch (mode) {
+	    	case ByDataType:
+	    		r.setDataType((Class<?>)mda[0]);
+	    		break;
+	    		
+	    	case ByLabel:
+	    		r.setLabel((String)mda[0]);
+	    		break;
+        	
+	    	case ByDescription:
+	    		r.setDescription((String)mda[0]);
+	    		break;
+        	
+        	default:
+        		break;
+        }
+        
         if (setCurrent && r != null)
             r.setCurrent();
         
@@ -1957,8 +1976,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                 if (isAdding || md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
-                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Label, md);
+                
                 // indexes are 1-based; element arrays are 0-based
+                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Label, md);
                 if (target != null)
                     return target.getIndex() - 1;
                 break;
@@ -2000,6 +2020,34 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                     return target.getIndex() - 1;
                 break;
             }
+            
+            case ByDataType:
+            	if (et == ElementType.Column) {
+                    Object md = mda != null && mda.length > 0 ? mda[0] : null;
+                    if (md == null || !(md instanceof Class))
+                        throw new InvalidException(this.getElementType(), 
+                                String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));
+                    if (isAdding)
+                        return numSlices == 0 ? 0 : numSlices;
+                    else {
+                    	Class<?> queryClass = (Class<?>)md;
+                    	boolean isExact = mda.length == 1 || 
+                    					  mda[1] == null || 
+                    					  !(boolean.class.isAssignableFrom(mda[1].getClass())) 
+                    					  ? true : (boolean)mda[1];
+                    	
+                    	// look for a column with a datatype of queryClass
+                        for (ColumnImpl col : m_cols) {
+                            if (col != null && ((col.getDataType() == queryClass) || (!isExact && queryClass.isAssignableFrom(col.getDataType())))) 
+                            	return col.getIndex();
+                        }
+                        
+                        // if we get here, no column found
+                        return -1;
+                    }
+            	}
+            	else
+                    throw new InvalidException(this.getElementType(), "ByDataType only valid for Column");
         }
         
         // if we get here, return the default, which indicates an error
