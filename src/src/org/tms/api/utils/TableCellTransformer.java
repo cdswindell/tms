@@ -27,7 +27,7 @@ public interface TableCellTransformer extends TableCellValidator
      * of {@link TableCellTransformer#transform(Object) transform(Object)} and uses it
      * to perform cell value transformation.
      * @param fileName file name of the Groovy script
-     * @return a {code TableCellTransformer} based on a Groovy implementation 
+     * @return a {@code TableCellTransformer} based on a Groovy implementation 
      */
     static public TableCellTransformer fromGroovy(String fileName)
     {
@@ -40,7 +40,7 @@ public interface TableCellTransformer extends TableCellValidator
      * @param fileName file name of the Groovy script
      * @param valName method name of the cell validator
      * @param transName method name of the cell transformer
-     * @return a {code TableCellTransformer} based on a Groovy implementation 
+     * @return a {@code TableCellTransformer} based on a Groovy implementation 
      */
     static public TableCellTransformer fromGroovy(String fileName, String valName, String transName)
     {
