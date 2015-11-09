@@ -98,6 +98,34 @@ public class XMLWriterTest extends BaseArchivalTest
     }
     
     @Test
+    public final void testExportXml() throws IOException
+    {
+        /*
+         * Note: If you change this test, be sure to update
+         * the gold standard file ExportTableGold
+         */
+        Path path = Paths.get(qualifiedFileName(ExportTableGold, "xml"));
+        byte[] gold = Files.readAllBytes(path);  
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+        
+        // create new XML, it should match the gold standard
+        Table gst = getBasicTable();
+        
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        gst.export(bos, XMLOptions.Default);
+        bos.close();
+
+        // test byte streams are the same
+        byte [] output =  bos.toByteArray();
+        assertNotNull(output);
+
+        assertThat(gold.length, is(output.length));       
+    }
+    
+    @Test
     public final void testExportXml2() throws IOException
     {
         /*

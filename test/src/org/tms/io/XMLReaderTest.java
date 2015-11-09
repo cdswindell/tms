@@ -31,6 +31,7 @@ public class XMLReaderTest extends BaseArchivalTest
     private static final String ExportTableGold = "testExportTable.xml";
     private static final String ExportTableGold3 = "testExportValidator.xml";
     private static final String ExportTableGold4 = "testExportRow.xml";
+    private static final String ExportTableGold5 = "testExportCol.xml";
     
     @Test
     public final void testCSVReaderConstructor()
@@ -79,6 +80,28 @@ public class XMLReaderTest extends BaseArchivalTest
             fail(e.getMessage());
         }
     }    
+    
+    @Test
+    public final void testParseCol() 
+    {
+        // now read the xml
+        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold5, "xml"), XMLOptions.Default); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parse();
+            assertNotNull(t);
+            
+            assertThat(t.getNumRows(), is(4));
+            assertThat(t.getNumColumns(), is(1));
+            assertThat(t.getNumCells(), is(4));
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
     
     @Test
     public final void testParse() 
