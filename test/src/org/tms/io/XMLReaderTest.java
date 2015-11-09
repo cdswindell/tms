@@ -17,6 +17,7 @@ import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.io.XMLOptions;
 import org.tms.api.utils.TableCellValidator;
+import org.tms.tds.TableImpl;
 import org.tms.tds.TdsUtils;
 
 public class XMLReaderTest extends BaseArchivalTest
@@ -59,6 +60,9 @@ public class XMLReaderTest extends BaseArchivalTest
             assertThat(t.getNumRows(), is(1024));
             assertThat(t.getNumColumns(), is(1024));
             assertThat(t.getNumCells(), is(1));
+            
+            assertThat(1024, is(((TableImpl)t).getRowsCapacity()));
+            assertThat(1024, is(((TableImpl)t).getColumnsCapacity()));
         }
         catch (IOException e)
         {

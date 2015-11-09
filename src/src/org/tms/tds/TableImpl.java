@@ -1345,7 +1345,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
      * of created rows, see {@link #getNumRows()}
      * @return
      */
-    protected int getRowsCapacity()
+    public int getRowsCapacity()
     {
         return m_rowsCapacity;
     }
@@ -1634,7 +1634,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return capacity;
     }
 
-    protected int getColumnsCapacity()
+    public int getColumnsCapacity()
     {
         return m_colsCapacity;
     }
