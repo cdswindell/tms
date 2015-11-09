@@ -22,6 +22,7 @@ import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.XMLOptions;
 import org.tms.api.utils.NumericRange;
+import org.tms.tds.TableImpl;
 import org.tms.tds.TdsUtils;
 
 public class XMLWriterTest extends BaseArchivalTest
@@ -61,11 +62,25 @@ public class XMLWriterTest extends BaseArchivalTest
         
         t.setCellValue(r,c,"abc"); 
         
+        assertThat(t.getNumRows(), is(1024));
+        assertThat(t.getNumColumns(), is(1024));
+        assertThat(t.getNumCells(), is(1));
+        
+        assertThat(1024, is(((TableImpl)t).getRowsCapacity()));
+        assertThat(1024, is(((TableImpl)t).getColumnsCapacity()));
+        
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         t.export(bos, XMLOptions.Default);
         bos.close();
 
+        assertThat(t.getNumRows(), is(1024));
+        assertThat(t.getNumColumns(), is(1024));
+        assertThat(t.getNumCells(), is(1));
+        
+        assertThat(1024, is(((TableImpl)t).getRowsCapacity()));
+        assertThat(1024, is(((TableImpl)t).getColumnsCapacity()));
+        
         // test byte streams are the same
         byte [] output =  bos.toByteArray();
         assertNotNull(output);

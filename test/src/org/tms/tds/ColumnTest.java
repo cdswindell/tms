@@ -15,6 +15,7 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.TableErrorClass;
+import org.tms.tds.dbms.DbmsTableImpl;
 
 public class ColumnTest
 {
@@ -316,7 +317,7 @@ public class ColumnTest
     }
         
     @Test
-    public void testAddColumns()
+    public void testAddColumnsByValue()
     {
         TableImpl t = new TableImpl(10, 10);
         assertThat(t, notNullValue());
@@ -337,36 +338,36 @@ public class ColumnTest
         }
         catch (Exception e) {}
         
-    	//this should sucseed
+    	//this should succeed
     	c = t.addColumn(Access.ByLabel, "Test Col", true);
         assertThat(c, notNullValue());        
         assertThat(2, is(c.getIndex()));   
         
         // ByDataType
-        c = t.addColumn(Access.ByDataType, String.class);
+        c = t.addColumn(Access.ByDataType, TableImpl.class);
         assertThat(c, notNullValue());
         
         assertThat(3, is(c.getIndex()));
-        assertThat(c.getDataType() == String.class, is(true));
+        assertThat(c.getDataType() == TableImpl.class, is(true));
         
-        c = t.getColumn(Access.ByDataType, String.class);
+        c = t.getColumn(Access.ByDataType, TableImpl.class);
         assertThat(c, notNullValue());
         assertThat(3, is(c.getIndex()));
         
         try {
         	//this should fail
-            c = t.addColumn(Access.ByDataType, String.class);
-        	fail("Collumn added");
+            c = t.addColumn(Access.ByDataType, TableImpl.class);
+        	fail("Column added");
         }
         catch (Exception e) {}
         
-    	//this should sucseed
-        c = t.addColumn(Access.ByDataType, String.class, true, true);
+    	//this should succeed
+        c = t.addColumn(Access.ByDataType, TableImpl.class, true, true);
         assertThat(c, notNullValue());        
         assertThat(4, is(c.getIndex()));     
         
         // retrieve it again, should get the first one
-        c = t.getColumn(Access.ByDataType, String.class);
+        c = t.getColumn(Access.ByDataType, DbmsTableImpl.class, false);
         assertThat(c, notNullValue());
         assertThat(3, is(c.getIndex()));
     }

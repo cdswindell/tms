@@ -2095,16 +2095,24 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                     
                 	Class<?> queryClass = (Class<?>)md;
                 	boolean isExact = mda == null ||
-                					  mda.length == 1 || 
+                					  mda.length < 2 || 
                 					  mda[1] == null || 
-                					  !(boolean.class.isAssignableFrom(mda[1].getClass())) 
+                					  !(Boolean.class.isAssignableFrom(mda[1].getClass())) 
                 					  ? true : (boolean)mda[1];
                 	
-                	// look for a column with a datatype of queryClass
-                    for (ColumnImpl col : m_cols) {
-                        if (col != null && ((col.getDataType() == queryClass) || (!isExact && queryClass.isAssignableFrom(col.getDataType())))) 
-                        	return col.getIndex() - 1;
-                    }
+                	// look for a column with a data type of queryClass
+                	if (isExact) {
+                        TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.DataType, md);
+                        if (target != null)
+                            return target.getIndex() - 1;
+                	}
+                	else {
+                        for (ColumnImpl col : m_cols) {
+                            if (col != null && col.getDataType() != null &&
+                                    ((col.getDataType() == queryClass) || (!isExact && col.getDataType().isAssignableFrom(queryClass)))) 
+                            	return col.getIndex() - 1;
+                        }
+                	}
                     
                     // if we get here, no column found
                     return -1;
