@@ -35,6 +35,7 @@ public class XMLWriterTest extends BaseArchivalTest
     private static final String ExportTableGold2 = "testExportTable2.xml";
     private static final String ExportTableGold3 = "testExportValidator.xml";
     private static final String ExportTableGold4 = "testExportRow.xml";
+    private static final String ExportTableGold5 = "testExportCol.xml";
     
     @Test
     public final void testExportRowXml() throws IOException
@@ -73,7 +74,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(qualifiedFileName(ExportTableGold, "xml"));
+        Path path = Paths.get(qualifiedFileName(ExportTableGold5, "xml"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
@@ -81,10 +82,12 @@ public class XMLWriterTest extends BaseArchivalTest
         
         // create new XML, it should match the gold standard
         Table gst = getBasicTable();
+        gst.setLabel("Test XML & Export Table Row");
+        Column c = gst.getColumn(1);
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        gst.export(bos, XMLOptions.Default);
+        c.export(bos, XMLOptions.Default);
         bos.close();
 
         // test byte streams are the same
