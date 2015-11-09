@@ -1,0 +1,11 @@
+<table rCap="1024" cCap="1024" readOnly="false" allowNulls="true" enforce="false">
+  <label>Test XML &amp; Export One Cell Table</label>
+  <rows/>
+  <columns/>
+  <cells>
+    <cell rIdx="1024" cIdx="1024">
+      <dataType>java.lang.String</dataType>
+      <value>abc</value>
+    </cell>
+  </cells>
+</table>

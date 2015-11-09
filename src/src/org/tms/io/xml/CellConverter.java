@@ -1,7 +1,9 @@
 package org.tms.io.xml;
 
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.io.BaseReader;
@@ -81,7 +83,14 @@ public class CellConverter extends BaseConverter
         int cIdx = Integer.valueOf(reader.getAttribute("cIdx"));
         
         Column col = t.getColumn(cIdx);
-        Cell c = t.getCell(t.getRow(rIdx), t.getColumn(cIdx));
+        if (col == null)
+            col = t.addColumn(Access.ByIndex, cIdx);
+        
+        Row row = t.getRow(rIdx);        
+        if (row == null)
+            row = t.addRow(Access.ByIndex, rIdx);
+        
+        Cell c = t.getCell(row, col);
         
         // upon return, we're left at the value tag
         unmarshalTableElement(c, true, reader, context);

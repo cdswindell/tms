@@ -12,12 +12,14 @@ import java.nio.file.Paths;
 
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.ConstraintViolationException;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.api.factories.TableFactory;
 import org.tms.api.io.XMLOptions;
 import org.tms.api.utils.NumericRange;
 import org.tms.tds.TdsUtils;
@@ -36,6 +38,40 @@ public class XMLWriterTest extends BaseArchivalTest
     private static final String ExportTableGold3 = "testExportValidator.xml";
     private static final String ExportTableGold4 = "testExportRow.xml";
     private static final String ExportTableGold5 = "testExportCol.xml";
+    private static final String ExportTableGold6 = "testExportOneCellTable.xml";
+    
+    @Test
+    public final void testExportOneCellTable() throws IOException
+    {
+        /*
+         * Note: If you change this test, be sure to update
+         * the gold standard file ExportTableGold
+         */
+        Path path = Paths.get(qualifiedFileName(ExportTableGold6, "xml"));
+        byte[] gold = Files.readAllBytes(path);  
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+        
+        // create new XML, it should match the gold standard
+        Table t = TableFactory.createTable(1024,  1024); 
+        t.setLabel("Test XML & Export One Cell Table");
+        Row r = t.addRow(Access.ByIndex, 1024);
+        Column c = t.addColumn(Access.ByIndex, 1024);
+        
+        t.setCellValue(r,c,"abc"); 
+        
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        t.export(bos, XMLOptions.Default);
+        bos.close();
+
+        // test byte streams are the same
+        byte [] output =  bos.toByteArray();
+        assertNotNull(output);
+
+        assertThat(gold.length, is(output.length));       
+    }
     
     @Test
     public final void testExportRowXml() throws IOException
