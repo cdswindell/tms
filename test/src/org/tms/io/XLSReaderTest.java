@@ -19,6 +19,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.io.XLSOptions;
+import org.tms.tds.TableImpl;
 
 public class XLSReaderTest extends BaseTest
 {
@@ -33,6 +34,7 @@ public class XLSReaderTest extends BaseTest
     private static final String SAMPLEMulti = "MultiSheet.xlsx";
     private static final String SAMPLEMultiXLS = "MultiSheet.xls";
     private static final String SAMPLEMath = "sampleMath.xlsx";
+    private static final String ExportTableGoldSingleCell = "testExportTableSingleCell.xlsx";
     
     @Test
     public final void testXlsReaderConstructor()
@@ -42,6 +44,34 @@ public class XLSReaderTest extends BaseTest
         assertThat(r.getFileName(), is(SAMPLE1));
         assertThat(r.isRowNames(), is(true));
         assertThat(r.isColumnNames(), is(true));
+    }
+
+    @Test
+    public final void testImportOneCellTable() throws InterruptedException 
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        assertNotNull(tc);
+        assertThat(tc.getNumTables(), is(0));
+        
+        XlsReader r = new XlsReader(qualifiedFileName(ExportTableGoldSingleCell, "xls"), tc, XLSOptions.Default); 
+        assertNotNull(r);
+        
+        try
+        {
+            Table t = r.parseActiveSheet();
+            assertNotNull(t);
+            
+            assertThat(t.getNumRows(), is(1024));
+            assertThat(t.getNumColumns(), is(1024));
+            assertThat(t.getNumCells(), is(1));
+            
+            assertThat(1024, is(((TableImpl)t).getRowsCapacity()));
+            assertThat(1024, is(((TableImpl)t).getColumnsCapacity()));
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
     }
 
     @Test

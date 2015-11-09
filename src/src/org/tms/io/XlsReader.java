@@ -551,20 +551,27 @@ public class XlsReader extends BaseReader<XLSOptions>
                         // use the helper classes AreaRef and CellReference to
                         // decode region reference
                         // Note: we cannot rely on aref.isSingleCell 
-                        AreaReference aref = new AreaReference(regionRef, m_ssV);
-                        CellReference[] cRefs = aref.getAllReferencedCells();
-
-                        if (isSingleCell(cRefs)) {
-                            org.tms.api.Cell tCell = getSingleCell(sheet, cRefs, t);
-                            if (tCell != null) {
-                                tCell.setLabel(name);
-                                m_namedTableElements.put(name, tCell);
+                        // also, AreaReference can not handle non-continuous regions
+                        try {
+                            AreaReference aref = new AreaReference(regionRef, m_ssV);
+                            CellReference[] cRefs = aref.getAllReferencedCells();
+    
+                            if (isSingleCell(cRefs)) {
+                                org.tms.api.Cell tCell = getSingleCell(sheet, cRefs, t);
+                                if (tCell != null) {
+                                    tCell.setLabel(name);
+                                    m_namedTableElements.put(name, tCell);
+                                }
+                            }  
+                            else {
+                                TableElement te = createTableElementFromNamedRegion(sheet, maxRows, maxCols, cRefs, t, name);
+                                if (te != null)
+                                    m_namedTableElements.put(name, te);
                             }
-                        }  
-                        else {
-                            TableElement te = createTableElementFromNamedRegion(sheet, maxRows, maxCols, cRefs, t, name);
-                            if (te != null)
-                                m_namedTableElements.put(name, te);
+                        }
+                        catch (IllegalArgumentException e) {
+                            // ignore areas we can't parse
+                            // TODO: log error
                         }
                     }
                 }

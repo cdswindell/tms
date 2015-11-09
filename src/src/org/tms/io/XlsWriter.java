@@ -135,9 +135,9 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         writer.export();
     }
 
-    private XlsWriter(TableExportAdapter tw, OutputStream out, XLSOptions options)
+    private XlsWriter(TableExportAdapter tea, OutputStream out, XLSOptions options)
     {
-        super(tw, out, options);        
+        super(tea, out, options);        
         m_styleCache = new HashMap<String, CellStyle>();
         m_rowMap = new HashMap<Sheet, Map<TableRowColumnElement, Integer>>();
         m_colMap = new HashMap<Sheet, Map<TableRowColumnElement, Integer>>();
@@ -329,7 +329,8 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         // set active cell
         Row r = sheet.getRow(firstActiveRow);
         Cell activeCell = r.getCell(firstActiveCol);
-        activeCell.setAsActiveCell();        
+        if (activeCell != null)
+            activeCell.setAsActiveCell();        
     }
 
     private void processDerivations(Table t, Workbook wb, Sheet sheet, int maxExcelCol)
