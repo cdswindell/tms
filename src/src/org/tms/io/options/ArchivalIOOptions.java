@@ -38,6 +38,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         Units,
         Tags,
         VerboseState,
+        UUIDs
     }
 
     protected abstract T clone(final ArchivalIOOptions<T> model);
@@ -60,6 +61,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         set(Options.Descriptions, true);
         set(Options.DisplayFormats, true);
         set(Options.Units, true);
+        set(Options.UUIDs, true);
         set(Options.Tags, true);
     }
 
@@ -94,6 +96,29 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
     {
         final T newOptions = clone(this);
         newOptions.set(Options.VerboseState, enabled);
+        return newOptions;
+    }
+    
+    public boolean isUUIDs()
+    {
+        return (Boolean)get(Options.UUIDs);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withUUIDs()
+    {
+        return withUUIDs(true);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withUUIDs(boolean enabled)
+    {
+        final T newOptions = clone(this);
+        newOptions.set(Options.UUIDs, enabled);
         return newOptions;
     }
     

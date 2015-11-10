@@ -473,4 +473,10 @@ public interface Table extends TableElement, InitializableTableProperties
      * @param persistent set to true to make this table survive garbage collections
      */
     void setPersistant(boolean persistent);
+    
+    /**
+     * Returns the unique UUID assigned to this {@link Table}.
+     * @return the unique UUID assigned to this {@code Table}
+     */
+    public String getUUID();
 }

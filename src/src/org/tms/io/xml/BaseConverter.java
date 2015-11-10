@@ -19,6 +19,7 @@ import org.tms.api.utils.Validatable;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.io.TableExportAdapter;
+import org.tms.tds.TableCellsElementImpl;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -45,6 +46,7 @@ abstract public class BaseConverter implements Converter
     static final public String UNITS_TAG = "units";
     static final public String FORMAT_TAG = "format";
     static final public String DATATYPE_TAG = "dataType";
+    static final public String UUID_TAG = "uuid";
     
     static final protected String INDEX_ATTR = "index";
     static final protected String READONLY_ATTR = "readOnly";
@@ -295,6 +297,9 @@ abstract public class BaseConverter implements Converter
                 writer.endNode();
             }
         }
+        
+        if (options().isUUIDs())
+            writeNode(te, TableProperty.UUID, UUID_TAG, writer, context);
     }        
 
     protected void marshalClassSpecificElements(TableElement te, HierarchicalStreamWriter writer, MarshallingContext context)
@@ -387,6 +392,14 @@ abstract public class BaseConverter implements Converter
                         
                         if (o != null)
                             v.setValidator((TableCellValidator)o);
+                    }
+                    break;
+                    
+                case UUID_TAG:
+                    if (options().isUUIDs()) {
+                        strVal = (String)context.convertAnother(t, String.class);
+                        if (t instanceof TableCellsElementImpl) 
+                            ((TableCellsElementImpl)t).setUUID(strVal);
                     }
                     break;
                     

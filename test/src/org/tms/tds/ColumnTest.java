@@ -370,5 +370,13 @@ public class ColumnTest
         c = t.getColumn(Access.ByDataType, DbmsTableImpl.class, false);
         assertThat(c, notNullValue());
         assertThat(3, is(c.getIndex()));
+        
+        // test UUID
+        String uuid = c.getUUID();
+        assertThat(uuid, notNullValue());
+        
+        Column cPrime = t.getColumn(Access.ByUUID, uuid);
+        assertThat(cPrime, notNullValue());
+        assertThat(cPrime, is(c));       
     }
 }

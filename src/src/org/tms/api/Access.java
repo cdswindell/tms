@@ -38,6 +38,8 @@ public enum Access
     ByDescription,
     /** The {@code TableElement} with the specified {@link TableProperty} value*/
     ByProperty,
-    /** The {@code TableElement} with the specified {@link TableProperty} value*/
+    /** The {@code TableElement} with the specified Data Type (Class) value*/
     ByDataType, /* Column-only*/
+    /** The {@code TableElement} with the specified UUID value*/
+    ByUUID, 
 }

@@ -25,7 +25,7 @@ import org.tms.tds.events.TableElementListeners;
  * This is the abstract superclass for all table elements that contain cells, 
  * including TableImpl, RowImpl, ColumnImpl, and SubsetImpl. 
  */
-abstract class TableCellsElementImpl extends TableElementImpl 
+public abstract class TableCellsElementImpl extends TableElementImpl 
 {
     abstract public int getNumCells();
     
@@ -50,6 +50,11 @@ abstract class TableCellsElementImpl extends TableElementImpl
     /*
      * Field getters and setters
      */    
+    public void setUUID(String strVal)
+    {
+        if (m_guid == null)
+            m_guid = UUID.fromString(strVal);
+    }
     
     public String getUUID()
     {
@@ -114,7 +119,12 @@ abstract class TableCellsElementImpl extends TableElementImpl
                 return getTags();
                 
             case UUID:
-                return getUUID();
+            {   
+                if (m_guid == null)
+                    return null;
+                else
+                    return getUUID();
+            }
                 
             default:
                 return super.getProperty(key);

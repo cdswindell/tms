@@ -1202,6 +1202,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                             String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));
                 return (SubsetImpl)find(ElementType.Subset, m_subsets, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
                 
+            case ByUUID:
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));
+                return (SubsetImpl)find(ElementType.Subset, m_subsets, TableProperty.UUID, md);
+                
             case ByProperty:
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;
                 Object value = mda != null && mda.length > 1 ? mda[1] : null;
@@ -2057,6 +2064,20 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                 
                 // indexes are 1-based; element arrays are 0-based
                 TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Description, md);
+                if (target != null) 
+                    return target.getIndex() - 1;
+                break;
+            }
+            
+            case ByUUID:
+            {
+                Object md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (isAdding || md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
+                
+                // indexes are 1-based; element arrays are 0-based
+                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.UUID, md);
                 if (target != null) 
                     return target.getIndex() - 1;
                 break;

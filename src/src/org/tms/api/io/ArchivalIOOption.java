@@ -132,4 +132,8 @@ public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends IOOptio
     public boolean isDisplayFormats();
     public T withDisplayFormats();
     public T withDisplayFormats(boolean enabled);
+    
+    public boolean isUUIDs();
+    public T withUUIDs();
+    public T withUUIDs(boolean enabled);
 }

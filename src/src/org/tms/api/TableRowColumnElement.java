@@ -21,6 +21,7 @@ public interface TableRowColumnElement extends TableElement, Derivable, Validata
      * @return The 1-based ordinal index of this Row/Column
      */
     public int getIndex();
+    public String getUUID();
     
     public void fill(Object o, int n, Access access, Object... mda);
     public void fill(Object[] o, Access access, Object... mda);
