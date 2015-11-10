@@ -10,9 +10,11 @@ import org.tms.io.xml.ColumnConverter;
 import org.tms.io.xml.DbmsTableConverter;
 import org.tms.io.xml.RowConverter;
 import org.tms.io.xml.SubsetConverter;
+import org.tms.io.xml.TableContextConverter;
 import org.tms.io.xml.TableConverter;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
+import org.tms.tds.ContextImpl;
 import org.tms.tds.RowImpl;
 import org.tms.tds.SubsetImpl;
 import org.tms.tds.TableImpl;
@@ -37,6 +39,7 @@ abstract public class ArchivalReader<T extends ArchivalIOOptions<T>> extends Bas
         XStream xmlStreamer = new XStream();
         xmlStreamer = new XStream();
             
+        xmlStreamer.alias(TableContextConverter.ELEMENT_TAG, ContextImpl.class);
         xmlStreamer.alias(DbmsTableConverter.ELEMENT_TAG, DbmsTableImpl.class);
         xmlStreamer.alias(TableConverter.ELEMENT_TAG, TableImpl.class);
         xmlStreamer.alias(RowConverter.ELEMENT_TAG, RowImpl.class);
@@ -44,6 +47,7 @@ abstract public class ArchivalReader<T extends ArchivalIOOptions<T>> extends Bas
         xmlStreamer.alias(SubsetConverter.ELEMENT_TAG, SubsetImpl.class);
         xmlStreamer.alias(CellConverter.ELEMENT_TAG, CellImpl.class);
             
+        xmlStreamer.registerConverter(new TableContextConverter(reader));
         xmlStreamer.registerConverter(new DbmsTableConverter(reader));
         xmlStreamer.registerConverter(new TableConverter(reader));
         xmlStreamer.registerConverter(new RowConverter(reader));

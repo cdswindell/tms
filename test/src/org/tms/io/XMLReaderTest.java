@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
@@ -34,6 +35,7 @@ public class XMLReaderTest extends BaseArchivalTest
     private static final String ExportTableGold4 = "testExportRow.xml";
     private static final String ExportTableGold5 = "testExportCol.xml";
     private static final String ExportTableGold6 = "testExportOneCellTable.xml";
+    private static final String ExportTableGoldTC = "testExportTableContext.xml";
     
     @Test
     public final void testCSVReaderConstructor()
@@ -45,6 +47,29 @@ public class XMLReaderTest extends BaseArchivalTest
         assertThat(r.isColumnNames(), is(true));
     }
 
+    @Test
+    public final void testImportTableContext() 
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        assertNotNull(tc);
+        assertThat(0, is(tc.getNumTables()));
+        
+        try
+        {
+            tc.importTables(qualifiedFileName(ExportTableGoldTC, "xml"));
+            assertThat(3, is(tc.getNumTables()));
+            
+            Table t3 = tc.getTable(Access.ByLabel, "Almost Empty Table");
+            assertNotNull(t3);
+            assertThat(10, is(t3.getNumRows()));
+            assertThat(2, is(t3.getNumColumns()));
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
+    }
+    
     @Test
     public final void testParseOneCellTable() 
     {

@@ -37,5 +37,11 @@ public class XMLReader extends ArchivalReader<XMLOptions>
     {
         XStream xs = super.getXStream(this);
         return (Table)xs.fromXML(getInputStream());
+    }
+
+    public void parseTableContext()
+    {
+        XStream xs = super.getXStream(this);
+        xs.fromXML(getInputStream());
     } 
 }

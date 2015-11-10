@@ -69,6 +69,33 @@ public class TableContextConverter extends BaseConverter
     @Override
     public TableContext unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
-        return null;
-    }        
+        TableContext tc = getTableContext();
+               
+        reader.moveDown();
+        processChildren(tc, TableImpl.class, reader, context);
+        reader.moveUp();
+        
+        return tc;
+    }     
+    
+    private String processChildren(TableContext tc, Class<?> clazz, HierarchicalStreamReader reader, UnmarshallingContext context)
+    {
+        String nodeName = reader.getNodeName();
+        while (reader.hasMoreChildren()) {
+            reader.moveDown();
+            context.convertAnother(tc, clazz);  
+            reader.moveUp();
+        }
+        
+        // we're done with tables, so move out of the "columns" tag
+        reader.moveUp();
+        
+        // set up to process remaining elements (subsets, cells)
+        if (reader.hasMoreChildren()) {
+            reader.moveDown();            
+            nodeName = reader.getNodeName();
+        }
+        
+        return nodeName;
+    }
 }

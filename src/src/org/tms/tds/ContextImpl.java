@@ -36,9 +36,11 @@ import org.tms.api.factories.TableFactory;
 import org.tms.api.io.IOOption;
 import org.tms.api.io.TMSOptions;
 import org.tms.api.io.XLSOptions;
+import org.tms.api.io.XMLOptions;
 import org.tms.io.TMSReader;
 import org.tms.io.TableContextExportAdapter;
 import org.tms.io.TableExportAdapter;
+import org.tms.io.XMLReader;
 import org.tms.io.XlsReader;
 import org.tms.tds.events.EventProcessorExecutor;
 import org.tms.tds.events.EventProcessorThreadPool;
@@ -1199,6 +1201,13 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
                 case TMS:
                 {
                     TMSReader reader = new TMSReader(fileName, this, (TMSOptions)format);
+                    reader.parseTableContext();
+                }
+                break;
+                                       
+                case XML:
+                {
+                    XMLReader reader = new XMLReader(fileName, this, (XMLOptions)format);
                     reader.parseTableContext();
                 }
                 break;
