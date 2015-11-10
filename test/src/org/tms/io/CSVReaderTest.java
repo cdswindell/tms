@@ -9,15 +9,13 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.tms.BaseTest;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.exceptions.TableIOException;
-import org.tms.api.factories.TableFactory;
 import org.tms.api.io.CSVOptions;
 
-public class CSVReaderTest extends BaseTest
+public class CSVReaderTest extends BaseIOTest
 {
     private static final String SAMPLE1 = "sample1.csv";
     private static final String SAMPLE2 = "sample2.csv";
@@ -295,7 +293,7 @@ public class CSVReaderTest extends BaseTest
     {
         try
         {
-            Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true); 
+            Table t = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true); 
             assertNotNull(t);
             
             assertThat(t.getNumRows(), is(4));

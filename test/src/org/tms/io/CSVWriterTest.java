@@ -9,15 +9,13 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.factories.TableFactory;
 import org.tms.api.io.CSVOptions;
 
-public class CSVWriterTest extends BaseTest
+public class CSVWriterTest extends BaseIOTest
 {
     private static final String SAMPLE1 = "sample1.csv";
     private static final String SAMPLE2 = "sample2.csv";
@@ -26,7 +24,7 @@ public class CSVWriterTest extends BaseTest
     @Test
     public final void testExportSample1() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport", ".csv");
@@ -35,7 +33,7 @@ public class CSVWriterTest extends BaseTest
         t.export(tmpFile.getPath());
         
         // now reimport it
-        Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        Table t2 = importCVSFile(tmpFile.getPath(), true, true);
         tmpFile.delete();
         
         assertNotNull(t2);        
@@ -60,7 +58,7 @@ public class CSVWriterTest extends BaseTest
             }
         }
         
-        t = TableFactory.importCSV(qualifiedFileName(SAMPLE2, "csv"), true, true);
+        t = importCVSFile(qualifiedFileName(SAMPLE2, "csv"), true, true);
         assertNotNull(t);
         
         tmpFile = File.createTempFile("testExport2", ".csv");
@@ -69,7 +67,7 @@ public class CSVWriterTest extends BaseTest
         t.export(tmpFile.getPath());
         
         // now reimport it
-        t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        t2 = importCVSFile(tmpFile.getPath(), true, true);
         tmpFile.delete();
         
         assertNotNull(t2);        
@@ -98,7 +96,7 @@ public class CSVWriterTest extends BaseTest
     @Test
     public final void testExportSample2() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE2, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE2, "csv"), true, true);
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport2", ".csv");
@@ -107,7 +105,7 @@ public class CSVWriterTest extends BaseTest
         t.export(tmpFile.getPath());
         
         // now reimport it
-        Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        Table t2 = importCVSFile(tmpFile.getPath(), true, true);
         tmpFile.delete();
         
         assertNotNull(t2);        
@@ -136,7 +134,7 @@ public class CSVWriterTest extends BaseTest
     @Test
     public final void testExportIgnoreEmptyCols() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE3, "csv"), true, true);
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport3", ".csv");
@@ -145,7 +143,7 @@ public class CSVWriterTest extends BaseTest
         t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyColumns());
         
         // now reimport it
-        Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        Table t2 = importCVSFile(tmpFile.getPath(), true, true);
         tmpFile.delete();
         
         assertNotNull(t2);        
@@ -180,7 +178,7 @@ public class CSVWriterTest extends BaseTest
     @Test
     public final void testExportIgnoreEmptyRows() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE3, "csv"), true, true);
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport4", ".csv");
@@ -189,7 +187,7 @@ public class CSVWriterTest extends BaseTest
         t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyRows());
         
         // now reimport it
-        Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        Table t2 = importCVSFile(tmpFile.getPath(), true, true);
         tmpFile.delete();
         
         assertNotNull(t2);        
@@ -225,7 +223,7 @@ public class CSVWriterTest extends BaseTest
     @Test
     public final void testExportIgnoreEmptyRowsAndCols() throws IOException
     {
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE3, "csv"), true, true);
         assertNotNull(t);
         
         File tmpFile = File.createTempFile("testExport5", ".csv");
@@ -234,7 +232,7 @@ public class CSVWriterTest extends BaseTest
         t.export(tmpFile.getPath(), CSVOptions.Default.withIgnoreEmptyRows().withIgnoreEmptyColumns());
         
         // now reimport it
-        Table t2 = TableFactory.importCSV(tmpFile.getPath(), true, true);
+        Table t2 = importCVSFile(tmpFile.getPath(), true, true);
         tmpFile.delete();
         
         assertNotNull(t2);        
@@ -278,7 +276,7 @@ public class CSVWriterTest extends BaseTest
                           "Yellow Row,,Yellow,true\r\n" +
                           "Cyan Row,,Cyan,false\r\n";
         
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE3, "csv"), true, true);
         assertNotNull(t);
         
         // export the file, ignoring empty rows and columns    
@@ -301,7 +299,7 @@ public class CSVWriterTest extends BaseTest
                           "Yellow Row,,Yellow,true\r\n" +
                           "Cyan Row,,Cyan,false\r\n";
         
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE3, "csv"), true, true);
         assertNotNull(t);
         
         // export the file, ignoring empty rows and columns    
@@ -325,7 +323,7 @@ public class CSVWriterTest extends BaseTest
                 "\"\",Yellow,true\r\n" +
                 "\"\",Cyan,false\r\n";
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE3, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE3, "csv"), true, true);
         assertNotNull(t);
         
         // export the file, ignoring empty rows and columns    

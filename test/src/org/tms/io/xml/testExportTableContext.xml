@@ -1,0 +1,112 @@
+<tableContext>
+  <tables>
+    <table rCap="10" cCap="2" readOnly="false" allowNulls="true" enforce="false">
+      <label>Almost Empty Table</label>
+      <rows/>
+      <columns>
+        <column index="1">
+          <derivation>rowIndex</derivation>
+        </column>
+        <column index="2">
+          <derivation>col 1 * col 1</derivation>
+        </column>
+      </columns>
+      <cells>
+        <cell rIdx="1" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>1.0</value>
+        </cell>
+        <cell rIdx="2" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>2.0</value>
+        </cell>
+        <cell rIdx="3" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>3.0</value>
+        </cell>
+        <cell rIdx="4" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>4.0</value>
+        </cell>
+        <cell rIdx="5" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>5.0</value>
+        </cell>
+        <cell rIdx="6" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>6.0</value>
+        </cell>
+        <cell rIdx="7" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>7.0</value>
+        </cell>
+        <cell rIdx="8" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>8.0</value>
+        </cell>
+        <cell rIdx="9" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>9.0</value>
+        </cell>
+        <cell rIdx="10" cIdx="1">
+          <dataType>java.lang.Double</dataType>
+          <value>10.0</value>
+        </cell>
+        <cell rIdx="1" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>1.0</value>
+        </cell>
+        <cell rIdx="2" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>4.0</value>
+        </cell>
+        <cell rIdx="3" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>9.0</value>
+        </cell>
+        <cell rIdx="4" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>16.0</value>
+        </cell>
+        <cell rIdx="5" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>25.0</value>
+        </cell>
+        <cell rIdx="6" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>36.0</value>
+        </cell>
+        <cell rIdx="7" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>49.0</value>
+        </cell>
+        <cell rIdx="8" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>64.0</value>
+        </cell>
+        <cell rIdx="9" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>81.0</value>
+        </cell>
+        <cell rIdx="10" cIdx="2">
+          <dataType>java.lang.Double</dataType>
+          <value>100.0</value>
+        </cell>
+      </cells>
+    </table>
+    <table rCap="0" cCap="0" readOnly="false" allowNulls="true" enforce="false">
+      <label>Empty Table</label>
+    </table>
+    <table rCap="1024" cCap="1024" readOnly="false" allowNulls="true" enforce="false">
+      <label>Test XML &amp; Export One Cell Table</label>
+      <rows/>
+      <columns/>
+      <cells>
+        <cell rIdx="1024" cIdx="1024">
+          <dataType>java.lang.String</dataType>
+          <value>abc</value>
+        </cell>
+      </cells>
+    </table>
+  </tables>
+</tableContext>

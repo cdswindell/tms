@@ -17,6 +17,7 @@ import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.io.IOOption;
 
 public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
@@ -42,15 +43,10 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     
     protected BaseWriter(TableExportAdapter tw, OutputStream out, E options)
     {
-        m_tableExportAdapter = tw;
         m_outStream = out;
         m_baseOptions = options;
         
-        m_nRows = tw.getNumRows();
-        m_nConsumableRows = -1; // to be initialized later
-        
-        m_nCols = tw.getNumColumns();
-        m_nConsumableColumns = -1; // to be initialized later
+        reset(tw);
     }
 
     protected BaseWriter(TableExportAdapter tw, File f, E options) 
@@ -59,6 +55,24 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         this(tw, new FileOutputStream(f), options);
     }
 
+    protected void reset(TableExportAdapter tw)
+    {
+        m_tableExportAdapter = tw;
+        
+        m_nRows = tw.getNumRows();
+        m_nConsumableRows = -1; // to be initialized later
+        m_ignoredRows = null;
+        m_activeRows = null;
+        m_rowIndexMap = null;
+        m_effRowIndexMap = null;
+        
+        m_nCols = tw.getNumColumns();
+        m_nConsumableColumns = -1; // to be initialized later
+        m_ignoredColumns = null;
+        m_activeCols = null;
+        m_colIndexMap = null;
+    }
+    
     public OutputStream getOutputStream()
     {
         return m_outStream;
@@ -77,6 +91,11 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_tableExportAdapter.getTable();
     }
     
+    protected TableContext getTableContext()
+    {
+        return m_tableExportAdapter.getTableContext();
+    }
+
     public ElementType getTableElementType()
     {
         return m_tableExportAdapter.getTableElementType();
@@ -356,4 +375,9 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
 		
 		return m_effRowIndexMap.get(i);
 	}
+
+    public BaseWriter<?> createDelegate(TableExportAdapter tea)
+    {
+        return this;
+    }
 }

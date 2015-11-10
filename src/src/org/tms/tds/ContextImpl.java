@@ -1,8 +1,13 @@
 package org.tms.tds;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -24,7 +29,17 @@ import org.tms.api.derivables.TokenMapper;
 import org.tms.api.events.TableElementEvent;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
+import org.tms.api.exceptions.TableIOException;
+import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.api.factories.TableFactory;
+import org.tms.api.io.IOOption;
+import org.tms.api.io.TMSOptions;
+import org.tms.api.io.XLSOptions;
+import org.tms.io.TMSReader;
+import org.tms.io.TableContextExportAdapter;
+import org.tms.io.TableExportAdapter;
+import org.tms.io.XlsReader;
 import org.tms.tds.events.EventProcessorExecutor;
 import org.tms.tds.events.EventProcessorThreadPool;
 import org.tms.tds.events.EventsProcessorThreadPoolCreator;
@@ -1052,6 +1067,18 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         return allTables;
     }
 
+    public List<TableImpl> getTables()
+    {
+        List<TableImpl> tables = new ArrayList<TableImpl>(allTables());
+        Collections.sort(tables, (TableImpl t1, TableImpl t2) -> { String s1 = t1.getLabel(); 
+                                                                   if (s1 == null) s1 = ""; 
+                                                                   String s2 = t2.getLabel();
+                                                                   if (s2 == null) s2 = "";
+                                                                   return s1.compareTo(s2);});
+        
+        return Collections.unmodifiableList(tables);
+    }
+
     Tag fetchTag(String tag)
     {
         return fetchTag(tag, true);
@@ -1079,7 +1106,121 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         else
             return null;
     }
-    
+        
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void export(String fileName) throws IOException
+    {
+        IOOption<?> format = TableExportAdapter.generateOptionsFromFileExtension(fileName);
+        if (format == null)
+            throw new UnimplementedException("No support for file format:" + fileName + " (TableContext)");                    
+
+        export(fileName, format);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void export(String fileName, IOOption<?> format) throws IOException
+    {
+       switch (format.getFileFormat()) {
+           case TMS:
+           case XML:
+           case EXCEL:
+           {
+               TableContextExportAdapter tcea = new TableContextExportAdapter(this, fileName, format);
+               tcea.export();
+            }
+           break;
+                                  
+           default:
+               throw new UnimplementedException("No support for file format:" + format.getFileFormat() + " (TableContext)");                    
+       }        
+    }
+
+    @Override
+    public void export(OutputStream out, IOOption<?> format) throws IOException
+    {
+       switch (format.getFileFormat()) {
+           case TMS:
+           case XML:
+           case EXCEL:
+           {
+               TableContextExportAdapter tcea = new TableContextExportAdapter(this, out, format);
+               tcea.export();
+            }
+           break;
+                                  
+           default:
+               throw new UnimplementedException("No support for file format:" + format.getFileFormat() + " (TableContext)");                    
+       }        
+    }
+
+    @Override
+    public Table importTable(String fileName)
+    {
+        IOOption<?> format = TableExportAdapter.generateOptionsFromFileExtension(fileName);
+        if (format == null)
+            format = TMSOptions.Default;
+        
+        return TableFactory.importFile(fileName, this, format);
+    }
+
+    @Override
+    public Table importTable(String fileName, IOOption<?> format)
+    {
+        return TableFactory.importFile(fileName, this, format);
+    }
+
+    @Override
+    public void importTables(String fileName)
+    {
+        IOOption<?> format = TableExportAdapter.generateOptionsFromFileExtension(fileName);
+        if (format == null)
+            format = TMSOptions.Default;
+        
+        importTables(fileName, format);
+    }
+
+    @Override
+    public void importTables(String fileName, IOOption<?> format)
+    {
+        if (format == null)
+            throw new IllegalArgumentException("Format required");
+        
+        if (!format.canImport())
+            throw new IllegalArgumentException("Format does not support import");
+        
+        try {
+            switch (format.getFileFormat()) {
+                case TMS:
+                {
+                    TMSReader reader = new TMSReader(fileName, this, (TMSOptions)format);
+                    reader.parseTableContext();
+                }
+                break;
+                                       
+                case EXCEL:
+                {
+                    XlsReader reader = new XlsReader(fileName, this, (XLSOptions)format);
+                    reader.parseWorkbook();
+                }
+                break;
+                    
+                default:
+                    TableFactory.importFile(fileName, this, format);
+                    break;
+            } 
+        }
+        catch (IOException e)
+        {
+            throw new TableIOException(e);
+        }
+    }
+
     /*
      * For unit tests only!!
      */

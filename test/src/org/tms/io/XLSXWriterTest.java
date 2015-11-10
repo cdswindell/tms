@@ -26,7 +26,6 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
-import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
@@ -38,7 +37,7 @@ import org.tms.api.factories.TableFactory;
 import org.tms.api.io.XLSOptions;
 import org.tms.tds.TableImpl;
 
-public class XLSXWriterTest extends BaseTest
+public class XLSXWriterTest extends BaseIOTest
 {
     private static final String SAMPLE1 = "sample1.csv";
     private static final String ExportTableGold = "testExportTable.xlsx";
@@ -88,7 +87,7 @@ public class XLSXWriterTest extends BaseTest
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
 
-        assertThat(gold.length, is(output.length));       
+        assertThat(this.closeTo(gold.length, output.length, 10), is(true));
     }
     
     @Test
@@ -104,7 +103,7 @@ public class XLSXWriterTest extends BaseTest
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         t.setLabel("Test Table");
         

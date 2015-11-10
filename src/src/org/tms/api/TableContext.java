@@ -1,5 +1,7 @@
 package org.tms.api;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -9,6 +11,7 @@ import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.api.io.IOOption;
 import org.tms.tds.events.EventProcessorThreadPool;
 
 /**
@@ -216,4 +219,14 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      * existing derivations.
      */
     public void deregisterAllOperators();   
+    
+    public void export(String fileName) throws IOException;
+    public void export(String fileName, IOOption<?>format) throws IOException;
+    public void export(OutputStream out, IOOption<?>format) throws IOException;
+    
+    public Table importTable(String fileName);
+    public Table importTable(String fileName, IOOption<?>format);
+
+    public void importTables(String fileName);
+    public void importTables(String fileName, IOOption<?>format);
 }

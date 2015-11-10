@@ -18,6 +18,7 @@ import org.tms.api.utils.TableCellValidator;
 import org.tms.api.utils.Validatable;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
+import org.tms.io.TableExportAdapter;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -72,8 +73,18 @@ abstract public class BaseConverter implements Converter
     }
 
     /*
-     * XML Export Only
+     * Export Only
      */
+    protected void popExportAdapter()
+    {
+    }
+
+    protected void pushExportAdapter(Table t)
+    {
+        TableExportAdapter tea = new TableExportAdapter(t, options());        
+        m_writer.createDelegate(tea);
+    }
+
     protected int getNumConsumableColumns()
     {
         return m_writer.getNumConsumableColumns();

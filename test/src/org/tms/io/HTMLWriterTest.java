@@ -11,16 +11,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Test;
-import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
-import org.tms.api.factories.TableFactory;
 import org.tms.api.io.HTMLOptions;
 
-public class HTMLWriterTest extends BaseTest
+public class HTMLWriterTest extends BaseIOTest
 {
     private static final String SAMPLE1 = "sample1.csv";
     private static final String ExportTableGold = "testExportTable.html";
@@ -41,7 +39,7 @@ public class HTMLWriterTest extends BaseTest
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
 
         // create output stream
@@ -81,7 +79,7 @@ public class HTMLWriterTest extends BaseTest
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
 
         Subset s = t.addSubset(Access.ByLabel, "CDS");
@@ -111,7 +109,7 @@ public class HTMLWriterTest extends BaseTest
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
 
         Row r = t.getRow(2);
@@ -140,7 +138,7 @@ public class HTMLWriterTest extends BaseTest
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
 
         Column c = t.getColumn(1);

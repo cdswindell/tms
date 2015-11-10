@@ -14,9 +14,12 @@ import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.CSVOptions;
 import org.tms.api.io.IOOption;
+import org.tms.api.io.TMSOptions;
 import org.tms.api.io.XLSOptions;
 import org.tms.api.io.XMLOptions;
 import org.tms.io.CSVReader;
+import org.tms.io.TMSReader;
+import org.tms.io.TableExportAdapter;
 import org.tms.io.XMLReader;
 import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
@@ -223,14 +226,14 @@ public final class TableFactory
     /*
      * Import Operations
      */    
-    static public Table importCSV(String csvFileName, boolean hasRowNames, boolean hasColumnHeaders)
+    static public Table importFile(String fileName)
     {
-        return importFile(csvFileName, ContextImpl.fetchDefaultContext(), CSVOptions.Default.withRowLabels(hasRowNames).withColumnLabels(hasColumnHeaders));
-    }
-    
-    static public Table importCSV(String csvFileName, CSVOptions format)
-    {
-        return importFile(csvFileName, ContextImpl.fetchDefaultContext(), format);
+        TableContext tc = ContextImpl.fetchDefaultContext();
+        IOOption<?> format = TableExportAdapter.generateOptionsFromFileExtension(fileName);
+        if (format == null)
+            format = TMSOptions.Default;
+        
+        return importFile(fileName, tc, format);
     }
     
     static public Table importFile(String fileName, IOOption<?> format)
@@ -242,7 +245,7 @@ public final class TableFactory
     static public Table importFile(String fileName, TableContext tc, IOOption<?> format)
     {
         if (format == null)
-            throw new IllegalArgumentException("Format argument cannot be null");
+            throw new IllegalArgumentException("Format required");
         
         if (!format.canImport())
             throw new IllegalArgumentException("Format does not support import");
@@ -269,6 +272,11 @@ public final class TableFactory
                 }
                     
                 case TMS:
+                {
+                    TMSReader r = new TMSReader(fileName, tc, (TMSOptions)format);
+                    return r.parse();
+                }
+                    
                 case JSON:
                 {
                     return null;
@@ -287,7 +295,7 @@ public final class TableFactory
     static public Table importFile(InputStream in, TableContext tc, IOOption<?> format)
     {
         if (format == null)
-            throw new IllegalArgumentException("Format argument cannot be null");
+            throw new IllegalArgumentException("Format required");
         
         if (!format.canImport())
             throw new IllegalArgumentException("Format does not support import");
@@ -314,6 +322,11 @@ public final class TableFactory
                 }
                     
                 case TMS:
+                {
+                    TMSReader r = new TMSReader(in, tc, (TMSOptions)format);
+                    return r.parse();
+                }
+                    
                 case JSON:
                 {
                     return null;

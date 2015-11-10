@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.tms.api.ElementType;
 import org.tms.api.io.TMSOptions;
 import org.tms.api.utils.ApiVersion;
 
@@ -26,7 +27,20 @@ public class TMSWriter extends ArchivalWriter<TMSOptions>
         export(tableExportAdapter, new FileOutputStream(file), options);
     }
 
-    public TMSWriter(TableExportAdapter tw, OutputStream out, TMSOptions options)
+
+    public static void exportTableContext(TableContextExportAdapter tcea, OutputStream out, TMSOptions options) 
+    throws IOException
+    {
+        TMSWriter tw = new TMSWriter(tcea, out, options);
+        tw.exportTableContext();       
+    }   
+    
+    TMSWriter(TableExportAdapter tw, TMSOptions options)
+    {
+        super(tw, null, options);
+    }
+
+    private TMSWriter(TableExportAdapter tw, OutputStream out, TMSOptions options)
     {
         super(tw, out, options);
     }
@@ -34,19 +48,29 @@ public class TMSWriter extends ArchivalWriter<TMSOptions>
     @Override
     protected void export() throws IOException
     {
-        writeHeader();
+        writeHeader(ElementType.Table);
         XStream xs = getXStream(this);
         GZIPOutputStream gz = new GZIPOutputStream(getOutputStream());
         xs.toXML(getTable(), gz);
         gz.finish();
     }
 
-    private void writeHeader() throws IOException
+    private void exportTableContext() throws IOException
+    {
+        writeHeader(ElementType.TableContext);
+        XStream xs = getXStream(this);
+        GZIPOutputStream gz = new GZIPOutputStream(getOutputStream());
+        xs.toXML(getTableContext(), gz);
+        gz.finish();
+    }
+
+    private void writeHeader(ElementType et) throws IOException
     {
         OutputStream out = getOutputStream();
+        String eType = et == ElementType.Table ? "TB" : et == ElementType.TableContext ? "TC" : null;
         
-        String head = "TMSTB[" + ApiVersion.CURRENT_VERSION.toFullVersionString() + "]";
+        String head = "TMS" + eType + "[" + ApiVersion.CURRENT_VERSION.toFullVersionString() + "]";
         out.write(head.getBytes());
         out.flush();
-    }   
+    }
 }

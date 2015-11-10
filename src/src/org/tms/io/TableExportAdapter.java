@@ -12,6 +12,7 @@ import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.IOOption;
 import org.tms.api.io.CSVOptions;
@@ -26,6 +27,11 @@ import org.tms.io.options.TitledPageIOOptions;
 
 public class TableExportAdapter
 {
+    public static IOOption<?> generateOptionsFromFileExtension(String fileName)
+    {
+        return generateOptionsFromFileExtension(new File(fileName));
+    }
+    
     public static IOOption<?> generateOptionsFromFileExtension(File file)
     {
         if (sf_FileFormatMap.isEmpty()) {
@@ -88,16 +94,32 @@ public class TableExportAdapter
     private boolean m_isFileBased;
     private List<Row> m_cachedRows;
     
-    public TableExportAdapter(Table t, String fileName, IOOption<?> options) 
-    throws IOException
+    public TableExportAdapter(Table t, IOOption<?> options) 
     {
         if (t == null)
             throw new IllegalArgumentException("Table required");
         
+        m_table = t;
+    }
+        
+    public TableExportAdapter(Table t, String fileName, IOOption<?> options) 
+    throws IOException
+    {
+        this(fileName, options);
+        
+        if (t == null)
+            throw new IllegalArgumentException("Table required");
+        
+        m_table = t;
+        m_options = options;
+    }
+        
+    protected TableExportAdapter(String fileName, IOOption<?> options) 
+    throws IOException
+    {
         if (fileName == null || (fileName = fileName.trim()).length() <= 0)
             throw new IllegalArgumentException("File name required");
         
-        m_table = t;
         m_file = new File(fileName);
         
         // check if file can be written
@@ -125,13 +147,34 @@ public class TableExportAdapter
     public TableExportAdapter(Table t, OutputStream out, IOOption<?> options) 
     throws IOException
     {
+        this(out, options);
+        m_table = t;
+    }
+    
+    protected TableExportAdapter(OutputStream out, IOOption<?> options) 
+    throws IOException
+    {        
         if (options == null)
             throw new UnimplementedException("Options required");
         
-        m_table = t;
         m_output = out;
         m_options = options;
         m_isFileBased = false;
+    }
+    
+    protected OutputStream getOutputStream()
+    {
+        return m_output;
+    }
+    
+    protected boolean isFileBased()
+    {
+        return m_isFileBased;
+    }
+    
+    protected IOOption<?> options()
+    {
+        return m_options;
     }
     
     public ElementType getTableElementType()
@@ -225,6 +268,11 @@ public class TableExportAdapter
         return m_table;
     }
 
+    public TableContext getTableContext()
+    {
+        return m_table.getTableContext();
+    }
+    
     public Row getRow(int rowIndex)
     {
         List<Row> rows = getRows();
@@ -232,5 +280,10 @@ public class TableExportAdapter
             return rows.get(rowIndex - 1);
         else
             return null;
+    }
+
+    public BaseWriter<?> createProxy()
+    {
+        return null;
     }
 }

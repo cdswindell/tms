@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
+import org.tms.api.ElementType;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
@@ -43,12 +44,23 @@ public class TMSReader extends ArchivalReader<TMSOptions>
 
     public Table parse() throws IOException
     {
-        readHeader();
-        XStream xs = super.getXStream(this);
+        ElementType eType = readHeader();
+        if (eType == ElementType.TableContext)
+            throw new TableIOException("Table file required; TableContext file was found.");
+        
+        XStream xs = super.getXStream(this);        
         return (Table)xs.fromXML(new GZIPInputStream(getInputStream()));
     }
 
-    private void readHeader() throws IOException
+
+    public void parseTableContext() throws IOException
+    {
+        readHeader();
+        XStream xs = super.getXStream(this);
+        xs.fromXML(new GZIPInputStream(getInputStream()));       
+    } 
+    
+    private ElementType readHeader() throws IOException
     {
         InputStream in = getInputStream();
         if (in == null || in.available() < 32)
@@ -62,7 +74,8 @@ public class TMSReader extends ArchivalReader<TMSOptions>
             throw new TableIOException("Invalid File Format");
         
         String teStr = new String( new byte[] {head[3], head[4]});
-        if (!isValidTableElement(teStr))
+        ElementType eType = parseElementType(teStr);
+        if (eType == null)
             throw new TableIOException("Invalid File Format: " + teStr);
 
         String verStr = "";
@@ -81,10 +94,18 @@ public class TMSReader extends ArchivalReader<TMSOptions>
         ApiVersion ver = ApiVersion.parse(verStr);
         if (ver == null || ver.isUnknown())
         	throw new TableIOException("Invalid File Format: No Version");
+        
+        return eType;
     }
 
-    private boolean isValidTableElement(String teStr)
+    private ElementType parseElementType(String teStr)
     {
-        return teStr != null && (teStr.equalsIgnoreCase("TC") || teStr.equalsIgnoreCase("TB"));
-    } 
+        if ("TC".equalsIgnoreCase(teStr))
+            return ElementType.TableContext;
+        
+        if ("TB".equalsIgnoreCase(teStr))
+            return ElementType.Table;
+        
+        return null;
+    }
 }

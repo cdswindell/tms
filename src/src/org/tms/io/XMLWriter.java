@@ -16,9 +16,20 @@ public class XMLWriter extends ArchivalWriter<XMLOptions>
         writer.export();        
     }
     
+    public static void exportTableContext(TableContextExportAdapter tea, OutputStream out, XMLOptions options)
+    {
+        XMLWriter writer = new XMLWriter(tea, out, options);
+        writer.exportTableContext();        
+    }
+    
     private XMLWriter(TableExportAdapter t, OutputStream out, XMLOptions options)
     {
         super(t, out, options);
+    }
+
+    XMLWriter(TableExportAdapter tw, XMLOptions options)
+    {
+        super(tw, null, options);
     }
 
     @Override
@@ -26,5 +37,11 @@ public class XMLWriter extends ArchivalWriter<XMLOptions>
     {
         XStream xs = getXStream(this);
         xs.toXML(getTable(), getOutputStream());
+    }
+
+    private void exportTableContext()
+    {
+        XStream xs = getXStream(this);
+        xs.toXML(getTableContext(), getOutputStream());
     }
 }

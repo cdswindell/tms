@@ -2,21 +2,19 @@ package org.tms.io;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Subset;
 import org.tms.api.Table;
-import org.tms.api.factories.TableFactory;
 
-abstract public class BaseArchivalTest extends BaseTest
+abstract public class BaseArchivalTest extends BaseIOTest
 {
     protected static final String SAMPLE1 = "sample1.csv";
     
     protected Table getBasicTable()
     {
-        Table gst = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
+        Table gst = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(gst);
         gst.setLabel("Test XML & Export Table");
         gst.tag("red", "green");

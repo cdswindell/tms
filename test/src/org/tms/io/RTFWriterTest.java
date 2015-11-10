@@ -11,12 +11,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Test;
-import org.tms.BaseTest;
 import org.tms.api.Table;
-import org.tms.api.factories.TableFactory;
 import org.tms.api.io.RTFOptions;
 
-public class RTFWriterTest extends BaseTest
+public class RTFWriterTest extends BaseIOTest
 {
     private static final String SAMPLE1 = "sample1.csv";
     private static final String ExportTableGold = "testExportTable.rtf";
@@ -34,7 +32,7 @@ public class RTFWriterTest extends BaseTest
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
 
-        Table t = TableFactory.importCSV(qualifiedFileName(SAMPLE1, "csv"), true, true);
+        Table t = importCVSFile(qualifiedFileName(SAMPLE1, "csv"), true, true);
         assertNotNull(t);
         
         // create output stream

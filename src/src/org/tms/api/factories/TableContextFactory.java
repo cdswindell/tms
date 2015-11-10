@@ -29,16 +29,15 @@ public class TableContextFactory
         return tc;
     }   
     
+    static public TableContext importWorkbook(String fileName)
+    {
+        return importWorkbook(fileName, XLSOptions.Default);
+    }
+        
     static public TableContext importWorkbook(String fileName, XLSOptions format)
     {
-        TableContext tc = TableContextFactory.createTableContext();
-        try {
-            importWorkbook(fileName, format, tc);
-        }
-        finally {
-            
-        }
-        
+        TableContext tc = fetchDefaultTableContext();
+        importWorkbook(fileName, format, tc);
         return tc;
     }
         
