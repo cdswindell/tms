@@ -49,7 +49,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * Note: If you change this test, be sure to update
          * the gold standard file ExportTableGold
          */
-        Path path = Paths.get(qualifiedFileName(ExportTableGold6, "xml"));
+        Path path = Paths.get(qualifiedFileName(ExportTableGoldTC, "xml"));
         byte[] gold = Files.readAllBytes(path);  
 
         assertNotNull(gold);
@@ -85,7 +85,7 @@ public class XMLWriterTest extends BaseArchivalTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        tc.export(ExportTableGoldTC, XMLOptions.Default);
+        tc.export(bos, XMLOptions.Default);
         bos.close();
 
         assertThat(t.getNumRows(), is(1024));
