@@ -77,34 +77,25 @@ public class XLSReaderTest extends BaseTest
     @Test
     public final void testImportMultiSheet() throws InterruptedException 
     {
-        TableContext tc = TableContextFactory.createTableContext();
+        TableContext tc = TableContextFactory.importTables(qualifiedFileName(SAMPLEMulti, "xls"), XLSOptions.Default.withRowLabels(false));
         assertNotNull(tc);
-        assertThat(tc.getNumTables(), is(0));
         
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMulti, "xls"), tc, XLSOptions.Default.withRowLabels(false)); 
-        assertNotNull(r);
-        
-        testMultiSheetImport(tc, r);
+        testMultiSheetImport(tc);
     }
 
     @Test
     public final void testImportMultiSheetXls() throws InterruptedException 
     {
-        TableContext tc = TableContextFactory.createTableContext();
+        TableContext tc = TableContextFactory.importTables(qualifiedFileName(SAMPLEMultiXLS, "xls"), XLSOptions.Default.withRowLabels(false));
         assertNotNull(tc);
-        assertThat(tc.getNumTables(), is(0));
         
-        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEMultiXLS, "xls"), tc, XLSOptions.Default.withRowLabels(false)); 
-        assertNotNull(r);
-        
-        testMultiSheetImport(tc, r);
+        testMultiSheetImport(tc);
     }
 
-    private void testMultiSheetImport(TableContext tc, XlsReader r) throws InterruptedException
+    private void testMultiSheetImport(TableContext tc) throws InterruptedException
     {
         try
         {
-            r.parseWorkbook();
             assertThat(tc.getNumTables(), is(3));
             
             Table inventory = tc.getTable(Access.ByLabel, "Inventory");
@@ -161,7 +152,7 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(assets, 4, 4, 50.0);
             vetCellValue(assets, 5, 4, 1290.50 );
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             fail(e.getMessage());
         }

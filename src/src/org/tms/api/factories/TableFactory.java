@@ -248,7 +248,7 @@ public final class TableFactory
             throw new IllegalArgumentException("Format required");
         
         if (!format.canImport())
-            throw new IllegalArgumentException("Format does not support import");
+            throw new IllegalArgumentException("Format does not support Table import");
         
         try
         {
@@ -298,7 +298,7 @@ public final class TableFactory
             throw new IllegalArgumentException("Format required");
         
         if (!format.canImport())
-            throw new IllegalArgumentException("Format does not support import");
+            throw new IllegalArgumentException("Format does not support Table import");
         
         try
         {

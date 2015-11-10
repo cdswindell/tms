@@ -34,6 +34,7 @@ import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.IOOption;
+import org.tms.api.io.TCOptions;
 import org.tms.api.io.TMSOptions;
 import org.tms.api.io.XLSOptions;
 import org.tms.api.io.XMLOptions;
@@ -1073,9 +1074,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     {
         List<TableImpl> tables = new ArrayList<TableImpl>(allTables());
         Collections.sort(tables, (TableImpl t1, TableImpl t2) -> { String s1 = t1.getLabel(); 
-                                                                   if (s1 == null) s1 = ""; 
+                                                                   if (s1 == null) s1 = t1.getUUID(); 
                                                                    String s2 = t2.getLabel();
-                                                                   if (s2 == null) s2 = "";
+                                                                   if (s2 == null) s2 = t2.getUUID();
                                                                    return s1.compareTo(s2);});
         
         return Collections.unmodifiableList(tables);
@@ -1182,7 +1183,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     {
         IOOption<?> format = TableExportAdapter.generateOptionsFromFileExtension(fileName);
         if (format == null)
-            format = TMSOptions.Default;
+            format = TCOptions.Default;
         
         importTables(fileName, format);
     }
@@ -1192,9 +1193,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     {
         if (format == null)
             throw new IllegalArgumentException("Format required");
-        
-        if (!format.canImport())
-            throw new IllegalArgumentException("Format does not support import");
         
         try {
             switch (format.getFileFormat()) {

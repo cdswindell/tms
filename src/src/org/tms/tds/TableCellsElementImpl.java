@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.tms.api.Cell;
 import org.tms.api.Table;
@@ -34,6 +35,7 @@ abstract class TableCellsElementImpl extends TableElementImpl
     private int m_pendings;
     private TableElementListeners m_listeners;
     private Map<String, Object> m_elemProperties;
+    private UUID m_guid;
     
     protected TableCellsElementImpl(TableElementImpl e)
     {
@@ -48,6 +50,17 @@ abstract class TableCellsElementImpl extends TableElementImpl
     /*
      * Field getters and setters
      */    
+    
+    public String getUUID()
+    {
+        synchronized (this) {
+            if (m_guid == null)
+                m_guid = UUID.randomUUID();
+        }
+        
+        return m_guid.toString();
+    }
+    
     @Override
     synchronized protected Map<String, Object> getElemProperties(boolean createIfEmpty)
     {
@@ -99,6 +112,9 @@ abstract class TableCellsElementImpl extends TableElementImpl
         {
             case Tags:
                 return getTags();
+                
+            case UUID:
+                return getUUID();
                 
             default:
                 return super.getProperty(key);

@@ -2,6 +2,7 @@ package org.tms.io.xml;
 
 import org.tms.api.Row;
 import org.tms.api.TableContext;
+import org.tms.api.io.TCOptions;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.ContextImpl;
@@ -54,13 +55,16 @@ public class TableContextConverter extends BaseConverter
         writer.startNode(TABLES_TAG);
         
         for (TableImpl t : tc.getTables()) {
-            pushExportAdapter(t);
-            
-            writer.startNode(TableConverter.ELEMENT_TAG);                
-            context.convertAnother(t);
-            writer.endNode();
-            
-            popExportAdapter();
+            boolean isPersistant = t.isPersistant();
+            if ((isPersistant && isPersistantTables()) || (!isPersistant && isNonPersistantTables())) {           
+                pushExportAdapter(t);
+                
+                writer.startNode(TableConverter.ELEMENT_TAG);   
+                context.convertAnother(t);
+                writer.endNode();
+                
+                popExportAdapter();
+            }
         }
         
         writer.endNode();
@@ -97,5 +101,37 @@ public class TableContextConverter extends BaseConverter
         }
         
         return nodeName;
+    }
+    
+    protected boolean isPersistantTables()
+    {
+        if (options() instanceof TCOptions)
+            return ((TCOptions)options()).isPersistantTables();
+        else
+            return true;
+    }
+    
+    protected boolean isNonPersistantTables()
+    {
+        if (options() instanceof TCOptions)
+            return ((TCOptions)options()).isNonPersistantTables();
+        else
+            return true;
+    }
+    
+    protected boolean isConstants()
+    {
+        if (options() instanceof TCOptions)
+            return ((TCOptions)options()).isConstants();
+        else
+            return true;
+    }
+    
+    protected boolean isOperators()
+    {
+        if (options() instanceof TCOptions)
+            return ((TCOptions)options()).isOperators();
+        else
+            return true;
     }
 }

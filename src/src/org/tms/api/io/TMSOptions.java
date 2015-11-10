@@ -7,7 +7,7 @@ public class TMSOptions extends ArchivalIOOptions<TMSOptions> implements Archiva
 
     public static final TMSOptions Default = new TMSOptions(true, true, false, false, true, true, true);
 
-    private TMSOptions(final boolean rowNames, 
+    protected TMSOptions(final boolean rowNames, 
                       final boolean colNames, 
                       final boolean ignoreEmptyRows, 
                       final boolean ignoreEmptyCols,
@@ -19,7 +19,7 @@ public class TMSOptions extends ArchivalIOOptions<TMSOptions> implements Archiva
         		withDerivations, withValidators, withState);
     }
     
-    private TMSOptions (final TMSOptions format)
+    protected TMSOptions (final TMSOptions format)
     {
         super(format);
     }    

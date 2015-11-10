@@ -105,16 +105,15 @@ public class TableExportAdapter
     public TableExportAdapter(Table t, String fileName, IOOption<?> options) 
     throws IOException
     {
-        this(fileName, options);
+        this(fileName, options, true);
         
         if (t == null)
             throw new IllegalArgumentException("Table required");
         
         m_table = t;
-        m_options = options;
     }
         
-    protected TableExportAdapter(String fileName, IOOption<?> options) 
+    protected TableExportAdapter(String fileName, IOOption<?> options, boolean performExportCheck) 
     throws IOException
     {
         if (fileName == null || (fileName = fileName.trim()).length() <= 0)
@@ -137,6 +136,9 @@ public class TableExportAdapter
             m_options = options;
         }
         
+        if (performExportCheck && !m_options.canExport())
+            throw new UnimplementedException(String.format("No support for exporting %s (%s)", fileName, m_options.getFileFormat()));
+        
         // create the output stream
         m_output = new FileOutputStream(m_file);
         
@@ -147,11 +149,11 @@ public class TableExportAdapter
     public TableExportAdapter(Table t, OutputStream out, IOOption<?> options) 
     throws IOException
     {
-        this(out, options);
+        this(out, options, true);
         m_table = t;
     }
     
-    protected TableExportAdapter(OutputStream out, IOOption<?> options) 
+    protected TableExportAdapter(OutputStream out, IOOption<?> options, boolean performExportCheck) 
     throws IOException
     {        
         if (options == null)
@@ -160,6 +162,9 @@ public class TableExportAdapter
         m_output = out;
         m_options = options;
         m_isFileBased = false;
+        
+        if (performExportCheck && !m_options.canExport())
+            throw new UnimplementedException(String.format("No support for exporting %s", m_options.getFileFormat()));        
     }
     
     protected OutputStream getOutputStream()

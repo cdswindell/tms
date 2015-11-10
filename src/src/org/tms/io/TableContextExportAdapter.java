@@ -15,14 +15,14 @@ public class TableContextExportAdapter extends TableExportAdapter
     public TableContextExportAdapter(TableContext context, String fileName, IOOption<?> options) 
     throws IOException
     {
-        super(fileName, options);
+        super(fileName, options, false);
         m_context = context;
     }
     
     public TableContextExportAdapter(TableContext context, OutputStream out, IOOption<?> options) 
     throws IOException
     {
-        super(out, options);
+        super(out, options, false);
         m_context = context;
     }
     

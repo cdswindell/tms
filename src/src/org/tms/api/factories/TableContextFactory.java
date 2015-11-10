@@ -1,11 +1,7 @@
 package org.tms.api.factories;
 
-import java.io.IOException;
-
 import org.tms.api.TableContext;
-import org.tms.api.exceptions.TableIOException;
-import org.tms.api.io.XLSOptions;
-import org.tms.io.XlsReader;
+import org.tms.api.io.IOOption;
 import org.tms.tds.ContextImpl;
 
 public class TableContextFactory
@@ -29,36 +25,20 @@ public class TableContextFactory
         return tc;
     }   
     
-    static public TableContext importWorkbook(String fileName)
+    static public TableContext importTables(String fileName)
     {
-        return importWorkbook(fileName, XLSOptions.Default);
-    }
-        
-    static public TableContext importWorkbook(String fileName, XLSOptions format)
-    {
-        TableContext tc = fetchDefaultTableContext();
-        importWorkbook(fileName, format, tc);
+        TableContext tc = createTableContext();
+        tc.importTables(fileName);
         return tc;
     }
         
-    static public TableContext importWorkbook(String fileName, XLSOptions format, TableContext tc)
+    static public TableContext importTables(String fileName, IOOption<?> format)
     {
-        if (format == null)
-            format = XLSOptions.Default;
-        
-        try
-        {
-            XlsReader r = new XlsReader(fileName, tc, (XLSOptions)format);
-            r.parseWorkbook();
-        }
-        catch (IOException e)
-        {
-            throw new TableIOException(e);
-        }
-        
+        TableContext tc = createTableContext();
+        tc.importTables(fileName, format);
         return tc;
     }
-    
+        
     /**
      * Construct a TableContextFactory instance.
      * <p>
