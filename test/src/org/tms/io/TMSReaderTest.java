@@ -14,7 +14,9 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.api.factories.TableFactory;
 import org.tms.api.io.TMSOptions;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TdsUtils;
@@ -30,6 +32,7 @@ public class TMSReaderTest extends BaseArchivalTest
     
     private static final String ExportTableGold = "simpleTable.tms";
     private static final String ExportTableGoldVal = "tableWithValidators.tms";
+    private static final String ExportTableContext = "TMSTableContext.tms";
     
     @Test
     public final void testCSVReaderConstructor()
@@ -41,6 +44,23 @@ public class TMSReaderTest extends BaseArchivalTest
         assertThat(r.isColumnNames(), is(true));
     }
 
+    @Test
+    public final void testParseTableContext() 
+    {
+        TableContext tc = TableContextFactory.importTables(qualifiedFileName(ExportTableContext, "tms"));
+        assertNotNull(tc);
+        assertThat(3, is(tc.getNumTables()));
+        
+        // this should fail
+        try {
+            TableFactory.importFile(qualifiedFileName(ExportTableContext, "tms"));
+            fail("import succeeded");
+        }
+        catch (Exception e) {
+            assertThat(e instanceof TableIOException, is(true));
+        }
+    }
+    
     @Test
     public final void testParse() 
     {

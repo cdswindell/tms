@@ -19,7 +19,6 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.ConstraintViolationException;
 import org.tms.api.factories.TableContextFactory;
-import org.tms.api.factories.TableFactory;
 import org.tms.api.io.XMLOptions;
 import org.tms.api.utils.NumericRange;
 import org.tms.tds.TableImpl;
@@ -56,38 +55,16 @@ public class XMLWriterTest extends BaseArchivalTest
         assertThat(gold.length > 0, is(true));
         
         // create new XML, it should match the gold standard
-        TableContext tc = TableContextFactory.createTableContext();
-        
-        Table t = TableFactory.createTable(1024,  1024, tc); 
-        t.setLabel("Test XML & Export One Cell Table");
-        Row r = t.addRow(Access.ByIndex, 1024);
-        Column c = t.addColumn(Access.ByIndex, 1024);
-        
-        t.setCellValue(r,c,"abc"); 
-        
-        assertThat(t.getNumRows(), is(1024));
-        assertThat(t.getNumColumns(), is(1024));
-        assertThat(t.getNumCells(), is(1));
-        
-        assertThat(1024, is(((TableImpl)t).getRowsCapacity()));
-        assertThat(1024, is(((TableImpl)t).getColumnsCapacity()));
-        
-        Table t2 = TableFactory.createTable(32, 32, tc); 
-        t2.setLabel("Empty Table");
-        
-        Table t3 = TableFactory.createTable(32, 32, tc); 
-        t3.setLabel("Almost Empty Table");
-        t3.addRow(10);
-        Column c1 = t3.addColumn(1);
-        c1.setDerivation("rIdx");
-        Column c2 = t3.addColumn(2);
-        c2.setDerivation("col 1 * col 1");
-        
+        TableContext tc = getPopulatedTableContext();
+                
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         tc.export(bos, XMLOptions.Default);
         bos.close();
 
+        Table t = tc.getTable(Access.ByLabel, "Test XML & Export One Cell Table");
+        assertNotNull(t);
+        
         assertThat(t.getNumRows(), is(1024));
         assertThat(t.getNumColumns(), is(1024));
         assertThat(t.getNumCells(), is(1));
@@ -116,12 +93,7 @@ public class XMLWriterTest extends BaseArchivalTest
         assertThat(gold.length > 0, is(true));
         
         // create new XML, it should match the gold standard
-        Table t = TableFactory.createTable(1024,  1024); 
-        t.setLabel("Test XML & Export One Cell Table");
-        Row r = t.addRow(Access.ByIndex, 1024);
-        Column c = t.addColumn(Access.ByIndex, 1024);
-        
-        t.setCellValue(r,c,"abc"); 
+        Table t = getOneCellTable();
         
         assertThat(t.getNumRows(), is(1024));
         assertThat(t.getNumColumns(), is(1024));

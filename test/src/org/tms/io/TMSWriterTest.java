@@ -32,9 +32,38 @@ public class TMSWriterTest extends BaseArchivalTest
     
     private static final String ExportTableGold = "simpleTable.tms";
     private static final String ExportTableGoldVal = "tableWithValidators.tms";
+    private static final String ExportTableContext = "TMSTableContext.tms";
     
     @Test
-    public final void testExportXml() throws IOException
+    public final void testExportTableContext() throws IOException
+    {
+        /*
+         * Note: If you change this test, be sure to update
+         * the gold standard file ExportTableGold
+         */
+        Path path = Paths.get(qualifiedFileName(ExportTableContext, "tms"));
+        byte[] gold = Files.readAllBytes(path);  
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+        
+        // create new XML, it should match the gold standard
+        TableContext tc = this.getPopulatedTableContext();
+        
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        tc.export(bos, TMSOptions.Default);
+        bos.close();
+
+        // test byte streams are the same
+        byte [] output =  bos.toByteArray();
+        assertNotNull(output);
+
+        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));       
+    }
+    
+    @Test
+    public final void testExportBasicTable() throws IOException
     {
         /*
          * Note: If you change this test, be sure to update
