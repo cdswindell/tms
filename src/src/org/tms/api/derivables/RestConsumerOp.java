@@ -19,6 +19,10 @@ import org.json.simple.parser.JSONParser;
 
 abstract public class RestConsumerOp implements Operator
 {
+    static {
+        System.setProperty("jsse.enableSNIExtension", "false");
+    }
+    
     abstract public String getUrl();
     abstract public LinkedHashMap<String, Object> getUrlParamsMap();
     
@@ -197,7 +201,7 @@ abstract public class RestConsumerOp implements Operator
                 urlCon.setConnectTimeout(getConnectionTimeout());
                 if (urlCon instanceof HttpURLConnection) {
                     HttpURLConnection httpCon = (HttpURLConnection)urlCon;
-                    httpCon.setRequestMethod(getRequestMethod());
+                    //httpCon.setRequestMethod(getRequestMethod());
                     
                     int code = httpCon.getResponseCode();
                     processResponseCode(code);
