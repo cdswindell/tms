@@ -286,10 +286,13 @@ public class PostfixStackEvaluator
 			Token pendingToken = m_opStack.peekFirst();
 			if (pendingToken != null && pendingToken.isPending()) {
 			    m_pfsArray = null; // conserve a bit of memory
+			    
 			    AwaitingState pendingState = new AwaitingState(this, row, col, pendingToken);
 			    pendingToken.setValue(pendingState);
+			    
                 if (tbl != null) 
                     tbl.setCellValue(row,  col, pendingToken);
+                
 			    throw new PendingDerivationException(pendingState);
 			}
 		}
