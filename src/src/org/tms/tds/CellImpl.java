@@ -166,8 +166,19 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                 decrementPendings();
                 try {
 
-                    if (t.isError()) 
-                        return this.setCellValueNoDataTypeCheck(t.getErrorCode());
+                    if (t.isError()) {
+                        boolean isDifferent = this.setCellValueNoDataTypeCheck(t.getErrorCode());
+                        switch (t.getErrorCode()) {
+                            case SeeErrorMessage:
+                                setErrorMessage(t.getStringValue());
+                                break;
+                                
+                            default:
+                                break;
+                        }
+                        
+                        return isDifferent;
+                    }
                     else if (t.isNull())
                         return setCellValue(null, true, false);
                     else if (t.isPending()) {
@@ -192,6 +203,19 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         
         return false;
 
+    }
+
+    private void setErrorMessage(String eMsg)
+    {
+        if (eMsg != null && (eMsg = eMsg.trim()).length() > 0)
+            setProperty(TableProperty.ErrorMessage, eMsg);  
+        else
+            clearProperty(TableProperty.ErrorMessage);
+    }
+    
+    public String getErrorMessage()
+    {
+        return (String) super.getProperty(TableProperty.ErrorMessage);
     }
 
     private void incrementPendings()
@@ -235,6 +259,10 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     
     protected boolean setCellValue(Object value, boolean typeSafeCheck, boolean doPreprocess)
     {
+        // clear error message, if cell is in error
+        if (isErrorValue())
+            setErrorMessage(null);
+        
         decrementPendings();
         if (typeSafeCheck && value != null && this.isDataTypeEnforced()) {
             if (isDatatypeMismatch(value))
@@ -550,6 +578,9 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                 
             case Tags:
                 return getTags();
+                
+            case ErrorMessage:
+                return getErrorMessage();
                 
             default:
                 return super.getProperty(key);
@@ -951,7 +982,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         RowImpl r = getRow();
         ColumnImpl c = getColumn();
         return String.format("[%s%s <%s> R%dC%d]", getElementType(), label, 
-                isPendings() ? "pending" : isNull() ? "null" :getCellValue().toString(),
+                isPendings() ? "pending" : isNull() ? "null" : (isErrorValue() && getErrorMessage() != null ? getErrorMessage() : getCellValue().toString()),
                 r != null ? r.getIndex() : 0,
                 c != null ? c.getIndex() : 0);
 	}
