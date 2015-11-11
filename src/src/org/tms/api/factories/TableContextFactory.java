@@ -30,7 +30,7 @@ public class TableContextFactory
     /**
      * Create, initialize, and return a new {@link TableContext}. The specified
      * {@link TableContext} is used to initialize the new {@link TableContext}.
-     * @param template {@code TableContext} to initialize the new {@code TableContext} from
+     * @param template {@code TableContext} used to initialize configurable options in the new {@code TableContext}
      * @return a new, initialized {@code TableContext}.
      */
     static public TableContext createTableContext(TableContext template)
