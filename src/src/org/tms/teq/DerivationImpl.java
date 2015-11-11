@@ -396,9 +396,15 @@ public final class DerivationImpl implements Derivation
                     return;
                 }
                 
-                t.setValue(value);
-                t.setTokenType(TokenType.Operand);
-                t.setOperator(BuiltinOperator.NOP);
+                if (value != null && value instanceof Token) {
+                    Token rsltToken = (Token) value;
+                    t.from(rsltToken);
+                }
+                else  {
+                    t.setValue(value);                   
+                    t.setTokenType(TokenType.Operand);
+                    t.setOperator(BuiltinOperator.NOP);
+                }
             }
             finally {
                 ps.unlock();

@@ -17,12 +17,18 @@ import org.tms.teq.PendingState;
  */
 public class Token implements Labeled
 {
-	public static Token createNullToken()
-	{
-		Token t = new Token(TokenType.NullValue, BuiltinOperator.NULL_operator);
-		return t;
-	}
-	
+    public static Token createNullToken()
+    {
+        Token t = new Token(TokenType.NullValue, BuiltinOperator.NULL_operator);
+        return t;
+    }
+    
+    public static Token createOperandToken(Object operand)
+    {
+        Token t = new Token(TokenType.Operand, operand);
+        return t;
+    }
+    
     public static Token createErrorToken(ErrorCode eCode)
     {
         return new Token(TokenType.EvaluationError, eCode);
@@ -120,6 +126,15 @@ public class Token implements Labeled
         setOperator(o);
     }
 
+
+    public void from(Token rsltToken)
+    {
+        m_label = rsltToken.m_label;
+        m_tokenType = rsltToken.m_tokenType;
+        m_oper = rsltToken.m_oper;
+        m_value = rsltToken.m_value;
+    }
+    
     public TokenType getTokenType()
     {
         return m_tokenType;

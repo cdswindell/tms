@@ -14,6 +14,11 @@ public interface Derivation
         DerivationImpl.postResult(transactionId, rslt);
     }
 
+    public static void postResult(UUID transactionId, Token rslt)
+    {
+        DerivationImpl.postResult(transactionId, rslt);
+    }
+
     public static UUID getTransactionID()
     {
         return DerivationImpl.getTransactionID();
