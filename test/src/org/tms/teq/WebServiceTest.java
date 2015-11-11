@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.util.LinkedHashMap;
 
 import org.junit.Test;
+import org.tms.BaseTest;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
@@ -16,7 +17,7 @@ import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.utils.StockTickerOp;
 
-public class WebServiceTest
+public class WebServiceTest extends BaseTest
 {
     @Test
     public void testWebServiceCall() throws InterruptedException 
@@ -72,6 +73,9 @@ public class WebServiceTest
     @Test
     public void testWebServiceCall2() throws InterruptedException 
     {       
+        StockTickerOp stocks = new StockTickerOp("ticker", "l_cur");
+        TableContextFactory.fetchDefaultTableContext().registerOperator(stocks);
+        
         CurrencyConverterOp curConvert = new CurrencyConverterOp("curConvert", "result");
         TableContextFactory.fetchDefaultTableContext().registerOperator(curConvert);
         
@@ -87,26 +91,35 @@ public class WebServiceTest
         Column c1 = t.addColumn();
         assertNotNull(c1);
         
-        t.setCellValue(r1,  c1, 10);
-        t.setCellValue(r2,  c1, 32.56);
+        t.setCellValue(r1,  c1, "JCOM");
+        t.setCellValue(r2,  c1, "EIGI");
         
         Column c2 = t.addColumn();
         assertNotNull(c2);
+        c2.setDerivation("ticker(col 1)");
         
-        c2.setDerivation("curConvert(\"USD\", \"EUR\", col 1)");
+        Column c3 = t.addColumn();
+        assertNotNull(c3);
+        c3.setDerivation("curConvert(\"USD\", \"EUR\", col 2)");
+       
+        Column c4 = t.addColumn();
+        assertNotNull(c4);
+        c4.setDerivation("curConvert(\"EUR\", \"USD\", col 3)");       
         
-        while(c2.isPendings()) {
-            assertNotNull(c2);
+        while(c4.isPendings()) {
+            assertNotNull(t);
             Thread.sleep(500);
         }
         
         Cell cell = t.getCell(r1,  c2);
         assertNotNull(cell);  
         assertThat(true, is(cell.isNumericValue()));
+        assertThat(closeTo(t.getCellValue(r1, c4), (double)cell.getCellValue(), 0.01), is(true));
         
         cell = t.getCell(r2,  c2);
         assertNotNull(cell);  
         assertThat(true, is(cell.isNumericValue()));
+        assertThat(closeTo(t.getCellValue(r2, c4), (double)cell.getCellValue(), 0.01), is(true));
     }
     
     public static class CurrencyConverterOp extends RestConsumerOp
