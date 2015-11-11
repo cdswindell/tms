@@ -16,7 +16,6 @@ import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.utils.StockTickerOp;
 
-
 public class WebServiceTest
 {
     @Test
