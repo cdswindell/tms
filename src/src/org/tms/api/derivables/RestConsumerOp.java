@@ -68,10 +68,18 @@ abstract public class RestConsumerOp implements Operator
                         argTypes.add((Class<?>)e.getValue());
                     }
                     else {
-                        if (m_constantUrlParamsStr.length() > 0)
-                            m_constantUrlParamsStr.append('&');
-                        m_constantUrlParamsStr.append(e.getKey()).append('=');
-                        m_constantUrlParamsStr.append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
+                        String key = e.getKey();
+                        Object value = e.getValue();
+                        
+                        if (key.startsWith("{") && key.endsWith("}")) {
+                            m_baseUrl = replace(m_baseUrl, key, value.toString());
+                        }
+                        else {
+                            if (m_constantUrlParamsStr.length() > 0)
+                                m_constantUrlParamsStr.append('&');
+                            m_constantUrlParamsStr.append(e.getKey()).append('=');
+                            m_constantUrlParamsStr.append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
+                        }
                     }
                 }
                 
@@ -159,19 +167,28 @@ abstract public class RestConsumerOp implements Operator
                 mArgs[i] = args[i].getValue();
             }
             
+            // get a copy of the base URL, it may also contain substitution params
+            String baseUrl = m_baseUrl;
+            
             // build final URL params string
             StringBuffer urlParams = new StringBuffer(m_constantUrlParamsStr);
             
             boolean needPrefix = urlParams.length() > 0;
             for (int i = 0; i < numArgs(); i++) {
-                if (needPrefix)
-                    urlParams.append('&');
-                urlParams.append(m_argKeys[i]).append('=');
-                if (mArgs[i] != null)
-                    urlParams.append(URLEncoder.encode(mArgs[i].toString(), "UTF-8"));           
+                if (m_argKeys[i].startsWith("{") && m_argKeys[i].endsWith("}")) {
+                    baseUrl = replace(baseUrl, m_argKeys[i], mArgs[i].toString());
+                }
+                else {
+                    if (needPrefix)
+                        urlParams.append('&');
+                    urlParams.append(m_argKeys[i]).append('=');
+                    if (mArgs[i] != null)
+                        urlParams.append(URLEncoder.encode(mArgs[i].toString(), "UTF-8"));
+                    needPrefix = true;
+                }
             }
             
-            RestEvaluator re = new RestEvaluator(Derivation.getTransactionID(), m_baseUrl, urlParams);
+            RestEvaluator re = new RestEvaluator(Derivation.getTransactionID(), baseUrl, urlParams);
             
             return Token.createPendingToken(re);
         }
@@ -179,6 +196,21 @@ abstract public class RestConsumerOp implements Operator
         {
             return Token.createErrorToken(e.getMessage());
         }
+    }
+    
+    private String replace(String source, String pattern, String replacement)
+    {
+        int idx = source.indexOf(pattern);
+        if (idx > -1) {
+            String result = source.substring(0, idx) + 
+                            replacement + 
+                            source.substring(idx + pattern.length());
+            
+            return result;
+        }
+        else
+            return source;
+        
     }
     
     protected class RestEvaluator implements Runnable

@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 
 import org.junit.Test;
@@ -71,7 +72,7 @@ public class WebServiceTest extends BaseTest
     }
     
     @Test
-    public void testWebServiceCall2() throws InterruptedException 
+    public void testWebServiceCall2() throws InterruptedException, IOException 
     {       
         StockTickerOp stocks = new StockTickerOp("ticker", "l_cur");
         TableContextFactory.fetchDefaultTableContext().registerOperator(stocks);
@@ -100,11 +101,11 @@ public class WebServiceTest extends BaseTest
         
         Column c3 = t.addColumn();
         assertNotNull(c3);
-        c3.setDerivation("curConvert(\"USD\", \"EUR\", col 2)");
+        c3.setDerivation("curConvert('USD', 'EUR', col 2)");
        
         Column c4 = t.addColumn();
         assertNotNull(c4);
-        c4.setDerivation("curConvert(\"EUR\", \"USD\", col 3)");       
+        c4.setDerivation("curConvert('EUR', 'USD', col 3)");       
         
         while(c4.isPendings()) {
             assertNotNull(t);
@@ -124,8 +125,9 @@ public class WebServiceTest extends BaseTest
     
     public static class CurrencyConverterOp extends RestConsumerOp
     {
-        private static final String API_TOKEN = "79cb2c564f02a96c481b49d971b14000";
         private static final String BASE_URL = "https://apilayer.net/api/";
+        private static final String ENDPOINT = "convert";
+        private static final String API_TOKEN = "79cb2c564f02a96c481b49d971b14000";
         
         public CurrencyConverterOp(String label, String resultKey)
         {
@@ -135,7 +137,7 @@ public class WebServiceTest extends BaseTest
         @Override
         public String getUrl()
         {
-            return BASE_URL + "convert";
+            return BASE_URL + ENDPOINT;
         }
 
         @Override
