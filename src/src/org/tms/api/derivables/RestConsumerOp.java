@@ -133,6 +133,18 @@ abstract public class RestConsumerOp implements Operator
     {
     }
     
+    protected Object coerceResult(Object leaf)
+    {
+        // all we can really do here is coerce strings to numbers...
+        if (Number.class.isAssignableFrom(m_resultType)) 
+            return Double.parseDouble(leaf.toString());
+        else if (m_resultType.isPrimitive())                
+            return Double.parseDouble(leaf.toString());
+        
+        throw new InvalidOperandsException(String.format("Invalid result type, found: %s required: %s", 
+                leaf.getClass().getSimpleName(), m_resultType.getSimpleName()));
+    }
+    
     @Override
     public String getLabel()
     {
@@ -221,7 +233,12 @@ abstract public class RestConsumerOp implements Operator
         public RestEvaluator(UUID transId, String baseUrl, StringBuffer urlParams)
         {
             m_transId = transId;
-            m_urlString = baseUrl + (urlParams != null ? "?" + urlParams.toString() : "");
+            m_urlString = baseUrl;
+            if (urlParams != null) {
+                if (m_urlString.indexOf('?') == -1)
+                    m_urlString += "?";
+                m_urlString += urlParams.toString();
+            }
         }
         
         @Override
@@ -290,14 +307,11 @@ abstract public class RestConsumerOp implements Operator
             if (m_resultType.isAssignableFrom(leaf.getClass()))
                 return leaf;
             
-            // all we can really do here is coerce strings to numbers...
-            if (Number.class.isAssignableFrom(m_resultType)) 
-                return Double.parseDouble(leaf.toString());
-            else if (m_resultType.isPrimitive())                
-                return Double.parseDouble(leaf.toString());
+            // allow implementer to coerce result
+            // we provide some defaults
             
-            throw new InvalidOperandsException(String.format("Invalid result type, found: %s required: %s", 
-                    leaf.getClass().getSimpleName(), m_resultType.getSimpleName()));
+            return coerceResult(leaf);
+            
         }
     }
 }
