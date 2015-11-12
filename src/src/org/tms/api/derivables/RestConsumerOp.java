@@ -133,6 +133,12 @@ abstract public class RestConsumerOp implements Operator
     {
     }
     
+    /**
+     * Override in implementing class as needed
+     * @param leaf REST result
+     * @return processed result
+     * @throws InvalidOperandsException if REST result cannot be coerced 
+     */
     protected Object coerceResult(Object leaf)
     {
         // all we can really do here is coerce strings to numbers...
