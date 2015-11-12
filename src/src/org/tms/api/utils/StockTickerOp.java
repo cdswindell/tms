@@ -4,7 +4,6 @@ import java.net.HttpURLConnection;
 import java.util.LinkedHashMap;
 
 import org.tms.api.derivables.InvalidOperandsException;
-import org.tms.api.derivables.RestConsumerOp;
 
 public class StockTickerOp extends RestConsumerOp
 {

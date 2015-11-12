@@ -1,4 +1,4 @@
-package org.tms.api.derivables;
+package org.tms.api.utils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -16,6 +16,12 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.tms.api.derivables.Derivation;
+import org.tms.api.derivables.InvalidOperandsException;
+import org.tms.api.derivables.InvalidOperatorException;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenType;
 
 abstract public class RestConsumerOp implements Operator
 {
@@ -134,7 +140,8 @@ abstract public class RestConsumerOp implements Operator
     }
     
     /**
-     * Override in implementing class as needed
+     * Override in implementing class as needed. Implementers should call
+     * super.coerceResult(leaf) at the end of their implementation.
      * @param leaf REST result
      * @return processed result
      * @throws InvalidOperandsException if REST result cannot be coerced 
@@ -144,8 +151,12 @@ abstract public class RestConsumerOp implements Operator
         // all we can really do here is coerce strings to numbers...
         if (Number.class.isAssignableFrom(m_resultType)) 
             return Double.parseDouble(leaf.toString());
-        else if (m_resultType.isPrimitive())                
-            return Double.parseDouble(leaf.toString());
+        else if (m_resultType.isPrimitive())  {   
+            if (m_resultType == boolean.class)
+                return Boolean.parseBoolean(leaf.toString());
+            else
+                return Double.parseDouble(leaf.toString());
+        }
         
         throw new InvalidOperandsException(String.format("Invalid result type, found: %s required: %s", 
                 leaf.getClass().getSimpleName(), m_resultType.getSimpleName()));

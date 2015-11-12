@@ -205,17 +205,24 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
 
     }
 
-    private void setErrorMessage(String eMsg)
+    void setErrorMessage(String eMsg)
     {
-        if (eMsg != null && (eMsg = eMsg.trim()).length() > 0)
+        if (eMsg != null && (eMsg = eMsg.trim()).length() > 0) {
+            set(sf_HAS_CELL_ERROR_MSG_FLAG, true);
             setProperty(TableProperty.ErrorMessage, eMsg);  
-        else
+        }
+        else {
+            unSet(sf_HAS_CELL_ERROR_MSG_FLAG);
             clearProperty(TableProperty.ErrorMessage);
+        }
     }
     
     public String getErrorMessage()
     {
-        return (String) super.getProperty(TableProperty.ErrorMessage);
+        if (isSet(sf_HAS_CELL_ERROR_MSG_FLAG))
+            return (String) super.getProperty(TableProperty.ErrorMessage);
+        else
+            return null;
     }
 
     private void incrementPendings()
@@ -584,6 +591,21 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                 
             default:
                 return super.getProperty(key);
+        }
+    }
+    
+    @Override
+    public boolean hasProperty(TableProperty key)
+    {
+        // Some properties are built into the base Table Element object
+        switch (key)
+        {
+            case ErrorMessage:
+                return isSet(sf_HAS_CELL_ERROR_MSG_FLAG);
+                
+            default:
+                return super.hasProperty(key);
+            
         }
     }
     

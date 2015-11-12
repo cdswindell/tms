@@ -6,6 +6,7 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
+import org.tms.api.derivables.ErrorCode;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
@@ -21,6 +22,7 @@ public class CellConverter extends BaseConverter
     static final public String ELEMENT_TAG = "cell";
     
     static final public String VALUE_TAG = "value";
+    static final public String ERROR_MESSAGE_TAG = "error";
     
     public CellConverter(BaseWriter<?> writer)
     {
@@ -58,17 +60,27 @@ public class CellConverter extends BaseConverter
         writeNode(c, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
         
         Class<?> dataType = c.getDataType();
+        if (dataType == null && c.isErrorValue())
+            dataType = ErrorCode.class;
+        if (dataType == null)
+            dataType = c.getColumn().getDataType();
         if (dataType != c.getColumn().getDataType() && dataType != null) {
             writer.startNode(DATATYPE_TAG);  
-            context.convertAnother(c.getDataType());
+            context.convertAnother(dataType);
             writer.endNode();
         }
         
         Object cellValue = c.getCellValue();
         if (cellValue != null) {
             writer.startNode(VALUE_TAG);  
-            context.convertAnother(cellValue);
+            context.convertAnother(c.isErrorValue() ? c.getErrorCode() : cellValue);
             writer.endNode();
+            
+            if (c.isErrorValue() && c.hasProperty(TableProperty.ErrorMessage)) {
+                writer.startNode(ERROR_MESSAGE_TAG);  
+                writer.setValue(c.getErrorMessage());
+                writer.endNode();
+            }                
         }
         
         writer.endNode();
@@ -128,14 +140,22 @@ public class CellConverter extends BaseConverter
 		            reader.moveUp();
 		        }
 	        	break;
-        
-	        	case VALUE_TAG: 
-	        	{
-		            Object o = context.convertAnother(t, dataType);  
-		            CellUtils.cellUpdater((CellImpl)c, o);
-		            reader.moveUp();
-	        	}
-	        	break;
+	            
+                case VALUE_TAG: 
+                {
+                    Object o = context.convertAnother(t, dataType);  
+                    CellUtils.cellUpdater((CellImpl)c, o);
+                    reader.moveUp();
+                }
+                break;
+                
+                case ERROR_MESSAGE_TAG: 
+                {
+                    String eMsg = (String)context.convertAnother(t, String.class);  
+                    CellUtils.cellErrorMessageUpdater((CellImpl)c, eMsg);
+                    reader.moveUp();
+                }
+                break;
         	}
         	
             // check next tag

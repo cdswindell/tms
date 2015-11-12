@@ -13,7 +13,7 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.derivables.RestConsumerOp;
+import org.tms.api.utils.RestConsumerOp;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.utils.StockTickerOp;
@@ -21,7 +21,7 @@ import org.tms.api.utils.StockTickerOp;
 public class WebServiceTest extends BaseTest
 {
     @Test
-    public void testWebServiceCall() throws InterruptedException 
+    public void testWebServiceCall() throws InterruptedException, IOException 
     {       
         StockTickerOp stocks = new StockTickerOp("l_cur");
         TableContextFactory.fetchDefaultTableContext().registerOperator(stocks);
@@ -51,6 +51,8 @@ public class WebServiceTest extends BaseTest
             Thread.sleep(500);
         }
         
+        t.export("foo.xml");
+        
         Cell cell = t.getCell(r1,  c2);
         assertNotNull(cell);  
         assertThat(true, is(cell.isNumericValue()));
@@ -72,7 +74,7 @@ public class WebServiceTest extends BaseTest
     }
     
     @Test
-    public void testWebServiceCall2() throws InterruptedException, IOException 
+    public void testWebServiceCall2() throws InterruptedException 
     {       
         StockTickerOp stocks = new StockTickerOp("ticker", "l_cur");
         TableContextFactory.fetchDefaultTableContext().registerOperator(stocks);

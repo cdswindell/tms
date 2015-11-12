@@ -6,4 +6,9 @@ public class CellUtils
     {
         return c.setCellValueNoDataTypeCheck(update);
     }
+
+    static final public void cellErrorMessageUpdater(CellImpl c, String eMsg)
+    {
+        c.setErrorMessage(eMsg);
+    }
 }
