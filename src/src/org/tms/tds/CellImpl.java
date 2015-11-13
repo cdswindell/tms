@@ -683,6 +683,11 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     @Override
     public Derivable setDerivation(String expr)
     {
+        return setDerivation(expr, true);
+    }
+    
+    protected Derivable setDerivation(String expr, boolean doRecalc)
+    {
         vetElement();
         
         // clear out any existing derivations
@@ -701,7 +706,8 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                 this.getColumn().setInUse(true);
                 getTable().registerDerivedCell(this, deriv);
                 
-                recalculate();
+                if (doRecalc)
+                    recalculate();
             }  
         }
         

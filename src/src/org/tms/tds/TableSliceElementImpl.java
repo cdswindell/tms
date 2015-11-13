@@ -26,7 +26,7 @@ import org.tms.tds.TableImpl.CellReference;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
-abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TableRowColumnElement
+public abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TableRowColumnElement
 {
     abstract protected TableSliceElementImpl insertSlice(int idx);
     abstract public TableSliceElementImpl setCurrent();
@@ -129,6 +129,11 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
     @Override
     public Derivable setDerivation(String expr)
     {
+        return setDerivation(expr, true);
+    }
+    
+    protected Derivable setDerivation(String expr, boolean doRecalc)
+    {
         vetElement();
         
         // clear out any existing derivations
@@ -147,7 +152,9 @@ abstract class TableSliceElementImpl extends TableCellsElementImpl implements De
                 }
                 
                 setInUse(true);
-                recalculate();
+                
+                if (doRecalc)
+                    recalculate();
             }  
         }
         

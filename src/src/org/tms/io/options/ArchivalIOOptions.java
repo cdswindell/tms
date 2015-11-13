@@ -32,6 +32,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
     private enum Options implements OptionEnum 
     {
         Derivations,
+        Recalculate,
         Validators,
         Descriptions, 
         DisplayFormats,
@@ -63,6 +64,8 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         set(Options.Units, true);
         set(Options.UUIDs, true);
         set(Options.Tags, true);
+        
+        set(Options.Recalculate, false);
     }
 
     protected ArchivalIOOptions(final ArchivalIOOptions<T> format)
@@ -76,6 +79,29 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         return clone((ArchivalIOOptions<T>) model);
     }
 
+    public boolean isRecalculate()
+    {
+        return (Boolean)get(Options.Recalculate);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withRecalculate()
+    {
+        return withRecalculate(true);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withRecalculate(boolean enabled)
+    {
+        final T newOptions = clone(this);
+        newOptions.set(Options.Recalculate, enabled);
+        return newOptions;
+    }
+    
     public boolean isVerboseState()
     {
         return (Boolean)get(Options.VerboseState);

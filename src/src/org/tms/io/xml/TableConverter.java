@@ -1,5 +1,7 @@
 package org.tms.io.xml;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.tms.api.Column;
@@ -10,6 +12,7 @@ import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Precisionable;
+import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableFactory;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
@@ -18,6 +21,7 @@ import org.tms.tds.ColumnImpl;
 import org.tms.tds.RowImpl;
 import org.tms.tds.SubsetImpl;
 import org.tms.tds.TableImpl;
+import org.tms.tds.TableSliceElementImpl;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -44,6 +48,44 @@ public class TableConverter extends BaseConverter
     static final protected String COLS_TAG = "columns";
     static final protected String SUBSETS_TAG = "subsets";
     static final protected String CELLS_TAG = "cells";
+    
+    /*
+     * In order to rebuild a row/column/cell, we need access to some methods
+     * that are explicitly not available outside of the CellImpl
+     * class/package.
+     * 
+     * We will use Java Reflection to get the method calls we need
+     * then mark them as accessible
+     */
+    static private Method setRowColDerivation = null;
+    static {
+        try
+        {
+            // setDerivation(String, boolean) is protected
+            setRowColDerivation = TableSliceElementImpl.class.getDeclaredMethod("setDerivation", 
+                                                                   new Class<?>[] {String.class, boolean.class});
+            setRowColDerivation.setAccessible(true);
+        }
+        catch (NoSuchMethodException | SecurityException e)
+        {
+            throw new TableIOException(e);
+        }
+    }
+    
+    static private Method setCellDerivation = null;
+    static {
+        try
+        {
+            // setDerivation(String, boolean) is protected
+            setCellDerivation = CellImpl.class.getDeclaredMethod("setDerivation", 
+                                                                  new Class<?>[] {String.class, boolean.class});
+            setCellDerivation.setAccessible(true);
+        }
+        catch (NoSuchMethodException | SecurityException e)
+        {
+            throw new TableIOException(e);
+        }
+    }
     
     public TableConverter(BaseWriter<?> writer)
     {
@@ -232,15 +274,34 @@ public class TableConverter extends BaseConverter
         // process derivations, if any
         if (options().isDerivations()) {
             for (Map.Entry<Derivable, String> e : getDerivationsMap(context).entrySet()) {
-                e.getKey().setDerivation(e.getValue());
+                Derivable d = e.getKey();
+                String eq = e.getValue();
+                
+                restoreDerivation(d, eq);
             }
             
-            t.recalculate();
+            if (options().isRecalculate())
+                t.recalculate();
         }
         
         return t;
     }
     
+	private void restoreDerivation(Derivable d, String eq)
+	{
+	    try
+	    {
+	        if (d instanceof TableSliceElementImpl) 
+	            setRowColDerivation.invoke(d, eq, false);
+	        else if (d instanceof CellImpl)
+                setCellDerivation.invoke(d, eq, false);
+	    }
+	    catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+	    {
+	        throw new TableIOException(e);
+	    }
+	}
+
     private String processChildren(Table t, Class<?> clazz, HierarchicalStreamReader reader, UnmarshallingContext context)
     {
         String nodeName = reader.getNodeName();

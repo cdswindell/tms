@@ -1,5 +1,6 @@
 package org.tms.api.io;
 
+
 /**
  * An {@link IOOption} where the output can persist TMS-specific functionality. 
  * Elements that are supported include:
@@ -21,6 +22,10 @@ public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends IOOptio
     public boolean isVerboseState();
     public T withVerboseState();
     public T withVerboseState(boolean enabled);
+    
+    public boolean isRecalculate();
+    public T withRecalculate();
+    public T withRecalculate(boolean enabled);
     
     /**
      * Returns {@code true} if TMS {@link org.tms.api.derivables.Derivation Derivation}s are imported or exported. 
