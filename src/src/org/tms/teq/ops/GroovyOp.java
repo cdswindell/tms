@@ -84,7 +84,6 @@ public class GroovyOp extends BaseOp
         m_method = m;
     }
 
-    @SuppressWarnings("resource")
     @Override
     public Token evaluate(Token... args)
     {
