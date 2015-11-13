@@ -205,7 +205,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
 
     }
 
-    void setErrorMessage(String eMsg)
+    protected void setErrorMessage(String eMsg)
     {
         if (eMsg != null && (eMsg = eMsg.trim()).length() > 0) {
             set(sf_HAS_CELL_ERROR_MSG_FLAG, true);
@@ -259,7 +259,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         }
     }
     
-    boolean setCellValueNoDataTypeCheck(Object value)
+    protected boolean setCellValueNoDataTypeCheck(Object value)
     {
         return setCellValue(value, false, false);
     }

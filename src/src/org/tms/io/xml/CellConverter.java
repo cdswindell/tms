@@ -1,5 +1,8 @@
 package org.tms.io.xml;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
@@ -7,10 +10,10 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.ErrorCode;
+import org.tms.api.exceptions.TableIOException;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
-import org.tms.tds.CellUtils;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -23,6 +26,43 @@ public class CellConverter extends BaseConverter
     
     static final public String VALUE_TAG = "value";
     static final public String ERROR_MESSAGE_TAG = "error";
+    
+    /*
+     * In order to rebuild a cell, we need access to some methods
+     * that are explicitly not available outside of the CellImpl
+     * class/package.
+     * 
+     * We will use Java Reflection to get the method calls we need
+     * then mark them as accessible
+     */
+    static private Method setCellValueNoCheck = null;
+    static {
+        try
+        {
+            // setCellValueNoDataTypeCheck
+            setCellValueNoCheck = CellImpl.class.getDeclaredMethod("setCellValueNoDataTypeCheck", 
+                                                                   new Class<?>[] {Object.class});
+            setCellValueNoCheck.setAccessible(true);
+        }
+        catch (NoSuchMethodException | SecurityException e)
+        {
+            throw new TableIOException(e);
+        }
+    }
+    
+    static private Method setCellErrorMessage = null;
+    static {
+        try
+        {
+            setCellErrorMessage = CellImpl.class.getDeclaredMethod("setErrorMessage", 
+                                                                   new Class<?>[] {String.class});
+            setCellErrorMessage.setAccessible(true);
+        }
+        catch (NoSuchMethodException | SecurityException e)
+        {
+            throw new TableIOException(e);
+        }
+    }
     
     public CellConverter(BaseWriter<?> writer)
     {
@@ -59,12 +99,13 @@ public class CellConverter extends BaseConverter
         writeNode(c, TableProperty.Units, UNITS_TAG, writer, context);
         writeNode(c, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
         
+        Column cCol = c.getColumn();
         Class<?> dataType = c.getDataType();
         if (dataType == null && c.isErrorValue())
             dataType = ErrorCode.class;
         if (dataType == null)
-            dataType = c.getColumn().getDataType();
-        if (dataType != c.getColumn().getDataType() && dataType != null) {
+            dataType = cCol.getDataType();
+        if (dataType != null && dataType != cCol.getDataType()) {
             writer.startNode(DATATYPE_TAG);  
             context.convertAnother(dataType);
             writer.endNode();
@@ -85,7 +126,6 @@ public class CellConverter extends BaseConverter
         
         writer.endNode();
     }
-
 
     @Override
     public Cell unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
@@ -143,8 +183,15 @@ public class CellConverter extends BaseConverter
 	            
                 case VALUE_TAG: 
                 {
-                    Object o = context.convertAnother(t, dataType);  
-                    CellUtils.cellUpdater((CellImpl)c, o);
+                    Object o = context.convertAnother(t, dataType); 
+                    try
+                    {
+                        setCellValueNoCheck.invoke(c, o);
+                    }
+                    catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+                    {
+                        throw new TableIOException(e);
+                    }
                     reader.moveUp();
                 }
                 break;
@@ -152,7 +199,15 @@ public class CellConverter extends BaseConverter
                 case ERROR_MESSAGE_TAG: 
                 {
                     String eMsg = (String)context.convertAnother(t, String.class);  
-                    CellUtils.cellErrorMessageUpdater((CellImpl)c, eMsg);
+                    try
+                    {
+                        setCellErrorMessage.invoke(c, eMsg);
+                    }
+                    catch (IllegalAccessException | IllegalArgumentException
+                            | InvocationTargetException e)
+                    {
+                        throw new TableIOException(e);
+                    }
                     reader.moveUp();
                 }
                 break;

@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
@@ -16,6 +17,7 @@ import org.tms.api.Table;
 import org.tms.api.utils.RestConsumerOp;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
+import org.tms.api.io.XMLOptions;
 import org.tms.api.utils.StockTickerOp;
 
 public class WebServiceTest extends BaseTest
@@ -51,8 +53,12 @@ public class WebServiceTest extends BaseTest
             Thread.sleep(500);
         }
         
-        t.export("foo.xml");
+        // export the file, we will read it later
+        File tmpFile = File.createTempFile("ErrorCell", ".xml");
+        tmpFile.deleteOnExit();
+        t.export(tmpFile.getAbsolutePath());
         
+        // check values
         Cell cell = t.getCell(r1,  c2);
         assertNotNull(cell);  
         assertThat(true, is(cell.isNumericValue()));
@@ -71,6 +77,20 @@ public class WebServiceTest extends BaseTest
         cell = t.getCell(r2,  c2);
         assertNotNull(cell);  
         assertThat(true, is(cell.isNumericValue()));
+        
+        // read export file and make sure the error cell is still in error
+        Table t2 = TableFactory.importFile(tmpFile.getAbsolutePath(), XMLOptions.Default.withDerivations(false));
+        assertNotNull(t2);
+        
+        cell = t2.getCell(t2.getRow(1), t2.getColumn(2));
+        assertNotNull(cell);  
+        assertThat(true, is(cell.isNumericValue()));
+        
+        cell = t2.getCell(t2.getRow(2), t2.getColumn(2));
+        assertNotNull(cell);  
+        assertThat(true, is(cell.isErrorValue()));
+        
+        tmpFile.delete();
     }
     
     @Test
