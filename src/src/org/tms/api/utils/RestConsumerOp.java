@@ -113,6 +113,11 @@ abstract public class RestConsumerOp implements Operator
         return data;
     }
     
+    protected Object postProcessParamValue(String paramName, Object paramValue)
+    {
+        return paramValue;
+    }
+    
     /**
      * Override to provide a different timeout
      * @return Connection timeout, in milliseconds
@@ -204,15 +209,16 @@ abstract public class RestConsumerOp implements Operator
             
             boolean needPrefix = urlParams.length() > 0;
             for (int i = 0; i < numArgs(); i++) {
+                Object mArg = postProcessParamValue(m_argKeys[i], mArgs[i]);
                 if (m_argKeys[i].startsWith("{") && m_argKeys[i].endsWith("}")) {
-                    baseUrl = replace(baseUrl, m_argKeys[i], mArgs[i].toString());
+                    baseUrl = replace(baseUrl, m_argKeys[i], mArg == null ? "" : mArgs[i].toString());
                 }
                 else {
                     if (needPrefix)
                         urlParams.append('&');
                     urlParams.append(m_argKeys[i]).append('=');
-                    if (mArgs[i] != null)
-                        urlParams.append(URLEncoder.encode(mArgs[i].toString(), "UTF-8"));
+                    if (mArg != null)
+                        urlParams.append(URLEncoder.encode(mArg.toString(), "UTF-8"));
                     needPrefix = true;
                 }
             }
@@ -263,6 +269,7 @@ abstract public class RestConsumerOp implements Operator
         {
             try {
                 URL myUrl = new URL(m_urlString);
+                
                 URLConnection urlCon = myUrl.openConnection();
                 urlCon.setConnectTimeout(getConnectionTimeout());
                 if (urlCon instanceof HttpURLConnection) {
@@ -302,6 +309,13 @@ abstract public class RestConsumerOp implements Operator
 
         private Object parseJsonResponse(JSONObject json)
         {
+            if (m_resultKey == null || (m_resultKey.trim()).length() <= 0) {
+                if (m_resultType.isAssignableFrom(json.getClass()))
+                    return json;
+                
+                return coerceResult(json);           
+            }
+            
             String [] tokens = m_resultKey.split("/");
             
             JSONObject tree = json;
@@ -327,8 +341,7 @@ abstract public class RestConsumerOp implements Operator
             // allow implementer to coerce result
             // we provide some defaults
             
-            return coerceResult(leaf);
-            
+            return coerceResult(leaf);           
         }
     }
 }

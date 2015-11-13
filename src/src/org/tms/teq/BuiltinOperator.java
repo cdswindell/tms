@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.json.simple.JSONObject;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.TableElement;
@@ -58,6 +59,9 @@ public enum BuiltinOperator implements Labeled, Operator
     
     // special "if" operator
     IfOper("if", TokenType.GenericFunc, 5, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
+    
+    // special JSON Parser operator
+    JsonOper(TokenType.GenericFunc, 5, toLabels("fromJSON", "jsonGet"), toArgs(JSONObject.class, String.class), Object.class, MathUtil.class, "jsonGet"),
     
     ColRefOper(TokenType.GenericFunc, 5, toLabels("colRef"), toArgs(Object.class), Column.class),
     RowRefOper(TokenType.GenericFunc, 5, toLabels("rowRef"), toArgs(Object.class), Row.class),

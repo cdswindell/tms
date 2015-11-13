@@ -10,12 +10,38 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937a;
+import org.json.simple.JSONObject;
 import org.tms.api.Cell;
 import org.tms.api.TableElement;
+import org.tms.api.derivables.InvalidOperandsException;
 
 public class MathUtil
 {
-
+    static final public Object jsonGet(JSONObject json, String key)
+    {
+        if (key == null || (key = key.trim()).length() <= 0)
+            return json;
+        
+        String [] tokens = key.split("/");
+        
+        JSONObject tree = json;
+        Object leaf = null;
+        int tokensProcessed = 0;
+        for (String token : tokens) {
+            leaf = tree.get(token);
+            tokensProcessed++;
+            if (leaf instanceof JSONObject)
+                tree = (JSONObject)leaf;
+            else
+                break;
+        }
+        
+        if (leaf == null && tokensProcessed < tokens.length)
+            throw new InvalidOperandsException("Result not found: " + tokens[tokensProcessed]);
+        
+        return leaf;
+    }
+    
     static final public double pmt(final double ipt, final int nPer, final double pv, final double fv)
     {
         double tmp = Math.exp(nPer*Math.log1p(ipt));

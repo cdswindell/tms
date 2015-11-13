@@ -8,16 +8,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
+import org.json.simple.JSONObject;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
-import org.tms.api.utils.RestConsumerOp;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.XMLOptions;
+import org.tms.api.utils.RestConsumerOp;
 import org.tms.api.utils.StockTickerOp;
 
 public class WebServiceTest extends BaseTest
@@ -145,6 +146,56 @@ public class WebServiceTest extends BaseTest
         assertThat(closeTo(t.getCellValue(r2, c4), (double)cell.getCellValue(), 0.01), is(true));
     }
     
+    @Test
+    public void testWeatherWebService() throws InterruptedException 
+    {       
+        WeatherOp curTemp = new WeatherOp("curTemp", "main/temp", double.class);
+        TableContextFactory.fetchDefaultTableContext().registerOperator(curTemp);
+        
+        WeatherOp weather = new WeatherOp("curWeather", "main", JSONObject.class);
+        TableContextFactory.fetchDefaultTableContext().registerOperator(weather);
+        
+        Table t = TableFactory.createTable();
+        assertNotNull(t);
+        
+        Row r1 = t.addRow();
+        assertNotNull(r1);
+        
+        Row r2 = t.addRow();
+        assertNotNull(r2);
+        
+        Column c1 = t.addColumn();
+        assertNotNull(c1);
+        
+        t.setCellValue(r1,  c1, "01720");
+        t.setCellValue(r2,  c1, "03254");
+        
+        Column c2 = t.addColumn();
+        assertNotNull(c2);
+        c2.setDerivation("curTemp(col 1)");
+        
+        Column c3 = t.addColumn();
+        assertNotNull(c3);
+        c3.setDerivation("curWeather(col 1)");
+        
+        Column c4 = t.addColumn();
+        assertNotNull(c4);
+        c4.setDerivation("fromJSON(col 3, 'temp')");
+        
+        while(t.isPendings()) {
+            assertNotNull(t);
+            Thread.sleep(500);
+        }
+        
+        Cell cell = t.getCell(r1,  c2);
+        assertNotNull(cell);  
+        assertThat(true, is(cell.isNumericValue()));
+        
+        cell = t.getCell(r2,  c2);
+        assertNotNull(cell);  
+        assertThat(true, is(cell.isNumericValue()));
+    }
+    
     public static class CurrencyConverterOp extends RestConsumerOp
     {
         private static final String BASE_URL = "https://apilayer.net/api/";
@@ -173,6 +224,46 @@ public class WebServiceTest extends BaseTest
             urlParams.put("amount", Double.class);
             
             return urlParams;            
+        }
+    }
+    
+    public static class WeatherOp extends RestConsumerOp
+    {
+        private static final String BASE_URL = "http://api.openweathermap.org/data/2.5/";
+        private static final String ENDPOINT = "weather";
+        private static final String API_TOKEN = "2de143494c0b295cca9337e1e96b00e0";
+        
+        public WeatherOp(String label, String resultKey, Class<?> resultType)
+        {
+            super(label, resultKey, resultType);
+        }
+
+        @Override
+        public String getUrl()
+        {
+            return BASE_URL + ENDPOINT;
+        }
+
+        @Override
+        public LinkedHashMap<String, Object> getUrlParamsMap()
+        {
+            LinkedHashMap<String, Object> urlParams = new LinkedHashMap<String, Object>(4);
+            
+            urlParams.put("units", "imperial");
+            urlParams.put("appid", API_TOKEN);
+            urlParams.put("zip", String.class);
+            
+            return urlParams;            
+        }
+        
+        @Override
+        protected Object postProcessParamValue(String paramName, Object paramValue)
+        {
+            if ("zip".equals(paramName)) {
+                return paramValue != null ? paramValue.toString() + ",us" : paramValue;
+            }
+            else
+                return paramValue;
         }
     }
 }
