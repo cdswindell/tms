@@ -20,7 +20,7 @@ import org.tms.api.io.IOOption;
  */
 public interface Subset extends TableElement
 {
-    public String getUUID();
+    public String getUuid();
     
     /**
      * Return the number of {@link Column}s in this {@code Subset}.

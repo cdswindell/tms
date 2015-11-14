@@ -56,7 +56,7 @@ public abstract class TableCellsElementImpl extends TableElementImpl
             m_guid = UUID.fromString(strVal);
     }
     
-    public String getUUID()
+    public String getUuid()
     {
         synchronized (this) {
             if (m_guid == null)
@@ -123,7 +123,7 @@ public abstract class TableCellsElementImpl extends TableElementImpl
                 if (m_guid == null)
                     return null;
                 else
-                    return getUUID();
+                    return getUuid();
             }
                 
             default:

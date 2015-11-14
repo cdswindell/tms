@@ -1081,9 +1081,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     {
         List<TableImpl> tables = new ArrayList<TableImpl>(allTables());
         Collections.sort(tables, (TableImpl t1, TableImpl t2) -> { String s1 = t1.getLabel(); 
-                                                                   if (s1 == null) s1 = t1.getUUID(); 
+                                                                   if (s1 == null) s1 = t1.getUuid(); 
                                                                    String s2 = t2.getLabel();
-                                                                   if (s2 == null) s2 = t2.getUUID();
+                                                                   if (s2 == null) s2 = t2.getUuid();
                                                                    return s1.compareTo(s2);});
         
         return Collections.unmodifiableList(tables);

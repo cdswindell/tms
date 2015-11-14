@@ -478,5 +478,5 @@ public interface Table extends TableElement, InitializableTableProperties
      * Returns the unique UUID assigned to this {@link Table}.
      * @return the unique UUID assigned to this {@code Table}
      */
-    public String getUUID();
+    public String getUuid();
 }

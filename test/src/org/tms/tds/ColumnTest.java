@@ -372,7 +372,7 @@ public class ColumnTest
         assertThat(3, is(c.getIndex()));
         
         // test UUID
-        String uuid = c.getUUID();
+        String uuid = c.getUuid();
         assertThat(uuid, notNullValue());
         
         Column cPrime = t.getColumn(Access.ByUUID, uuid);
