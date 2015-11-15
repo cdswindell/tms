@@ -1,5 +1,6 @@
 package org.tms.web.controllers;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +13,15 @@ import org.primefaces.event.CellEditEvent;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.io.Printable;
 
 @ManagedBean(name="tableEdit" )
 @ViewScoped
 
-public class TableEditor 
+public class TableEditor implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	@SuppressWarnings("unchecked")
 	static <T> T findBean(String beanName) {
 	    FacesContext context = FacesContext.getCurrentInstance();
@@ -62,17 +66,58 @@ public class TableEditor
 		return m_eCols;
 	}
 	
-    public void onCellEdit(CellEditEvent event) 
-    {
-        Object oldValue = event.getOldValue();
-        Object newValue = event.getNewValue();
-         
-        if(newValue != null && !newValue.equals(oldValue)) {
-            //FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Cell Changed", "Old: " + oldValue + ", New:" + newValue);
-            //FacesContext.getCurrentInstance().addMessage(null, msg);
-        }
-    }
-    
+	public void clearRow(EditRow eRow)
+	{
+		if (eRow != null) 			
+			eRow.getRow().clear();
+	}
+	
+	public void addRow(EditRow eRow)
+	{
+		if (eRow != null) {
+			int idx = eRow.getIndex();
+			m_tableViewer.getTable().addRow(idx+1);
+		}
+		else
+			m_tableViewer.getTable().addRow();
+		
+		m_eRows = null;
+	}
+	
+	public void deleteRow()
+	{
+		if (getSelectedRow() != null) 			
+			m_tableViewer.getTable().delete(getSelectedRow().getRow());
+		
+		m_eRows = null;
+	}
+	
+	public void addColumn(EditColumn eCol)
+	{
+		if (eCol != null) {
+			int idx = eCol.getIndex();
+			m_tableViewer.getTable().addColumn(idx+1);
+		}
+		else
+			m_tableViewer.getTable().addColumn();
+		
+		m_eCols = null;
+	}
+	
+	public void deleteColumn()
+	{
+		if (getSelectedColumn() != null) 			
+			m_tableViewer.getTable().delete(getSelectedColumn().getColumn());
+		
+		m_eCols = null;
+	}
+	
+	public void clearColumn(EditColumn eCol)
+	{
+		if (eCol != null) 			
+			eCol.getColumn().clear();
+	}
+	
     public EditRow getSelectedRow()
     {
     	return m_selectedRow;
@@ -81,9 +126,6 @@ public class TableEditor
     public void setSelectedRow(EditRow er)
     {
     	m_selectedRow = er;
-    	
-		EditColumn ec = TableEditor.findBean("col");
-		setSelectedColumn(ec);
     }
     
     public EditColumn getSelectedColumn()
@@ -96,23 +138,35 @@ public class TableEditor
     	m_selectedCol = ec;
     }
     
-    public void clearCell()
+    public void onCellEdit()
     {
-		EditRow er = TableEditor.findBean("row");
-		EditColumn ec = TableEditor.findBean("col");
-		
-		if (er != null && ec != null) {
-			
-		}    	
+    	System.out.println("Cell Updated..");
     }
     
-	public static class EditRow 
+    public void onCellUpdate(CellEditEvent event)
+    {
+    	System.out.println("Cell Updated..");
+    }
+    
+	public static class EditRow implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+		
 		private Row m_row;
 		
 		public EditRow(Row r)
 		{
 			m_row = r;
+		}
+		
+		public Row getRow() 
+		{
+			return m_row;
+		}
+
+		public int getIndex()
+		{
+			return m_row.getIndex();
 		}
 		
 		public String getLabel()
@@ -127,10 +181,17 @@ public class TableEditor
 		{
 			m_row.setLabel(val);
 		}
+		
+		public String getUuid()
+		{
+			return m_row.getUuid();
+		}
 	}
 	
-	public static class EditColumn 
+	public static class EditColumn implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+		
 		private Column m_col;
 		
 		public EditColumn(Column c)
@@ -138,6 +199,11 @@ public class TableEditor
 			m_col = c;
 		}
 		
+		public Column getColumn() 
+		{
+			return m_col;
+		}
+
 		public String getLabel()
 		{
 			String label = m_col.getLabel();
@@ -150,12 +216,42 @@ public class TableEditor
 		{
 			m_col.setLabel(val);
 		}
+				
+		public String getUuid()
+		{
+			return m_col.getUuid();
+		}
 		
+		public int getIndex()
+		{
+			return m_col.getIndex();
+		}
+		
+		public String getStyle()
+		{
+			Cell cell = getTableCell();
+			if (cell instanceof Printable) {
+				Printable p = (Printable)cell;
+				if (p.isCenterAligned())
+					return "float:center;";
+				else if (p.isRightAligned())
+					return "float:right;";
+			}
+			
+			return "float:left;";
+		}
+		
+		private Cell getTableCell() 
+		{
+			EditRow er = TableEditor.findBean("row");			
+			Cell cell = m_col.getTable().getCell(er.m_row, m_col);
+			
+			return cell;
+		}
+
 		public String getFormattedValue()
 		{
-			EditRow er = TableEditor.findBean("row");
-			
-			Cell cell = m_col.getTable().getCell(er.m_row, m_col);
+			Cell cell = getTableCell();
 			if (cell != null)
 				return cell.getFormattedCellValue();
 			else
@@ -164,9 +260,7 @@ public class TableEditor
 		
 		public String getRawValue()
 		{
-			EditRow er = TableEditor.findBean("row");
-			
-			Cell cell = m_col.getTable().getCell(er.m_row, m_col);
+			Cell cell = getTableCell();
 			if (cell != null && !cell.isNull()) {
 				if (cell.isDerived())
 					return "=" + cell.getDerivation().getAsEnteredExpression();
@@ -179,9 +273,7 @@ public class TableEditor
 		
 		public void setRawValue(String val)
 		{
-			EditRow er = TableEditor.findBean("row");
-			
-			Cell cell = m_col.getTable().getCell(er.m_row, m_col);
+			Cell cell = getTableCell();
 			if (cell != null) {
 				if (val == null || (val = val.trim()).length() <= 0) 
 					cell.setCellValue(null);
