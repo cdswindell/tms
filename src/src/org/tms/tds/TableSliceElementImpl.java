@@ -571,7 +571,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
-            DerivationImpl.recalculateAffected(this);
+            DerivationImpl.recalculateAffected(this.getTable());
         
         return setSome;
     }
@@ -636,7 +636,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
-            DerivationImpl.recalculateAffected(this);
+            DerivationImpl.recalculateAffected(this.getTable());
         
     }
     
@@ -702,7 +702,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         }        
         
         if (setSome && parent != null && parent.isAutoRecalculateEnabled())
-            DerivationImpl.recalculateAffected(this);        
+            DerivationImpl.recalculateAffected(this.getTable());        
     }
     
 	private boolean isDerived(Cell c)

@@ -19,12 +19,19 @@
    
    <p:confirmDialog message="Do you really want to delete this column?" 
                      header="Delete Column" severity="alert" widgetVar="deleteColDialog" appendTo="@(body)">
-        <p:commandButton id="confirm" value="Yes" update=":form:tableEditorId" oncomplete="PF('deleteColDialog').hide()" 
+        <p:commandButton id="confirmCD" value="Yes" update=":form:tableEditorId" oncomplete="PF('deleteColDialog').hide()" 
                          actionListener="#{tableEdit.deleteColumn}" />  
-        <p:commandButton id="decline" value="No" onclick="PF('deleteColDialog').hide()" type="button" />  
+        <p:commandButton id="declineCD" value="No" onclick="PF('deleteColDialog').hide()" type="button" />  
    </p:confirmDialog>  
     
-   <p:remoteCommand name="onCellEdit" action="#{tableEdit.onCellEdit}" update="@form" />
+   <p:confirmDialog message="Do you really want to delete this row?" 
+                     header="Delete Row" severity="alert" widgetVar="deleteRowDialog" appendTo="@(body)">
+        <p:commandButton id="confirmRD" value="Yes" update=":form:tableEditorId" oncomplete="PF('deleteRowDialog').hide()" 
+                         actionListener="#{tableEdit.deleteRow}" />  
+        <p:commandButton id="declineRD" value="No" onclick="PF('deleteRowDialog').hide()" type="button" />  
+   </p:confirmDialog>  
+    
+   <p:remoteCommand name="onCellEdit" update="@form" />
    <p:dataTable id="tableEditorId"
    				 var="row" 
    				 value="#{tableEdit.rows}" 
@@ -41,22 +48,21 @@
        
     	<p:ajax event="cellEdit" oncomplete="onCellEdit()" />
  
-       <p:column >
-           <p:cellEditor>
-               <f:facet name="output">
-               		<p:outputLabel value="#{row.label}" id="rowName"  style="font-weight:bold;">
-			        <p:contextMenu for="rowName" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
-		        		<p:menuitem  value="Derivation..." icon="ui-icon-close"/>
-		        		<p:menuitem  value="Rename..." icon="ui-icon-close"/>
-		        		<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearRow(row)}" update="@form">
-	      					<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
-		        		</p:menuitem>
-		        		<p:menuitem  value="Insert" icon="ui-icon-plus" actionListener="#{tableEdit.addRow(row)}" update="@form"/>
-	               	</p:contextMenu>
-	               	</p:outputLabel>
-               </f:facet>
-               <f:facet name="input"><p:inputText value="#{row.label}" style="width:100%"/></f:facet>
-           </p:cellEditor>
+       <p:column>
+			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
+			<p:contextMenu for="rowNames" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
+				<p:menuitem  value="Derivation..." icon="ui-icon-close">
+      				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
+      			</p:menuitem>
+				<p:menuitem  value="Rename..." icon="ui-icon-close">
+      				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
+      			</p:menuitem>
+				<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearRow(row)}" update="@form"/>
+				<p:menuitem  value="Insert" icon="ui-icon-plus" actionListener="#{tableEdit.addRow(row)}" update="@form"/>
+	        	<p:menuitem  value="Delete..." icon="ui-icon-trash" oncomplete="PF('deleteRowDialog').show()" >
+      				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
+	        	</p:menuitem>
+			</p:contextMenu>
        </p:column>
        
        <c:forEach items="#{tableEdit.columns}" var="col">
@@ -64,8 +70,12 @@
             <f:facet name="header">
                 <h:outputText value="#{col.label}"/>
 		        <p:contextMenu for="col_#{col.index}" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
-		        	<p:menuitem  value="Derivation..." icon="ui-icon-close"/>
-		        	<p:menuitem  value="Rename..." icon="ui-icon-close"/>
+		        	<p:menuitem  value="Derivation..." icon="ui-icon-close">
+	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
+	      			</p:menuitem>
+		        	<p:menuitem  value="Rename..." icon="ui-icon-close">
+	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
+	      			</p:menuitem>
 		        	<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearColumn(col)}" update="@form"/>
 		        	<p:menuitem  value="Insert" icon="ui-icon-plus" actionListener="#{tableEdit.addColumn(col)}" update="@form"/>
 		        	<p:menuitem  value="Delete..." icon="ui-icon-trash" oncomplete="PF('deleteColDialog').show()" >

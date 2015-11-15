@@ -9,10 +9,10 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
-import org.primefaces.event.CellEditEvent;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.TableRowColumnElement;
 import org.tms.io.Printable;
 
 @ManagedBean(name="tableEdit" )
@@ -138,95 +138,75 @@ public class TableEditor implements Serializable
     	m_selectedCol = ec;
     }
     
-    public void onCellEdit()
+    abstract static public class EditBase implements Serializable
     {
-    	System.out.println("Cell Updated..");
+		private static final long serialVersionUID = 1L;
+		
+		protected TableRowColumnElement m_te;   	
+    	public EditBase(TableRowColumnElement te)
+    	{
+    		m_te = te;
+    	}
+    	
+    	public TableRowColumnElement getTE()
+    	{
+    		return m_te;
+    	}
+    	
+		public int getIndex()
+		{
+			return m_te.getIndex();
+		}
+		
+		public String getLabel()
+		{
+			String label = m_te.getLabel();
+			if (label == null || (label = label.trim()).length() <= 0)
+				label = (m_te instanceof Row ? "Row " : "Col ") + m_te.getIndex();
+			
+			return label;
+		}
+		
+		public void setLabel(String val)
+		{
+			m_te.setLabel(val);
+		}
+		
+		public String getUuid()
+		{
+			return m_te.getUuid();
+		}
     }
     
-    public void onCellUpdate(CellEditEvent event)
-    {
-    	System.out.println("Cell Updated..");
-    }
-    
-	public static class EditRow implements Serializable
+	public static class EditRow extends EditBase 
 	{
 		private static final long serialVersionUID = 1L;
 		
-		private Row m_row;
-		
 		public EditRow(Row r)
 		{
-			m_row = r;
+			super(r);
 		}
 		
 		public Row getRow() 
 		{
-			return m_row;
-		}
-
-		public int getIndex()
-		{
-			return m_row.getIndex();
-		}
-		
-		public String getLabel()
-		{
-			String label = m_row.getLabel();
-			if (label == null || (label = label.trim()).length() <= 0)
-				label = "Row " + m_row.getIndex();
-			return label;
-		}
-		
-		public void setLabel(String val)
-		{
-			m_row.setLabel(val);
-		}
-		
-		public String getUuid()
-		{
-			return m_row.getUuid();
+			return (Row)m_te;
 		}
 	}
 	
-	public static class EditColumn implements Serializable
+	public static class EditColumn extends EditBase implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 		
-		private Column m_col;
-		
 		public EditColumn(Column c)
 		{
-			m_col = c;
+			super(c);
 		}
 		
 		public Column getColumn() 
 		{
-			return m_col;
+			return (Column)m_te;
 		}
 
-		public String getLabel()
-		{
-			String label = m_col.getLabel();
-			if (label == null || (label = label.trim()).length() <= 0)
-				label = "Col " + m_col.getIndex();
-			return label;
-		}
-		
-		public void setLabel(String val)
-		{
-			m_col.setLabel(val);
-		}
-				
-		public String getUuid()
-		{
-			return m_col.getUuid();
-		}
-		
-		public int getIndex()
-		{
-			return m_col.getIndex();
-		}
-		
 		public String getStyle()
 		{
 			Cell cell = getTableCell();
@@ -244,7 +224,7 @@ public class TableEditor implements Serializable
 		private Cell getTableCell() 
 		{
 			EditRow er = TableEditor.findBean("row");			
-			Cell cell = m_col.getTable().getCell(er.m_row, m_col);
+			Cell cell = m_te.getTable().getCell(er.getRow(), (Column)m_te);
 			
 			return cell;
 		}

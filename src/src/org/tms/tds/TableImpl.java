@@ -393,6 +393,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             if (deletedAny) {
                 reclaimColumnSpace();
                 reclaimRowSpace();
+                
+                // recalculate the table
+                DerivationImpl.recalculateAffected(this);
             }
         }
     }
