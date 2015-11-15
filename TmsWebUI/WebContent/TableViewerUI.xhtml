@@ -3,17 +3,54 @@
 	  xmlns:ui="http://java.sun.com/jsf/facelets" 
 	  xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui">
-
-<head>
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core">
+<h:head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>TMS Tables</title>
-</head>
-
-<body>
+</h:head>
+<h:body>
 <h:form id="form">
    <p:growl id="msgs" showDetail="true"/>
-   <p:spinner />  
+   
+   <p:contextMenu for="tableEditorId" widgetVar="cMenu">   
+       <p:menuitem value="Edit Cell" icon="ui-icon-search" onclick="PF('tableCell').showCellEditor();return false;"/>  
+       <p:menuitem value="Clear Cell" icon="ui-icon-close" actionListener="#{tableEdit.clearCell}"/>  
+       <p:menuitem value="Hide Menu" icon="ui-icon-close" onclick="PF('cMenu').hide()"/>  
+   </p:contextMenu> 
+
+   	<p:dataTable id="tableEditorId" 
+   				 var="row" 
+   				 value="#{tableEdit.rows}" 
+   				 editable="true"
+   				 editMode="cell" 
+   				 widgetVar="tableCell" 
+   				 resizableColumns="true"
+   				 scrollable="true"
+   				 rowKey="#{row}">
+       <f:facet name="header">
+           <p:outputLabel value="#{tableView.title}"/>
+       </f:facet>
+ 
+       <p:ajax event="cellEdit" listener="#{tableEdit.onCellEdit}" update=":form:msgs,:form:tableEditorId" />
+       
+       <p:column >
+           <p:cellEditor>
+               <f:facet name="output"><h:outputText value="#{row.label}" /></f:facet>
+               <f:facet name="input"><p:inputText value="#{row.label}" style="width:100%"/></f:facet>
+           </p:cellEditor>
+       </p:column>
+       
+       <c:forEach items="#{tableEdit.columns}" var="col">
+          <p:column headerText="#{col.label}">
+          	<p:cellEditor>
+               <f:facet name="output"><h:outputText value="#{col.formattedValue}" /></f:facet>
+               <f:facet name="input"><p:inputText value="#{col.rawValue}" style="width:96%"/></f:facet>
+            </p:cellEditor>
+       	  </p:column>
+       </c:forEach>
+       
+	</p:dataTable>  
 </h:form>
-</body>
+</h:body>
 </html>
