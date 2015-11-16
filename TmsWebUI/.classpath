@@ -6,7 +6,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="/TMS/target/tms-0.9.jar">
+	<classpathentry exported="true" kind="lib" path="/TMS/target/tms-0.9.jar" sourcepath="/TMS">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>

@@ -29,7 +29,7 @@ public class TableViewer
     		m_table.addRow(10);
     		m_table.addColumn(3);
     		
-    		m_table.getTableContext().registerOperator(new StockTickerOp("l_cur"));
+    		m_table.getTableContext().registerOperator(new StockTickerOp());
     	}
     }
 	

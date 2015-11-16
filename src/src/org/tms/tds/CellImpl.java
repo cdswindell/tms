@@ -64,6 +64,9 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         if (getCellValue() == null)
             return null;
         
+        if (isPending())
+        	return "Pending...";
+        
         String format = getFormatString();
         if (format != null) {
             try {
@@ -1055,7 +1058,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     @Override
     public boolean isLeftAligned()
     {
-        return !(isNumericValue() || isBooleanValue());
+        return !(isRightAligned() || isCenterAligned() );
     }
 
     @Override
@@ -1067,7 +1070,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     @Override
     public boolean isCenterAligned()
     {
-        return isBooleanValue();
+        return isBooleanValue() || isPending();
     }
 
     @Override
