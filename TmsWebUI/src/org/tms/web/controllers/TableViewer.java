@@ -10,6 +10,7 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
+import org.tms.api.utils.StockTickerOp;
 
 @ManagedBean(name = "tableView")
 @ApplicationScoped
@@ -27,6 +28,8 @@ public class TableViewer
     		
     		m_table.addRow(10);
     		m_table.addColumn(3);
+    		
+    		m_table.getTableContext().registerOperator(new StockTickerOp("l_cur"));
     	}
     }
 	

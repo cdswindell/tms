@@ -3,6 +3,7 @@ package org.tms.web.controllers;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -66,6 +67,78 @@ public class TableEditor implements Serializable
 		return m_eCols;
 	}
 	
+	public String getEntityTag()
+	{
+		if (m_selectedRow != null)
+			return "Row";
+		else if (m_selectedCol != null)
+			return "Column";
+		else
+			return "";		
+	}
+	
+	public String getEntityLabel()
+	{
+		if (getSelectedEntity() != null)
+			return getSelectedEntity().getLabel();
+		else
+			return "";		
+	}
+	
+	public String getEntityDerivation()
+	{
+		if (getSelectedEntity() != null && getSelectedEntity().getTE().isDerived())
+			return getSelectedEntity().getTE().getDerivation().getAsEnteredExpression();
+		else
+			return "";		
+	}
+	
+	public void setEntityLabel(String label)
+	{
+		if (getSelectedEntity() != null)
+			getSelectedEntity().setLabel(label);
+	}
+	
+	public void renameEntity()
+	{
+	    FacesContext context = FacesContext.getCurrentInstance();
+	    Map<String,String> params = context.getExternalContext().getRequestParameterMap();
+	    String val = params.get("newName"); 
+	    if (val == null || (val = val.trim()).length() == 0)
+	    	val = null;
+	    
+		EditBase eb = getSelectedEntity();
+		if (eb != null) 
+			eb.setLabel(val);
+	}
+	
+	public void deriveEntity()
+	{
+	    FacesContext context = FacesContext.getCurrentInstance();
+	    Map<String,String> params = context.getExternalContext().getRequestParameterMap();
+	    String val = params.get("newDeriv"); 
+	    if (val == null || (val = val.trim()).length() == 0)
+	    	val = null;
+	    
+		EditBase eb = getSelectedEntity();
+		if (eb != null) {
+			if (val == null)
+				eb.getTE().clearDerivation();
+			else
+				eb.getTE().setDerivation(val);
+		}
+	}
+	
+	public EditBase getSelectedEntity()
+	{
+		if (m_selectedRow != null)
+			return m_selectedRow;
+		else if (m_selectedCol != null)
+			return m_selectedCol;
+		else
+			return null;		
+	}
+	
 	public void clearRow(EditRow eRow)
 	{
 		if (eRow != null) 			
@@ -90,6 +163,7 @@ public class TableEditor implements Serializable
 			m_tableViewer.getTable().delete(getSelectedRow().getRow());
 		
 		m_eRows = null;
+		m_selectedRow = null;
 	}
 	
 	public void addColumn(EditColumn eCol)
@@ -110,6 +184,7 @@ public class TableEditor implements Serializable
 			m_tableViewer.getTable().delete(getSelectedColumn().getColumn());
 		
 		m_eCols = null;
+		m_selectedCol = null;
 	}
 	
 	public void clearColumn(EditColumn eCol)
@@ -126,6 +201,7 @@ public class TableEditor implements Serializable
     public void setSelectedRow(EditRow er)
     {
     	m_selectedRow = er;
+    	m_selectedCol = null;
     }
     
     public EditColumn getSelectedColumn()
@@ -136,6 +212,7 @@ public class TableEditor implements Serializable
     public void setSelectedColumn(EditColumn ec)
     {
     	m_selectedCol = ec;
+    	m_selectedRow = null;
     }
     
     abstract static public class EditBase implements Serializable
