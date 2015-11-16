@@ -113,6 +113,11 @@ abstract public class RestConsumerOp implements Operator
         return data;
     }
     
+    protected boolean isAllowNulls()
+    {
+    	return false;
+    }
+    
     protected Object postProcessParamValue(String paramName, Object paramValue)
     {
         return paramValue;
@@ -199,6 +204,9 @@ abstract public class RestConsumerOp implements Operator
             Object [] mArgs = new Object [numArgs()];
             for (int i = 0; i < numArgs(); i++) {
                 mArgs[i] = args[i].getValue();
+                
+                if (mArgs[i] == null && !isAllowNulls())
+                	return Token.createNullToken();
             }
             
             // get a copy of the base URL, it may also contain substitution params

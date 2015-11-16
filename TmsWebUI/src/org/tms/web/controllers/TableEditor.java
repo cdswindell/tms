@@ -290,7 +290,7 @@ public class TableEditor implements Serializable
 			if (cell instanceof Printable) {
 				Printable p = (Printable)cell;
 				if (p.isCenterAligned())
-					return "float:center;";
+					return "text-align:center;";
 				else if (p.isRightAligned())
 					return "float:right;";
 			}
