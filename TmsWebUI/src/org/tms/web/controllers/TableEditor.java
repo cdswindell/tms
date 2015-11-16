@@ -283,15 +283,23 @@ public class TableEditor implements Serializable
 		
 		public String getDerivation()
 		{
-			if (isDerived())
+			if (isValid() && isDerived())
 				return m_te.getDerivation().getAsEnteredExpression();
 			else
 				return "";
 		}
 		
 		public boolean isDerived()
+		{    
+			if (isValid())
+				return m_te.isDerived();
+			else
+				return false;
+		}
+		
+		public boolean isValid()
 		{
-			return m_te.isDerived();
+			return m_te.isValid();
 		}
     }
     

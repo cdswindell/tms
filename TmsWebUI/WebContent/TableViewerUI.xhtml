@@ -88,15 +88,15 @@
 <h:form id="form">
    <p:growl id="msgs" showDetail="true"/>
    
-   <p:confirmDialog message="Do you really want to delete this column?" 
-                     header="Delete Column" severity="alert" widgetVar="deleteColDialog" appendTo="@(body)">
+   <p:confirmDialog id="deleColDlg" message="Do you really want to delete this column?" 
+                     header="Delete Column: #{tableEdit.selectedEntity.label}" severity="alert" widgetVar="deleteColDialog" >
         <p:commandButton id="confirmCD" value="Yes" update=":form:tableEditorId" oncomplete="PF('deleteColDialog').hide()" 
                          actionListener="#{tableEdit.deleteColumn}" />  
         <p:commandButton id="declineCD" value="No" onclick="PF('deleteColDialog').hide()" type="button" />  
-   </p:confirmDialog>  
-    
-   <p:confirmDialog message="Do you really want to delete this row?" 
-                     header="Delete Row" severity="alert" widgetVar="deleteRowDialog" appendTo="@(body)">
+   </p:confirmDialog>   
+     
+   <p:confirmDialog id="deleRowDlg" message="Do you really want to delete this row?" 
+                     header="Delete Row: #{tableEdit.selectedEntity.label}" severity="alert" widgetVar="deleteRowDialog" >
         <p:commandButton id="confirmRD" value="Yes" update=":form:tableEditorId" oncomplete="PF('deleteRowDialog').hide()" 
                          actionListener="#{tableEdit.deleteRow}" />  
         <p:commandButton id="declineRD" value="No" onclick="PF('deleteRowDialog').hide()" type="button" />  
@@ -130,7 +130,7 @@
       			</p:menuitem>
 				<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearRow(row)}" update="@form"/>
 				<p:menuitem  value="Insert" icon="ui-icon-plus" actionListener="#{tableEdit.addRow(row)}" update="@form"/>
-	        	<p:menuitem  value="Delete..." icon="ui-icon-trash" oncomplete="PF('deleteRowDialog').show()" >
+	        	<p:menuitem  value="Delete..." icon="ui-icon-trash" oncomplete="PF('deleteRowDialog').show()" update=":form:deleRowDlg">
       				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
 	        	</p:menuitem>
 			</p:contextMenu>
@@ -153,7 +153,7 @@
 	      			</p:menuitem>
 		        	<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearColumn(col)}" update="@form"/>
 		        	<p:menuitem  value="Insert" icon="ui-icon-plus" actionListener="#{tableEdit.addColumn(col)}" update="@form"/>
-		        	<p:menuitem  value="Delete..." icon="ui-icon-trash" oncomplete="PF('deleteColDialog').show()" >
+		        	<p:menuitem  value="Delete..." icon="ui-icon-trash" oncomplete="PF('deleteColDialog').show()" update=":form:deleColDlg">
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 		        	</p:menuitem>
 		        </p:contextMenu>
@@ -165,8 +165,12 @@
             </p:cellEditor>
        	  </p:column>
        </c:forEach>
-	</p:dataTable>  
-	
+	</p:dataTable>  	
 </h:form>
+
+<p:socket channel="/tableUpdated" >
+	<p:ajax event="message" update="form:tableEditorId"/>
+</p:socket>
+
 </h:body>
 </html>
