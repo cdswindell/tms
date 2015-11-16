@@ -3,7 +3,6 @@ package org.tms.web.controllers;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -77,6 +76,22 @@ public class TableEditor implements Serializable
 			return "";		
 	}
 	
+	public String getEntityFormat()
+	{
+		if (getSelectedEntity() != null)
+			return getSelectedEntity().getDisplayFormat();
+		else
+			return "";		
+	}
+	
+	public void setEntityFormat(String format)
+	{
+		if (getSelectedEntity() != null) 			
+			getSelectedEntity().setDisplayFormat(format);
+			
+		clearSelectedEntity();
+	}
+	
 	public String getEntityLabel()
 	{
 		if (getSelectedEntity() != null)
@@ -85,6 +100,18 @@ public class TableEditor implements Serializable
 			return "";		
 	}
 	
+	public void setEntityLabel(String label)
+	{
+		if (getSelectedEntity() != null) {
+			if (label != null && (label = label.trim()).length() <= 0)
+				label = null;
+			
+			getSelectedEntity().setLabel(label);
+			
+			clearSelectedEntity();
+		}
+	}	
+
 	public String getEntityDerivation()
 	{
 		if (getSelectedEntity() != null && getSelectedEntity().getTE().isDerived())
@@ -93,42 +120,22 @@ public class TableEditor implements Serializable
 			return "";		
 	}
 	
-	public void setEntityLabel(String label)
+	public void setEntityDerivation(String deriv)
 	{
-		if (getSelectedEntity() != null)
-			getSelectedEntity().setLabel(label);
-	}
-	
-	public void renameEntity()
-	{
-	    FacesContext context = FacesContext.getCurrentInstance();
-	    Map<String,String> params = context.getExternalContext().getRequestParameterMap();
-	    String val = params.get("newName"); 
-	    if (val == null || (val = val.trim()).length() == 0)
-	    	val = null;
-	    
-		EditBase eb = getSelectedEntity();
-		if (eb != null) 
-			eb.setLabel(val);
-	}
-	
-	public void deriveEntity()
-	{
-	    FacesContext context = FacesContext.getCurrentInstance();
-	    Map<String,String> params = context.getExternalContext().getRequestParameterMap();
-	    String val = params.get("newDeriv"); 
-	    if (val == null || (val = val.trim()).length() == 0)
-	    	val = null;
-	    
-		EditBase eb = getSelectedEntity();
-		if (eb != null) {
-			if (val == null)
+		if (getSelectedEntity() != null) {
+			if (deriv != null && (deriv = deriv.trim()).length() <= 0)
+				deriv = null;
+			
+			EditBase eb = getSelectedEntity();
+			if (deriv == null)
 				eb.getTE().clearDerivation();
 			else
-				eb.getTE().setDerivation(val);
+				eb.getTE().setDerivation(deriv);
+			
+			clearSelectedEntity();
 		}
-	}
-	
+	}	
+
 	public EditBase getSelectedEntity()
 	{
 		if (m_selectedRow != null)
@@ -137,6 +144,12 @@ public class TableEditor implements Serializable
 			return m_selectedCol;
 		else
 			return null;		
+	}
+	
+	private void clearSelectedEntity()
+	{
+		m_selectedRow = null;
+		m_selectedCol = null;
 	}
 	
 	public void clearRow(EditRow eRow)
@@ -246,12 +259,39 @@ public class TableEditor implements Serializable
 		
 		public void setLabel(String val)
 		{
+			if (val != null && (val = val.trim()).length() <= 0)
+				val = null;
 			m_te.setLabel(val);
+		}
+		
+		public String getDisplayFormat()
+		{
+			return m_te.getDisplayFormat();
+		}
+		
+		public void setDisplayFormat(String val)
+		{
+			if (val != null && (val = val.trim()).length() <= 0)
+				val = null;
+			m_te.setDisplayFormat(val);
 		}
 		
 		public String getUuid()
 		{
 			return m_te.getUuid();
+		}
+		
+		public String getDerivation()
+		{
+			if (isDerived())
+				return m_te.getDerivation().getAsEnteredExpression();
+			else
+				return "";
+		}
+		
+		public boolean isDerived()
+		{
+			return m_te.isDerived();
 		}
     }
     
@@ -290,7 +330,7 @@ public class TableEditor implements Serializable
 			if (cell instanceof Printable) {
 				Printable p = (Printable)cell;
 				if (p.isCenterAligned())
-					return "text-align:center;";
+					return "display: table-cell;text-align: center;";
 				else if (p.isRightAligned())
 					return "float:right;";
 			}

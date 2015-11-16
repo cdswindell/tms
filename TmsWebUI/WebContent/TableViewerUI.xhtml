@@ -16,36 +16,35 @@
 </style>
 </h:head>
 <h:body>
-<h:form id="form">
-   <p:growl id="msgs" showDetail="true"/>
-   
+<h:form id="rename">
     <p:dialog id="renameTEDialog" 
     		  header="Rename #{tableEdit.entityTag}" 
     		  widgetVar="renameTEDialog" 
     		  modal="true" 
     		  resizable="false" 
-    		  appendTo="@(body)"
               showEffect="clip" 
-              hideEffect="fold">  
+              hideEffect="fold" >  
 	    <p:panelGrid id="renameTEPanel" columns="2" cellpadding="4" styleClass="renameHeaderGrid">
 	        <p:outputLabel value="#{tableEdit.entityTag} Name: " />  
-	        <p:inputText id="txRenameTE" value="#{tableEdit.entityLabel}" widgetVar="newName"/> 
+	        <p:inputText id="txRenameTE" value="#{tableEdit.entityLabel}" widgetVar="newName"/>
 	        <p:commandButton icon="ui-icon-check"   
 	        				 value="OK" 
-	        				 update="@form"
-	        				 onclick="onRename([{name:'newName',value:PF('newName').jq.val()}]);"
 	        				 oncomplete="PF('renameTEDialog').hide()"
+	        				 process="@form"
+	        				 update=":form:tableEditorId"
+	        				 onstart="$('rename').submit();"
 	        				 />
 			<p:commandButton icon="ui-icon-cancel" value="Cancel" type="button" onclick="PF('renameTEDialog').hide()"/>
 		</p:panelGrid>  
     </p:dialog>
-       
+</h:form>
+
+<h:form id="derive">
     <p:dialog id="deriveTEDialog" 
     		  header="Set #{tableEdit.entityTag} Derivation" 
     		  widgetVar="deriveTEDialog" 
     		  modal="true" 
     		  resizable="false" 
-    		  appendTo="@(body)"
               showEffect="clip" 
               hideEffect="fold">  
 	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="renameHeaderGrid">
@@ -53,13 +52,41 @@
 	        <p:inputText id="txDeriveTE" value="#{tableEdit.entityDerivation}" widgetVar="newDeriv" size="30"/> 
 	        <p:commandButton icon="ui-icon-check"   
 	        				 value="OK" 
-	        				 update="@form"
-	        				 onclick="onDerive([{name:'newDeriv',value:PF('newDeriv').jq.val()}]);"
 	        				 oncomplete="PF('deriveTEDialog').hide()"
+	        				 update=":form:tableEditorId"
+	        				 process="@form"
+	        				 onstart="$('#derive').submit();"
 	        				 />
 			<p:commandButton icon="ui-icon-cancel" value="Cancel" type="button" onclick="PF('deriveTEDialog').hide()"/>
 		</p:panelGrid>  
    </p:dialog>
+</h:form>
+
+<h:form id="format">
+    <p:dialog id="formatTEDialog" 
+    		  header="Set #{tableEdit.entityTag} Format" 
+    		  widgetVar="formatTEDialog" 
+    		  modal="true" 
+    		  resizable="false" 
+              showEffect="clip" 
+              hideEffect="fold">  
+	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="renameHeaderGrid">
+	        <p:outputLabel value="#{tableEdit.entityTag} Format: " />  
+	        <p:inputText id="txFormatTE" value="#{tableEdit.entityFormat}" widgetVar="newFormat" size="20"/> 
+	        <p:commandButton icon="ui-icon-check"   
+	        				 value="OK" 
+	        				 oncomplete="PF('formatTEDialog').hide()"
+	        				 update=":form:tableEditorId"
+	        				 process="@form"
+	        				 onstart="$('#format').submit();"
+	        				 />
+			<p:commandButton icon="ui-icon-cancel" value="Cancel" type="button" onclick="PF('formatTEDialog').hide()"/>
+		</p:panelGrid>  
+   </p:dialog>
+</h:form>
+
+<h:form id="form">
+   <p:growl id="msgs" showDetail="true"/>
    
    <p:confirmDialog message="Do you really want to delete this column?" 
                      header="Delete Column" severity="alert" widgetVar="deleteColDialog" appendTo="@(body)">
@@ -76,8 +103,6 @@
    </p:confirmDialog>  
     
    <p:remoteCommand name="onCellEdit" update="@form" />
-   <p:remoteCommand name="onRename" actionListener="#{tableEdit.renameEntity}" update="@form" />
-   <p:remoteCommand name="onDerive" actionListener="#{tableEdit.deriveEntity}" update="@form" />
    <p:dataTable id="tableEditorId"
    				 var="row" 
    				 value="#{tableEdit.rows}" 
@@ -86,7 +111,7 @@
    				 widgetVar="tableCell" 
    				 resizableColumns="true"
    				 scrollable="true"
-   				 stickyHeader="true"
+   				 stickyHeader="true" 
    				 >
        <f:facet name="header">
            <p:outputLabel value="#{tableView.title}" style="font-weight:bold;font-size:125%"/>
@@ -94,13 +119,13 @@
        
        <p:ajax event="cellEdit" oncomplete="onCellEdit()" />
  
-       <p:column>
+       <p:column styleClass="ui-widget-header">
 			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
 			<p:contextMenu for="rowNames" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
-				<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":form:deriveTEDialog">
+				<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog">
       				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
       			</p:menuitem>
-				<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTEDialog').show();" update=":form:renameTEDialog">
+				<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTEDialog').show();" update=":rename:renameTEDialog">
       				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
       			</p:menuitem>
 				<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearRow(row)}" update="@form"/>
@@ -112,14 +137,18 @@
        </p:column>
        
        <c:forEach items="#{tableEdit.columns}" var="col">
-          <p:column headerText="#{col.label}" id="col_#{col.index}">
+          <p:column id="col_#{col.index}" >
             <f:facet name="header">
                 <h:outputText value="#{col.label}"/>
+                <h:outputText value="*" rendered="#{col.derived}" />
 		        <p:contextMenu for="col_#{col.index}" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
-					<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":form:deriveTEDialog">
+					<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog">
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 	      			</p:menuitem>
-		        	<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTEDialog').show();" update=":form:renameTEDialog">
+		        	<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTEDialog').show();" update=":rename:renameTEDialog">
+	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
+	      			</p:menuitem>
+					<p:menuitem  value="Format..." icon="ui-icon-calculator" oncomplete="PF('formatTEDialog').show();" update=":format:formatTEDialog">
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 	      			</p:menuitem>
 		        	<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearColumn(col)}" update="@form"/>
@@ -128,9 +157,10 @@
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 		        	</p:menuitem>
 		        </p:contextMenu>
+   		   	 <p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived}"/>
             </f:facet>
           	<p:cellEditor>
-               <f:facet name="output"><h:outputText value="#{col.formattedValue}" style="#{col.style}"/></f:facet>
+               <f:facet name="output"><div align="center"><h:outputText value="#{col.formattedValue}" style="#{col.style}"/></div></f:facet>
                <f:facet name="input"><p:inputText value="#{col.rawValue}" style="width:96%"/></f:facet>
             </p:cellEditor>
        	  </p:column>
