@@ -4,14 +4,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.UploadedFile;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.TableContext;
 import org.tms.api.TableRowColumnElement;
 import org.tms.io.Printable;
 
@@ -36,6 +40,36 @@ public class TableEditor implements Serializable
 	
 	private EditRow m_selectedRow;
 	private EditColumn m_selectedCol;
+
+	private UploadedFile m_file;
+	
+	public UploadedFile getFile() 
+	{
+		return m_file;
+	}
+
+	public void setFile(UploadedFile file) 
+	{
+		this.m_file = file;
+	}
+
+	public void uploadOps(FileUploadEvent event) 
+	{
+		m_file = event.getFile();
+		if (m_file != null) {
+			TableContext tc = m_tableViewer.getTable().getTableContext();
+			tc.registerGroovyOperators(new String(m_file.getContents()));
+			
+            FacesMessage message = new FacesMessage("Succesful", "Operator(s) in: " + m_file.getFileName() + " are now available.");
+            FacesContext.getCurrentInstance().addMessage(null, message);
+            m_file = null;
+		}
+	}
+	
+	public boolean isNoFile()
+	{
+		return m_file == null;
+	}
 	
 	public void reset()
 	{

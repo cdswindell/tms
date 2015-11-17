@@ -9,10 +9,17 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>TMS Tables</title>
 <style>
-	.renameHeaderGrid.ui-panelgrid>*>tr,
-	.renameHeaderGrid.ui-panelgrid .ui-panelgrid-cell 
+	.tmsHeaderGrid.ui-panelgrid>*>tr,
+	.tmsHeaderGrid.ui-panelgrid .ui-panelgrid-cell 
 	{
 	    border: none;
+	}
+	.toolBarGrid.ui-panelgrid>*>tr,
+	.toolBarGrid.ui-panelgrid .ui-panelgrid-cell 
+	{
+	    border: none;
+	    background-color: transparent !important;
+	    margin: 0 auto;
 	}
 </style>
 </h:head>
@@ -25,7 +32,7 @@
     		  resizable="false" 
               showEffect="clip" 
               hideEffect="fold" >  
-	    <p:panelGrid id="renameTEPanel" columns="2" cellpadding="4" styleClass="renameHeaderGrid">
+	    <p:panelGrid id="renameTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:outputLabel value="#{tableEdit.entityTag} Name: " />  
 	        <p:inputText id="txRenameTE" value="#{tableEdit.entityLabel}" widgetVar="newName"/>
 	        <p:commandButton icon="ui-icon-check"   
@@ -48,11 +55,11 @@
     		  resizable="false" 
               showEffect="clip" 
               hideEffect="fold">  
-	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="renameHeaderGrid">
+	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:outputLabel value="#{tableEdit.entityTag} Derivation: "/>  
 	        <p:inputText id="txDeriveTE" value="#{tableEdit.entityDerivation}" widgetVar="newDeriv" size="30" styleClass="txDeriveTE"/> 
 		</p:panelGrid>  
-	    <p:panelGrid id="deriveTEPanel2" columns="3" cellpadding="4" styleClass="renameHeaderGrid">
+	    <p:panelGrid id="deriveTEPanel2" columns="3" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:commandButton icon="ui-icon-check"   
 	        				 value="OK" 
 	        				 oncomplete="PF('deriveTEDialog').hide()"
@@ -81,7 +88,7 @@
     		  resizable="false" 
               showEffect="clip" 
               hideEffect="fold">  
-	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="renameHeaderGrid">
+	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:outputLabel value="#{tableEdit.entityTag} Format: " />  
 	        <p:inputText id="txFormatTE" value="#{tableEdit.entityFormat}" widgetVar="newFormat" size="20"/> 
 	        <p:commandButton icon="ui-icon-check"   
@@ -93,6 +100,32 @@
 	        				 />
 			<p:commandButton icon="ui-icon-cancel" value="Cancel" type="button" onclick="PF('formatTEDialog').hide()"/>
 		</p:panelGrid>  
+   </p:dialog>
+</h:form>
+
+<h:form id="gScript" enctype="multipart/form-data">
+	<p:dialog id="scriptTEDialog" 
+    		  header="Upload New Operators" 
+    		  widgetVar="scriptTEDialog" 
+    		  modal="true" 
+    		  resizable="false" 
+              showEffect="clip"
+              hideEffect="fold">  
+	    <p:panelGrid id="scriptTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
+	        <p:outputLabel value="Script File: "/>  
+ 			<p:fileUpload widgetVar="fileUpload"
+ 						  fileUploadListener="#{tableEdit.uploadOps}"
+ 						  value="#{tableEdit.file}" 
+ 						  mode="advanced"
+ 						  dragDropSupport="true"
+ 						  fileLimit="1" 
+ 						  allowTypes="/(\.|\/)(groovy|gvy|gy|gsh|txt)$/"
+ 						  update="uploadMessages"/>
+		</p:panelGrid>  
+	    <p:panelGrid  columns="1" cellpadding="4" styleClass="tmsHeaderGrid" >
+			<p:commandButton icon="ui-icon-check" value="Done" type="button" onclick="PF('scriptTEDialog').hide()"/>
+	    </p:panelGrid>
+		<p:growl id="uploadMessages" showDetail="true" />	
    </p:dialog>
 </h:form>
 
@@ -130,12 +163,12 @@
  	   </f:facet>
        <p:ajax event="cellEdit" oncomplete="onCellEdit()" />
  
-       <p:column styleClass="ui-widget-header" width="115">
+       <p:column styleClass="ui-widget-header" width="105">
             <f:facet name="header">
-	    	  <p:panelGrid id="btnPanel" columns="3" cellpadding="0" styleClass="renameHeaderGrid" style="background-color:gray">
+	    	  <p:panelGrid id="btnPanel" columns="3" border="0" cellpadding="0" cellspacing="0" styleClass="toolBarGrid" >
         		<p:commandButton id="resetTable" icon="ui-icon-refresh" update=":form:tableEditorId" actionListener="#{tableEdit.reset}" style="margin:0px;width:25px;height:25px"/>  
         		<p:commandButton id="recalcAll" icon="ui-icon-calculator" update=":form:tableEditorId" actionListener="#{tableEdit.recalc}" style="margin:0px;width:25px;height:25px"/>  
-        		<p:commandButton id="groovyOps" icon="ui-icon-script" update=":form:tableEditorId" style="margin:0px;width:25px;height:25px"/>  
+        		<p:commandButton id="groovyOps" icon="ui-icon-script" oncomplete="PF('scriptTEDialog').show();" style="margin:0px;width:25px;height:25px"/>  
 			  </p:panelGrid>
             </f:facet>
 			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
