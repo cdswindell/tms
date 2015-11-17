@@ -37,6 +37,21 @@ public class TableEditor implements Serializable
 	private EditRow m_selectedRow;
 	private EditColumn m_selectedCol;
 	
+	public void reset()
+	{
+		clearSelectedEntity();
+		m_eRows = null;
+		m_eCols = null;
+		
+		m_tableViewer = null;
+		setTableViewer(new TableViewer());
+	}
+	
+	public void recalc()
+	{
+		m_tableViewer.getTable().recalculate();
+	}
+		
 	public void setTableViewer(TableViewer tv) 
 	{
 		m_tableViewer = tv;
@@ -337,7 +352,7 @@ public class TableEditor implements Serializable
 			Cell cell = getTableCell();
 			if (cell instanceof Printable) {
 				Printable p = (Printable)cell;
-				if (p.isCenterAligned())
+				if (p.isCenterAligned() || cell.isErrorValue())
 					return "display: table-cell;text-align: center;";
 				else if (p.isRightAligned())
 					return "float:right;";
@@ -357,8 +372,12 @@ public class TableEditor implements Serializable
 		public String getFormattedValue()
 		{
 			Cell cell = getTableCell();
-			if (cell != null)
-				return cell.getFormattedCellValue();
+			if (cell != null) {
+				if (cell.isErrorValue())
+					return "--Error--";
+				else
+					return cell.getFormattedCellValue();
+			}
 			else
 				return "";
 		}

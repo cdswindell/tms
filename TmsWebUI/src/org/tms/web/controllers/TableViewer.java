@@ -2,7 +2,6 @@ package org.tms.web.controllers;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 
@@ -24,7 +23,11 @@ public class TableViewer implements TableElementListener
 {
 	private Table m_table;
 	
-    @PostConstruct
+	public TableViewer()
+	{
+		init();
+	}
+	
     public void init()     
     {
     	if (m_table == null) {

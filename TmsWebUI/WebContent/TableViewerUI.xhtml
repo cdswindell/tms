@@ -9,10 +9,11 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>TMS Tables</title>
 <style>
-.renameHeaderGrid.ui-panelgrid>*>tr,
-.renameHeaderGrid.ui-panelgrid .ui-panelgrid-cell {
-    border: none;
-}
+	.renameHeaderGrid.ui-panelgrid>*>tr,
+	.renameHeaderGrid.ui-panelgrid .ui-panelgrid-cell 
+	{
+	    border: none;
+	}
 </style>
 </h:head>
 <h:body>
@@ -48,14 +49,24 @@
               showEffect="clip" 
               hideEffect="fold">  
 	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="renameHeaderGrid">
-	        <p:outputLabel value="#{tableEdit.entityTag} Derivation: " />  
-	        <p:inputText id="txDeriveTE" value="#{tableEdit.entityDerivation}" widgetVar="newDeriv" size="30"/> 
+	        <p:outputLabel value="#{tableEdit.entityTag} Derivation: "/>  
+	        <p:inputText id="txDeriveTE" value="#{tableEdit.entityDerivation}" widgetVar="newDeriv" size="30" styleClass="txDeriveTE"/> 
+		</p:panelGrid>  
+	    <p:panelGrid id="deriveTEPanel2" columns="3" cellpadding="4" styleClass="renameHeaderGrid">
 	        <p:commandButton icon="ui-icon-check"   
 	        				 value="OK" 
 	        				 oncomplete="PF('deriveTEDialog').hide()"
 	        				 update=":form:tableEditorId"
 	        				 process="@form"
 	        				 onstart="$('#derive').submit();"
+	        				 />
+	        <p:commandButton icon="ui-icon-arrowthickstop-1-w"   
+	        				 value="Clear" 
+	        				 onclick="$('.txDeriveTE').val('')"
+	        				 process="@form"
+	        				 immediate="true"
+	        				 ajax="false"
+	        				 type="button"
 	        				 />
 			<p:commandButton icon="ui-icon-cancel" value="Cancel" type="button" onclick="PF('deriveTEDialog').hide()"/>
 		</p:panelGrid>  
@@ -109,17 +120,24 @@
    				 editable="true"
    				 editMode="cell" 
    				 widgetVar="tableCell" 
-   				 resizableColumns="true"
+   				 resizableColumns="true" 
+   				 liveResize="true"
    				 scrollable="true"
    				 stickyHeader="true" 
    				 >
        <f:facet name="header">
            <p:outputLabel value="#{tableView.title}" style="font-weight:bold;font-size:125%"/>
-       </f:facet>
-       
+ 	   </f:facet>
        <p:ajax event="cellEdit" oncomplete="onCellEdit()" />
  
-       <p:column styleClass="ui-widget-header">
+       <p:column styleClass="ui-widget-header" width="115">
+            <f:facet name="header">
+	    	  <p:panelGrid id="btnPanel" columns="3" cellpadding="0" styleClass="renameHeaderGrid" style="background-color:gray">
+        		<p:commandButton id="resetTable" icon="ui-icon-refresh" update=":form:tableEditorId" actionListener="#{tableEdit.reset}" style="margin:0px;width:25px;height:25px"/>  
+        		<p:commandButton id="recalcAll" icon="ui-icon-calculator" update=":form:tableEditorId" actionListener="#{tableEdit.recalc}" style="margin:0px;width:25px;height:25px"/>  
+        		<p:commandButton id="groovyOps" icon="ui-icon-script" update=":form:tableEditorId" style="margin:0px;width:25px;height:25px"/>  
+			  </p:panelGrid>
+            </f:facet>
 			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
 			<p:contextMenu for="rowNames" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
 				<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog">
@@ -148,7 +166,7 @@
 		        	<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTEDialog').show();" update=":rename:renameTEDialog">
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 	      			</p:menuitem>
-					<p:menuitem  value="Format..." icon="ui-icon-calculator" oncomplete="PF('formatTEDialog').show();" update=":format:formatTEDialog">
+					<p:menuitem  value="Format..." icon="ui-icon-wrench" oncomplete="PF('formatTEDialog').show();" update=":format:formatTEDialog">
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 	      			</p:menuitem>
 		        	<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearColumn(col)}" update="@form"/>

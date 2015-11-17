@@ -918,7 +918,10 @@ public final class DerivationImpl implements Derivation
         Table tbl = row.getTable();
         
         Iterable<Column> cols = null;
-        if (modifiedElement != null && modifiedElement instanceof Cell) {
+        if (modifiedElement != null && 
+        		modifiedElement instanceof Cell &&
+        		!isCellComponentInAggregate((Cell)modifiedElement)) 
+        {
             Column col = ((Cell)modifiedElement).getColumn();
             assert col != null : "Column required";
             cols = Collections.singletonList(col);
@@ -966,7 +969,10 @@ public final class DerivationImpl implements Derivation
         Table tbl = col.getTable();
         
         Iterable<Row> rows = null;
-        if (modifiedElement != null && modifiedElement instanceof Cell) {
+        if (modifiedElement != null && 
+        		modifiedElement instanceof Cell && 
+        		!isCellComponentInAggregate((Cell)modifiedElement)) 
+        {
             Row row = ((Cell)modifiedElement).getRow();
             assert row != null : "Row required";
             rows = Collections.singletonList(row);
@@ -1006,7 +1012,37 @@ public final class DerivationImpl implements Derivation
         	dc.remove(col);
     }
 
-    void cacheDeferredCalculation(AwaitingState pendingState, DerivationContext dc)
+    /**
+     * Returns true if the cell row or column is a parameter
+     * in an aggregate operator (StatOp, TransformOp, etc)
+     * 
+     * @param modifiedElement
+     * @return true if in aggregate
+     */
+    private boolean isCellComponentInAggregate(Cell cell) 
+    {
+		Row cellRow = cell.getRow();
+		Column cellCol = cell.getColumn();
+		
+		Iterator<Token> iter = m_pfs.descendingIterator();
+		Object eRef = null;
+		while (iter != null && iter.hasNext()) {
+			Token t = iter.next();
+			if (t != null && t.getTokenType() != null) {
+				TokenType tt = t.getTokenType();
+				if (tt == TokenType.StatOp || tt == TokenType.TransformOp) {
+					if (eRef == cellRow || eRef == cellCol)
+						return true;
+				}
+			}
+			
+			eRef = t.getValue();
+		}
+		
+		return false;
+	}
+
+	void cacheDeferredCalculation(AwaitingState pendingState, DerivationContext dc)
     {
         sf_UUID_PENDING_STATE_MAP.put(pendingState.getTransactionID(), pendingState);
         if (pendingState.isRunnable()) {
