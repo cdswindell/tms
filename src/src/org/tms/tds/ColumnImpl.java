@@ -21,7 +21,6 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.io.IOOption;
 import org.tms.io.ColumnExportAdapter;
 import org.tms.io.TableExportAdapter;
-import org.tms.teq.DerivationImpl;
 
 public class ColumnImpl extends TableSliceElementImpl implements Column
 {
@@ -508,11 +507,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         
         // mark row as deleted
         invalidate(); 
-        
-        // recalculate the table
-        if (compress)
-        	DerivationImpl.recalculateAffected(parent);
-        
+                
         fireEvents(this, TableElementEventType.OnDelete);
     }
 

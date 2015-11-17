@@ -397,8 +397,9 @@ public class PendingOperatorTest extends BaseTest
         assertThat(t.getColumn(), is(curCol));
         
         numRows = t.getNumRows();
-        assertThat(closeTo(cR1C4.getCellValue(), 0.0, 0.00000000001), is(true));
-        assertThat(cR2C4.getCellValue(), is(220.0));
+        if (!cR1C4.isErrorValue())
+        	assertThat(String.format("Expected: 0, Observed: %s", cR2C4.getCellValue()), cR1C4.getCellValue(), is(0.0));
+        assertThat(String.format("Expected: 220, Observed: %s", cR2C4.getCellValue()), cR2C4.getCellValue(),  is(220.0));
         assertThat(cR3C4.getCellValue(), is(numRows * 1.0));
                 
         for (Row r : t.rows()) {

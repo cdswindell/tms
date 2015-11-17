@@ -1024,19 +1024,70 @@ public final class DerivationImpl implements Derivation
 		Row cellRow = cell.getRow();
 		Column cellCol = cell.getColumn();
 		
+		Set<Derivable> processedElems = new LinkedHashSet<Derivable>(m_pfs.size());
+		Set<Derivable> derivedElems = new LinkedHashSet<Derivable>(m_pfs.size());
+		
 		Iterator<Token> iter = m_pfs.descendingIterator();
 		Object eRef = null;
 		while (iter != null && iter.hasNext()) {
 			Token t = iter.next();
 			if (t != null && t.getTokenType() != null) {
 				TokenType tt = t.getTokenType();
-				if (tt == TokenType.StatOp || tt == TokenType.TransformOp) {
+				if (eRef != null && (tt == TokenType.StatOp || tt == TokenType.TransformOp)) {
+					/*
+					 * if this cell's row/column matches the target of this
+					 * stat or transform op, we need to recalculate the
+					 * entire target
+					 * 
+					 * Similarly, if the target is a subset, and this
+					 * cell is in a contained row/column, we have to do that too
+					 */
 					if (eRef == cellRow || eRef == cellCol)
 						return true;
+					else if (eRef instanceof Subset) {
+						Subset s = (Subset)eRef;
+						if (s.contains(cellRow) || s.contains(cellCol))
+							return true;
+					}
+					else if (derivedElems.contains(eRef)){
+						Derivable d = (Derivable)eRef;
+						if (isCellComponentInAggregate(cellRow, cellCol, d, processedElems))
+							return true;
+					}
 				}
 			}
 			
 			eRef = t.getValue();
+			if (eRef instanceof Derivable && ((Derivable)eRef).isDerived())
+				derivedElems.add((Derivable)eRef);
+		}
+		
+		// ok, at this point, we know the derivation doesn't contain any direct
+		// aggregate elements, but what about the derived elements it is based on,
+		// are any of them aggregates that are affected by this cell?
+		for (Derivable d : derivedElems) {
+			Derivation deriv = d.getDerivation();
+			if (deriv instanceof DerivationImpl) {
+				if (((DerivationImpl)deriv).isCellComponentInAggregate(cell))
+					return true;
+			}			
+		}
+		
+		return false;
+	}
+
+	private boolean isCellComponentInAggregate(Row cellRow, Column cellCol, Derivable d, Set<Derivable> processedElems) 
+	{
+		if (processedElems.contains(d))
+			return false;
+		
+		processedElems.add(d);
+		for (TableElement te : d.getAffectedBy()) {
+			if (te == cellRow || te == cellCol)
+				return true;
+			
+			if (te instanceof Derivable)
+				return isCellComponentInAggregate(cellRow, cellCol, (Derivable)te, processedElems);
 		}
 		
 		return false;

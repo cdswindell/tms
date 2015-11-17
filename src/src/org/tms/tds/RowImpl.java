@@ -20,7 +20,6 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.io.IOOption;
 import org.tms.io.RowExportAdapter;
 import org.tms.io.TableExportAdapter;
-import org.tms.teq.DerivationImpl;
 
 public class RowImpl extends TableSliceElementImpl implements Row
 {
@@ -323,11 +322,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
     	
         // mark row as deleted
         invalidate();        
-        
-        // recalculate the table
-        if (compress)
-        	DerivationImpl.recalculateAffected(parent);
-        
+                
         fireEvents(this, TableElementEventType.OnDelete);
     }
     
