@@ -36,6 +36,12 @@ public class StockTickerOp extends RestConsumerOp
     }
     
     @Override
+    /**
+     * Yahoo doesn't return "clean" json, so we need to use an
+     * extension point on RestConsumerOp to postprocess the
+     * returned text to strip away the non-json characters...
+     * {@inheritDoc}
+     */
     protected String postProcessInputStream(final String data)
     {
         if (data.startsWith("// [") && data.endsWith("]")) {
@@ -49,6 +55,16 @@ public class StockTickerOp extends RestConsumerOp
     }
 
     @Override
+    /**
+     * Define the URL Params this Yahoo Web API requires/supports
+     * In this case, there are 2; a static param, "client", which
+     * is set to "ig", and a variable param, "q", which is supplied
+     * when the operator is used. 
+     * 
+     * By setting the map value for the "q" key to String.class,
+     * we tell TMS that the operator tahes 1 argument, and that
+     * its type is a String.
+     */
     public LinkedHashMap<String, Object> getUrlParamsMap()
     {
         LinkedHashMap<String, Object> urlParams = new LinkedHashMap<String, Object>(2);

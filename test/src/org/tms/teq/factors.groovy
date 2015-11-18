@@ -1,5 +1,6 @@
 class factors {
     int firstFactor(double x) {
+    	if (x == 1) return 1
         def factor = 2
         while (x % factor != 0) { factor++ }        
         factor 
@@ -7,7 +8,7 @@ class factors {
     
     int lastFactor(double x) {
         def factor = (int)(x/2)
-        while (x % factor != 0 && factor > 1) { factor-- }        
+        while (x % factor != 0 && factor >= 1) { factor-- }        
         factor 
     }  
     

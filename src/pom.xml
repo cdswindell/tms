@@ -36,6 +36,19 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+      	<groupId>org.codehaus.gmavenplus</groupId>
+      	<artifactId>gmavenplus-plugin</artifactId>
+      	<version>1.5</version>
+      	 <dependencies>
+          <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.4.5</version>
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -47,12 +60,12 @@
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-all</artifactId>
-      <version>2.0.6</version>
+      <version>2.4.5</version>
     </dependency>
   	<dependency>
   		<groupId>org.apache.commons</groupId>
   		<artifactId>commons-math3</artifactId>
-  		<version>3.4.1</version>
+  		<version>3.5</version>
   	</dependency>
   	<dependency>
   		<groupId>mysql</groupId>
@@ -77,7 +90,7 @@
   	<dependency>
   		<groupId>net.sf.jasperreports</groupId>
   		<artifactId>jasperreports</artifactId>
-  		<version>6.1.1</version>
+  		<version>6.2.0</version>
   		<exclusions>
   			<exclusion>
   				<artifactId>jfreechart</artifactId>
@@ -218,11 +231,6 @@
   		<groupId>com.thoughtworks.xstream</groupId>
   		<artifactId>xstream</artifactId>
   		<version>1.4.8</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.fasterxml.jackson.module</groupId>
-  		<artifactId>jackson-module-jsonSchema</artifactId>
-  		<version>2.6.3</version>
   	</dependency>
   </dependencies>
 </project>
