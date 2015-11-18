@@ -1,7 +1,5 @@
 package org.tms.teq.ops;
 
-import groovy.lang.GroovyClassLoader;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -13,6 +11,10 @@ import org.tms.api.derivables.InvalidOperatorException;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
+import org.tms.api.exceptions.IllegalTableStateException;
+
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyObject;
 
 public class GroovyOp extends BaseOp
 {   
@@ -20,6 +22,7 @@ public class GroovyOp extends BaseOp
     {
         // compile the Groovy class
         Class<?> groovyClazz = null;
+        boolean registeredAny = false;
         try
         {
             // compile the code in the supplied file name
@@ -40,12 +43,29 @@ public class GroovyOp extends BaseOp
                         
                         GroovyOp op = new GroovyOp(methodName, args, resultType, groovyClazz, m);
                         tokenMapper.registerOperator(op);
+                        registeredAny = true;
                     }
                 }
             }           
         }
-        catch (CompilationFailedException | IOException e)
+        catch (CompilationFailedException | IllegalTableStateException | IOException e)
         {
+        	//hmm, try one more thing, try running the the script; 
+        	// we'll want to change this eventually, as it could be a security risk
+        	try {
+        		if (groovyClazz != null && !registeredAny) {
+        			Method runMethod = groovyClazz.getDeclaredMethod("run", new Class<?>[] {});
+        			if (runMethod != null) {
+	        			GroovyObject groovyObject = (GroovyObject)groovyClazz.newInstance();
+	        			if (groovyObject != null) {
+	        				groovyObject.invokeMethod("run", new Class<?>[] {});
+	        				return;
+	        			}
+        			}
+        		}
+        	} 
+        	catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException e1) { }
+        	
             throw new InvalidOperatorException(e);
         }        
     }
