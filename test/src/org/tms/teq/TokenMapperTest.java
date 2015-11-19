@@ -354,7 +354,6 @@ public class TokenMapperTest extends BaseTest
     
     public class Square implements Operator
     {
-
         @Override
         public TokenType getTokenType()
         {

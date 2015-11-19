@@ -173,31 +173,46 @@ abstract public class RestConsumerOp implements Operator
     }
     
     @Override
-    public String getLabel()
+	/**
+	 * {@inheritDoc}
+	 */
+    final public String getLabel()
     {
         return m_label;
     }
     
     @Override
-    public TokenType getTokenType()
+	/**
+	 * {@inheritDoc}
+	 */
+    final public TokenType getTokenType()
     {
-        return TokenType.GenericFunc;
+        return TokenType.numArgsToTokenType(getArgTypes() != null ? getArgTypes().length : 0);
     }
 
     @Override
-    public Class<?> getResultType()
+	/**
+	 * {@inheritDoc}
+	 */
+    final public Class<?> getResultType()
     {
         return m_resultType;
     }
     
     @Override
-    public Class<?>[] getArgTypes()
+	/**
+	 * {@inheritDoc}
+	 */
+    final public Class<?>[] getArgTypes()
     {
         return m_argTypes;
     }
 
     @Override
-    public Token evaluate(Token... args)
+	/**
+	 * {@inheritDoc}
+	 */
+    final public Token evaluate(Token... args)
     {
         try {
             // harvest args

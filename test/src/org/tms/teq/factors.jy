@@ -15,5 +15,4 @@ class factors(Object):
 		while (x % factor != 0):
 			factor += 1        
 		print factor
-
 		

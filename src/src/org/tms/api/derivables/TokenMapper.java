@@ -233,7 +233,8 @@ public class TokenMapper
             throw new IllegalTableStateException("Labeled operator required");
         
         switch(tt) {
-            case UnaryFunc:
+        	case BuiltIn:
+        	case UnaryFunc:
             case BinaryFunc:
             case GenericFunc:
                 break;

@@ -59,7 +59,7 @@ public class JythonOp extends BaseOp
         PythonInterpreter pi = null;
         try
         {
-        	pi = JythonOp.getPyInterpreterInstance();
+        	pi = new PythonInterpreter();
         	
             // compile the code in the supplied file name
             // or, if text doesn't refer to a file, treat it as jython code
@@ -125,6 +125,10 @@ public class JythonOp extends BaseOp
         {
             throw new InvalidOperatorException(e);
         }   
+        finally {
+        	if (pi !=  null)
+        		pi.close();
+        }
     }
     
     private String m_methodName;
@@ -304,6 +308,15 @@ public class JythonOp extends BaseOp
 						
 					case "long":
 						return long.class;
+						
+					case "short":
+						return short.class;
+						
+					case "byte":
+						return byte.class;
+						
+					case "char":
+						return char.class;
 						
 					case "boolean":
 						return boolean.class;
