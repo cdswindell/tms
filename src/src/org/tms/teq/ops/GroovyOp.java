@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.tms.api.derivables.InvalidOperatorException;
+import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
@@ -22,7 +23,6 @@ public class GroovyOp extends BaseOp
     {
         // compile the Groovy class
         Class<?> groovyClazz = null;
-        boolean registeredAny = false;
         try
         {
             // compile the code in the supplied file name
@@ -33,6 +33,18 @@ public class GroovyOp extends BaseOp
             else
                 groovyClazz = new GroovyClassLoader().parseClass(text);
             
+            // first, see if we can instantiate the object, and if we can, is it an Operator?
+            // if it is, register it and return
+            try {
+				GroovyObject groovyObject = (GroovyObject)groovyClazz.newInstance();
+				if (groovyObject != null && groovyObject instanceof Operator) {
+					tokenMapper.registerOperator((Operator)groovyObject);
+					return;
+				}
+            } 
+            catch (IllegalTableStateException | InstantiationException | IllegalAccessException e) {}
+            
+            // Otherwise, register executable methods
             for (Method m : groovyClazz.getDeclaredMethods()) {
                 int methodType = m.getModifiers();
                 String methodName = m.getName();
@@ -43,29 +55,12 @@ public class GroovyOp extends BaseOp
                         
                         GroovyOp op = new GroovyOp(methodName, args, resultType, groovyClazz, m);
                         tokenMapper.registerOperator(op);
-                        registeredAny = true;
                     }
                 }
             }           
         }
-        catch (CompilationFailedException | IllegalTableStateException | IOException e)
+        catch (CompilationFailedException | IOException e)
         {
-        	//hmm, try one more thing, try running the the script; 
-        	// we'll want to change this eventually, as it could be a security risk
-        	try {
-        		if (groovyClazz != null && !registeredAny) {
-        			Method runMethod = groovyClazz.getDeclaredMethod("run", new Class<?>[] {});
-        			if (runMethod != null) {
-	        			GroovyObject groovyObject = (GroovyObject)groovyClazz.newInstance();
-	        			if (groovyObject != null) {
-	        				groovyObject.invokeMethod("run", new Class<?>[] {});
-	        				return;
-	        			}
-        			}
-        		}
-        	} 
-        	catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException e1) { }
-        	
             throw new InvalidOperatorException(e);
         }        
     }
@@ -80,6 +75,13 @@ public class GroovyOp extends BaseOp
     private Method m_method;
     private Object m_groovyInst;
     
+    private GroovyOp(String label, Class<?>[] pTypes, Class<?> resultType, Class<?> groovyClazz, Method m)
+    {
+        super(label, TokenType.numArgsToTokenType(pTypes != null ? pTypes.length : 0), pTypes, resultType);
+        m_groovyClazz = groovyClazz;
+        m_method = m;
+    }
+
     public GroovyOp(String label, Class<?> [] pTypes, Class<?> resultType, String fileName)
     {
         this(label, pTypes, resultType, fileName, label);
@@ -95,13 +97,6 @@ public class GroovyOp extends BaseOp
         super(label, tt, pTypes, resultType);
         m_file = new File(fileName);
         m_methodName = methodName;
-    }
-
-    private GroovyOp(String label, Class<?>[] pTypes, Class<?> resultType, Class<?> groovyClazz, Method m)
-    {
-        super(label, TokenType.numArgsToTokenType(pTypes != null ? pTypes.length : 0), pTypes, resultType);
-        m_groovyClazz = groovyClazz;
-        m_method = m;
     }
 
     @Override

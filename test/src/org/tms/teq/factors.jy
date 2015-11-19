@@ -1,0 +1,19 @@
+from java.lang import Object
+class factors(Object):
+	def firstFactor(self, x):
+		"@sig  public  double firstFactor  (double x)"
+		if (x == 1):
+			return 1
+		factor = 2
+		while (x % factor != 0):
+			factor += 1        
+		return factor
+	def firstFactor2(self, x):
+		if (x == 1):
+			return 1
+		factor = 2
+		while (x % factor != 0):
+			factor += 1        
+		print factor
+
+		

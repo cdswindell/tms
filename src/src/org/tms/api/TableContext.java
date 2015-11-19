@@ -229,4 +229,6 @@ public interface TableContext extends BaseElement, InitializableTableProperties
 
     public void importTables(String fileName);
     public void importTables(String fileName, IOOption<?>format);
+
+	void registerJythonOperators(String fileName);
 }

@@ -7,17 +7,12 @@ import org.tms.api.derivables.InvalidOperandsException;
 
 public class StockTickerOp extends RestConsumerOp
 {
-    public StockTickerOp()
+	public StockTickerOp()
     {
         super("ticker", "l_cur", double.class);
     }
 
-    public StockTickerOp(String resultKey)
-    {
-        super("ticker", resultKey, double.class);
-    }
-
-    public StockTickerOp(String label, String resultKey)
+    protected StockTickerOp(String label, String resultKey)
     {
         super(label, resultKey, double.class);
     }

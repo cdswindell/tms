@@ -18,6 +18,7 @@ import org.tms.api.factories.TableContextFactory;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.ops.BaseOp;
 import org.tms.teq.ops.GroovyOp;
+import org.tms.teq.ops.JythonOp;
 
 public class TokenMapper
 {
@@ -164,6 +165,11 @@ public class TokenMapper
         GroovyOp.registerAllOps(this, fileName);
     }
     
+    public void registerJythonOperators(String fileName)
+    {
+        JythonOp.registerAllOps(this, fileName);
+    }
+    
     public <T, R> void registerOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)
     {
         Operator op = new UnaryFunc1ArgOp<T, R>(label, TokenType.UnaryFunc, p1Type, resultType, uniOp);
@@ -233,7 +239,7 @@ public class TokenMapper
                 break;
                 
             default:
-                throw new IllegalTableStateException("TokenType not supported");
+                throw new IllegalTableStateException("TokenType not supported: " + tt);
         }
         
         Token t = new Token(tt, oper);

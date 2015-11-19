@@ -327,6 +327,31 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.getValue(), is(7.0));        
     }
         
+    @Test
+    public final void testJythonOperator()
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        assertThat(tm, notNullValue());
+        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+        
+        // register new operator, class implements Operator
+        tm.registerJythonOperators(qualifiedFileName("dayChg.jy"));
+        
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("dayChg('ctct')", null);
+        assertThat(pse, notNullValue());
+        
+        // register new operator, class consists of methods
+        tm.registerJythonOperators(qualifiedFileName("factors.jy"));
+        
+        pse = new PostfixStackEvaluator("firstFactor(81)", null);
+        assertThat(pse, notNullValue());
+        
+        Token resToken = pse.evaluate();
+        assertThat(resToken, notNullValue());
+        assertThat(3.0, is(resToken.getNumericValue()));
+    }
+    
     public class Square implements Operator
     {
 

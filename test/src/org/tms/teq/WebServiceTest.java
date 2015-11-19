@@ -26,7 +26,7 @@ public class WebServiceTest extends BaseTest
     @Test
     public void testWebServiceCall() throws InterruptedException, IOException 
     {       
-        StockTickerOp stocks = new StockTickerOp("l_cur");
+        StockTickerOp stocks = new StockTickerOp();
         TableContextFactory.fetchDefaultTableContext().registerOperator(stocks);
         
         Table t = TableFactory.createTable();
@@ -97,7 +97,7 @@ public class WebServiceTest extends BaseTest
     @Test
     public void testWebServiceCall2() throws InterruptedException 
     {       
-        StockTickerOp stocks = new StockTickerOp("ticker", "l_cur");
+        StockTickerOp stocks = new StockTickerOp();
         TableContextFactory.fetchDefaultTableContext().registerOperator(stocks);
         
         CurrencyConverterOp curConvert = new CurrencyConverterOp("curConvert", "result");
