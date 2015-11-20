@@ -1,0 +1,9 @@
+from org.tms.api.utils import SynchronousOp;
+from java.lang import Double
+class volumeOp(SynchronousOp):
+	def __init__(self):
+		SynchronousOp.__init__(self, "volume", [Double, Double, Double], Double)
+	
+	def performCalculation(self, argMap):
+		return argMap[0] * argMap[1] * argMap[2]
+		

@@ -3,27 +3,19 @@ package org.tms.api.utils;
 import java.util.UUID;
 
 import org.tms.api.derivables.Derivation;
-import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
-import org.tms.api.derivables.TokenType;
+import org.tms.teq.AbstractOperator;
 
-abstract public class AsynchronousOperator implements Operator, Runnable 
+abstract public class AsynchronousOp extends AbstractOperator implements Runnable
 {
-	abstract public Object performCalculation(Object [] m_args);
-	
-	private String m_label;
-	private Class<?>[] m_argTypes;
-	private Class<?> m_resultType;
 	private Object [] m_args;
 	private UUID m_transactionId;
-	
-	public AsynchronousOperator(String label, Class<?>[] argTypes, Class<?> resultType)
+		
+	public AsynchronousOp(String label, Class<?>[] argTypes, Class<?> resultType) 
 	{
-		m_label = label;
-		m_argTypes = argTypes;
-		m_resultType = resultType;
+		super(label, argTypes, resultType);
 	}
-	
+
 	@Override
 	/**
 	 * {@inheritDoc}
@@ -40,52 +32,6 @@ abstract public class AsynchronousOperator implements Operator, Runnable
             Token errToken = Token.createErrorToken(e.getMessage());
             Derivation.postResult(m_transactionId, errToken);
 		}
-	}
-
-	@Override
-	/**
-	 * {@inheritDoc}
-	 */
-	final public String getLabel() 
-	{
-		return m_label;
-	}
-
-	@Override
-	/**
-	 * {@inheritDoc}
-	 */
-	final public TokenType getTokenType() 
-	{
-		return TokenType.numArgsToTokenType(getArgTypes() != null ? getArgTypes().length : 0);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-    final public int numArgs()
-    {
-        Class<?> [] args = getArgTypes();
-        
-        return args != null ? args.length : 0;
-    }
-    
-	@Override
-	/**
-	 * {@inheritDoc}
-	 */
-	final public Class<?>[] getArgTypes() 
-	{
-		return m_argTypes;
-	}
-
-	@Override
-	/**
-	 * {@inheritDoc}
-	 */
-	final public Class<?> getResultType() 
-	{
-		return m_resultType;
 	}
 
 	@Override
@@ -109,10 +55,5 @@ abstract public class AsynchronousOperator implements Operator, Runnable
         
 		// return the pending token
         return Token.createPendingToken(this);
-	}
-
-	protected boolean isAllowNulls()
-	{
-		return false;
 	}
 }

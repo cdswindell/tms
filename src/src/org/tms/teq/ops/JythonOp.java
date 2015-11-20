@@ -27,6 +27,7 @@ import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.TableIOException;
+import org.tms.teq.AbstractOperator;
 
 public class JythonOp extends BaseOp 
 {	
@@ -73,23 +74,10 @@ public class JythonOp extends BaseOp
             	pi.exec(pyCode);
             }
             
-            // first, see if we can instantiate the object, and if we can, is it an Operator?
-            // if it is, register it and return           
             PyObject pyThing = pi.get(className);
 			if (pyThing != null ) {
-				PyObject pyObj = pyThing.__call__();
-	            try {
-	            	// construct the object
-					if (pyObj != null) {
-						// cast the object to an operator, success??
-						Operator op = (Operator)pyObj.__tojava__(Operator.class);
-						tokenMapper.registerOperator(op);
-						return;
-					}
-	            } 
-	            catch (Exception e) { }
-	            
-	            // if we get here, the object wasn't an operator, try it as just a class
+	            // Start by harvesting the methods in the class
+				// we'll need to consult the dictionary below
 	            PyStringMap pSm = (PyStringMap)pyThing.fastGetDict();
 	            Map<String, PyFunction> posibleFuncMap = new HashMap<String, PyFunction>();
 	            for (Object k : pSm.keys()) {
@@ -99,27 +87,61 @@ public class JythonOp extends BaseOp
 	            			Object val = pSm.get(new PyString(methodName));
 	            			if (val != null && val instanceof PyFunction) {
 	            				PyFunction pyFunc = (PyFunction)val;
-	            				if (pyFunc.__doc__ != null && !(pyFunc.__doc__ instanceof PyNone))
+	            				if ("performCalculation".equals(methodName) ||
+	            						(pyFunc.__doc__ != null && !(pyFunc.__doc__ instanceof PyNone)))
 	            					posibleFuncMap.put(methodName, pyFunc);
 	            			}
 	            		}
 	            	}	            		
-	            }
+	            }	
 	            
-	            
-	            if (posibleFuncMap != null && !posibleFuncMap.isEmpty()) {
-	                // Otherwise, register executable methods
-	                for (Map.Entry<String, PyFunction> e : posibleFuncMap.entrySet()) {
-	                	String methodName = e.getKey();
-	                	PyFunction pyFunc = e.getValue();
-	                	SigParser pyArgs = new SigParser(methodName, pyFunc);
-	                	
-	                    JythonOp op = new JythonOp(methodName, pyArgs.getArgTypes(), pyArgs.getResultType(), className, methodName, pyObj);
-	                    tokenMapper.registerOperator(op);
-	                }           
-	            }
-            
+            	// construct the object, this is the only way we can tell the
+	            // actual class (I think...)
+				PyObject pyObj = pyThing.__call__();
+				if (pyObj != null) {						            
+		            // first, see if we can instantiate the object, and if we can, is it an AbstractOperator?
+		            // if it is, harvest the processCalculation method and move along           
+		            try {
+		            	// construct the object
+						// cast the object to an AbstractOperator, success??
+						AbstractOperator op = (AbstractOperator)pyObj.__tojava__(AbstractOperator.class);
+					    
+						// ok, so it is an AbstractOperator! Harvest the performCalculation method
+						// from the j/python class
+						if (!posibleFuncMap.containsKey("performCalculation"))
+				            throw new InvalidOperatorException("Required method not found: performCalculation");
+														
+						tokenMapper.registerOperator(op);
+						return;
+		            } 
+		            catch (Exception e) { }
+				
+		            // next, see if we can instantiate the object, and if we can, is it an Operator?
+		            // if it is, register it and return           
+		            try {
+						// cast the object to an operator, success??
+						Operator op = (Operator)pyObj.__tojava__(Operator.class);
+						tokenMapper.registerOperator(op);
+						return;
+		            } 
+		            catch (Exception e) { }
+	            	            
+		            if (posibleFuncMap != null && !posibleFuncMap.isEmpty()) {
+		                // Otherwise, register executable methods
+		                for (Map.Entry<String, PyFunction> e : posibleFuncMap.entrySet()) {
+		                	String methodName = e.getKey();
+		                	PyFunction pyFunc = e.getValue();
+		                	SigParser pyArgs = new SigParser(methodName, pyFunc);
+		                	
+		                    JythonOp op = new JythonOp(methodName, pyArgs.getArgTypes(), pyArgs.getResultType(), className, methodName, pyObj);
+		                    tokenMapper.registerOperator(op);
+		                }           
+		            }
+				}           
 			}
+        }
+        catch (InvalidOperatorException e) {
+        	throw e;
         }
         catch (Exception e)
         {

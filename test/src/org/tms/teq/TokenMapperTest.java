@@ -350,6 +350,16 @@ public class TokenMapperTest extends BaseTest
         Token resToken = pse.evaluate();
         assertThat(resToken, notNullValue());
         assertThat(3.0, is(resToken.getNumericValue()));
+        
+        // register new operator, class consists of methods
+        tm.registerJythonOperators(qualifiedFileName("volumeOp.jy"));
+        
+        pse = new PostfixStackEvaluator("volume(3, 4, 5)", null);
+        assertThat(pse, notNullValue());
+        
+        resToken = pse.evaluate();
+        assertThat(resToken, notNullValue());
+        assertThat(60.0, is(resToken.getNumericValue()));
     }
     
     public class Square implements Operator

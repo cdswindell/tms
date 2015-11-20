@@ -246,6 +246,7 @@ abstract public class RestConsumerOp implements Operator
                 }
             }
             
+            // create a RestEvaluator; it is a Runnable
             RestEvaluator re = new RestEvaluator(Derivation.getTransactionID(), baseUrl, urlParams);
             
             return Token.createPendingToken(re);
@@ -262,13 +263,11 @@ abstract public class RestConsumerOp implements Operator
         if (idx > -1) {
             String result = source.substring(0, idx) + 
                             replacement + 
-                            source.substring(idx + pattern.length());
-            
+                            source.substring(idx + pattern.length());            
             return result;
         }
         else
-            return source;
-        
+            return source;        
     }
     
     protected class RestEvaluator implements Runnable
@@ -358,12 +357,12 @@ abstract public class RestConsumerOp implements Operator
             
             if (leaf == null)
                 return null;
+            
             if (m_resultType.isAssignableFrom(leaf.getClass()))
                 return leaf;
             
             // allow implementer to coerce result
-            // we provide some defaults
-            
+            // we provide some defaults            
             return coerceResult(leaf);           
         }
     }
