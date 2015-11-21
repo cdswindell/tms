@@ -1,0 +1,8 @@
+def area(x, y):
+	"@sig public double area(double x, double y)"
+	return x*y
+
+def perimeter(x, y):
+	"@sig public double perimeter(double x, double y)"
+	return 2*(x+y)
+

@@ -360,6 +360,23 @@ public class TokenMapperTest extends BaseTest
         resToken = pse.evaluate();
         assertThat(resToken, notNullValue());
         assertThat(60.0, is(resToken.getNumericValue()));
+        
+        // register new operator, file consists of functions
+        tm.registerJythonOperators(qualifiedFileName("geomFuncs.jy"));
+        
+        pse = new PostfixStackEvaluator("area(5, 4)", null);
+        assertThat(pse, notNullValue());
+        
+        resToken = pse.evaluate();
+        assertThat(resToken, notNullValue());
+        assertThat(20.0, is(resToken.getNumericValue()));
+        
+        pse = new PostfixStackEvaluator("perimeter(5, 4)", null);
+        assertThat(pse, notNullValue());
+        
+        resToken = pse.evaluate();
+        assertThat(resToken, notNullValue());
+        assertThat(18.0, is(resToken.getNumericValue()));
     }
     
     public class Square implements Operator

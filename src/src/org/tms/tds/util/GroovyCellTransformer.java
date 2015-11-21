@@ -1,39 +1,78 @@
 package org.tms.tds.util;
 
-import groovy.lang.GroovyClassLoader;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.tms.api.exceptions.ConstraintViolationException;
 import org.tms.api.utils.TableCellTransformer;
+import org.tms.api.utils.TableCellValidator;
+
+import groovy.lang.GroovyClassLoader;
 
 public class GroovyCellTransformer implements TableCellTransformer
 {
     private static final long serialVersionUID = -6882519397752443785L;
     
+    public static final TableCellValidator construct(String text, String valMethodName, String transMethodName)
+    {
+    	return construct(TableCellTransformer.class, text, valMethodName, transMethodName);
+    }
+    
+    static final TableCellValidator construct(Class<? extends TableCellValidator> clazz,  
+    		String text, String valMethodName, String transMethodName)
+    {
+    	try {
+	        Class<?> groovyClazz;
+	        File file = new File(text);
+	        if (file.exists() && file.canRead())
+	            groovyClazz = new GroovyClassLoader().parseClass(file);
+	        else
+	            groovyClazz = new GroovyClassLoader().parseClass(text);
+	        
+		    // if this object is a TableCellTransformer, construct it and return
+		    if (TableCellTransformer.class.isAssignableFrom(groovyClazz)) {
+		    	return (TableCellTransformer)groovyClazz.newInstance();
+		    }
+		    else if (TableCellValidator.class.isAssignableFrom(groovyClazz)) {
+		    	if (clazz == TableCellValidator.class)
+		    		return (TableCellValidator)groovyClazz.newInstance();
+		    	else
+		            throw new IllegalArgumentException("TableCellTransformer request but TableCellValidator found"); 
+		    }
+		    
+		    // otherwise, return our special handler
+		    return new GroovyCellTransformer(clazz, groovyClazz, text, valMethodName, transMethodName);
+    	} 
+    	catch (CompilationFailedException | IOException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalArgumentException("Exception encountered while processing Groovy: " + e.getMessage()); 
+		}
+    }
+    
+    private Class<? extends TableCellValidator> m_requestedClazz;
     private Class<?> m_groovyClazz;
     private Method m_groovyTransformMethod;
     private Method m_groovyValidationMethod;
     private Object m_groovyInst;
     
-    public GroovyCellTransformer(String text, String valMethodName, String transMethodName)
+    private GroovyCellTransformer(Class<? extends TableCellValidator> clazz, Class<?> groovyClazz, 
+    		String text, String valMethodName, String transMethodName)
     {
+    	m_requestedClazz = clazz;
+    	
         boolean valReq = valMethodName != null && (valMethodName = valMethodName.trim()).length() > 0;
         String valMethName = valMethodName != null ? valMethodName : "validate";
 
-        boolean transReq = transMethodName != null && (transMethodName = transMethodName.trim()).length() > 0;
-        String transMethName = transMethodName != null ? transMethodName : "transform";
+        boolean transReq = m_requestedClazz == TableCellTransformer.class;
+        String transMethName = transReq && transMethodName != null && (transMethodName = transMethodName.trim()).length() > 0 
+        		? transMethodName : null;
+        	
         try {
-            File file = new File(text);
-            if (file.exists() && file.canRead())
-                m_groovyClazz = new GroovyClassLoader().parseClass(file);
-            else
-                m_groovyClazz = new GroovyClassLoader().parseClass(text);
-            
+        	m_groovyClazz = groovyClazz;
+        	
             for (Method m : m_groovyClazz.getDeclaredMethods()) {
                 int methodType = m.getModifiers();
                 String curMethodName = m.getName();
@@ -47,10 +86,10 @@ public class GroovyCellTransformer implements TableCellTransformer
                                     continue;
                                 
                                 m_groovyValidationMethod = m;
-                                if (m_groovyTransformMethod != null)
+                                if (transMethName == null || m_groovyTransformMethod != null)
                                     break;                                
                             }
-                            else {
+                            else if (transMethName != null) {
                                 if (m_groovyTransformMethod != null || (transMethName != null && !transMethName.equals(curMethodName)))
                                     continue;
                                 
@@ -75,7 +114,7 @@ public class GroovyCellTransformer implements TableCellTransformer
             // create validation instance object
             m_groovyInst = m_groovyClazz.newInstance();
         }
-        catch (IOException | InstantiationException | IllegalAccessException e)
+        catch (InstantiationException | IllegalAccessException e)
         {
             throw new IllegalArgumentException("Exception encountered while processing Groovy: " + e.getMessage()); 
         }
@@ -95,7 +134,6 @@ public class GroovyCellTransformer implements TableCellTransformer
             catch (IllegalAccessException | IllegalArgumentException e)
             {
                 System.out.println(e.getMessage());
-                // TODO: log validation call error
             }
             catch (InvocationTargetException ve) {
                 Throwable cve = ve.getTargetException();

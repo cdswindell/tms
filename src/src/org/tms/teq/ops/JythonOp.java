@@ -3,19 +3,12 @@ package org.tms.teq.ops;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.python.core.Py;
 import org.python.core.PyCode;
-import org.python.core.PyDictionary;
-import org.python.core.PyFloat;
 import org.python.core.PyFunction;
-import org.python.core.PyInteger;
-import org.python.core.PyList;
-import org.python.core.PyLong;
 import org.python.core.PyNone;
 import org.python.core.PyObject;
 import org.python.core.PyString;
@@ -26,8 +19,7 @@ import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
-import org.tms.api.exceptions.TableIOException;
-import org.tms.teq.AbstractOperator;
+import org.tms.tds.util.JythonHelper;
 
 public class JythonOp extends BaseOp 
 {	
@@ -70,53 +62,16 @@ public class JythonOp extends BaseOp
             else
             	pyCode = pi.compile(text);
             
-            synchronized (pi) {
-            	pi.exec(pyCode);
-            }
-            
-            PyObject pyThing = pi.get(className);
+            // compile the code
+            pi.exec(pyCode);
+
+            PyObject pyThing = className != null ? pi.get(className) : null;
 			if (pyThing != null ) {
-	            // Start by harvesting the methods in the class
-				// we'll need to consult the dictionary below
-	            PyStringMap pSm = (PyStringMap)pyThing.fastGetDict();
-	            Map<String, PyFunction> posibleFuncMap = new HashMap<String, PyFunction>();
-	            for (Object k : pSm.keys()) {
-	            	if (k instanceof String) {
-	            		String methodName = (String)k;
-	            		if (!(methodName.startsWith("__") || methodName.endsWith("__"))) {
-	            			Object val = pSm.get(new PyString(methodName));
-	            			if (val != null && val instanceof PyFunction) {
-	            				PyFunction pyFunc = (PyFunction)val;
-	            				if ("performCalculation".equals(methodName) ||
-	            						(pyFunc.__doc__ != null && !(pyFunc.__doc__ instanceof PyNone)))
-	            					posibleFuncMap.put(methodName, pyFunc);
-	            			}
-	            		}
-	            	}	            		
-	            }	
-	            
             	// construct the object, this is the only way we can tell the
 	            // actual class (I think...)
 				PyObject pyObj = pyThing.__call__();
 				if (pyObj != null) {						            
-		            // first, see if we can instantiate the object, and if we can, is it an AbstractOperator?
-		            // if it is, harvest the processCalculation method and move along           
-		            try {
-		            	// construct the object
-						// cast the object to an AbstractOperator, success??
-						AbstractOperator op = (AbstractOperator)pyObj.__tojava__(AbstractOperator.class);
-					    
-						// ok, so it is an AbstractOperator! Harvest the performCalculation method
-						// from the j/python class
-						if (!posibleFuncMap.containsKey("performCalculation"))
-				            throw new InvalidOperatorException("Required method not found: performCalculation");
-														
-						tokenMapper.registerOperator(op);
-						return;
-		            } 
-		            catch (Exception e) { }
-				
-		            // next, see if we can instantiate the object, and if we can, is it an Operator?
+		            // first, see if we can instantiate the object, and if we can, is it an Operator?
 		            // if it is, register it and return           
 		            try {
 						// cast the object to an operator, success??
@@ -126,19 +81,58 @@ public class JythonOp extends BaseOp
 		            } 
 		            catch (Exception e) { }
 	            	            
+		            // otherwise see if file was a Jython class, if so, harvest the 
+		            // methods with signatures in the 
+					// we'll need to consult the dictionary below
+		            PyStringMap pSm = (PyStringMap)pyThing.fastGetDict();
+		            Map<String, PyFunction> posibleFuncMap = new HashMap<String, PyFunction>();
+		            for (Object k : pSm.keys()) {
+		            	if (k instanceof String) {
+		            		String methodName = (String)k;
+		            		if (!(methodName.startsWith("__") || methodName.endsWith("__"))) {
+		            			Object val = pSm.get(new PyString(methodName));
+		            			if (val != null && val instanceof PyFunction) {
+		            				PyFunction pyFunc = (PyFunction)val;
+		            				if ((pyFunc.__doc__ != null && !(pyFunc.__doc__ instanceof PyNone)))
+		            					posibleFuncMap.put(methodName, pyFunc);
+		            			}
+		            		}
+		            	}	            		
+		            }	
+		            
 		            if (posibleFuncMap != null && !posibleFuncMap.isEmpty()) {
 		                // Otherwise, register executable methods
 		                for (Map.Entry<String, PyFunction> e : posibleFuncMap.entrySet()) {
 		                	String methodName = e.getKey();
 		                	PyFunction pyFunc = e.getValue();
-		                	SigParser pyArgs = new SigParser(methodName, pyFunc);
+		                	JythonHelper pyArgs = new JythonHelper(methodName, pyFunc);
 		                	
-		                    JythonOp op = new JythonOp(methodName, pyArgs.getArgTypes(), pyArgs.getResultType(), className, methodName, pyObj);
+		                    JythonOp op = new JythonOp(methodName, pyArgs.getArgTypes(), pyArgs.getResultType(), methodName, pyObj);
 		                    tokenMapper.registerOperator(op);
 		                }           
 		            }
-				}           
+				} 
+				
+				return;
 			}
+			
+			// if there was no class, harvest functions, if any
+			PyObject dirObj = pi.eval("dir()");
+			if (dirObj != null) {
+				Map<String, PyFunction> posibleFuncMap = JythonHelper.extractMethods(pi, dirObj);
+	            	            
+	            if (posibleFuncMap != null && !posibleFuncMap.isEmpty()) {
+	                // Otherwise, register executable methods
+	                for (Map.Entry<String, PyFunction> e : posibleFuncMap.entrySet()) {
+	                	String methodName = e.getKey();
+	                	PyFunction pyFunc = e.getValue();
+	                	JythonHelper pyArgs = new JythonHelper(methodName, pyFunc);
+	                	
+	                	JythonOp op = new JythonOp(methodName, pyArgs.getArgTypes(), pyArgs.getResultType(), methodName, pyFunc);
+	                    tokenMapper.registerOperator(op);
+	                }           
+	            }
+			}		
         }
         catch (InvalidOperatorException e) {
         	throw e;
@@ -156,20 +150,20 @@ public class JythonOp extends BaseOp
     private String m_methodName;
     private PyObject m_pyObj;
     
-    private JythonOp(String label, Class<?>[] pTypes, Class<?> resultType, String className, String methodName, PyObject pyObj)
+    private JythonOp(String label, Class<?>[] pTypes, Class<?> resultType, String methodName, PyObject pyObj)
     {
         super(label, TokenType.numArgsToTokenType(pTypes != null ? pTypes.length : 0), pTypes, resultType);
         m_methodName = methodName;
         m_pyObj = pyObj;
     }
 
-	public JythonOp(String label, TokenType tt, Class<?>[] argTypes, Class<?> resultType) 
+    private JythonOp(String label, TokenType tt, Class<?>[] argTypes, Class<?> resultType) 
 	{
 		super(label, tt, argTypes, resultType);
 	}
 
 	@Override
-	public Token evaluate(Token... args) 
+	final public Token evaluate(Token... args) 
 	{
         // Transfer the args from the TMS system into
         // an array to set up for the method call
@@ -178,179 +172,15 @@ public class JythonOp extends BaseOp
             mArgs[i] = Py.java2py(args[i].getValue());
         }
         
-        PyObject pyResult = m_pyObj.invoke(m_methodName, mArgs);
+        PyObject pyResult;
+        if (m_pyObj instanceof PyFunction)
+        	pyResult = ((PyFunction)m_pyObj).__call__(mArgs);
+        else
+        	pyResult = m_pyObj.invoke(m_methodName, mArgs);
         
         // and return the result
-        Object result = pythonToPig(pyResult);        
+        Object result = JythonHelper.pythonToPig(pyResult);        
         return new Token(TokenType.Operand, result);
 	}
 
-    public static Object pythonToPig(PyObject pyObject) 
-    {
-        try {
-            Object javaObj = null;
-            // Add code for all supported pig types here
-            // Tuple, bag, map, int, long, float, double, chararray, bytearray 
-            if (pyObject instanceof PyList) {
-                List<Object> list = new ArrayList<Object>();
-                for (PyObject bagTuple : ((PyList) pyObject).asIterable()) {
-                    // In jython, list need not be a bag of tuples, as it is in case of pig
-                    // So we fail with cast exception if we dont find tuples inside bag
-                    // This is consistent with java udf (bag should be filled with tuples)
-                    list.add(pythonToPig(bagTuple));
-                }
-                javaObj = list;
-            } else if (pyObject instanceof PyDictionary) {
-                @SuppressWarnings("unchecked")
-				Map<?, PyObject> map = Py.tojava(pyObject, Map.class);
-                Map<Object, Object> newMap = new HashMap<Object, Object>();
-                for (Map.Entry<?, PyObject> entry : map.entrySet()) {
-                    newMap.put(entry.getKey(), pythonToPig(entry.getValue()));
-                }
-                javaObj = newMap;
-            } else if (pyObject instanceof PyLong) {
-                javaObj = pyObject.__tojava__(Long.class);
-            } else if (pyObject instanceof PyInteger) {
-                javaObj = pyObject.__tojava__(Integer.class);
-            } else if (pyObject instanceof PyFloat) {
-                // J(P)ython is loosely typed, supports only float type, 
-                // hence we convert everything to double to save precision
-                javaObj = pyObject.__tojava__(Double.class);
-            } else if (pyObject instanceof PyString) {
-                javaObj = pyObject.__tojava__(String.class);
-            } else if (pyObject instanceof PyNone) {
-                return null;
-            } 
-            return javaObj;
-        } catch (Exception e) {
-            throw new TableIOException("Cannot convert jython type to pig datatype "+ e);
-        }
-    }
-    
-	static protected class SigParser 
-	{
-		private String m_methodName;
-		private PyFunction m_pyFunction;
-		private Class<?> m_returnType;
-		private Class<?>[] m_argTypes;
-		
-		public SigParser(String methodName, PyFunction pyFunc) 
-		{
-			m_methodName = methodName;
-			m_pyFunction = pyFunc;
-			
-			init();
-		}
-
-		public Class<?> getResultType()
-		{
-			return m_returnType;
-		}
-		
-		public Class<?> [] getArgTypes()
-		{
-			return m_argTypes;
-		}
-		
-		/**
-		 * Parse out the signature, will be in the form:
-		 * public <dataType> 
-		 */
-		private void init() 
-		{
-			String sig = m_pyFunction.__doc__.toString();
-			
-			// remove multiple runs of spaces
-			while (sig.indexOf("  ") > -1) {
-				sig = sig.replace("  ", " ");
-			}
-			
-			while (sig.indexOf(" (") > -1) {
-				sig = sig.replace(" (", "(");
-			}
-			
-			String tokens[] = sig.split(" ");
-			// should be at least 3 tokens at this point; 
-			// "public", "<data type>", and <methodName(...
-			if (tokens.length < 4)
-				throw new InvalidOperatorException("Malformed J/Python: Invalid @sig: " + sig); 
-			
-			if (!"@sig".equals(tokens[0]))
-				throw new InvalidOperatorException("Malformed J/Python: @sig not found: " + sig); 
-			
-			if (!"public".equals(tokens[1]))
-				throw new InvalidOperatorException("Malformed J/Python: @sig not \"public\": " + sig); 
-			
-			m_returnType = parseClassRef(tokens[2]);
-			
-			// token 3 should start with the method name
-			String mnP = m_methodName + "(";
-			if (!tokens[3].startsWith(mnP))
-				throw new InvalidOperatorException("Malformed J/Python: method name mismatch: " + sig); 
-			
-			int idx = sig.indexOf(mnP);
-			String sigPrime = sig.substring(idx + mnP.length());
-			if (sigPrime.endsWith(")"))
-				sigPrime = sigPrime.substring(0, sigPrime.length() - 1);
-			
-			tokens = sigPrime.split("\\,");
-			List<Class<?>> argTypes = new ArrayList<Class<?>>(tokens.length);
-			
-			for (String t : tokens) {
-				int spIdx = t.indexOf(" ");
-				if (spIdx == -1)
-					throw new InvalidOperatorException("Malformed J/Python: missing arg type: " + sig); 
-					
-				Class<?> argType = parseClassRef(t.substring(0, spIdx));
-				if (argType == null || argType == void.class)
-					throw new InvalidOperatorException("Malformed J/Python: missing/invalid arg type: " + sig); 
-				
-				argTypes.add(argType);
-			}
-			
-			m_argTypes = argTypes.toArray(new Class<?>[] {});
-		}
-
-		private Class<?> parseClassRef(String className) 
-		{
-			
-			try {
-				return Class.forName(className);
-			} 
-			catch (ClassNotFoundException e) {
-				switch (className) {
-					case "double":
-						return double.class;
-						
-					case "float":
-						return float.class;
-					
-					case "int":
-						return int.class;
-						
-					case "long":
-						return long.class;
-						
-					case "short":
-						return short.class;
-						
-					case "byte":
-						return byte.class;
-						
-					case "char":
-						return char.class;
-						
-					case "boolean":
-						return boolean.class;
-						
-					case "void":
-						return void.class;
-						
-					default:
-						return null;
-				}
-			}
-		}
-		
-	}
 }

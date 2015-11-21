@@ -3,7 +3,7 @@ package org.tms.api.utils;
 import java.io.Serializable;
 
 import org.tms.api.exceptions.ConstraintViolationException;
-import org.tms.tds.util.GroovyCellTransformer;
+import org.tms.tds.util.GroovyCellValidator;
 
 /**
  * Classes that implement {@code TableCellValidator} can validate perspective cell values before they are persisted in
@@ -33,20 +33,18 @@ public interface TableCellValidator extends Serializable
      */
     static public TableCellValidator fromGroovy(String fileName)
     {
-        return new GroovyCellTransformer(fileName, null, null);
+        return GroovyCellValidator.construct(fileName, null);
     }
     
     /**
-     * Create and return a {@link TableCellValidator} based on a Groovy implementation. Methods
-     * for both cell value validation as well as transformation can be specified.
+     * Create and return a {@link TableCellValidator} based on a Groovy implementation. 
      * @param fileName file name of the Groovy script
      * @param valName method name of the cell validator
-     * @param transName method name of the cell transformer
      * @return a {@code TableCellValidator} based on a Groovy implementation 
      */
-    static public TableCellValidator fromGroovy(String fileName, String valName, String transName)
+    static public TableCellValidator fromGroovy(String fileName, String valName)
     {
-        return new GroovyCellTransformer(fileName, valName, transName);
+        return GroovyCellValidator.construct(fileName, valName);
     }
     
     /**

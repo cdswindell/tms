@@ -13,7 +13,6 @@ import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.IllegalTableStateException;
-import org.tms.teq.AbstractOperator;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
@@ -34,18 +33,7 @@ public class GroovyOp extends BaseOp
             else
                 groovyClazz = new GroovyClassLoader().parseClass(text);
             
-            // first, see if we can instantiate the object, and if we can, is it an AbstractOperator?
-            // if it is, register it and return
-            try {
-				GroovyObject groovyObject = (GroovyObject)groovyClazz.newInstance();
-				if (groovyObject != null && groovyObject instanceof AbstractOperator) {
-					tokenMapper.registerOperator((AbstractOperator)groovyObject);
-					return;
-				}
-            } 
-            catch (IllegalTableStateException | InstantiationException | IllegalAccessException e) {}
-            
-            // then, see if we can instantiate the object, and if we can, is it an Operator?
+            // first, see if we can instantiate the object, and if we can, is it an Operator?
             // if it is, register it and return
             try {
 				GroovyObject groovyObject = (GroovyObject)groovyClazz.newInstance();

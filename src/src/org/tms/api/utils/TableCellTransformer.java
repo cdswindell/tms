@@ -2,6 +2,7 @@ package org.tms.api.utils;
 
 import org.tms.api.exceptions.ConstraintViolationException;
 import org.tms.tds.util.GroovyCellTransformer;
+import org.tms.tds.util.JythonCellTransformer;
 
 /**
  * Classes that implement {@code TableCellTransformer} can modify values before they are persisted in
@@ -31,7 +32,7 @@ public interface TableCellTransformer extends TableCellValidator
      */
     static public TableCellTransformer fromGroovy(String fileName)
     {
-        return new GroovyCellTransformer(fileName, null, null);
+        return (TableCellTransformer)GroovyCellTransformer.construct(fileName, null, null);
     }
     
     /**
@@ -44,7 +45,17 @@ public interface TableCellTransformer extends TableCellValidator
      */
     static public TableCellTransformer fromGroovy(String fileName, String valName, String transName)
     {
-        return new GroovyCellTransformer(fileName, valName, transName);
+        return (TableCellTransformer)GroovyCellTransformer.construct(fileName, valName, transName);
+    }
+    
+    static public TableCellTransformer fromJython(String fileName)
+    {
+        return (TableCellTransformer) JythonCellTransformer.construct(fileName, null, null);
+    }
+    
+    static public TableCellTransformer fromJython(String fileName, String valName, String transName)
+    {
+        return (TableCellTransformer) JythonCellTransformer.construct(fileName, valName, transName);
     }
     
     /**
