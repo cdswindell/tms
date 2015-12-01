@@ -12,7 +12,7 @@ import org.tms.api.exceptions.ConstraintViolationException;
 import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.utils.NumericRange;
 import org.tms.api.utils.NumericRangeRequired;
-import org.tms.api.utils.TableCellTransformer;
+import org.tms.api.utils.TableCellValidator;
 
 public class CellValidationTest
 {
@@ -151,8 +151,8 @@ public class CellValidationTest
         ColumnImpl c1 = t.addColumn(Access.Next);
         ColumnImpl c2 = t.addColumn(Access.Next);
         
-        TableCellTransformer tct = 
-                TableCellTransformer.fromGroovy("class valIt {void validate(Object x){assert x instanceof Number : \"number required\"\n def xd = ((Number)x).doubleValue()\n assert xd >= 30 && xd <= 40}}");
+        TableCellValidator tct = 
+                TableCellValidator.fromGroovy("class valIt {void validate(Object x){assert x instanceof Number : \"number required\"\n def xd = ((Number)x).doubleValue()\n assert xd >= 30 && xd <= 40}}");
         r1.setValidator(tct);
         c1.setValidator(new NumericRange(1.0, 10.0));
         
@@ -172,7 +172,7 @@ public class CellValidationTest
         }       
                 
         // test usage of groovy
-        tct = TableCellTransformer.fromGroovy("class valIt {void validate(Object x){assert x != null && x instanceof Number : \"number required\"}}");
+        tct = TableCellValidator.fromGroovy("class valIt {void validate(Object x){assert x != null && x instanceof Number : \"number required\"}}");
         cR4C1.setValidator(tct);
         
         cR1C1.setCellValue(2.0);

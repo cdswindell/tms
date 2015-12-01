@@ -64,7 +64,6 @@ public class TableEditor implements Serializable
 	
 	public String getFilePattern()
 	{
-		System.out.println("FileType: " + m_scriptType);
 		switch(m_scriptType) {
 			case "Python":
 				return "/(\\.|\\/)(python|jython|py|jy|txt)$/";
