@@ -257,6 +257,13 @@ public class InfixExpressionParser
                     ifs.push(tType, oper);
                     break;
                     
+                case LeftParen:
+                    Token tmpT = ifs.peek();
+                    if (t != null && tmpT.isBuiltIn()) {
+                        ifs.push(tType, oper);
+                        break;
+                    }
+                    
                 default:
                     if (pr != null)
                         pr.addIssue(ParserStatusCode.InvalidExpression, curPos);
