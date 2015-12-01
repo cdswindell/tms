@@ -21,7 +21,7 @@ public enum TableElementEventType
     OnPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     OnNoPendings(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     
-    OnRecalculate(false, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    OnRecalculate(false, true, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     ;
     
     private Set<ElementType> m_implementedBy = new HashSet<ElementType>();

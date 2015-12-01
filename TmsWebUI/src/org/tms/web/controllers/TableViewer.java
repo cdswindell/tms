@@ -40,6 +40,7 @@ public class TableViewer implements TableElementListener
     		m_table.getTableContext().registerOperator(new StockTickerOp());
     		
     		m_table.addListeners(TableElementEventType.OnNoPendings, this);
+    		m_table.addListeners(TableElementEventType.OnRecalculate, this);
     	}
     }
 	

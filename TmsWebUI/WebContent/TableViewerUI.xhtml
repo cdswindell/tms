@@ -58,14 +58,16 @@
 	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:outputLabel value="#{tableEdit.entityTag} Derivation: "/>  
 	        <p:inputText id="txDeriveTE" value="#{tableEdit.entityDerivation}" widgetVar="newDeriv" size="30" styleClass="txDeriveTE"/> 
+	        <p:outputLabel value="Update Every: " for="minMax"/>  
+			<p:spinner id="minMax" value="#{tableEdit.updateEvery}" min="0" max="100" suffix=" seconds"/>
 		</p:panelGrid>  
 	    <p:panelGrid id="deriveTEPanel2" columns="3" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:commandButton icon="ui-icon-check"   
 	        				 value="OK" 
+	        				 actionListener="#{tableEdit.applyDerivation}"
 	        				 oncomplete="PF('deriveTEDialog').hide()"
 	        				 update=":form:tableEditorId"
 	        				 process="@form"
-	        				 onstart="$('#derive').submit();"
 	        				 />
 	        <p:commandButton icon="ui-icon-arrowthickstop-1-w"   
 	        				 value="Clear" 

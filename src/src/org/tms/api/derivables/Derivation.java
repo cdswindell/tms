@@ -1,6 +1,7 @@
 package org.tms.api.derivables;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.tms.api.Table;
 import org.tms.api.TableContext;
@@ -31,8 +32,12 @@ public interface Derivation
     public String getAsEnteredExpression();
     public String getPostfixExpression();
     public String getInfixExpression();
-    boolean isParsed();
-    boolean isConverted();
+    public boolean isParsed();
+    public boolean isConverted();
 
-    void recalculateTarget();
+    public void recalculateTarget();
+
+    public boolean isPeriodic();
+    public void recalculateEvery(int frequency);
+    public void recalculateEvery(int frequency, TimeUnit unit);
 }

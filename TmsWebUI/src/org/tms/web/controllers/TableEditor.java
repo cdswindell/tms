@@ -3,6 +3,7 @@ package org.tms.web.controllers;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -18,6 +19,8 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.TableContext;
 import org.tms.api.TableRowColumnElement;
+import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Derivation;
 import org.tms.io.Printable;
 
 @ManagedBean(name="tableEdit" )
@@ -46,6 +49,8 @@ public class TableEditor implements Serializable
 
 	private UploadedFile m_file;
 	private String m_scriptType;
+	private int m_updateEvery;
+	private String m_entityDeriv;
 
 	public TableEditor()
 	{
@@ -212,6 +217,16 @@ public class TableEditor implements Serializable
 		}
 	}	
 
+	public int getUpdateEvery()
+	{
+		return m_updateEvery;
+	}
+	
+	public void setUpdateEvery(int updateEvery)
+	{
+		m_updateEvery = updateEvery;
+	}
+	
 	public String getEntityDerivation()
 	{
 		if (getSelectedEntity() != null && getSelectedEntity().getTE().isDerived())
@@ -222,20 +237,31 @@ public class TableEditor implements Serializable
 	
 	public void setEntityDerivation(String deriv)
 	{
-		if (getSelectedEntity() != null) {
-			if (deriv != null && (deriv = deriv.trim()).length() <= 0)
-				deriv = null;
-			
-			EditBase eb = getSelectedEntity();
-			if (deriv == null)
-				eb.getTE().clearDerivation();
-			else
-				eb.getTE().setDerivation(deriv);
-			
-			clearSelectedEntity();
-		}
+		m_entityDeriv = deriv;
 	}	
 
+	public void applyDerivation()
+	{
+		if (getSelectedEntity() != null) {
+			if (m_entityDeriv != null && (m_entityDeriv = m_entityDeriv.trim()).length() <= 0)
+				m_entityDeriv = null;
+			
+			EditBase eb = getSelectedEntity();
+			if (m_entityDeriv == null)
+				eb.getTE().clearDerivation();
+			else {
+				Derivable de = eb.getTE().setDerivation(m_entityDeriv);				
+				if (m_updateEvery > 0) {
+					Derivation d = de.getDerivation();
+					d.recalculateEvery(m_updateEvery, TimeUnit.SECONDS);
+				}
+			}
+			
+			m_entityDeriv = null;
+			clearSelectedEntity();
+		}
+	}
+	
 	public EditBase getSelectedEntity()
 	{
 		if (m_selectedRow != null)

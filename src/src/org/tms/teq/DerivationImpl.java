@@ -16,6 +16,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.tms.api.BaseElement;
 import org.tms.api.Cell;
@@ -39,14 +43,14 @@ import org.tms.teq.PendingState.AwaitingState;
 import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 import org.tms.util.Tuple;
 
-public final class DerivationImpl implements Derivation
+public final class DerivationImpl implements Derivation, Runnable
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
     private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
     private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
-
+    
     private static final ThreadLocal<UUID> sf_GUID_CACHE = new  ThreadLocal<UUID>() {
         @Override protected UUID initialValue() {
             Thread ct = Thread.currentThread();
@@ -56,6 +60,18 @@ public final class DerivationImpl implements Derivation
         }
     };
     
+    private static final int sf_NUM_THREADS = 1;
+    private static final boolean sf_MAY_INTERRUPT_IF_RUNNING = true;
+    
+    private static ScheduledExecutorService sf_DerivationScheduler;
+    
+    private static final synchronized ScheduledExecutorService getDerivationScheduler()
+    {
+    	if (sf_DerivationScheduler == null)
+    		sf_DerivationScheduler = Executors.newScheduledThreadPool(sf_NUM_THREADS);
+    	return sf_DerivationScheduler;
+    }
+
     /**
      * Creates a DerivationImpl from the provided expression and assigns it to the specified TableElement.
      * The expression is parsed into an infix expression, then converted to postfix notation to
@@ -470,6 +486,8 @@ public final class DerivationImpl implements Derivation
 
     private boolean m_pendingCachesInitialized;
     
+    private ScheduledFuture<?> m_scheduledFuture;
+    
     private DerivationImpl()
     {
         m_beingDestroyed = false;
@@ -477,6 +495,7 @@ public final class DerivationImpl implements Derivation
         m_affectedBy = new LinkedHashSet<TableElement>();
         m_precision = new MathContext(sf_DEFAULT_PRECISION);
         
+        m_scheduledFuture = null;
         m_pendingCachesInitialized = false;
         m_cachedAwaitingStates = null;
         m_cachedPendingStats = null;       
@@ -569,6 +588,9 @@ public final class DerivationImpl implements Derivation
     {
         m_beingDestroyed = true;    
 
+        // shut down any future executions
+        cancelPeriodicExecution();
+        
         // Shut down/clear any async operators
         if (m_cachedAwaitingStates != null) {
             for (AwaitingState ps : m_cachedAwaitingStates) {
@@ -637,14 +659,14 @@ public final class DerivationImpl implements Derivation
         m_pendingCachesInitialized = false;
     }
     
-    boolean isBeingDestroyed()
+	boolean isBeingDestroyed()
     {
         return m_beingDestroyed;
     }
     
     public void delete()
     {
-        if (this.getTarget() != null)
+        if (getTarget() != null)
             getTarget().clearDerivation();
         else {
             destroy();
@@ -1162,8 +1184,48 @@ public final class DerivationImpl implements Derivation
         }
         
         return value;
+    }     
+    
+    @Override
+    public boolean isPeriodic()
+    {
+    	return m_scheduledFuture != null;
     }
-      
+    
+    private void cancelPeriodicExecution() 
+    {
+        if (m_scheduledFuture != null) {
+        	m_scheduledFuture.cancel(sf_MAY_INTERRUPT_IF_RUNNING);
+        	m_scheduledFuture = null;
+        }       	
+	}
+
+    @Override
+    public void recalculateEvery(int frequency)
+    {
+    	recalculateEvery(frequency, TimeUnit.MILLISECONDS);
+    }
+    
+    @Override
+    public void recalculateEvery(int frequency, TimeUnit unit)
+    {
+    	if (unit == null)
+    		unit = TimeUnit.MILLISECONDS;
+    	
+    	// cancel current schedule
+    	cancelPeriodicExecution();
+    	
+    	// reschedule
+    	if (frequency > 0)  	
+    		m_scheduledFuture = getDerivationScheduler().scheduleAtFixedRate(this, frequency, frequency, unit);
+    }
+    
+	@Override
+	public void run() 
+	{
+		this.getTarget().recalculate(); // we want events handlers to fire		
+	}
+	
     public String toString()
     {
         return String.format("%s [%s %s]", 
