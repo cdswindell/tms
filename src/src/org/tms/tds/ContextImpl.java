@@ -666,6 +666,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     }
     
     @Override
+    public void registerJythonOperators(String fileName, String className)
+    {
+        TokenMapper.fetchTokenMapper(this).registerJythonOperators(fileName, className);
+    }
+    
+    @Override
     public boolean deregisterOperator(Operator oper)
     {
         return TokenMapper.fetchTokenMapper(this).deregisterOperator(oper);

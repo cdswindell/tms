@@ -170,6 +170,11 @@ public class TokenMapper
         JythonOp.registerAllOps(this, fileName);
     }
     
+    public void registerJythonOperators(String fileName, String className)
+    {
+        JythonOp.registerAllOps(this, fileName, className);
+    }
+    
     public <T, R> void registerOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)
     {
         Operator op = new UnaryFunc1ArgOp<T, R>(label, TokenType.UnaryFunc, p1Type, resultType, uniOp);

@@ -104,6 +104,7 @@
 </h:form>
 
 <h:form id="gScript" enctype="multipart/form-data">
+    <p:remoteCommand name="onScriptTypeChange" update=":gScript:fileUpload" actionListener="#{tableEdit.recalc}"/>
 	<p:dialog id="scriptTEDialog" 
     		  header="Upload New Operators" 
     		  widgetVar="scriptTEDialog" 
@@ -113,19 +114,23 @@
               hideEffect="fold">  
 	    <p:panelGrid id="scriptTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:outputLabel value="Script File: "/>  
- 			<p:fileUpload widgetVar="fileUpload"
+ 			<p:fileUpload id="fileUpload"
+ 						  widgetVar="fileUploadP"
  						  fileUploadListener="#{tableEdit.uploadOps}"
  						  value="#{tableEdit.file}" 
  						  mode="advanced"
  						  dragDropSupport="true"
  						  fileLimit="1" 
- 						  previewWidth="200"
- 						  
- 						  allowTypes="/(\.|\/)(groovy|gvy|gy|gsh|txt)$/"
+ 						  allowTypes="#{tableEdit.filePattern}"
  						  update="uploadMessages"/>
 		</p:panelGrid>  
-	    <p:panelGrid  columns="1" cellpadding="4" styleClass="tmsHeaderGrid" >
-			<p:commandButton icon="ui-icon-check" value="Done" type="button" onclick="PF('scriptTEDialog').hide()"/>
+	    <p:panelGrid  columns="3" cellpadding="4" styleClass="tmsHeaderGrid" >
+          <p:outputLabel for="format" value="Format" />
+          <p:selectOneRadio id="scriptType" value="#{tableEdit.scriptType}" immediate="true" valueChangeListener="#{tableEdit.scriptTypeChanged}" onchange="onScriptTypeChange()">
+            <f:selectItem itemLabel="Groovy" itemValue="Groovy" />
+            <f:selectItem itemLabel="P/Jython" itemValue="Python" />
+          </p:selectOneRadio>
+   		  <p:commandButton icon="ui-icon-check" value="Done" type="button" onclick="PF('scriptTEDialog').hide()"/>
 	    </p:panelGrid>
 		<p:growl id="uploadMessages" showDetail="true" />	
    </p:dialog>
@@ -170,7 +175,7 @@
 	    	  <p:panelGrid id="btnPanel" columns="3" border="0" cellpadding="0" cellspacing="0" styleClass="toolBarGrid" >
         		<p:commandButton id="resetTable" icon="ui-icon-refresh" update=":form:tableEditorId" actionListener="#{tableEdit.reset}" style="margin:0px;width:25px;height:25px"/>  
         		<p:commandButton id="recalcAll" icon="ui-icon-calculator" update=":form:tableEditorId" actionListener="#{tableEdit.recalc}" style="margin:0px;width:25px;height:25px"/>  
-        		<p:commandButton id="groovyOps" icon="ui-icon-script" oncomplete="PF('scriptTEDialog').show();" style="margin:0px;width:25px;height:25px"/>  
+        		<p:commandButton id="groovyOps" icon="ui-icon-script" update=":gScript:fileUpload" oncomplete="PF('scriptTEDialog').show();" style="margin:0px;width:25px;height:25px"/>  
 			  </p:panelGrid>
             </f:facet>
 			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>

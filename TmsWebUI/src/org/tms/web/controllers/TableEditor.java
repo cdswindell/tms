@@ -9,6 +9,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
 
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
@@ -25,6 +26,8 @@ import org.tms.io.Printable;
 public class TableEditor implements Serializable
 {
 	private static final long serialVersionUID = 1L;
+	private static final String sf_GROOVY = "Groovy";
+	private static final String sf_PYTHON = "Python";
 
 	@SuppressWarnings("unchecked")
 	static <T> T findBean(String beanName) {
@@ -42,6 +45,40 @@ public class TableEditor implements Serializable
 	private EditColumn m_selectedCol;
 
 	private UploadedFile m_file;
+	private String m_scriptType;
+
+	public TableEditor()
+	{
+		m_scriptType = sf_GROOVY;
+	}
+	
+	public void setScriptType(String st)
+	{
+		m_scriptType = st;
+	}
+	
+	public String getScriptType()
+	{
+		return m_scriptType;
+	}
+	
+	public String getFilePattern()
+	{
+		System.out.println("FileType: " + m_scriptType);
+		switch(m_scriptType) {
+			case "Python":
+				return "/(\\.|\\/)(python|jython|py|jy|txt)$/";
+				
+			case "Groovy":
+			default:
+				return "/(\\.|\\/)(groovy|gvy|gy|gsh|txt)$/";
+		}
+	}
+	
+	public void scriptTypeChanged(ValueChangeEvent vce)
+	{
+		System.out.println("FileType changed: " + m_scriptType);		
+	}
 	
 	public UploadedFile getFile() 
 	{
@@ -58,7 +95,12 @@ public class TableEditor implements Serializable
 		m_file = event.getFile();
 		if (m_file != null) {
 			TableContext tc = m_tableViewer.getTable().getTableContext();
-			tc.registerGroovyOperators(new String(m_file.getContents()));
+			
+			if (sf_PYTHON.equals(m_scriptType)) {
+				tc.registerJythonOperators(new String(m_file.getContents()), extractClassName(event));
+			}
+			else
+				tc.registerGroovyOperators(new String(m_file.getContents()));
 			
             FacesMessage message = new FacesMessage("Succesful", "Operator(s) in: " + m_file.getFileName() + " are now available.");
             FacesContext.getCurrentInstance().addMessage(null, message);
@@ -66,6 +108,16 @@ public class TableEditor implements Serializable
 		}
 	}
 	
+	private String extractClassName(FileUploadEvent event) 
+	{
+		String fileName = event.getFile().getFileName();
+		int idx = fileName.lastIndexOf('.');
+		if (idx > -1)
+			return fileName.substring(0, idx);
+		else
+			return fileName;
+	}
+
 	public boolean isNoFile()
 	{
 		return m_file == null;
