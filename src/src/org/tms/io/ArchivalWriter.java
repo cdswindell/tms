@@ -32,7 +32,6 @@ abstract public class ArchivalWriter<T extends ArchivalIOOptions<T>> extends Bas
     protected XStream getXStream(ArchivalWriter<T> writer)
     {
         XStream xmlStreamer = new XStream();
-        xmlStreamer = new XStream();
             
         xmlStreamer.alias(TableContextConverter.ELEMENT_TAG, ContextImpl.class);
         xmlStreamer.alias(DbmsTableConverter.ELEMENT_TAG, DbmsTableImpl.class);
