@@ -27,7 +27,7 @@ public class RTFWriterTest extends BaseIOTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGold, "misc"));
-        byte[] gold = Files.readAllBytes(path);  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
@@ -48,7 +48,7 @@ public class RTFWriterTest extends BaseIOTest
         bos.close();
 
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output =  toLinuxByteArray(bos.toByteArray());
         assertNotNull(output);
 
         assertThat(gold.length, is(output.length));

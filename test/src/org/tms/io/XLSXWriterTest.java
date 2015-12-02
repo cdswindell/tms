@@ -87,7 +87,7 @@ public class XLSXWriterTest extends BaseIOTest
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
 
-        assertThat(this.closeTo(gold.length, output.length, 10), is(true));
+        assertThat(this.closeTo(gold.length, output.length, 100), is(true));
     }
     
     @Test
