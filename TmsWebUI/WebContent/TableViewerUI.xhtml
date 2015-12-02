@@ -181,6 +181,7 @@
 			  </p:panelGrid>
             </f:facet>
 			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
+	        <h:outputText value="*" rendered="#{row.derived}" />
 			<p:contextMenu for="rowNames" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
 				<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog">
       				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
