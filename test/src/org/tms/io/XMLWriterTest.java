@@ -52,7 +52,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGoldTC, "xml"));
-        byte[] gold = Files.readAllBytes(path);  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));

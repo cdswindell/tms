@@ -121,4 +121,21 @@ public class BaseTest
 		else
 			return bos.toByteArray();
 	}
+    
+    protected byte[] toLinuxByteArray(byte[] bytes) 
+    {
+    	String lineSep = System.lineSeparator();
+		if ("\r\n".equals(lineSep)) {
+			String winStr = new String(bytes);
+			int idx = winStr.indexOf(lineSep);
+			while(idx > -1) {
+				winStr = winStr.substring(0, idx) + "\n" + winStr.substring(idx + 2);
+				idx = winStr.indexOf(lineSep);
+			}
+			
+			return winStr.getBytes();
+		}
+		else
+			return bytes;
+	}
 }
