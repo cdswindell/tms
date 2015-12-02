@@ -17,8 +17,8 @@ public interface Derivable extends TableElement
      * @param expression the element's derivation, as an algebraic string
      * @return this Derivable element
      */
-    public Derivable setDerivation(String expression);
-    public Derivable clearDerivation();
+    public Derivation setDerivation(String expression);
+    public void clearDerivation();
     
     /**
      * Returns {@code true} if this element is derived

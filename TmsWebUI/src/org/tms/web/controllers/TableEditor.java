@@ -19,7 +19,6 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.TableContext;
 import org.tms.api.TableRowColumnElement;
-import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Derivation;
 import org.tms.io.Printable;
 
@@ -250,11 +249,9 @@ public class TableEditor implements Serializable
 			if (m_entityDeriv == null)
 				eb.getTE().clearDerivation();
 			else {
-				Derivable de = eb.getTE().setDerivation(m_entityDeriv);				
-				if (m_updateEvery > 0) {
-					Derivation d = de.getDerivation();
+				Derivation d = eb.getTE().setDerivation(m_entityDeriv);				
+				if (m_updateEvery > 0) 
 					d.recalculateEvery(m_updateEvery, TimeUnit.SECONDS);
-				}
 			}
 			
 			m_entityDeriv = null;

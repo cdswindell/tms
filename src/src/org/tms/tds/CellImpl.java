@@ -15,6 +15,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.Taggable;
 import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.ErrorCode;
 import org.tms.api.derivables.Token;
 import org.tms.api.events.BlockedRequestException;
@@ -684,20 +685,21 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     }
 
     @Override
-    public Derivable setDerivation(String expr)
+    public Derivation setDerivation(String expr)
     {
         return setDerivation(expr, true);
     }
     
-    protected Derivable setDerivation(String expr, boolean doRecalc)
+    protected DerivationImpl setDerivation(String expr, boolean doRecalc)
     {
         vetElement();
         
         // clear out any existing derivations
         clearDerivation();
         
+        DerivationImpl deriv = null;
         if (expr != null && expr.trim().length() > 0) {
-            DerivationImpl deriv = DerivationImpl.create(expr.trim(), this);
+            deriv = DerivationImpl.create(expr.trim(), this);
             
             // mark the rows/columns that impact the deriv, and evaluate values
             if (deriv != null && deriv.isConverted()) {
@@ -714,11 +716,11 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
             }  
         }
         
-        return this;
+        return deriv;
     }
 
     @Override
-    public Derivable clearDerivation()
+    public void clearDerivation()
     {
         DerivationImpl deriv = getTable() != null ? getTable().getCellDerivation(this) : null;
         if (deriv != null) {
@@ -731,8 +733,6 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
             getTable().deregisterDerivedCell(this);            
             deriv.destroy();
         }  
-        
-        return this;
     }
 
     @Override

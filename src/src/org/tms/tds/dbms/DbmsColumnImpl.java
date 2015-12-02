@@ -2,7 +2,7 @@ package org.tms.tds.dbms;
 
 import org.tms.api.Access;
 import org.tms.api.ElementType;
-import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Derivation;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
@@ -68,7 +68,7 @@ public class DbmsColumnImpl extends ColumnImpl
     }
 
     @Override
-    public Derivable setDerivation(String expr) 
+    public Derivation setDerivation(String expr) 
     {
         throw new UnsupportedImplementationException(this, "Cannot set a derivation on a database column");
     }

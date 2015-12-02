@@ -520,14 +520,14 @@ public class StatOperatorTest extends BaseTest
         
         Row r2 = t.addRow(Access.Next);
         t.setCellValue(r2, c1, 13);
-        c = (Cell) t.getCell(r2, c2).setDerivation("tScore(20000, 19800, 1750, 14)");
+        c = (Cell) t.getCell(r2, c2).setDerivation("tScore(20000, 19800, 1750, 14)").getTarget();
         t.setCellValue(r2, c3, 0.338);
         assertThat(closeTo(t.getCellValue(r2, c4), 0.338, 0.001), is(true));
         assertThat(closeTo(t.getCellValue(r2, c5), -0.4276, 0.0001), is(true));
         
         Row r3 = t.addRow(Access.Next);
         t.setCellValue(r3, c1, 24);
-        c = (Cell) t.getCell(r3, c2).setDerivation("tScore(112.1, 115, 11, 25)");
+        c = (Cell) t.getCell(r3, c2).setDerivation("tScore(112.1, 115, 11, 25)").getTarget();
         t.setCellValue(r3, c3, 0.90);
         assertThat(closeTo(t.getCellValue(r3, c4), 0.90, 0.001), is(true));
         assertThat(closeTo(t.getCellValue(r3, c5), 1.3182, 0.001), is(true));

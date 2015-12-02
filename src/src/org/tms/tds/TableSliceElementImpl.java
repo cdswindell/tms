@@ -15,6 +15,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Derivation;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -127,12 +128,12 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     }
     
     @Override
-    public Derivable setDerivation(String expr)
+    public Derivation setDerivation(String expr)
     {
         return setDerivation(expr, true);
     }
     
-    protected Derivable setDerivation(String expr, boolean doRecalc)
+    protected DerivationImpl setDerivation(String expr, boolean doRecalc)
     {
         vetElement();
         
@@ -158,7 +159,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
             }  
         }
         
-        return this;
+        return m_deriv;
     }
     
     @Override
@@ -171,7 +172,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     }
     
     @Override
-    public Derivable clearDerivation()
+    public void clearDerivation()
     {
         if (m_deriv != null) {
             DerivationImpl deriv = m_deriv;
@@ -185,8 +186,6 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
             
             deriv.destroy();
         }   
-        
-        return this;
     }
     
     @Override

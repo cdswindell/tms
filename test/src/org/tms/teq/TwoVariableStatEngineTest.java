@@ -89,13 +89,13 @@ public class TwoVariableStatEngineTest extends BaseTest
         tData.setCellValue(tData.getRow(Access.Current), c2, 6);
         
         Table t2 = TableFactory.createTable();
-        Cell cR1C1 = (Cell)t2.getCell(t2.addRow(), t2.addColumn()).setDerivation("slope(col Data::X, col Data::Y)");
+        Cell cR1C1 = (Cell)t2.getCell(t2.addRow(), t2.addColumn()).setDerivation("slope(col Data::X, col Data::Y)").getTarget();
         assertThat(closeTo(cR1C1.getCellValue(), 1.1486486, 0.000001), is(true));
         
-        Cell cR2C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn()).setDerivation("intercept(col Data::X, col Data::Y)");
+        Cell cR2C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn()).setDerivation("intercept(col Data::X, col Data::Y)").getTarget();
         assertThat(closeTo(cR2C1.getCellValue(), -0.216216, 0.000001), is(true));
         
-        Cell cR3C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn()).setDerivation("ccr(col Data::X, col Data::Y)");
+        Cell cR3C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn()).setDerivation("ccr(col Data::X, col Data::Y)").getTarget();
         assertThat(closeTo(cR3C1.getCellValue(), 0.9881049, 0.000001), is(true));
         
         Cell cR4C1 = (Cell)t2.getCell(t2.addRow(), t2.getColumn());
@@ -172,12 +172,12 @@ public class TwoVariableStatEngineTest extends BaseTest
         t.getCell(t.getRow(Access.Next), c2).setDerivation("count(col 2)");
         
         Column c3 = t.addColumn();
-        Cell c = (Cell) t.getCell(t.getRow(Access.First), c3).setDerivation("tsPValue(col 1, col 2)");
+        Cell c = (Cell) t.getCell(t.getRow(Access.First), c3).setDerivation("tsPValue(col 1, col 2)").getTarget();
         
-        c = (Cell) t.getCell(t.getRow(Access.Next), c3).setDerivation("tsTValue(col 1, col 2)");
+        c = (Cell) t.getCell(t.getRow(Access.Next), c3).setDerivation("tsTValue(col 1, col 2)").getTarget();
         assertThat(closeTo(c.getCellValue(), 1.91, 0.01), is(true));
         
-        c = (Cell) t.getCell(t.getRow(Access.Next), c3).setDerivation("tsTTest(col 1, col 2, 0.10)");
+        c = (Cell) t.getCell(t.getRow(Access.Next), c3).setDerivation("tsTTest(col 1, col 2, 0.10)").getTarget();
         assertThat(c.getCellValue(), is(true));
     }      
 }

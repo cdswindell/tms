@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.TableElement;
 import org.tms.teq.DerivationImpl;
 
 
@@ -40,4 +41,6 @@ public interface Derivation
     public boolean isPeriodic();
     public void recalculateEvery(long frequency);
     public void recalculateEvery(long frequency, TimeUnit unit);
+
+	public TableElement getTarget();
 }

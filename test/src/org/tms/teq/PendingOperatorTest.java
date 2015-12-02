@@ -44,8 +44,8 @@ public class PendingOperatorTest extends BaseTest
         int numRows = 2500;
         t.addRow(Access.ByIndex, numRows);
         
-        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c2 = (Column)t.addColumn().setDerivation("pending2(col 1, 10)"); // c2
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)").getTarget(); // c1
+        Column c2 = (Column)t.addColumn().setDerivation("pending2(col 1, 10)").getTarget(); // c2
         Column c3 = (Column)t.addColumn(); // cell derivations column, c3   
         
         assertThat(((TableImpl)t).isPendings(), is(true));
@@ -101,10 +101,10 @@ public class PendingOperatorTest extends BaseTest
         int numRows = 500;
         t.addRow(Access.ByIndex, numRows);
         
-        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)").getTarget(); // c1
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 50)").getTarget(); // c2
         Column c3 = (Column)t.addColumn(); // cell derivations column, c3        
-        Column c4 = (Column)t.addColumn().setDerivation("normalize(col 2)"); // c4       
+        Column c4 = (Column)t.addColumn().setDerivation("normalize(col 2)").getTarget(); // c4       
         
         Cell cR1C3 = t.getCell(t.getRow(Access.First), c3);
         cR1C3.setDerivation("mean(Col 4)");
@@ -157,11 +157,11 @@ public class PendingOperatorTest extends BaseTest
         t.addRow(Access.ByIndex, numRows);
         
         int factor = 2;
-        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 500)"); // c1
-        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 25) + col 2"); // c3
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)").getTarget(); // c1
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 500)").getTarget(); // c1
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, 25) + col 2").getTarget(); // c3
         Column c3 = (Column)t.addColumn(); // cell derivations column, c4        
-        Column c4 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c45    
+        Column c4 = (Column)t.addColumn().setDerivation("normalize(col 3)").getTarget(); // c45    
         
         assertThat(c1a.isValid(), is(true));
         
@@ -214,9 +214,9 @@ public class PendingOperatorTest extends BaseTest
         int numRows = 500;
         t.addRow(Access.ByIndex, numRows);
         
-        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 500)"); // c2, will block c3
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50)/2"); // c3
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)").getTarget(); // c1
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 500)").getTarget(); // c2, will block c3
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50)/2").getTarget(); // c3
         Column c4 = (Column)t.addColumn(); // cell derivations column, c5
         
         assertThat(c1a, notNullValue());
@@ -268,12 +268,12 @@ public class PendingOperatorTest extends BaseTest
         int numRows = 1000;
         t.addRow(Access.ByIndex, numRows);
         
-        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, randInt(50) + 1)"); // c2, will block c3
-        Column c3 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending2(col 1, randInt(100) + 1)/2"); // c3
-        Column c4 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)").getTarget(); // c1
+        Column c2 = (Column)t.addColumn().setDerivation("pending(col 1, randInt(50) + 1)").getTarget(); // c2, will block c3
+        Column c3 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending2(col 1, randInt(100) + 1)/2").getTarget(); // c3
+        Column c4 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2").getTarget(); // c4
         Column c5 = (Column)t.addColumn(); // cell derivations column, c5        
-        Column c6 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c6
+        Column c6 = (Column)t.addColumn().setDerivation("normalize(col 3)").getTarget(); // c6
         assertThat(((TableImpl)t).isPendings(), is(true));          
         
         assertThat(c2, notNullValue());
@@ -355,12 +355,12 @@ public class PendingOperatorTest extends BaseTest
         int numRows = 1000;
         t.addRow(Access.ByIndex, numRows);
         
-        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)"); // c1
-        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)"); // c2, will block c3
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50 + col 2)/2"); // c3
-        Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2"); // c4
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)").getTarget(); // c1
+        Column c1a = (Column)t.addColumn().setDerivation("pending(col 1, 50)").getTarget(); // c2, will block c3
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 50) + col 2 + pending(col 1, 50 + col 2)/2").getTarget(); // c3
+        Column c3 = (Column)t.addColumn().setDerivation("col 3 - 70 - col 1 * 2").getTarget(); // c4
         Column c4 = (Column)t.addColumn(); // cell derivations column, c5        
-        Column c5 = (Column)t.addColumn().setDerivation("normalize(col 3)"); // c6
+        Column c5 = (Column)t.addColumn().setDerivation("normalize(col 3)").getTarget(); // c6
         
         // delete some rows while calculations are pending
         t.getRow(Access.ByIndex, 800).delete();
@@ -444,8 +444,8 @@ public class PendingOperatorTest extends BaseTest
         
         t.addRow(Access.ByIndex, 1000);
         
-        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)");
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");
+        Column c1 = (Column)t.addColumn().setDerivation("randInt(50)").getTarget();
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2").getTarget();
         t.addColumn().setDerivation("col 2 - 70");
         Column c4 = (Column)t.addColumn(); // cell derivations column
         
@@ -518,8 +518,8 @@ public class PendingOperatorTest extends BaseTest
         t.addRow(Access.ByIndex, 10000);
         
         t.addColumn().setDerivation("randInt(50)");
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");
-        Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70");
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2").getTarget();
+        Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70").getTarget();
         Column c4 = (Column)t.addColumn(); // cell derivations column
         
         t.addColumn().setDerivation("normalize(col 2)"); // c5
@@ -571,8 +571,8 @@ public class PendingOperatorTest extends BaseTest
         t.addRow(Access.ByIndex, 10000);
         
         t.addColumn().setDerivation("randInt(50)");
-        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2");
-        Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70");
+        Column c2 = (Column)t.addColumn().setDerivation("7 * pending(5, 5000) + pending(col 1, 50)/2").getTarget();
+        Column c3 = (Column)t.addColumn().setDerivation("col 2 - 70").getTarget();
         Column c4 = (Column)t.addColumn(); // cell derivations column
         
         t.addColumn().setDerivation("normalize(col 2)"); // c5

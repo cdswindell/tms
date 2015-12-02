@@ -7,7 +7,7 @@ import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
-import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Derivation;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
@@ -110,7 +110,7 @@ public class DbmsCellImpl extends CellImpl
     }
     
     @Override
-    public Derivable setDerivation(String expr) 
+    public Derivation setDerivation(String expr) 
     {
         throw new UnsupportedImplementationException(this, "Cannot set a derivation on a database cell");
     }
