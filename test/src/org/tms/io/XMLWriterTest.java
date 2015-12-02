@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,8 +18,10 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.derivables.Derivation;
 import org.tms.api.exceptions.ConstraintViolationException;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.api.factories.TableFactory;
 import org.tms.api.io.XMLOptions;
 import org.tms.api.utils.NumericRange;
 import org.tms.tds.TableImpl;
@@ -235,6 +238,46 @@ public class XMLWriterTest extends BaseArchivalTest
         assertNotNull(output);
 
         assertThat(String.format("Gold is: %d bos is: %d", gold.length, output.length),output.length, is(gold.length));       
+    }
+    
+    @Test
+    public final void testExportPeriodicDerivation() throws IOException
+    {
+        // create new XML, it should match the gold standard
+        Table gst = getBasicTable();
+        assertNotNull(gst);
+        
+        Column c = gst.addColumn();
+        c.setDerivation("randBetween(1,100)");
+        Derivation d = c.getDerivation();
+        d.recalculateEvery(5000);
+        
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        gst.export(bos, XMLOptions.Default);
+        bos.close();
+        
+        gst.delete();
+        assertThat(false, is(gst.isValid()));
+        gst = null;
+
+        // test byte streams are the same
+        byte [] output =  bos.toByteArray();
+        assertNotNull(output);
+        
+        // reimport
+        ByteArrayInputStream bis = new ByteArrayInputStream(output);
+        gst = TableFactory.importFile(bis, null, XMLOptions.Default);
+        assertNotNull(gst);
+        
+        // check last derived column
+        Column lastCol = gst.getColumn(Access.Last);
+        assertNotNull(lastCol);
+        assertThat(true, is(lastCol.isDerived()));
+        
+        d = lastCol.getDerivation();
+        assertNotNull(d);
+        assertThat(true, is(d.isPeriodic()));
     }
     
     @Test

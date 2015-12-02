@@ -306,6 +306,9 @@ public final class TableFactory
         if (!format.canImport())
             throw new IllegalArgumentException("Format does not support Table import");
         
+        if (tc == null)
+        	tc = TableContextFactory.fetchDefaultTableContext();
+        
         try
         {
             switch (format.getFileFormat()) {
@@ -355,6 +358,9 @@ public final class TableFactory
         
         if (!format.canImport())
             throw new IllegalArgumentException("Format does not support Table import");
+        
+        if (tc == null)
+        	tc = TableContextFactory.fetchDefaultTableContext();
         
         try
         {

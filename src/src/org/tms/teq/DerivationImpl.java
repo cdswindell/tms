@@ -1238,9 +1238,9 @@ public final class DerivationImpl implements Derivation, Runnable
 	
     public String toString()
     {
-        return String.format("%s [%s %s]", 
+        return String.format("%s [%s%s%s]", 
                 this.getAsEnteredExpression(),
-                isParsed() ? "parsed" : "", isConverted() ? "converted" : "");
+                isParsed() ? "parsed " : "", isConverted() ? "converted " : "", isPeriodic() ? "periodic" : "");
     }
     
     protected static class DerivationContext 
