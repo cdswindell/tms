@@ -15,7 +15,7 @@ public interface Derivable extends TableElement
     /**
      * Get the derivation assigned to this element, if one exists.
      * @param expression the element's derivation, as an algebraic string
-     * @return this Derivable element
+     * @return the new derivation
      */
     public Derivation setDerivation(String expression);
     public void clearDerivation();
@@ -32,8 +32,7 @@ public interface Derivable extends TableElement
      * @return a List of the TableElement elements that affect this derivation
      */
     public List<TableElement> getAffectedBy();
-   
-    
+      
     /**
      * Recalculates the derived element. Once complete, recalculates all dependent elements
      * and their dependencies, etc.

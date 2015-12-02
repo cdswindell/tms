@@ -26,8 +26,9 @@ public interface Derivation
         return DerivationImpl.getTransactionID();
     }
     
-    Table getTable();
-    TableContext getTableContext();
+    public Table getTable();
+	public TableElement getTarget();
+	public TableContext getTableContext();
 
     public String getExpression();
     public String getAsEnteredExpression();
@@ -41,6 +42,4 @@ public interface Derivation
     public boolean isPeriodic();
     public void recalculateEvery(long frequency);
     public void recalculateEvery(long frequency, TimeUnit unit);
-
-	public TableElement getTarget();
 }
