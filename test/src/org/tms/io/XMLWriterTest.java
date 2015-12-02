@@ -52,7 +52,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGoldTC, "xml"));
-        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path)); 
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
@@ -90,7 +90,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGold6, "xml"));
-        byte[] gold = Files.readAllBytes(path);  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
@@ -132,7 +132,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGold4, "xml"));
-        byte[] gold = Files.readAllBytes(path);  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
@@ -162,7 +162,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGold5, "xml"));
-        byte[] gold = Files.readAllBytes(path);  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
@@ -192,7 +192,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGold, "xml"));
-        byte[] gold = Files.readAllBytes(path);  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
@@ -220,7 +220,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGold2, "xml"));
-        byte[] gold = Files.readAllBytes(path);  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
@@ -288,7 +288,7 @@ public class XMLWriterTest extends BaseArchivalTest
          * the gold standard file ExportTableGold
          */
         Path path = Paths.get(qualifiedFileName(ExportTableGold3, "xml"));
-        byte[] gold = Files.readAllBytes(path);  
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path));  
 
         assertNotNull(gold);
         assertThat(gold.length > 0, is(true));
