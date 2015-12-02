@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.tms.api</groupId>
   <artifactId>tms</artifactId>
-  <version>0.9</version>
+  <version>1.1</version>
   <name>tms</name>
   <build>
     <sourceDirectory>src</sourceDirectory>

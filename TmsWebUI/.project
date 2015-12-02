@@ -3,6 +3,7 @@
 	<name>TmsWebUI</name>
 	<comment></comment>
 	<projects>
+		<project>TMS</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

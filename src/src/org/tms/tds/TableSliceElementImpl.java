@@ -498,7 +498,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     @Override
     public boolean fill(Object o) 
     {
-        return fill(o, true, true, true);
+        return fill(o, true, false, true);
     }
     
     boolean fill(Object o, boolean preserveCurrent, boolean preserveDerivedCells, boolean fireEvents) 
@@ -536,6 +536,8 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
                     if (c != null) {
                         if (preserveDerivedCells && isDerived(c)) 
                             continue;
+                        else
+                        	c.clearDerivation();
                         
                         try {
                             if (((CellImpl)c).setCellValue(o, true, false))

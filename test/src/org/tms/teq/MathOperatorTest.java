@@ -122,17 +122,18 @@ public class MathOperatorTest extends BaseTest
         assertThat(cR1C1, notNullValue());
         
         cR1C1.setDerivation("numberOf(col 1, 50)");
-        c1.fill(100);
         assertThat(cR1C1.getCellValue(), is (0.0));
+        c1.fill(100);
+        assertThat(cR1C1.getCellValue(), is (100));
         
         c1.fill(500);
-        assertThat(cR1C1.getCellValue(), is (0.0));
+        assertThat(cR1C1.getCellValue(), is (500));
         
         c1.fill(10);
-        assertThat(cR1C1.getCellValue(), is (0.0));
+        assertThat(cR1C1.getCellValue(), is (10));
         
         c1.fill(22);
-        assertThat(cR1C1.getCellValue(), is (0.0));
+        assertThat(cR1C1.getCellValue(), is (22));
         
         c1.fill("abc");
         cR1C1.setDerivation("numberOf(col 1, 'abc')");
@@ -142,7 +143,7 @@ public class MathOperatorTest extends BaseTest
         assertThat(cR1C1.getCellValue(), is (0.0));
         
         c1.fill(50);
-        assertThat(cR1C1.getCellValue(), is (499.0));
+        assertThat(cR1C1.getCellValue(), is (50));
         
         Cell cR1C2 = tbl.getCell(r1,  c2);
         assertThat(cR1C2, notNullValue());
@@ -156,7 +157,7 @@ public class MathOperatorTest extends BaseTest
         c3.setDerivation("normalize(col 2)");
         
         assertThat(cR1C1.isNumericValue(), is(true));
-        assertThat(cR1C1.getCellValue(), is (499.0));
+        assertThat(cR1C1.getCellValue(), is (50));
         assertThat(cR1C2.getCellValue(), is (499.0));
         assertThat(closeTo(cR1C3.getCellValue(), 0, 0.000000000001), is (true));
         
