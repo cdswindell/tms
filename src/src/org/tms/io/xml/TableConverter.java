@@ -22,6 +22,7 @@ import org.tms.tds.RowImpl;
 import org.tms.tds.SubsetImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.TableSliceElementImpl;
+import org.tms.teq.DerivationImpl;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -273,9 +274,9 @@ public class TableConverter extends BaseConverter
         
         // process derivations, if any
         if (options().isDerivations()) {
-            for (Map.Entry<Derivable, String> e : getDerivationsMap(context).entrySet()) {
+            for (Map.Entry<Derivable, CachedDerivation> e : getDerivationsMap(context).entrySet()) {
                 Derivable d = e.getKey();
-                String eq = e.getValue();
+                CachedDerivation eq = e.getValue();
                 
                 restoreDerivation(d, eq);
             }
@@ -287,14 +288,20 @@ public class TableConverter extends BaseConverter
         return t;
     }
     
-	private void restoreDerivation(Derivable d, String eq)
+	private void restoreDerivation(Derivable d, CachedDerivation eq)
 	{
 	    try
 	    {
 	        if (d instanceof TableSliceElementImpl) 
-	            setRowColDerivation.invoke(d, eq, false);
+	            setRowColDerivation.invoke(d, eq.getDerivation(), false);
 	        else if (d instanceof CellImpl)
-                setCellDerivation.invoke(d, eq, false);
+                setCellDerivation.invoke(d, eq.getDerivation(), false);
+	        
+	        if (eq.getPeriod() > 0) {
+	        	DerivationImpl dv = (DerivationImpl)d.getDerivation();
+	        	if (dv != null)
+	        		dv.recalculateEvery(eq.getPeriod());
+	        }
 	    }
 	    catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
 	    {

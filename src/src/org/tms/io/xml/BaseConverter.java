@@ -20,6 +20,7 @@ import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.TableCellsElementImpl;
+import org.tms.teq.DerivationImpl;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -52,6 +53,7 @@ abstract public class BaseConverter implements Converter
     static final protected String READONLY_ATTR = "readOnly";
     static final protected String ALLOWNULLS_ATTR = "allowNulls";
     static final protected String ENFORCE_DATATYPE_ATTR = "enforce";
+    static final protected String DERIV_PERIOD_ATTR = "repeat";
     
     private BaseWriter<?> m_writer;
     private BaseReader<?> m_reader;
@@ -276,6 +278,8 @@ abstract public class BaseConverter implements Converter
         {
             Derivation d =  ((Derivable)te).getDerivation();
             writer.startNode(DERIV_TAG);
+            if (d.isPeriodic())
+            	writer.addAttribute(DERIV_PERIOD_ATTR, String.valueOf(((DerivationImpl)d).getPeriodInMilliSeconds()));
             writer.setValue(d.getExpression());
             writer.endNode();
         }
@@ -367,9 +371,10 @@ abstract public class BaseConverter implements Converter
                     
                 case DERIV_TAG:
                     if (options().isDerivations()) {
+                    	Long period = readAttributeLong(DERIV_PERIOD_ATTR, reader);
                         strVal = (String)context.convertAnother(t, String.class);
                         if (t instanceof Derivable)
-                            cacheDerivation((Derivable)t, strVal, context);
+                            cacheDerivation((Derivable)t, strVal, period, context);
                     }
                     break;
                     
@@ -411,18 +416,19 @@ abstract public class BaseConverter implements Converter
         }
     }       
     
-    private void cacheDerivation(Derivable te, String deriv, UnmarshallingContext context)
+    private void cacheDerivation(Derivable te, String deriv, Long period, UnmarshallingContext context)
     {
-        Map<Derivable, String> derivsMap = getDerivationsMap(context);       
-        derivsMap.put(te,  deriv);
+        Map<Derivable, CachedDerivation> derivsMap = getDerivationsMap(context);  
+        CachedDerivation cd = new CachedDerivation(deriv, period);
+        derivsMap.put(te,  cd);
     }
 
-    protected Map<Derivable, String> getDerivationsMap(UnmarshallingContext context)
+    protected Map<Derivable, CachedDerivation> getDerivationsMap(UnmarshallingContext context)
     {
         @SuppressWarnings("unchecked")
-        Map<Derivable, String> derivsMap = (Map<Derivable, String>)context.get(TMS_DERIVATIONS_KEY);
+        Map<Derivable, CachedDerivation> derivsMap = (Map<Derivable, CachedDerivation>)context.get(TMS_DERIVATIONS_KEY);
         if (derivsMap == null) {
-            derivsMap = new LinkedHashMap<Derivable, String>();
+            derivsMap = new LinkedHashMap<Derivable, CachedDerivation>();
             context.put(TMS_DERIVATIONS_KEY, derivsMap);
         }
         
@@ -450,6 +456,18 @@ abstract public class BaseConverter implements Converter
         return null;
     }
     
+    protected Long readAttributeLong(String attrName, HierarchicalStreamReader reader)
+    {
+        try {
+            String val = reader.getAttribute(attrName);
+            if (val != null)          
+                return Long.parseLong(val);
+        }
+        catch (Exception e) {}
+        
+        return null;
+    }
+    
     protected Double readAttributeDouble(String attrName, HierarchicalStreamReader reader)
     {
         try {
@@ -460,5 +478,27 @@ abstract public class BaseConverter implements Converter
         catch (Exception e) {}
         
         return null;
+    }
+    
+    final static class CachedDerivation
+    {
+    	private String m_deriv;
+		private long m_period;
+
+		CachedDerivation(String deriv, Long period)
+    	{
+    		m_deriv = deriv;
+    		m_period = period != null ? period : 0l;
+    	}
+		
+		String getDerivation()
+		{
+			return m_deriv;
+		}
+		
+		long getPeriod()
+		{
+			return m_period;
+		}
     }
 }

@@ -38,6 +38,6 @@ public interface Derivation
     public void recalculateTarget();
 
     public boolean isPeriodic();
-    public void recalculateEvery(int frequency);
-    public void recalculateEvery(int frequency, TimeUnit unit);
+    public void recalculateEvery(long frequency);
+    public void recalculateEvery(long frequency, TimeUnit unit);
 }

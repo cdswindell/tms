@@ -482,11 +482,13 @@ public final class DerivationImpl implements Derivation, Runnable
     private Map<TableElement, PendingStatistic> m_cachedPendingStats;
     private Map<Cell, Set<PendingState>> m_cellBlockedPendingStatesMap;
     
-    public boolean m_beingDestroyed;
+    private boolean m_beingDestroyed;
 
     private boolean m_pendingCachesInitialized;
     
     private ScheduledFuture<?> m_scheduledFuture;
+
+	private long m_scheduledPeriod;
     
     private DerivationImpl()
     {
@@ -1192,22 +1194,28 @@ public final class DerivationImpl implements Derivation, Runnable
     	return m_scheduledFuture != null;
     }
     
+    public long getPeriodInMilliSeconds()
+    {
+    	return m_scheduledPeriod;
+    }
+    
     private void cancelPeriodicExecution() 
     {
         if (m_scheduledFuture != null) {
         	m_scheduledFuture.cancel(sf_MAY_INTERRUPT_IF_RUNNING);
+        	m_scheduledPeriod = 0;
         	m_scheduledFuture = null;
         }       	
 	}
 
     @Override
-    public void recalculateEvery(int frequency)
+    public void recalculateEvery(long frequency)
     {
     	recalculateEvery(frequency, TimeUnit.MILLISECONDS);
     }
     
     @Override
-    public void recalculateEvery(int frequency, TimeUnit unit)
+    public void recalculateEvery(long frequency, TimeUnit unit)
     {
     	if (unit == null)
     		unit = TimeUnit.MILLISECONDS;
@@ -1216,8 +1224,10 @@ public final class DerivationImpl implements Derivation, Runnable
     	cancelPeriodicExecution();
     	
     	// reschedule
-    	if (frequency > 0)  	
+    	if (frequency > 0)  {	
+    		m_scheduledPeriod = TimeUnit.MILLISECONDS.convert(frequency, unit);
     		m_scheduledFuture = getDerivationScheduler().scheduleAtFixedRate(this, frequency, frequency, unit);
+    	}
     }
     
 	@Override
