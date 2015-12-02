@@ -107,9 +107,14 @@ public class BaseTest
     
     protected byte[] toLinuxByteArray(ByteArrayOutputStream bos) 
     {
-		if ("\r\n".equals(System.lineSeparator())) {
+    	String lineSep = System.lineSeparator();
+		if ("\r\n".equals(lineSep)) {
 			String winStr = bos.toString();
-			winStr = winStr.replaceAll("\\r\\n", "\\n");
+			int idx = winStr.indexOf(lineSep);
+			while(idx > -1) {
+				winStr = winStr.substring(0, idx) + "\n" + winStr.substring(idx + 2);
+				idx = winStr.indexOf(lineSep);
+			}
 			
 			return winStr.getBytes();
 		}
