@@ -76,13 +76,13 @@ public class XMLWriterTest extends BaseArchivalTest
         assertThat(1024, is(((TableImpl)t).getColumnsCapacity()));
         
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output = toLinuxByteArray(bos);
         assertNotNull(output);
 
         assertThat(gold.length, is(output.length));       
     }
     
-    @Test
+	@Test
     public final void testExportOneCellTable() throws IOException
     {
         /*
@@ -118,7 +118,7 @@ public class XMLWriterTest extends BaseArchivalTest
         assertThat(1024, is(((TableImpl)t).getColumnsCapacity()));
         
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output =  toLinuxByteArray(bos);
         assertNotNull(output);
 
         assertThat(gold.length, is(output.length));       
@@ -148,7 +148,7 @@ public class XMLWriterTest extends BaseArchivalTest
         bos.close();
 
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output =  toLinuxByteArray(bos);
         assertNotNull(output);
 
         assertThat(gold.length, is(output.length));       
@@ -178,7 +178,7 @@ public class XMLWriterTest extends BaseArchivalTest
         bos.close();
 
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output =  toLinuxByteArray(bos);
         assertNotNull(output);
 
         assertThat(gold.length, is(output.length));       
@@ -206,7 +206,7 @@ public class XMLWriterTest extends BaseArchivalTest
         bos.close();
 
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output =  toLinuxByteArray(bos);
         assertNotNull(output);
 
         assertThat(gold.length, is(output.length));       
@@ -234,7 +234,7 @@ public class XMLWriterTest extends BaseArchivalTest
         bos.close();
 
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output =  toLinuxByteArray(bos);
         assertNotNull(output);
 
         assertThat(String.format("Gold is: %d bos is: %d", gold.length, output.length),output.length, is(gold.length));       
@@ -262,7 +262,7 @@ public class XMLWriterTest extends BaseArchivalTest
         gst = null;
 
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output =  toLinuxByteArray(bos);
         assertNotNull(output);
         
         // reimport
@@ -311,7 +311,7 @@ public class XMLWriterTest extends BaseArchivalTest
         bos.close();
 
         // test byte streams are the same
-        byte [] output =  bos.toByteArray();
+        byte [] output =  toLinuxByteArray(bos);
         assertNotNull(output);
 
         assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));       

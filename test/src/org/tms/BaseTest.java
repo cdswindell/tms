@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import org.tms.api.Access;
@@ -103,4 +104,16 @@ public class BaseTest
         }
         return cell;
     }    
+    
+    protected byte[] toLinuxByteArray(ByteArrayOutputStream bos) 
+    {
+		if ("\r\n".equals(System.lineSeparator())) {
+			String winStr = bos.toString();
+			winStr = winStr.replaceAll("\\r\\n", "\\n");
+			
+			return winStr.getBytes();
+		}
+		else
+			return bos.toByteArray();
+	}
 }
