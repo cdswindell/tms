@@ -80,7 +80,7 @@ public class TableEditor implements Serializable
 	
 	public void scriptTypeChanged(ValueChangeEvent vce)
 	{
-		System.out.println("FileType changed: " + m_scriptType);		
+		System.out.println(String.format("FileType changed, Old: %s New: %s", vce.getOldValue(), vce.getNewValue()));		
 	}
 	
 	public UploadedFile getFile() 
