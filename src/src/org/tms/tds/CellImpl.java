@@ -31,10 +31,10 @@ import org.tms.teq.DerivationImpl;
 
 public class CellImpl extends TableElementImpl implements Cell, Printable
 {
-    protected Object m_cellValue;  
-    protected ColumnImpl m_col;
+    protected Object m_cellValue;   // the actual cell value
+    protected ColumnImpl m_col;  	// the parent column
     
-    private int m_cellOffset;
+    private int m_cellOffset;		// used to determine parent row
     
     protected CellImpl(ColumnImpl col, int cellOffset)
     {

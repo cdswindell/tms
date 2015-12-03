@@ -379,4 +379,41 @@ public class ColumnTest
         assertThat(cPrime, notNullValue());
         assertThat(cPrime, is(c));       
     }
+    
+    @Test
+    public void columnToArrayTest()
+    {
+        TableImpl t = new TableImpl(100, 10);
+        assertThat(t, notNullValue());
+        
+        t.addRow(100);
+        ColumnImpl c = t.addColumn();
+        assertThat(c, notNullValue());
+        
+        c.setDerivation("randBetween(0, 100)");
+        
+        Object [] o = c.toArray();
+        assertThat(o, notNullValue());
+        assertThat(100, is(o.length));
+        
+        Double [] nums = c.toArray(new Double[] {});
+        assertThat(nums, notNullValue());
+        assertThat(100, is(nums.length));
+        
+        // add some strings into the mix and make sure they are not in array
+        t.setCellValue(t.getRow(1), c, "abc");
+        t.setCellValue(t.getRow(50), c, "abc");
+        
+        nums = c.toArray(new Double[] {});
+        assertThat(nums, notNullValue());
+        assertThat(98, is(nums.length));        
+        
+        // add some strings into the mix and make sure they are not in array
+        t.setCellValue(t.getRow(2), c, 2);
+        t.setCellValue(t.getRow(52), c, 52);
+        
+        nums = c.toArray(new Double[] {});
+        assertThat(nums, notNullValue());
+        assertThat(98, is(nums.length));        
+    }
 }

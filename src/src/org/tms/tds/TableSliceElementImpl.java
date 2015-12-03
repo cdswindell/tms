@@ -21,6 +21,7 @@ import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TableImpl.CellReference;
@@ -728,6 +729,66 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
 	{
 		return getNumCells() == 0;
 	}   
+    
+    @Override
+    public Object [] toArray()
+    {
+        vetElement();       
+        List<Object> l = new ArrayList<Object>(size());
+        for (Cell c : cells()) {
+        	l.add(c.getCellValue());
+        }
+        
+    	return l.toArray();
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+	public <T> T[] toArray(T[] template) 
+    {
+        vetElement();
+        Class<?> clazz = template.getClass().getComponentType();
+        boolean clazzIsNumeric = Number.class.isAssignableFrom(clazz);
+        List<T> l = new ArrayList<T>(size());
+        for (Cell c : cells()) {
+        	Object cv = c.getCellValue();
+        	if (cv != null && clazz.isAssignableFrom(cv.getClass()))
+        		l.add((T)cv);
+        	else if (cv != null && c.isNumericValue() && clazzIsNumeric)
+        		l.add((T)convertNumericValue((Number)cv, clazz));
+        	else if (cv == null)
+        		l.add(null);
+        }
+        
+    	return l.toArray(template);
+    }
+    
+    private Object convertNumericValue(Number cv, Class<?> clazz) 
+    {
+		if (clazz == Double.class)
+			return cv.doubleValue();
+		else if (clazz == Float.class)
+			return cv.floatValue();
+		else if (clazz == Long.class)
+			return cv.longValue();
+		else if (clazz == Integer.class)
+			return cv.intValue();
+		else if (clazz == Short.class)
+			return cv.shortValue();
+		else if (clazz == Byte.class)
+			return cv.byteValue();
+		return null;
+	}
+    
+	public int size()
+    {
+    	if (this instanceof RowImpl)
+    		return getTable().getNumColumns();
+    	else if (this instanceof ColumnImpl)
+    		return getTable().getNumRows();
+    	else
+    		throw new UnimplementedException("No support for: " + this.getClass().getSimpleName());
+    }
     
     @Override
     public String toString()

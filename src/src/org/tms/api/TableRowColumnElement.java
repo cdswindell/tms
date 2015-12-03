@@ -96,4 +96,7 @@ public interface TableRowColumnElement extends TableElement, Derivable, Validata
      * @return the previous current {@code Row}/{@code Column}
      */
     public TableRowColumnElement setCurrent();
+    
+    public Object[] toArray();
+    public <T> T[] toArray(T[] template);
 }
