@@ -414,10 +414,11 @@ abstract public class BaseElementImpl implements BaseElement
 
     private BaseElement findTaggedElement(Collection<? extends BaseElement> slices, Object tagObjs) 
     {
-    	if (this instanceof TableCellsElementImpl) {
+    	ContextImpl tc = this instanceof ContextImpl ? (ContextImpl) this :
+    		this instanceof TableCellsElementImpl ? ((TableCellsElementImpl)this).getTableContext() : null;
+    	if (tc != null) {
     		String [] tagStrs = harvestTagStrs(tagObjs);
     		if (tagStrs != null && tagStrs.length > 0) {
-	    		ContextImpl tc = ((TableCellsElementImpl)this).getTableContext();
 		    	Set<Tag> tags = Tag.encodeTags(tagStrs, tc, false);
 		    	if (tags != null && tags.size() == tagStrs.length) {		    	
 			        for (BaseElement tes : slices) {

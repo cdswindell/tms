@@ -84,6 +84,17 @@ public class TagTest extends BaseTest
         Table tbl = TableFactory.createTable();
         assertNotNull(tbl);
         
+        ContextImpl tc = (ContextImpl)tbl.getTableContext();
+        assertNotNull(tc);
+        
+        Table t = tc.getTable(Access.ByTag, "tc1");
+        assertNull(t);
+        
+        tbl.tag("tc1", "tc2");
+        t = tc.getTable(Access.ByTag, "tc1");
+        assertNotNull(t);
+        assertThat(t, is(tbl));
+        
         Column c1 = tbl.addColumn();
         c1.tag("c1");
         
@@ -104,5 +115,7 @@ public class TagTest extends BaseTest
         
         c = tbl.getColumn(Access.ByTag, "c1", "c2", "c3");
         assertNull(c);
+        
+        tc.clearGlobalTagCache();
     }
 }
