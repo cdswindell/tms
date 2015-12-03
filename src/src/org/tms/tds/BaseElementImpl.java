@@ -6,10 +6,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.tms.api.BaseElement;
 import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
+import org.tms.api.Taggable;
 import org.tms.api.exceptions.DeletedElementException;
 import org.tms.api.exceptions.InvalidPropertyException;
 import org.tms.api.exceptions.ReadOnlyException;
@@ -393,6 +395,8 @@ abstract public class BaseElementImpl implements BaseElement
         assert value != null : "Value required";
         
         if (slices != null && value != null) {
+        	if (key == TableProperty.Tags)
+        		return findTaggedElement(slices, value);
             for (BaseElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
@@ -408,7 +412,48 @@ abstract public class BaseElementImpl implements BaseElement
         return null;
     }
 
-    protected BaseElement find(Collection<? extends BaseElement> slices, String key, Object value)
+    private BaseElement findTaggedElement(Collection<? extends BaseElement> slices, Object tagObjs) 
+    {
+    	if (this instanceof TableCellsElementImpl) {
+    		String [] tagStrs = harvestTagStrs(tagObjs);
+    		if (tagStrs != null && tagStrs.length > 0) {
+	    		ContextImpl tc = ((TableCellsElementImpl)this).getTableContext();
+		    	Set<Tag> tags = Tag.encodeTags(tagStrs, tc, false);
+		    	if (tags != null && tags.size() == tagStrs.length) {		    	
+			        for (BaseElement tes : slices) {
+			            if (tes != null && tes instanceof Taggable) {
+			            	Taggable te = (Taggable)tes;
+			            	if (te.isTagged(tagStrs))
+			            		return tes;
+			            }
+			        }
+		    	}
+    		}
+    	}
+        
+        return null;
+	}
+    
+	private String[] harvestTagStrs(Object tagObjs) 
+	{
+		if (tagObjs instanceof String)
+			return new String [] { (String)tagObjs };
+		else if (tagObjs instanceof Object[]) {
+			Object [] objs = (Object[])tagObjs;
+			List<String> strs = new ArrayList<String>(objs.length);
+			
+			for (Object o : objs) {
+				if (o instanceof String)
+					strs.add((String)o);
+			}
+			
+			return strs.toArray(new String [] {});
+		}
+		else
+			return null;
+	}
+	
+	protected BaseElement find(Collection<? extends BaseElement> slices, String key, Object value)
     {
         assert key != null : "TableProperty required (String)";
         assert value != null : "Value required";

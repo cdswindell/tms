@@ -2086,6 +2086,20 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                 break;
             }
             
+            case ByTag:
+            {
+                Object md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (isAdding || md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
+                
+                // indexes are 1-based; element arrays are 0-based
+                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Tags, mda);
+                if (target != null) 
+                    return target.getIndex() - 1;
+                break;
+            }
+            
             case ByProperty:
             {
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;

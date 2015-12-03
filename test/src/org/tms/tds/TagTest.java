@@ -1,13 +1,16 @@
 package org.tms.tds;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.tms.BaseTest;
+import org.tms.api.Access;
+import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
@@ -73,5 +76,33 @@ public class TagTest extends BaseTest
         assertThat(tbl.getTags(), nullValue());
         assertThat(tc.getGlobalTagCache().size(), is(4));
         tc.clearGlobalTagCache();
+    }
+    
+    @Test
+    public final void testTagAccess()
+    {
+        Table tbl = TableFactory.createTable();
+        assertNotNull(tbl);
+        
+        Column c1 = tbl.addColumn();
+        c1.tag("c1");
+        
+        Column c2 = tbl.addColumn();
+        c2.tag("c1", "c2");
+        
+        Column c = tbl.getColumn(Access.ByTag, "c1");
+        assertNotNull(c);
+        assertThat(c, is(c1));
+        
+        c = tbl.getColumn(Access.ByTag, "c2");
+        assertNotNull(c);
+        assertThat(c, is(c2));
+        
+        c = tbl.getColumn(Access.ByTag, "c1", "c2");
+        assertNotNull(c);
+        assertThat(c, is(c2));
+        
+        c = tbl.getColumn(Access.ByTag, "c1", "c2", "c3");
+        assertNull(c);
     }
 }
