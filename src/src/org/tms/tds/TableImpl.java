@@ -34,6 +34,7 @@ import org.tms.api.TableContext;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
+import org.tms.api.Taggable;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Precisionable;
 import org.tms.api.derivables.Token;
@@ -1096,13 +1097,38 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         
         Object md = null;
         switch (mode) {
-            case ByLabel:
+	        case ByUUID:
+	        case ByLabel:
             case ByDescription:
                 md = mda != null && mda.length > 0 ? mda[0] : null;
                 if (md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", ElementType.Cell, mode, (md == null ? "<null>" : md.toString())));
-                return (CellImpl)findCells(mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+                TableProperty prop = null;
+                switch(mode) {
+	            	case ByUUID:
+	            		prop = TableProperty.UUID;
+	            		break;
+	            		
+	            	case ByLabel:
+	            		prop = TableProperty.Label;
+	            		break;
+	            		
+	            	case ByDescription:
+	            		prop = TableProperty.Description;
+	            		break;
+	            		
+	            	default:
+	                    throw new InvalidAccessException(ElementType.Table, ElementType.Subset, mode, false, mda);                
+	            }
+                return (CellImpl)findCells(prop, md);
+                
+            case ByTag:
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Cell, mode, (md == null ? "<null>" : md.toString())));
+                return (CellImpl)findCells(TableProperty.Tags, mda);
                 
             case ByProperty:
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;
@@ -1172,6 +1198,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         if (key == TableProperty.Label && isCellLabelsIndexed())
             return (CellImpl)find(ElementType.Cell, null, key, query);
         
+        if (key == TableProperty.Tags )
+            return (CellImpl)findTaggedCells(query);
+        
         for (ColumnImpl col : m_cols) {
             if (col != null) {
                 for (CellImpl c : col.cellsInternal()) {
@@ -1187,7 +1216,27 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return null;
     }
 
-    /*
+    private CellImpl findTaggedCells(Object tagObjs) 
+    {
+    	ContextImpl tc = this.getTableContext();
+    	if (tc != null) {
+    		String [] tagStrs = harvestTagStrs(tagObjs);
+    		if (tagStrs != null && tagStrs.length > 0) {
+		    	Set<Tag> tags = Tag.encodeTags(tagStrs, tc, false);
+		    	if (tags != null && tags.size() == tagStrs.length) {		    	
+			        for (Map.Entry<CellImpl, Set<Tag>> e: m_cellTags.entrySet()) {
+		            	Taggable te = (Taggable)e.getKey();
+		            	if (te.isTagged(tagStrs))
+		            		return e.getKey();
+			        }
+		    	}
+    		}
+    	}
+        
+        return null;
+	}
+
+	/*
      * Subset manipulation routines
      */
     @Override
@@ -1199,18 +1248,40 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         switch (mode) {
             case ByLabel:
             case ByDescription:
-                md = mda != null && mda.length > 0 ? mda[0] : null;
-                if (md == null || !(md instanceof String))
-                    throw new InvalidException(this.getElementType(), 
-                            String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));
-                return (SubsetImpl)find(ElementType.Subset, m_subsets, mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
-                
             case ByUUID:
+            {
                 md = mda != null && mda.length > 0 ? mda[0] : null;
                 if (md == null || !(md instanceof String))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));
-                return (SubsetImpl)find(ElementType.Subset, m_subsets, TableProperty.UUID, md);
+                
+                TableProperty prop = null;
+                switch(mode) {
+	            	case ByUUID:
+	            		prop = TableProperty.UUID;
+	            		break;
+	            		
+	            	case ByLabel:
+	            		prop = TableProperty.Label;
+	            		break;
+	            		
+	            	case ByDescription:
+	            		prop = TableProperty.Description;
+	            		break;
+	            		
+	            	default:
+	                    throw new InvalidAccessException(ElementType.Table, ElementType.Subset, mode, false, mda);                
+	            }
+                
+                return (SubsetImpl)find(ElementType.Subset, m_subsets, prop, md);
+            }
+                
+            case ByTag:
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof String))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));
+                return (SubsetImpl)find(ElementType.Subset, m_subsets, TableProperty.Tags, mda);
                 
             case ByProperty:
                 Object key = mda != null && mda.length > 0 ? mda[0] : null;
@@ -2204,7 +2275,6 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         
         return elemIndex.get(key);
     }
-
     
     @Override
     synchronized public int getNumCells()

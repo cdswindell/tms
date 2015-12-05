@@ -435,7 +435,7 @@ abstract public class BaseElementImpl implements BaseElement
         return null;
 	}
     
-	private String[] harvestTagStrs(Object tagObjs) 
+	protected String[] harvestTagStrs(Object tagObjs) 
 	{
 		if (tagObjs instanceof String)
 			return new String [] { (String)tagObjs };

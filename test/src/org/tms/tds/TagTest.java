@@ -10,7 +10,9 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
@@ -115,6 +117,21 @@ public class TagTest extends BaseTest
         
         c = tbl.getColumn(Access.ByTag, "c1", "c2", "c3");
         assertNull(c);
+        
+        Row r1 = tbl.addRow();
+        Cell cell1 = tbl.getCell(r1, c1);
+        assertNotNull(cell1);
+        
+        Cell cell2 = tbl.getCell(r1, c2);
+        assertNotNull(cell2);
+        
+        Cell cell = tbl.getCell(Access.ByTag, "c1");
+        assertNull(cell);
+        
+        cell1.tag("abc", "def");
+        cell = tbl.getCell(Access.ByTag, "abc");
+        assertNotNull(cell1);
+        assertThat(cell1, is(cell));
         
         tc.clearGlobalTagCache();
     }
