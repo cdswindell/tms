@@ -1034,13 +1034,31 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     {
     	Object md = null;
     	switch (mode) {
+    		case ByUUID:
 	    	case ByLabel:
 	    	case ByDescription:
 	    		md = mda != null && mda.length > 0 ? mda[0] : null;
 	    		if (md == null || !(md instanceof String))
 	    			throw new InvalidException(this.getElementType(), 
 	    					String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (md == null ? "<null>" : md.toString())));
-	    		return (TableImpl)find(allTables(), mode == Access.ByLabel ? TableProperty.Label : TableProperty.Description, md);
+                TableProperty prop = null;
+                switch(mode) {
+	            	case ByUUID:
+	            		prop = TableProperty.UUID;
+	            		break;
+	            		
+	            	case ByLabel:
+	            		prop = TableProperty.Label;
+	            		break;
+	            		
+	            	case ByDescription:
+	            		prop = TableProperty.Description;
+	            		break;
+	            		
+	            	default:
+	                    throw new InvalidAccessException(ElementType.Table, ElementType.Subset, mode, false, mda);                
+	            }
+	    		return (TableImpl)find(allTables(), prop, md);
 	
 	    	case ByTag:
 	    		md = mda != null && mda.length > 0 ? mda[0] : null;
@@ -1048,13 +1066,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
 	    			throw new InvalidException(this.getElementType(), 
 	    					String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (md == null ? "<null>" : md.toString())));
 	    		return (TableImpl)find(allTables(), TableProperty.Tags, mda);
-	
-	    	case ByUUID:
-	    		md = mda != null && mda.length > 0 ? mda[0] : null;
-	    		if (md == null || !(md instanceof String))
-	    			throw new InvalidException(this.getElementType(), 
-	    					String.format("Invalid %s %s argument: %s", ElementType.Table, mode, (md == null ? "<null>" : md.toString())));
-	    		return (TableImpl)find(allTables(), TableProperty.UUID , md);
 	
 	    	case ByProperty:
 	    		Object key = mda != null && mda.length > 0 ? mda[0] : null;
