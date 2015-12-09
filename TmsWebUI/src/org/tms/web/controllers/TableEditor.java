@@ -1,5 +1,9 @@
 package org.tms.web.controllers;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +17,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
 import org.tms.api.Cell;
 import org.tms.api.Column;
@@ -20,6 +26,7 @@ import org.tms.api.Row;
 import org.tms.api.TableContext;
 import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.io.TMSOptions;
 import org.tms.io.Printable;
 
 @ManagedBean(name="tableEdit" )
@@ -93,6 +100,23 @@ public class TableEditor implements Serializable
 		this.m_file = file;
 	}
 
+	public StreamedContent getSavedFile() 
+	throws IOException 
+	{
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		m_tableViewer.getTable().export(bos, TMSOptions.Default);
+		bos.close();
+		
+		InputStream stream = new ByteArrayInputStream(bos.toByteArray());
+		
+		String tableName = m_tableViewer.getTable().getLabel();
+		if (tableName == null || (tableName = tableName.trim()).length() <= 0)
+			tableName = "table";
+		tableName+= ".tms";
+		
+		return new DefaultStreamedContent(stream, "application/octet-stream", tableName);
+    }
+	
 	public void uploadOps(FileUploadEvent event) 
 	{
 		m_file = event.getFile();

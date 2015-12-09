@@ -113,9 +113,10 @@ public class InfixExpressionParser
         else
             ifs.clear();
         
-        char [] exprChars = m_expr.toCharArray();
         TokenMapper tm = TokenMapper.fetchTokenMapper(table);
         ifs.setTokenMapper(tm);
+        
+        char [] exprChars = m_expr.toCharArray();
         boolean parsingLabel = false;
         while (curPos < exprLen) {
             parsingLabel = false;
@@ -512,13 +513,13 @@ public class InfixExpressionParser
                            ParseResult pr)
     {
     	int charsParsed = 0; // assume the worst
-    	
-        // find a "word", as defined by letters, digits, #'s, _'s, and :'s     	
     	StringBuffer sb = new StringBuffer();
     	int maxPos = exprChars.length;
     	boolean foundLabel = false;
     	int labelCharsParsed = 0;
     	boolean firstCharLetterOrDigit = false;
+    	
+        // find a "word", as defined by letters, digits, #'s, _'s, and :'s     	
         for (int i = curPos; i < maxPos; i++) {
         	char c = exprChars[i];
         	// need to allow for !=, <>, <=, & >=
@@ -563,6 +564,7 @@ public class InfixExpressionParser
 
         /* check if the word is an operator */
         Token t = tm.lookUpToken(sb.toString());
+        
         TokenType tt = null;
         Operator oper = null;
         Object value = null;
@@ -657,11 +659,6 @@ public class InfixExpressionParser
                 }
             }
 
-            // if still no luck, assume a term in the constants table
-            if (tt == null && value == null) {
-                
-            }
-            
         	// TODO: handle other tricks in teq_parse
         }
         

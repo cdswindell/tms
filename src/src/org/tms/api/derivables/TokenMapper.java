@@ -11,6 +11,8 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import org.tms.api.Access;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -55,6 +57,11 @@ public class TokenMapper
         return fetchTokenMapper(c);
     }
     
+    static public TokenMapper fetchTokenMapper()
+    {
+    	return fetchTokenMapper(TableContextFactory.fetchDefaultTableContext());
+    }
+    
     static public TokenMapper fetchTokenMapper(TableContext c)
     {
         if (c == null)
@@ -66,6 +73,8 @@ public class TokenMapper
         
         // token mapper not created, create it now
         tm = new TokenMapper(c);
+        
+        // fetch operators table
         
         return tm;
     }
@@ -82,6 +91,8 @@ public class TokenMapper
         for (Entry<String, Token> e: source.m_userTokenMap.entrySet()) {
             tm.m_userTokenMap.put(e.getKey(), e.getValue());
         }
+        
+        tm.m_operTable = source.m_operTable;
         
         return tm;
     }
@@ -105,6 +116,21 @@ public class TokenMapper
         m_context = context;
     }
    
+    public boolean hasOperatorTable()
+    {
+    	return m_operTable != null;
+    }
+    
+    public Table getOperatorTable()
+    {
+    	return m_operTable;
+    }
+    
+    public void setOperatorTable(Table t)
+    {
+    	m_operTable = t;
+    }
+    
     public Token lookUpToken(char label)
     {
         return lookUpToken(Character.toString(label), m_operTable);
@@ -122,17 +148,20 @@ public class TokenMapper
     
     public Token lookUpToken(String label, Table operTable)
     {
-        if (label == null)
+        if (label == null || (label = label.trim()).length() <= 0)
             return null;
         
-        Token t = m_userTokenMap.get(label.trim().toLowerCase());
+        Token t = m_userTokenMap.get(label.toLowerCase());
         if (t != null)
             return t;
         
-        t = sf_BuiltInTokenMap.get(label.trim().toLowerCase());
+        t = sf_BuiltInTokenMap.get(label.toLowerCase());
         
         if (t == null && operTable != null) {
-            
+            Row r = operTable.getRow(Access.ByLabel, label);
+            if (r != null) {
+            	
+            }
         }
                 
         return t;        

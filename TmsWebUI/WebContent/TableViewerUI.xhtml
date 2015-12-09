@@ -15,11 +15,22 @@
 	    border: none;
 	}
 	.toolBarGrid.ui-panelgrid>*>tr,
+	.toolBarGrid.ui-panelgrid>*>td,
 	.toolBarGrid.ui-panelgrid .ui-panelgrid-cell 
 	{
-	    border: none;
+		padding: 0px;
+		padding-top: 5px;
+		padding-left: 1px;
+		border: none;
+	    margin: 0px auto;
 	    background-color: transparent !important;
-	    margin: 0 auto;
+	}
+	.tmsActionBtn
+	{
+		width: 20px;
+		height: 20px;
+		margin: 0px;
+		padding: 0px;
 	}
 </style>
 </h:head>
@@ -139,8 +150,21 @@
 </h:form>
 
 <h:form id="form">
+	<script type="text/javascript">
+	function startDownload() {
+	    PF('statusDialog').show();
+	}
+	 
+	function stopDownload() {
+	    PF('statusDialog').hide();
+	}
+	</script>
    <p:growl id="msgs" showDetail="true"/>
    
+	<p:dialog modal="true" widgetVar="statusDialog" header="Status" draggable="false" closable="false" resizable="false">
+	    <p:graphicImage value="/ajaxloadingbar.gif" />
+	</p:dialog>
+
    <p:confirmDialog id="deleColDlg" message="Do you really want to delete this column?" 
                      header="Delete Column: #{tableEdit.selectedEntity.label}" severity="alert" widgetVar="deleteColDialog" >
         <p:commandButton id="confirmCD" value="Yes" update=":form:tableEditorId" oncomplete="PF('deleteColDialog').hide()" 
@@ -174,10 +198,14 @@
  
        <p:column styleClass="ui-widget-header" width="105">
             <f:facet name="header">
-	    	  <p:panelGrid id="btnPanel" columns="3" border="0" cellpadding="0" cellspacing="0" styleClass="toolBarGrid" >
-        		<p:commandButton id="resetTable" icon="ui-icon-refresh" update=":form:tableEditorId" actionListener="#{tableEdit.reset}" style="margin:0px;width:25px;height:25px"/>  
-        		<p:commandButton id="recalcAll" icon="ui-icon-calculator" update=":form:tableEditorId" actionListener="#{tableEdit.recalc}" style="margin:0px;width:25px;height:25px"/>  
-        		<p:commandButton id="groovyOps" icon="ui-icon-script" update=":gScript:fileUpload" oncomplete="PF('scriptTEDialog').show();" style="margin:0px;width:25px;height:25px"/>  
+	    	  <p:panelGrid id="btnPanel" columns="5" styleClass="toolBarGrid" >
+        		<p:commandButton id="resetTable" icon="ui-icon-refresh" title="New Table" update=":form:tableEditorId" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn"/>  
+        		<p:commandButton id="fileOpen" icon="ui-icon-folder-open" title="Load Table" update=":gScript:fileUpload" oncomplete="PF('scriptTEDialog').show();" styleClass="tmsActionBtn"/>  
+        		<p:commandButton id="fileSave" icon="ui-icon-disk" title="Save Table" ajax="false" onclick="PrimeFaces.monitorDownload(startDownload, stopDownload);" styleClass="tmsActionBtn">
+        			<p:fileDownload value="#{tableEdit.savedFile}" contentDisposition="attachment"/>
+        		</p:commandButton>  
+        		<p:commandButton id="recalcAll" icon="ui-icon-calculator" title="Recalculate All" update=":form:tableEditorId" actionListener="#{tableEdit.recalc}" styleClass="tmsActionBtn"/>  
+        		<p:commandButton id="scriptOps" icon="ui-icon-script" title="Load Operators" update=":gScript:fileUpload" oncomplete="PF('scriptTEDialog').show();" styleClass="tmsActionBtn"/>  
 			  </p:panelGrid>
             </f:facet>
 			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
