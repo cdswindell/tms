@@ -149,6 +149,33 @@
    </p:dialog>
 </h:form>
 
+<h:form id="gLoadTable" enctype="multipart/form-data">
+    <p:remoteCommand name="onTableLoad" update=":form:tableEditorId"/>
+	<p:dialog id="loadTEDialog" 
+    		  header="Load Saved Table" 
+    		  widgetVar="loadTEDialog" 
+    		  modal="true" 
+    		  resizable="false" 
+              showEffect="clip"
+              hideEffect="fold">  
+	    <p:panelGrid id="loadTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
+	        <p:outputLabel value="Table File: "/>  
+ 			<p:fileUpload id="tableUpload"
+ 						  widgetVar="tableUploadP"
+ 						  fileUploadListener="#{tableEdit.uploadTable}"
+ 						  value="#{tableEdit.tableFile}" 
+ 						  mode="advanced"
+ 						  dragDropSupport="true"
+ 						  fileLimit="1" 
+ 						  allowTypes="/(\.|\/)(tms)$/"
+ 						  update="tableLoadMessages"/>
+   		    <p:commandButton icon="ui-icon-check" value="Done" type="button" onclick="PF('loadTEDialog').hide();onTableLoad();" update=":form:tableEditorId"/>
+   		    <p:outputLabel value=""/>
+		</p:panelGrid>  
+		<p:growl id="tableLoadMessages" showDetail="true" />	
+   </p:dialog>
+</h:form>
+
 <h:form id="form">
 	<script type="text/javascript">
 	function startDownload() {
@@ -200,7 +227,7 @@
             <f:facet name="header">
 	    	  <p:panelGrid id="btnPanel" columns="5" styleClass="toolBarGrid" >
         		<p:commandButton id="resetTable" icon="ui-icon-refresh" title="New Table" update=":form:tableEditorId" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn"/>  
-        		<p:commandButton id="fileOpen" icon="ui-icon-folder-open" title="Load Table" update=":gScript:fileUpload" oncomplete="PF('scriptTEDialog').show();" styleClass="tmsActionBtn"/>  
+        		<p:commandButton id="fileOpen" icon="ui-icon-folder-open" title="Load Table" update=":form:tableEditorId" oncomplete="PF('loadTEDialog').show();" styleClass="tmsActionBtn"/>  
         		<p:commandButton id="fileSave" icon="ui-icon-disk" title="Save Table" ajax="false" onclick="PrimeFaces.monitorDownload(startDownload, stopDownload);" styleClass="tmsActionBtn">
         			<p:fileDownload value="#{tableEdit.savedFile}" contentDisposition="attachment"/>
         		</p:commandButton>  

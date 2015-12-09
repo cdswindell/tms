@@ -44,6 +44,27 @@ public class TableViewer implements TableElementListener
     	}
     }
 	
+    public void init(Table t)     
+    {
+    	if (m_table == null) {
+    		m_table.removeAllListeners();
+    		m_table = null;
+    	}
+    	
+    	if (t.getLabel() == null)
+    		t.setLabel("TMS Table Demonstration");
+    		
+    	m_table = t;
+		m_table.getTableContext().registerOperator(new StockTickerOp());
+		
+		m_table.addListeners(TableElementEventType.OnNoPendings, this);
+		m_table.addListeners(TableElementEventType.OnRecalculate, this);
+		
+		EventBusFactory eb = EventBusFactory.getDefault();
+        EventBus eventBus = eb.eventBus();
+        eventBus.publish("/tableUpdated", "table loaded");
+    }
+	
     public Table getTable()
     {
     	return m_table;

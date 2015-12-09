@@ -23,9 +23,11 @@ import org.primefaces.model.UploadedFile;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.factories.TableFactory;
 import org.tms.api.io.TMSOptions;
 import org.tms.io.Printable;
 
@@ -57,6 +59,7 @@ public class TableEditor implements Serializable
 	private String m_scriptType;
 	private int m_updateEvery;
 	private String m_entityDeriv;
+	private UploadedFile m_tableFile;
 
 	public TableEditor()
 	{
@@ -100,6 +103,16 @@ public class TableEditor implements Serializable
 		this.m_file = file;
 	}
 
+	public UploadedFile getTableFile() 
+	{
+		return m_tableFile;
+	}
+
+	public void setTableFile(UploadedFile file) 
+	{
+		this.m_tableFile = file;
+	}
+
 	public StreamedContent getSavedFile() 
 	throws IOException 
 	{
@@ -132,6 +145,25 @@ public class TableEditor implements Serializable
             FacesMessage message = new FacesMessage("Succesful", "Operator(s) in: " + m_file.getFileName() + " are now available.");
             FacesContext.getCurrentInstance().addMessage(null, message);
             m_file = null;
+		}
+	}
+	
+	public void uploadTable(FileUploadEvent event) throws IOException 
+	{
+		m_tableFile = event.getFile();
+		if (m_tableFile != null) {
+			TableContext tc = m_tableViewer.getTable().getTableContext();
+			
+			Table t = TableFactory.importFile(m_tableFile.getInputstream(), tc, TMSOptions.Default);
+			m_tableViewer.init(t);
+            
+    		clearSelectedEntity();
+            m_tableFile = null;
+    		m_eRows = null;
+    		m_eCols = null;
+			
+            FacesMessage message = new FacesMessage("Succesful", "Table loaded...");
+            FacesContext.getCurrentInstance().addMessage(null, message);
 		}
 	}
 	
