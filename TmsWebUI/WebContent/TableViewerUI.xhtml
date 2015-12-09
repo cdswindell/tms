@@ -58,6 +58,29 @@
     </p:dialog>
 </h:form>
 
+<h:form id="renameTable">
+    <p:dialog id="renameTableTEDialog" 
+    		  header="Rename Table" 
+    		  widgetVar="renameTableTEDialog" 
+    		  modal="true" 
+    		  resizable="false" 
+              showEffect="clip" 
+              hideEffect="fold" >  
+	    <p:panelGrid id="renameTableTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
+	        <p:outputLabel value="Table Name: " />  
+	        <p:inputText id="txRenameTableTE" value="#{tableEdit.tableName}" widgetVar="newTableName"/>
+	        <p:commandButton icon="ui-icon-check"   
+	        				 value="OK" 
+	        				 oncomplete="PF('renameTableTEDialog').hide()"
+	        				 process="@form"
+	        				 update=":form:tableEditorId"
+	        				 onstart="$('renameTable').submit();"
+	        				 />
+			<p:commandButton icon="ui-icon-cancel" value="Cancel" type="button" onclick="PF('renameTableTEDialog').hide()"/>
+		</p:panelGrid>  
+    </p:dialog>
+</h:form>
+
 <h:form id="derive">
     <p:dialog id="deriveTEDialog" 
     		  header="Set #{tableEdit.entityTag} Derivation" 
@@ -219,7 +242,11 @@
    				 stickyHeader="true" 
    				 >
        <f:facet name="header">
-           <p:outputLabel value="#{tableView.title}" style="font-weight:bold;font-size:125%"/>
+           <p:outputLabel id="tableTitle" value="#{tableEdit.tableName}" style="font-weight:bold;font-size:125%"/>
+		   <p:contextMenu for="tableTitle" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
+				<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTableTEDialog').show();" update=":renameTable:renameTableTEDialog"/>
+				<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearTable}" update="@form"/>
+		   </p:contextMenu>
  	   </f:facet>
        <p:ajax event="cellEdit" oncomplete="onCellEdit()" />
  

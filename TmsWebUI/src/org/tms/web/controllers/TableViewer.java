@@ -30,7 +30,12 @@ public class TableViewer implements TableElementListener
 	
     public void init()     
     {
-    	if (m_table == null) {
+    	init(false);
+    }
+    
+    public void init(boolean forceIt)     
+    {
+    	if (m_table == null || forceIt) {
     		m_table = TableFactory.createTable();
     		m_table.setLabel("TMS Table Demonstration");
     		

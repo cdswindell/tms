@@ -66,6 +66,24 @@ public class TableEditor implements Serializable
 		m_scriptType = sf_GROOVY;
 	}
 	
+	public void clearTable()
+	{
+		m_tableViewer.getTable().clear();
+		clearSelectedEntity();
+		m_eRows = null;
+		m_eCols = null;
+	}
+	
+	public String getTableName()
+	{
+		return m_tableViewer.getTable().getLabel();
+	}
+	
+	public void setTableName(String tableName)
+	{
+		m_tableViewer.getTable().setLabel(tableName);
+	}
+		
 	public void setScriptType(String st)
 	{
 		m_scriptType = st;
@@ -188,8 +206,7 @@ public class TableEditor implements Serializable
 		m_eRows = null;
 		m_eCols = null;
 		
-		m_tableViewer = null;
-		setTableViewer(new TableViewer());
+		m_tableViewer.init(true);
 	}
 	
 	public void recalc()
