@@ -81,12 +81,23 @@ public class Token implements Labeled
         setTokenType(tokenType);
     }
 
+    public Token(String label, TokenType tokenType)
+    {
+        setTokenType(tokenType);
+        setLabel(label);
+    }
+
     /**
      * Create a new {@code Token} given a {@link TokenType} and an operand
      * @param tt the TokenType
      * @param value the Operand
      */
     public Token(TokenType tt, Object value)
+    {
+    	this(tt, value, (String) null);
+    }
+    
+    public Token(TokenType tt, Object value, String label)
     {
         if (value == null && tt != TokenType.Pending) {
             setTokenType(TokenType.NullValue);
@@ -104,6 +115,7 @@ public class Token implements Labeled
         else {
             setTokenType(tt);
             setValue(value);
+            setLabel(label);
         }
     }
 
@@ -318,6 +330,11 @@ public class Token implements Labeled
     public String getLabel()
     {
         return m_label;
+    }
+    
+    void setLabel(String label)
+    {
+        m_label = label != null && (label = label.trim()).length() > 0 ? label : null;
     }
     
     public String toString()

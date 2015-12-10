@@ -1,5 +1,6 @@
 package org.tms.api.derivables;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,8 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.api.factories.TableFactory;
+import org.tms.api.io.TMSOptions;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.ops.BaseOp;
 import org.tms.teq.ops.GroovyOp;
@@ -75,6 +78,19 @@ public class TokenMapper
         tm = new TokenMapper(c);
         
         // fetch operators table
+        File opTable = new File("Constants.tms");
+        if (!opTable.exists())
+        	opTable = new File("constants.tms");
+        
+        if (opTable.exists()) {
+        	Table t = TableFactory.importFile(opTable.getName(), c, TMSOptions.Default);
+        	if (t != null) {
+        		try {
+        			tm.setConstantsTable(t);
+        		}
+        		catch (Exception e) {};
+        	}
+        }
         
         return tm;
     }
@@ -121,13 +137,15 @@ public class TokenMapper
     	return m_operTable != null;
     }
     
-    public Table getOperatorTable()
+    public Table getConstantsTable()
     {
     	return m_operTable;
     }
     
-    public void setOperatorTable(Table t)
+    public void setConstantsTable(Table t)
     {
+    	if (t != null && t.getNumColumns() < 1)
+    		throw new IllegalArgumentException("Operator table must have at least one column");
     	m_operTable = t;
     }
     
@@ -160,7 +178,9 @@ public class TokenMapper
         if (t == null && operTable != null) {
             Row r = operTable.getRow(Access.ByLabel, label);
             if (r != null) {
-            	
+            	Object value = operTable.getCellValue(r, operTable.getColumn(1));
+            	if (value != null)
+            		t = new Token(TokenType.Constant, value, label);
             }
         }
                 

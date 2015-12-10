@@ -611,6 +611,22 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         m_tokenMapper = tm;
     }
         
+    public Table getConstantsTable()
+    {
+    	if (m_tokenMapper == null)
+    		return null;
+    	
+    	return getTokenMapper().getConstantsTable();
+    }
+    
+    public void setConstantsTable(Table constants)
+    {
+    	if (m_tokenMapper == null)
+    		setTokenMapper(null); // initializes token mapper
+    	
+    	getTokenMapper().setConstantsTable(constants);
+    }
+    
     @Override
     public <T, U, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, Class<?> resultType, BiFunction<T, U, R> biOp)
     {
@@ -1003,6 +1019,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     synchronized protected void deregister(TableImpl table)
     {
         if (table != null) {
+        	// if the table being deleted is the current constants table, 
+        	// remove this association
+        	if (table == getConstantsTable())
+        		setConstantsTable(null);
+        	
             m_registeredNonpersistantTables.remove(table);
             m_registeredPersistantTables.remove(table);
         }

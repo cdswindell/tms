@@ -117,7 +117,6 @@ public class PostfixStackGenerator
             TokenType tt = ift.getTokenType();
             
             switch (tt) {
-                case Constant:
                 case ColumnRef:
                 case RowRef:
                 case SubsetRef:
@@ -127,8 +126,9 @@ public class PostfixStackGenerator
                     pfs.push(tt, ift.getOperator(), ift.getValue());
                     break;
                 
+                case Constant:
                 case Operand:
-                    pfs.push(TokenType.Operand, ift.getValue());
+                    pfs.push(TokenType.Operand, ift.getValue(), ift.getLabel());
                     break;
                     
                 case LeftParen:

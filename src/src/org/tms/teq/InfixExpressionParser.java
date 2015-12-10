@@ -568,6 +568,7 @@ public class InfixExpressionParser
         TokenType tt = null;
         Operator oper = null;
         Object value = null;
+        String tLabel = null;
         if (t != null) {
         	charsParsed = sb.length();
         	tt = t.getTokenType();
@@ -626,6 +627,10 @@ public class InfixExpressionParser
                     return 0;
                 }
             }
+            else if (tt == TokenType.Constant) {
+            	value = t.getValue();
+            	tLabel = t.getLabel();
+            }
         }
         else {
             /*
@@ -669,7 +674,7 @@ public class InfixExpressionParser
         		return 0;
         	}
         	
-        	ifs.push(tt, oper, value);
+        	ifs.push(tt, oper, value, tLabel);
         }
         else {
         	if (!(tt == TokenType.BinaryOp || (tt == TokenType.UnaryTrailingOp)) ) {
@@ -678,7 +683,7 @@ public class InfixExpressionParser
         		return 0;
         	}
         	
-        	ifs.push(tt, oper, value);        	
+        	ifs.push(tt, oper, value, tLabel);        	
         }
         
         return charsParsed;
