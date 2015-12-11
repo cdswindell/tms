@@ -170,10 +170,6 @@ public class TokenMapper
             return null;
         
         Token t = m_userTokenMap.get(label.toLowerCase());
-        if (t != null)
-            return t;
-        
-        t = sf_BuiltInTokenMap.get(label.toLowerCase());
         
         if (t == null && operTable != null) {
             Row r = operTable.getRow(Access.ByLabel, label);
@@ -183,7 +179,10 @@ public class TokenMapper
             		t = new Token(TokenType.Constant, value, label);
             }
         }
-                
+        
+        if (t == null)
+        	t = sf_BuiltInTokenMap.get(label.toLowerCase());
+        
         return t;        
     }  
     

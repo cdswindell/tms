@@ -610,99 +610,106 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         
         m_tokenMapper = tm;
     }
-        
+      
+    private TokenMapper fetchTokenMapper()
+    {
+    	if (m_tokenMapper == null) 
+    		m_tokenMapper = TokenMapper.fetchTokenMapper(this);
+    	
+    	return m_tokenMapper;
+    }
+    
+    @Override
     public Table getConstantsTable()
     {
     	if (m_tokenMapper == null)
     		return null;
     	
-    	return getTokenMapper().getConstantsTable();
+    	return fetchTokenMapper().getConstantsTable();
     }
     
+    @Override
     public void setConstantsTable(Table constants)
     {
-    	if (m_tokenMapper == null)
-    		setTokenMapper(null); // initializes token mapper
-    	
-    	getTokenMapper().setConstantsTable(constants);
+    	fetchTokenMapper().setConstantsTable(constants);
     }
     
     @Override
     public <T, U, R> void registerOperator(String label, Class<?> argTypeX, Class<?> argTypeY, Class<?> resultType, BiFunction<T, U, R> biOp)
     {
-        TokenMapper.fetchTokenMapper(this).registerOperator(label, argTypeX, argTypeY, resultType, biOp);
+    	fetchTokenMapper().registerOperator(label, argTypeX, argTypeY, resultType, biOp);
     }
     
     @Override
     public <T, R> void registerOperator(String label, Class<?> argType, Class<?> resultType, Function<T, R> uniOp)
     {
-        TokenMapper.fetchTokenMapper(this).registerOperator(label, argType, resultType, uniOp);
+        fetchTokenMapper().registerOperator(label, argType, resultType, uniOp);
     }
     
     @Override
     public void registerNumericOperator(String label, UnaryOperator<Double> uniOp)
     {
-        TokenMapper.fetchTokenMapper(this).registerNumericOperator(label, uniOp);
+        fetchTokenMapper().registerNumericOperator(label, uniOp);
     }
     
     @Override
     public void registerNumericOperator(String label, BinaryOperator<Double> biOp)
     {
-        TokenMapper.fetchTokenMapper(this).registerNumericOperator(label, biOp);
+        fetchTokenMapper().registerNumericOperator(label, biOp);
     }
     
     @Override
     public void registerOperator(Operator oper)
     {
-        TokenMapper.fetchTokenMapper(this).registerOperator(oper);
+        fetchTokenMapper().registerOperator(oper);
     }
     
     @Override
     public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName)
     {
-        TokenMapper.fetchTokenMapper(this).registerGroovyOperator(label, pTypes, resultType, fileName, methodName);
+        fetchTokenMapper().registerGroovyOperator(label, pTypes, resultType, fileName, methodName);
     }
     
     @Override
     public void registerGroovyOperators(String fileName)
     {
-        TokenMapper.fetchTokenMapper(this).registerGroovyOperators(fileName);
+        fetchTokenMapper().registerGroovyOperators(fileName);
     }
     
     @Override
     public void registerGroovyOverload(String label, Class<?> pType1, Class<?> pType2, Class<?> resultType, String fileName, String methodName)
     {
-        TokenMapper.fetchTokenMapper(this).registerGroovyOverload(label, pType1, pType2, resultType, fileName, methodName);
+        fetchTokenMapper().registerGroovyOverload(label, pType1, pType2, resultType, fileName, methodName);
     }
     
     @Override
     public void registerJythonOperators(String fileName)
     {
-        TokenMapper.fetchTokenMapper(this).registerJythonOperators(fileName);
+        fetchTokenMapper().registerJythonOperators(fileName);
     }
     
     @Override
     public void registerJythonOperators(String fileName, String className)
     {
-        TokenMapper.fetchTokenMapper(this).registerJythonOperators(fileName, className);
+        fetchTokenMapper().registerJythonOperators(fileName, className);
     }
     
     @Override
     public boolean deregisterOperator(Operator oper)
     {
-        return TokenMapper.fetchTokenMapper(this).deregisterOperator(oper);
+        return fetchTokenMapper().deregisterOperator(oper);
     }
     
     @Override
     public boolean deregisterOperator(String label)
     {
-        return TokenMapper.fetchTokenMapper(this).deregisterOperator(label);
+        return fetchTokenMapper().deregisterOperator(label);
     }
     
     @Override
     public void deregisterAllOperators()
     {
-        TokenMapper.fetchTokenMapper(this).deregisterAllOperators();
+        fetchTokenMapper().deregisterAllOperators();
     }
     
     public int getRowCapacityIncr()

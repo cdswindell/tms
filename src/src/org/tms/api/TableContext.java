@@ -232,4 +232,8 @@ public interface TableContext extends BaseElement, InitializableTableProperties
 
     public void registerJythonOperators(String fileName);
     public void registerJythonOperators(String fileName, String className);
+
+    public Table getConstantsTable();
+
+    public void setConstantsTable(Table constants);
 }
