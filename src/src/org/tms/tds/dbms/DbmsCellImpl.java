@@ -9,6 +9,7 @@ import org.tms.api.ElementType;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.exceptions.ReadOnlyException;
+import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
 
@@ -80,8 +81,7 @@ public class DbmsCellImpl extends CellImpl
         }
         catch (SQLException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new TableIOException(e);
         }
     }
 

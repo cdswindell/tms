@@ -13,6 +13,7 @@ import java.util.Set;
 import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
+import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.RowImpl;
@@ -234,8 +235,7 @@ public class DbmsTableImpl extends TableImpl
         }
         catch (SQLException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new TableIOException(e);
         }
         
         return totalRows ;
