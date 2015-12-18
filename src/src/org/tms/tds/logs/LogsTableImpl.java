@@ -14,7 +14,7 @@ import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.exceptions.UnsupportedImplementationException;
-import org.tms.api.io.LogFileFormat;
+import org.tms.api.io.logs.LogFileFormat;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
@@ -189,7 +189,20 @@ public class LogsTableImpl extends TableImpl
 
     private void releaseResources()
     {
-    
+    	if (m_logFileReader != null) {
+    		try {
+				m_logFileReader.close();
+			} catch (IOException e) { /* noop */ }
+    		m_logFileReader = null;
+    	}
+    	
+    	if (m_logFileInputStream != null) {
+    		try {
+    			m_logFileInputStream.close();
+			} catch (IOException e) { /* noop */ }
+    		m_logFileInputStream = null;
+    	}
+
     }
     
     @Override
@@ -209,6 +222,8 @@ public class LogsTableImpl extends TableImpl
     {
         try {
             super.finalize();   
+            m_unprocessedRows.clear();
+            m_unprocessedRows = null;
         }
         finally {
             releaseResources();

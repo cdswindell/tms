@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.tms.BaseTest;
-import org.tms.api.io.LogFileFormat;
+import org.tms.api.utils.OSXSystemLogReader;
 
 public class LogsTableImplTest extends BaseTest
 {
@@ -17,16 +17,7 @@ public class LogsTableImplTest extends BaseTest
 	{
 		File logFile = new File("/private/var/log/system.log");
 		
-		LogsTableImpl lft = LogsTableImpl.createTable(logFile, new TestLogFileFormat());
+		LogsTableImpl lft = LogsTableImpl.createTable(logFile, new OSXSystemLogReader());
 		assertNotNull(lft);
-	}
-
-	public class TestLogFileFormat implements LogFileFormat
-	{
-		@Override
-		public int getNumFields() 
-		{
-			return 0;
-		}		
 	}
 }
