@@ -3,7 +3,6 @@ package org.tms.tds.logs;
 import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.derivables.Derivation;
-import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
@@ -12,24 +11,20 @@ import org.tms.tds.TableImpl;
 
 public class LogsColumnImpl extends ColumnImpl
 {
-    private int m_resultSetIndex;
-
-    public LogsColumnImpl(TableImpl parentTable, int resultSetIndex, String clazzName)
+	private int m_fieldIndex;
+	
+    public LogsColumnImpl(TableImpl parentTable, int fieldIndex, String colName, Class<?> dataType)
     {
         super(parentTable);
         
-        m_resultSetIndex = resultSetIndex;    
+        m_fieldIndex = fieldIndex;
         setReadOnly(true);
-        try
-        {
-            if (clazzName != null && (clazzName = clazzName.trim()).length() > 0) {
-                setDataType(Class.forName(clazzName));
-                setStronglyTyped(true);
-            }
-        }
-        catch (ClassNotFoundException e)
-        {
-            throw new IllegalTableStateException("Cannot load DBMS driver: " + e.getMessage());
+    	if (colName != null)
+    		setLabel(colName);
+    	
+        if (dataType != null) {
+            setDataType(dataType);
+            setStronglyTyped(true);
         }
     }
 
@@ -47,9 +42,9 @@ public class LogsColumnImpl extends ColumnImpl
      * Return the 1-based index of the row in the dbms table result set
      * @return the 1-based index of the row in the dbms table result set
      */
-    protected int getResultSetIndex()
+    protected int getFieldIndex()
     {
-        return m_resultSetIndex;
+        return m_fieldIndex;
     }
     
     @Override

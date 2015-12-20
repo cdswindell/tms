@@ -160,6 +160,15 @@ public class LogsTableImpl extends TableImpl
             // process column information
             if (!isRefresh) {
             	m_numLogsCols = m_logFileFormat.getNumFields();
+                setColumnsCapacity(calcColumnsCapacity(m_numLogsCols));
+                
+            	String [] fieldNames = m_logFileFormat.getFieldNames();
+            	Class<?> [] dataTypes = m_logFileFormat.getFieldDataTypes();
+            	
+            	for (int i = 0; i < m_numLogsCols; i++) {
+            		LogsColumnImpl c = new LogsColumnImpl(this, i, fieldNames[i], dataTypes[i]);
+                    add(c, false, false, Access.ByIndex, i+1);
+            	}
             }
             
             // if we're refreshing, recalculate all derivations
