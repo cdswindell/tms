@@ -13,7 +13,6 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 
-
 public class BaseTest
 {
     public boolean closeTo(double x, double y, double withIn) 

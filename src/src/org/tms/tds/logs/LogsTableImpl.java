@@ -44,7 +44,7 @@ public class LogsTableImpl extends TableImpl
     private LogFileFormat m_logFileFormat;
 	private LineNumberReader m_logFileReader;
 	private FileInputStream m_logFileInputStream;
-	private int m_currentLineNumber;
+	private int m_nextLineNumber;
     
     public LogsTableImpl(File logFile, LogFileFormat lff, ContextImpl tc) 
     throws IOException
@@ -52,7 +52,7 @@ public class LogsTableImpl extends TableImpl
         // initialize the default table object
         super(tc.getRowCapacityIncr(), tc.getColumnCapacityIncr(), tc);
         m_numLogsCols = m_numLogsRows = 0;
-        m_currentLineNumber = 0;
+        m_nextLineNumber = 0;
         
     	if (logFile == null)
     		throw new IllegalArgumentException("File required");
@@ -197,9 +197,7 @@ public class LogsTableImpl extends TableImpl
         totalRows = m_logFileReader.getLineNumber();
         
         // Reset Stream and line number;
-        m_logFileInputStream.getChannel().position(0);
-        m_logFileReader.setLineNumber(0);
-        m_currentLineNumber = 0;
+        resetLineReader();
         
         return totalRows ;
     }
@@ -220,7 +218,7 @@ public class LogsTableImpl extends TableImpl
     		m_logFileInputStream = null;
     	}
 
-        m_currentLineNumber = 0;
+        m_nextLineNumber = 0;
     }
     
     @Override
@@ -265,18 +263,24 @@ public class LogsTableImpl extends TableImpl
 	{
 		int desiredLineNumber = row.getLineNumber();
 		
-		if (desiredLineNumber < m_currentLineNumber) {
-	        m_logFileInputStream.getChannel().position(0);
-	        m_logFileReader.setLineNumber(0);
-	        m_currentLineNumber = 0;			
-		}
+		if (desiredLineNumber < m_nextLineNumber) 
+	        resetLineReader();			
 		
 		String logFileLine;
 		do {
 			logFileLine = m_logFileReader.readLine();
-			m_currentLineNumber = m_logFileReader.getLineNumber();
-		} while (m_currentLineNumber < desiredLineNumber);
+			m_nextLineNumber = m_logFileReader.getLineNumber();
+		} while (m_nextLineNumber <= desiredLineNumber);
 		
 		return logFileLine;
+	}
+
+	private void resetLineReader() throws IOException {
+		m_logFileInputStream.getChannel().position(0);
+		m_logFileReader.setLineNumber(0);
+		
+		BufferedReader fr = new BufferedReader(new InputStreamReader(m_logFileInputStream));
+		m_logFileReader = new LineNumberReader(fr);
+		m_nextLineNumber = 0;
 	}
 }
