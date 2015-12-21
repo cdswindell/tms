@@ -8,35 +8,35 @@ import org.tms.tds.RowImpl;
 
 public class LogsRowImpl extends RowImpl
 {
-    private int m_resultSetIndex;
-    private boolean m_resultSetRowProcessed;
+    private int m_lineNumber;
+    private boolean m_rowProcessed;
     
-    public LogsRowImpl(LogsTableImpl parentTable, int rsIndex)
+    public LogsRowImpl(LogsTableImpl parentTable, int lineNo)
     {
         super(parentTable);
-        m_resultSetRowProcessed = false;
-        m_resultSetIndex = rsIndex;
+        m_rowProcessed = false;
+        m_lineNumber = lineNo;
     }
 
     protected boolean isEntryProcessed()
     {
-        return m_resultSetRowProcessed;
+        return m_rowProcessed;
     }
     
     void setEntryProcessed(boolean processed)
     {
-        m_resultSetRowProcessed = processed;
+        m_rowProcessed = processed;
         if (processed)
             getTable().removeLogsRowFromUnprocessed(this);
     }
     
     /**
-     * Return the 1-based index of the row in the dbms table result set
-     * @return the 1-based index of the row in the dbms table result set
+     * Return the 0-based log file line number associated with this row 
+     * @return the 0-based log file line number associated with this row 
      */
-    protected int getResultSetIndex()
+    protected int getLineNumber()
     {
-        return m_resultSetIndex;
+        return m_lineNumber;
     }
     
     @Override

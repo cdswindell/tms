@@ -42,7 +42,7 @@ public class LogsColumnImpl extends ColumnImpl
      * Return the 1-based index of the row in the dbms table result set
      * @return the 1-based index of the row in the dbms table result set
      */
-    protected int getFieldIndex()
+    public int getFieldIndex()
     {
         return m_fieldIndex;
     }

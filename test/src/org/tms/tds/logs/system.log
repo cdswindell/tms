@@ -1,0 +1,343 @@
+Dec 18 00:02:40 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3252] <Notice>: 2015-12-18 00:02:40.163 GoogleSoftwareUpdateAgent[3252/0xa3d6f000] [lvl=2] -[KSAgentApp setupLoggerOutput] Agent settings: <KSAgentSettings:0x22c410 bundleID=com.google.Keystone.Agent lastCheck=2015-12-18 03:01:54 +0000 checkInterval=18000.000000 uiDisplayInterval=604800.000000 sleepInterval=1800.000000 jitterInterval=900 maxRunInterval=0.000000 isConsoleUser=1 ticketStorePath=/Users/davids/Library/Google/GoogleSoftwareUpdate/TicketStore/Keystone.ticketstore runMode=3 daemonUpdateEngineBrokerServiceName=com.google.Keystone.Daemon.UpdateEngine daemonAdministrationServiceName=com.google.Keystone.Daemon.Administration logEverything=0 logBufferSize=2048 alwaysPromptForUpdates=0 productIDToUpdate=(null) lastUIDisplayed=(null) alwaysShowStatusItem=0 updateCheckTag=(null) printResults=NO userInitiated=NO>
+Dec 18 00:06:00 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:08:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 00:08:59 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:11:16 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 00:11:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:15:20 CDS-MacBook-Pro spindump[3262] <Notice>: Saved diag report for powerstats version com.apple.SystemStats.Daily to /Library/Logs/DiagnosticReports/powerstats_2015-12-18-001520_CDS-MacBook-Pro.diag
+Dec 18 00:15:22 CDS-MacBook-Pro spindump[3263] <Notice>: Saved diag report for powerstats version com.apple.SystemStats.TopBatteryPowerEvent to /Library/Logs/DiagnosticReports/powerstats_2015-12-18-001522_CDS-MacBook-Pro.diag
+Dec 18 00:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 00:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651841032 322347768    67% 81544127 40293471   67%   /
+Dec 18 00:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 00:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 00:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 00:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 00:21:58 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:21:58 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 00:21:58 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:23:55 CDS-MacBook-Pro kernel[0] <Notice>: nspace-handler-set-snapshot-time: 1450416237
+Dec 18 00:23:55 CDS-MacBook-Pro com.apple.mtmd[188] <Notice>: Set snapshot time: 2015-12-18 00:23:57 -0500 (current time: 2015-12-18 00:23:55 -0500)
+Dec 18 00:25:25 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Starting automatic backup
+Dec 18 00:25:25 CDS-MacBook-Pro kernel[0] <Notice>: nspace-handler-set-snapshot-time: 1450416327
+Dec 18 00:25:25 CDS-MacBook-Pro com.apple.mtmd[188] <Notice>: Set snapshot time: 2015-12-18 00:25:27 -0500 (current time: 2015-12-18 00:25:25 -0500)
+Dec 18 00:25:25 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Network destination already mounted at: /Volumes/Time Capsule
+Dec 18 00:25:37 CDS-MacBook-Pro com.apple.backupd[3267] <Error>: Disk image already attached: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle, DIHLDiskImageAttach returned: 35 (Resource temporarily unavailable)
+Dec 18 00:25:38 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Disk image /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle mounted at: /Volumes/Time Machine Backups
+Dec 18 00:25:39 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Backing up to /dev/disk3s2: /Volumes/Time Machine Backups/Backups.backupdb
+Dec 18 00:25:41 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Will copy (71.7 MB) from Macintosh HD
+Dec 18 00:25:41 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Found 134 files (71.7 MB) needing backup
+Dec 18 00:25:41 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: 2.61 GB required (including padding), 2.01 TB available
+Dec 18 00:26:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:26:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 00:26:50 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Copied 177 items (71.7 MB) from volume Macintosh HD. Linked 2759.
+Dec 18 00:26:59 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Created new backup: 2015-12-18-002652
+Dec 18 00:27:00 CDS-MacBook-Pro kernel[0] <Notice>: hfs: mounted Recovery HD on device disk0s3
+Dec 18 00:27:00 CDS-MacBook-Pro mds[64] <Error>: (Volume.Normal:2464) volume:0x7fb4ba86d000 ********** Bootstrapped Creating a default store:0 SpotLoc:(null) SpotVerLoc:(null) occlude:0 /Volumes/Recovery HD
+Dec 18 00:27:00 CDS-MacBook-Pro fseventsd[50] <Critical>: Logging disabled completely for device:1: /Volumes/Recovery HD
+Dec 18 00:27:00 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Starting post-backup thinning
+Dec 18 00:27:00 CDS-MacBook-Pro mdworker[3240] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 00:27:00 CDS-MacBook-Pro mdworker[3239] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 00:27:00 CDS-MacBook-Pro mdworker[3245] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 00:27:00 CDS-MacBook-Pro mdworker[3244] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 00:27:00 CDS-MacBook-Pro mdworker[3243] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 00:27:00 CDS-MacBook-Pro mdworker[3259] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 00:27:00 CDS-MacBook-Pro kernel[0] <Notice>: hfs: unmount initiated on Recovery HD on device disk0s3
+Dec 18 00:28:59 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:30:00 CDS-MacBook-Pro syslogd[47] <Notice>: Configuration Notice: ASL Module "com.apple.authd" sharing output destination "/var/log/asl" with ASL Module "com.apple.asl".  Output parameters from ASL Module "com.apple.asl" override any specified in ASL Module "com.apple.authd".
+Dec 18 00:30:00 CDS-MacBook-Pro syslogd[47] <Notice>: Configuration Notice: ASL Module "com.apple.callhistory.asl.conf" claims selected messages.  Those messages may not appear in standard system log files or in the ASL database.
+Dec 18 00:30:00 CDS-MacBook-Pro syslogd[47] <Notice>: Configuration Notice: ASL Module "com.apple.cdscheduler" claims selected messages.  Those messages may not appear in standard system log files or in the ASL database.
+Dec 18 00:32:58 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Deleted /Volumes/Time Machine Backups/Backups.backupdb/CDS MacBook Pro/2015-11-18-002219 (362.4 MB)
+Dec 18 00:32:58 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 00:32:58 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Post-backup thinning complete: 1 expired backups removed
+Dec 18 00:32:58 CDS-MacBook-Pro com.apple.backupd[3267] <Notice>: Backup completed successfully.
+Dec 18 00:32:58 CDS-MacBook-Pro mdworker[3281] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 00:32:58 CDS-MacBook-Pro mdworker[3282] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 00:33:25 CDS-MacBook-Pro com.apple.backupd[3267] <Error>: Failed to eject volume /Volumes/Time Machine Backups (FSVolumeRefNum: -106; status: -47; dissenting pid: 0)
+Dec 18 00:33:25 CDS-MacBook-Pro com.apple.backupd[3267] <Error>: Failed to eject Time Machine disk image: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle
+Dec 18 00:34:03 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:34:07 CDS-MacBook-Pro mds[64] <Error>: (Volume.Error:880) Root store set to FSOnly with matching create! (loaded:1)
+Dec 18 00:36:58 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:44:05 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 00:44:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:44:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 00:47:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:49:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 00:49:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651747968 322440832    67% 81532494 40305104   67%   /
+Dec 18 00:49:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 00:49:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 00:49:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 00:49:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 00:51:58 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 00:54:46 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 00:58:52 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:02:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 01:03:03 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3299] <Notice>: 2015-12-18 01:03:03.222 GoogleSoftwareUpdateAgent[3299/0xa3d6f000] [lvl=2] -[KSAgentApp setupLoggerOutput] Agent settings: <KSAgentSettings:0x22d780 bundleID=com.google.Keystone.Agent lastCheck=2015-12-18 03:01:54 +0000 checkInterval=18000.000000 uiDisplayInterval=604800.000000 sleepInterval=1800.000000 jitterInterval=900 maxRunInterval=0.000000 isConsoleUser=1 ticketStorePath=/Users/davids/Library/Google/GoogleSoftwareUpdate/TicketStore/Keystone.ticketstore runMode=3 daemonUpdateEngineBrokerServiceName=com.google.Keystone.Daemon.UpdateEngine daemonAdministrationServiceName=com.google.Keystone.Daemon.Administration logEverything=0 logBufferSize=2048 alwaysPromptForUpdates=0 productIDToUpdate=(null) lastUIDisplayed=(null) alwaysShowStatusItem=0 updateCheckTag=(null) printResults=NO userInitiated=NO>
+Dec 18 01:04:57 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 01:05:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:14:57 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 01:14:57 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 01:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651765864 322422936    67% 81534731 40302867   67%   /
+Dec 18 01:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 01:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 01:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 01:19:37 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 01:20:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:20:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 01:22:20 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:24:58 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 01:26:25 CDS-MacBook-Pro kernel[0] <Notice>: nspace-handler-set-snapshot-time: 1450419987
+Dec 18 01:26:25 CDS-MacBook-Pro com.apple.mtmd[188] <Notice>: Set snapshot time: 2015-12-18 01:26:27 -0500 (current time: 2015-12-18 01:26:25 -0500)
+Dec 18 01:28:59 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:30:44 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 01:30:44 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651682624 322506176    67% 81524326 40313272   67%   /
+Dec 18 01:30:44 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 01:30:44 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 01:30:44 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 01:30:44 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 01:33:09 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:33:28 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Starting automatic backup
+Dec 18 01:33:28 CDS-MacBook-Pro kernel[0] <Notice>: nspace-handler-set-snapshot-time: 1450420410
+Dec 18 01:33:28 CDS-MacBook-Pro com.apple.mtmd[188] <Notice>: Set snapshot time: 2015-12-18 01:33:30 -0500 (current time: 2015-12-18 01:33:28 -0500)
+Dec 18 01:33:28 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Network destination already mounted at: /Volumes/Time Capsule
+Dec 18 01:33:40 CDS-MacBook-Pro com.apple.backupd[3315] <Error>: Disk image already attached: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle, DIHLDiskImageAttach returned: 35 (Resource temporarily unavailable)
+Dec 18 01:33:41 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Disk image /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle mounted at: /Volumes/Time Machine Backups
+Dec 18 01:33:43 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Backing up to /dev/disk3s2: /Volumes/Time Machine Backups/Backups.backupdb
+Dec 18 01:33:45 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Will copy (40.6 MB) from Macintosh HD
+Dec 18 01:33:45 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Found 124 files (40.6 MB) needing backup
+Dec 18 01:33:45 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: 2.58 GB required (including padding), 2.01 TB available
+Dec 18 01:34:59 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 01:35:37 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Copied 167 items (40.6 MB) from volume Macintosh HD. Linked 2640.
+Dec 18 01:35:43 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Created new backup: 2015-12-18-013541
+Dec 18 01:35:45 CDS-MacBook-Pro kernel[0] <Notice>: hfs: mounted Recovery HD on device disk0s3
+Dec 18 01:35:45 CDS-MacBook-Pro mds[64] <Error>: (Volume.Normal:2464) volume:0x7fb4b89dc000 ********** Bootstrapped Creating a default store:0 SpotLoc:(null) SpotVerLoc:(null) occlude:0 /Volumes/Recovery HD
+Dec 18 01:35:45 CDS-MacBook-Pro fseventsd[50] <Critical>: Logging disabled completely for device:1: /Volumes/Recovery HD
+Dec 18 01:35:45 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Starting post-backup thinning
+Dec 18 01:35:45 CDS-MacBook-Pro mdworker[3288] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 01:35:45 CDS-MacBook-Pro mdworker[3289] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 01:35:45 CDS-MacBook-Pro mdworker[3290] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 01:35:45 CDS-MacBook-Pro mdworker[3292] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 01:35:45 CDS-MacBook-Pro mdworker[3306] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 01:35:45 CDS-MacBook-Pro mdworker[3293] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 01:35:45 CDS-MacBook-Pro kernel[0] <Notice>: hfs: unmount initiated on Recovery HD on device disk0s3
+Dec 18 01:36:47 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Deleted /Volumes/Time Machine Backups/Backups.backupdb/CDS MacBook Pro/2015-12-16-235629 (49.7 MB)
+Dec 18 01:36:47 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Post-backup thinning complete: 1 expired backups removed
+Dec 18 01:36:48 CDS-MacBook-Pro com.apple.backupd[3315] <Notice>: Backup completed successfully.
+Dec 18 01:36:48 CDS-MacBook-Pro mdworker[3328] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 01:37:13 CDS-MacBook-Pro com.apple.backupd[3315] <Error>: Failed to eject volume /Volumes/Time Machine Backups (FSVolumeRefNum: -106; status: -47; dissenting pid: 0)
+Dec 18 01:37:13 CDS-MacBook-Pro com.apple.backupd[3315] <Error>: Failed to eject Time Machine disk image: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle
+Dec 18 01:37:20 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:37:56 CDS-MacBook-Pro mds[64] <Error>: (Volume.Error:880) Root store set to FSOnly with matching create! (loaded:1)
+Dec 18 01:38:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:38:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 01:42:08 CDS-MacBook-Pro diagnostics_agent[470] <Warning>: AutoSubmitPreference is 1
+Dec 18 01:42:08 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:42:09 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Cleaning up expired diagnostic messages database at path: /var/log/DiagnosticMessages/2015.11.18.asl
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Removed expired problem report: file:///Users/davids/Library/Logs/DiagnosticReports/FinderSyncAPIExtension_2015-11-17-214551_CDS-MacBook-Pro.crash
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Removed expired problem report: file:///Users/davids/Library/Logs/DiagnosticReports/Mail_2015-11-17-184509_CDS-MacBook-Pro.crash
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Removed expired problem report: file:///Users/davids/Library/Logs/DiagnosticReports/Mail_2015-11-17-211650_CDS-MacBook-Pro.crash
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Removed expired problem report: file:///Library/Logs/DiagnosticReports/awdd_2015-11-17-142023_CDS-MacBook-Pro.awd
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Removed expired problem report: file:///Library/Logs/DiagnosticReports/com.apple.WebKit.Plugin.64_2015-11-17-211948_CDS-MacBook-Pro.wakeups_resource.diag
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Removed expired problem report: file:///Library/Logs/DiagnosticReports/eclipse_2015-11-17-152812_CDS-MacBook-Pro.wakeups_resource.diag
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Removed expired problem report: file:///Library/Logs/DiagnosticReports/eclipse_2015-11-17-211700_CDS-MacBook-Pro.wakeups_resource.diag
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: Submitted problem report file:///Library/Logs/DiagnosticReports/awdd_2015-12-17-064722_CDS-MacBook-Pro.awd
+Dec 18 01:42:35 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:42:35 CDS-MacBook-Pro SubmitDiagInfo[594] <Notice>: SubmitDiagInfo sucessfully uploaded 144 diagnostic messages
+Dec 18 01:44:59 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 01:47:33 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:47:33 CDS-MacBook-Pro locationd[87] <Error>: Couldn't find a requirement string for masquerading client com.apple.Maps
+Dec 18 01:47:35 CDS-MacBook-Pro locationd[87] <Notice>: NETWORK: requery, 0, 0, 0, 0, 2, items, fQueryRetries, 0, fLastRetryTimestamp, 472092455.6
+Dec 18 01:47:35 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:47:45 CDS-MacBook-Pro locationd[87] <Notice>: Location icon should now be in state 'Inactive'
+Dec 18 01:48:46 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:49:34 CDS-MacBook-Pro sandboxd[137] ([221]) <Notice>: softwareupdated(221) deny system-fsctl 0x682f
+Dec 18 01:50:43 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:54:59 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 01:56:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 01:56:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 01:59:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:03:26 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3348] <Notice>: 2015-12-18 02:03:26.261 GoogleSoftwareUpdateAgent[3348/0xa3d6f000] [lvl=2] -[KSAgentApp setupLoggerOutput] Agent settings: <KSAgentSettings:0x707810 bundleID=com.google.Keystone.Agent lastCheck=2015-12-18 03:01:54 +0000 checkInterval=18000.000000 uiDisplayInterval=604800.000000 sleepInterval=1800.000000 jitterInterval=900 maxRunInterval=0.000000 isConsoleUser=1 ticketStorePath=/Users/davids/Library/Google/GoogleSoftwareUpdate/TicketStore/Keystone.ticketstore runMode=3 daemonUpdateEngineBrokerServiceName=com.google.Keystone.Daemon.UpdateEngine daemonAdministrationServiceName=com.google.Keystone.Daemon.Administration logEverything=0 logBufferSize=2048 alwaysPromptForUpdates=0 productIDToUpdate=(null) lastUIDisplayed=(null) alwaysShowStatusItem=0 updateCheckTag=(null) printResults=NO userInitiated=NO>
+Dec 18 02:04:59 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 02:07:23 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:12:57 CDS-MacBook-Pro sandboxd[137] ([309]) <Notice>: storeaccountd(309) deny file-write-create /Users/davids/Library/Caches/com.apple.Spotlight/ProductionBag
+Dec 18 02:14:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:14:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 02:14:56 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:15:02 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 02:17:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:19:38 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 02:19:38 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651733616 322455184    67% 81530700 40306898   67%   /
+Dec 18 02:19:38 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 02:19:38 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 02:19:38 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 02:19:38 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 02:22:23 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:25:16 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 02:26:18 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:32:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 02:34:28 CDS-MacBook-Pro kernel[0] <Notice>: nspace-handler-set-snapshot-time: 1450424070
+Dec 18 02:34:28 CDS-MacBook-Pro com.apple.mtmd[188] <Notice>: Set snapshot time: 2015-12-18 02:34:30 -0500 (current time: 2015-12-18 02:34:28 -0500)
+Dec 18 02:35:16 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 02:35:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:37:18 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Starting automatic backup
+Dec 18 02:37:18 CDS-MacBook-Pro kernel[0] <Notice>: nspace-handler-set-snapshot-time: 1450424240
+Dec 18 02:37:18 CDS-MacBook-Pro com.apple.mtmd[188] <Notice>: Set snapshot time: 2015-12-18 02:37:20 -0500 (current time: 2015-12-18 02:37:18 -0500)
+Dec 18 02:37:18 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Network destination already mounted at: /Volumes/Time Capsule
+Dec 18 02:37:23 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:37:30 CDS-MacBook-Pro com.apple.backupd[3362] <Error>: Disk image already attached: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle, DIHLDiskImageAttach returned: 35 (Resource temporarily unavailable)
+Dec 18 02:37:32 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Disk image /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle mounted at: /Volumes/Time Machine Backups
+Dec 18 02:37:33 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Backing up to /dev/disk3s2: /Volumes/Time Machine Backups/Backups.backupdb
+Dec 18 02:37:35 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Will copy (40.8 MB) from Macintosh HD
+Dec 18 02:37:35 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Found 139 files (40.8 MB) needing backup
+Dec 18 02:37:35 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: 2.58 GB required (including padding), 2.01 TB available
+Dec 18 02:37:38 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:38:30 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Copied 180 items (40.8 MB) from volume Macintosh HD. Linked 2694.
+Dec 18 02:38:38 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Created new backup: 2015-12-18-023832
+Dec 18 02:38:39 CDS-MacBook-Pro kernel[0] <Notice>: hfs: mounted Recovery HD on device disk0s3
+Dec 18 02:38:39 CDS-MacBook-Pro mds[64] <Error>: (Volume.Normal:2464) volume:0x7fb4b9080800 ********** Bootstrapped Creating a default store:0 SpotLoc:(null) SpotVerLoc:(null) occlude:0 /Volumes/Recovery HD
+Dec 18 02:38:39 CDS-MacBook-Pro fseventsd[50] <Critical>: Logging disabled completely for device:1: /Volumes/Recovery HD
+Dec 18 02:38:39 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Starting post-backup thinning
+Dec 18 02:38:39 CDS-MacBook-Pro mdworker[3333] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:38:39 CDS-MacBook-Pro mdworker[3334] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:38:39 CDS-MacBook-Pro mdworker[3335] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:38:39 CDS-MacBook-Pro mdworker[3336] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:38:39 CDS-MacBook-Pro mdworker[3355] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:38:39 CDS-MacBook-Pro mdworker[3338] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:38:39 CDS-MacBook-Pro kernel[0] <Notice>: hfs: unmount initiated on Recovery HD on device disk0s3
+Dec 18 02:39:12 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:39:21 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Deleted /Volumes/Time Machine Backups/Backups.backupdb/CDS MacBook Pro/2015-12-17-021017 (49 MB)
+Dec 18 02:39:21 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Post-backup thinning complete: 1 expired backups removed
+Dec 18 02:39:21 CDS-MacBook-Pro com.apple.backupd[3362] <Notice>: Backup completed successfully.
+Dec 18 02:39:21 CDS-MacBook-Pro mdworker[3375] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:39:37 CDS-MacBook-Pro mdworker[3376] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:39:37 CDS-MacBook-Pro mdworker[3377] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 02:39:49 CDS-MacBook-Pro com.apple.backupd[3362] <Error>: Failed to eject volume /Volumes/Time Machine Backups (FSVolumeRefNum: -106; status: -47; dissenting pid: 0)
+Dec 18 02:39:49 CDS-MacBook-Pro com.apple.backupd[3362] <Error>: Failed to eject Time Machine disk image: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle
+Dec 18 02:40:32 CDS-MacBook-Pro mds[64] <Error>: (Volume.Error:880) Root store set to FSOnly with matching create! (loaded:1)
+Dec 18 02:41:40 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:45:30 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 02:46:38 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:48:47 CDS-MacBook-Pro sandboxd[137] ([309]) <Notice>: storeaccountd(309) deny file-write-create /Users/davids/Library/Caches/com.apple.Safari/ProductionBag
+Dec 18 02:48:59 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:49:38 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 02:49:38 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651745976 322442824    67% 81532245 40305353   67%   /
+Dec 18 02:49:38 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 02:49:38 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 02:49:38 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 02:49:38 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 02:50:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:50:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 02:52:02 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 02:55:47 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3393] <Notice>: 2015-12-18 03:03:49.298 GoogleSoftwareUpdateAgent[3393/0xa3d6f000] [lvl=2] -[KSAgentApp setupLoggerOutput] Agent settings: <KSAgentSettings:0x21be10 bundleID=com.google.Keystone.Agent lastCheck=2015-12-18 03:01:54 +0000 checkInterval=18000.000000 uiDisplayInterval=604800.000000 sleepInterval=1800.000000 jitterInterval=900 maxRunInterval=0.000000 isConsoleUser=1 ticketStorePath=/Users/davids/Library/Google/GoogleSoftwareUpdate/TicketStore/Keystone.ticketstore runMode=3 daemonUpdateEngineBrokerServiceName=com.google.Keystone.Daemon.UpdateEngine daemonAdministrationServiceName=com.google.Keystone.Daemon.Administration logEverything=0 logBufferSize=2048 alwaysPromptForUpdates=0 productIDToUpdate=(null) lastUIDisplayed=(null) alwaysShowStatusItem=0 updateCheckTag=(null) printResults=NO userInitiated=NO>
+Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3393] <Notice>: 2015-12-18 03:03:49.300 GoogleSoftwareUpdateAgent[3393/0xa3d6f000] [lvl=2] -[KSAgentApp checkForUpdates] Starting update check.
+Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3393] <Notice>: 2015-12-18 03:03:49.301 GoogleSoftwareUpdateAgent[3393/0xb029b000] [lvl=2] -[KSAgentApp(KeystoneThread) runKeystonesInThreadWithArg:] Starting engine thread
+Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateDaemon[3395] <Notice>: 2015-12-18 03:03:49.351 GoogleSoftwareUpdateDaemon[3395/0xa3d6f000] [lvl=2] +[KSKeystoneTicketRepair updateKeystoneTicketInTicketStore:version:bundlePath:error:] KSKeystoneTicketRepair does not need to update the Keystone ticket.
+Dec 18 03:03:49 CDS-MacBook-Pro com.apple.xpc.launchd[1] (com.google.keystone.daemon[3395]) <Warning>: Endpoint has been activated through legacy launch(3) APIs. Please switch to XPC or bootstrap_check_in(): com.google.Keystone.Daemon.Administration
+Dec 18 03:03:49 CDS-MacBook-Pro com.apple.xpc.launchd[1] (com.google.keystone.daemon[3395]) <Warning>: Endpoint has been activated through legacy launch(3) APIs. Please switch to XPC or bootstrap_check_in(): com.google.Keystone.Daemon.UpdateEngine
+Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateDaemon[3395] <Notice>: 2015-12-18 03:03:49.356 GoogleSoftwareUpdateDaemon[3395/0xa3d6f000] [lvl=2] -[KeystoneDaemon logServiceState] GoogleSoftwareUpdate daemon (1.2.3.738) vending: com.google.Keystone.Daemon.UpdateEngine: 2 connection(s) com.google.Keystone.Daemon.Administration: 0 connection(s)
+Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateDaemon[3395] <Notice>: 2015-12-18 03:03:49.371 GoogleSoftwareUpdateDaemon[3395/0xb0197000] [lvl=2] -[KSUpdateEngine updateProductID:] KSUpdateEngine updating product ID: "com.google.Keystone"
+Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateDaemon[3395] <Notice>: 2015-12-18 03:03:49.374 GoogleSoftwareUpdateDaemon[3395/0xb0197000] [lvl=2] -[KSCheckAction performAction] KSCheckAction checking 1 ticket(s).
+Dec 18 03:03:49 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+50:12 CDS-MacBook-Pro com.apple.backupd[3575] <Error>: Failed to eject volume /Volumes/Time Machine Backups (FSVolumeRefNum: -106; status: -47; dissenting pid: 0)
+Dec 18 06:50:12 CDS-MacBook-Pro com.apple.backupd[3575] <Error>: Failed to eject Time Machine disk image: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle
+Dec 18 06:51:01 CDS-MacBook-Pro mds[64] <Error>: (Volume.Error:880) Root store set to FSOnly with matching create! (loaded:1)
+Dec 18 06:52:30 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 06:59:58 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 07:02:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:02:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 07:05:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:05:25 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3606] <Notice>: 2015-12-18 07:05:25.510 GoogleSoftwareUpdateAgent[3606/0xa3d6f000] [lvl=2] -[KSAgentApp setupLoggerOutput] Agent settings: <KSAgentSettings:0x52b070 bundleID=com.google.Keystone.Agent lastCheck=2015-12-18 08:03:53 +0000 checkInterval=18000.000000 uiDisplayInterval=604800.000000 sleepInterval=1800.000000 jitterInterval=900 maxRunInterval=0.000000 isConsoleUser=1 ticketStorePath=/Users/davids/Library/Google/GoogleSoftwareUpdate/TicketStore/Keystone.ticketstore runMode=3 daemonUpdateEngineBrokerServiceName=com.google.Keystone.Daemon.UpdateEngine daemonAdministrationServiceName=com.google.Keystone.Daemon.Administration logEverything=0 logBufferSize=2048 alwaysPromptForUpdates=0 productIDToUpdate=(null) lastUIDisplayed=(null) alwaysShowStatusItem=0 updateCheckTag=(null) printResults=NO userInitiated=NO>
+Dec 18 07:05:53 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:09:58 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 07:14:56 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:19:41 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 07:19:41 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651666880 322521920    67% 81522358 40315240   67%   /
+Dec 18 07:19:41 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 07:19:41 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 07:19:41 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 07:19:41 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 07:19:58 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 07:20:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:20:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 07:22:30 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:29:58 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 07:30:46 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 07:30:46 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651669656 322519144    67% 81522705 40314893   67%   /
+Dec 18 07:30:46 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 07:30:46 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 07:30:46 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 07:30:46 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 07:35:22 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:38:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 07:39:59 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 07:41:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:47:33 CDS-MacBook-Pro locationd[87] <Error>: Couldn't find a requirement string for masquerading client com.apple.Maps
+Dec 18 07:47:34 CDS-MacBook-Pro locationd[87] <Notice>: Location icon should now be in state 'Active'
+Dec 18 07:47:35 CDS-MacBook-Pro locationd[87] <Notice>: NETWORK: requery, 0, 0, 0, 0, 2, items, fQueryRetries, 0, fLastRetryTimestamp, 472114055.8
+Dec 18 07:47:35 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:47:44 CDS-MacBook-Pro locationd[87] <Notice>: Location icon should now be in state 'Inactive'
+Dec 18 07:48:33 CDS-MacBook-Pro kernel[0] <Notice>: nspace-handler-set-snapshot-time: 1450442915
+Dec 18 07:48:33 CDS-MacBook-Pro com.apple.mtmd[188] <Notice>: Set snapshot time: 2015-12-18 07:48:35 -0500 (current time: 2015-12-18 07:48:33 -0500)
+Dec 18 07:48:45 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:48:46 CDS-MacBook-Pro sandboxd[137] ([309]) <Notice>: storeaccountd(309) deny file-write-create /Users/davids/Library/Caches/com.apple.Safari/ProductionBag
+Dec 18 07:48:46 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:49:34 CDS-MacBook-Pro sandboxd[137] ([221]) <Notice>: softwareupdated(221) deny system-fsctl 0x682f
+Dec 18 07:49:59 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 07:50:04 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Starting automatic backup
+Dec 18 07:50:04 CDS-MacBook-Pro kernel[0] <Notice>: nspace-handler-set-snapshot-time: 1450443006
+Dec 18 07:50:04 CDS-MacBook-Pro com.apple.mtmd[188] <Notice>: Set snapshot time: 2015-12-18 07:50:06 -0500 (current time: 2015-12-18 07:50:04 -0500)
+Dec 18 07:50:04 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Network destination already mounted at: /Volumes/Time Capsule
+Dec 18 07:50:16 CDS-MacBook-Pro com.apple.backupd[3628] <Error>: Disk image already attached: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle, DIHLDiskImageAttach returned: 35 (Resource temporarily unavailable)
+Dec 18 07:50:18 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Disk image /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle mounted at: /Volumes/Time Machine Backups
+Dec 18 07:50:19 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Backing up to /dev/disk3s2: /Volumes/Time Machine Backups/Backups.backupdb
+Dec 18 07:50:21 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Will copy (40.6 MB) from Macintosh HD
+Dec 18 07:50:21 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Found 138 files (40.6 MB) needing backup
+Dec 18 07:50:21 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: 2.58 GB required (including padding), 2.01 TB available
+Dec 18 07:51:19 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Copied 180 items (40.6 MB) from volume Macintosh HD. Linked 2660.
+Dec 18 07:51:28 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Created new backup: 2015-12-18-075120
+Dec 18 07:51:29 CDS-MacBook-Pro kernel[0] <Notice>: hfs: mounted Recovery HD on device disk0s3
+Dec 18 07:51:29 CDS-MacBook-Pro mds[64] <Error>: (Volume.Normal:2464) volume:0x7fb4b9080800 ********** Bootstrapped Creating a default store:0 SpotLoc:(null) SpotVerLoc:(null) occlude:0 /Volumes/Recovery HD
+Dec 18 07:51:30 CDS-MacBook-Pro fseventsd[50] <Critical>: Logging disabled completely for device:1: /Volumes/Recovery HD
+Dec 18 07:51:30 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Starting post-backup thinning
+Dec 18 07:51:30 CDS-MacBook-Pro mdworker[3600] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 07:51:30 CDS-MacBook-Pro mdworker[3601] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 07:51:30 CDS-MacBook-Pro mdworker[3602] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 07:51:30 CDS-MacBook-Pro mdworker[3605] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 07:51:30 CDS-MacBook-Pro mdworker[3604] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 07:51:30 CDS-MacBook-Pro mdworker[3633] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 07:51:30 CDS-MacBook-Pro mdworker[3634] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 07:51:30 CDS-MacBook-Pro kernel[0] <Notice>: hfs: unmount initiated on Recovery HD on device disk0s3
+Dec 18 07:51:38 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:52:20 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Deleted /Volumes/Time Machine Backups/Backups.backupdb/CDS MacBook Pro/2015-12-17-072350 (47 MB)
+Dec 18 07:52:20 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Post-backup thinning complete: 1 expired backups removed
+Dec 18 07:52:20 CDS-MacBook-Pro com.apple.backupd[3628] <Notice>: Backup completed successfully.
+Dec 18 07:52:20 CDS-MacBook-Pro mdworker[3644] <Error>: (ImportBailout.Error:1325) Asked to exit for Diskarb
+Dec 18 07:52:40 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:52:46 CDS-MacBook-Pro com.apple.backupd[3628] <Error>: Failed to eject volume /Volumes/Time Machine Backups (FSVolumeRefNum: -106; status: -47; dissenting pid: 0)
+Dec 18 07:52:46 CDS-MacBook-Pro com.apple.backupd[3628] <Error>: Failed to eject Time Machine disk image: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle
+Dec 18 07:53:32 CDS-MacBook-Pro mds[64] <Error>: (Volume.Error:880) Root store set to FSOnly with matching create! (loaded:1)
+Dec 18 07:53:35 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:56:16 CDS-MacBook-Pro CalendarAgent[292] <Warning>: [com.apple.calendar.store.log.caldav.coredav] [Refusing to parse response to PROPPATCH because of content-type: [text/html; charset=UTF-8].]
+Dec 18 07:56:50 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 07:58:57 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem 512-blocks      Used Available Capacity  iused    ifree %iused  Mounted on
+Dec 18 07:58:57 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk1  974700800 651622032 322566768    67% 81516752 40320846   67%   /
+Dec 18 07:58:57 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks       Used  Available Capacity   iused     ifree %iused  Mounted on
+Dec 18 07:58:57 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk3s2 5855666960 1935453872 3920213088    34% 120965865 245013318   33%   /Volumes/Time Machine Backups
+Dec 18 07:58:57 CDS-MacBook-Pro Google Drive[496] <Notice>: Filesystem   512-blocks   Used Available Capacity iused ifree %iused  Mounted on
+Dec 18 07:58:57 CDS-MacBook-Pro Google Drive[496] <Notice>: /dev/disk2s2     377340 377340         0   100%   94333     0  100%   /Volumes/Google Chrome
+Dec 18 07:59:16 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 08:00:00 CDS-MacBook-Pro syslogd[47] <Notice>: ASL Sender Statistics
+Dec 18 08:00:29 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 08:00:29 CDS-MacBook-Pro locationd[87] <Notice>: Location icon should now be in state 'Active'
+Dec 18 08:00:29 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 08:00:31 CDS-MacBook-Pro locationd[87] <Notice>: NETWORK: requery, 0, 0, 0, 0, 2, items, fQueryRetries, 0, fLastRetryTimestamp, 472135655.3
+Dec 18 08:00:31 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 08:00:40 CDS-MacBook-Pro locationd[87] <Notice>: Location icon should now be in state 'Inactive'
+Dec 18 08:01:48 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
+Dec 18 08:05:48 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3659] <Notice>: 2015-12-18 08:05:48.570 GoogleSoftwareUpdateAgent[3659/0xa3d6f000] [lvl=2] -[KSAgentApp setupLoggerOutput] Agent settings: <KSAgentSettings:0x231b490 bundleID=com.google.Keystone.Agent lastCheck=2015-12-18 08:03:53 +0000 checkInterval=18000.000000 uiDisplayInterval=604800.000000 sleepInterval=1800.000000 jitterInterval=900 maxRunInterval=0.000000 isConsoleUser=1 ticketStorePath=/Users/davids/Library/Google/GoogleSoftwareUpdate/TicketStore/Keystone.ticketstore runMode=3 daemonUpdateEngineBrokerServiceName=com.google.Keystone.Daemon.UpdateEngine daemonAdministrationServiceName=com.google.Keystone.Daemon.Administration logEverything=0 logBufferSize=2048 alwaysPromptForUpdates=0 productIDToUpdate=(null) lastUIDisplayed=(null) alwaysShowStatusItem=0 updateCheckTag=(null) printResults=NO userInitiated=NO>
+Dec 18 08:05:48 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3659] <Notice>: 2015-12-18 08:05:48.572 GoogleSoftwareUpdateAgent[3659/0xa3d6f000] [lvl=2] -[KSAgentApp checkForUpdates] Starting update check.
+Dec 18 08:05:48 CDS-MacBook-Pro GoogleSoftwareUpdateAgent[3659] <Notice>: 2015-12-18 08:05:48.572 GoogleSoftwareUpdateAgent[3659/0xb029b000] [lvl=2] -[KSAgentApp(KeystoneThread) runKeystonesInThreadWithArg:] Starting engine thread
+Dec 18 08:05:48 CDS-MacBook-Pro GoogleSoftwareUpdateDaemon[3661] <Notice>: 2015-12-18 08:05:48.627 GoogleSoftwareUpdateDaemon[3661/0xa3d6f000] [lvl=2] +[KSKeystoneTicketRepair updateKeystoneTicketInTicketStore:version:bundlePath:error:] KSKeystoneTicketRepair does not need to update the Keystone ticket.
+Dec 18 08:05:48 CDS-MacBook-Pro com.apple.xpc.launchd[1] (com.google.keystone.daemon[3661]) <Warning>: Endpoint has been activated through legacy launch(3) APIs. Please switch to XPC or bootstrap_check_in(): com.google.Keystone.Daemon.Administration
+Dec 18 08:05:48 CDS-MacBook-Pro com.apple.xpc.launchd[1] (com.google.keystone.daemon[3661]) <Warning>: Endpoint has been activated through legacy launch(3) APIs. Please switch to XPC or bootstrap_check_in(): com.google.Keystone.Daemon.UpdateEngine

@@ -44,6 +44,7 @@ public class LogsTableImpl extends TableImpl
     private LogFileFormat m_logFileFormat;
 	private LineNumberReader m_logFileReader;
 	private FileInputStream m_logFileInputStream;
+	private int m_currentLineNumber;
     
     public LogsTableImpl(File logFile, LogFileFormat lff, ContextImpl tc) 
     throws IOException
@@ -51,6 +52,7 @@ public class LogsTableImpl extends TableImpl
         // initialize the default table object
         super(tc.getRowCapacityIncr(), tc.getColumnCapacityIncr(), tc);
         m_numLogsCols = m_numLogsRows = 0;
+        m_currentLineNumber = 0;
         
     	if (logFile == null)
     		throw new IllegalArgumentException("File required");
@@ -75,6 +77,11 @@ public class LogsTableImpl extends TableImpl
     public int getNumLogsRows()
     {
         return m_numLogsRows;
+    }
+    
+    LogFileFormat getLogFileFormat() 
+    {
+    	return m_logFileFormat;
     }
     
     synchronized public void refresh() 
@@ -152,7 +159,7 @@ public class LogsTableImpl extends TableImpl
             setRowsCapacity(calcRowsCapacity(Math.max(m_numLogsRows, getNumRows())));
             m_unprocessedRows = new WeakHashSet<LogsRowImpl>(m_numLogsRows);
             for (int i = 1; i <= m_numLogsRows; i++) {
-                LogsRowImpl row = new LogsRowImpl(this, i);
+                LogsRowImpl row = new LogsRowImpl(this, i - 1);
                 m_unprocessedRows.add(row);
                 add(row, false, false, Access.ByIndex, i);
             }
@@ -192,6 +199,7 @@ public class LogsTableImpl extends TableImpl
         // Reset Stream and line number;
         m_logFileInputStream.getChannel().position(0);
         m_logFileReader.setLineNumber(0);
+        m_currentLineNumber = 0;
         
         return totalRows ;
     }
@@ -212,6 +220,7 @@ public class LogsTableImpl extends TableImpl
     		m_logFileInputStream = null;
     	}
 
+        m_currentLineNumber = 0;
     }
     
     @Override
@@ -250,4 +259,24 @@ public class LogsTableImpl extends TableImpl
     {
         throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill a log file row/column");
     }
+
+	synchronized String getLogFileLine(LogsRowImpl row) 
+	throws IOException 
+	{
+		int desiredLineNumber = row.getLineNumber();
+		
+		if (desiredLineNumber < m_currentLineNumber) {
+	        m_logFileInputStream.getChannel().position(0);
+	        m_logFileReader.setLineNumber(0);
+	        m_currentLineNumber = 0;			
+		}
+		
+		String logFileLine;
+		do {
+			logFileLine = m_logFileReader.readLine();
+			m_currentLineNumber = m_logFileReader.getLineNumber();
+		} while (m_currentLineNumber < desiredLineNumber);
+		
+		return logFileLine;
+	}
 }
