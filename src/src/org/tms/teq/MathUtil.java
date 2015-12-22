@@ -17,6 +17,16 @@ import org.tms.api.derivables.InvalidOperandsException;
 
 public class MathUtil
 {
+	static final public int indexOf(String source, String target)
+	{
+		return source.toLowerCase().indexOf(target.toLowerCase());
+	}
+	
+	static final public boolean contains(String source, String target)
+	{
+		return indexOf(source, target) > -1;
+	}
+	
     static final public Object jsonGet(JSONObject json, String key)
     {
         if (key == null || (key = key.trim()).length() <= 0)

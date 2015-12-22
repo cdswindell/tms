@@ -139,6 +139,8 @@ public enum BuiltinOperator implements Labeled, Operator
     MidOper(TokenType.GenericFunc, 5, toLabels("mid", "instrMid"), toArgs(String.class, int.class, int.class), String.class, MathUtil.class, "instrMid"),
     toLowerOper(TokenType.UnaryFunc, 5, toLabels("toLower"), toArgs(String.class), String.class, MathUtil.class),
     toUpperOper(TokenType.UnaryFunc, 5, toLabels("toUpper"), toArgs(String.class), String.class, MathUtil.class),
+    IndexOfOper(TokenType.BinaryFunc, 5, toLabels("indexOf"), toArgs(String.class, String.class), int.class, MathUtil.class, "indexOf"),
+    ContainsOper(TokenType.BinaryFunc, 5, toLabels("contains"), toArgs(String.class, String.class), boolean.class, MathUtil.class, "contains"),
     trimOper(TokenType.UnaryFunc, 5, toLabels("trim"), toArgs(String.class), String.class, MathUtil.class),
     reverseOper(TokenType.UnaryFunc, 5, toLabels("reverse"), toArgs(String.class), String.class, MathUtil.class),
     toStringOper(TokenType.UnaryFunc, 5, toLabels("toString"), toArgs(Object.class), String.class, MathUtil.class),
