@@ -275,7 +275,9 @@ public class LogsTableImpl extends TableImpl
 		return logFileLine;
 	}
 
-	private void resetLineReader() throws IOException {
+	private void resetLineReader() 
+	throws IOException 
+	{
 		m_logFileInputStream.getChannel().position(0);
 		m_logFileReader.setLineNumber(0);
 		

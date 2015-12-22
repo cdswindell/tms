@@ -239,7 +239,6 @@ Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateDaemon[3395] <Notice>: 2015-
 Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateDaemon[3395] <Notice>: 2015-12-18 03:03:49.371 GoogleSoftwareUpdateDaemon[3395/0xb0197000] [lvl=2] -[KSUpdateEngine updateProductID:] KSUpdateEngine updating product ID: "com.google.Keystone"
 Dec 18 03:03:49 CDS-MacBook-Pro GoogleSoftwareUpdateDaemon[3395] <Notice>: 2015-12-18 03:03:49.374 GoogleSoftwareUpdateDaemon[3395/0xb0197000] [lvl=2] -[KSCheckAction performAction] KSCheckAction checking 1 ticket(s).
 Dec 18 03:03:49 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"
-50:12 CDS-MacBook-Pro com.apple.backupd[3575] <Error>: Failed to eject volume /Volumes/Time Machine Backups (FSVolumeRefNum: -106; status: -47; dissenting pid: 0)
 Dec 18 06:50:12 CDS-MacBook-Pro com.apple.backupd[3575] <Error>: Failed to eject Time Machine disk image: /Volumes/Time Capsule/CDS MacBook Pro.sparsebundle
 Dec 18 06:51:01 CDS-MacBook-Pro mds[64] <Error>: (Volume.Error:880) Root store set to FSOnly with matching create! (loaded:1)
 Dec 18 06:52:30 CDS-MacBook-Pro networkd[180] <Error>: -[NETProxyLookup pacLookupComplete:proxies:error:] PAC evaluation error: Error Domain=kCFErrorDomainCFNetwork Code=308 "(null)"

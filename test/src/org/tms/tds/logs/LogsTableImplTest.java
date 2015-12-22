@@ -25,7 +25,7 @@ public class LogsTableImplTest extends BaseTest
 		
 		LogsTableImpl lft = LogsTableImpl.createTable(logFile, new OSXSystemLogReader());
 		assertNotNull(lft);
-		assertThat(343, is(lft.getNumRows()));
+		assertThat(342, is(lft.getNumRows()));
 		
 		Column dateCol = lft.getColumn(1);
 		assertNotNull(dateCol);
