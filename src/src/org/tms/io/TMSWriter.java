@@ -21,12 +21,12 @@ public class TMSWriter extends ArchivalWriter<TMSOptions>
         tw.export();
     }
 
-    public static void export(TableExportAdapter tableExportAdapter, File file, TMSOptions options) 
+    @SuppressWarnings("resource")
+	public static void export(TableExportAdapter tableExportAdapter, File file, TMSOptions options) 
     throws IOException
     {
         export(tableExportAdapter, new FileOutputStream(file), options);
     }
-
 
     public static void exportTableContext(TableContextExportAdapter tcea, OutputStream out, TMSOptions options) 
     throws IOException
@@ -64,7 +64,8 @@ public class TMSWriter extends ArchivalWriter<TMSOptions>
         gz.finish();
     }
 
-    private void writeHeader(ElementType et) throws IOException
+    @SuppressWarnings("resource")
+	private void writeHeader(ElementType et) throws IOException
     {
         OutputStream out = getOutputStream();
         String eType = et == ElementType.Table ? "TB" : et == ElementType.TableContext ? "TC" : null;

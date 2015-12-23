@@ -64,7 +64,8 @@ public class DbmsCellImpl extends CellImpl
         return m_cellValue;
     }
     
-    private void processResultSetRow(DbmsRowImpl row)
+    @SuppressWarnings("resource")
+	private void processResultSetRow(DbmsRowImpl row)
     {
         DbmsTableImpl table = row.getTable();
         ResultSet rs = table.getResultSet();

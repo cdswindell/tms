@@ -24,7 +24,8 @@ public class CSVWriter extends BaseWriter<CSVOptions>
         writer.export();        
     }
     
-    public static void export(TableExportAdapter tea, File file, CSVOptions options) 
+    @SuppressWarnings("resource")
+	public static void export(TableExportAdapter tea, File file, CSVOptions options) 
     throws IOException
     {
         export(tea, new FileOutputStream(file), options);        

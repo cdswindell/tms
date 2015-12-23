@@ -44,5 +44,9 @@ public class RTFReport extends TMSReport
         {
             throw new TableIOException(e);
         }
+        finally {
+        	if (out != null)
+        		out.close();
+        }
     }
 }

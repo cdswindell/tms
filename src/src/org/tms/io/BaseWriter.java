@@ -49,7 +49,8 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         reset(tw);
     }
 
-    protected BaseWriter(TableExportAdapter tw, File f, E options) 
+    @SuppressWarnings("resource")
+	protected BaseWriter(TableExportAdapter tw, File f, E options) 
     throws IOException
     {
         this(tw, new FileOutputStream(f), options);

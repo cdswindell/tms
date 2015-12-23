@@ -25,13 +25,15 @@ public class GroovyCellTransformer implements TableCellTransformer
     static final TableCellValidator construct(Class<? extends TableCellValidator> clazz,  
     		String text, String valMethodName, String transMethodName)
     {
+    	GroovyClassLoader gcl = null;
     	try {
 	        Class<?> groovyClazz;
 	        File file = new File(text);
+	        gcl = new GroovyClassLoader();
 	        if (file.exists() && file.canRead())
-	            groovyClazz = new GroovyClassLoader().parseClass(file);
+	            groovyClazz = gcl.parseClass(file);
 	        else
-	            groovyClazz = new GroovyClassLoader().parseClass(text);
+	            groovyClazz = gcl.parseClass(text);
 	        
 		    // if this object is a TableCellTransformer, construct it and return
 		    if (TableCellTransformer.class.isAssignableFrom(groovyClazz)) {
@@ -50,6 +52,15 @@ public class GroovyCellTransformer implements TableCellTransformer
     	catch (CompilationFailedException | IOException | InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException("Exception encountered while processing Groovy: " + e.getMessage()); 
 		}
+        finally {
+        	try {
+	        	if (gcl != null) {
+	        		gcl.close();
+	        		gcl = null;
+	        	}
+        	} 
+        	catch (IOException e) { /* noop */ }
+        }
     }
     
     private Class<? extends TableCellValidator> m_requestedClazz;

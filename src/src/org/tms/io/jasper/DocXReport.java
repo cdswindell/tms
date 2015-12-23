@@ -43,11 +43,17 @@ public class DocXReport extends TMSReport
             OutputStreamExporterOutput output = new SimpleOutputStreamExporterOutput(out);
             docExporter.setExporterOutput(output);
             
-            docExporter.exportReport();           
+            docExporter.exportReport();  
+            
+            out.close();
         }
         catch (JRException e)
         {
             throw new TableIOException(e);
+        }
+        finally {
+        	if (out != null)
+        		out.close();
         }
     }
 }

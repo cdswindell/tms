@@ -60,7 +60,8 @@ public class TMSReader extends ArchivalReader<TMSOptions>
         xs.fromXML(new GZIPInputStream(getInputStream()));       
     } 
     
-    private ElementType readHeader() throws IOException
+    @SuppressWarnings("resource")
+	private ElementType readHeader() throws IOException
     {
         InputStream in = getInputStream();
         if (in == null || in.available() < 32)

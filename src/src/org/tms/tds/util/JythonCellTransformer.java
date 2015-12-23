@@ -47,8 +47,11 @@ public class JythonCellTransformer implements TableCellTransformer
             // compile the code in the supplied file name
             // or, if text doesn't refer to a file, treat it as jython code
             File file = new File(text);         
-            if (file.exists() && file.canRead())
-            	pyCode = pi.compile(new InputStreamReader(new FileInputStream(file)));
+            if (file.exists() && file.canRead()) {
+            	InputStreamReader isr = new InputStreamReader(new FileInputStream(file));
+            	pyCode = pi.compile(isr);
+            	isr.close();
+            }
             else
             	pyCode = pi.compile(text);
             

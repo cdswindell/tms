@@ -312,6 +312,8 @@ abstract public class RestConsumerOp implements Operator
                     buffer.append(line);
                 }
                 
+                reader.close();
+                
                 // allow result to be postprocessed, as some
                 // json streams have to be adjusted
                 String jsonStr = postProcessInputStream(buffer.toString());

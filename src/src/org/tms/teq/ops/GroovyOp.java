@@ -23,15 +23,17 @@ public class GroovyOp extends BaseOp
     {
         // compile the Groovy class
         Class<?> groovyClazz = null;
+    	GroovyClassLoader gcl = null;
         try
         {
             // compile the code in the supplied file name
             // or, if text doesn't refer to a file, treat it as groovy code
             File file = new File(text);
+            gcl = new GroovyClassLoader();
             if (file.exists() && file.canRead())
-                groovyClazz = new GroovyClassLoader().parseClass(file);
+                groovyClazz = gcl.parseClass(file);
             else
-                groovyClazz = new GroovyClassLoader().parseClass(text);
+                groovyClazz = gcl.parseClass(text);
             
             // first, see if we can instantiate the object, and if we can, is it an Operator?
             // if it is, register it and return
@@ -63,6 +65,15 @@ public class GroovyOp extends BaseOp
         {
             throw new InvalidOperatorException(e);
         }        
+        finally {
+        	try {
+	        	if (gcl != null) {
+	        		gcl.close();
+	        		gcl = null;
+	        	}
+        	} 
+        	catch (IOException e) { /* noop */ }
+        }
     }
     
     /*
@@ -102,10 +113,13 @@ public class GroovyOp extends BaseOp
     @Override
     public Token evaluate(Token... args)
     {
+    	GroovyClassLoader gcl = null;
         try {
             // compile the Groovy class
-            if (m_groovyClazz == null && m_file != null)
-                m_groovyClazz = new GroovyClassLoader().parseClass(m_file); 
+            if (m_groovyClazz == null && m_file != null) {
+            	gcl = new GroovyClassLoader();
+                m_groovyClazz = gcl.parseClass(m_file); 
+            }
             
             // if the class is null at this point, we're done
             if (m_groovyClazz == null)
@@ -136,6 +150,15 @@ public class GroovyOp extends BaseOp
                IllegalArgumentException | InvocationTargetException e)
         {
             return Token.createErrorToken(e.getMessage());
+        }
+        finally {
+        	try {
+	        	if (gcl != null) {
+	        		gcl.close();
+	        		gcl = null;
+	        	}
+        	} 
+        	catch (IOException e) { /* noop */ }
         }
     }
 }
