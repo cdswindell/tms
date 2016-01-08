@@ -29,7 +29,7 @@ public class ColumnConverter extends BaseConverter
     @Override
     public boolean canConvert(@SuppressWarnings("rawtypes") Class arg)
     {
-        return ColumnImpl.class.isAssignableFrom(arg);
+        return ColumnImpl.class == arg;
     }
 
     protected String getElementTag()
@@ -42,13 +42,10 @@ public class ColumnConverter extends BaseConverter
      */
     protected boolean isRelevant(Column c)
     {
-    	if (options().isVerboseState())
-    		return true;
-    	
-        if (hasValue(c, TableProperty.Units))
+        if ((options().isUnits() || options().isVerboseState()) && hasValue(c, TableProperty.Units))
             return true;
         
-        if (hasValue(c, TableProperty.DisplayFormat))
+        if ((options().isDisplayFormats() || options().isVerboseState()) && hasValue(c, TableProperty.DisplayFormat))
             return true;
         
         if (hasValue(c, TableProperty.DataType))

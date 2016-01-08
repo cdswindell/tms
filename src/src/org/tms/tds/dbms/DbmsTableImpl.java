@@ -206,7 +206,7 @@ public class DbmsTableImpl extends TableImpl
                         DbmsColumnImpl col = new DbmsColumnImpl(this, i, rsmd.getColumnClassName(i));
                         add(col, false, false, Access.ByIndex, i);
                         
-                        col.setLabel(rsmd.getColumnLabel(i));
+                        col.setLabelInternal(rsmd.getColumnLabel(i));
                     }            
                 }
                 else

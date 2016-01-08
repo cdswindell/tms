@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -15,6 +16,7 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.api.io.XMLOptions;
 
 public class DbmsTableImplTest extends BaseDbmsTest
 {
@@ -84,5 +86,69 @@ public class DbmsTableImplTest extends BaseDbmsTest
 
         r.setDerivation("mean(colref('empno'))");
         r.setDerivation("mean(colref(1))");
+    }
+	
+    @Test
+    public final void testMusicDBMSTable() throws ClassNotFoundException, SQLException, IOException
+    {
+        TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
+        
+        tc.loadDatabaseDriver("com.mysql.jdbc.Driver");
+        assertThat(tc.isDatabaseDriverLoaded("com.mysql.jdbc.Driver"), is(true));
+        
+        // count the number of expected rows and columns
+        ResultSet rs = fetchResultSet("jdbc:mysql://localhost/music?user=davids&password=mysql", 
+                                      "select * from songs order by track_id");
+        
+        int numRows = getDbmsRowCount(rs);
+        int numCols = getDbmsColumnCount(rs);
+        close(rs);
+        
+        // create basic table using mysql "music" database
+        DbmsTableImpl t = new DbmsTableImpl("jdbc:mysql://localhost/music?user=davids&password=mysql", 
+        									"select * from songs order by track_id");
+        assertThat(t, notNullValue());
+        assertThat(t.getNumRows(), is(numRows));
+        assertThat(t.getNumColumns(), is(numCols));
+        
+        Object value = t.getCellValue(t.getRow(Access.ByIndex, 2), t.getColumn(Access.First));
+        assertThat(value, notNullValue());
+        
+        t.refresh();
+        Column c = t.addColumn();
+        c.setDerivation("col tempo * col 'tempo'");
+        
+        // test deleting a database row
+        Row fr = t.getRow(Access.First);
+        assertThat(fr, notNullValue());
+        
+        fr.delete();
+        assertThat(t.getNumDbmsRows(), is(numRows - 1));
+        assertThat(t.getNumRows(), is(numRows - 1));
+        
+        Column tempo =  t.getColumn(Access.ByLabel, "tempo");
+        
+        for (int i = 1; i < t.getNumRows(); i++) {
+            Row r = t.getRow(Access.ByIndex, i);
+            Object dbValue = t.getCellValue(r, tempo);
+            Object derivedValue = t.getCellValue(r, c);
+            
+            assertThat(dbValue instanceof Number, is(true));
+            assertThat(derivedValue instanceof Number, is(true));
+            
+            assertThat(closeTo(derivedValue, (double)dbValue * (double)dbValue, 0.001), is(true));            
+        }
+        
+        t.export("music.xml", XMLOptions.Default.withVerboseState());
+        
+        Row r = t.addRow();
+        Cell cell = t.getCell(r, tempo);
+        cell.setDerivation("mean(col tempo)");
+        assertThat(cell.isNumericValue(), is(true));
+        
+        r.delete();
+        r = t.addRow();
+        assertThat(r, notNullValue());
     }
 }

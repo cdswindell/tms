@@ -77,7 +77,7 @@ public class CellConverter extends BaseConverter
     @Override
     public boolean canConvert(@SuppressWarnings("rawtypes") Class arg)
     {
-        return CellImpl.class.isAssignableFrom(arg);
+        return CellImpl.class == arg;
     }
 
     protected String getElementTag()
@@ -85,10 +85,31 @@ public class CellConverter extends BaseConverter
         return CellConverter.ELEMENT_TAG;
     }
     
+    /**
+     * Return true of this cell should be output
+     */
+    protected boolean isRelevant(Cell c)
+    {
+    	if (c.getCellValue() != null)
+    		return true;
+    	
+        if ((options().isUnits() || options().isVerboseState()) && hasValue(c, TableProperty.Units))
+            return true;
+        
+        if ((options().isDisplayFormats() || options().isVerboseState()) && hasValue(c, TableProperty.DisplayFormat))
+            return true;
+        
+        return super.isRelevant(c);
+    }
+
     @Override
     public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         CellImpl c = (CellImpl)arg;
+        
+        // if the row only has defaults, no need to output it
+        if (!isRelevant(c))
+            return;
         
         writer.startNode(getElementTag());                
         writer.addAttribute("rIdx", String.valueOf(getRemappedRowIndex(c.getRow())));
@@ -96,8 +117,14 @@ public class CellConverter extends BaseConverter
         
         marshalTableElement(c, writer, context, true);
         
-        writeNode(c, TableProperty.Units, UNITS_TAG, writer, context);
-        writeNode(c, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
+        if (options().isUnits() || options().isVerboseState())
+        	writeNode(c, TableProperty.Units, UNITS_TAG, writer, context);
+        
+        if (options().isDisplayFormats() || options().isVerboseState())
+        	writeNode(c, TableProperty.DisplayFormat, FORMAT_TAG, writer, context);
+        
+        if (options().isUUIDs() || options().isVerboseState())
+            writeNode(c, TableProperty.UUID, UUID_TAG, writer, context);
         
         Column cCol = c.getColumn();
         Class<?> dataType = c.getDataType();

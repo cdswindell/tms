@@ -162,7 +162,10 @@ public class XMLReaderTest extends BaseArchivalTest
         Table gst = getBasicTable();
         
         // now read the xml
-        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold, "xml"), XMLOptions.Default); 
+        XMLReader r = new XMLReader(qualifiedFileName(ExportTableGold, "xml"), 
+        		XMLOptions.Default
+        			.withDescriptions()
+        			.withUnits()); 
         assertNotNull(r);
         
         try

@@ -16,6 +16,12 @@ public class XMLOptions extends ArchivalIOOptions<XMLOptions> implements Archiva
     {
         super(IOFileFormat.XML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols, 
         		withDerivations, withValidators, withState);
+        
+        set(Options.Descriptions, false);
+        set(Options.DisplayFormats, false);
+        set(Options.Units, false);
+        set(Options.UUIDs, false);
+        set(Options.Tags, false);
     }
     
     private XMLOptions (final XMLOptions format)

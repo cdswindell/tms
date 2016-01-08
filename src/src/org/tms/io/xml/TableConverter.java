@@ -187,8 +187,10 @@ public class TableConverter extends BaseConverter
                 for (int rIdx = 1; rIdx <= nRows; rIdx++) {
                     if (!isIgnoreRow(rIdx)) {
                         Row r = getRowByEffectiveIndex(rIdx);
-                        if (t.isCellDefined(r, c))
-                            context.convertAnother(t.getCell(r,  c));
+                        if (t.isCellDefined(r, c)) {
+                        	Object o = t.getCell(r,  c);
+                            context.convertAnother(o);
+                        }
                     }
                 }
             }

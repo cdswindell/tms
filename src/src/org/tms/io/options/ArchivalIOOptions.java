@@ -29,16 +29,18 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
     extends BaseIOOptions<T> 
     implements ArchivalIOOption<T>
 {    
-    private enum Options implements OptionEnum 
+    public enum Options implements OptionEnum 
     {
-        Derivations,
         Recalculate,
+        VerboseState,
+        
+        Derivations,
         Validators,
+        
         Descriptions, 
         DisplayFormats,
         Units,
         Tags,
-        VerboseState,
         UUIDs
     }
 
@@ -55,9 +57,10 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
     {
         super(format, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
 
+        set(Options.VerboseState, withVerboseState);
+        
         set(Options.Derivations, withDerivations);
         set(Options.Validators, withValidators);
-        set(Options.VerboseState, withVerboseState);
         
         set(Options.Descriptions, true);
         set(Options.DisplayFormats, true);
@@ -265,7 +268,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
      */
     public T withUnits()
     {
-        return withDescriptions(true);
+        return withUnits(true);
     }
     
     /**

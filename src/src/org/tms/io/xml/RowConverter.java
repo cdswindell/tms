@@ -42,13 +42,10 @@ public class RowConverter extends BaseConverter
      */
     protected boolean isRelevant(Row r)
     {
-    	if (options().isVerboseState())
-    		return true;
-    	
-        if (hasValue(r, TableProperty.Units))
+        if ((options().isUnits() || options().isVerboseState()) && hasValue(r, TableProperty.Units))
             return true;
         
-        if (hasValue(r, TableProperty.DisplayFormat))
+        if ((options().isDisplayFormats() || options().isVerboseState()) && hasValue(r, TableProperty.DisplayFormat))
             return true;
         
         return super.isRelevant(r);

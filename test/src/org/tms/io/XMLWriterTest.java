@@ -144,7 +144,7 @@ public class XMLWriterTest extends BaseArchivalTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        r.export(bos, XMLOptions.Default);
+        r.export(bos, XMLOptions.Default.withTags());
         bos.close();
 
         // test byte streams are the same
@@ -174,7 +174,7 @@ public class XMLWriterTest extends BaseArchivalTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        c.export(bos, XMLOptions.Default);
+        c.export(bos, XMLOptions.Default.withTags());
         bos.close();
 
         // test byte streams are the same
@@ -202,7 +202,7 @@ public class XMLWriterTest extends BaseArchivalTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        gst.export(bos, XMLOptions.Default);
+        gst.export(bos, XMLOptions.Default.withTags().withDescriptions().withUnits());
         bos.close();
 
         // test byte streams are the same
@@ -230,7 +230,13 @@ public class XMLWriterTest extends BaseArchivalTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        gst.export(bos, XMLOptions.Default.withIgnoreEmptyColumns().withColumnLabels(false).withRowLabels(false));
+        gst.export(bos, XMLOptions.Default
+        		.withIgnoreEmptyColumns()
+        		.withColumnLabels(false)
+        		.withRowLabels(false)
+        		.withTags()
+        		.withDescriptions()
+        		.withUnits());
         bos.close();
 
         // test byte streams are the same

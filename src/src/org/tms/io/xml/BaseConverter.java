@@ -206,9 +206,6 @@ abstract public class BaseConverter implements Converter
 
     protected boolean isRelevant(TableElement te)
     {
-    	if (options().isVerboseState())
-    		return true;
-    	
         if (te == te.getTable())
             return true;
         
@@ -223,24 +220,33 @@ abstract public class BaseConverter implements Converter
             return true;
         
         if (hasValue(te, TableProperty.Label)) {
-            if (te instanceof Row && options().isRowLabels())
-                return true;
-            if (te instanceof Column && options().isColumnLabels())
-                return true;
+            if (te instanceof Row) { 
+            	if (options().isRowLabels())
+            		return true;
+            }
+            else if (te instanceof Column) {
+            	if (options().isColumnLabels())
+                    return true;
+            }
+            else // not a row or column but labeled; it is required
+            	return true;
         }
         
-        if (options().isTags() && hasValue(te, TableProperty.Tags)) 
+        if ((options().isTags() || options().isVerboseState()) && hasValue(te, TableProperty.Tags)) 
             return true;
         
-        if (options().isDescriptions() && hasValue(te, TableProperty.Description)) 
+        if ((options().isDescriptions() || options().isVerboseState()) && hasValue(te, TableProperty.Description)) 
             return true;
         
-        if (options().isDerivations() && 
+        if ((options().isDerivations() || options().isVerboseState()) && 
         		getTableElementType() == ElementType.Table &&
         		hasValue(te, TableProperty.Derivation))
             return true;
         
-        if (options().isValidators() && hasValue(te, TableProperty.Validator))
+        if ((options().isValidators() || options().isVerboseState()) && hasValue(te, TableProperty.Validator))
+            return true;
+        
+        if ((options().isUUIDs() || options().isVerboseState()) && hasValue(te, TableProperty.UUID))
             return true;
         
         return false;
@@ -267,13 +273,13 @@ abstract public class BaseConverter implements Converter
         if (includeLabel)
             writeNode(te, TableProperty.Label, LABEL_TAG, writer, context);
         
-        if (options().isDescriptions())
+        if (options().isDescriptions() || options().isVerboseState())
             writeNode(te, TableProperty.Description, DESC_TAG, writer, context);
         
-        if (options().isTags())
-                writeNode(te, TableProperty.Tags, TAGS_TAG, writer, context);
+        if (options().isTags() || options().isVerboseState())
+            writeNode(te, TableProperty.Tags, TAGS_TAG, writer, context);
 
-        if (options().isDerivations() && getTableElementType() == ElementType.Table &&
+        if ((options().isDerivations() || options().isVerboseState()) && getTableElementType() == ElementType.Table &&
         		te instanceof Derivable && ((Derivable)te).isDerived()) 
         {
             Derivation d =  ((Derivable)te).getDerivation();
@@ -302,13 +308,13 @@ abstract public class BaseConverter implements Converter
             }
         }
         
-        if (options().isUUIDs())
+        if (options().isUUIDs() || options().isVerboseState())
             writeNode(te, TableProperty.UUID, UUID_TAG, writer, context);
     }        
 
     protected void marshalClassSpecificElements(TableElement te, HierarchicalStreamWriter writer, MarshallingContext context)
     {
-        // override in superclasses to handle class-specific data       
+        // override in super classes to handle class-specific data       
     }
 
     /*

@@ -23,7 +23,7 @@ public class DbmsColumnImpl extends ColumnImpl
         try
         {
             if (clazzName != null && (clazzName = clazzName.trim()).length() > 0) {
-                setDataType(Class.forName(clazzName));
+                setDataTypeInternal(Class.forName(clazzName));
                 setStronglyTyped(true);
             }
         }
@@ -67,6 +67,28 @@ public class DbmsColumnImpl extends ColumnImpl
             return super.createNewCell(row);
     }
 
+	protected void setLabelInternal(String columnLabel) 
+	{
+		super.setLabel(columnLabel);		
+	}
+	
+    protected void setDataTypeInternal(Class<?> dataType)
+    {
+        super.setDataType(dataType);;
+    }
+    
+    @Override
+    public void setLabel(String label)
+    {
+    	throw new UnsupportedImplementationException(this, "Cannot set the label on a database column");
+    }
+    
+    @Override
+    public void setDataType(Class<?> dataType)
+    {
+        throw new UnsupportedImplementationException(this, "Cannot set the data type on a database column");
+    }
+    
     @Override
     public Derivation setDerivation(String expr) 
     {
