@@ -1,5 +1,6 @@
 package org.tms.io.xml;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,16 +60,23 @@ abstract public class BaseConverter implements Converter
     private BaseReader<?> m_reader;
     private ArchivalIOOption<?> m_options;
     
+    private Map<String, String> m_attribCache;
+    private boolean m_useAttribCache;
+    
     public BaseConverter(BaseWriter<?> writer)
     {
         m_writer = writer;
         m_options = (ArchivalIOOption<?>)writer.options();
+        m_attribCache = new HashMap<String, String>();
+        m_useAttribCache = false;
     }
 
     public BaseConverter(BaseReader<?> reader)
     {
         m_reader = reader;
         m_options = (ArchivalIOOption<?>)reader.options();
+        m_attribCache = new HashMap<String, String>();
+        m_useAttribCache = false;
     }
 
     protected ArchivalIOOption<?> options()
@@ -330,99 +338,126 @@ abstract public class BaseConverter implements Converter
         return (Table)context.get(TMS_TABLE_KEY);
     }
     
-    protected void unmarshalTableElement(TableElement t, boolean doLabel, HierarchicalStreamReader reader, UnmarshallingContext context)
+    protected void cacheAllAttributes(HierarchicalStreamReader reader)
     {
-        Boolean val = readAttributeBoolean(READONLY_ATTR, reader);
-        if (val != null)
-            t.setReadOnly(val);
-        
-        val = readAttributeBoolean(ALLOWNULLS_ATTR, reader);
-        if (val != null)
-            t.setSupportsNull(val);
-        
-        val = readAttributeBoolean(ENFORCE_DATATYPE_ATTR, reader);
-        if (val != null)
-            t.setEnforceDataType(val);
-        
-        // process other common elements
-        while (reader.hasMoreChildren()) {
-            reader.moveDown();
-            String nodeName = reader.getNodeName();
-            String strVal = null;
-            switch (nodeName) {
-                case LABEL_TAG:
-                    if (doLabel) {
-                        strVal = (String)context.convertAnother(t, String.class);
-                        t.setLabel(strVal);
-                    }
-                    break;
-                    
-                case DESC_TAG:
-                    if (options().isDescriptions()) {
-                        strVal = (String)context.convertAnother(t, String.class);
-                        t.setDescription(strVal);
-                    }
-                    break;
-                    
-                case TAGS_TAG:
-                    while (reader.hasMoreChildren()) {
-                        reader.moveDown();
-                        if (options().isTags()) {
-                            strVal = (String)context.convertAnother(t, String.class);
-                            t.tag(strVal);
-                        }
-                        reader.moveUp();
-                    }
-                    break;
-                    
-                case DERIV_TAG:
-                    if (options().isDerivations()) {
-                    	Long period = readAttributeLong(DERIV_PERIOD_ATTR, reader);
-                        strVal = (String)context.convertAnother(t, String.class);
-                        if (t instanceof Derivable)
-                            cacheDerivation((Derivable)t, strVal, period, context);
-                    }
-                    break;
-                    
-                case VALIDATOR_TAG:
-                    if (options().isValidators() && t instanceof Validatable) {
-                        Validatable v = (Validatable)t;
-                        Class<?> valClass = null;
-                        reader.moveDown();
-                        try {
-                            valClass = (Class<?>)context.convertAnother(v, Class.class);
-                        }
-                        catch (Exception e) {
-                            valClass = TableCellValidator.class;
-                        }
-                        reader.moveUp();
-                        
-                        reader.moveDown();
-                        Object o = context.convertAnother(v, valClass);;
-                        reader.moveUp();
-                        
-                        if (o != null)
-                            v.setValidator((TableCellValidator)o);
-                    }
-                    break;
-                    
-                case UUID_TAG:
-                    if (options().isUUIDs()) {
-                        strVal = (String)context.convertAnother(t, String.class);
-                        if (t instanceof TableCellsElementImpl) 
-                            ((TableCellsElementImpl)t).setUUID(strVal);
-                    }
-                    break;
-                    
-                default:
-                    return;
-            }
-            
-            reader.moveUp();
-        }
+    	clearCachedAttributes();
+    	
+    	int attrCnt = reader.getAttributeCount();
+    	for (int i = 0; i < attrCnt; i++) {
+    		String attrName = reader.getAttributeName(i);
+    		String attrVal = reader.getAttribute(i);
+    		
+    		if (attrVal != null && (attrVal = attrVal.trim()).length() > 0)
+    			m_attribCache.put(attrName, attrVal);
+    	}
+    	
+    	m_useAttribCache = true;
+    }
+    
+    protected void clearCachedAttributes() 
+    {
+    	m_attribCache.clear();
+    	m_useAttribCache = false;
+	}
+
+	protected void unmarshalTableElement(TableElement t, boolean doLabel, HierarchicalStreamReader reader, UnmarshallingContext context)
+    {
+		try {
+	        Boolean val = readAttributeBoolean(READONLY_ATTR, reader);
+	        if (val != null)
+	            t.setReadOnly(val);
+	        
+	        val = readAttributeBoolean(ALLOWNULLS_ATTR, reader);
+	        if (val != null)
+	            t.setSupportsNull(val);
+	        
+	        val = readAttributeBoolean(ENFORCE_DATATYPE_ATTR, reader);
+	        if (val != null)
+	            t.setEnforceDataType(val);
+	        
+	        // process other common elements
+	        while (reader.hasMoreChildren()) {
+	            reader.moveDown();
+	            String nodeName = reader.getNodeName();
+	            String strVal = null;
+	            switch (nodeName) {
+	                case LABEL_TAG:
+	                    if (doLabel) {
+	                        strVal = (String)context.convertAnother(t, String.class);
+	                        t.setLabel(strVal);
+	                    }
+	                    break;
+	                    
+	                case DESC_TAG:
+	                    if (options().isDescriptions()) {
+	                        strVal = (String)context.convertAnother(t, String.class);
+	                        t.setDescription(strVal);
+	                    }
+	                    break;
+	                    
+	                case TAGS_TAG:
+	                    while (reader.hasMoreChildren()) {
+	                        reader.moveDown();
+	                        if (options().isTags()) {
+	                            strVal = (String)context.convertAnother(t, String.class);
+	                            t.tag(strVal);
+	                        }
+	                        reader.moveUp();
+	                    }
+	                    break;
+	                    
+	                case DERIV_TAG:
+	                    if (options().isDerivations()) {
+	                    	Long period = readAttributeLong(DERIV_PERIOD_ATTR, reader);
+	                        strVal = (String)context.convertAnother(t, String.class);
+	                        if (t instanceof Derivable)
+	                            cacheDerivation((Derivable)t, strVal, period, context);
+	                    }
+	                    break;
+	                    
+	                case VALIDATOR_TAG:
+	                    if (options().isValidators() && t instanceof Validatable) {
+	                        Validatable v = (Validatable)t;
+	                        Class<?> valClass = null;
+	                        reader.moveDown();
+	                        try {
+	                            valClass = (Class<?>)context.convertAnother(v, Class.class);
+	                        }
+	                        catch (Exception e) {
+	                            valClass = TableCellValidator.class;
+	                        }
+	                        reader.moveUp();
+	                        
+	                        reader.moveDown();
+	                        Object o = context.convertAnother(v, valClass);;
+	                        reader.moveUp();
+	                        
+	                        if (o != null)
+	                            v.setValidator((TableCellValidator)o);
+	                    }
+	                    break;
+	                    
+	                case UUID_TAG:
+	                    if (options().isUUIDs()) {
+	                        strVal = (String)context.convertAnother(t, String.class);
+	                        if (t instanceof TableCellsElementImpl) 
+	                            ((TableCellsElementImpl)t).setUUID(strVal);
+	                    }
+	                    break;
+	                    
+	                default:
+	                	return;
+	            }
+	            
+	            reader.moveUp();
+	        }
+		}
+		finally {
+			clearCachedAttributes();
+		}
     }       
     
-    private void cacheDerivation(Derivable te, String deriv, Long period, UnmarshallingContext context)
+	private void cacheDerivation(Derivable te, String deriv, Long period, UnmarshallingContext context)
     {
         Map<Derivable, CachedDerivation> derivsMap = getDerivationsMap(context);  
         CachedDerivation cd = new CachedDerivation(deriv, period);
@@ -443,7 +478,7 @@ abstract public class BaseConverter implements Converter
 
     protected Boolean readAttributeBoolean(String attrName, HierarchicalStreamReader reader)
     {
-        String val = reader.getAttribute(attrName);
+        String val = m_useAttribCache ? m_attribCache.get(attrName) : reader.getAttribute(attrName);
         if (val != null) 
             return Boolean.parseBoolean(val);
         
@@ -453,7 +488,7 @@ abstract public class BaseConverter implements Converter
     protected Integer readAttributeInteger(String attrName, HierarchicalStreamReader reader)
     {
         try {
-            String val = reader.getAttribute(attrName);
+            String val = m_useAttribCache ? m_attribCache.get(attrName) : reader.getAttribute(attrName);
             if (val != null)          
                 return Integer.parseInt(val);
         }
@@ -465,7 +500,7 @@ abstract public class BaseConverter implements Converter
     protected Long readAttributeLong(String attrName, HierarchicalStreamReader reader)
     {
         try {
-            String val = reader.getAttribute(attrName);
+            String val = m_useAttribCache ? m_attribCache.get(attrName) : reader.getAttribute(attrName);
             if (val != null)          
                 return Long.parseLong(val);
         }
@@ -477,7 +512,7 @@ abstract public class BaseConverter implements Converter
     protected Double readAttributeDouble(String attrName, HierarchicalStreamReader reader)
     {
         try {
-            String val = reader.getAttribute(attrName);
+            String val = m_useAttribCache ? m_attribCache.get(attrName) : reader.getAttribute(attrName);
             if (val != null)          
                 return Double.parseDouble(val);
         }

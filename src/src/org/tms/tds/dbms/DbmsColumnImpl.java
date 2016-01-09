@@ -78,12 +78,6 @@ public class DbmsColumnImpl extends ColumnImpl
     }
     
     @Override
-    public void setLabel(String label)
-    {
-    	throw new UnsupportedImplementationException(this, "Cannot set the label on a database column");
-    }
-    
-    @Override
     public void setDataType(Class<?> dataType)
     {
         throw new UnsupportedImplementationException(this, "Cannot set the data type on a database column");

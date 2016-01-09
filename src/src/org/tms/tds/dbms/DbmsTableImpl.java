@@ -1,5 +1,7 @@
 package org.tms.tds.dbms;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,6 +17,9 @@ import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.api.io.IOOption;
+import org.tms.io.DbmsTableExportAdapter;
+import org.tms.io.TableExportAdapter;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
@@ -81,6 +86,22 @@ public class DbmsTableImpl extends TableImpl
         fetchResultSet(false);
     }
     
+    @Override
+    public void export(String fileName, IOOption<?> options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new DbmsTableExportAdapter(this, fileName, options);
+        writer.export();
+    }
+
+    @Override
+    public void export(OutputStream out, IOOption<?> options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new DbmsTableExportAdapter(this, out, options);
+        writer.export();
+    }
+
     public String getConnectionUrl()
     {
         return m_connectionUrl;

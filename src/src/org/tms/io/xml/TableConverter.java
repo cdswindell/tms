@@ -202,10 +202,11 @@ public class TableConverter extends BaseConverter
 	@Override
     public Table unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
-        int rCap = readAttributeInteger(ROWSCAP_ATTR, reader);
-        int cCap = readAttributeInteger(COLSCAP_ATTR, reader);
-        
-        TableImpl t = (TableImpl)TableFactory.createTable(rCap, cCap, getTableContext());
+		// cache the attributes, we can't "go back" once we've read nodes
+		cacheAllAttributes(reader);
+		
+		// create the table
+        TableImpl t = createTable(reader, context);
         
         // if full state was persisted, process more attributes
         if (options().isVerboseState()) {
@@ -290,6 +291,14 @@ public class TableConverter extends BaseConverter
         return t;
     }
     
+	protected TableImpl createTable(HierarchicalStreamReader reader, UnmarshallingContext context) 
+	{
+        int rCap = readAttributeInteger(ROWSCAP_ATTR, reader);
+        int cCap = readAttributeInteger(COLSCAP_ATTR, reader);
+        
+		return (TableImpl)TableFactory.createTable(rCap, cCap, getTableContext());
+	}
+	
 	private void restoreDerivation(Derivable d, CachedDerivation eq)
 	{
 	    try

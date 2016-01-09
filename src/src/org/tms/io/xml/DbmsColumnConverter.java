@@ -29,6 +29,5 @@ public class DbmsColumnConverter extends ColumnConverter
     protected boolean isRelevant(Column c)
     {
     	return false;
-//        return super.isRelevant(c);
     }
 }

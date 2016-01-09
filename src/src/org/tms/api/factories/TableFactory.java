@@ -264,18 +264,20 @@ public final class TableFactory
         return t;
     }
 
-    static public Table createDbmsTable(String connectionUrl, String query, String driverClassName, ContextImpl tc) 
-    throws SQLException, ClassNotFoundException
-    {
-        Table t = DbmsTableImpl.createTable(connectionUrl, query, driverClassName, tc);       
-        return t;
-    }
-
     static public Table createDbmsTable(String connectionUrl, String query, String driverClassName) 
     throws SQLException, ClassNotFoundException
     {
         Table t = DbmsTableImpl.createTable(connectionUrl, query, 
-                  driverClassName, ContextImpl.fetchDefaultContext());       
+                  							driverClassName, ContextImpl.fetchDefaultContext());       
+        return t;
+    }
+
+    static public Table createDbmsTable(String connectionUrl, String query, String driverClassName, TableContext tc) 
+    throws SQLException, ClassNotFoundException
+    {
+    	Table t = null;
+        if (tc instanceof ContextImpl)
+        	t = DbmsTableImpl.createTable(connectionUrl, query, driverClassName, (ContextImpl)tc);       
         return t;
     }
 

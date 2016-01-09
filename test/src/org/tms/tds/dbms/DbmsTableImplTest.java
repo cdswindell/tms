@@ -2,6 +2,7 @@ package org.tms.tds.dbms;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -16,7 +17,8 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
-import org.tms.api.io.XMLOptions;
+import org.tms.api.factories.TableFactory;
+import org.tms.api.io.TMSOptions;
 
 public class DbmsTableImplTest extends BaseDbmsTest
 {
@@ -116,8 +118,14 @@ public class DbmsTableImplTest extends BaseDbmsTest
         assertThat(value, notNullValue());
         
         t.refresh();
-        Column c = t.addColumn();
+        Column tempoC = t.getColumn(Access.ByLabel, "tempo");
+        assertNotNull(tempoC);
+        
+        Column c = t.addColumn(tempoC.getIndex() + 1);
         c.setDerivation("col tempo * col 'tempo'");
+        
+        Column fc = t.addColumn(Access.First);
+        fc.setLabel("First Col");
         
         // test deleting a database row
         Row fr = t.getRow(Access.First);
@@ -140,7 +148,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
             assertThat(closeTo(derivedValue, (double)dbValue * (double)dbValue, 0.001), is(true));            
         }
         
-        t.export("music.xml", XMLOptions.Default.withVerboseState());
+        t.export("music.tms", TMSOptions.Default);
         
         Row r = t.addRow();
         Cell cell = t.getCell(r, tempo);
@@ -150,5 +158,12 @@ public class DbmsTableImplTest extends BaseDbmsTest
         r.delete();
         r = t.addRow();
         assertThat(r, notNullValue());
+        
+        // read in the table
+        t.delete();
+        t = null;
+        
+        t = (DbmsTableImpl) TableFactory.importFile("music.tms");
+        assertNotNull(t);
     }
 }

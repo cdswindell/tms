@@ -29,7 +29,7 @@ public class RowConverter extends BaseConverter
     @Override
     public boolean canConvert(@SuppressWarnings("rawtypes") Class arg)
     {
-        return RowImpl.class.isAssignableFrom(arg);
+        return RowImpl.class == arg;
     }
 
     protected String getElementTag()
