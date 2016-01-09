@@ -59,7 +59,12 @@ public class TMSWriterTest extends BaseArchivalTest
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
 
-        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));       
+        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));   
+        
+        TableContext tc2 = TableContextFactory.importTables(qualifiedFileName(ExportTableContext, "tms"));
+        assertNotNull(tc2);
+        
+        assertThat(tc.getNumTables(), is(tc2.getNumTables()));       
     }
     
     @Test
