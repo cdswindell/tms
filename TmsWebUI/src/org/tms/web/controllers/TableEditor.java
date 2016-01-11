@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.faces.application.FacesMessage;
@@ -18,6 +19,8 @@ import javax.faces.event.ValueChangeEvent;
 
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.LazyDataModel;
+import org.primefaces.model.SortOrder;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
 import org.tms.api.Cell;
@@ -61,9 +64,25 @@ public class TableEditor implements Serializable
 	private String m_entityDeriv;
 	private UploadedFile m_tableFile;
 
+	private LazyTableModel m_lazyTableModel;
+	
 	public TableEditor()
 	{
 		m_scriptType = sf_GROOVY;
+		m_lazyTableModel = null;
+	}	
+	
+	public LazyTableModel getPagedRows()
+	{
+		if (m_lazyTableModel == null)
+			m_lazyTableModel = new LazyTableModel();
+		
+		return m_lazyTableModel;
+	}	
+	
+	public boolean isBigTable()
+	{
+		return m_tableViewer.isBigTable();
 	}
 	
 	public void clearTable()
@@ -72,6 +91,7 @@ public class TableEditor implements Serializable
 		clearSelectedEntity();
 		m_eRows = null;
 		m_eCols = null;
+		m_lazyTableModel = null;
 	}
 	
 	public String getTableName()
@@ -179,6 +199,7 @@ public class TableEditor implements Serializable
             m_tableFile = null;
     		m_eRows = null;
     		m_eCols = null;
+    		m_lazyTableModel = null;
 			
             FacesMessage message = new FacesMessage("Succesful", "Table loaded...");
             FacesContext.getCurrentInstance().addMessage(null, message);
@@ -205,7 +226,8 @@ public class TableEditor implements Serializable
 		clearSelectedEntity();
 		m_eRows = null;
 		m_eCols = null;
-		
+		m_lazyTableModel = null;
+
 		m_tableViewer.init(true);
 	}
 	
@@ -364,6 +386,7 @@ public class TableEditor implements Serializable
 			m_tableViewer.getTable().addRow();
 		
 		m_eRows = null;
+		m_lazyTableModel = null;
 	}
 	
 	public void deleteRow()
@@ -372,6 +395,7 @@ public class TableEditor implements Serializable
 			m_tableViewer.getTable().delete(getSelectedRow().getRow());
 		
 		m_eRows = null;
+		m_lazyTableModel = null;
 		m_selectedRow = null;
 	}
 	
@@ -604,5 +628,71 @@ public class TableEditor implements Serializable
 				}
 			}			
 		}
+	}
+	
+	public class LazyTableModel extends LazyDataModel<EditRow>
+	{
+		private static final long serialVersionUID = -1L;
+		
+		private List<EditRow> m_rows;
+		
+		public LazyTableModel() 
+		{
+			super();
+			m_rows = null;
+			
+			setPageSize(10);
+			setRowIndex(0);
+		}
+		
+		@Override
+	    public List<EditRow> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String,Object> filters) 
+	    {
+	        Table t = m_tableViewer.getTable();
+			if (m_rows == null || first != getRowIndex() || pageSize != getPageSize() || m_rows.isEmpty() ) {
+		        first = first>= 0 ? first : 0;
+		        pageSize = pageSize > 0 ? pageSize : getPageSize() > 0 ?  getPageSize() : 10;
+		        m_rows = new ArrayList<EditRow>(pageSize);
+		        
+		        int numRows = t.getNumRows();
+		        for (int i = 0; i < pageSize && first + i + 1 <= numRows; i++) {
+		        	m_rows.add(new EditRow(t.getRow( first + i + 1)));
+		        }				
+			}
+			
+			this.setRowCount(t.getNumRows());
+			return m_rows;	        
+	    }
+		
+		@Override
+		public int getPageSize()
+		{
+			return super.getPageSize() > 0 ? super.getPageSize() : 10;
+		}
+		
+		@Override
+		public void setPageSize(int pageSize)
+		{
+			super.setPageSize(pageSize);
+		}
+		
+	    @Override
+	    public Object getRowKey(EditRow row) 
+	    {
+	        return row.getTE().getIndex();
+	    }		
+	    
+	    @Override
+	    public void setRowIndex(int rowIndex) {
+	        /*
+	         * The following is in ancestor (LazyDataModel):
+	         * this.rowIndex = rowIndex == -1 ? rowIndex : (rowIndex % pageSize);
+	         */
+	        if (rowIndex == -1 || getPageSize() == 0) {
+	            super.setRowIndex(-1);
+	        }
+	        else
+	            super.setRowIndex(rowIndex % getPageSize());
+	    }
 	}
 }

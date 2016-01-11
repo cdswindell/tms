@@ -32,6 +32,13 @@
 		margin: 0px;
 		padding: 0px;
 	}
+	
+	.tmsContainer
+	{
+		padding: 0px;
+		margin: 0px;
+		border: none;
+	}
 </style>
 </h:head>
 <h:body>
@@ -50,7 +57,7 @@
 	        				 value="OK" 
 	        				 oncomplete="PF('renameTEDialog').hide()"
 	        				 process="@form"
-	        				 update=":form:tableEditorId"
+	        				 update=":form:mainPanel"
 	        				 onstart="$('rename').submit();"
 	        				 />
 			<p:commandButton icon="ui-icon-cancel" value="Cancel" type="button" onclick="PF('renameTEDialog').hide()"/>
@@ -73,7 +80,7 @@
 	        				 value="OK" 
 	        				 oncomplete="PF('renameTableTEDialog').hide()"
 	        				 process="@form"
-	        				 update=":form:tableEditorId"
+	        				 update=":form:mainPanel"
 	        				 onstart="$('renameTable').submit();"
 	        				 />
 			<p:commandButton icon="ui-icon-cancel" value="Cancel" type="button" onclick="PF('renameTableTEDialog').hide()"/>
@@ -100,7 +107,7 @@
 	        				 value="OK" 
 	        				 actionListener="#{tableEdit.applyDerivation}"
 	        				 oncomplete="PF('deriveTEDialog').hide()"
-	        				 update=":form:tableEditorId"
+	        				 update=":form:mainPanel"
 	        				 process="@form"
 	        				 />
 	        <p:commandButton icon="ui-icon-arrowthickstop-1-w"   
@@ -130,7 +137,7 @@
 	        <p:commandButton icon="ui-icon-check"   
 	        				 value="OK" 
 	        				 oncomplete="PF('formatTEDialog').hide()"
-	        				 update=":form:tableEditorId"
+	        				 update=":form:mainPanel"
 	        				 process="@form"
 	        				 onstart="$('#format').submit();"
 	        				 />
@@ -173,7 +180,7 @@
 </h:form>
 
 <h:form id="gLoadTable" enctype="multipart/form-data">
-    <p:remoteCommand name="onTableLoad" update=":form:tableEditorId"/>
+    <p:remoteCommand name="onTableLoad" update=":form:mainPanel"/>
 	<p:dialog id="loadTEDialog" 
     		  header="Load Saved Table" 
     		  widgetVar="loadTEDialog" 
@@ -192,7 +199,7 @@
  						  fileLimit="1" 
  						  allowTypes="/(\.|\/)(tms)$/"
  						  update="tableLoadMessages"/>
-   		    <p:commandButton icon="ui-icon-check" value="Done" type="button" onclick="PF('loadTEDialog').hide();onTableLoad();" update=":form:tableEditorId"/>
+   		    <p:commandButton icon="ui-icon-check" value="Done" type="button" onclick="PF('loadTEDialog').hide();onTableLoad();" update=":form:mainPanel"/>
    		    <p:outputLabel value=""/>
 		</p:panelGrid>  
 		<p:growl id="tableLoadMessages" showDetail="true" />	
@@ -217,20 +224,23 @@
 
    <p:confirmDialog id="deleColDlg" message="Do you really want to delete this column?" 
                      header="Delete Column: #{tableEdit.selectedEntity.label}" severity="alert" widgetVar="deleteColDialog" >
-        <p:commandButton id="confirmCD" value="Yes" update=":form:tableEditorId" oncomplete="PF('deleteColDialog').hide()" 
+        <p:commandButton id="confirmCD" value="Yes" update=":form:mainPanel" oncomplete="PF('deleteColDialog').hide()" 
                          actionListener="#{tableEdit.deleteColumn}" />  
         <p:commandButton id="declineCD" value="No" onclick="PF('deleteColDialog').hide()" type="button" />  
    </p:confirmDialog>   
      
    <p:confirmDialog id="deleRowDlg" message="Do you really want to delete this row?" 
                      header="Delete Row: #{tableEdit.selectedEntity.label}" severity="alert" widgetVar="deleteRowDialog" >
-        <p:commandButton id="confirmRD" value="Yes" update=":form:tableEditorId" oncomplete="PF('deleteRowDialog').hide()" 
+        <p:commandButton id="confirmRD" value="Yes" update=":form:mainPanel" oncomplete="PF('deleteRowDialog').hide()" 
                          actionListener="#{tableEdit.deleteRow}" />  
         <p:commandButton id="declineRD" value="No" onclick="PF('deleteRowDialog').hide()" type="button" />  
    </p:confirmDialog>  
     
    <p:remoteCommand name="onCellEdit" update="@form" />
+   
+   <p:panel id="mainPanel" styleClass="tmsContainer">
    <p:dataTable id="tableEditorId"
+   				 rendered="#{!tableEdit.bigTable}"
    				 var="row" 
    				 value="#{tableEdit.rows}" 
    				 editable="true"
@@ -238,7 +248,6 @@
    				 widgetVar="tableCell" 
    				 resizableColumns="true" 
    				 liveResize="true"
-   				 scrollable="true"
    				 stickyHeader="true" 
    				 >
        <f:facet name="header">
@@ -253,12 +262,12 @@
        <p:column styleClass="ui-widget-header" width="105">
             <f:facet name="header">
 	    	  <p:panelGrid id="btnPanel" columns="5" styleClass="toolBarGrid" >
-        		<p:commandButton id="resetTable" icon="ui-icon-refresh" title="New Table" update=":form:tableEditorId" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn"/>  
-        		<p:commandButton id="fileOpen" icon="ui-icon-folder-open" title="Load Table" update=":form:tableEditorId" oncomplete="PF('loadTEDialog').show();" styleClass="tmsActionBtn"/>  
+        		<p:commandButton id="resetTable" icon="ui-icon-refresh" title="New Table" update=":form:mainPanel" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn"/>  
+        		<p:commandButton id="fileOpen" icon="ui-icon-folder-open" title="Load Table" update=":form:mainPanel" oncomplete="PF('loadTEDialog').show();" styleClass="tmsActionBtn"/>  
         		<p:commandButton id="fileSave" icon="ui-icon-disk" title="Save Table" ajax="false" onclick="PrimeFaces.monitorDownload(startDownload, stopDownload);" styleClass="tmsActionBtn">
         			<p:fileDownload value="#{tableEdit.savedFile}" contentDisposition="attachment"/>
         		</p:commandButton>  
-        		<p:commandButton id="recalcAll" icon="ui-icon-calculator" title="Recalculate All" update=":form:tableEditorId" actionListener="#{tableEdit.recalc}" styleClass="tmsActionBtn"/>  
+        		<p:commandButton id="recalcAll" icon="ui-icon-calculator" title="Recalculate All" update=":form:mainPanel" actionListener="#{tableEdit.recalc}" styleClass="tmsActionBtn"/>  
         		<p:commandButton id="scriptOps" icon="ui-icon-script" title="Load Operators" update=":gScript:fileUpload" oncomplete="PF('scriptTEDialog').show();" styleClass="tmsActionBtn"/>  
 			  </p:panelGrid>
             </f:facet>
@@ -280,7 +289,7 @@
        </p:column>
        
        <c:forEach items="#{tableEdit.columns}" var="col">
-          <p:column id="col_#{col.index}" >
+          <p:column id="col_#{col.index}" width="200">
             <f:facet name="header">
                 <h:outputText value="#{col.label}"/>
                 <h:outputText value="*" rendered="#{col.derived}" />
@@ -300,7 +309,7 @@
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 		        	</p:menuitem>
 		        </p:contextMenu>
-   		   	 <p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived}"/>
+   		   	 	<p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived}"/>
             </f:facet>
           	<p:cellEditor>
                <f:facet name="output"><div align="center"><h:outputText value="#{col.formattedValue}" style="#{col.style}"/></div></f:facet>
@@ -308,11 +317,100 @@
             </p:cellEditor>
        	  </p:column>
        </c:forEach>
-	</p:dataTable>  	
+	</p:dataTable> 
+	
+   <p:dataTable id="bigTableEditorId"
+   				 rendered="#{tableEdit.bigTable}"
+   				 var="row" 
+   				 value="#{tableEdit.pagedRows}" 
+   				 editable="true"
+   				 editMode="cell" 
+   				 widgetVar="tableCell"
+   				 stickyHeader="true" 
+   				 scrollable="true"
+   				 scrollWidth="100%"
+   				 lazy="true"
+   				 rows="10"
+   				 paginator="true"
+				 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+				 rowsPerPageTemplate="5,10,25"
+   				 >
+       <f:facet name="header">
+           <p:outputLabel id="tableTitle" value="#{tableEdit.tableName}" style="font-weight:bold;font-size:125%"/>
+		   <p:contextMenu for="tableTitle" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
+				<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTableTEDialog').show();" update=":renameTable:renameTableTEDialog" partialSubmit="true"/>
+				<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearTable}" update="@form" partialSubmit="true"/>
+		   </p:contextMenu>
+ 	   </f:facet>
+	   <p:ajax event="cellEdit" oncomplete="onCellEdit()" partialSubmit="false"/>
+ 
+       <p:column styleClass="ui-widget-header" width="105">
+            <f:facet name="header">
+	    	  <p:panelGrid id="btnPanel" columns="5" styleClass="toolBarGrid" >
+        		<p:commandButton  id="resetTable" icon="ui-icon-refresh" title="New Table" update=":form:mainPanel" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn" partialSubmit="true"/>
+        		<p:commandButton id="fileOpen" icon="ui-icon-folder-open" title="Load Table" update=":form:mainPanel" oncomplete="PF('loadTEDialog').show();" styleClass="tmsActionBtn" partialSubmit="true"/>  
+        		<p:commandButton id="fileSave" icon="ui-icon-disk" title="Save Table" ajax="false" onclick="PrimeFaces.monitorDownload(startDownload, stopDownload);" styleClass="tmsActionBtn" partialSubmit="true">
+        			<p:fileDownload value="#{tableEdit.savedFile}" contentDisposition="attachment"/>
+        		</p:commandButton>  
+        		<p:commandButton id="recalcAll" icon="ui-icon-calculator" title="Recalculate All" update=":form:mainPanel" actionListener="#{tableEdit.recalc}" styleClass="tmsActionBtn" partialSubmit="true"/>  
+        		<p:commandButton id="scriptOps" icon="ui-icon-script" title="Load Operators" update=":gScript:fileUpload" oncomplete="PF('scriptTEDialog').show();" styleClass="tmsActionBtn" partialSubmit="true"/>  
+			  </p:panelGrid>
+            </f:facet>
+            
+			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
+	        <h:outputText value="*" rendered="#{row.derived}" />
+	        
+			<p:contextMenu for="rowNames" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;" partialSubmit="true">
+				<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog" partialSubmit="true">
+      				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
+      			</p:menuitem>
+				<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTEDialog').show();" update=":rename:renameTEDialog" partialSubmit="true">
+      				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
+      			</p:menuitem>
+				<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearRow(row)}" update="@form" partialSubmit="true"/>
+				<p:menuitem  value="Insert" icon="ui-icon-plus" actionListener="#{tableEdit.addRow(row)}" update="@form" partialSubmit="true"/>
+	        	<p:menuitem  value="Delete..." icon="ui-icon-trash" oncomplete="PF('deleteRowDialog').show()" update=":form:deleRowDlg" partialSubmit="true">
+      				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
+	        	</p:menuitem>
+			</p:contextMenu>
+       </p:column>
+       
+       <c:forEach items="#{tableEdit.columns}" var="col">
+          <p:column id="col_#{col.index}" width="200">
+            <f:facet name="header">
+                <h:outputText value="#{col.label}"/>
+                <h:outputText value="*" rendered="#{col.derived}" />
+		        <p:contextMenu for="col_#{col.index}" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
+					<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog" partialSubmit="true">
+	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
+	      				<p:ajax partialSubmit="true"/>
+	      			</p:menuitem>
+		        	<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTEDialog').show();" update=":rename:renameTEDialog" partialSubmit="true">
+	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
+	      			</p:menuitem>
+					<p:menuitem  value="Format..." icon="ui-icon-wrench" oncomplete="PF('formatTEDialog').show();" update=":format:formatTEDialog" partialSubmit="true">
+	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
+	      			</p:menuitem>
+		        	<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearColumn(col)}" update="@form" partialSubmit="true"/>
+		        	<p:menuitem  value="Insert" icon="ui-icon-plus" actionListener="#{tableEdit.addColumn(col)}" update="@form" partialSubmit="true"/>
+		        	<p:menuitem  value="Delete..." icon="ui-icon-trash" oncomplete="PF('deleteColDialog').show()" update=":form:deleColDlg" partialSubmit="true">
+	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
+		        	</p:menuitem>
+		        </p:contextMenu>
+   		   	 	<p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived}"/>
+            </f:facet>
+          	<p:cellEditor>
+               <f:facet name="output"><div align="center"><h:outputText value="#{col.formattedValue}" style="#{col.style}"/></div></f:facet>
+               <f:facet name="input"><p:inputText value="#{col.rawValue}" style="width:96%"/></f:facet>
+            </p:cellEditor>
+       	  </p:column>
+       </c:forEach>
+	</p:dataTable> 
+	</p:panel>
 </h:form>
 
 <p:socket channel="/tableUpdated" >
-	<p:ajax event="message" update="form:tableEditorId"/>
+	<p:ajax event="message" update="form:mainPanel"/>
 </p:socket>
 
 </h:body>

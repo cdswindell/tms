@@ -21,6 +21,8 @@ import org.tms.api.utils.StockTickerOp;
 
 public class TableViewer implements TableElementListener
 {
+	private static final int MAX_SIZE = 100;
+	
 	private Table m_table;
 	
 	public TableViewer()
@@ -110,5 +112,11 @@ public class TableViewer implements TableElementListener
 		EventBusFactory eb = EventBusFactory.getDefault();
         EventBus eventBus = eb.eventBus();
         eventBus.publish("/tableUpdated", "pending cells updated");
+	}
+
+	public boolean isBigTable() 
+	{
+		
+		return m_table != null && (m_table.getNumRows() > MAX_SIZE || m_table.getNumColumns() > MAX_SIZE);
 	}
 }
