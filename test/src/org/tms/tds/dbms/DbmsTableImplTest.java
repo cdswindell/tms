@@ -5,7 +5,11 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -17,11 +21,12 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
-import org.tms.api.factories.TableFactory;
 import org.tms.api.io.TMSOptions;
 
 public class DbmsTableImplTest extends BaseDbmsTest
 {
+    private static final String ExportMusicTableGold = "music.tms";
+    
 	@Ignore
     @Test
     public final void testCreateDBMSTable() throws ClassNotFoundException, SQLException
@@ -93,6 +98,17 @@ public class DbmsTableImplTest extends BaseDbmsTest
     @Test
     public final void testMusicDBMSTable() throws ClassNotFoundException, SQLException, IOException
     {
+        /*
+         * Note: If you change this test, be sure to update
+         * the gold standard file ExportTableGold
+         */
+        Path path = Paths.get(qualifiedFileName(ExportMusicTableGold, "tms"));
+        byte[] gold = Files.readAllBytes(path);  
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+        
+        // construct table
         TableContext tc = TableContextFactory.fetchDefaultTableContext();
         assertThat(tc, notNullValue());
         
@@ -148,7 +164,16 @@ public class DbmsTableImplTest extends BaseDbmsTest
             assertThat(closeTo(derivedValue, (double)dbValue * (double)dbValue, 0.001), is(true));            
         }
         
-        t.export("music.tms", TMSOptions.Default);
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        t.export(bos, TMSOptions.Default);
+        bos.close();
+
+        // test byte streams are the same
+        byte [] output =  bos.toByteArray();
+        assertNotNull(output);
+
+        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));   
         
         Row r = t.addRow();
         Cell cell = t.getCell(r, tempo);
@@ -159,11 +184,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         r = t.addRow();
         assertThat(r, notNullValue());
         
-        // read in the table
         t.delete();
         t = null;
-        
-        t = (DbmsTableImpl) TableFactory.importFile("music.tms");
-        assertNotNull(t);
     }
 }
