@@ -85,6 +85,21 @@ public class TableEditor implements Serializable
 		return m_tableViewer.isBigTable();
 	}
 	
+	public boolean isCellEditable(EditRow r, EditColumn c)
+	{
+		if (r != null && c != null) {
+			Cell cell = getTableCell(r, c);
+			return !cell.isReadOnly();
+		}
+			
+		return true;
+	}
+	
+	private Cell getTableCell(EditRow r, EditColumn c) 
+	{
+		return m_tableViewer.getTable().getCell((Row)r.getTE(), (Column)c.getTE());
+	}
+
 	public void clearTable()
 	{
 		m_tableViewer.getTable().clear();

@@ -333,7 +333,7 @@
    				 rows="10"
    				 paginator="true"
 				 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
-				 rowsPerPageTemplate="5,10,25"
+				 rowsPerPageTemplate="10,25,50,100"
    				 >
        <f:facet name="header">
            <p:outputLabel id="tableTitle" value="#{tableEdit.tableName}" style="font-weight:bold;font-size:125%"/>
@@ -376,7 +376,7 @@
        </p:column>
        
        <c:forEach items="#{tableEdit.columns}" var="col">
-          <p:column id="col_#{col.index}" width="200">
+          <p:column id="col_#{col.index}" width="200" >
             <f:facet name="header">
                 <h:outputText value="#{col.label}"/>
                 <h:outputText value="*" rendered="#{col.derived}" />
@@ -399,10 +399,11 @@
 		        </p:contextMenu>
    		   	 	<p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived}"/>
             </f:facet>
-          	<p:cellEditor>
+          	<p:cellEditor rendered="#{tableEdit.isCellEditable(row, col)}">
                <f:facet name="output"><div align="center"><h:outputText value="#{col.formattedValue}" style="#{col.style}"/></div></f:facet>
                <f:facet name="input"><p:inputText value="#{col.rawValue}" style="width:96%"/></f:facet>
             </p:cellEditor>
+            <p:outputLabel rendered="#{tableEdit.isCellEditable(row, col) == false}"><div align="center"><h:outputText value="#{col.formattedValue}" style="#{col.style}"/></div></p:outputLabel>
        	  </p:column>
        </c:forEach>
 	</p:dataTable> 
