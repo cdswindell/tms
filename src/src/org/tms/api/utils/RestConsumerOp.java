@@ -158,6 +158,9 @@ abstract public class RestConsumerOp implements Operator
      */
     protected Object coerceResult(Object leaf)
     {
+    	if (leaf == null || leaf.toString().trim().length() <= 0)
+    		return null;
+    	
         // all we can really do here is coerce strings to numbers...
         if (Number.class.isAssignableFrom(m_resultType)) 
             return Double.parseDouble(leaf.toString());
