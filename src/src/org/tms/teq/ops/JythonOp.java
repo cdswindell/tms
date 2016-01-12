@@ -179,22 +179,27 @@ public class JythonOp extends BaseOp
 	@Override
 	final public Token evaluate(Token... args) 
 	{
-        // Transfer the args from the TMS system into
-        // an array to set up for the method call
-        PyObject [] mArgs = new PyObject [numArgs()];
-        for (int i = 0; i < numArgs(); i++) {
-            mArgs[i] = Py.java2py(args[i].getValue());
+		try {
+	        // Transfer the args from the TMS system into
+	        // an array to set up for the method call
+	        PyObject [] mArgs = new PyObject [numArgs()];
+	        for (int i = 0; i < numArgs(); i++) {
+	            mArgs[i] = Py.java2py(args[i].getValue());
+	        }
+	        
+	        PyObject pyResult;
+	        if (m_pyObj instanceof PyFunction)
+	        	pyResult = ((PyFunction)m_pyObj).__call__(mArgs);
+	        else
+	        	pyResult = m_pyObj.invoke(m_methodName, mArgs);
+	        
+	        // and return the result
+	        Object result = JythonHelper.pythonToPig(pyResult);        
+	        return new Token(TokenType.Operand, result);
+		}
+		catch (Exception e)
+        {
+            return Token.createErrorToken(e.getMessage());
         }
-        
-        PyObject pyResult;
-        if (m_pyObj instanceof PyFunction)
-        	pyResult = ((PyFunction)m_pyObj).__call__(mArgs);
-        else
-        	pyResult = m_pyObj.invoke(m_methodName, mArgs);
-        
-        // and return the result
-        Object result = JythonHelper.pythonToPig(pyResult);        
-        return new Token(TokenType.Operand, result);
 	}
-
 }
