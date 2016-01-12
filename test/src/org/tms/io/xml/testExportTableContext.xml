@@ -1,6 +1,6 @@
 <tableContext>
   <tables>
-    <table rCap="10" cCap="2" readOnly="false" allowNulls="true" enforce="false">
+    <table nRows="10" cCols="2" readOnly="false" allowNulls="true" enforce="false">
       <label>Almost Empty Table</label>
       <rows/>
       <columns>
@@ -94,10 +94,10 @@
         </cell>
       </cells>
     </table>
-    <table rCap="0" cCap="0" readOnly="false" allowNulls="true" enforce="false">
+    <table nRows="0" cCols="0" readOnly="false" allowNulls="true" enforce="false">
       <label>Empty Table</label>
     </table>
-    <table rCap="1024" cCap="1024" readOnly="false" allowNulls="true" enforce="false">
+    <table nRows="1024" cCols="1024" readOnly="false" allowNulls="true" enforce="false">
       <label>Test XML &amp; Export One Cell Table</label>
       <rows/>
       <columns/>

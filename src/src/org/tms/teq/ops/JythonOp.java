@@ -20,6 +20,7 @@ import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
 import org.tms.tds.util.JythonHelper;
+import org.tms.teq.AbstractOperator;
 
 public class JythonOp extends BaseOp 
 {	
@@ -74,7 +75,17 @@ public class JythonOp extends BaseOp
 	            // actual class (I think...)
 				PyObject pyObj = pyThing.__call__();
 				if (pyObj != null) {						            
-		            // first, see if we can instantiate the object, and if we can, is it an Operator?
+		            // first, see if we can instantiate the object, and if we can, is it an AbstractOperator?
+		            // if it is, register it and return           
+		            try {
+						// cast the object to an AbstractOperator, success??
+						Operator op = (AbstractOperator)pyObj.__tojava__(AbstractOperator.class);
+						tokenMapper.registerOperator(op);
+						return;
+		            } 
+		            catch (Exception e) { }
+		            
+		            // then, see if we can instantiate the object, and if we can, is it an Operator?
 		            // if it is, register it and return           
 		            try {
 						// cast the object to an operator, success??

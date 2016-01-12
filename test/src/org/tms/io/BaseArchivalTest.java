@@ -78,15 +78,22 @@ abstract public class BaseArchivalTest extends BaseIOTest
         Table t = TableFactory.createTable(16,  16, tc); 
         t.setLabel("Points Table");
         
-        Column c = t.addColumn();
-        c.setLabel("Point");
-        c.setDataType(Point.class);
+        Column c1 = t.addColumn();
+        c1.setLabel("Point 1");
+        c1.setDataType(Point.class);
+        
+        Column c2 = t.addColumn();
+        c2.setLabel("Point 2");
+        c2.setDataType(Point.class);
         
         for (int i = 1; i <= 16; i++) {
         	Row r = t.addRow();
         	
         	Point p = new Point(getRandomCoord(0, 128), getRandomCoord(0, 128));
-            t.setCellValue(r,c, p); 
+            t.setCellValue(r, c1, p); 
+            
+        	p = new Point(getRandomCoord(0, 128), getRandomCoord(0, 128));
+            t.setCellValue(r, c2, p); 
         }
         
         // add a few more cols

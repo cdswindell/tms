@@ -1,4 +1,4 @@
-<table rCap="4" cCap="5" readOnly="false" allowNulls="true" enforce="false">
+<table nRows="4" cCols="5" readOnly="false" allowNulls="true" enforce="false">
   <label>Test XML &amp; Export Table</label>
   <tags>
     <string>green</string>
@@ -48,7 +48,7 @@
         <string>red</string>
         <string>subset</string>
       </tags>
-      <sCols>4,5,3</sCols>
+      <sCols>3,4,5</sCols>
     </subset>
   </subsets>
   <cells>

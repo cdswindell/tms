@@ -307,8 +307,17 @@ public class TableConverter extends BaseConverter
     
 	protected TableImpl createTable(HierarchicalStreamReader reader, UnmarshallingContext context) 
 	{
-        int rCap = readAttributeInteger(ROWSCAP_ATTR, reader);
-        int cCap = readAttributeInteger(COLSCAP_ATTR, reader);
+        Integer rCap = readAttributeInteger(ROWSCAP_ATTR, reader);
+        if (rCap == null)
+        	rCap = readAttributeInteger(NROWS_ATTR, reader);
+        if (rCap == null)
+        	rCap = getTableContext().getPropertyInt(TableProperty.numRowsCapacity);
+        
+        Integer cCap = readAttributeInteger(COLSCAP_ATTR, reader);
+        if (cCap == null)
+        	cCap = readAttributeInteger(NCOLS_ATTR, reader);
+        if (cCap == null)
+        	cCap = getTableContext().getPropertyInt(TableProperty.numColumnsCapacity);
         
 		return (TableImpl)TableFactory.createTable(rCap, cCap, getTableContext());
 	}

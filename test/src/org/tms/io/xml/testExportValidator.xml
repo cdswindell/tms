@@ -1,4 +1,4 @@
-<table rCap="1024" cCap="32" autoCalc="true" precision="15" fsTh="2.0" readOnly="false" allowNulls="true" enforce="false">
+<table nRows="4" cCols="5" rCap="1024" cCap="32" autoCalc="true" precision="15" fsTh="2.0" readOnly="false" allowNulls="true" enforce="false">
   <label>Test XML &amp; Export Table</label>
   <tags>
     <string>green</string>
@@ -22,7 +22,7 @@
     <column index="1">
       <label>A</label>
       <validator>
-        <valClass>org.tms.io.XMLWriterTest$$Lambda$3/1601292138</valClass>
+        <valClass>org.tms.io.XMLWriterTest$$Lambda$3/1007309018</valClass>
         <valImpl resolves-to="serialized-lambda">
           <capturingClass>org.tms.io.XMLWriterTest</capturingClass>
           <functionalInterfaceClass>org/tms/api/utils/TableCellValidator</functionalInterfaceClass>
@@ -40,7 +40,7 @@
     <column index="2">
       <label>B</label>
       <validator>
-        <valClass>org.tms.io.XMLWriterTest$$Lambda$4/1218593486</valClass>
+        <valClass>org.tms.io.XMLWriterTest$$Lambda$4/2038148563</valClass>
         <valImpl resolves-to="serialized-lambda">
           <capturingClass>org.tms.io.XMLWriterTest</capturingClass>
           <functionalInterfaceClass>org/tms/api/utils/TableCellTransformer</functionalInterfaceClass>
@@ -78,16 +78,16 @@
   </columns>
   <subsets>
     <subset>
+      <label>Excluded Cols</label>
+      <sCols>4</sCols>
+    </subset>
+    <subset>
       <label>Some Cols</label>
       <tags>
         <string>red</string>
         <string>subset</string>
       </tags>
-      <sCols>5,4,3</sCols>
-    </subset>
-    <subset>
-      <label>Excluded Cols</label>
-      <sCols>4</sCols>
+      <sCols>3,4,5</sCols>
     </subset>
   </subsets>
   <cells>

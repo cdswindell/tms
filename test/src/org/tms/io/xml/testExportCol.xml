@@ -1,4 +1,4 @@
-<table rCap="4" cCap="1" readOnly="false" allowNulls="true" enforce="false">
+<table nRows="4" cCols="1" readOnly="false" allowNulls="true" enforce="false">
   <label>Test XML &amp; Export Table Row</label>
   <tags>
     <string>green</string>
