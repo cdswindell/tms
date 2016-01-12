@@ -180,7 +180,7 @@
 </h:form>
 
 <h:form id="gLoadTable" enctype="multipart/form-data">
-    <p:remoteCommand name="onTableLoad" update=":form:mainPanel"/>
+    <p:remoteCommand name="onTableLoad" update=":form:mainPanel,:gLoadTable:loadTEDialog"/>
 	<p:dialog id="loadTEDialog" 
     		  header="Load Saved Table" 
     		  widgetVar="loadTEDialog" 

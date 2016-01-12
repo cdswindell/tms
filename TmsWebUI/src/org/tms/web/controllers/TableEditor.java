@@ -215,6 +215,7 @@ public class TableEditor implements Serializable
     		m_eRows = null;
     		m_eCols = null;
     		m_lazyTableModel = null;
+    		m_tableFile = null;
 			
             FacesMessage message = new FacesMessage("Succesful", "Table loaded...");
             FacesContext.getCurrentInstance().addMessage(null, message);

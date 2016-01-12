@@ -1,0 +1,5 @@
+from org.tms.api.utils import StockTickerOp;
+class dayHigh(StockTickerOp):
+	def __init__(self):
+		StockTickerOp.__init__(self, "lastTrade", "lt")
+		
