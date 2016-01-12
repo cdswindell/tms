@@ -14,6 +14,7 @@ import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.tds.TableImpl;
+import org.tms.util.Point;
 
 abstract public class BaseArchivalTest extends BaseIOTest
 {
@@ -66,8 +67,40 @@ abstract public class BaseArchivalTest extends BaseIOTest
 
         return t;
     }
+   
+    protected Table getPointsTable()
+    {
+    	return getPointsTable(TableContextFactory.fetchDefaultTableContext());
+    }
     
-    protected TableContext getPopulatedTableContext()
+    protected Table getPointsTable(TableContext tc)
+    {
+        Table t = TableFactory.createTable(16,  16, tc); 
+        t.setLabel("Points Table");
+        
+        Column c = t.addColumn();
+        c.setLabel("Point");
+        c.setDataType(Point.class);
+        
+        for (int i = 1; i <= 16; i++) {
+        	Row r = t.addRow();
+        	
+        	Point p = new Point(getRandomCoord(0, 128), getRandomCoord(0, 128));
+            t.setCellValue(r,c, p); 
+        }
+        
+        // add a few more cols
+        t.addColumn(3);
+        
+        return t;
+    }
+    
+    private int getRandomCoord(int init, int max) 
+    {
+		return init + (int)(Math.random() * max) + 1;
+	}
+
+	protected TableContext getPopulatedTableContext()
     {
         TableContext tc = TableContextFactory.createTableContext();
         

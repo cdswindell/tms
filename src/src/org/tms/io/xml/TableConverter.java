@@ -33,6 +33,8 @@ public class TableConverter extends BaseConverter
 {
     static final public String ELEMENT_TAG = "table";
     
+    static final protected String NROWS_ATTR = "nRows";
+    static final protected String NCOLS_ATTR = "cCols";
     static final protected String ROWSCAP_ATTR = "rCap";
     static final protected String COLSCAP_ATTR = "cCap";
     static final protected String ROWSINCR_ATTR = "rIncr";
@@ -109,6 +111,12 @@ public class TableConverter extends BaseConverter
     {
         TableImpl t = (TableImpl)arg;
         
+        int nRows = getNumConsumableRows();
+        int nCols = getNumConsumableColumns();
+        
+        writer.addAttribute(NROWS_ATTR, String.valueOf(nRows));
+        writer.addAttribute(NCOLS_ATTR, String.valueOf(nCols));
+        
         // if persisting complete state, add attributes for more details
         if (options().isVerboseState()) {
             writer.addAttribute(ROWSCAP_ATTR, String.valueOf(t.getProperty(TableProperty.numRowsCapacity)));
@@ -116,16 +124,11 @@ public class TableConverter extends BaseConverter
             writer.addAttribute(AUTOCALC_ATTR, String.valueOf(t.getProperty(TableProperty.isAutoRecalculate)));
             writer.addAttribute(PRECISION_ATTR, String.valueOf(t.getPrecision()));
             writer.addAttribute(FREESPACE_ATTR, String.valueOf(t.getProperty(TableProperty.FreeSpaceThreshold)));
-        }
-        else {
-	        writer.addAttribute(ROWSCAP_ATTR, String.valueOf(t.getNumRows()));
-	        writer.addAttribute(COLSCAP_ATTR, String.valueOf(getNumConsumableColumns()));
         }        
         
         marshalTableElement(t, writer, context, true);
         
         // Rows
-        int nRows = getNumConsumableRows();
         if (nRows > 0) {
             writer.startNode(ROWS_TAG);
             if (options().isVerboseState()) {
@@ -144,7 +147,6 @@ public class TableConverter extends BaseConverter
         }
         
         // Columns
-        int nCols = this.getNumConsumableColumns();
         if (nCols > 0) {
             writer.startNode(COLS_TAG);
             if (options().isVerboseState()) {
@@ -207,6 +209,10 @@ public class TableConverter extends BaseConverter
 		
 		// create the table
         TableImpl t = createTable(reader, context);
+        
+        // get the total number of rows/columns
+        Integer nRows = readAttributeInteger(NROWS_ATTR, reader);
+        Integer nCols = readAttributeInteger(NCOLS_ATTR, reader);
         
         // if full state was persisted, process more attributes
         if (options().isVerboseState()) {
@@ -287,6 +293,14 @@ public class TableConverter extends BaseConverter
             if (options().isRecalculate())
                 t.recalculate();
         }
+        
+        
+        // as a final check, verify the table has the correct number of rows & cols
+        if (nRows != null && nRows > t.getNumRows())
+        	t.addRow(nRows);
+        
+        if (nCols != null && nCols > t.getNumColumns())
+        	t.addColumn(nCols);
         
         return t;
     }

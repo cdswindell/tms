@@ -33,7 +33,36 @@ public class TMSWriterTest extends BaseArchivalTest
     private static final String ExportTableGold = "simpleTable.tms";
     private static final String ExportTableGoldVal = "tableWithValidators.tms";
     private static final String ExportTableContext = "TMSTableContext.tms";
+    private static final String ExportPointsTable = "TMSPointsTable.tms";
     
+    @Test
+    public final void testExportPointsTable() throws IOException
+    {
+        /*
+         * Note: If you change this test, be sure to update
+         * the gold standard file ExportTableGold
+         */
+        Path path = Paths.get(qualifiedFileName(ExportPointsTable, "tms"));
+        byte[] gold = Files.readAllBytes(path);  
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+        
+    	Table t = getPointsTable();
+        assertNotNull(t);
+    	
+        // create output stream
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        t.export(bos, TMSOptions.Default);
+        bos.close();
+
+        // test byte streams are the same
+        byte [] output =  bos.toByteArray();
+        assertNotNull(output);
+
+        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));   
+     }
+
     @Test
     public final void testExportTableContext() throws IOException
     {
