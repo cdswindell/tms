@@ -239,7 +239,7 @@
    <p:remoteCommand name="onCellEdit" update="@form" />
    
    <p:panel id="mainPanel" styleClass="tmsContainer">
-   <p:dataTable id="tableEditorId"
+    <p:dataTable id="tableEditorId"
    				 rendered="#{!tableEdit.bigTable}"
    				 var="row" 
    				 value="#{tableEdit.rows}" 
@@ -247,7 +247,6 @@
    				 editMode="cell" 
    				 widgetVar="tableCell" 
    				 resizableColumns="true" 
-   				 liveResize="true"
    				 stickyHeader="true" 
    				 >
        <f:facet name="header">
@@ -319,16 +318,17 @@
        </c:forEach>
 	</p:dataTable> 
 	
-   <p:dataTable id="bigTableEditorId"
+    <p:dataTable id="bigTableEditorId"
    				 rendered="#{tableEdit.bigTable}"
    				 var="row" 
    				 value="#{tableEdit.pagedRows}" 
    				 editable="true"
    				 editMode="cell" 
    				 widgetVar="tableCell"
-   				 stickyHeader="true" 
+   				 resizableColumns="true" 
    				 scrollable="true"
    				 scrollWidth="100%"
+   				 scrollHeight="100%"
    				 lazy="true"
    				 rows="10"
    				 paginator="true"
