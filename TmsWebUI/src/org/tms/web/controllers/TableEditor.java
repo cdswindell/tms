@@ -395,7 +395,7 @@ public class TableEditor implements Serializable
 	{
 		if (eRow != null) {
 			int idx = eRow.getIndex();
-			m_tableViewer.getTable().addRow(idx+1);
+			m_tableViewer.getTable().addRow(idx);
 		}
 		else
 			m_tableViewer.getTable().addRow();
@@ -418,7 +418,7 @@ public class TableEditor implements Serializable
 	{
 		if (eCol != null) {
 			int idx = eCol.getIndex();
-			m_tableViewer.getTable().addColumn(idx+1);
+			m_tableViewer.getTable().addColumn(idx);
 		}
 		else
 			m_tableViewer.getTable().addColumn();

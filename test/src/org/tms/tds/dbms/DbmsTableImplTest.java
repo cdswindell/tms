@@ -117,7 +117,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         
         // count the number of expected rows and columns
         ResultSet rs = fetchResultSet("jdbc:mysql://localhost/music?user=davids&password=mysql", 
-                                      "select * from songs order by track_id");
+                                      "select * from metadata");
         
         int numRows = getDbmsRowCount(rs);
         int numCols = getDbmsColumnCount(rs);
@@ -125,7 +125,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         
         // create basic table using mysql "music" database
         DbmsTableImpl t = new DbmsTableImpl("jdbc:mysql://localhost/music?user=davids&password=mysql", 
-        									"select * from songs order by track_id");
+        									"select * from metadata order by artist_name, album, title");
         assertThat(t, notNullValue());
         assertThat(t.getNumRows(), is(numRows));
         assertThat(t.getNumColumns(), is(numCols));
