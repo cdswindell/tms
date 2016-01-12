@@ -125,7 +125,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         
         // create basic table using mysql "music" database
         DbmsTableImpl t = new DbmsTableImpl("jdbc:mysql://localhost/music?user=davids&password=mysql", 
-        									"select * from metadata order by artist_name, album, title");
+        									"select * from metadata");
         assertThat(t, notNullValue());
         assertThat(t.getNumRows(), is(numRows));
         assertThat(t.getNumColumns(), is(numCols));
