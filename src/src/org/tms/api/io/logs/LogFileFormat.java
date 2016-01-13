@@ -1,6 +1,8 @@
 package org.tms.api.io.logs;
 
-public interface LogFileFormat 
+import java.io.Serializable;
+
+public interface LogFileFormat extends Serializable
 {
 	public int getNumFields();	
 	public String [] getFieldNames();	

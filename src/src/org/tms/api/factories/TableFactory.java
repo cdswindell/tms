@@ -1,14 +1,15 @@
 package org.tms.api.factories;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
-import org.tms.api.Cell;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
@@ -18,6 +19,7 @@ import org.tms.api.io.IOOption;
 import org.tms.api.io.TMSOptions;
 import org.tms.api.io.XLSOptions;
 import org.tms.api.io.XMLOptions;
+import org.tms.api.io.logs.LogFileFormat;
 import org.tms.io.CSVReader;
 import org.tms.io.TMSReader;
 import org.tms.io.TableExportAdapter;
@@ -26,6 +28,7 @@ import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
+import org.tms.tds.logs.LogsTableImpl;
 
 /**
  * The class {@code TableFactory} contains methods to construct {@link Table} objects as well as to import
@@ -278,6 +281,21 @@ public final class TableFactory
     	Table t = null;
         if (tc instanceof ContextImpl)
         	t = DbmsTableImpl.createTable(connectionUrl, query, driverClassName, (ContextImpl)tc);       
+        return t;
+    }
+
+    static public Table createLogsTable(File logFile, LogFileFormat format) 
+    throws IOException 
+    {
+        return createLogsTable(logFile, format, ContextImpl.fetchDefaultContext());
+    }
+
+    static public Table createLogsTable(File logFile, LogFileFormat format, TableContext tc) 
+    throws IOException 
+    {
+    	Table t = null;
+        if (tc instanceof ContextImpl)
+        	t = LogsTableImpl.createTable(logFile, format, (ContextImpl)tc);       
         return t;
     }
 

@@ -186,9 +186,18 @@ abstract public class BaseConverter implements Converter
         }
     }
     
-    protected void writeNode(String val, String tag,HierarchicalStreamWriter writer, MarshallingContext context)
+    protected void writeNode(String val, String tag, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         if (val != null && (val = val.trim()).length() > 0) {
+            writer.startNode(tag);  
+            context.convertAnother(val);
+            writer.endNode(); 
+        }
+    }
+    
+    protected void writeNode(Object val, String tag, HierarchicalStreamWriter writer, MarshallingContext context)
+    {
+        if (val != null) {
             writer.startNode(tag);  
             context.convertAnother(val);
             writer.endNode(); 

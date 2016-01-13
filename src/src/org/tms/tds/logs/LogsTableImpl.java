@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,7 +15,10 @@ import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.api.io.IOOption;
 import org.tms.api.io.logs.LogFileFormat;
+import org.tms.io.LogsTableExportAdapter;
+import org.tms.io.TableExportAdapter;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
@@ -69,6 +73,22 @@ public class LogsTableImpl extends TableImpl
         processLogFile(false);
     }
     
+    @Override
+    public void export(String fileName, IOOption<?> options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new LogsTableExportAdapter(this, fileName, options);
+        writer.export();
+    }
+
+    @Override
+    public void export(OutputStream out, IOOption<?> options) 
+    throws IOException
+    {
+        TableExportAdapter writer = new LogsTableExportAdapter(this, out, options);
+        writer.export();
+    }
+
     public int getNumLogsColumns()
     {
         return m_numLogsCols;
@@ -79,9 +99,14 @@ public class LogsTableImpl extends TableImpl
         return m_numLogsRows;
     }
     
-    LogFileFormat getLogFileFormat() 
+    public LogFileFormat getLogFileFormat() 
     {
     	return m_logFileFormat;
+    }
+    
+    public File getLogFile() 
+    {
+    	return m_logFile;
     }
     
     synchronized public void refresh() 

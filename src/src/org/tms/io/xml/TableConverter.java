@@ -296,15 +296,25 @@ public class TableConverter extends BaseConverter
         
         
         // as a final check, verify the table has the correct number of rows & cols
-        if (nRows != null && nRows > t.getNumRows())
+        if (extendTableRows() && nRows != null && nRows > t.getNumRows())
         	t.addRow(nRows);
         
-        if (nCols != null && nCols > t.getNumColumns())
+        if (extendTableColumns() && nCols != null && nCols > t.getNumColumns())
         	t.addColumn(nCols);
         
         return t;
     }
     
+	protected boolean extendTableRows()
+	{
+		return true;
+	}
+	
+	protected boolean extendTableColumns()
+	{
+		return true;
+	}
+	
 	protected TableImpl createTable(HierarchicalStreamReader reader, UnmarshallingContext context) 
 	{
         Integer rCap = readAttributeInteger(ROWSCAP_ATTR, reader);

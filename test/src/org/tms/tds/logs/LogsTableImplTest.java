@@ -64,6 +64,6 @@ public class LogsTableImplTest extends BaseTest
 		warningsCell.setDerivation("numberOf(col 'Severity', 'Warning')");
 		
 		double nWarnings = (Double)warningsCell.getCellValue();
-		assertThat(19.0, is(nWarnings));		
+		assertThat(19.0, is(nWarnings));	
 	}
 }
