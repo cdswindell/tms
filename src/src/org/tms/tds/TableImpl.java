@@ -2527,6 +2527,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         
         CellReference cr = getCurrent();
         try {
+            for (CellImpl cell : derivedCells())
+                derived.add(cell);
+        
             for (ColumnImpl col : getColumnsInternal()) {
                 if (col != null && col.isDerived())
                     derived.add(col);
@@ -2537,9 +2540,6 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                     derived.add(row);
             }
             
-            for (CellImpl cell : derivedCells())
-                derived.add(cell);
-        
             return Collections.unmodifiableList(new ArrayList<Derivable>(derived));
         }
         finally {
