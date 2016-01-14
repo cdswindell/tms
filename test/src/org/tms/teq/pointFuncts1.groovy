@@ -8,6 +8,14 @@ class pointFuncts {
        return Math.sqrt(dx*dx + dy*dy);
     }
     
+    boolean insideOf(Point x, Point y, double range) {
+       return distance(x, y) <= range ;
+    }
+    
+    boolean outsideOf(Point x, Point y, double range) {
+       return !insideOf(x, y, range);
+    }
+    
     int getX(Point x) {
        x.getX();
     }

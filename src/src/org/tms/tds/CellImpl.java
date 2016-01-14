@@ -169,7 +169,6 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                 boolean nowPending = false;
                 decrementPendings();
                 try {
-
                     if (t.isError()) {
                         boolean isDifferent = this.setCellValueNoDataTypeCheck(t.getErrorCode());
                         switch (t.getErrorCode()) {
@@ -199,7 +198,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                         return setCellValue(t.getValue(), true, false);
                 }
                 finally {
-                    if (!wasPending && nowPending)
+                    if (wasPending && !nowPending)
                         fireEvents(TableElementEventType.OnNoPendings);                
                 }
             }

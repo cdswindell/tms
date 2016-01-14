@@ -40,6 +40,11 @@ public class Token implements Labeled
         return new Token(TokenType.EvaluationError, msg);
     }   
 
+	public static Token createErrorToken(Exception e) 
+	{
+        return new Token(TokenType.EvaluationError, e.getMessage());
+	}
+	
     public static Token createPendingToken(Runnable runnable)
     {
         return new Token(TokenType.Pending, runnable);

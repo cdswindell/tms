@@ -32,12 +32,12 @@ public enum BuiltinOperator implements Labeled, Operator
     DivOper("/", TokenType.BinaryOp, 4),
     
     // boolean comparison operators
-    EqOper(TokenType.BinaryOp, 4, toLabels("=", "==", "EQ"), toArgs(Object.class, Object.class), boolean.class),
-    NEqOper(TokenType.BinaryOp, 4, toLabels("!=", "<>", "NE"), toArgs(Object.class, Object.class), boolean.class),
-    GtOper(TokenType.BinaryOp, 4, toLabels(">", "GT"), toArgs(Object.class, Object.class), boolean.class),
-    LtOper(TokenType.BinaryOp, 4, toLabels("<", "LT"), toArgs(Object.class, Object.class), boolean.class),
-    GtEOper(TokenType.BinaryOp, 4, toLabels(">=", "GE"), toArgs(Object.class, Object.class), boolean.class),
-    LtEOper(TokenType.BinaryOp, 4, toLabels("<=", "LE"), toArgs(Object.class, Object.class), boolean.class),
+    EqOper(TokenType.BinaryOp, 5, toLabels("=", "==", "EQ"), toArgs(Object.class, Object.class), boolean.class),
+    NEqOper(TokenType.BinaryOp, 5, toLabels("!=", "<>", "NE"), toArgs(Object.class, Object.class), boolean.class),
+    GtOper(TokenType.BinaryOp, 5, toLabels(">", "GT"), toArgs(Object.class, Object.class), boolean.class),
+    LtOper(TokenType.BinaryOp, 5, toLabels("<", "LT"), toArgs(Object.class, Object.class), boolean.class),
+    GtEOper(TokenType.BinaryOp, 5, toLabels(">=", "GE"), toArgs(Object.class, Object.class), boolean.class),
+    LtEOper(TokenType.BinaryOp, 5, toLabels("<=", "LE"), toArgs(Object.class, Object.class), boolean.class),
     
     // Logical Operators
     AndOper(TokenType.BinaryOp, 5,toLabels("&&", "and"), toArgs(Object.class, Object.class), boolean.class),

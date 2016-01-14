@@ -112,6 +112,7 @@ public class TableViewer implements TableElementListener
 		EventBusFactory eb = EventBusFactory.getDefault();
         EventBus eventBus = eb.eventBus();
         eventBus.publish("/tableUpdated", "pending cells updated");
+        //System.out.println(e);
 	}
 
 	public boolean isBigTable() 

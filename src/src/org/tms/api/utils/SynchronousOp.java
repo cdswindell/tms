@@ -11,9 +11,6 @@ abstract public class SynchronousOp extends AbstractOperator
 	}
 
 	@Override
-	/**
-	 * {@inheritDoc}
-	 */
 	final public Token evaluate(Token... args) 
 	{
 		try {
@@ -33,7 +30,7 @@ abstract public class SynchronousOp extends AbstractOperator
 	        return t;
 		}
 		catch (Exception e) {
-            Token errToken = Token.createErrorToken(e.getMessage());
+            Token errToken = Token.createErrorToken(e);
             return errToken;
 		}
 	}
