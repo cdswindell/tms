@@ -25,6 +25,7 @@ public class LogsTableImplTest extends BaseTest
 		
 		LogsTableImpl lft = LogsTableImpl.createTable(logFile, new OSXSystemLogReader());
 		assertNotNull(lft);
+		lft.setLabel("Mac OS X System Log Example");
 		assertThat(342, is(lft.getNumRows()));
 		
 		Column dateCol = lft.getColumn(1);
@@ -65,5 +66,8 @@ public class LogsTableImplTest extends BaseTest
 		
 		double nWarnings = (Double)warningsCell.getCellValue();
 		assertThat(19.0, is(nWarnings));	
+		
+		//lft.export("foo.xml", XMLOptions.Default.withVerboseState());
+		lft.export("systemLog.tms");
 	}
 }

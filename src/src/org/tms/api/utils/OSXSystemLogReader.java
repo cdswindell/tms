@@ -9,13 +9,13 @@ import org.tms.api.io.logs.LogFileFormat;
 
 public class OSXSystemLogReader implements LogFileFormat 
 {
-	private static final long serialVersionUID = 5847443802414685349L;
-	
+	private static final long serialVersionUID = 2270403391879386118L;
+
+	static private SimpleDateFormat m_logDateFormat = new SimpleDateFormat("MMM dd HH:mm:ss");
+
 	private String[] m_fieldNames = {"Timestamp", "System", "Source", "PID", "Severity", "Message"};
 	private Class<?>[] m_fieldTypes = {Date.class, String.class, String.class, int.class, String.class, String.class};
 	
-	private SimpleDateFormat m_logDateFormat = new SimpleDateFormat("MMM dd HH:mm:ss");
-
 	@Override
 	public int getNumFields() 
 	{

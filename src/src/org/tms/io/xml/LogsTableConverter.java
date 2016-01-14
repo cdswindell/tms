@@ -49,8 +49,14 @@ public class LogsTableConverter extends TableConverter
 	protected boolean extendTableRows()
 	{
 		return false;
-	}
+	}	
 	
+    @Override
+	protected boolean extendTableColumns()
+	{
+		return false;
+	}
+    
     @Override
     protected TableImpl createTable(HierarchicalStreamReader reader, UnmarshallingContext context) 
     {

@@ -68,7 +68,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         set(Options.UUIDs, true);
         set(Options.Tags, true);
         
-        set(Options.Recalculate, false);
+        set(Options.Recalculate, true);
     }
 
     protected ArchivalIOOptions(final ArchivalIOOptions<T> format)

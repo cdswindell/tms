@@ -51,6 +51,12 @@ public class DbmsTableConverter extends TableConverter
 	}
 	
     @Override
+	protected boolean extendTableColumns()
+	{
+		return false;
+	}
+	
+    @Override
     protected TableImpl createTable(HierarchicalStreamReader reader, UnmarshallingContext context) 
     {
 		String driver = null;
