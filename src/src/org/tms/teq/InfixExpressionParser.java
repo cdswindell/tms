@@ -1,6 +1,7 @@
 package org.tms.teq;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -748,6 +749,8 @@ public class InfixExpressionParser
             Column col = null;
             if (er.isIndex()) 
                 col = table.getColumn(Access.ByIndex, er.getIndex());
+            else if (er.isUUID()) 
+                col = table.getColumn(Access.ByUUID, er.getUUID());
             else {
                 String label = er.getLabel();
                 col = table.getColumn(Access.ByLabel, label);
@@ -799,6 +802,8 @@ public class InfixExpressionParser
             Row row = null;
             if (er.isIndex()) 
                 row = table.getRow(Access.ByIndex, er.getIndex());
+            else if (er.isUUID()) 
+            	row = table.getRow(Access.ByUUID, er.getUUID());
             else {
                 String label = er.getLabel();
                 row = table.getRow(Access.ByLabel, label);
@@ -874,6 +879,7 @@ public class InfixExpressionParser
          *	-- an integer
          *  -- an unquoted word
          *  -- a quoted string
+         *  -- a quoted UUID
          */
     	StringBuffer sb = new StringBuffer();
     	int maxPos = exprChars.length;
@@ -906,7 +912,7 @@ public class InfixExpressionParser
     		    break;
     		}
     		
-    		// handle parsing of comparitor operators, so we can do things like
+    		// handle parsing of comparator operators, so we can do things like
     		// col 12!=col 6
     		if (foundDigit && !foundNonDigit && (c == '=' || c == '!' || c == '<' || c == '>')) {
                 charsParsed--;
@@ -950,11 +956,12 @@ public class InfixExpressionParser
 		private int m_charsParsed;
 		private int m_index;
 		private String m_label;
+		private UUID m_uuid;
 		
 		public ElementReference(int charsParsed, String label, int idx)
 		{
 			m_charsParsed = charsParsed;
-			m_label = label;
+			m_label = label != null && (label = label.trim()).length() > 0 ? label : null;
 			m_index = idx;
 		}
 		
@@ -976,6 +983,26 @@ public class InfixExpressionParser
 		public boolean isIndex()
 		{
 			return m_index > 0;
+		}
+		
+		public boolean isUUID()
+		{
+			getUUID();
+			return m_uuid != null;
+		}
+		
+		public UUID getUUID() 
+		{
+			if (m_uuid == null && m_label != null) {
+				try {
+					m_uuid = UUID.fromString(m_label);
+				}
+				catch (IllegalArgumentException e) {
+					m_uuid = null;
+				}
+			}
+			
+			return m_uuid;
 		}
 		
 		public String getLabel()
