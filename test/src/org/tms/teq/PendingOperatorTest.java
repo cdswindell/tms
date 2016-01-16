@@ -28,6 +28,8 @@ import org.tms.tds.TableImpl;
 
 public class PendingOperatorTest extends BaseTest
 {
+	//@Rule public SimpleRepeatRule repeatRule = new SimpleRepeatRule(100);
+	
     @Test
     public final void testPendingTwoVariableStatEngine() throws InterruptedException
     {
