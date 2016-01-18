@@ -36,6 +36,8 @@ public enum TokenType implements Labeled
     Comma(true, ","),
     LeftParen(true, "("),
     RightParen(false, ")"),
+    
+    OperandDataType(false),
        
     NullOpValue(false),
     LAST_TokenType(false);

@@ -377,7 +377,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 
     private boolean putInParens(int priority)
     {
-        return priority <= 2;
+        return priority <= 5;
     }
 
     private boolean putInParens(Token token, int numArgs)

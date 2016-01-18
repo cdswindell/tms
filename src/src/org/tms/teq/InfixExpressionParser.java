@@ -523,6 +523,7 @@ public class InfixExpressionParser
         // find a "word", as defined by letters, digits, #'s, _'s, and :'s     	
         for (int i = curPos; i < maxPos; i++) {
         	char c = exprChars[i];
+        	
         	// need to allow for !=, <>, <=, & >=
         	if (Character.isLetterOrDigit(c) || c == '#' || c == '_' || c == ':'|| c == '.') {
         		sb.append(c);
@@ -552,11 +553,23 @@ public class InfixExpressionParser
                         foundLabel = true;
                         break;
                     
+                    case "=":
+                    case "<":
+                    case ">":
+                    	if ((i + 1) < maxPos) {
+                    		char nextChar = exprChars[i + 1];
+                    		if (nextChar != '=' && nextChar != '>')
+    	                        foundLabel = true;
+                    	}	                    	
+                        break;
+                        
                     default:
                         break;
                 }
+                
                 if (foundLabel)
                     break;
+                
                 continue;
         	}
         	else

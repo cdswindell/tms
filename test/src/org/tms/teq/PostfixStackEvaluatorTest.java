@@ -28,6 +28,20 @@ public class PostfixStackEvaluatorTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(6.0));
+        
+        pse = new PostfixStackEvaluator("pi + 3 + randBetween(1,8)!", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        
+        pse = new PostfixStackEvaluator("hypot(4, randInt(50) + 1)", null);
+        assertThat(pse, notNullValue());
+        
+        t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
     }
 
     @Test
@@ -53,6 +67,62 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getValue(), is(9.0));
     }
     
+    @Test
+    public final void testSimpleEvaluate() 
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("2 * 3 + 5 * 2", null);
+        assertThat(pse, notNullValue());
+        
+        // simple unary function
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(16.0));
+    }
+    
+    @Test
+    public final void testCompoundBooleanEvaluate() 
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("hypot(3.0, 4.0) <= 24 && randBetween(1, 10) < 11", null);
+        assertThat(pse, notNullValue());
+        
+        // simple unary function
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isBoolean(), is(true));
+        assertThat(t.getValue(), is(true));
+    }
+    
+    @Test
+    public final void testCommaEvaluate() 
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("mod(5, mod(2 + 7, 5))", null);
+        assertThat(pse, notNullValue());
+        
+        // simple unary function
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.getValue(), is(1.0));
+    }
+
+    @Test
+    public final void testComplexPresidence() 
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("3+2*2-5 < 3*2+2/5 == 7*3+1>28/4+3", null);
+        assertThat(pse, notNullValue());
+        
+        // simple unary function
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isBoolean(), is(true));
+        assertThat(t.getValue(), is(true));
+    }
+
     @Test
     public final void testFactorials() 
     throws PendingDerivationException, BlockedDerivationException
@@ -350,7 +420,7 @@ public class PostfixStackEvaluatorTest
     throws PendingDerivationException, BlockedDerivationException
     {
         // hypot operator
-        PostfixStackEvaluator pse = new PostfixStackEvaluator("hypot((1 + 2), 4)", null);
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("hypot(1 + 2, 4)", null);
         assertThat(pse, notNullValue());
 
         Token t = pse.evaluate();
@@ -388,7 +458,7 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getNumericValue(), is(3.0));
         
         // smaller operator
-        pse = new PostfixStackEvaluator("smaller(smaller(1, (1 + 1)), 4)", null);
+        pse = new PostfixStackEvaluator("smaller(smaller(1, 1 + 1), 4)", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
@@ -399,7 +469,7 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getNumericValue(), is(1.0));
         
         // smaller operator
-        pse = new PostfixStackEvaluator("smaller(bigger(1, (1 + 1)), 4)", null);
+        pse = new PostfixStackEvaluator("smaller(bigger(1, 1 + 1), 4)", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
@@ -410,7 +480,7 @@ public class PostfixStackEvaluatorTest
         assertThat(t.getNumericValue(), is(2.0));
         
         // power operator
-        pse = new PostfixStackEvaluator("pow((1 + 2), bigger(4,3))", null);
+        pse = new PostfixStackEvaluator("pow(1 + 2, bigger(4,3))", null);
         assertThat(pse, notNullValue());
 
         t = pse.evaluate();
@@ -423,10 +493,10 @@ public class PostfixStackEvaluatorTest
     
     @Test
     public void testComplexExpression()
-   throws PendingDerivationException, BlockedDerivationException
+    throws PendingDerivationException, BlockedDerivationException
     {
         // smaller operator
-        PostfixStackEvaluator pse = new PostfixStackEvaluator("smaller(bigger(1, smaller((1 + 1), 3)), 4)", null);
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("smaller(bigger(1, smaller(1 + 1, 3)), 4)", null);
         assertThat(pse, notNullValue());
 
         Token t = pse.evaluate();
@@ -435,6 +505,22 @@ public class PostfixStackEvaluatorTest
         assertThat(t.isError(), is(false));
         assertThat(t.getErrorCode(), is(ErrorCode.NoError));
         assertThat(t.getNumericValue(), is(2.0));
+    }
+    
+    @Test
+    public void testComplexExpression2()
+    throws PendingDerivationException, BlockedDerivationException
+    {
+        // smaller operator
+        PostfixStackEvaluator pse = new PostfixStackEvaluator("3*2^3*2", null);
+        assertThat(pse, notNullValue());
+
+        Token t = pse.evaluate();
+        assertThat(t, notNullValue());
+        assertThat(t.isNumeric(), is(true));
+        assertThat(t.isError(), is(false));
+        assertThat(t.getErrorCode(), is(ErrorCode.NoError));
+        assertThat(t.getNumericValue(), is(48.0));
     }
     
     @Test

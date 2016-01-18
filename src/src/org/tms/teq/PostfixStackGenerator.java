@@ -102,12 +102,13 @@ public class PostfixStackGenerator
         pfs.setTokenMapper(ifs.getTokenMapper());
         
         // create the temporary op stack, ops will be pushed onto this stack 
-        // until one with a lessor priority is encountered        
+        // until one with a lesser priority is encountered        
         EquationStack ops = new EquationStack(StackType.Op);
-        int infixParens = 0;
+        EquationStack operands = new EquationStack(StackType.Op);
         Token t = null;
         Operator oper = null;
         boolean endRight = false;
+        int infixParens = 0;
         int p1, p2;
         
         // process the infix stack in reverse order (not from head, but from tail)
@@ -122,13 +123,19 @@ public class PostfixStackGenerator
                 case SubsetRef:
                 case CellRef:
                 case TableRef:
+                    pfs.push(tt, ift.getOperator(), ift.getValue());
+                    operands.push(tt, ift.getOperator(), ift.getValue());
+                    break;
+                    
                 case BuiltIn:
                     pfs.push(tt, ift.getOperator(), ift.getValue());
+                    operands.push(TokenType.OperandDataType, ift.getOperator().getResultType());
                     break;
                 
                 case Constant:
                 case Operand:
                     pfs.push(TokenType.Operand, ift.getValue(), ift.getLabel());
+                    operands.push(TokenType.Operand, ift.getValue());
                     break;
                     
                 case LeftParen:
@@ -140,8 +147,10 @@ public class PostfixStackGenerator
                     infixParens--;
                     t = ops.pollFirst();
                     while (t != null && !t.isLeftParen()) {
-                        pfs.push(t.getTokenType(), t.getOperator());
-                        t = ops.pollFirst();
+                    	if (validateOp(t, pfs, operands, pr)) 
+                            t = ops.pollFirst();
+                    	else 
+                    		return pr;
                     }
                     break;
                     
@@ -167,25 +176,41 @@ public class PostfixStackGenerator
                         else if (p1 == p2 && p2 == BuiltinOperator.MAX_PRIORITY)
                             endRight = true;
                         else {
-                            endRight = false;
                             t = ops.pop();
-                            assert t != null : "Ops stack token is null";
-                            pfs.push(t.getTokenType(), t.getOperator());
+                            if (t == null || t.getOperator() == null) 
+                                return pr.addIssue(ParserStatusCode.EmptyStack, "Ops stack is empty"); 
+                            
+                        	if (validateOp(t, pfs, operands)) 
+                            	endRight = false;
+                            else {
+                            	ops.push(t.getTokenType(), t.getOperator());
+                            	endRight = true;
+                            }
                         }
                     } while (!endRight);
                     ops.push(tt, oper);
                     break;
                                         
-                case Comma: // eat commas, unless the top of the ops stack is a multi-arg function
-                    if (!ops.isEmpty()) {
-                        t = ops.peek();
-                        if (t != null && (t.isFunction() && 
-                                         ((t.getOperator() != null ? t.getOperator().numArgs() : t.getTokenType().numArgs()) > 1) ||
-                                           t.getOperator() == BuiltinOperator.NegOper)) 
-                        {
-                            ops.pop(); // remove the element, as we are about to process it
-                            pfs.push(t);
-                        }
+                case Comma: // eat commas, unless ops stack has expressions in need of evaluation
+                    if (!ops.isEmpty()) {                    	
+                        do {
+                            if (ops.isEmpty())
+                                endRight = true;
+                            else if ((t = ops.peek()) != null && t.isLeftParen())
+                                endRight = true;
+                            else {
+                                t = ops.pop();
+                                if (t == null || t.getOperator() == null) 
+                                    return pr.addIssue(ParserStatusCode.EmptyStack, "Ops stack is empty"); 
+                                
+                            	if (validateOp(t, pfs, operands)) 
+                                	endRight = false;
+                                else {
+                                	ops.push(t.getTokenType(), t.getOperator());
+                                	endRight = true;
+                                }
+                            }
+                        } while (!endRight);
                     }
                     break;
                     
@@ -199,12 +224,19 @@ public class PostfixStackGenerator
         }
 
         // parens counter should be 0
-        assert infixParens == 0 : "Parens count mismatch: " + infixParens;
+        if (infixParens != 0) {
+        	pr.addIssue(ParserStatusCode.ParenMismatch, "Unbalanced Parenthesis: " + 
+        							(infixParens > 0 ? "too few \")\"" : "too many \")\""));
+        }
         
         // clear the ops stack
         while (!ops.isEmpty()) {
             t = ops.pop();
-            assert t != null : "Ops stack token is null";
+            if (t == null) {
+            	pr.addIssue(ParserStatusCode.InvalidExpressionStack, "Operator Needed");
+            	break;
+            }
+            
             pfs.push(t.getTokenType(), t.getOperator());
         }
         
@@ -214,7 +246,69 @@ public class PostfixStackGenerator
         return pr;
     }
 
-    private void validatePostfixStack(EquationStack pfs, ParseResult pr)
+    private boolean validateOp(Token t, EquationStack pfs, EquationStack operands) 
+    {
+    	return validateOp(t, pfs, operands, null);
+    }
+    
+    private boolean validateOp(Token t, EquationStack pfs, EquationStack operands, ParseResult pr) 
+    {
+    	Operator op = t.getOperator();
+    	if (op == null) {
+    		if (pr != null)
+    			pr.addIssue(ParserStatusCode.InvalidOperandLocation, "Operator Missing");
+    		return false;
+    	}
+    	
+    	int numArgs = op.numArgs();
+    	if (operands.size() < numArgs) {
+    		if (pr != null)
+    			pr.addIssue(ParserStatusCode.ArgumentCountMismatch, "Argument Count Mismatch");
+    		return false;
+    	}
+    	
+    	EquationStack tmpOperands = new EquationStack(StackType.Op);
+    	if (!validateOp(op.getArgTypes(), operands, tmpOperands)) {
+    		// restore operandStack
+    		while (!tmpOperands.isEmpty())
+    			operands.push(tmpOperands.pop());
+    		
+    		if (pr != null)
+    			pr.addIssue(ParserStatusCode.ArgumentTypeMismatch, "Argument Type Mismatch");
+    		return false;
+    	}
+        
+        // we're good, push the op and record it's type on the stack
+        pfs.push(t.getTokenType(), op);
+        operands.push(TokenType.OperandDataType, op.getResultType());
+        return true;
+	}
+
+	private boolean validateOp(Class<?>[] argTypes, EquationStack operands, EquationStack tmpOperands) 
+	{
+		for (int i = argTypes.length - 1; i >= 0; i--) {
+			Class<?> reqType = argTypes[i];
+			Token t = operands.pop();
+			tmpOperands.push(t);
+			
+			if (!isA(t, reqType))
+				return false;
+		}
+		
+		return true;
+	}
+
+	private boolean isA(Token t, Class<?> reqType) 
+	{
+		if (t.isA(reqType, true) || t.isReference())
+			return true;
+		else if (t.getTokenType() == TokenType.OperandDataType && (t.getDataType() == Object.class || reqType == Object.class))
+			return true;
+		else
+			return false;
+	}
+
+	private void validatePostfixStack(EquationStack pfs, ParseResult pr)
     {
         // process the infix stack in reverse order (not from head, but from tail)
         EquationStack opStack = new EquationStack(StackType.Op);

@@ -261,12 +261,21 @@ public class Token implements Labeled
         m_value = value;
     }
 
-    public Class<? extends Object> getDataType()
+    @SuppressWarnings("unchecked")
+	public Class<? extends Object> getDataType()
     {
         if (isNull())
             return null;
-        else
-            return getValue().getClass();
+        else {
+            if (getTokenType() == TokenType.OperandDataType)
+            	return (Class<? extends Object>)getValue();
+            else if (getTokenType() == TokenType.BuiltIn || isFunction())
+            	return getOperator().getResultType();
+            else if (getValue() != null)
+            	return getValue().getClass();
+            else
+            	return null;
+        }
     }
             
     public boolean isA(Class<?> targetClazz)
@@ -303,8 +312,7 @@ public class Token implements Labeled
         else if (targetClazz.isPrimitive() && dataType.isPrimitive()) {
             if (targetClazz == double.class && (dataType == float.class || dataType == long.class || dataType == int.class || dataType == short.class || dataType == byte.class || dataType == char.class)  ||
                (targetClazz == long.class && (dataType == int.class || dataType == short.class || dataType == byte.class || dataType == char.class)) ||
-               (targetClazz == int.class && (dataType == short.class || dataType == byte.class || dataType == char.class)) 
-                )
+               (targetClazz == int.class && (dataType == short.class || dataType == byte.class || dataType == char.class)))
                 return true;
         }
         
