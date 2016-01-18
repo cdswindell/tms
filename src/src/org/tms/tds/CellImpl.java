@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 
 import org.tms.api.Cell;
 import org.tms.api.ElementType;
@@ -228,6 +229,26 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
             return null;
     }
 
+    public String getUuid()
+    {
+    	String uuidStr = (String)getProperty(TableProperty.UUID);
+    	if (uuidStr == null) {
+    		uuidStr = UUID.randomUUID().toString();
+    		setProperty(TableProperty.UUID, uuidStr);
+    	}
+    	
+    	return uuidStr;
+    }
+    
+    /**
+     * Should only be called by persistance methods to restore object state
+     * @param strVal
+     */
+	public void setUUID(String strVal) 
+	{
+		setProperty(TableProperty.UUID, strVal);
+	}
+	
     private void incrementPendings()
     {
         if (!isPendings()) {

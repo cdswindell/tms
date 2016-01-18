@@ -11,8 +11,9 @@ import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.io.logs.LogFileFormat;
 import org.tms.tds.CellImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 
-public class LogsCellImpl extends CellImpl
+public class LogsCellImpl extends CellImpl implements ExternalDependenceTableElement
 {
     private LogsRowImpl m_row;
     

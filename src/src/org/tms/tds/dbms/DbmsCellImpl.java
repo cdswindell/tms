@@ -12,8 +12,9 @@ import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 
-public class DbmsCellImpl extends CellImpl
+public class DbmsCellImpl extends CellImpl implements ExternalDependenceTableElement
 {
 
     private DbmsRowImpl m_row;

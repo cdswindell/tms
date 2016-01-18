@@ -5,6 +5,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
 import org.tms.api.TableRowColumnElement;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.DerivationImpl;
 import org.tms.teq.InfixExpressionParser;
@@ -609,6 +610,12 @@ public class Token implements Labeled
             sb.append(InfixExpressionParser.sf_TABLE_REF);
         }
         
+        String uuid = null;
+        Table refTable = ref.getTable();
+        boolean useUUID = refTable instanceof ExternalDependenceTableElement && !(ref instanceof ExternalDependenceTableElement);
+        if (useUUID)
+        	uuid = ref.getUuid();
+        
         String label = ref.getLabel();
         if (label == null || label.trim().length() <= 0)
             label = null;
@@ -618,19 +625,29 @@ public class Token implements Labeled
             case "cell":
                 if (!requiresTrailingQuote)
                     sb.append('"');
-                sb.append(label);
+                if (useUUID)
+                	sb.append(uuid);
+                else
+                    sb.append(label);
                 requiresTrailingQuote = true;
                 break;
                 
             case "row":
             case "col":
-                if (label == null)
+            	if (useUUID) {
+                    if (!requiresTrailingQuote)
+                        sb.append('"');
+                	sb.append(uuid);
+                    requiresTrailingQuote = true;
+            	}
+            	else if (label == null)
                     sb.append(((TableRowColumnElement)ref).getIndex());
                 else {
                     if (!requiresTrailingQuote) {
                         sb.append('"');
                         requiresTrailingQuote = true;
                     }
+                    
                     sb.append(label);
                 }
                 break;

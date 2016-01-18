@@ -117,6 +117,8 @@ public interface TableElement extends BaseElement, Listenable, Taggable
      */
     public boolean isLabelIndexed();
     
+    public String getUuid();
+    
     /**
      * Return the description string assigned to this {@link TableElement}.
      * @return the description string assigned to this {@code TableElement}

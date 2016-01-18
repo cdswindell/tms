@@ -4,9 +4,10 @@ import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 
-public class LogsRowImpl extends RowImpl
+public class LogsRowImpl extends RowImpl implements ExternalDependenceTableElement
 {
     private int m_lineNumber;
     private boolean m_rowProcessed;

@@ -21,11 +21,12 @@ import org.tms.api.io.IOOption;
 import org.tms.io.DbmsTableExportAdapter;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.ContextImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 import org.tms.util.WeakHashSet;
 
-public class DbmsTableImpl extends TableImpl
+public class DbmsTableImpl extends TableImpl implements ExternalDependenceTableElement
 {
     public static final DbmsTableImpl createTable(String connectionUrl, String query) 
     throws SQLException

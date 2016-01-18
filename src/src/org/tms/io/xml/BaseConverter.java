@@ -20,6 +20,7 @@ import org.tms.api.utils.Validatable;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.io.TableExportAdapter;
+import org.tms.tds.CellImpl;
 import org.tms.tds.TableCellsElementImpl;
 import org.tms.teq.DerivationImpl;
 
@@ -451,6 +452,8 @@ abstract public class BaseConverter implements Converter
 	                        strVal = (String)context.convertAnother(t, String.class);
 	                        if (t instanceof TableCellsElementImpl) 
 	                            ((TableCellsElementImpl)t).setUUID(strVal);
+	                        if (t instanceof CellImpl) 
+	                            ((CellImpl)t).setUUID(strVal);
 	                    }
 	                    break;
 	                    

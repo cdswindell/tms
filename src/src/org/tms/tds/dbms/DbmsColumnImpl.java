@@ -7,10 +7,11 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 
-public class DbmsColumnImpl extends ColumnImpl
+public class DbmsColumnImpl extends ColumnImpl implements ExternalDependenceTableElement
 {
     private int m_resultSetIndex;
 

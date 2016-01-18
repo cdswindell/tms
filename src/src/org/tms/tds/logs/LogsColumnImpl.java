@@ -6,10 +6,11 @@ import org.tms.api.derivables.Derivation;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 
-public class LogsColumnImpl extends ColumnImpl
+public class LogsColumnImpl extends ColumnImpl implements ExternalDependenceTableElement
 {
 	private int m_fieldIndex;
 	

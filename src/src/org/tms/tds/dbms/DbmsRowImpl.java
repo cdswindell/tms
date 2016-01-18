@@ -4,9 +4,10 @@ import org.tms.api.Access;
 import org.tms.api.ElementType;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.exceptions.UnsupportedImplementationException;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 
-public class DbmsRowImpl extends RowImpl
+public class DbmsRowImpl extends RowImpl implements ExternalDependenceTableElement
 {
     private int m_resultSetIndex;
     private boolean m_resultSetRowProcessed;

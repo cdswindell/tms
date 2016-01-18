@@ -20,11 +20,12 @@ import org.tms.api.io.logs.LogFileFormat;
 import org.tms.io.LogsTableExportAdapter;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.ContextImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 import org.tms.util.WeakHashSet;
 
-public class LogsTableImpl extends TableImpl
+public class LogsTableImpl extends TableImpl implements ExternalDependenceTableElement
 {
     public static final LogsTableImpl createTable(File logFile, LogFileFormat lff) 
     throws IOException
