@@ -145,13 +145,24 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         if (expr != null && expr.trim().length() > 0) {
             m_deriv = DerivationImpl.create(expr.trim(), this);
             
+            // if the parent table is based on a dbms or log file, make sure UUIDs
+            // are assigned to affectedBy references
+            boolean assignUuids = getTable() != null && getTable() instanceof ExternalDependenceTableElement;
+            
             // mark the rows/columns that impact the deriv, and evaluate values
             if (m_deriv != null && m_deriv.isConverted()) {
                 Derivable elem = m_deriv.getTarget();
                 for (TableElement d : m_deriv.getAffectedBy()) {
                     TableElementImpl tse = (TableElementImpl)d;
                     tse.registerAffects(elem);
+                    
+                    // Assign a UUID, if needed
+                    if (assignUuids)
+                    	tse.getUuid();
                 }
+                
+                if (assignUuids) 
+                	m_deriv.resetAsEnteredExpression();
                 
                 setInUse(true);
                 

@@ -198,7 +198,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
 	 */
     public String toExpression()
     {
-        return toExpression(m_stackType == StackType.Postfix, m_primaryTable);
+        return toExpression(m_stackType == StackType.Postfix, true, m_primaryTable);
     }
     
     /**
@@ -210,7 +210,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
      * @param primaryTable
      * @return
      */
-    String toExpression(boolean addExtraSpaces, Table primaryTable)
+    String toExpression(boolean addExtraSpaces, boolean preferUUIDs, Table primaryTable)
     {
         if (isEmpty())
             return null;
@@ -230,7 +230,7 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                     sb.append(' ');
                 
                 if (!addExtraSpaces && t.isBasicOperator()) sb.append(' ');                
-                sb.append(t.toExpressionValue(primaryTable));
+                sb.append(t.toExpressionValue(preferUUIDs, primaryTable));
                 if (!addExtraSpaces && (t.isBasicOperator() || tt == TokenType.Comma )) sb.append(' ');
                 
                 addLeadingSpace = true;

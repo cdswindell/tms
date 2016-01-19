@@ -781,7 +781,7 @@ public final class DerivationImpl implements Derivation, Runnable
     public String getInfixExpression()
     {
         if (m_ifs != null)
-            return m_ifs.toExpression(false, getTable());
+            return m_ifs.toExpression(false, false, getTable());
         else
             return null;
     }
@@ -790,7 +790,7 @@ public final class DerivationImpl implements Derivation, Runnable
     public String getPostfixExpression()
     {
         if (m_pfs != null)
-            return m_pfs.toExpression(true, getTable());
+            return m_pfs.toExpression(true, false, getTable());
         else
             return null;
     }
@@ -799,7 +799,7 @@ public final class DerivationImpl implements Derivation, Runnable
     public String getExpression()
     {
         if (m_ifs != null)
-            return m_ifs.toExpression(false, getTable());
+            return m_ifs.toExpression(false, true, getTable());
         else
             return null;
     }
@@ -815,6 +815,11 @@ public final class DerivationImpl implements Derivation, Runnable
             return null;
     }
 
+	public void resetAsEnteredExpression() 
+	{
+		m_asEntered	= m_ifs.toExpression(false, false, getTable());
+	}
+	
     protected EquationStack getInfixStackInternal()
     {
         return m_ifs;

@@ -140,6 +140,9 @@ public class DbmsTableImplTest extends BaseDbmsTest
         Column c = t.addColumn(tempoC.getIndex() + 1);
         c.setDerivation("col tempo * col 'tempo'");
         
+        Column c2 = t.addColumn(Access.Last);
+        c2.setDerivation("2 * col " + c.getIndex());
+        
         Column fc = t.addColumn(Access.First);
         fc.setLabel("First Col");
         
@@ -167,13 +170,14 @@ public class DbmsTableImplTest extends BaseDbmsTest
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         t.export(bos, TMSOptions.Default);
+        //t.export("music.xml", XMLOptions.Default.withVerboseState());
         bos.close();
 
         // test byte streams are the same
         byte [] output =  bos.toByteArray();
         assertNotNull(output);
 
-        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 16), is(true));   
+        assertThat(String.format("Gold: %d, Observed: %d",  gold.length, output.length), closeTo(output.length, gold.length, 8), is(true));   
         
         Row r = t.addRow();
         Cell cell = t.getCell(r, tempo);

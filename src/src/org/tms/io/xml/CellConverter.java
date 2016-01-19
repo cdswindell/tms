@@ -90,6 +90,17 @@ public class CellConverter extends BaseConverter
      */
     protected boolean isRelevant(Cell c)
     {
+    	// don't persist calculated values for external dependence tables
+    	if (isExternalDependenceTable()) {
+    		Column col = c.getColumn();
+    		if (col.isDerived())
+    			return false;
+    		
+    		Row row = c.getRow();
+    		if (row.isDerived())
+    			return false;
+    	}
+
     	if (c.getCellValue() != null)
     		return true;
     	
@@ -102,7 +113,7 @@ public class CellConverter extends BaseConverter
         return super.isRelevant(c);
     }
 
-    @Override
+	@Override
     public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         CellImpl c = (CellImpl)arg;

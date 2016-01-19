@@ -58,7 +58,7 @@ public class InfixExpressionParser
 
     public String parsedInfixExpression()
     {
-        return m_ifs != null ? m_ifs.toExpression(true, getTable()) : null;
+        return m_ifs != null ? m_ifs.toExpression(true, false, getTable()) : null;
     }
     
     public ParseResult validateExpression()
@@ -969,7 +969,7 @@ public class InfixExpressionParser
 		private int m_charsParsed;
 		private int m_index;
 		private String m_label;
-		private UUID m_uuid;
+		private String m_uuid;
 		
 		public ElementReference(int charsParsed, String label, int idx)
 		{
@@ -1004,11 +1004,11 @@ public class InfixExpressionParser
 			return m_uuid != null;
 		}
 		
-		public UUID getUUID() 
+		public String getUUID() 
 		{
 			if (m_uuid == null && m_label != null) {
 				try {
-					m_uuid = UUID.fromString(m_label);
+					m_uuid = (UUID.fromString(m_label)).toString();
 				}
 				catch (IllegalArgumentException e) {
 					m_uuid = null;

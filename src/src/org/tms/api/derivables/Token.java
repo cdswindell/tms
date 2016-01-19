@@ -552,10 +552,15 @@ public class Token implements Labeled
 
     public String toExpressionValue()
     {
-        return toExpressionValue(null);
+        return toExpressionValue(false, null);
     }
     
     public String toExpressionValue(Table primaryTable)
+    {
+        return toExpressionValue(false, primaryTable);
+    }
+    
+    public String toExpressionValue(boolean preferUUIDs, Table primaryTable)
     {
         if (isNumeric())
             return getNumericValue().toString();
@@ -565,19 +570,19 @@ public class Token implements Labeled
             StringBuffer sb = new StringBuffer();
             switch (getTokenType()) {
                 case ColumnRef:
-                    sb.append(createRef("col", (TableElement)getValue(), primaryTable));
+                    sb.append(createRef("col", (TableElement)getValue(), preferUUIDs, primaryTable));
                     break;
                     
                 case RowRef:
-                    sb.append(createRef("row", (TableElement)getValue(), primaryTable));
+                    sb.append(createRef("row", (TableElement)getValue(), preferUUIDs, primaryTable));
                     break;
                     
                 case CellRef:
-                    sb.append(createRef("cell", (TableElement)getValue(), primaryTable));
+                    sb.append(createRef("cell", (TableElement)getValue(), preferUUIDs, primaryTable));
                     break;
                     
                 case SubsetRef:
-                    sb.append(createRef("subset", (TableElement)getValue(), primaryTable));
+                    sb.append(createRef("subset", (TableElement)getValue(), preferUUIDs, primaryTable));
                     break;
                     
                 default:
@@ -598,7 +603,7 @@ public class Token implements Labeled
             return this.toString();
     }
 
-    private Object createRef(String elemType, TableElement ref, Table primaryTable)
+    private Object createRef(String elemType, TableElement ref, boolean preferUUIDs, Table primaryTable)
     {
         StringBuffer sb = new StringBuffer(elemType + " ");
         
@@ -612,7 +617,8 @@ public class Token implements Labeled
         
         String uuid = null;
         Table refTable = ref.getTable();
-        boolean useUUID = refTable instanceof ExternalDependenceTableElement && !(ref instanceof ExternalDependenceTableElement);
+        boolean useUUID = preferUUIDs &&
+        					refTable instanceof ExternalDependenceTableElement && !(ref instanceof ExternalDependenceTableElement);
         if (useUUID)
         	uuid = ref.getUuid();
         

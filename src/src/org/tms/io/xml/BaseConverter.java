@@ -21,6 +21,7 @@ import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.CellImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.TableCellsElementImpl;
 import org.tms.teq.DerivationImpl;
 
@@ -88,6 +89,12 @@ abstract public class BaseConverter implements Converter
     /*
      * Export Only
      */
+    protected boolean isExternalDependenceTable() 
+    {
+		Table t = m_writer.getTable();
+		return t instanceof ExternalDependenceTableElement;
+	}
+
     protected void popExportAdapter()
     {
     }

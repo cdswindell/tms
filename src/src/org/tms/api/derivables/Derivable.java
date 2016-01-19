@@ -13,11 +13,15 @@ public interface Derivable extends TableElement
     public Derivation getDerivation();
     
     /**
-     * Get the derivation assigned to this element, if one exists.
+     * Set the derivation assigned to this element, using the supplied expression.
      * @param expression the element's derivation, as an algebraic string
      * @return the new derivation
      */
     public Derivation setDerivation(String expression);
+    
+    /**
+     * Clear the derivation assigned to this element, if one is defined.
+     */
     public void clearDerivation();
     
     /**
