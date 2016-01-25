@@ -162,7 +162,20 @@ abstract public class ExternalDependenceTableConverter extends TableConverter
 				m_rowIdxMap = new HashMap<Integer, Integer>();
 			
     		if (rIdx <= m_lastRowIdx) {
-    			m_rowIdxMap.put(rIdx, rIdx);    			
+    			int nrIdx = rIdx;
+    			
+    			// check if table has expanded and this element needs to be relocated
+    			if (m_lastExtRowIdx > -1 && rIdx > m_lastExtRowIdx) {
+    				if (m_curExtRowIdx == -1)
+    					m_curExtRowIdx = findLastExternalRowIdx(m_table);
+    				if (m_curExtRowIdx > 0 && m_curExtRowIdx > m_lastExtRowIdx) {
+    					nrIdx += m_curExtRowIdx - m_lastExtRowIdx;  
+    					if (nrIdx > m_lastRowIdx)
+    						m_lastRowIdx = nrIdx;
+    				}
+    			}
+    			
+    			m_rowIdxMap.put(rIdx, nrIdx);    			
     			return rIdx; // else, if idx is <= current last, use the idx
     		}
     		else {

@@ -231,7 +231,7 @@ public class WebServiceTest extends BaseTest
     {
         private static final String BASE_URL = "http://api.openweathermap.org/data/2.5/";
         private static final String ENDPOINT = "weather";
-        private static final String API_TOKEN = "2de143494c0b295cca9337e1e96b00e0";
+        private static final String API_TOKEN = "69d4f6e3828f05e2e310bb14ff2d1c4e";
         
         public WeatherOp(String label, String resultKey, Class<?> resultType)
         {
