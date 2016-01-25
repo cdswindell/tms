@@ -18,6 +18,7 @@ import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 import org.tms.tds.SubsetImpl;
 import org.tms.tds.TableImpl;
@@ -110,6 +111,10 @@ public class TableConverter extends BaseConverter
     public void marshal(Object arg, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         TableImpl t = (TableImpl)arg;
+        
+        // if the table is "special", save the converter class
+        if (t instanceof ExternalDependenceTableElement)
+        	context.put(TMS_TABLE_CONVERTER_KEY, this);
         
         int nRows = getNumConsumableRows();
         int nCols = getNumConsumableColumns();
@@ -235,6 +240,10 @@ public class TableConverter extends BaseConverter
         // save the table for others to access
         context.put(TMS_TABLE_KEY, t);
         
+        // if the table is "special", save the converter class
+        if (t instanceof ExternalDependenceTableElement)
+        	context.put(TMS_TABLE_CONVERTER_KEY, this);
+        
         // so where are we now?
         String nodeName = reader.getNodeName();
         
@@ -262,7 +271,7 @@ public class TableConverter extends BaseConverter
             
             nodeName = processChildren(t,  ColumnImpl.class, reader, context);
         }
-        
+       
         if (SUBSETS_TAG.equals(nodeName)) {
         	if (options().isVerboseState()) {
                 Boolean bVal = readAttributeBoolean(SUBIDX_ATTR, reader);
@@ -279,6 +288,7 @@ public class TableConverter extends BaseConverter
         	}
         	
             nodeName = processChildren(t,  CellImpl.class, reader, context);
+            
         }
         
         // process derivations, if any
@@ -293,8 +303,7 @@ public class TableConverter extends BaseConverter
             if (options().isRecalculate())
                 t.recalculate();
         }
-        
-        
+               
         // as a final check, verify the table has the correct number of rows & cols
         if (extendTableRows() && nRows != null && nRows > t.getNumRows())
         	t.addRow(nRows);

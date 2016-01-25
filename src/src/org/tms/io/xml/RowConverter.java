@@ -5,6 +5,7 @@ import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
+import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -48,6 +49,9 @@ public class RowConverter extends BaseConverter
         if ((options().isDisplayFormats() || options().isVerboseState()) && hasValue(r, TableProperty.DisplayFormat))
             return true;
         
+        if (r.getTable() != null && r.getTable() instanceof ExternalDependenceTableElement && !(r instanceof ExternalDependenceTableElement))
+        	return true;
+        
         return super.isRelevant(r);
     }
 
@@ -80,7 +84,8 @@ public class RowConverter extends BaseConverter
         Table t = (Table)context.get(TMS_TABLE_KEY);
         int rIdx = Integer.valueOf(reader.getAttribute(INDEX_ATTR));
         
-        Row r = t.addRow(rIdx);
+        Row r = t.addRow(getRemappedRowIdx(rIdx, context));
+        postConstructAction(t, r, context);
         
         // upon return, we are left in the Columns or Cells tag
         unmarshalTableElement(r, options().isRowLabels(), reader, context);        
@@ -103,8 +108,7 @@ public class RowConverter extends BaseConverter
 		            reader.moveUp();
         		}
         		break;
-		            
-		        
+		            	        
         		case FORMAT_TAG:
         		{
 		            if (options().isDisplayFormats()) {

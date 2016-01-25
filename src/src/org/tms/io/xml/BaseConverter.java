@@ -34,6 +34,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 abstract public class BaseConverter implements Converter
 {
     static final protected String TMS_TABLE_KEY = "__tms table key__";
+    static final protected String TMS_TABLE_CONVERTER_KEY = "__tms table converter key__";
     static final protected String TMS_DERIVATIONS_KEY = "__tms derivations key__";
     static final protected String TMS_READONLY_KEY  = "__tms read-only key__";
     static final protected String TMS_ALLOWNULLS_KEY  = "__tms allow nulls key__";
@@ -392,6 +393,9 @@ abstract public class BaseConverter implements Converter
 	        if (val != null)
 	            t.setEnforceDataType(val);
 	        
+	        // Handle class-specific attributes and labels
+	        unmarshalClassSpecificElements(t, reader, context);
+	        
 	        // process other common elements
 	        while (reader.hasMoreChildren()) {
 	            reader.moveDown();
@@ -474,8 +478,38 @@ abstract public class BaseConverter implements Converter
 		finally {
 			clearCachedAttributes();
 		}
-    }       
-    
+    }  	
+
+	protected void unmarshalClassSpecificElements(TableElement t, HierarchicalStreamReader reader, UnmarshallingContext context) 
+	{
+		// override in subclass as appropriate
+	}
+
+	protected void postConstructAction(Table t, Object te, UnmarshallingContext context) 
+	{
+		ExternalDependenceTableConverter edCvt = (ExternalDependenceTableConverter)context.get(TMS_TABLE_CONVERTER_KEY);
+		if (edCvt != null) 
+			edCvt.postConstructAction(t, te);
+	}
+	
+	protected int getRemappedColIdx(int cIdx, UnmarshallingContext context) 
+	{
+		ExternalDependenceTableConverter edCvt = (ExternalDependenceTableConverter)context.get(TMS_TABLE_CONVERTER_KEY);
+		if (edCvt != null) 
+			cIdx = edCvt.getRemappedColIdx(cIdx);
+		
+		return cIdx;
+	}   
+	
+	protected int getRemappedRowIdx(int rIdx, UnmarshallingContext context) 
+	{
+		ExternalDependenceTableConverter edCvt = (ExternalDependenceTableConverter)context.get(TMS_TABLE_CONVERTER_KEY);
+		if (edCvt != null) 
+			rIdx = edCvt.getRemappedRowIdx(rIdx);
+		
+		return rIdx;
+	}   
+	
 	private void cacheDerivation(Derivable te, String deriv, Long period, UnmarshallingContext context)
     {
         Map<Derivable, CachedDerivation> derivsMap = getDerivationsMap(context);  

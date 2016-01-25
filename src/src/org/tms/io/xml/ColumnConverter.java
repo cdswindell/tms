@@ -6,6 +6,7 @@ import org.tms.api.TableProperty;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.ColumnImpl;
+import org.tms.tds.ExternalDependenceTableElement;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -51,6 +52,9 @@ public class ColumnConverter extends BaseConverter
         if (hasValue(c, TableProperty.DataType))
             return true;
         
+        if (c.getTable() != null && c.getTable() instanceof ExternalDependenceTableElement && !(c instanceof ExternalDependenceTableElement))
+        	return true;
+        
         return super.isRelevant(c);
     }
 
@@ -84,9 +88,11 @@ public class ColumnConverter extends BaseConverter
     public Column unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
         Table t = (Table)context.get(TMS_TABLE_KEY);
+        
         int cIdx = Integer.valueOf(reader.getAttribute(INDEX_ATTR));
         
-        Column c = t.addColumn(cIdx);
+        Column c = t.addColumn(getRemappedColIdx(cIdx, context));
+        postConstructAction(t, c, context);
         
         // upon return, we are left in the Columns or Cells tag
         unmarshalTableElement(c, options().isColumnLabels(), reader, context);        
@@ -148,6 +154,6 @@ public class ColumnConverter extends BaseConverter
         }
         
         return c;
-    }        
+    }
 }
 

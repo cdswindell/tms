@@ -16,7 +16,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class LogsTableConverter extends TableConverter
+public class LogsTableConverter extends ExternalDependenceTableConverter
 {
     static final public String ELEMENT_TAG = "logsTable";
     
@@ -40,22 +40,13 @@ public class LogsTableConverter extends TableConverter
     protected void marshalClassSpecificElements(TableElement te, HierarchicalStreamWriter writer, MarshallingContext context)
     {
     	LogsTableImpl lTe = (LogsTableImpl)te;
+        
+        super.marshalClassSpecificElements(te, writer, context);
+        
         writeNode(lTe.getLogFile().getPath(), "logFile", writer, context);
         writeNode(lTe.getLogFileFormat().getClass().getName(), "formatClass", writer, context);
         writeNode(lTe.getLogFileFormat(), "format", writer, context);
     }
-    
-    @Override
-	protected boolean extendTableRows()
-	{
-		return false;
-	}	
-	
-    @Override
-	protected boolean extendTableColumns()
-	{
-		return false;
-	}
     
     @Override
     protected TableImpl createTable(HierarchicalStreamReader reader, UnmarshallingContext context) 
@@ -107,6 +98,7 @@ public class LogsTableConverter extends TableConverter
 
     	try {
 			LogsTableImpl t = (LogsTableImpl) TableFactory.createLogsTable(logFile, logFileFormat, getTableContext());
+			cacheDimensions(t);
 			return t;
 		} 
     	catch (Exception e) {

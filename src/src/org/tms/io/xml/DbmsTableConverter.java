@@ -15,7 +15,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class DbmsTableConverter extends TableConverter
+public class DbmsTableConverter extends ExternalDependenceTableConverter
 {
     static final public String ELEMENT_TAG = "dbmsTable";
     
@@ -39,23 +39,14 @@ public class DbmsTableConverter extends TableConverter
     protected void marshalClassSpecificElements(TableElement te, HierarchicalStreamWriter writer, MarshallingContext context)
     {
         DbmsTableImpl dbTe = (DbmsTableImpl)te;
+        
+        super.marshalClassSpecificElements(te, writer, context);
+        
         writeNode(dbTe.getDriverClassName(), "driver", writer, context);
         writeNode(dbTe.getConnectionUrl(), "connectionUrl", writer, context);
-        writeNode(dbTe.getQuery(), "query", writer, context);
+        writeNode(dbTe.getQuery(), "query", writer, context);       
     }
     
-    @Override
-	protected boolean extendTableRows()
-	{
-		return false;
-	}
-	
-    @Override
-	protected boolean extendTableColumns()
-	{
-		return false;
-	}
-	
     @Override
     protected TableImpl createTable(HierarchicalStreamReader reader, UnmarshallingContext context) 
     {
@@ -96,6 +87,7 @@ public class DbmsTableConverter extends TableConverter
 
     	try {
 			DbmsTableImpl t = (DbmsTableImpl) TableFactory.createDbmsTable(connectionUrl, query, driver, getTableContext());
+			cacheDimensions(t);
 			return t;
 		} 
     	catch (ClassNotFoundException | SQLException e) {

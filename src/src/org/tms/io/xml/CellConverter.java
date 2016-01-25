@@ -172,13 +172,18 @@ public class CellConverter extends BaseConverter
         int rIdx = Integer.valueOf(reader.getAttribute("rIdx"));
         int cIdx = Integer.valueOf(reader.getAttribute("cIdx"));
         
-        Column col = t.getColumn(cIdx);
-        if (col == null)
-            col = t.addColumn(Access.ByIndex, cIdx);
+        // check that we don't need to add a new row/col to table
+        // to house the concrete (non-external-dependent) cell
+		rIdx = getRemappedRowIdx(rIdx, context);
+		cIdx = getRemappedColIdx(cIdx, context);
         
         Row row = t.getRow(rIdx);        
         if (row == null)
             row = t.addRow(Access.ByIndex, rIdx);
+        
+        Column col = t.getColumn(cIdx);
+        if (col == null)
+            col = t.addColumn(Access.ByIndex, cIdx);
         
         Cell c = t.getCell(row, col);
         

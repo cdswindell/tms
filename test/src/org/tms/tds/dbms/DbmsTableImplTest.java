@@ -144,7 +144,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         c2.setDerivation("2 * col " + c.getIndex());
         
         Column fc = t.addColumn(Access.First);
-        fc.setLabel("First Col");
+        t.setCellValue(t.getRow(Access.ByIndex, 2), fc, 13.6);
         
         // test deleting a database row
         Row fr = t.getRow(Access.First);
