@@ -36,7 +36,7 @@ import org.tms.tds.logs.LogsTableImpl;
 
 import com.thoughtworks.xstream.XStream;
 
-abstract public class ArchivalWriter<T extends ArchivalIOOptions<T>> extends BaseWriter<T>
+abstract class ArchivalWriter<T extends ArchivalIOOptions<T>> extends BaseWriter<T>
 {
     public ArchivalWriter(TableExportAdapter tea, OutputStream out, T options)
     {

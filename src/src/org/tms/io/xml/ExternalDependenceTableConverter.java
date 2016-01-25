@@ -16,7 +16,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-abstract public class ExternalDependenceTableConverter extends TableConverter
+abstract class ExternalDependenceTableConverter extends TableConverter
 {
 	private int m_lastRowIdx;
 	private int m_lastColIdx;

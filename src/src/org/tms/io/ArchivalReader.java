@@ -36,7 +36,7 @@ import org.tms.tds.logs.LogsTableImpl;
 
 import com.thoughtworks.xstream.XStream;
 
-abstract public class ArchivalReader<T extends ArchivalIOOptions<T>> extends BaseReader<T>
+abstract class ArchivalReader<T extends ArchivalIOOptions<T>> extends BaseReader<T>
 {
     public ArchivalReader(File file, TableContext context, T format)
     {

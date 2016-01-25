@@ -1,6 +1,6 @@
 package org.tms.io;
 
-abstract public class BaseIO
+abstract class BaseIO
 {   
     protected String trimString(String arg)
     {

@@ -31,7 +31,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-abstract public class BaseConverter implements Converter
+abstract class BaseConverter implements Converter
 {
     static final protected String TMS_TABLE_KEY = "__tms table key__";
     static final protected String TMS_TABLE_CONVERTER_KEY = "__tms table converter key__";

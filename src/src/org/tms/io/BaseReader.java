@@ -13,7 +13,7 @@ import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.io.IOOption;
 
-public abstract class BaseReader<E extends IOOption<?>> extends BaseIO
+abstract public class BaseReader<E extends IOOption<?>> extends BaseIO
 {
     private static final InputStream makeInputStream(File inputFile)
     {
