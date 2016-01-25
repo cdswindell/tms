@@ -68,6 +68,6 @@ public class LogsTableImplTest extends BaseTest
 		assertThat(19.0, is(nWarnings));	
 		
 		//lft.export("foo.xml", XMLOptions.Default.withVerboseState());
-		lft.export("systemLog.tms");
+		//lft.export("systemLog.tms");
 	}
 }
