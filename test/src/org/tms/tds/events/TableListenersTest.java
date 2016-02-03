@@ -114,6 +114,7 @@ public class TableListenersTest extends BaseTest
         
         assertThat(stl.getNumFired() > 0, is(true));
     }  
+    
     @Test
     public void testOnBeforeDeleteEvent() throws InterruptedException
     {
@@ -182,7 +183,7 @@ public class TableListenersTest extends BaseTest
     
     private static class TableCellListener implements TableElementListener
     {
-        private int m_fired;
+        private volatile int m_fired;
         public TableCellListener() 
         {
             m_fired = 0;
@@ -233,7 +234,7 @@ public class TableListenersTest extends BaseTest
     }  
     private static class DeleteRowListener implements TableElementListener
     {
-        private int m_fired;
+        private volatile int m_fired;
         public DeleteRowListener() 
         {
             m_fired = 0;

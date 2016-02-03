@@ -68,14 +68,14 @@ public class JustInTimeSet<E> implements Set<E>
     @Override
     public boolean add(E e)
     {
-        createBackingSet();
+    	createBackingSet();
         return m_backingSet.add(e);
     }
 
     @Override
     public boolean addAll(Collection<? extends E> c)
     {
-        createBackingSet();
+    	createBackingSet();
         return m_backingSet.addAll(c);
     }
 

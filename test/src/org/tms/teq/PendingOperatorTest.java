@@ -28,13 +28,13 @@ import org.tms.tds.TableImpl;
 
 public class PendingOperatorTest extends BaseTest
 {
-	//@Rule public SimpleRepeatRule repeatRule = new SimpleRepeatRule(100);
+	//@Rule public SimpleRepeatRule repeatRule = new SimpleRepeatRule(5000);
 	
     @Test
     public final void testPendingTwoVariableStatEngine() throws InterruptedException
     {
         TableContext tc = TableContextFactory.createTableContext();
-        ((ContextImpl)tc).setPendingMaximumPoolSize(1000);
+        ((ContextImpl)tc).setPendingMaximumPoolSize(750);
         ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         
         Table t = TableFactory.createTable(tc);

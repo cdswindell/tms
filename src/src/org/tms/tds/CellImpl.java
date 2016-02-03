@@ -55,12 +55,6 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     }
     
     @Override
-    public Object getCellValue()
-    {
-        return m_cellValue;
-    }
-    
-    @Override
     public String getFormattedCellValue()
     {
         if (getCellValue() == null)
@@ -161,54 +155,6 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         return ErrorCode.NoError;
     }
     
-    protected boolean postResult(Token t)
-    {
-        TableImpl parentTable = getTable();
-        if (parentTable != null) {
-            synchronized(parentTable) {
-                boolean wasPending = isPendings();
-                boolean nowPending = false;
-                decrementPendings();
-                try {
-                    if (t.isError()) {
-                        boolean isDifferent = this.setCellValueNoDataTypeCheck(t.getErrorCode());
-                        switch (t.getErrorCode()) {
-                            case SeeErrorMessage:
-                                setErrorMessage(t.getStringValue());
-                                break;
-                                
-                            default:
-                                break;
-                        }
-                        
-                        return isDifferent;
-                    }
-                    else if (t.isNull())
-                        return setCellValue(null, true, false);
-                    else if (t.isPending()) {
-                        m_cellValue = t.getValue();
-                        nowPending = true;
-                        incrementPendings();
-
-                        if (!wasPending)
-                            fireEvents(TableElementEventType.OnPendings);
-
-                        return true;
-                    }
-                    else
-                        return setCellValue(t.getValue(), true, false);
-                }
-                finally {
-                    if (wasPending && !nowPending)
-                        fireEvents(TableElementEventType.OnNoPendings);                
-                }
-            }
-        }
-        
-        return false;
-
-    }
-
     protected void setErrorMessage(String eMsg)
     {
         if (eMsg != null && (eMsg = eMsg.trim()).length() > 0) {
@@ -288,7 +234,13 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         return setCellValue(value, false, false);
     }
     
-    protected boolean setCellValue(Object value, boolean typeSafeCheck, boolean doPreprocess)
+    @Override
+    synchronized public Object getCellValue()
+    {
+        return m_cellValue;
+    }
+    
+    synchronized protected boolean setCellValue(Object value, boolean typeSafeCheck, boolean doPreprocess)
     {
         // clear error message, if cell is in error
         if (isErrorValue())
@@ -320,6 +272,53 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         return valuesDiffer;
     }
     
+    synchronized protected boolean postResult(Token t)
+    {
+        TableImpl parentTable = getTable();
+        if (parentTable != null) {
+            synchronized(parentTable) {
+                boolean wasPending = isPendings();
+                boolean nowPending = false;
+                decrementPendings();
+                try {
+                    if (t.isError()) {
+                        boolean isDifferent = this.setCellValueNoDataTypeCheck(t.getErrorCode());
+                        switch (t.getErrorCode()) {
+                            case SeeErrorMessage:
+                                setErrorMessage(t.getStringValue());
+                                break;
+                                
+                            default:
+                                break;
+                        }
+                        
+                        return isDifferent;
+                    }
+                    else if (t.isNull())
+                        return setCellValue(null, true, false);
+                    else if (t.isPending()) {
+                        m_cellValue = t.getValue();
+                        nowPending = true;
+                        incrementPendings();
+
+                        if (!wasPending)
+                            fireEvents(TableElementEventType.OnPendings);
+
+                        return true;
+                    }
+                    else
+                        return setCellValue(t.getValue(), true, false);
+                }
+                finally {
+                    if (wasPending && !nowPending)
+                        fireEvents(TableElementEventType.OnNoPendings);                
+                }
+            }
+        }
+        
+        return false;
+    }
+
     private boolean isDatatypeMismatch(Object value)
     {
         if (value == null)

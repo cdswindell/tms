@@ -10,7 +10,7 @@ import org.tms.tds.RowImpl;
 public class DbmsRowImpl extends RowImpl implements ExternalDependenceTableElement
 {
     private int m_resultSetIndex;
-    private boolean m_resultSetRowProcessed;
+    private volatile boolean m_resultSetRowProcessed;
     
     public DbmsRowImpl(DbmsTableImpl parentTable, int rsIndex)
     {

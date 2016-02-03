@@ -2326,7 +2326,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         	return false;
     }
     
-    synchronized protected Object getCellValue(RowImpl row, ColumnImpl col) 
+    protected Object getCellValue(RowImpl row, ColumnImpl col) 
     {
         CellImpl cell = getCell(row, col, false);
         if (cell != null) 

@@ -10,7 +10,7 @@ import org.tms.tds.RowImpl;
 public class LogsRowImpl extends RowImpl implements ExternalDependenceTableElement
 {
     private int m_lineNumber;
-    private boolean m_rowProcessed;
+    private volatile boolean m_rowProcessed;
     
     public LogsRowImpl(LogsTableImpl parentTable, int lineNo)
     {

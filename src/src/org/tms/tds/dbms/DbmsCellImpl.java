@@ -16,7 +16,6 @@ import org.tms.tds.ExternalDependenceTableElement;
 
 public class DbmsCellImpl extends CellImpl implements ExternalDependenceTableElement
 {
-
     private DbmsRowImpl m_row;
     
     protected DbmsCellImpl(DbmsRowImpl row, DbmsColumnImpl col)
