@@ -22,6 +22,7 @@ import org.tms.api.factories.TableFactory;
 import org.tms.api.io.TMSOptions;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.ops.BaseOp;
+import org.tms.teq.ops.ClassOp;
 import org.tms.teq.ops.GroovyOp;
 import org.tms.teq.ops.JythonOp;
 
@@ -221,6 +222,11 @@ public class TokenMapper
     public void registerJythonOperators(String fileName, String className)
     {
         JythonOp.registerAllOps(this, fileName, className);
+    }
+    
+    public void registerOperators(Class<?> clazz)
+    {
+    	ClassOp.processClass(this, clazz);
     }
     
     public <T, R> void registerOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> uniOp)

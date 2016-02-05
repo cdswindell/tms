@@ -139,10 +139,7 @@ public class GroovyOp extends BaseOp
 
             // Transfer the args from the TMS system into
             // an array to set up for the method call
-            Object [] mArgs = new Object [numArgs()];
-            for (int i = 0; i < numArgs(); i++) {
-                mArgs[i] = args[i].getValue();
-            }
+            Object [] mArgs = unpack(args);
             
             // Invoke the method on the Groovy object, with args
             Object result = m_method.invoke(m_groovyInst, mArgs);

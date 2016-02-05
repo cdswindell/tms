@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.Token;
 import org.tms.teq.AbstractOperator;
+import org.tms.teq.NullsNotAllowedException;
 
 abstract public class AsynchronousOp extends AbstractOperator
 {
@@ -21,19 +22,16 @@ abstract public class AsynchronousOp extends AbstractOperator
 	{
 		try {
 	        // harvest args
-	        Object [] mArgs = new Object [numArgs()];
-	        for (int i = 0; i < numArgs(); i++) {
-	            mArgs[i] = args[i].getValue();
-	            
-	            if (mArgs[i] == null && !isAllowNulls())
-	            	return Token.createNullToken();
-	        }
+	        Object [] mArgs = unpack(args);
 	        
 	        // save away the args and the transaction id
 	        CalculationRunner cr = new CalculationRunner(mArgs, Derivation.getTransactionID());
 	        
 			// return the pending token
 	        return Token.createPendingToken(cr);
+		}
+		catch (NullsNotAllowedException e) {
+        	return Token.createNullToken();
 		}
 		catch (Exception e) {
 			return Token.createErrorToken(e);

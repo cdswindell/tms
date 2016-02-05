@@ -1,11 +1,12 @@
 package org.tms.teq;
 
 import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 
 abstract public class AbstractOperator implements Operator 
 {
-	abstract public Object performCalculation(Object [] m_args);
+	abstract public Object performCalculation(Object [] m_args) throws Exception;
 	
 	private String m_label;
 	private Class<?>[] m_argTypes;
@@ -68,5 +69,47 @@ abstract public class AbstractOperator implements Operator
 	protected boolean isAllowNulls()
 	{
 		return false;
+	}
+	
+	protected Object[] unpack(Token[] tokens) throws NullsNotAllowedException
+	{
+        Object [] mArgs = new Object [numArgs()];
+        for (int i = 0; i < numArgs(); i++) {
+            mArgs[i] = unpackArg(tokens[i].getValue(), getArgTypes()[i]);
+            
+            if (mArgs[i] == null && !isAllowNulls())
+            	throw new NullsNotAllowedException();
+        }
+		
+		return mArgs;
+	}
+
+	private Object unpackArg(Object value, Class<?> requiredType) 
+	{
+		if (value != null && requiredType.isPrimitive()) 
+			value = convertToPrimitive(value, requiredType);
+		
+		return value;
+	}
+
+	private Object convertToPrimitive(Object value, Class<?> requiredType) 
+	{
+		if (value instanceof Number) {
+			Number n = (Number)value;
+			if (requiredType == int.class) 
+				return n.intValue();
+			else if (requiredType == long.class) 
+				return n.longValue();
+			else if (requiredType == double.class) 
+				return n.doubleValue();
+			else if (requiredType == float.class) 
+				return n.floatValue();
+			else if (requiredType == short.class) 
+				return n.shortValue();
+			else if (requiredType == byte.class) 
+				return n.byteValue();
+		}
+		
+		return value;
 	}
 }
