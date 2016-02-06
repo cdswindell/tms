@@ -136,11 +136,7 @@ public class ClassOperatorsTest extends BaseTest
         assertThat(t1, notNullValue());
         assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
         
-        // get token map and register MyPoint class
-        TokenMapper tm = tc.getTokenMapper();
-        assertNotNull(tm);
-        
-        tm.registerOperators(MyPoint.class);
+        tc.registerOperators(MyPoint.class);
         
         // create some rows and columns to work with
         t1.addRow(1000);
