@@ -130,9 +130,9 @@ public class ClassOperatorsTest extends BaseTest
     {
         TableContext tc = TableContextFactory.createTableContext();
         ((ContextImpl)tc).setPendingMaximumPoolSize(50);
-        ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        ((ContextImpl)tc).setPendingKeepAliveTime(10, TimeUnit.MILLISECONDS);
         
-        Table t1 = TableFactory.createTable(5000, 4, tc);        
+        Table t1 = TableFactory.createTable(1000, 4, tc);        
         assertThat(t1, notNullValue());
         assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
         
@@ -155,6 +155,9 @@ public class ClassOperatorsTest extends BaseTest
         Column c3 = t1.addColumn(3);
         Derivation d3 = c3.setDerivation("distance(col 1, col 2)");
         assertNotNull(d3);
+        
+        // there *should* be some pendings
+        assertThat(true, is(t1.isPendings()));
         
         // set derivation
         Column c4 = t1.addColumn(4);
