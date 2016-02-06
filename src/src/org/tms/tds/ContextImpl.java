@@ -665,6 +665,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     }
     
     @Override
+    public void registerOperators(Class<?> clazz)
+    {
+        fetchTokenMapper().registerOperators(clazz);
+    }
+    
+    @Override
     public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName)
     {
         fetchTokenMapper().registerGroovyOperator(label, pTypes, resultType, fileName, methodName);

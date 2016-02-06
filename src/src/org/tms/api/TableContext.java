@@ -154,6 +154,13 @@ public interface TableContext extends BaseElement, InitializableTableProperties
     public void registerOperator(Operator oper);
 
     /**
+     * Registers class methods and constructors for use as operators
+     * in Derivations.
+     * @param clazz The class to evaluate
+     */
+    public void registerOperators(Class<?> clazz);
+    
+    /**
      * Deregisters the supplied {@link org.tms.api.derivables.Operator Operator} {@code oper} 
      * from this {@code TableContext}.
      * <p>
@@ -229,7 +236,7 @@ public interface TableContext extends BaseElement, InitializableTableProperties
 
     public void importTables(String fileName);
     public void importTables(String fileName, IOOption<?>format);
-
+    
     public void registerJythonOperators(String fileName);
     public void registerJythonOperators(String fileName, String className);
 
