@@ -24,7 +24,6 @@ import org.tms.tds.TableImpl;
 
 public class ClassOperatorsTest extends BaseTest 
 {
-
     @Test
     public void testClassConstructors()
     {
@@ -45,7 +44,7 @@ public class ClassOperatorsTest extends BaseTest
         
         // set derivation
         Column c1 = t1.addColumn(1);
-        Derivation d1 = c1.setDerivation("makeOriginMyPoint()");
+        Derivation d1 = c1.setDerivation("makeMyPointOrigin()");
         assertNotNull(d1);
         
         // set derivation
@@ -143,7 +142,7 @@ public class ClassOperatorsTest extends BaseTest
         
         // set derivation
         Column c1 = t1.addColumn(1);
-        Derivation d1 = c1.setDerivation("makeOriginMyPoint()");
+        Derivation d1 = c1.setDerivation("makeMyPointOrigin()");
         assertNotNull(d1);
         
         // set derivation
@@ -211,7 +210,7 @@ public class ClassOperatorsTest extends BaseTest
     	private int m_x;
 		private int m_y;
 		
-		@RegisterOp(token="makeOriginMyPoint")
+		@RegisterOp(token="makeMyPointOrigin")
 		public MyPoint() 
 		{
 			this(0, 0);
