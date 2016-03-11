@@ -160,7 +160,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
 
     private Map<String, Object> m_elemProperties;
     
-    private Map<String, Tag> m_globalTagCache;
+    private Map<String, Tag> m_globalTagCache; 
     
     private ContextImpl(boolean isDefault, TableContext otherContext)
     {

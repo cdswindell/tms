@@ -58,4 +58,9 @@ public interface Operator extends Labeled
     {
         return false;
     }
+    
+    default String [] getCategories()
+    {
+    	return new String[] {};
+    }
 }

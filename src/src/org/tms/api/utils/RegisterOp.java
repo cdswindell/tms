@@ -12,4 +12,5 @@ public @interface RegisterOp
 	public String token() default "";
 	public boolean exclude() default false;
 	public boolean async() default false;
+	public String[] categories() default {};
 }

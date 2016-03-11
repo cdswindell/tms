@@ -233,7 +233,7 @@ public class ClassOperatorsTest extends BaseTest
 			return m_y;
 		}
 		
-		@RegisterOp(async=true)
+		@RegisterOp(async=true, categories={"math"})
 		public double distance(MyPoint other)
 		{
 			int dx = other.getX() - getX();

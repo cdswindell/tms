@@ -118,6 +118,8 @@ public class TokenMapper
     private Map<OverloadKey, Token> m_userOverloadedOps = new HashMap<OverloadKey, Token>();
     private Table m_operTable;
     private TableContext m_context;
+    private Map<Category, Set<Operator>> m_catalog = new HashMap<Category, Set<Operator>>();
+    private Map<String, Category> m_globalCategoryCache = new HashMap<String, Category>();
     
     private TokenMapper(Table operTable)
     {
@@ -133,6 +135,29 @@ public class TokenMapper
         m_context = context;
     }
    
+    Category fetchCategory(String cat)
+    {
+        return fetchCategory(cat, true);
+    }
+    
+	public Category fetchCategory(String category, boolean createIfMissing) 
+	{
+        if (category != null && (category = category.trim().toLowerCase()).length() > 0) {
+            Category tObj = m_globalCategoryCache.get(category);
+            if (tObj == null && createIfMissing) {
+                // minimize object creation
+            	category = category.intern();
+                
+                tObj = new OperatorCategory(category);
+                m_globalCategoryCache.put(category, tObj);
+            }
+            
+            return tObj;
+        }
+        else
+            return null;
+	}
+	
     public boolean hasOperatorTable()
     {
     	return m_operTable != null;
