@@ -45,228 +45,233 @@ public enum BuiltinOperator implements Labeled, Operator
     NULL_operator,
 
     // Basic math operators, implementation supported for numbers and strings (+ & -)
-    PlusOper("+", TokenType.BinaryOp, 5),
-    MinusOper("-", TokenType.BinaryOp, 5),
-    MultOper("*", TokenType.BinaryOp, 6),
-    DivOper("/", TokenType.BinaryOp, 6),
+    PlusOper(TokenType.BinaryOp, 5, "+", toCategories()),
+    MinusOper(TokenType.BinaryOp, 5, "-", toCategories()),
+    MultOper(TokenType.BinaryOp, 6, "*", toCategories()),
+    DivOper(TokenType.BinaryOp, 6, "/", toCategories()),
     
     // boolean comparison operators
-    EqOper(TokenType.BinaryOp, 3, toLabels("=", "==", "EQ"), toArgs(Object.class, Object.class), boolean.class),
-    NEqOper(TokenType.BinaryOp, 3, toLabels("!=", "<>", "NE"), toArgs(Object.class, Object.class), boolean.class),
-    GtOper(TokenType.BinaryOp, 4, toLabels(">", "GT"), toArgs(Object.class, Object.class), boolean.class),
-    LtOper(TokenType.BinaryOp, 4, toLabels("<", "LT"), toArgs(Object.class, Object.class), boolean.class),
-    GtEOper(TokenType.BinaryOp, 4, toLabels(">=", "GE"), toArgs(Object.class, Object.class), boolean.class),
-    LtEOper(TokenType.BinaryOp, 4, toLabels("<=", "LE"), toArgs(Object.class, Object.class), boolean.class),
+    EqOper(TokenType.BinaryOp, 3, toLabels("=", "==", "EQ"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical", "comparison")),
+    NEqOper(TokenType.BinaryOp, 3, toLabels("!=", "<>", "NE"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical", "comparison")),
+    GtOper(TokenType.BinaryOp, 4, toLabels(">", "GT"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical", "comparison")),
+    LtOper(TokenType.BinaryOp, 4, toLabels("<", "LT"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical", "comparison")),
+    GtEOper(TokenType.BinaryOp, 4, toLabels(">=", "GE"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical", "comparison")),
+    LtEOper(TokenType.BinaryOp, 4, toLabels("<=", "LE"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical", "comparison")),
     
     // Logical Operators
-    AndOper(TokenType.BinaryOp, 2, toLabels("&&", "and"), toArgs(Object.class, Object.class), boolean.class),
-    OrOper(TokenType.BinaryOp, 2, toLabels("||", "or"), toArgs(Object.class, Object.class), boolean.class),
-    XorOper(TokenType.BinaryOp, 2, toLabels("xor"), toArgs(Object.class, Object.class), boolean.class),
-    NotOper(TokenType.UnaryOp, 2, toLabels("~", "not"), toArgs(Object.class), boolean.class),
+    AndOper(TokenType.BinaryOp, 2, toLabels("&&", "and"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical")),
+    OrOper(TokenType.BinaryOp, 2, toLabels("||", "or"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical")),
+    XorOper(TokenType.BinaryOp, 2, toLabels("xor"), toArgs(Object.class, Object.class), boolean.class, toCategories("logical")),
+    NotOper(TokenType.UnaryOp, 2, toLabels("~", "not"), toArgs(Object.class), boolean.class, toCategories("logical")),
     
     // Unary is tests
-    IsEvenOper(TokenType.UnaryFunc, 8, toLabels("isEven"), toArgs(Object.class), boolean.class),
-    IsOddOper(TokenType.UnaryFunc, 8, toLabels("isOdd"), toArgs(Object.class), boolean.class),
+    IsEvenOper(TokenType.UnaryFunc, 8, toLabels("isEven"), toArgs(Object.class), boolean.class, toCategories("logical", "math")),
+    IsOddOper(TokenType.UnaryFunc, 8, toLabels("isOdd"), toArgs(Object.class), boolean.class, toCategories("logical", "math")),
     
-    IsErrorOper(TokenType.UnaryFunc, 8, toLabels("isError"), toArgs(Object.class), boolean.class),
-    IsNumberOper(TokenType.UnaryFunc, 8, toLabels("isNumber"), toArgs(Object.class), boolean.class),
-    IsTextOper(TokenType.UnaryFunc, 8, toLabels("isText"), toArgs(Object.class), boolean.class),
-    IsLogicalOper(TokenType.UnaryFunc, 8, toLabels("isLogical"), toArgs(Object.class), boolean.class),
-    
-    // special isNull operator, which is somewhat out of bounds
-    IsNullOper(TokenType.UnaryFunc, 8, toLabels("isNull"), toArgs(Object.class), boolean.class),
+    IsErrorOper(TokenType.UnaryFunc, 8, toLabels("isError"), toArgs(Object.class), boolean.class, toCategories("information")),
+    IsNumberOper(TokenType.UnaryFunc, 8, toLabels("isNumber"), toArgs(Object.class), boolean.class, toCategories("information")),
+    IsTextOper(TokenType.UnaryFunc, 8, toLabels("isText"), toArgs(Object.class), boolean.class, toCategories("information")),
+    IsLogicalOper(TokenType.UnaryFunc, 8, toLabels("isLogical"), toArgs(Object.class), boolean.class, toCategories("information")),
+    IsNullOper(TokenType.UnaryFunc, 8, toLabels("isNull"), toArgs(Object.class), boolean.class, toCategories("information")),
     
     // special "if" operator
-    IfOper("if", TokenType.GenericFunc, 8, (Class<?>)null, (String)null, Boolean.class, Object.class, Object.class),
+    IfOper(TokenType.GenericFunc, 8, toLabels("if"), toArgs(boolean.class, Object.class, Object.class), Object.class, toCategories("logical")),
     
     // special JSON Parser operator
-    JsonOper(TokenType.GenericFunc, 8, toLabels("fromJSON", "jsonGet"), toArgs(JSONObject.class, String.class), Object.class, MathUtil.class, "jsonGet"),
+    JsonOper(TokenType.GenericFunc, 8, toLabels("fromJSON", "jsonGet"), toArgs(JSONObject.class, String.class), Object.class, toCategories("information", "lookup", "json"), MathUtil.class, "jsonGet"),
     
-    ColRefOper(TokenType.GenericFunc, 8, toLabels("colRef"), toArgs(Object.class), Column.class),
-    RowRefOper(TokenType.GenericFunc, 8, toLabels("rowRef"), toArgs(Object.class), Row.class),
+    ColRefOper(TokenType.GenericFunc, 8, toLabels("colRef"), toArgs(Object.class), Column.class, toCategories("lookup", "table")),
+    RowRefOper(TokenType.GenericFunc, 8, toLabels("rowRef"), toArgs(Object.class), Row.class, toCategories("lookup", "table")),
+    NumberOfOper(TokenType.GenericFunc, 8, toLabels("numberOf"), toArgs(TableElement.class, Object.class), int.class, toCategories("information", "lookup"), MathUtil.class), 
     
     // Special math operators, implemented in Java Math class
-    ModOper(TokenType.BinaryOp, 6, MathUtil.class, "mod", "mod"),  
-    PowerOper(TokenType.BinaryOp, 7, Math.class, "pow", "^"),
+    //ModOper(TokenType.BinaryOp, 6, toLabels("mod", "modulus", "remainder"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class),  
+    PowerOper(TokenType.BinaryOp, 7, toLabels("^"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class, "pow"),  
     
     // Factorial operator, implemented in code
-    FactOper(TokenType.UnaryTrailingOp, 7, MathUtil.class, "fact", "!"),
-    PercentOper(TokenType.UnaryTrailingOp, 7, MathUtil.class, "percent", "%"),
+    FactOper(TokenType.UnaryTrailingOp, 7, toLabels("!"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class, "fact"),  
+    PercentOper(TokenType.UnaryTrailingOp, 7, toLabels("%", "percent"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class, "percent"),  
     
     // Unary functions, mostly supported in Java Math
-    FracOper("frac", TokenType.UnaryFunc, 8, MathUtil.class),
-    NegOper("neg", TokenType.UnaryFunc, 8, MathUtil.class),
+    FracOper(TokenType.UnaryFunc, 8, toLabels("frac"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class),  
+    NegOper(TokenType.UnaryFunc, 8, toLabels("neg"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class),  
     
-    AbsOper("abs", TokenType.UnaryFunc, 8, Math.class),
-    SqrtOper("sqrt", TokenType.UnaryFunc, 8, Math.class),
-    CbrtOper("cbrt", TokenType.UnaryFunc, 8, Math.class),
-    ExpOper(TokenType.UnaryFunc, 8, Math.class, "exp"),
-    LogOper(TokenType.UnaryFunc, 8, Math.class, "log", "ln", "loge"),
-    Log10Oper(TokenType.UnaryFunc, 8, Math.class, "log10", "log", "log10"),
-    RandOper(TokenType.BuiltIn, 8, toLabels("random", "rand"), null, double.class, Math.class),
-    RandIntOper(TokenType.UnaryFunc, 8, toLabels("randomInt", "randomInt", "randInt"), toArgs(double.class), int.class, MathUtil.class),
-    RandBetweenOper(TokenType.BinaryFunc, 8, toLabels("randomBetween", "randomBetween", "randBetween"), toArgs(double.class, double.class), int.class, MathUtil.class),
+    AbsOper(TokenType.UnaryFunc, 8, toLabels("abs"), toArgs(double.class), double.class, toCategories("math"), Math.class),  
+    SqrtOper(TokenType.UnaryFunc, 8, toLabels("sqrt"), toArgs(double.class), double.class, toCategories("math"), Math.class),  
+    CbrtOper(TokenType.UnaryFunc, 8, toLabels("cbrt"), toArgs(double.class), double.class, toCategories("math"), Math.class),  
+    ExpOper(TokenType.UnaryFunc, 8, toLabels("exp"), toArgs(double.class), double.class, toCategories("math"), Math.class),  
+    LogOper(TokenType.UnaryFunc, 8, toLabels("ln", "loge"), toArgs(double.class), double.class, toCategories("math"), Math.class, "log"),  
+    Log10Oper(TokenType.UnaryFunc, 8, toLabels("log", "log10"), toArgs(double.class), double.class, toCategories("math"), Math.class, "log10"),  
+    
+    RandOper(TokenType.BuiltIn, 8, toLabels("random", "rand"), null, double.class, toCategories("math", "statistical"), Math.class),
+    RandIntOper(TokenType.UnaryFunc, 8, toLabels("randomInt", "randomInt", "randInt"), toArgs(double.class), int.class, toCategories("math", "statistical"), MathUtil.class),
+    RandBetweenOper(TokenType.BinaryFunc, 8, toLabels("randomBetween", "randomBetween", "randBetween"), toArgs(double.class, double.class), int.class, toCategories("math", "statistical"), MathUtil.class),
 
     // TVM Calculations
-    PmtOper(TokenType.GenericFunc, 8, toLabels("pmt", "paymentPerTerm"), toArgs(double.class, int.class, double.class, double.class), double.class, MathUtil.class),
-    FvOper(TokenType.GenericFunc, 8, toLabels("fv", "futureValue"), toArgs(double.class, int.class, double.class, double.class), double.class, MathUtil.class),
-    PvOper(TokenType.GenericFunc, 8, toLabels("pv", "presentValue"), toArgs(double.class, int.class, double.class, double.class), double.class, MathUtil.class),
-    NPerOper(TokenType.GenericFunc, 8, toLabels("nper", "numPeriods"), toArgs(double.class, double.class, double.class, double.class), double.class, MathUtil.class),
-    RateOper(TokenType.GenericFunc, 8, toLabels("rate", "interestRate"), toArgs(int.class, double.class, double.class, double.class), double.class, MathUtil.class),
+    PmtOper(TokenType.GenericFunc, 8, toLabels("pmt", "paymentPerTerm"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
+    FvOper(TokenType.GenericFunc, 8, toLabels("fv", "futureValue"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
+    PvOper(TokenType.GenericFunc, 8, toLabels("pv", "presentValue"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
+    NPerOper(TokenType.GenericFunc, 8, toLabels("nper", "numPeriods"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
+    RateOper(TokenType.GenericFunc, 8, toLabels("rate", "interestRate"), toArgs(int.class, double.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
     
     // trig functions, radians
-    toDegreesOper("toDegrees", TokenType.UnaryFunc, 8, Math.class),
-    toRadiansOper("toRadians", TokenType.UnaryFunc, 8, Math.class),
+    toDegreesOper(TokenType.UnaryFunc, 8, toLabels("toDegrees"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
+    toRadiansOper(TokenType.UnaryFunc, 8, toLabels("toRadians"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
     
-    SinOper("sin", TokenType.UnaryFunc, 8, Math.class),
-    CosOper("cos", TokenType.UnaryFunc, 8, Math.class),
-    TanOper("tan", TokenType.UnaryFunc, 8, Math.class),
-    ASinOper("asin", TokenType.UnaryFunc, 8, Math.class),
-    ACosOper("acos", TokenType.UnaryFunc, 8, Math.class),
-    ATanOper("atan", TokenType.UnaryFunc, 8, Math.class),
+    SinOper(TokenType.UnaryFunc, 8, toLabels("sin"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
+    CosOper(TokenType.UnaryFunc, 8, toLabels("cos"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
+    TanOper(TokenType.UnaryFunc, 8, toLabels("tan"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
+    ASinOper(TokenType.UnaryFunc, 8, toLabels("asin"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
+    ACosOper(TokenType.UnaryFunc, 8, toLabels("acos"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
+    ATanOper(TokenType.UnaryFunc, 8, toLabels("atan"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
 
-    SinDOper("sinD", TokenType.UnaryFunc, 8, MathUtil.class),
-    CosDOper("cosD", TokenType.UnaryFunc, 8, MathUtil.class),
-    TanDOper("tanD", TokenType.UnaryFunc, 8, MathUtil.class),
-    ASinDOper("asinD", TokenType.UnaryFunc, 8, MathUtil.class),
-    ACosDOper("acosD", TokenType.UnaryFunc, 8, MathUtil.class),
-    ATanDOper("atanD", TokenType.UnaryFunc, 8, MathUtil.class),
+    SinDOper(TokenType.UnaryFunc, 8, toLabels("sinD"), toArgs(double.class), double.class, toCategories("math","trigonometry"), MathUtil.class),
+    CosDOper(TokenType.UnaryFunc, 8, toLabels("cosD"), toArgs(double.class), double.class, toCategories("math","trigonometry"), MathUtil.class),
+    TanDOper(TokenType.UnaryFunc, 8, toLabels("tanD"), toArgs(double.class), double.class, toCategories("math","trigonometry"), MathUtil.class),
+    ASinDOper(TokenType.UnaryFunc, 8, toLabels("asinD"), toArgs(double.class), double.class, toCategories("math","trigonometry"), MathUtil.class),
+    ACosDOper(TokenType.UnaryFunc, 8, toLabels("acosD"), toArgs(double.class), double.class, toCategories("math","trigonometry"), MathUtil.class),
+    ATanDOper(TokenType.UnaryFunc, 8, toLabels("atanD"), toArgs(double.class), double.class, toCategories("math","trigonometry"), MathUtil.class),
 
-    SinHOper("sinh", TokenType.UnaryFunc, 8, Math.class),
-    CosHOper("cosh", TokenType.UnaryFunc, 8, Math.class),
-    TanHOper("tanh", TokenType.UnaryFunc, 8, Math.class),
+    SinHOper(TokenType.UnaryFunc, 8, toLabels("sinh"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
+    CosHOper(TokenType.UnaryFunc, 8, toLabels("cosh"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
+    TanHOper(TokenType.UnaryFunc, 8, toLabels("tanh"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
 
-    FactFuncOper(TokenType.UnaryFunc, 8, MathUtil.class, "fact", "factorial", "fact"),
-    FloorOper(TokenType.UnaryFunc, 8, Math.class, "floor", "roundDown", "floor"),
-    CeilOper(TokenType.UnaryFunc, 8, Math.class, "ceil", "roundUp", "ceil"),
-    SignOper(TokenType.UnaryFunc, 8, Math.class, "signum", "sign", "signum"),
-    RoundOper("round", TokenType.UnaryFunc, 8, Math.class),
+    FactFuncOper(TokenType.UnaryFunc, 8, toLabels("fact", "factorial"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class),
+    FloorOper(TokenType.UnaryFunc, 8, toLabels("roundDown", "floor"), toArgs(double.class), double.class, toCategories("math"), Math.class, "floor"),
+    CeilOper(TokenType.UnaryFunc, 8, toLabels("roundUp", "ceil"), toArgs(double.class), double.class, toCategories("math"), Math.class, "ceil"),
+    SignOper(TokenType.UnaryFunc, 8, toLabels("sign", "signum"), toArgs(double.class), double.class, toCategories("math"), Math.class, "signum"),
+    RoundOper(TokenType.UnaryFunc, 8, toLabels("round"), toArgs(double.class), double.class, toCategories("math"), Math.class),
   
     // Useful functions from Apache Math Commons
-    IsPrimeOper(TokenType.UnaryFunc, 8, toLabels("isPrime"), toArgs(int.class), boolean.class, org.apache.commons.math3.primes.Primes.class),    
-    NextPrimeOper("nextPrime", TokenType.UnaryFunc, 8, org.apache.commons.math3.primes.Primes.class, "nextPrime", int.class),
-    PrimeFactorsOper("primeFactors", TokenType.UnaryFunc, 8, org.apache.commons.math3.primes.Primes.class, "primeFactors", int.class),
-    PowerOf2Oper("isPowerOfTwo", TokenType.UnaryFunc, 8, org.apache.commons.math3.util.ArithmeticUtils.class, "isPowerOfTwo", long.class),
+    IsPrimeOper(TokenType.UnaryFunc, 8, toLabels("isPrime"), toArgs(int.class), boolean.class, toCategories("logical", "math"), org.apache.commons.math3.primes.Primes.class),    
+    NextPrimeOper(TokenType.UnaryFunc, 8, toLabels("nextPrime"), toArgs(int.class), boolean.class, toCategories("math"), org.apache.commons.math3.primes.Primes.class),    
+    PrimeFactorsOper(TokenType.UnaryFunc, 8, toLabels("primeFactors"), toArgs(int.class), boolean.class, toCategories("math"), org.apache.commons.math3.primes.Primes.class),    
+    PowerOf2Oper(TokenType.UnaryFunc, 8, toLabels("isPowerOfTwo"), toArgs(long.class), boolean.class, toCategories("math"), org.apache.commons.math3.util.ArithmeticUtils.class),    
     
-    GcdOper("gcd", TokenType.BinaryFunc, 8, org.apache.commons.math3.util.ArithmeticUtils.class, "gcd", long.class, long.class),   
-    LcmOper("lcm", TokenType.BinaryFunc, 8, org.apache.commons.math3.util.ArithmeticUtils.class, "lcm", long.class, long.class),
+    GcdOper(TokenType.BinaryFunc, 8, toLabels("gcd"), toArgs(long.class, long.class), long.class, toCategories("math"), org.apache.commons.math3.util.ArithmeticUtils.class),   
+    LcmOper(TokenType.BinaryFunc, 8, toLabels("lcm"), toArgs(long.class, long.class), long.class, toCategories("math"), org.apache.commons.math3.util.ArithmeticUtils.class),
     
     // String functions
-    LenOper(TokenType.UnaryFunc, 8, toLabels("len", "length"), toArgs(String.class), int.class, MathUtil.class, "length"),
-    LeftOper(TokenType.BinaryFunc, 8, toLabels("left", "instrLeft"), toArgs(String.class, int.class), String.class, MathUtil.class, "instrLeft"),
-    RightOper(TokenType.BinaryFunc, 8, toLabels("right", "instrRight"), toArgs(String.class, int.class), String.class, MathUtil.class, "instrRight"),
-    MidOper(TokenType.GenericFunc, 8, toLabels("mid", "instrMid"), toArgs(String.class, int.class, int.class), String.class, MathUtil.class, "instrMid"),
-    toLowerOper(TokenType.UnaryFunc, 8, toLabels("toLower"), toArgs(String.class), String.class, MathUtil.class),
-    toUpperOper(TokenType.UnaryFunc, 8, toLabels("toUpper"), toArgs(String.class), String.class, MathUtil.class),
-    IndexOfOper(TokenType.BinaryFunc, 8, toLabels("indexOf"), toArgs(String.class, String.class), int.class, MathUtil.class, "indexOf"),
-    ContainsOper(TokenType.BinaryFunc, 8, toLabels("contains"), toArgs(String.class, String.class), boolean.class, MathUtil.class, "contains"),
-    trimOper(TokenType.UnaryFunc, 8, toLabels("trim"), toArgs(String.class), String.class, MathUtil.class),
-    reverseOper(TokenType.UnaryFunc, 8, toLabels("reverse"), toArgs(String.class), String.class, MathUtil.class),
-    toStringOper(TokenType.UnaryFunc, 8, toLabels("toString"), toArgs(Object.class), String.class, MathUtil.class),
-    toNumberOper(TokenType.UnaryFunc, 8, toLabels("toNumber"), toArgs(Object.class), double.class, MathUtil.class),
+    LenOper(TokenType.UnaryFunc, 8, toLabels("len", "length"), toArgs(String.class), int.class, toCategories("text"), MathUtil.class, "length"),
+    LeftOper(TokenType.BinaryFunc, 8, toLabels("left", "instrLeft"), toArgs(String.class, int.class), String.class, toCategories("text"), MathUtil.class, "instrLeft"),
+    RightOper(TokenType.BinaryFunc, 8, toLabels("right", "instrRight"), toArgs(String.class, int.class), String.class, toCategories("text"), MathUtil.class, "instrRight"),
+    MidOper(TokenType.GenericFunc, 8, toLabels("mid", "instrMid"), toArgs(String.class, int.class, int.class), String.class, toCategories("text"), MathUtil.class, "instrMid"),
+    toLowerOper(TokenType.UnaryFunc, 8, toLabels("toLower"), toArgs(String.class), String.class, toCategories("text"), MathUtil.class),
+    toUpperOper(TokenType.UnaryFunc, 8, toLabels("toUpper"), toArgs(String.class), String.class, toCategories("text"), MathUtil.class),
+    IndexOfOper(TokenType.BinaryFunc, 8, toLabels("indexOf"), toArgs(String.class, String.class), int.class, toCategories("text"), MathUtil.class),
+    ContainsOper(TokenType.BinaryFunc, 8, toLabels("contains"), toArgs(String.class, String.class), boolean.class, toCategories("text"), MathUtil.class),
+    trimOper(TokenType.UnaryFunc, 8, toLabels("trim"), toArgs(String.class), String.class, toCategories("text"), MathUtil.class),
+    reverseOper(TokenType.UnaryFunc, 8, toLabels("reverse"), toArgs(String.class), String.class, toCategories("text"), MathUtil.class),
+    toStringOper(TokenType.UnaryFunc, 8, toLabels("toString"), toArgs(Object.class), String.class, toCategories("text"), MathUtil.class),
+    toNumberOper(TokenType.UnaryFunc, 8, toLabels("toNumber"), toArgs(Object.class), double.class, toCategories("text"), MathUtil.class),
    
     // Binary functions, mostly supported in Java Math
-    ReminderFuncOper(TokenType.BinaryFunc, 8, Math.class, "IEEEremainder", "remainder"),
-    ModFuncOper(TokenType.BinaryFunc, 8, MathUtil.class, "mod", "mod"),
-    PowerFuncOper(TokenType.BinaryFunc, 8, Math.class, "pow", "pow", "power"),
+    ReminderFuncOper(TokenType.BinaryFunc, 8, toLabels("IEEEremainder"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class),
+    ModFuncOper(TokenType.BinaryFunc, 8, toLabels("mod", "modulus", "remainder"), toArgs(double.class, double.class), double.class, toCategories("math"), MathUtil.class),
+    PowerFuncOper(TokenType.BinaryFunc, 8, toLabels("pow", "power"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class),
 
-    BiggerOper(TokenType.BinaryFunc, 8, Math.class, "max", "bigger"),
-    SmallerOper(TokenType.BinaryFunc, 8, Math.class, "min", "smaller"),
-    HypotOper(TokenType.BinaryFunc, 8, org.apache.commons.math3.util.FastMath.class, "hypot"),
-    NumberOfOper("numberOf", TokenType.GenericFunc, 8, MathUtil.class, "numberOf", TableElement.class, Object.class),    
-    PermOper(TokenType.BinaryFunc, 8, MathUtil.class, "numPermutations", "perm", "nPk"),    
-    CombOper(TokenType.BinaryFunc, 8, MathUtil.class, "numCombinations", "comb", "nCk", "nChooseK"),    
+    BiggerOper(TokenType.BinaryFunc, 8, toLabels("max", "bigger"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class),
+    SmallerOper(TokenType.BinaryFunc, 8, toLabels("min", "smaller"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class),
+    HypotOper(TokenType.BinaryFunc, 8, toLabels("hypot"), toArgs(double.class, double.class), double.class, toCategories("math"), org.apache.commons.math3.util.FastMath.class),   
+    
+    PermOper(TokenType.BinaryFunc, 8, toLabels("perm", "numPermutations", "perm", "nPk"), toArgs(double.class, double.class), double.class, toCategories("math"), MathUtil.class, "numPermutations"),    
+    CombOper(TokenType.BinaryFunc, 8, toLabels("comb", "numCombinations", "nCk", "nChooseK"), toArgs(double.class, double.class), double.class, toCategories("math"), MathUtil.class, "numCombinations"),    
 
     // Builtin functions
-    NullOper(TokenType.BuiltIn, 8, "null"),
-    TrueOper(TokenType.BuiltIn, 8, "true"),
-    FalseOper(TokenType.BuiltIn, 8, "false"),
-    EOper(TokenType.BuiltIn, 8, toLabels("e"), null, double.class, MathUtil.class),
-    PiOper(TokenType.BuiltIn, 8, toLabels("pi"), null, double.class, MathUtil.class),
-    ColumnIndexOper(TokenType.BuiltIn, 8, toLabels("columnIndex", "cidx"), null, int.class),
-    RowIndexOper(TokenType.BuiltIn, 8, toLabels("rowIndex", "ridx"), null, int.class),
+    NullOper(TokenType.BuiltIn, 8, "null", toCategories("constant")),
+    TrueOper(TokenType.BuiltIn, 8, "true", toCategories("logical", "constant")),
+    FalseOper(TokenType.BuiltIn, 8, "false", toCategories("logical", "constant")),
+    EOper(TokenType.BuiltIn, 8, toLabels("e"), null, double.class, toCategories("math", "constant"), MathUtil.class),
+    PiOper(TokenType.BuiltIn, 8, toLabels("pi"), null, double.class, toCategories("math", "constant"), MathUtil.class),
     
-    NowOper(TokenType.BuiltIn, 8, toLabels("now"), null, java.util.Date.class),
+    ColumnIndexOper(TokenType.BuiltIn, 8, toLabels("columnIndex", "cidx"), null, int.class, toCategories("lookup", "information")),
+    RowIndexOper(TokenType.BuiltIn, 8, toLabels("rowIndex", "ridx"), null, int.class, toCategories("lookup", "information")),
+    
+    NowOper(TokenType.BuiltIn, 8, toLabels("now"), null, java.util.Date.class, toCategories("Date/Time")),
 
     // Single Variable Stat Functions 
-    SumOper(TokenType.StatOp, 8, "sum"),
-    Sum2Oper(TokenType.StatOp, 8, "sumOfSquares", "sumSqs", "ss", "sumsq"),
-    SumSqD2Oper(TokenType.StatOp, 8, "sumOfSquaredDeviates", "ss", "ssd", "devsq"),
-    MeanOper(TokenType.StatOp, 8, "mean", "average", "avg"),
-    MedianOper(TokenType.StatOp, 8, "median"),
-    QuartileOper(TokenType.StatOp, 8, toLabels("quartile"), toArgs(TableElement.class, int.class), double.class),
-    FirstQuartileOper(TokenType.StatOp, 8, "firstQuartile", "firstQ"),
-    ThirdQuartileOper(TokenType.StatOp, 8, "thirdQuartile", "thirdQ"),
-    ModeOper(TokenType.StatOp, 8, "mode"),
-    StDevPopulationOper(TokenType.StatOp, 8, "stDevPopulation", "stDevOfPopulation", "stDev.p"),
-    StDevSampleOper(TokenType.StatOp, 8, "stDevSample", "stDevOfSample", "stDev", "stDev.s"),
-    VarPopulationOper(TokenType.StatOp, 8, "variancePopulation", "varianceOfPopulation", "var.p"),
-    VarSampleOper(TokenType.StatOp, 8, "varianceSample", "varianceOfSample", "var", "var.s", "variance"),
-    MinOper(TokenType.StatOp, 8, "min", "minimum"),
-    MaxOper(TokenType.StatOp, 8, "max", "maximum"),
-    RangeOper(TokenType.StatOp, 8, "range", "spread"),
-    CountOper(TokenType.StatOp, 8, "count", "cnt"),
-    SkewOper(TokenType.StatOp, 8, "skewness", "skew"),
-    KurtosisOper(TokenType.StatOp, 8, "kurtosis", "kurt"),
+    SumOper(TokenType.StatOp, 8, toLabels("sum"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    Sum2Oper(TokenType.StatOp, 8, toLabels("sumOfSquares", "sumSqs", "ss", "sumsq"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    SumSqD2Oper(TokenType.StatOp, 8, toLabels("sumOfSquaredDeviates", "ss", "ssd", "devsq"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    MeanOper(TokenType.StatOp, 8, toLabels("mean", "average", "avg"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    MedianOper(TokenType.StatOp, 8, toLabels("median"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    QuartileOper(TokenType.StatOp, 8, toLabels("quartile"), toArgs(TableElement.class, int.class), double.class, toCategories("statistical")),
+    FirstQuartileOper(TokenType.StatOp, 8, toLabels("firstQuartile", "firstQ"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    ThirdQuartileOper(TokenType.StatOp, 8, toLabels("thirdQuartile", "thirdQ"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    ModeOper(TokenType.StatOp, 8, toLabels("mode"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    StDevPopulationOper(TokenType.StatOp, 8, toLabels("stDevPopulation", "stDevOfPopulation", "stDev.p"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    StDevSampleOper(TokenType.StatOp, 8, toLabels("stDevSample", "stDevOfSample", "stDev", "stDev.s"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    VarPopulationOper(TokenType.StatOp, 8, toLabels("variancePopulation", "varianceOfPopulation", "var.p"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    VarSampleOper(TokenType.StatOp, 8, toLabels("varianceSample", "varianceOfSample", "var", "var.s", "variance"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    MinOper(TokenType.StatOp, 8, toLabels("min", "minimum"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    MaxOper(TokenType.StatOp, 8, toLabels("max", "maximum"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    RangeOper(TokenType.StatOp, 8, toLabels("range", "spread"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    CountOper(TokenType.StatOp, 8, toLabels("count", "cnt"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    SkewOper(TokenType.StatOp, 8, toLabels("skewness", "skew"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    KurtosisOper(TokenType.StatOp, 8, toLabels("kurtosis", "kurt"), toArgs(TableElement.class), double.class, toCategories("statistical")),
     
-    PValueOper(TokenType.StatOp, 8, "tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"),
-    TValueOper(TokenType.StatOp, 8, "tStatistic", "tValue", "oneSampleTwoTailTTestTValue"),
-    TTestOper(TokenType.StatOp, 8, "tTest"),
+    PValueOper(TokenType.StatOp, 8, toLabels("tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistical")),
+    TValueOper(TokenType.StatOp, 8, toLabels("tStatistic", "tValue", "oneSampleTwoTailTTestTValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistical")),
+    TTestOper(TokenType.StatOp, 8, toLabels("tTest"), toArgs(TableRowColumnElement.class, double.class, double.class), double.class, toCategories("statistical")),
     
-    TwoSamplePValueOper(TokenType.StatOp, 8, "twoSampleTSigLevel",  "tsPValue",  "twoSamplePValue", "twoSampleTwoTailTTestPValue"),
-    TwoSampleTValueOper(TokenType.StatOp, 8, "twoSampleTStatistic", "tsTValue",  "twoSampleTValue", "twoSampleTwoTailTTestTValue"),
-    TwoSampleTTestOper(TokenType.StatOp, 8, "twoSampleTTest", "tsTTest"),
+    TwoSamplePValueOper(TokenType.StatOp, 8, toLabels("twoSampleTSigLevel",  "tsPValue",  "twoSamplePValue", "twoSampleTwoTailTTestPValue"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical")),
+    TwoSampleTValueOper(TokenType.StatOp, 8, toLabels("twoSampleTStatistic", "tsTValue",  "twoSampleTValue", "twoSampleTwoTailTTestTValue"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical")),
+    TwoSampleTTestOper(TokenType.StatOp, 8, toLabels("twoSampleTTest", "tsTTest"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class, double.class), double.class, toCategories("statistical")),
     
     // Normal Distribution Single Variable Stat Functions 
-    NormSampleOper(TokenType.BinaryFunc, 8, MathUtil.class, "normalSample", "normalSample", "normS", "normalS"),
-    NormDensityOper(TokenType.GenericFunc, 8, MathUtil.class, "normalDensity", "normalDensity", "normD", "normalD", "normPDF"),
-    NormCumProbOper(TokenType.GenericFunc, 8, MathUtil.class, "normalCumProb", "normalCumProb", "normCP", "normalCP", "normCDF"),
-    NormInvCumProbOper(TokenType.GenericFunc, 8, MathUtil.class, "normalInvCumProb", "normalInvCumProb", "normICP", "normalICP", "normInvCDF"),
-    NormProbOper(TokenType.GenericFunc, 8, MathUtil.class, "normalProbability", "normalProbability", "normalProb", "normP", "normalP", "normPMF"),
-    NormProbInRangeOper(TokenType.GenericFunc, 8, MathUtil.class, "normalProbInRange", "normalProbInRange", 
-                                                                  "normalProbabilityInRange","normPIR", "normalPIR"), 
+    NormSampleOper(TokenType.BinaryFunc, 8, toLabels("normalSample", "normalSample", "normS", "normalS"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    NormDensityOper(TokenType.GenericFunc, 8, toLabels("normalDensity", "normalDensity", "normD", "normalD", "normPDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    NormCumProbOper(TokenType.GenericFunc, 8, toLabels("normalCumProb", "normalCumProb", "normCP", "normalCP", "normCDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    NormInvCumProbOper(TokenType.GenericFunc, 8, toLabels("normalInvCumProb", "normalInvCumProb", "normICP", "normalICP", "normInvCDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    NormProbOper(TokenType.GenericFunc, 8, toLabels("normalProbability", "normalProbability", "normalProb", "normP", "normalP", "normPMF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    NormProbInRangeOper(TokenType.GenericFunc, 8, toLabels("normalProbInRange", "normalProbInRange", "normalProbabilityInRange","normPIR", "normalPIR"), 
+    											  toArgs(double.class, double.class, double.class, double.class), 
+    											  double.class, 
+    											  toCategories("statistical", "distribution"), 
+    											  MathUtil.class), 
+    
     // Exponential Distribution Single Variable Stat Functions 
-    ExpSampleOper(TokenType.UnaryFunc, 8, MathUtil.class, "exponentialSample", "exponentialSample", "expS"),
-    ExpDensityOper(TokenType.BinaryFunc, 8, MathUtil.class, "exponentialDensity", "exponentialDensity", "expD", "expPDF"),
-    ExpCumProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "exponentialCumProb", "exponentialCumProb", "expCP", "expCDF"),
-    ExpInvCumProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "exponentialInvCumProb", "exponentialInvCumProb", "expICP", "expInvCDF"),
-    ExpProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "exponentialProbability", "exponentialProbability", "expProb", "expP", "expPMF"),
-    ExpProbInRangeOper(TokenType.GenericFunc, 8, MathUtil.class, "exponentialProbInRange", "exponentialProbInRange", 
-                                                                    "exponentialProbabilityInRange","expPIR"), 
+    ExpSampleOper(TokenType.UnaryFunc, 8, toLabels("exponentialSample", "expS"), toArgs(double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ExpDensityOper(TokenType.BinaryFunc, 8, toLabels("exponentialDensity", "expD", "expPDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ExpCumProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialCumProb", "expCP", "expCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ExpInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialInvCumProb", "expICP", "expInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ExpProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialProbability", "expProb", "expP", "expPMF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ExpProbInRangeOper(TokenType.GenericFunc, 8,toLabels("exponentialProbInRange", "exponentialProbabilityInRange","expPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class), 
+    
     // Chi Squared Distribution Single Variable Stat Functions                                                               
-    ChiSqSampleOper(TokenType.UnaryFunc, 8, MathUtil.class, "chiSqSample", "ChiSqSample", "ChiSqS"),
-    ChiSqDensityOper(TokenType.BinaryFunc, 8, MathUtil.class, "chiSqDensity", "ChiSqDensity", "ChiSqD", "ChiSqPDF"),
-    ChiSqCumProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "chiSqCumProb", "chiSqCumProb", "chiSqCP", "chiSqCDF"),
-    ChiSqInvCumProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "chiSqInvCumProb", "ChiSqInvCumProb", "ChiSqICP", "ChiSqInvCDF"),
-    ChiSqProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "chiSqProbability", "ChiSqProbability", "ChiSqProb", "ChiSqP", "ChiSqPMF"),
-    ChiSqProbInRangeOper(TokenType.GenericFunc, 8, MathUtil.class, "chiSqProbInRange", "ChiSqProbInRange", "ChiSqProbabilityInRange","ChiSqPIR"),    
-    ChiSqScoreOper("chiSqScore", TokenType.GenericFunc, 8, MathUtil.class, "chiSqScore", double.class, double.class, double.class),    
-    ChiSqStatOper("chiSqStat", TokenType.StatOp, 8, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
-    ChiSqTestOper("chiSqTest", TokenType.StatOp, 8, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class, double.class),
+    ChiSqSampleOper(TokenType.UnaryFunc, 8, toLabels("chiSqSample", "ChiSqS"), toArgs(double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ChiSqDensityOper(TokenType.BinaryFunc, 8, toLabels("chiSqDensity", "ChiSqD", "ChiSqPDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ChiSqCumProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqCumProb", "chiSqCP", "chiSqCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ChiSqInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqInvCumProb", "ChiSqICP", "ChiSqInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ChiSqProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqProbability", "ChiSqProb", "ChiSqP", "ChiSqPMF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    ChiSqProbInRangeOper(TokenType.GenericFunc, 8, toLabels("chiSqProbInRange", "ChiSqProbabilityInRange","ChiSqPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
+    ChiSqScoreOper(TokenType.GenericFunc, 8, toLabels("chiSqScore"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
+    ChiSqStatOper(TokenType.StatOp, 8, toLabels("chiSqStat"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "distribution")),
+    ChiSqTestOper(TokenType.StatOp, 8, toLabels("chiSqTest"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class, double.class), double.class, toCategories("statistical", "distribution")),
 
     // T Distribution Single Variable Stat Functions                                                               
-    TSampleOper(TokenType.UnaryFunc, 8, MathUtil.class, "tSample", "tSample", "tS"),
-    TDensityOper(TokenType.BinaryFunc, 8, MathUtil.class, "tDensity", "tDensity", "tD", "tPDF"),
-    TCumProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "tCumProb", "tCumProb", "tCP", "tCDF"),
-    TInvCumProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "tInvCumProb", "tInvCumProb", "tICP", "tInvCDF"),
-    TProbOper(TokenType.BinaryFunc, 8, MathUtil.class, "tProbability", "tProbability", "tProb", "tP", "tPMF"),
-    TProbInRangeOper(TokenType.GenericFunc, 8, MathUtil.class, "tProbInRange", "tProbInRange", "tProbabilityInRange","tPIR"),    
+    TSampleOper(TokenType.UnaryFunc, 8, toLabels("tSample", "tS"), toArgs(double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    TDensityOper(TokenType.BinaryFunc, 8, toLabels("tDensity", "tD", "tPDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    TCumProbOper(TokenType.BinaryFunc, 8, toLabels("tCumProb", "tCP", "tCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    TInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("tInvCumProb", "tICP", "tInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    TProbOper(TokenType.BinaryFunc, 8, toLabels("tProbability", "tProb", "tP", "tPMF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    TProbInRangeOper(TokenType.GenericFunc, 8, toLabels("tProbInRange", "tProbabilityInRange","tPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
 
-    TScoreOper("tScore", TokenType.GenericFunc, 8, MathUtil.class, "tScore", double.class, double.class, double.class, double.class),    
-    PopMeanOper("popMean", TokenType.GenericFunc, 8, MathUtil.class, "popMean", double.class, double.class, double.class, double.class),    
+    TScoreOper(TokenType.GenericFunc, 8, toLabels("tScore"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
+    PopMeanOper(TokenType.GenericFunc, 8, toLabels("popMean"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
     
     // Two Variable Stat Functions
-    LinearSlopeOper("slope", TokenType.StatOp, 8, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
-    LinearInterceptOper("intercept", TokenType.StatOp, 8, (Class<?>)null, (String)null, TableRowColumnElement.class, TableRowColumnElement.class),
-    LinearROper(TokenType.StatOp, 8, "correlation", "ccr", "correl"),
-    LinearR2Oper(TokenType.StatOp, 8, "correlation2", "ccr2", "r2", "rsq"),
-    LinearComputeXOper(TokenType.GenericFunc, 8, MathUtil.class, "lrComputeX", "computeX", "lrComputeX"),
-    LinearComputeYOper(TokenType.GenericFunc, 8, MathUtil.class, "lrComputeY", "computeY", "lrComputeY"),
+    LinearSlopeOper(TokenType.StatOp, 8, toLabels("slope"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "regression")),
+    LinearInterceptOper(TokenType.StatOp, 8, toLabels("intercept"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "regression")),
+    LinearROper(TokenType.StatOp, 8, toLabels("correlation", "ccr", "correl"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "regression")),
+    LinearR2Oper(TokenType.StatOp, 8, toLabels("correlation2", "ccr2", "r2", "rsq"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "regression")),
+    LinearComputeXOper(TokenType.GenericFunc, 8, toLabels("lrComputeX", "computeX", "lrComputeX"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "regression"), MathUtil.class),
+    LinearComputeYOper(TokenType.GenericFunc, 8, toLabels("lrComputeY", "computeY", "lrComputeY"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "regression"), MathUtil.class),
     
     // Transformation Functions
-    MeanCenterOper(TokenType.TransformOp, 8, toLabels("meanCenter"), toArgs(TableElement.class), null),
-    NormalizeOper(TokenType.TransformOp, 8, toLabels("normalize", "standardize"), toArgs(TableElement.class), null),    
-    ScaleOper(TokenType.TransformOp, 8, toLabels("scale"), toArgs(TableElement.class, double.class, double.class), null),
+    MeanCenterOper(TokenType.TransformOp, 8, toLabels("meanCenter"), toArgs(TableElement.class), null, toCategories("transform")),
+    NormalizeOper(TokenType.TransformOp, 8, toLabels("normalize", "standardize"), toArgs(TableElement.class), null, toCategories("transform")),    
+    ScaleOper(TokenType.TransformOp, 8, toLabels("scale"), toArgs(TableElement.class, double.class, double.class), null, toCategories("transform")),
 
     Paren(10, TokenType.LeftParen, TokenType.RightParen),
     NOP(0, TokenType.Comma, TokenType.ColumnRef, TokenType.RowRef, TokenType.SubsetRef, TokenType.CellRef, TokenType.TableRef),
@@ -276,6 +281,11 @@ public enum BuiltinOperator implements Labeled, Operator
     static private String [] toLabels(String... labels)
     {
         return labels;        
+    }
+    
+    static private String [] toCategories(String... cats)
+    {
+        return cats;        
     }
     
     static private Class<?> [] toArgs(Class<?>... args)
@@ -293,6 +303,7 @@ public enum BuiltinOperator implements Labeled, Operator
     private String m_methodName;
     private Method m_method;
     private Class<?>[] m_methodArgs;
+    private String[]  m_categories;
 
     private Class<? extends Object> m_resultType;
     
@@ -304,22 +315,24 @@ public enum BuiltinOperator implements Labeled, Operator
     }
     
     private BuiltinOperator(TokenType tt, 
-                            int priority, 
-                            String labels[], 
-                            Class<? extends Object > args[], 
-                            Class<? extends Object> resultType)
-    {
-        this(tt, priority, labels, args, resultType, (Class<?>)null, (String)null);
-    }
-    
+            int priority, 
+            String labels[], 
+            Class<? extends Object > args[], 
+            Class<? extends Object> resultType,
+            String [] categories)
+	{
+    	this(tt, priority, labels, args, resultType, categories, (Class<?>)null, (String)null);
+	}
+
     private BuiltinOperator(TokenType tt, 
                             int priority, 
                             String labels[], 
                             Class<? extends Object > args[], 
                             Class<? extends Object> resultType, 
+                            String [] categories,
                             Class<? extends Object> clazz)
     {
-        this(tt, priority, labels, args, resultType, clazz, null);
+        this(tt, priority, labels, args, resultType, categories, clazz, null);
     }
     
     private BuiltinOperator(TokenType tt, 
@@ -327,6 +340,7 @@ public enum BuiltinOperator implements Labeled, Operator
                             String labels[], 
                             Class<? extends Object > args[], 
                             Class<? extends Object> resultType, 
+                            String [] categories,
                             Class<? extends Object> clazz, 
                             String methodName)
     {
@@ -342,30 +356,20 @@ public enum BuiltinOperator implements Labeled, Operator
             }
         }
         else {
-            m_label = methodName;
+            m_label = methodName == null ? m_label : methodName;
             m_aliases.add(methodName.toLowerCase());
         }
         
         m_resultType = resultType;
         m_methodArgs = args == null ? new Class<?> [] {} : args;
+        m_categories = categories;
         
         m_clazz = clazz;
         if (clazz != null)
             m_methodName = methodName != null ? methodName : m_label;
     }
     
-    private BuiltinOperator(int priority)
-    {
-        this();
-        m_priority = priority;
-    }
-    
-    private BuiltinOperator(String label, TokenType tt)
-    {
-        this(label, tt, 6);
-    }
-    
-    private BuiltinOperator(String label, TokenType tt, int priority)
+    private BuiltinOperator(TokenType tt, int priority, String label, String [] categories)
     {
         this();
         m_label = label;
@@ -374,47 +378,7 @@ public enum BuiltinOperator implements Labeled, Operator
         
         m_priority = priority;
         m_tokenTypes.add(tt);
-    }
-    
-    private BuiltinOperator(String label, TokenType tt, int priority, Class<? extends Object> clazz)
-    {
-        this(label, tt, priority, clazz, label);
-    }
-    
-    private BuiltinOperator(String label, TokenType tt, int priority, Class<? extends Object> clazz, String methodName)
-    {
-        this(label, tt, priority);
-        m_clazz = clazz;
-        m_methodName = methodName;
-    }
-    
-    private BuiltinOperator(String label, TokenType tt, int priority, Class<? extends Object> clazz, String methodName, Class<?>... argTypes)
-    {
-        this(label, tt, priority);
-        m_clazz = clazz;
-        m_methodName = methodName;
-        m_methodArgs = argTypes;
-    }
-    
-    private BuiltinOperator(TokenType tt, int priority, Class<? extends Object> clazz, String methodName, String...labels)
-    {
-        this();
-        m_priority = priority;
-        m_tokenTypes.add(tt);
-        if (labels != null && labels.length > 0) {
-            for (String label : labels) {
-                if (m_label == null)
-                    m_label = label;
-                m_aliases.add(label.toLowerCase());
-            }
-        }
-        else {
-            m_label = methodName;
-            m_aliases.add(methodName.toLowerCase());
-        }
-        
-        m_clazz = clazz;
-        m_methodName = methodName;
+        m_categories = categories;
     }
     
     private BuiltinOperator(int priority, TokenType... tts)
@@ -424,20 +388,6 @@ public enum BuiltinOperator implements Labeled, Operator
         if (tts != null) {
             for (TokenType tt : tts) {
                 m_tokenTypes.add(tt);
-            }
-        }
-    }
-    
-    private BuiltinOperator(TokenType tt, int priority, String... labels)
-    {
-        this();
-        m_priority = priority;
-        m_tokenTypes.add(tt);
-        if (labels != null) {
-            for (String label : labels) {
-            	if (m_label == null)
-            		m_label = label;
-            	m_aliases.add(label.toLowerCase());
             }
         }
     }
@@ -486,6 +436,12 @@ public enum BuiltinOperator implements Labeled, Operator
     }
     
     @Override
+    public String [] getCategories()
+    {
+    	return m_categories;
+    }
+    
+    @Override
     public String getLabel()
     {
         return m_label;
@@ -526,51 +482,6 @@ public enum BuiltinOperator implements Labeled, Operator
                     m_methodArgs = new Class<?>[]{Object.class, Object.class};
                     break;
                     
-                case PValueOper:
-                case TValueOper:
-                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, double.class};
-                    break;
-                    
-                case TTestOper:
-                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, double.class, double.class};
-                    break;
-                    
-                case TwoSamplePValueOper:
-                case TwoSampleTValueOper:
-                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, TableRowColumnElement.class};
-                    break;
-                    
-                case TwoSampleTTestOper:
-                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, TableRowColumnElement.class, double.class};
-                    break;
-                    
-                case LinearROper:
-                case LinearR2Oper:
-                    m_methodArgs = new Class<?>[]{TableRowColumnElement.class, TableRowColumnElement.class};
-                    break;
-                    
-                case LinearComputeXOper:
-                case LinearComputeYOper:
-                    m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
-                    break;
-                
-                case NormDensityOper:
-                case NormCumProbOper:
-                case NormInvCumProbOper:
-                case NormProbOper:
-                    m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
-                    break;
-                
-                case NormProbInRangeOper:
-                    m_methodArgs = new Class<?>[]{double.class, double.class, double.class, double.class};
-                    break;
-                    
-                case ChiSqProbInRangeOper:
-                case ExpProbInRangeOper:
-                case TProbInRangeOper:
-                    m_methodArgs = new Class<?>[]{double.class, double.class, double.class};
-                    break;
-                
                 default:
                     TokenType tt = getPrimaryTokenType();
                     int numArgs = tt != null ? tt.numArgs() : 0;

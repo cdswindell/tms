@@ -128,6 +128,7 @@ public class XlsReader extends BaseReader<XLSOptions>
         sf_FunctionMap.put("SIGN", BuiltinOperator.SignOper);
         sf_FunctionMap.put("INT", BuiltinOperator.FloorOper);
         sf_FunctionMap.put("TRUNC", BuiltinOperator.FloorOper);
+        sf_FunctionMap.put("CEILING", BuiltinOperator.CeilOper);
         sf_FunctionMap.put("GCD", BuiltinOperator.GcdOper);
         sf_FunctionMap.put("LCM", BuiltinOperator.LcmOper);
         
@@ -210,13 +211,17 @@ public class XlsReader extends BaseReader<XLSOptions>
         sf_FunctionMap.put("RSQ", BuiltinOperator.LinearR2Oper);        
     }
     
-    static final Set<Operator> sf_InvertedArgs = new HashSet<Operator>();
-    
+    static final Set<Operator> sf_InvertedArgs = new HashSet<Operator>(); 
     static {
         sf_InvertedArgs.add(BuiltinOperator.LinearSlopeOper);
         sf_InvertedArgs.add(BuiltinOperator.LinearInterceptOper);
         sf_InvertedArgs.add(BuiltinOperator.LinearROper);
         sf_InvertedArgs.add(BuiltinOperator.LinearR2Oper);
+    }
+    
+    static final Map<Operator, Integer> sf_OmitArgs = new HashMap<Operator, Integer>(); 
+    static {
+    	sf_OmitArgs.put(BuiltinOperator.CeilOper, 1);
     }
     
     private Map<String, DerivationScope> m_derivCache = null;
@@ -603,8 +608,18 @@ public class XlsReader extends BaseReader<XLSOptions>
                             // for a few Excel formulas,
                             // we need to swap the order of
                             // the operands
-                            if (tmsT.getOperator() != null && sf_InvertedArgs.contains(tmsT.getOperator()))
-                                es.reverse(tmsT.getOperator().numArgs());
+                        	Operator op = tmsT.getOperator();
+                        	if (op != null) {
+	                            if (sf_InvertedArgs.contains(op))
+	                                es.reverse(op.numArgs());
+	                            else if (sf_OmitArgs.containsKey(op)) {
+	                            	int omittedArgs = sf_OmitArgs.get(op);
+	                            	for (; omittedArgs > 0; omittedArgs--) {
+	                            		es.pop();
+	                            	}
+	                            }
+                        	}
+                        	
                             es.push(tmsT);
                         }
                     }
@@ -715,8 +730,7 @@ public class XlsReader extends BaseReader<XLSOptions>
         String funcName = trimString(eT.getNameName());
         if (funcName != null) {
             Operator op = sf_FunctionMap.get(funcName);
-            if (op != null) {
-                
+            if (op != null) {               
                 m_externalFuncRefStack.push(op);
                 return null;
             }

@@ -3,6 +3,7 @@ package org.tms.api.derivables;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +13,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.tms.api.Access;
 import org.tms.api.Row;
 import org.tms.api.Table;
@@ -29,6 +31,8 @@ import org.tms.teq.ops.JythonOp;
 public class TokenMapper
 {
     static final private Map<String, Token> sf_BuiltInTokenMap = new HashMap<String, Token>();  
+    static final private Map<Category, Set<Operator>> sf_OperatorCatalog = new HashMap<Category, Set<Operator>>();
+    static final private Map<String, Category> sf_GlobalCategoryCache = new HashMap<String, Category>();
     
     static {
         for (BuiltinOperator o : BuiltinOperator.values()) {
@@ -51,7 +55,9 @@ public class TokenMapper
                         }
                     }
                 }               
-            }            
+            } 
+            
+            cacheGlobalOperatorCategories(o);
         }
     }
     
@@ -61,7 +67,44 @@ public class TokenMapper
         return fetchTokenMapper(c);
     }
     
-    static public TokenMapper fetchTokenMapper()
+    private static void cacheGlobalOperatorCategories(BuiltinOperator op) 
+    {
+		String [] cats = op.getCategories();
+		if (cats != null && cats.length > 0) {
+			for (String cat : cats) {
+				if (cat != null && (cat = cat.trim()).length() > 0) {
+					Category c = fetchGlobalCategory(WordUtils.capitalizeFully(cat), true);
+					categorizeGlobalOperator(c, op);					
+				}
+			}
+		}
+		
+	}
+
+	private static void categorizeGlobalOperator(Category c, BuiltinOperator op) 
+	{
+		Set<Operator> ops = sf_OperatorCatalog.get(c);
+		if (ops == null) 
+			ops = new HashSet<Operator>();
+		
+		ops.add(op);		
+	}
+
+	private static Category fetchGlobalCategory(String cat, boolean addIfMissing) 
+	{
+		Category c = sf_GlobalCategoryCache.get(cat);
+		
+		if (c == null && addIfMissing) {
+			cat = cat.intern();
+			c = new OperatorCategory(cat);
+			
+			sf_GlobalCategoryCache.put(cat, c);
+		}
+		
+		return c;
+	}
+
+	static public TokenMapper fetchTokenMapper()
     {
     	return fetchTokenMapper(TableContextFactory.fetchDefaultTableContext());
     }
@@ -118,8 +161,8 @@ public class TokenMapper
     private Map<OverloadKey, Token> m_userOverloadedOps = new HashMap<OverloadKey, Token>();
     private Table m_operTable;
     private TableContext m_context;
-    private Map<Category, Set<Operator>> m_catalog = new HashMap<Category, Set<Operator>>();
-    private Map<String, Category> m_globalCategoryCache = new HashMap<String, Category>();
+    private Map<Category, Set<Operator>> m_userOpCatalog = new HashMap<Category, Set<Operator>>();
+    private Map<String, Category> m_userCategoryCache = new HashMap<String, Category>();
     
     private TokenMapper(Table operTable)
     {
@@ -142,15 +185,20 @@ public class TokenMapper
     
 	public Category fetchCategory(String category, boolean createIfMissing) 
 	{
-        if (category != null && (category = category.trim().toLowerCase()).length() > 0) {
-            Category tObj = m_globalCategoryCache.get(category);
-            if (tObj == null && createIfMissing) {
-                // minimize object creation
-            	category = category.intern();
-                
-                tObj = new OperatorCategory(category);
-                m_globalCategoryCache.put(category, tObj);
-            }
+        if (category != null && (category = category.trim()).length() > 0) {
+        	category = WordUtils.capitalizeFully(category);
+        	
+        	Category tObj = TokenMapper.fetchGlobalCategory(category, false);      	
+        	if (tObj == null) {
+	            tObj = m_userCategoryCache.get(category);
+	            if (tObj == null && createIfMissing) {
+	                // minimize object creation
+	            	category = category.intern();
+	                
+	                tObj = new OperatorCategory(category);
+	                m_userCategoryCache.put(category, tObj);
+	            }
+        	}
             
             return tObj;
         }
@@ -329,6 +377,45 @@ public class TokenMapper
         
         Token t = new Token(tt, oper);
         m_userTokenMap.put(label.trim().toLowerCase(),  t);
+        
+        cacheOperatorCategories(oper);
+    }
+    
+    private void cacheOperatorCategories(Operator op) 
+    {
+		String [] cats = op.getCategories();
+		if (cats != null && cats.length > 0) {
+			for (String cat : cats) {
+				if (cat != null && (cat = cat.trim()).length() > 0) {
+					Category c = fetchCategory(WordUtils.capitalizeFully(cat), true);
+					if (c != null) {
+						Set<Operator> ops = m_userOpCatalog.get(c);
+					    if (ops == null)
+					    	ops = new HashSet<Operator>();
+						ops.add(op);
+					}
+				}
+			}
+		}		
+	}
+
+    private void removeCachedOperator(Operator op) 
+    {
+		String [] cats = op.getCategories();
+		if (cats != null && cats.length > 0) {
+			for (String cat : cats) {
+				if (cat != null && (cat = cat.trim()).length() > 0) {
+					Category c = fetchCategory(WordUtils.capitalizeFully(cat), true);
+					if (c != null) {
+						Set<Operator> ops = m_userOpCatalog.get(c);
+					    if (ops != null) {
+					    	if (ops.remove(op) && ops.isEmpty())
+					    		m_userOpCatalog.remove(c);
+					    }
+					}
+				}
+			}
+		}		
     }
     
     public boolean deregisterOperator(Operator oper)
@@ -338,10 +425,15 @@ public class TokenMapper
         
         String label = oper.getLabel();
         
-        return deregisterOperator(label);
+        if (label != null && (label = label.trim()).length() > 0) {
+        	removeCachedOperator(oper);
+        	return deregisterOperator(label);
+        }
+        else
+        	return false;
     }
     
-    public boolean deregisterOperator(String label)
+    protected boolean deregisterOperator(String label)
     {
         if (label == null || label.trim().length() == 0)
             throw new IllegalTableStateException("Labeled operator required");
@@ -353,6 +445,8 @@ public class TokenMapper
     public void deregisterAllOperators()
     {
     	m_userTokenMap.clear();
+    	m_userOpCatalog.clear();
+    	m_userCategoryCache.clear();
     }
    
     public <T, R> void overloadOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> unOp)

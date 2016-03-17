@@ -707,12 +707,6 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     }
     
     @Override
-    public boolean deregisterOperator(String label)
-    {
-        return fetchTokenMapper().deregisterOperator(label);
-    }
-    
-    @Override
     public void deregisterAllOperators()
     {
         fetchTokenMapper().deregisterAllOperators();

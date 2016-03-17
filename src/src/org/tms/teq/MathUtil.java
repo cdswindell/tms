@@ -357,7 +357,7 @@ public class MathUtil
             return Double.NaN;
     }   
     
-    static final public double numberOf(TableElement te, Object q)
+    static final public int numberOf(TableElement te, Object q)
     {
         int count = 0;
         if (te != null && q != null) {
@@ -385,7 +385,7 @@ public class MathUtil
             }
         }
         
-        return (double)count;
+        return count;
     }   
     
     static final private BigDecimal toBigDecimal(Object n)

@@ -215,12 +215,17 @@ public class XLSReaderTest extends BaseTest
             
             vetCellValue(t, "IntVal", 18.0, "roundDown(18.7)");
             vetCellValue(t, "TruncVal", 18.0, "roundDown(18.7)");
+            vetCellValue(t, "CeilVal", 19.0, "roundUp(18.7)");
             
             vetCellValue(t, "CombinVal", 20.0, "comb(6.0, 3.0)");
             vetCellValue(t, "PermutVal", 120.0, "perm(6.0, 3.0)");
             
             vetCellValue(t, "GcdVal", 7, "gcd(56.0, 21.0)");
             vetCellValue(t, "LcmVal", 72, "lcm(24.0, 36.0)");
+            
+            vetCellValue(t, "FactVal", 720.0, "fact(6.0)");
+            vetCellValue(t, "PiVal", 3.141592654, "pi");
+            vetCellValue(t, "ModVal", 2.0, "mod(5.0, 3.0)");
         }
         catch (IOException e)
         {
@@ -600,7 +605,7 @@ public class XLSReaderTest extends BaseTest
             assertThat(cell.isDerived(), is(true));
             deriv = cell.getDerivation().getExpression();
             assertNotNull(deriv);
-            assertThat(deriv, is("factorial(cell \"BasicMathVal\")"));
+            assertThat(deriv, is("fact(cell \"BasicMathVal\")"));
             
             cell = vetCellValue(t, "YellowTrim", "Yellow");
             assertThat(cell.isDerived(), is(true));

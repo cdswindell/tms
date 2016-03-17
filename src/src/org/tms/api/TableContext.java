@@ -207,18 +207,6 @@ public interface TableContext extends BaseElement, InitializableTableProperties
     public void registerGroovyOverload(String label, Class<?> pType1, Class<?> pType2, Class<?> resultType, String fileName, String methodName);
     
     /**
-     * Deregisters the {@link org.tms.api.derivables.Operator Operator} with the supplied {@code label} 
-     * from this {@code TableContext}.
-     * <p>
-     * <b>Note:</b>Deregistering {@link org.tms.api.derivables.Operator Operator}s only prevents them from being used
-     * as a new {@link org.tms.api.derivables.Derivable Derivable} expression, it does not invalidate them in
-     * existing derivations.
-     * @param label the label associated with the Operator to deregister
-     * @return true if an Operator with the supplied label was found (and deregistered)
-     */
-    public boolean deregisterOperator(String label);
-
-    /**
      * Deregisters all user-defined {@link org.tms.api.derivables.Operator Operator}s from this {@code TableContext}.
      * <p>
      * <b>Note:</b>Deregistering {@link org.tms.api.derivables.Operator Operator}s only prevents them from being used
