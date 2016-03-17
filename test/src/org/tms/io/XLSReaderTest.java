@@ -226,6 +226,19 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, "FactVal", 720.0, "fact(6.0)");
             vetCellValue(t, "PiVal", 3.141592654, "pi");
             vetCellValue(t, "ModVal", 2.0, "mod(5.0, 3.0)");
+            vetCellValue(t, "PowOpVal", 8.0, "2.0 ^ 3.0");
+            vetCellValue(t, "PowVal", 8.0, "pow(2.0, 3.0)");
+            
+            vetCellValue(t, "ToDegVal", 90.0, "toDegrees(pi / 2.0)");
+            vetCellValue(t, "ToRadVal", 1.57079633, "toRadians(90.0)");
+
+            vetCellValue(t, "QuoVal", 3.0, "quotient(7.0, 2.0)");
+            vetCellValue(t, "RoundVal", 19.0, "round(18.7)");
+            
+            vetCellValue(t, "TrueVal", true, "true");
+            vetCellValue(t, "FalseVal", false, "false");
+            vetCellValue(t, "IfVal", 3.0, "if((cell \"AbsVal\" > 4.0), 3.0, 1.0)");
+            vetCellValue(t, "IfElseVal", 1.0, "if((cell \"AbsVal\" < 4.0), 3.0, 1.0)");
         }
         catch (IOException e)
         {

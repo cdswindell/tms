@@ -52,6 +52,15 @@ public class MathUtil
         return leaf;
     }
     
+    static final public long quotient(double x, double y)
+    {
+    	// do some rounding
+    	long xL = (long)(x + 0.5);
+    	long yL = (long)(y + 0.5);
+    	
+    	return xL / yL;
+    }
+    
     static final public double pmt(final double ipt, final int nPer, final double pv, final double fv)
     {
         double tmp = Math.exp(nPer*Math.log1p(ipt));

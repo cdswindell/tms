@@ -90,7 +90,7 @@ public enum BuiltinOperator implements Labeled, Operator
     
     // Factorial operator, implemented in code
     FactOper(TokenType.UnaryTrailingOp, 7, toLabels("!"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class, "fact"),  
-    PercentOper(TokenType.UnaryTrailingOp, 7, toLabels("%", "percent"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class, "percent"),  
+    PercentOper(TokenType.UnaryTrailingOp, 7, toLabels("%"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class, "percent"),  
     
     // Unary functions, mostly supported in Java Math
     FracOper(TokenType.UnaryFunc, 8, toLabels("frac"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class),  
@@ -140,7 +140,7 @@ public enum BuiltinOperator implements Labeled, Operator
     FloorOper(TokenType.UnaryFunc, 8, toLabels("roundDown", "floor"), toArgs(double.class), double.class, toCategories("math"), Math.class, "floor"),
     CeilOper(TokenType.UnaryFunc, 8, toLabels("roundUp", "ceil"), toArgs(double.class), double.class, toCategories("math"), Math.class, "ceil"),
     SignOper(TokenType.UnaryFunc, 8, toLabels("sign", "signum"), toArgs(double.class), double.class, toCategories("math"), Math.class, "signum"),
-    RoundOper(TokenType.UnaryFunc, 8, toLabels("round"), toArgs(double.class), double.class, toCategories("math"), Math.class),
+    RoundOper(TokenType.UnaryFunc, 8, toLabels("round"), toArgs(double.class), long.class, toCategories("math"), Math.class),
   
     // Useful functions from Apache Math Commons
     IsPrimeOper(TokenType.UnaryFunc, 8, toLabels("isPrime"), toArgs(int.class), boolean.class, toCategories("logical", "math"), org.apache.commons.math3.primes.Primes.class),    
@@ -168,10 +168,11 @@ public enum BuiltinOperator implements Labeled, Operator
     // Binary functions, mostly supported in Java Math
     ReminderFuncOper(TokenType.BinaryFunc, 8, toLabels("IEEEremainder"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class),
     ModFuncOper(TokenType.BinaryFunc, 8, toLabels("mod", "modulus", "remainder"), toArgs(double.class, double.class), double.class, toCategories("math"), MathUtil.class),
+    QuotientFuncOper(TokenType.BinaryFunc, 8, toLabels("quotient", "intDiv", "integerDivision"), toArgs(double.class, double.class), long.class, toCategories("math"), MathUtil.class),
     PowerFuncOper(TokenType.BinaryFunc, 8, toLabels("pow", "power"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class),
 
-    BiggerOper(TokenType.BinaryFunc, 8, toLabels("max", "bigger"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class),
-    SmallerOper(TokenType.BinaryFunc, 8, toLabels("min", "smaller"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class),
+    BiggerOper(TokenType.BinaryFunc, 8, toLabels("bigger"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class, "max"),
+    SmallerOper(TokenType.BinaryFunc, 8, toLabels("smaller"), toArgs(double.class, double.class), double.class, toCategories("math"), Math.class, "min"),
     HypotOper(TokenType.BinaryFunc, 8, toLabels("hypot"), toArgs(double.class, double.class), double.class, toCategories("math"), org.apache.commons.math3.util.FastMath.class),   
     
     PermOper(TokenType.BinaryFunc, 8, toLabels("perm", "numPermutations", "perm", "nPk"), toArgs(double.class, double.class), double.class, toCategories("math"), MathUtil.class, "numPermutations"),    

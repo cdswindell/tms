@@ -99,7 +99,7 @@ public class XlsReader extends BaseReader<XLSOptions>
         sf_OperatorMap.put(MultiplyPtg.class, BuiltinOperator.MultOper);
         
         sf_OperatorMap.put(PercentPtg.class, BuiltinOperator.PercentOper);
-        sf_OperatorMap.put(PowerPtg.class, BuiltinOperator.PowerFuncOper);
+        sf_OperatorMap.put(PowerPtg.class, BuiltinOperator.PowerOper);
         sf_OperatorMap.put(ConcatPtg.class, BuiltinOperator.PlusOper);
         
         sf_OperatorMap.put(EqualPtg.class, BuiltinOperator.EqOper);
@@ -117,9 +117,7 @@ public class XlsReader extends BaseReader<XLSOptions>
         sf_FunctionMap.put("PI", BuiltinOperator.PiOper);
         sf_FunctionMap.put("MOD", BuiltinOperator.ModFuncOper);
         sf_FunctionMap.put("POWER", BuiltinOperator.PowerFuncOper);
-        
-        sf_FunctionMap.put("COLUMN", BuiltinOperator.ColumnIndexOper);
-        sf_FunctionMap.put("ROW", BuiltinOperator.RowIndexOper);
+        sf_FunctionMap.put("QUOTIENT", BuiltinOperator.QuotientFuncOper);
         
         sf_FunctionMap.put("RAND", BuiltinOperator.RandOper);
         sf_FunctionMap.put("RANDBETWEEN", BuiltinOperator.RandBetweenOper);
@@ -129,6 +127,7 @@ public class XlsReader extends BaseReader<XLSOptions>
         sf_FunctionMap.put("INT", BuiltinOperator.FloorOper);
         sf_FunctionMap.put("TRUNC", BuiltinOperator.FloorOper);
         sf_FunctionMap.put("CEILING", BuiltinOperator.CeilOper);
+        sf_FunctionMap.put("ROUND", BuiltinOperator.RoundOper);
         sf_FunctionMap.put("GCD", BuiltinOperator.GcdOper);
         sf_FunctionMap.put("LCM", BuiltinOperator.LcmOper);
         
@@ -222,6 +221,7 @@ public class XlsReader extends BaseReader<XLSOptions>
     static final Map<Operator, Integer> sf_OmitArgs = new HashMap<Operator, Integer>(); 
     static {
     	sf_OmitArgs.put(BuiltinOperator.CeilOper, 1);
+    	sf_OmitArgs.put(BuiltinOperator.RoundOper, 1);
     }
     
     private Map<String, DerivationScope> m_derivCache = null;
