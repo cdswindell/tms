@@ -1,6 +1,6 @@
 package org.tms.api.derivables;
 
-public interface Labeled
+public interface Labeled 
 {
     public String getLabel();
     

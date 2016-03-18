@@ -3,11 +3,13 @@ package org.tms.teq;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Table;
@@ -22,6 +24,13 @@ import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 public class TokenMapperTest extends BaseTest
 {
 
+    @AfterClass
+    static public void cleanup()
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((Table) null);
+        tm.deregisterAllOperators();
+    }
+    
     @Test
     public final void testFetchTokenMapperTable()
     {
@@ -324,7 +333,9 @@ public class TokenMapperTest extends BaseTest
         assertThat(t, notNullValue());
         assertThat(t.isNumeric(), is(true));
         assertThat(t.isString(), is(false));
-        assertThat(t.getValue(), is(7.0));        
+        assertThat(t.getValue(), is(7.0));       
+        
+        tm.deregisterAllOperators();
     }
         
     @Test
@@ -377,9 +388,110 @@ public class TokenMapperTest extends BaseTest
         resToken = pse.evaluate();
         assertThat(resToken, notNullValue());
         assertThat(18.0, is(resToken.getNumericValue()));
+        
+        tm.deregisterAllOperators();
     }
     
-    public class Square implements Operator
+    @Test
+    public void testGetCategories()
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        assertNotNull(tm);
+        
+        List<String> cats = tm.getOperatorCategories();
+        assertNotNull(cats);
+        assertThat(false, is(cats.isEmpty()));
+        assertThat(true, is(cats.contains("Math")));
+        assertThat(true, is(cats.contains("Financial")));
+    }
+    
+    @Test
+    public void testRegisteredOpCategories()
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        assertNotNull(tm);
+        
+        List<String> cats = tm.getOperatorCategories();
+        assertNotNull(cats);
+        assertThat(false, is(cats.isEmpty()));
+        assertThat(false, is(cats.contains("Special Math")));
+        
+        Operator op = new Square();
+        tm.registerOperator(op);
+        
+        cats = tm.getOperatorCategories();
+        assertNotNull(cats);
+        assertThat(false, is(cats.isEmpty()));
+        assertThat(true, is(cats.contains("Special Math")));
+        
+        tm.deregisterOperator(op);
+        cats = tm.getOperatorCategories();
+        assertNotNull(cats);
+        assertThat(false, is(cats.isEmpty()));
+        assertThat(false, is(cats.contains("Special Math")));   
+    }
+    
+    @Test
+    public void testRegisteredFetchByCategory()
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        assertNotNull(tm);
+        
+        List<String> cats = tm.getOperatorCategories();
+        assertNotNull(cats);
+        assertThat(false, is(cats.isEmpty()));
+        assertThat(false, is(cats.contains("Special Math")));
+        
+        Operator op = new Square();
+        tm.registerOperator(op);
+        
+        cats = tm.getOperatorCategories();
+        assertNotNull(cats);
+        assertThat(false, is(cats.isEmpty()));
+        assertThat(true, is(cats.contains("Special Math")));
+        
+        List<Operator> ops = tm.getOperatorsForCategory("special math");
+        assertNotNull(ops);
+        assertThat(false, is(ops.isEmpty()));
+        assertThat(true, is(ops.contains(op)));
+        
+        tm.deregisterOperator(op);
+    }
+    
+    @Test
+    public void testRegisteredFetchByMathCategory()
+    {
+        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        assertNotNull(tm);
+        
+        List<Operator> ops = tm.getOperatorsForCategory("math");
+        assertNotNull(ops);
+        assertThat(false, is(ops.isEmpty()));
+        
+        for (Operator op : BuiltinOperator.values()) {
+        	if (isCategorized(op, "math")) {
+                assertThat(true, is(ops.contains(op)));
+                ops.remove(op);
+        	}
+        }
+        
+        assertThat(true, is(ops.isEmpty()));
+    }
+    
+    private boolean isCategorized(Operator op, String cat) 
+    {
+		if (op == null || op.getCategories() == null || op.getCategories().length <= 0)
+			return false;
+		
+		for (String s : op.getCategories()) {
+			if (cat.equalsIgnoreCase(s))
+				return true;
+		}
+		
+		return false;
+	}
+
+	public class Square implements Operator
     {
         @Override
         public TokenType getTokenType()
@@ -412,7 +524,13 @@ public class TokenMapperTest extends BaseTest
         public Class<?> getResultType()
         {
             return double.class;
-        }       
+        }  
+        
+        @Override
+        public String[] getCategories()
+        {
+        	return new String [] {"Special Math"};
+        }
     }
     
     public class Add3 implements Operator

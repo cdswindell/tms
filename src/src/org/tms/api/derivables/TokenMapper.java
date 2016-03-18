@@ -2,6 +2,8 @@ package org.tms.api.derivables;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +33,7 @@ import org.tms.teq.ops.JythonOp;
 public class TokenMapper
 {
     static final private Map<String, Token> sf_BuiltInTokenMap = new HashMap<String, Token>();  
-    static final private Map<Category, Set<Operator>> sf_OperatorCatalog = new HashMap<Category, Set<Operator>>();
+    static final private Map<Category, Set<Operator>> sf_GlobalOperatorCache = new HashMap<Category, Set<Operator>>();
     static final private Map<String, Category> sf_GlobalCategoryCache = new HashMap<String, Category>();
     
     static {
@@ -67,13 +69,19 @@ public class TokenMapper
         return fetchTokenMapper(c);
     }
     
+    private static final String massageCategoryLabel(String label)
+    {
+    	label = label.trim();
+    	return WordUtils.capitalizeFully(label, ' ', '/');	
+    }
+    
     private static void cacheGlobalOperatorCategories(BuiltinOperator op) 
     {
 		String [] cats = op.getCategories();
 		if (cats != null && cats.length > 0) {
 			for (String cat : cats) {
 				if (cat != null && (cat = cat.trim()).length() > 0) {
-					Category c = fetchGlobalCategory(WordUtils.capitalizeFully(cat), true);
+					Category c = fetchGlobalCategory(massageCategoryLabel(cat), true);
 					categorizeGlobalOperator(c, op);					
 				}
 			}
@@ -83,9 +91,11 @@ public class TokenMapper
 
 	private static void categorizeGlobalOperator(Category c, BuiltinOperator op) 
 	{
-		Set<Operator> ops = sf_OperatorCatalog.get(c);
-		if (ops == null) 
+		Set<Operator> ops = sf_GlobalOperatorCache.get(c);
+		if (ops == null) {
 			ops = new HashSet<Operator>();
+			sf_GlobalOperatorCache.put(c,  ops);
+		}
 		
 		ops.add(op);		
 	}
@@ -96,7 +106,7 @@ public class TokenMapper
 		
 		if (c == null && addIfMissing) {
 			cat = cat.intern();
-			c = new OperatorCategory(cat);
+			c = new Category(cat);
 			
 			sf_GlobalCategoryCache.put(cat, c);
 		}
@@ -152,6 +162,14 @@ public class TokenMapper
             tm.m_userTokenMap.put(e.getKey(), e.getValue());
         }
         
+        for (Entry<String, Category> e : source.m_userCategoryCache.entrySet()) {
+        	tm.m_userCategoryCache.put(e.getKey(), e.getValue());
+        }
+        
+        for (Entry<Category, Set<Operator>> e : source.m_userOperatorCache.entrySet()) {
+        	tm.m_userOperatorCache.put(e.getKey(), new HashSet<Operator>(e.getValue()));
+        }
+        
         tm.m_operTable = source.m_operTable;
         
         return tm;
@@ -161,7 +179,7 @@ public class TokenMapper
     private Map<OverloadKey, Token> m_userOverloadedOps = new HashMap<OverloadKey, Token>();
     private Table m_operTable;
     private TableContext m_context;
-    private Map<Category, Set<Operator>> m_userOpCatalog = new HashMap<Category, Set<Operator>>();
+    private Map<Category, Set<Operator>> m_userOperatorCache = new HashMap<Category, Set<Operator>>();
     private Map<String, Category> m_userCategoryCache = new HashMap<String, Category>();
     
     private TokenMapper(Table operTable)
@@ -186,7 +204,7 @@ public class TokenMapper
 	public Category fetchCategory(String category, boolean createIfMissing) 
 	{
         if (category != null && (category = category.trim()).length() > 0) {
-        	category = WordUtils.capitalizeFully(category);
+        	category = massageCategoryLabel(category);
         	
         	Category tObj = TokenMapper.fetchGlobalCategory(category, false);      	
         	if (tObj == null) {
@@ -195,7 +213,7 @@ public class TokenMapper
 	                // minimize object creation
 	            	category = category.intern();
 	                
-	                tObj = new OperatorCategory(category);
+	                tObj = new Category(category);
 	                m_userCategoryCache.put(category, tObj);
 	            }
         	}
@@ -387,11 +405,14 @@ public class TokenMapper
 		if (cats != null && cats.length > 0) {
 			for (String cat : cats) {
 				if (cat != null && (cat = cat.trim()).length() > 0) {
-					Category c = fetchCategory(WordUtils.capitalizeFully(cat), true);
+					Category c = fetchCategory(massageCategoryLabel(cat), true);
 					if (c != null) {
-						Set<Operator> ops = m_userOpCatalog.get(c);
-					    if (ops == null)
+						Set<Operator> ops = m_userOperatorCache.get(c);
+					    if (ops == null) {
 					    	ops = new HashSet<Operator>();
+					    	m_userOperatorCache.put(c, ops);
+					    }
+					    
 						ops.add(op);
 					}
 				}
@@ -405,12 +426,14 @@ public class TokenMapper
 		if (cats != null && cats.length > 0) {
 			for (String cat : cats) {
 				if (cat != null && (cat = cat.trim()).length() > 0) {
-					Category c = fetchCategory(WordUtils.capitalizeFully(cat), true);
+					Category c = fetchCategory(massageCategoryLabel(cat), false);
 					if (c != null) {
-						Set<Operator> ops = m_userOpCatalog.get(c);
+						Set<Operator> ops = m_userOperatorCache.get(c);
 					    if (ops != null) {
-					    	if (ops.remove(op) && ops.isEmpty())
-					    		m_userOpCatalog.remove(c);
+					    	if (ops.remove(op) && ops.isEmpty()) {
+					    		m_userOperatorCache.remove(c);
+					    		this.m_userCategoryCache.remove(c.getLabel());
+					    	}
 					    }
 					}
 				}
@@ -445,10 +468,57 @@ public class TokenMapper
     public void deregisterAllOperators()
     {
     	m_userTokenMap.clear();
-    	m_userOpCatalog.clear();
+    	m_userOperatorCache.clear();
     	m_userCategoryCache.clear();
     }
    
+    public List<String> getOperatorCategories()
+    {
+    	Set<String> catNamesSet = new HashSet<String>();
+    	
+    	for (String catName : sf_GlobalCategoryCache.keySet()) {
+    		catNamesSet.add(catName);
+    	}
+    	
+    	for (String catName : m_userCategoryCache.keySet()) {
+    		catNamesSet.add(catName);
+    	}
+    	
+    	List<String> catNames = new ArrayList<String>(catNamesSet);
+    	Collections.sort(catNames);
+    	
+    	return catNames;
+    } 
+
+	public List<Operator> getOperatorsForCategory(String label) 
+	{
+		Category c = fetchCategory(massageCategoryLabel(label), false);
+		if (c == null)
+			return Collections.emptyList();
+		
+		Set<Operator> opSet = new HashSet<Operator>();
+		
+		Set<Operator> ops = m_userOperatorCache.get(c);
+		if (ops != null)
+			opSet.addAll(ops);
+		
+		ops = sf_GlobalOperatorCache.get(c);
+		if (ops != null)
+			opSet.addAll(ops);
+		
+		// turn set into a list
+		List<Operator> opsList = new ArrayList<Operator>(opSet);
+		
+		// sort the list by operator name
+		if (!opsList.isEmpty()) {
+			Comparator<Operator> byLabel = (Operator o1, Operator o2)->o1.getLabel().compareToIgnoreCase(o2.getLabel());
+			Collections.sort(opsList, byLabel);
+	    }
+		
+		// and return it
+		return opsList;		
+	}
+	
     public <T, R> void overloadOperator(String label, Class<?> p1Type, Class<?> resultType, Function<T, R> unOp)
     {
         Operator op = new UnaryFunc1ArgOp<T, R>(label, TokenType.UnaryOp, p1Type, resultType, unOp);
@@ -616,9 +686,7 @@ public class TokenMapper
         return String.format("[Tokens Built in: %d, User: %d, Overloads: %d]", 
                 sf_BuiltInTokenMap.size(), m_userTokenMap.size(), m_userOverloadedOps.size());
     }
-    
-    
-    
+      
     static private class UnaryFunc1ArgOp<T, R> extends BaseOp
     {
         private Function<T, R> m_uniOp;

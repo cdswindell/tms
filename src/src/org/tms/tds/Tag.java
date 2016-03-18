@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Tag implements Serializable
+public class Tag implements Serializable, Comparable<Tag>
 {
     private static final long serialVersionUID = -8379517266723894527L;
 
@@ -49,7 +49,7 @@ public class Tag implements Serializable
     
     public Tag(String label)
     {
-        m_label = label.trim().toLowerCase();
+        m_label = label.trim();
     }
     
     public String getLabel()
@@ -94,4 +94,14 @@ public class Tag implements Serializable
         
         return true;
     }
+    
+
+	@Override
+	public int compareTo(Tag o) 
+	{
+		if (o == null)
+			return 1;
+		
+		return this.getLabel().compareTo(o.getLabel());
+	}
 }

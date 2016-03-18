@@ -108,11 +108,11 @@ public enum BuiltinOperator implements Labeled, Operator
     RandBetweenOper(TokenType.BinaryFunc, 8, toLabels("randomBetween", "randomBetween", "randBetween"), toArgs(double.class, double.class), int.class, toCategories("math", "statistical"), MathUtil.class),
 
     // TVM Calculations
-    PmtOper(TokenType.GenericFunc, 8, toLabels("pmt", "paymentPerTerm"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
-    FvOper(TokenType.GenericFunc, 8, toLabels("fv", "futureValue"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
-    PvOper(TokenType.GenericFunc, 8, toLabels("pv", "presentValue"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
-    NPerOper(TokenType.GenericFunc, 8, toLabels("nper", "numPeriods"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
-    RateOper(TokenType.GenericFunc, 8, toLabels("rate", "interestRate"), toArgs(int.class, double.class, double.class, double.class), double.class, toCategories("finanial"), MathUtil.class),
+    PmtOper(TokenType.GenericFunc, 8, toLabels("pmt", "paymentPerTerm"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("Financial"), MathUtil.class),
+    FvOper(TokenType.GenericFunc, 8, toLabels("fv", "futureValue"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("Financial"), MathUtil.class),
+    PvOper(TokenType.GenericFunc, 8, toLabels("pv", "presentValue"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("Financial"), MathUtil.class),
+    NPerOper(TokenType.GenericFunc, 8, toLabels("nper", "numPeriods"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("Financial"), MathUtil.class),
+    RateOper(TokenType.GenericFunc, 8, toLabels("rate", "interestRate"), toArgs(int.class, double.class, double.class, double.class), double.class, toCategories("Financial"), MathUtil.class),
     
     // trig functions, radians
     toDegreesOper(TokenType.UnaryFunc, 8, toLabels("toDegrees"), toArgs(double.class), double.class, toCategories("math","trigonometry"), Math.class),
@@ -146,7 +146,7 @@ public enum BuiltinOperator implements Labeled, Operator
     IsPrimeOper(TokenType.UnaryFunc, 8, toLabels("isPrime"), toArgs(int.class), boolean.class, toCategories("logical", "math"), org.apache.commons.math3.primes.Primes.class),    
     NextPrimeOper(TokenType.UnaryFunc, 8, toLabels("nextPrime"), toArgs(int.class), boolean.class, toCategories("math"), org.apache.commons.math3.primes.Primes.class),    
     PrimeFactorsOper(TokenType.UnaryFunc, 8, toLabels("primeFactors"), toArgs(int.class), boolean.class, toCategories("math"), org.apache.commons.math3.primes.Primes.class),    
-    PowerOf2Oper(TokenType.UnaryFunc, 8, toLabels("isPowerOfTwo"), toArgs(long.class), boolean.class, toCategories("math"), org.apache.commons.math3.util.ArithmeticUtils.class),    
+    IsPowerOf2Oper(TokenType.UnaryFunc, 8, toLabels("isPowerOfTwo"), toArgs(long.class), boolean.class, toCategories("math"), org.apache.commons.math3.util.ArithmeticUtils.class),    
     
     GcdOper(TokenType.BinaryFunc, 8, toLabels("gcd"), toArgs(long.class, long.class), long.class, toCategories("math"), org.apache.commons.math3.util.ArithmeticUtils.class),   
     LcmOper(TokenType.BinaryFunc, 8, toLabels("lcm"), toArgs(long.class, long.class), long.class, toCategories("math"), org.apache.commons.math3.util.ArithmeticUtils.class),
