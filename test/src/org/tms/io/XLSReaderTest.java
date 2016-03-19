@@ -34,6 +34,7 @@ public class XLSReaderTest extends BaseTest
     private static final String SAMPLEMulti = "MultiSheet.xlsx";
     private static final String SAMPLEMultiXLS = "MultiSheet.xls";
     private static final String SAMPLEMath = "sampleMath.xlsx";
+    private static final String SAMPLEText = "sampleText.xlsx";
     private static final String ExportTableGoldSingleCell = "testExportTableSingleCell.xlsx";
     
     @Test
@@ -158,6 +159,43 @@ public class XLSReaderTest extends BaseTest
         }
     }
     
+    @Test
+    public final void testImportTextSheet() 
+    {
+        XlsReader r = new XlsReader(qualifiedFileName(SAMPLEText, "xls"), XLSOptions.Default.withRowLabels(false)); 
+        assertNotNull(r);
+        
+        testImportTextSheet(r);
+    }
+
+    private void testImportTextSheet(XlsReader r)
+    {
+        try
+        {
+            Table t = r.parseActiveSheet();
+            assertNotNull(t);
+            
+            Column valCol = t.getColumn(Access.ByLabel, "Value");
+            assertNotNull(valCol);
+            
+            vetCellValue(t, "UpperVal", "ABCDEFGHI", "toUpper(\"AbcDefGhi\")");
+            vetCellValue(t, "LowerVal", "abcdefghi", "toLower(\"AbcDefGhi\")");
+            vetCellValue(t, "LenVal", 9.0, "len(\"AbcDefGhi\")");
+            vetCellValue(t, "TrimVal", "Abc Def Ghi", "trim(\"  Abc Def Ghi  \")");
+            vetCellValue(t, "ConcatVal", "AbcDefGhi", "\"Abc\" + \"Def\" + \"Ghi\"");
+            vetCellValue(t, "ReptVal", "abcabcabc", "\"abc\" * 3.0");
+            vetCellValue(t, "ExactVal", true, "\"abc\" = \"abc\"");
+            vetCellValue(t, "ValVal", 9, "toNumber(\"9\")");
+            vetCellValue(t, "LeftVal", "Abc", "left(\"AbcDefGhi\", 3.0)");
+            vetCellValue(t, "RightVal", "Ghi", "right(\"AbcDefGhi\", 3.0)");
+            vetCellValue(t, "MidVal", "Def", "mid(\"AbcDefGhi\", 4.0, 3.0)");
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+    }
+
     @Test
     public final void testImportMathSheet() 
     {

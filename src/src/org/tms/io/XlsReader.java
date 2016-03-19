@@ -160,6 +160,7 @@ public class XlsReader extends BaseReader<XLSOptions>
         sf_FunctionMap.put("LEN",  BuiltinOperator.LenOper);
         sf_FunctionMap.put("TRIM",  BuiltinOperator.trimOper);
         sf_FunctionMap.put("CONCATENATE",  BuiltinOperator.PlusOper);
+        sf_FunctionMap.put("CONCAT",  BuiltinOperator.PlusOper);
         sf_FunctionMap.put("REPT",  BuiltinOperator.MultOper);
         sf_FunctionMap.put("EXACT", BuiltinOperator.EqOper);
         sf_FunctionMap.put("VALUE", BuiltinOperator.toNumberOper);
@@ -620,6 +621,11 @@ public class XlsReader extends BaseReader<XLSOptions>
 	                            		es.pop();
 	                            	}
 	                            }
+	                            else if ((tmsT instanceof ExcelToken) && ((ExcelToken)tmsT).numArgs() > op.numArgs()) {
+	                            	for (int i = op.numArgs(); i < ((ExcelToken)tmsT).numArgs(); i++) {
+	                            		es.push(tmsT);
+	                            	}
+	                            }
                         	}
                         	
                             es.push(tmsT);
@@ -918,7 +924,7 @@ public class XlsReader extends BaseReader<XLSOptions>
             Operator op = sf_FunctionMap.get(funcName.toUpperCase());
             
             if (op != null)
-                return new Token(op); 
+                return new ExcelToken(op, eT.getNumberOfOperands()); 
             else if ("#external#".equals(funcName) && !m_externalFuncRefStack.isEmpty())
                 return m_externalFuncRefStack.pop();
         }
@@ -1399,5 +1405,21 @@ public class XlsReader extends BaseReader<XLSOptions>
             
             return otherDerivedCells;
         }
+    }
+    
+    class ExcelToken extends Token
+    {
+    	private int m_numArgs;
+    	
+    	public ExcelToken(Operator op, int numArgs)
+    	{
+    		super(op);
+    		m_numArgs = numArgs;
+    	}
+    	
+    	public int numArgs()
+    	{
+    		return m_numArgs;
+    	}
     }
 }
