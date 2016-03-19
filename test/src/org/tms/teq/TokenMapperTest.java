@@ -16,9 +16,10 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
-import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.tds.ContextImpl;
+import org.tms.tds.TokenMapper;
 import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class TokenMapperTest extends BaseTest
@@ -42,7 +43,7 @@ public class TokenMapperTest extends BaseTest
     @Test
     public final void testFetchTokenMapperTableContext()
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
+        TokenMapper tm = TokenMapper.fetchTokenMapper((Table) null);
         assertThat(tm, notNullValue());
         assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
         
@@ -50,18 +51,17 @@ public class TokenMapperTest extends BaseTest
         assertThat(c, notNullValue());
         assertThat(c, not(TableContextFactory.fetchDefaultTableContext()));
         
-        tm = c.getTokenMapper();
+        tm = ((ContextImpl)c).getTokenMapper();
         assertThat(tm, notNullValue());
-        assertThat(tm, not(TableContextFactory.fetchDefaultTableContext().getTokenMapper()));
+        assertThat(tm, not(((ContextImpl)TableContextFactory.fetchDefaultTableContext()).getTokenMapper()));
     }
 
     @Test
     public final void testRegisterOperator()
     throws PendingDerivationException, BlockedDerivationException
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertThat(tm, notNullValue());
-        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
         PostfixStackEvaluator pse = null;
         try {
@@ -76,7 +76,7 @@ public class TokenMapperTest extends BaseTest
         
         // register new operator
         Square sOp = new Square();
-        tm.registerOperator(sOp);
+        tc.registerOperator(sOp);
         
         // reparse expression
         pse = new PostfixStackEvaluator("square(-6)", null);
@@ -87,11 +87,11 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(36.0));
         
-        tm.deregisterOperator(sOp);
+        tc.deregisterOperator(sOp);
         
         // register new operator
         Add3 add3 = new Add3();
-        tm.registerOperator(add3);
+        tc.registerOperator(add3);
         
         // reparse expression
         pse = new PostfixStackEvaluator("add3(1,2,3)", null);
@@ -102,16 +102,15 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(6.0));
         
-        tm.deregisterAllOperators();
+        tc.deregisterAllOperators();
     }
     
     @Test
     public final void testLamdaRegisterOperator()
     throws PendingDerivationException, BlockedDerivationException
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertThat(tm, notNullValue());
-        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
         PostfixStackEvaluator pse = null;
         try {
@@ -125,8 +124,8 @@ public class TokenMapperTest extends BaseTest
         }
         
         // register new operators
-        tm.registerNumericOperator("square", (x)->x*x);
-        tm.registerNumericOperator("cube", (x)->x*x*x);
+        tc.registerNumericOperator("square", (x)->x*x);
+        tc.registerNumericOperator("cube", (x)->x*x*x);
         
         // reparse expression
         pse = new PostfixStackEvaluator("square(-6)", null);
@@ -147,7 +146,7 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.getValue(), is(-27.0));
         
         // remove operator and reparse
-        tm.deregisterAllOperators();
+        tc.deregisterAllOperators();
         try {
             pse = new PostfixStackEvaluator("square(-6)", null);
             fail("square operator resolved");
@@ -159,7 +158,6 @@ public class TokenMapperTest extends BaseTest
         }
         
         // try again with unary function (Function) lambda expression
-        TableContext tc = tm.getTableContext();
         tc.registerOperator("square", Double.class, Double.class, (Double x)->String.valueOf(x*x));
         
         pse = new PostfixStackEvaluator("square(-6)", null);
@@ -181,7 +179,7 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(60.0));
         
-        tm.deregisterAllOperators();
+        tc.deregisterAllOperators();
         
         // reevaluate again, should succeed
         t = pse.evaluate();
@@ -202,13 +200,12 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.isNumeric(), is(false));
         assertThat(t.getValue(), is("512.021.0"));
         
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertThat(tm, notNullValue());
-        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
         // register new operator
 		AddStringNum plusOverload = new AddStringNum();
-        tm.overloadOperator("+", plusOverload);
+        tc.overloadOperator("+", plusOverload);
         
         pse = new PostfixStackEvaluator("'5' + 6 * 2 + ('2' + 1)", null);
         assertThat(pse, notNullValue());
@@ -218,8 +215,13 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.isNumeric(), is(true));
         assertThat(t.getValue(), is(20.0));
         
+        tc.unOverloadOperator("+", plusOverload);       
+        
         // overload operator using Lambda
-        tm.unOverloadOperator("+", plusOverload);
+        TokenMapper tm = TokenMapper.fetchTokenMapper((Table) null);
+        assertThat(tm, notNullValue());
+        assertThat(tm.getTableContext(), is(tc)); 
+        
         tm.overloadOperator("+", String.class, Double.class, Double.class,
                 (String x, Double y)->Double.valueOf(x) + y);
         
@@ -236,12 +238,11 @@ public class TokenMapperTest extends BaseTest
     public final void testGroovyOperator()
     throws PendingDerivationException, BlockedDerivationException
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertThat(tm, notNullValue());
-        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
         // register new operator
-        tm.registerGroovyOperator("greet", new Class<?>[]{String.class}, String.class, qualifiedFileName("person.groovy"));
+        tc.registerGroovyOperator("greet", new Class<?>[]{String.class}, String.class, qualifiedFileName("person.groovy"));
         
         PostfixStackEvaluator pse = new PostfixStackEvaluator("greet(\"Dave\")", null);
         assertThat(pse, notNullValue());
@@ -253,7 +254,7 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.getValue(), is("Hello Dave!!!")); 
         
         // register new operator
-        tm.registerGroovyOperators(qualifiedFileName("geomFuncs.groovy"));
+        tc.registerGroovyOperators(qualifiedFileName("geomFuncs.groovy"));
         
         pse = new PostfixStackEvaluator("volume(2, 3, 4)", null);
         assertThat(pse, notNullValue());
@@ -291,7 +292,7 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.isString(), is(false));
         assertThat(t.getValue(), is(2 * Math.PI));             
         
-        tm.registerGroovyOperators(qualifiedFileName("factors.groovy"));
+        tc.registerGroovyOperators(qualifiedFileName("factors.groovy"));
 
         pse = new PostfixStackEvaluator("firstFactor(91)", null);
         assertThat(pse, notNullValue());
@@ -324,7 +325,7 @@ public class TokenMapperTest extends BaseTest
         assertThat(list.contains(7), is(true));
         assertThat(list.contains(13), is(true));
         
-        tm.registerGroovyOperators("class myMath { double addIt(double x, double y, double z){x + y + z}\n double subIt(double x, double y){x - y} }");
+        tc.registerGroovyOperators("class myMath { double addIt(double x, double y, double z){x + y + z}\n double subIt(double x, double y){x - y} }");
 
         pse = new PostfixStackEvaluator("addIt(3, 4, 2) + subIt(5, 7)", null);
         assertThat(pse, notNullValue());
@@ -335,25 +336,24 @@ public class TokenMapperTest extends BaseTest
         assertThat(t.isString(), is(false));
         assertThat(t.getValue(), is(7.0));       
         
-        tm.deregisterAllOperators();
+        tc.deregisterAllOperators();
     }
         
     @Test
     public final void testJythonOperator()
     throws PendingDerivationException, BlockedDerivationException
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertThat(tm, notNullValue());
-        assertThat(tm.getTableContext(), is(TableContextFactory.fetchDefaultTableContext())); 
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
         // register new operator, class implements Operator
-        tm.registerJythonOperators(qualifiedFileName("dayChg.jy"));
+        tc.registerJythonOperators(qualifiedFileName("dayChg.jy"));
         
         PostfixStackEvaluator pse = new PostfixStackEvaluator("dayChg('ctct')", null);
         assertThat(pse, notNullValue());
         
         // register new operator, class consists of methods
-        tm.registerJythonOperators(qualifiedFileName("factors.jy"));
+        tc.registerJythonOperators(qualifiedFileName("factors.jy"));
         
         pse = new PostfixStackEvaluator("firstFactor(81)", null);
         assertThat(pse, notNullValue());
@@ -363,7 +363,7 @@ public class TokenMapperTest extends BaseTest
         assertThat(3.0, is(resToken.getNumericValue()));
         
         // register new operator, class consists of methods
-        tm.registerJythonOperators(qualifiedFileName("volumeOp.jy"));
+        tc.registerJythonOperators(qualifiedFileName("volumeOp.jy"));
         
         pse = new PostfixStackEvaluator("volume(3, 4, 5)", null);
         assertThat(pse, notNullValue());
@@ -373,7 +373,7 @@ public class TokenMapperTest extends BaseTest
         assertThat(60.0, is(resToken.getNumericValue()));
         
         // register new operator, file consists of functions
-        tm.registerJythonOperators(qualifiedFileName("geomFuncs.jy"));
+        tc.registerJythonOperators(qualifiedFileName("geomFuncs.jy"));
         
         pse = new PostfixStackEvaluator("area(5, 4)", null);
         assertThat(pse, notNullValue());
@@ -389,16 +389,16 @@ public class TokenMapperTest extends BaseTest
         assertThat(resToken, notNullValue());
         assertThat(18.0, is(resToken.getNumericValue()));
         
-        tm.deregisterAllOperators();
+        tc.deregisterAllOperators();
     }
     
     @Test
     public void testGetCategories()
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertNotNull(tm);
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
-        List<String> cats = tm.getOperatorCategories();
+        List<String> cats = tc.getOperatorCategories();
         assertNotNull(cats);
         assertThat(false, is(cats.isEmpty()));
         assertThat(true, is(cats.contains("Math")));
@@ -408,24 +408,24 @@ public class TokenMapperTest extends BaseTest
     @Test
     public void testRegisteredOpCategories()
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertNotNull(tm);
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
-        List<String> cats = tm.getOperatorCategories();
+        List<String> cats = tc.getOperatorCategories();
         assertNotNull(cats);
         assertThat(false, is(cats.isEmpty()));
         assertThat(false, is(cats.contains("Special Math")));
         
         Operator op = new Square();
-        tm.registerOperator(op);
+        tc.registerOperator(op);
         
-        cats = tm.getOperatorCategories();
+        cats = tc.getOperatorCategories();
         assertNotNull(cats);
         assertThat(false, is(cats.isEmpty()));
         assertThat(true, is(cats.contains("Special Math")));
         
-        tm.deregisterOperator(op);
-        cats = tm.getOperatorCategories();
+        tc.deregisterOperator(op);
+        cats = tc.getOperatorCategories();
         assertNotNull(cats);
         assertThat(false, is(cats.isEmpty()));
         assertThat(false, is(cats.contains("Special Math")));   
@@ -434,37 +434,37 @@ public class TokenMapperTest extends BaseTest
     @Test
     public void testRegisteredFetchByCategory()
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertNotNull(tm);
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
-        List<String> cats = tm.getOperatorCategories();
+        List<String> cats = tc.getOperatorCategories();
         assertNotNull(cats);
         assertThat(false, is(cats.isEmpty()));
         assertThat(false, is(cats.contains("Special Math")));
         
         Operator op = new Square();
-        tm.registerOperator(op);
+        tc.registerOperator(op);
         
-        cats = tm.getOperatorCategories();
+        cats = tc.getOperatorCategories();
         assertNotNull(cats);
         assertThat(false, is(cats.isEmpty()));
         assertThat(true, is(cats.contains("Special Math")));
         
-        List<Operator> ops = tm.getOperatorsForCategory("special math");
+        List<Operator> ops = tc.getOperatorsForCategory("special math");
         assertNotNull(ops);
         assertThat(false, is(ops.isEmpty()));
         assertThat(true, is(ops.contains(op)));
         
-        tm.deregisterOperator(op);
+        tc.deregisterOperator(op);
     }
     
     @Test
     public void testRegisteredFetchByMathCategory()
     {
-        TokenMapper tm = TokenMapper.fetchTokenMapper((TableContext) null);
-        assertNotNull(tm);
+    	TableContext tc = TableContextFactory.fetchDefaultTableContext();
+        assertThat(tc, notNullValue());
         
-        List<Operator> ops = tm.getOperatorsForCategory("math");
+        List<Operator> ops = tc.getOperatorsForCategory("math");
         assertNotNull(ops);
         assertThat(false, is(ops.isEmpty()));
         

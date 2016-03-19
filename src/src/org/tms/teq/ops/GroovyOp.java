@@ -10,9 +10,9 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.tms.api.derivables.InvalidOperatorException;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
-import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.IllegalTableStateException;
+import org.tms.tds.TokenMapper;
 import org.tms.teq.AbstractOperator;
 
 import groovy.lang.GroovyClassLoader;

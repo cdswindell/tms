@@ -25,7 +25,6 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Precisionable;
-import org.tms.api.derivables.TokenMapper;
 import org.tms.api.events.TableElementEvent;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
@@ -670,6 +669,12 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         fetchTokenMapper().registerOperators(clazz);
     }
     
+	@Override
+	public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<String> resultType, String fileName) 
+	{
+        fetchTokenMapper().registerGroovyOperator(label, pTypes, resultType, fileName);
+	}
+
     @Override
     public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName)
     {
@@ -712,6 +717,29 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         fetchTokenMapper().deregisterAllOperators();
     }
     
+    @Override
+    public void overloadOperator(String theOp, Operator op)
+    {
+    	fetchTokenMapper().overloadOperator(theOp, op);
+    }
+    
+    @Override
+    public void unOverloadOperator(String theOp, Operator op)
+    {
+    	fetchTokenMapper().unOverloadOperator(theOp, op);
+    }
+    
+	@Override
+	public List<String> getOperatorCategories() 
+	{
+		return fetchTokenMapper().getOperatorCategories();
+	}
+
+	@Override
+	public List<Operator> getOperatorsForCategory(String category) 
+	{
+		return fetchTokenMapper().getOperatorsForCategory(category);
+	}
     public int getRowCapacityIncr()
     {
         return m_rowCapacityIncr;

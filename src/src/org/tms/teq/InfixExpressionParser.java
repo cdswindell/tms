@@ -12,8 +12,8 @@ import org.tms.api.Table;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
-import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
+import org.tms.tds.TokenMapper;
 import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class InfixExpressionParser

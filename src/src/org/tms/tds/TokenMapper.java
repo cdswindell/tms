@@ -1,4 +1,4 @@
-package org.tms.api.derivables;
+package org.tms.tds;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,6 +20,12 @@ import org.tms.api.Access;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.derivables.GenericFunc3Arg;
+import org.tms.api.derivables.GenericFunc4Arg;
+import org.tms.api.derivables.GenericFunc5Arg;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
@@ -66,7 +72,7 @@ public class TokenMapper
     static public TokenMapper fetchTokenMapper(Table t)
     {
         TableContext c = t != null ? t.getTableContext() : TableContextFactory.fetchDefaultTableContext();
-        return fetchTokenMapper(c);
+        return fetchTokenMapper((ContextImpl)c);
     }
     
     private static final String massageCategoryLabel(String label)
@@ -116,13 +122,13 @@ public class TokenMapper
 
 	static public TokenMapper fetchTokenMapper()
     {
-    	return fetchTokenMapper(TableContextFactory.fetchDefaultTableContext());
+    	return fetchTokenMapper((ContextImpl)TableContextFactory.fetchDefaultTableContext());
     }
     
-    static public TokenMapper fetchTokenMapper(TableContext c)
+    static public TokenMapper fetchTokenMapper(ContextImpl c)
     {
         if (c == null)
-            c = TableContextFactory.fetchDefaultTableContext();
+            c = (ContextImpl)TableContextFactory.fetchDefaultTableContext();
             
         TokenMapper tm = c.getTokenMapper();
         if (tm != null)

@@ -1,13 +1,10 @@
-package org.tms.api.derivables;
+package org.tms.tds;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.tms.tds.ContextImpl;
-import org.tms.tds.Tag;
 
 public class Category extends Tag
 {

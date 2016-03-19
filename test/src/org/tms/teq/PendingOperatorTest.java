@@ -19,7 +19,6 @@ import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
-import org.tms.api.derivables.TokenMapper;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
@@ -39,9 +38,8 @@ public class PendingOperatorTest extends BaseTest
         
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
-        tm.registerOperator(new PendingOperator2());
+        tc.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator2());
         
         int numRows = 2500;
         t.addRow(Access.ByIndex, numRows);
@@ -86,6 +84,8 @@ public class PendingOperatorTest extends BaseTest
         }  
         
         ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
+        
+        tc.deregisterAllOperators();
     }
         
     @Test
@@ -97,8 +97,7 @@ public class PendingOperatorTest extends BaseTest
         
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator());
         
         int numRows = 500;
         t.addRow(Access.ByIndex, numRows);
@@ -141,6 +140,8 @@ public class PendingOperatorTest extends BaseTest
         }  
         
         ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
+        
+        tc.deregisterAllOperators();
     }
         
     @Test
@@ -152,8 +153,7 @@ public class PendingOperatorTest extends BaseTest
         
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator());
         
         int numRows = 250;
         t.addRow(Access.ByIndex, numRows);
@@ -200,6 +200,7 @@ public class PendingOperatorTest extends BaseTest
         }       
         
         ((ContextImpl)tc).shutdownDerivableThreadPool();
+        tc.deregisterAllOperators();
     }
         
     @Test
@@ -210,8 +211,7 @@ public class PendingOperatorTest extends BaseTest
         
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator());
         
         int numRows = 500;
         t.addRow(Access.ByIndex, numRows);
@@ -253,6 +253,7 @@ public class PendingOperatorTest extends BaseTest
         }
         
         ((DerivableThreadPool)tc).shutdownDerivableThreadPool();       
+        tc.deregisterAllOperators();
     }
     
     @Test
@@ -263,9 +264,8 @@ public class PendingOperatorTest extends BaseTest
         
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
-        tm.registerOperator(new PendingOperator2());
+        tc.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator2());
         
         int numRows = 1000;
         t.addRow(Access.ByIndex, numRows);
@@ -341,6 +341,7 @@ public class PendingOperatorTest extends BaseTest
         assertThat(((TableImpl)t).isPendings(), is(false));
         
         ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
+        tc.deregisterAllOperators();
     }
     
     @Test
@@ -351,8 +352,7 @@ public class PendingOperatorTest extends BaseTest
         
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator());
         
         int numRows = 1000;
         t.addRow(Access.ByIndex, numRows);
@@ -431,6 +431,7 @@ public class PendingOperatorTest extends BaseTest
         assertThat(((TableImpl)t).isPendings(), is(false));
         
         ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
+        tc.deregisterAllOperators();
     }
     
     @Test
@@ -441,8 +442,7 @@ public class PendingOperatorTest extends BaseTest
         ((ContextImpl)tc).setPendingKeepAliveTime(100, TimeUnit.MILLISECONDS);
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator());
         
         t.addRow(Access.ByIndex, 1000);
         
@@ -503,6 +503,7 @@ public class PendingOperatorTest extends BaseTest
         }
         
         ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
+        tc.deregisterAllOperators();
     }
     
     @Test
@@ -514,8 +515,7 @@ public class PendingOperatorTest extends BaseTest
         
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator());
         
         t.addRow(Access.ByIndex, 10000);
         
@@ -556,6 +556,7 @@ public class PendingOperatorTest extends BaseTest
         }
         
         ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
+        tc.deregisterAllOperators();
     }
     
     @Test
@@ -567,8 +568,7 @@ public class PendingOperatorTest extends BaseTest
         
         Table t = TableFactory.createTable(tc);
         
-        TokenMapper tm = tc.getTokenMapper();
-        tm.registerOperator(new PendingOperator());
+        tc.registerOperator(new PendingOperator());
         
         t.addRow(Access.ByIndex, 10000);
         
@@ -604,6 +604,7 @@ public class PendingOperatorTest extends BaseTest
         assertThat(cR3C4.isInvalid(), is(true));
         
         ((DerivableThreadPool)tc).shutdownDerivableThreadPool();
+        tc.deregisterAllOperators();
     }
     
     public class PendingOperator implements Operator, Runnable

@@ -15,7 +15,6 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivation;
-import org.tms.api.derivables.TokenMapper;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.utils.RegisterOp;
@@ -33,11 +32,7 @@ public class ClassOperatorsTest extends BaseTest
         assertThat(t1, notNullValue());
         assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
         
-        // get token map and register MyPoint class
-        TokenMapper tm = tc.getTokenMapper();
-        assertNotNull(tm);
-        
-        tm.registerOperators(MyPoint.class);
+        tc.registerOperators(MyPoint.class);
         
         // create some rows and columns to work with
         t1.addRow(10);
@@ -84,12 +79,8 @@ public class ClassOperatorsTest extends BaseTest
         Table t1 = TableFactory.createTable(10, 12, tc);        
         assertThat(t1, notNullValue());
         assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
-        
-        // get token map and register MyPoint class
-        TokenMapper tm = tc.getTokenMapper();
-        assertNotNull(tm);
-        
-        tm.registerOperators(MyPoint.class);
+                
+        tc.registerOperators(MyPoint.class);
         
         // create some rows and columns to work with
         t1.addRow(10);

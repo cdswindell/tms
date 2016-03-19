@@ -7,10 +7,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.tms.api.derivables.Operator;
-import org.tms.api.derivables.TokenMapper;
 import org.tms.api.utils.AsynchronousOp;
 import org.tms.api.utils.RegisterOp;
 import org.tms.api.utils.SynchronousOp;
+import org.tms.tds.TokenMapper;
 
 public class ClassOp  
 {

@@ -2,6 +2,7 @@ package org.tms.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -9,7 +10,6 @@ import java.util.function.UnaryOperator;
 
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Operator;
-import org.tms.api.derivables.TokenMapper;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.io.IOOption;
 import org.tms.tds.events.EventProcessorThreadPool;
@@ -43,12 +43,6 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      * @return the number of Table instances in this TableContext
      */
     public int getNumTables();
-    
-    /**
-     * Returns the {@link org.tms.api.derivables.TokenMapper TokenMapper} associated with this {@code TableContext}.
-     * @return the TokenMapper associated with this TableContext.
-     */
-    public TokenMapper getTokenMapper();
     
     /**
      * Loads the JDBC database driver class named {@code driverClassName} and maintains an index of 
@@ -179,10 +173,20 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      * @param pTypes array specifying the classes of the input arguments
      * @param resultType the class of the return type
      * @param fileName fully-qualified file name containing the Groovy class containing the function logic
+     */
+	public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<String> resultType, String fileName);
+	
+    /**
+     * Registers a new {@link org.tms.api.derivables.Operator Operator} that uses the Groovy code
+     * specified in {@code fileName} to perform the calculation.
+     * @param label the function label, which is used to reference this {@code Operator} in a {@code Derivable} expression
+     * @param pTypes array specifying the classes of the input arguments
+     * @param resultType the class of the return type
+     * @param fileName fully-qualified file name containing the Groovy class containing the function logic
      * @param methodName the method name containing the Groovy code containing the function logic
      */
-    public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName);
-    
+    public void registerGroovyOperator(String label, Class<?>[] pTypes, Class<?> resultType, String fileName, String methodName);    
+
     /**
      * Loads and compiles the Groovy class contained in {@code fileName}. {@link org.tms.api.derivables.Operator Operator}s
      * are created from each {@code public} method that return a value found in the compiled class. The class itself must be concrete
@@ -215,6 +219,9 @@ public interface TableContext extends BaseElement, InitializableTableProperties
      */
     public void deregisterAllOperators();   
     
+	public void overloadOperator(String opStr, Operator op);
+	public void unOverloadOperator(String opStr, Operator op);
+	
     public void export(String fileName) throws IOException;
     public void export(String fileName, IOOption<?>format) throws IOException;
     public void export(OutputStream out, IOOption<?>format) throws IOException;
@@ -231,4 +238,8 @@ public interface TableContext extends BaseElement, InitializableTableProperties
     public Table getConstantsTable();
 
     public void setConstantsTable(Table constants);
+
+	public List<String> getOperatorCategories();
+
+	public List<Operator> getOperatorsForCategory(String string);
 }
