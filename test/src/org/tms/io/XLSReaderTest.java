@@ -183,6 +183,7 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, "LenVal", 9.0, "len(\"AbcDefGhi\")");
             vetCellValue(t, "TrimVal", "Abc Def Ghi", "trim(\"  Abc Def Ghi  \")");
             vetCellValue(t, "ConcatVal", "AbcDefGhi", "\"Abc\" + \"Def\" + \"Ghi\"");
+            vetCellValue(t, "ConcatSymVal", "AbcDefGhi", "\"Abc\" + \"Def\" + \"Ghi\"");
             vetCellValue(t, "ReptVal", "abcabcabc", "\"abc\" * 3.0");
             vetCellValue(t, "ExactVal", true, "\"abc\" = \"abc\"");
             vetCellValue(t, "ValVal", 9, "toNumber(\"9\")");

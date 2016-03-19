@@ -290,14 +290,14 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
                         Token y = operands.pop();
                         Token x = operands.pop();
                         
-                        if (putInParens(priority) && x.isNumeric() && y.isNumeric())
+                        if (putInParens(priority, x, y))
                             expr.append('(');
                             
                         expr.append(x.toExpressionValue(m_primaryTable)).append(' ');
                         expr.append(op.getLabel()).append(' ');
                         expr.append(y.toExpressionValue(m_primaryTable));
                         
-                        if (putInParens(priority) && x.isNumeric() && y.isNumeric())
+                        if (putInParens(priority, x, y))
                             expr.append(')');
                     } 
                     else { // some kind of function
@@ -375,8 +375,12 @@ public class EquationStack extends ArrayDeque<Token> implements Iterable<Token>
         return parenCnt == 0;
     }
 
-    private boolean putInParens(int priority)
+    private boolean putInParens(int priority, Token x, Token y)
     {
+    	if (x != null && x.isString() && x.isOperand() && !x.isExpression() &&
+    		y != null && y.isString() && y.isOperand() && !x.isExpression())
+    		return false;
+    	
         return priority <= 5;
     }
 
