@@ -239,6 +239,12 @@ public class XLSReaderTest extends BaseTest
             vetCellValue(t, "FalseVal", false, "false");
             vetCellValue(t, "IfVal", 3.0, "if((cell \"AbsVal\" > 4.0), 3.0, 1.0)");
             vetCellValue(t, "IfElseVal", 1.0, "if((cell \"AbsVal\" < 4.0), 3.0, 1.0)");
+
+            vetCellValue(t, "EvenVal", 4.0, "toEven(2.91)");
+            vetCellValue(t, "EvenNegVal", -8.0, "toEven(-7.8)");
+
+            vetCellValue(t, "OddVal", 3.0, "toOdd(2.91)");
+            vetCellValue(t, "OddNegVal", -9.0, "toOdd(-7.8)");
         }
         catch (IOException e)
         {

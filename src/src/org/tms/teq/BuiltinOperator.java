@@ -95,6 +95,8 @@ public enum BuiltinOperator implements Labeled, Operator
     // Unary functions, mostly supported in Java Math
     FracOper(TokenType.UnaryFunc, 8, toLabels("frac"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class),  
     NegOper(TokenType.UnaryFunc, 8, toLabels("neg"), toArgs(double.class), double.class, toCategories("math"), MathUtil.class),  
+    toEvenOper(TokenType.UnaryFunc, 8, toLabels("toEven"), toArgs(double.class), long.class, toCategories("math"), MathUtil.class),  
+    toOddOper(TokenType.UnaryFunc, 8, toLabels("toOdd"), toArgs(double.class), long.class, toCategories("math"), MathUtil.class),  
     
     AbsOper(TokenType.UnaryFunc, 8, toLabels("abs"), toArgs(double.class), double.class, toCategories("math"), Math.class),  
     SqrtOper(TokenType.UnaryFunc, 8, toLabels("sqrt"), toArgs(double.class), double.class, toCategories("math"), Math.class),  

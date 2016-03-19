@@ -61,6 +61,36 @@ public class MathUtil
     	return xL / yL;
     }
     
+    static final public long toEven(double x)
+    {
+    	// save sign of final answer
+    	int sgn = x >= 0 ? 1 : -1;
+    	
+    	// convert double to long
+    	long xL = (long)Math.ceil(Math.abs(x));
+    	
+    	// now convert to even
+    	xL += (xL % 2);
+    	
+    	// adjust sign
+    	return xL * sgn;
+    }
+    
+    static final public long toOdd(double x)
+    {
+    	// save sign of final answer
+    	int sgn = x >= 0 ? 1 : -1;
+    	
+    	// convert double to long
+    	long xL = (long)Math.ceil(Math.abs(x));
+    	
+    	// now convert to odd
+    	xL += 1 - (xL % 2);
+    	
+    	// adjust sign
+    	return xL * sgn;
+    }
+    
     static final public double pmt(final double ipt, final int nPer, final double pv, final double fv)
     {
         double tmp = Math.exp(nPer*Math.log1p(ipt));

@@ -130,6 +130,8 @@ public class XlsReader extends BaseReader<XLSOptions>
         sf_FunctionMap.put("ROUND", BuiltinOperator.RoundOper);
         sf_FunctionMap.put("GCD", BuiltinOperator.GcdOper);
         sf_FunctionMap.put("LCM", BuiltinOperator.LcmOper);
+        sf_FunctionMap.put("EVEN", BuiltinOperator.toEvenOper);
+        sf_FunctionMap.put("ODD", BuiltinOperator.toOddOper);
         
         sf_FunctionMap.put("COMBIN", BuiltinOperator.CombOper);
         sf_FunctionMap.put("PERMUT", BuiltinOperator.PermOper);
