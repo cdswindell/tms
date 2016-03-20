@@ -3,6 +3,7 @@ package org.tms.io.xml;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Set;
 
 import org.tms.api.Column;
 import org.tms.api.ElementType;
@@ -18,6 +19,7 @@ import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
+import org.tms.tds.ContextImpl;
 import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 import org.tms.tds.SubsetImpl;
@@ -290,7 +292,19 @@ public class TableConverter extends BaseConverter
             nodeName = processChildren(t,  CellImpl.class, reader, context);
             
         }
-        
+
+        // register annotated dataTypes, if any
+		@SuppressWarnings("unchecked")
+		Set<Class<?>> toRegisterDataTypes = (Set<Class<?>>)context.get(TMS_TO_REGISTER_CACHE_KEY);
+		if (toRegisterDataTypes != null) {
+			ContextImpl tc = t.getTableContext();
+			if (tc != null) {
+				for (Class<?> clazz : toRegisterDataTypes) {
+					tc.registerOperators(clazz);
+				}
+			}
+		}
+
         // process derivations, if any
         if (options().isDerivations()) {
             for (Map.Entry<Derivable, CachedDerivation> e : getDerivationsMap(context).entrySet()) {

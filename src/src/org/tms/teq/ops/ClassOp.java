@@ -34,13 +34,24 @@ public class ClassOp
 		 * process constructors first
 		 */
 		Constructor<?>[] makers = clazz.getConstructors();
+		String simpleName = clazz.getSimpleName();
+		
+		Set<String> cats = new HashSet<String>();
+		cats.add(simpleName);
+		cats.add("constructor");
 		for (Constructor<?> m : makers) {
 			RegisterOp anno = m.getAnnotation(RegisterOp.class);
 			if (anno != null && !anno.exclude()) {
-				String label = anno.token().length() > 0 ? anno.token() : "make" + clazz.getSimpleName();
+				String label = anno.token().length() > 0 ? anno.token() : "make" + simpleName;
 				Class<?>[] argTypes = m.getParameterTypes();
+				String [] categories = anno.categories();
+				if (categories != null && categories.length > 0) {
+					for (String c : categories) {
+						cats.add(c);
+					}
+				}
 				
-				Operator op = new ConstructClassOp(label, argTypes, clazz, m);
+				Operator op = new ConstructClassOp(label, argTypes, clazz, m, cats.toArray(new String [] {}));
 				tm.registerOperator(op);
 			}
 		}
@@ -67,11 +78,22 @@ public class ClassOp
 							opTypes[i + 1] = argTypes[i];
 						}
 						
+						cats.clear();
+						cats.add(simpleName);
+						if (anno != null) {
+							String [] categories = anno.categories();
+							if (categories != null && categories.length > 0) {
+								for (String c : categories) {
+									cats.add(c);
+								}
+							}							
+						}
+						
 						Operator op = null;
 						if (async)
-							op = new AsyncClassOp(label, opTypes, retType, m);
+							op = new AsyncClassOp(label, opTypes, retType, m, cats.toArray(new String [] {}));
 						else
-							op = new SyncClassOp(label, opTypes, retType, m);
+							op = new SyncClassOp(label, opTypes, retType, m, cats.toArray(new String [] {}));
 						
 						tm.registerOperator(op);
 					}
@@ -84,9 +106,9 @@ public class ClassOp
 	{
 		private Constructor<?> m_constructor;
 
-		public ConstructClassOp(String label, Class<?>[] argTypes, Class<?> resultType, Constructor<?> maker) 
+		public ConstructClassOp(String label, Class<?>[] argTypes, Class<?> resultType, Constructor<?> maker, String... categories) 
 		{
-			super(label, argTypes, resultType);
+			super(label, argTypes, resultType, categories);
 			m_constructor = maker;
 		}
 
@@ -102,9 +124,9 @@ public class ClassOp
 	{
 		private Method m_method;
 
-		public SyncClassOp(String label, Class<?>[] argTypes, Class<?> resultType, Method method) 
+		public SyncClassOp(String label, Class<?>[] argTypes, Class<?> resultType, Method method, String... categories) 
 		{
-			super(label, argTypes, resultType);
+			super(label, argTypes, resultType, categories);
 			m_method = method;
 		}
 
@@ -129,9 +151,9 @@ public class ClassOp
 	{
 		private Method m_method;
 
-		public AsyncClassOp(String label, Class<?>[] argTypes, Class<?> resultType, Method method) 
+		public AsyncClassOp(String label, Class<?>[] argTypes, Class<?> resultType, Method method, String... categories) 
 		{
-			super(label, argTypes, resultType);
+			super(label, argTypes, resultType, categories);
 			m_method = method;
 		}
 

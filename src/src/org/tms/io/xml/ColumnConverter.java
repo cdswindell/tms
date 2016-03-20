@@ -131,8 +131,10 @@ public class ColumnConverter extends BaseConverter
 	        	case DATATYPE_TAG: 
 	        	{
 		            Class<?>dataType = (Class<?>)context.convertAnother(t, Class.class);
-		            if (dataType != null)
+		            if (dataType != null) {
 		                c.setDataType(dataType);
+		                cacheDataType(context, dataType);
+		            }
 		            
 		            reader.moveUp();
 		        }

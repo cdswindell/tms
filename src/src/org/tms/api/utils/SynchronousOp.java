@@ -11,6 +11,11 @@ abstract public class SynchronousOp extends AbstractOperator
 		super(label, argTypes, resultType);
 	}
 
+	public SynchronousOp(String label, Class<?>[] argTypes, Class<?> resultType, String... categories) 
+	{
+		super(label, argTypes, resultType, categories);
+	}
+
 	@Override
 	final public Token evaluate(Token... args) 
 	{

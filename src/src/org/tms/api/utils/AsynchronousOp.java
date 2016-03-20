@@ -14,6 +14,11 @@ abstract public class AsynchronousOp extends AbstractOperator
 		super(label, argTypes, resultType);
 	}
 
+	public AsynchronousOp(String label, Class<?>[] argTypes, Class<?> resultType, String... categories) 
+	{
+		super(label, argTypes, resultType, categories);
+	}
+
 	@Override
 	/**
 	 * {@inheritDoc}

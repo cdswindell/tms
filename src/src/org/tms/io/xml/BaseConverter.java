@@ -1,9 +1,11 @@
 package org.tms.io.xml;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.tms.api.Column;
 import org.tms.api.ElementType;
@@ -15,6 +17,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.io.ArchivalIOOption;
+import org.tms.api.utils.RegisterOp;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.api.utils.Validatable;
 import org.tms.io.BaseReader;
@@ -39,6 +42,8 @@ abstract class BaseConverter implements Converter
     static final protected String TMS_READONLY_KEY  = "__tms read-only key__";
     static final protected String TMS_ALLOWNULLS_KEY  = "__tms allow nulls key__";
     static final protected String TMS_ENFORCE_KEY  = "__tms enforce datatype key__";
+    static final protected String TMS_DATATYPE_CACHE_KEY = "__tms database cache key__";
+    static final protected String TMS_TO_REGISTER_CACHE_KEY = "__tms to_register cache key__";
     
     static final protected String LABEL_TAG = "label";
     static final protected String DESC_TAG = "description";
@@ -573,7 +578,47 @@ abstract class BaseConverter implements Converter
         
         return null;
     }
-    
+        
+    /**
+     * Column and cell dataType classes registered with the RegisterOp annotation must be
+     * processed before derivations are processed. The code below caches classtes to register
+     * in an efficient manner.
+     * @param context
+     * @param dataType
+     */
+	protected void cacheDataType(UnmarshallingContext context, Class<?> dataType) 
+	{
+		// first check if the class has already been evaluated and determined to be registerable
+		@SuppressWarnings("unchecked")
+		Set<Class<?>> toRegisterDataTypes = (Set<Class<?>>)context.get(TMS_TO_REGISTER_CACHE_KEY);
+		if (toRegisterDataTypes != null && toRegisterDataTypes.contains(dataType))
+			return;
+
+		//If it isn't, then check if it's been evaluated
+		@SuppressWarnings("unchecked")
+		Set<Class<?>> evaluatedDatatypes = (Set<Class<?>>)context.get(TMS_DATATYPE_CACHE_KEY);
+		if (evaluatedDatatypes == null) {
+			evaluatedDatatypes = new HashSet<Class<?>>();
+			context.put(TMS_DATATYPE_CACHE_KEY, evaluatedDatatypes);
+		}
+		
+		if (evaluatedDatatypes.contains(dataType))
+			return;
+		
+		// ok, so we haven't seen this class before in any context; mark it so we don' reprocess
+		evaluatedDatatypes.add(dataType);
+		
+		// now check if the marking annotation is present
+		if (dataType.getAnnotation(RegisterOp.class) != null) {
+			if (toRegisterDataTypes == null) {
+				toRegisterDataTypes = new HashSet<Class<?>>();
+				context.put(TMS_TO_REGISTER_CACHE_KEY, toRegisterDataTypes);
+			}
+			
+			toRegisterDataTypes.add(dataType);
+		}
+	}        
+
     final static class CachedDerivation
     {
     	private String m_deriv;

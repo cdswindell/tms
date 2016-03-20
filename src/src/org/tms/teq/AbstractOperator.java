@@ -11,12 +11,19 @@ abstract public class AbstractOperator implements Operator
 	private String m_label;
 	private Class<?>[] m_argTypes;
 	private Class<?> m_resultType;
+	private String [] m_categories;
 	
 	public AbstractOperator(String label, Class<?>[] argTypes, Class<?> resultType)
+	{
+		this(label, argTypes, resultType, (String [])null);
+	}
+	
+	public AbstractOperator(String label, Class<?>[] argTypes, Class<?> resultType, String... categories)
 	{
 		m_label = label;
 		m_argTypes = argTypes;
 		m_resultType = resultType;
+		m_categories = categories;
 	}
 	
 	@Override
@@ -34,7 +41,7 @@ abstract public class AbstractOperator implements Operator
 	 */
 	final public TokenType getTokenType() 
 	{
-		return TokenType.numArgsToTokenType(getArgTypes() != null ? getArgTypes().length : 0);
+		return TokenType.numArgsToTokenType(numArgs());
 	}
 
 	@Override
@@ -43,6 +50,7 @@ abstract public class AbstractOperator implements Operator
 	 */
     final public int numArgs()
     {
+		// need to call method, as it could have been overridden
         Class<?> [] args = getArgTypes();
         
         return args != null ? args.length : 0;
@@ -66,6 +74,15 @@ abstract public class AbstractOperator implements Operator
 		return m_resultType;
 	}
 
+	@Override
+	/**
+	 * {@inheritDoc}
+	 */
+	final public String[] getCategories()
+	{
+		return m_categories;
+	}
+	
 	protected boolean isAllowNulls()
 	{
 		return false;

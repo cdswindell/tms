@@ -254,8 +254,12 @@ public class CellConverter extends BaseConverter
                     reader.moveUp();
                 }
                 break;
-        	}
-        	
+        	}       	
+            
+            // remember data types
+            if (dataType != null)
+            	cacheDataType(context, dataType);
+            
             // check next tag
             if (reader.hasMoreChildren()) {
                 reader.moveDown();
@@ -266,5 +270,5 @@ public class CellConverter extends BaseConverter
         }
         
         return c;
-    }        
+    }
 }

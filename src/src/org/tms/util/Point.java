@@ -1,14 +1,24 @@
 package org.tms.util;
 
+import org.tms.api.utils.RegisterOp;
+
+@RegisterOp
 public class Point 
 {
 	private int m_x;
 	private int m_y;
 	
+	@RegisterOp()
 	public Point(int x, int y)
 	{
 		m_x = x;
 		m_y = y;
+	}
+	
+	@RegisterOp(token="copyPoint")
+	public Point(Point op)
+	{
+		this(op != null ? op.getX() : 0, op != null ? op.getY() : 0);
 	}
 	
 	public int getX()
@@ -19,6 +29,14 @@ public class Point
 	public int getY()
 	{
 		return m_y;
+	}
+	
+	public double distanceTo(Point other)
+	{
+		int dx = getX() - other.getX();
+		int dy = getY() - other.getY();
+
+		return Math.sqrt(dx*dx + dy*dy);
 	}
 	
 	public String toString()
