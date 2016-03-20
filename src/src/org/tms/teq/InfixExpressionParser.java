@@ -676,6 +676,29 @@ public class InfixExpressionParser
                     oper = BuiltinOperator.NOP;
                     charsParsed = sb.length();
                 }
+                else {
+                	// is the label a column label?
+                	Column col = table.getColumn(Access.ByLabel, label);
+                	
+                    if (col == null && table.getTableContext() != null && 
+                            (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
+                            (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
+                    {
+                        String tableName = label.substring(0, tblRefIdx);
+                        Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
+                        if (refTable != null) {
+                            label = label.substring(tblRefIdx + sf_TABLE_REF.length());
+                            col = refTable.getColumn(Access.ByLabel, label);
+                        }
+                    }
+                    
+                	if (col != null) {
+                        value = col;
+                        tt = TokenType.ColumnRef;
+                        oper = BuiltinOperator.NOP;
+                        charsParsed = sb.length();
+                	}
+                }
             }
 
         	// TODO: handle other tricks in teq_parse
