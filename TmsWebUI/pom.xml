@@ -70,6 +70,17 @@
   		</exclusions>
   	</dependency>
   	<dependency>
+  		<groupId>org.apache.commons</groupId>
+  		<artifactId>commons-lang3</artifactId>
+  		<version>3.4</version>
+  		<exclusions>
+  			<exclusion>
+  				<artifactId>junit</artifactId>
+  				<groupId>junit</groupId>
+  			</exclusion>
+  		</exclusions>
+  	</dependency>
+  	<dependency>
   		<groupId>com.thoughtworks.xstream</groupId>
   		<artifactId>xstream</artifactId>
   		<version>1.4.9</version>
