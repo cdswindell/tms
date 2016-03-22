@@ -23,6 +23,7 @@ import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
@@ -42,6 +43,9 @@ public class TableEditor implements Serializable
 	private static final long serialVersionUID = 1L;
 	private static final String sf_GROOVY = "Groovy";
 	private static final String sf_PYTHON = "Python";
+	
+	private static final String sf_STANDARD = "Standard";
+	private static final String sf_TIMESERIES = "TimeSeries";
 
 	@SuppressWarnings("unchecked")
 	static <T> T findBean(String beanName) {
@@ -65,9 +69,11 @@ public class TableEditor implements Serializable
 	private UploadedFile m_tableFile;
 
 	private LazyTableModel m_lazyTableModel;
+	private String m_derivType;
 	
 	public TableEditor()
 	{
+		m_derivType = sf_STANDARD;
 		m_scriptType = sf_GROOVY;
 		m_lazyTableModel = null;
 	}	
@@ -327,8 +333,24 @@ public class TableEditor implements Serializable
 		}
 	}	
 
+	public void derivationTypeChanged(ValueChangeEvent vce)
+	{
+		m_derivType = (String) vce.getNewValue();
+		System.out.println(String.format("Derivation Type changed, Old: %s New: %s", vce.getOldValue(), vce.getNewValue()));		
+	}
+	
 	public int getUpdateEvery()
 	{
+		m_updateEvery = 0;
+		
+		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
+		if (te != null) {
+			if (sf_TIMESERIES.equals(m_derivType)) 
+				m_updateEvery = (int)te.getTable().getTimeSeriesedRowsPeriodInMilliSeconds() / 1000;
+			else if (sf_STANDARD.equals(m_derivType) && te.isDerived()) 
+				m_updateEvery = (int)te.getDerivation().getPeriodInMilliSeconds() / 1000;
+		}
+
 		return m_updateEvery;
 	}
 	
@@ -339,10 +361,17 @@ public class TableEditor implements Serializable
 	
 	public String getEntityDerivation()
 	{
-		if (getSelectedEntity() != null && getSelectedEntity().getTE().isDerived())
-			return getSelectedEntity().getTE().getDerivation().getAsEnteredExpression();
-		else
-			return "";		
+		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
+		if (te != null) {
+			if (sf_TIMESERIES.equals(m_derivType)) {
+				if (te.isTimeSeries())
+					return te.getTimeSeries().getAsEnteredExpression();
+			}
+			else if (te.isDerived())
+				return te.getDerivation().getAsEnteredExpression();
+		}
+		
+		return "";		
 	}
 	
 	public void setEntityDerivation(String deriv)
@@ -350,19 +379,55 @@ public class TableEditor implements Serializable
 		m_entityDeriv = deriv;
 	}	
 
+	public String getEntityDerivationType()
+	{
+		m_derivType = sf_STANDARD;
+		
+		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
+		if (te != null) {
+			if (te.isTimeSeries())
+				m_derivType = sf_TIMESERIES;
+		}
+		
+		return m_derivType;
+	}
+	
+	public void setEntityDerivationType(String dt)
+	{
+		m_derivType = dt;
+	}
+
 	public void applyDerivation()
 	{
-		if (getSelectedEntity() != null) {
+		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
+		if (te != null) {
 			if (m_entityDeriv != null && (m_entityDeriv = m_entityDeriv.trim()).length() <= 0)
 				m_entityDeriv = null;
 			
-			EditBase eb = getSelectedEntity();
-			if (m_entityDeriv == null)
-				eb.getTE().clearDerivation();
+			if (m_entityDeriv == null) {
+				if (sf_TIMESERIES.equals(m_derivType))
+					te.clearTimeSeries();
+				else
+					te.clearDerivation();
+			}
 			else {
-				Derivation d = eb.getTE().setDerivation(m_entityDeriv);				
-				if (m_updateEvery > 0) 
-					d.recalculateEvery(m_updateEvery, TimeUnit.SECONDS);
+				if (sf_TIMESERIES.equals(m_derivType)) {
+					te.setTimeSeries(m_entityDeriv);						
+					if (!te.getTable().isTimeSeriesedRowsActive() && m_updateEvery > 0) {
+						Column tsCol = te.getTable().getColumn(Access.ByLabel, "Time Stamp");
+						if (tsCol == null) {
+							tsCol = te.getTable().addColumn(Access.ByIndex, 1);
+							tsCol.setLabel("Time Stamp");
+						}
+						
+						te.getTable().enableTimeSeriesedRows(tsCol, m_updateEvery * 1000);
+					}
+				}
+				else {
+					Derivation d = te.setDerivation(m_entityDeriv);				
+					if (m_updateEvery > 0) 
+						d.recalculateEvery(m_updateEvery, TimeUnit.SECONDS);
+				}
 			}
 			
 			m_entityDeriv = null;

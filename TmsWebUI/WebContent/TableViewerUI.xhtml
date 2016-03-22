@@ -89,6 +89,7 @@
 </h:form>
 
 <h:form id="derive">
+    <p:remoteCommand name="onDerivTypeChange" update=":derive:txDeriveTE,:derive:minMax" />
     <p:dialog id="deriveTEDialog" 
     		  header="Set #{tableEdit.entityTag} Derivation" 
     		  widgetVar="deriveTEDialog" 
@@ -99,6 +100,11 @@
 	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:outputLabel value="#{tableEdit.entityTag} Derivation: "/>  
 	        <p:inputText id="txDeriveTE" value="#{tableEdit.entityDerivation}" widgetVar="newDeriv" size="30" styleClass="txDeriveTE"/> 
+	          <p:outputLabel for="derivType" value="Derivation Type:" />
+	          <p:selectOneRadio id="derivType" value="#{tableEdit.entityDerivationType}" immediate="true" valueChangeListener="#{tableEdit.derivationTypeChanged}" onchange="onDerivTypeChange()">
+	            <f:selectItem itemLabel="Standard" itemValue="Standard" />
+	            <f:selectItem itemLabel="Time Series" itemValue="TimeSeries" />
+	          </p:selectOneRadio>
 	        <p:outputLabel value="Update Every: " for="minMax"/>  
 			<p:spinner id="minMax" value="#{tableEdit.updateEvery}" min="0" max="100" suffix=" seconds"/>
 		</p:panelGrid>  
@@ -261,7 +267,7 @@
        <p:column styleClass="ui-widget-header" width="105">
             <f:facet name="header">
 	    	  <p:panelGrid id="btnPanel" columns="5" styleClass="toolBarGrid" >
-        		<p:commandButton id="resetTable" icon="ui-icon-refresh" title="New Table" update=":form:mainPanel" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn"/>  
+        		<p:commandButton id="resetTable" icon="ui-icon-newwin" title="New Table" update=":form:mainPanel" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn"/>  
         		<p:commandButton id="fileOpen" icon="ui-icon-folder-open" title="Load Table" update=":form:mainPanel" oncomplete="PF('loadTEDialog').show();" styleClass="tmsActionBtn"/>  
         		<p:commandButton id="fileSave" icon="ui-icon-disk" title="Save Table" ajax="false" onclick="PrimeFaces.monitorDownload(startDownload, stopDownload);" styleClass="tmsActionBtn">
         			<p:fileDownload value="#{tableEdit.savedFile}" contentDisposition="attachment"/>

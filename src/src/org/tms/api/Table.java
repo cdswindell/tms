@@ -488,4 +488,7 @@ public interface Table extends TableElement, InitializableTableProperties
 
     public void enableTimeSeriesedRows(Column timeStampCol, long frequency);
     public void enableTimeSeriesedRows(Column timeStampCol, long frequency, TimeUnit unit);
+
+	public long getTimeSeriesedRowsPeriodInMilliSeconds();
+	public long getTimeSeriesedColumnsPeriodInMilliSeconds();
 }

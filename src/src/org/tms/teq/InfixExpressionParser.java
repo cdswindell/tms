@@ -121,7 +121,7 @@ public class InfixExpressionParser
         boolean parsingLabel = false;
         while (curPos < exprLen) {
             parsingLabel = false;
-            char c = exprChars[curPos];
+            char c = xlateChar(exprChars[curPos]);
             if (Character.isWhitespace(c)) {
                 curPos++;
                 continue;
@@ -163,7 +163,23 @@ public class InfixExpressionParser
         return pr;
     }
 
-    private void validateSemantics(EquationStack ifs, Derivable target, ParseResult pr)
+    private char xlateChar(char c) 
+    {	
+    	switch(c) {
+			case 8216:
+			case 8217:
+				return '\'';
+				
+			case 8220:
+			case 8221:
+				return '"';
+			
+    		default:
+    			return c;
+    	}
+	}
+
+	private void validateSemantics(EquationStack ifs, Derivable target, ParseResult pr)
     {
         // check that the target of the derivation is appropriate
         // only Row, Column, and Cell can be targets of a derivation
@@ -402,10 +418,11 @@ public class InfixExpressionParser
 
     private int parseText(char[] exprChars, int curPos, EquationStack ifs, ParseResult pr)
     {
-        char delim = exprChars[curPos];
+        char delim = xlateChar(exprChars[curPos]);
         StringBuffer text = new StringBuffer();
         
         int exprLen = exprChars.length;
+        
         // special case boundary test; if quote is last character of expression, this is an error
         if (curPos == exprLen - 1) {
             pr.addIssue(ParserStatusCode.SingletonQuote, curPos);
@@ -414,7 +431,7 @@ public class InfixExpressionParser
           
         boolean foundTrailingDelim = false;
         for (int i = curPos + 1; i < exprLen; i++) {
-            char c = exprChars[i];
+            char c = xlateChar(exprChars[i]);
             if (c == delim) {
                 foundTrailingDelim = true;
                 break;       

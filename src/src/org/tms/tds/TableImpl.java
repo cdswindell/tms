@@ -2676,11 +2676,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
 		return m_columnsTimeSeries != null && !m_columnsTimeSeries.isEmpty();
 	}
 	
+	@Override
     public long getTimeSeriesedRowsPeriodInMilliSeconds()
     {
     	return m_rowsTimeSeriesPeriod;
     }
     
+	@Override
     public long getTimeSeriesedColumnsPeriodInMilliSeconds()
     {
     	return m_columnsTimeSeriesPeriod;
