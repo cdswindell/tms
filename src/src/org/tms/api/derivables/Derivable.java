@@ -7,7 +7,7 @@ import org.tms.api.TableElement;
 public interface Derivable extends TableElement
 {    
     /**
-     * Return the element's derivation, as a {@link String}, if one is defined.
+     * Return the element's derivation, as a {@link Derivation}, if one is defined.
      * @return the element's derivation
      */
     public Derivation getDerivation();

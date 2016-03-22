@@ -33,8 +33,13 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.derivables.TimeSeries;
+import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
+import org.tms.api.events.DeleteEvent;
+import org.tms.api.events.TableElementEvent;
+import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
@@ -43,7 +48,7 @@ import org.tms.teq.PendingState.AwaitingState;
 import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 import org.tms.util.Tuple;
 
-public final class DerivationImpl implements Derivation, Runnable
+public final class DerivationImpl implements Derivation, TimeSeries, TableElementListener, Runnable
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
@@ -586,10 +591,28 @@ public final class DerivationImpl implements Derivation, Runnable
         return false;
     }
     
+	@Override
+	public void eventOccured(TableElementEvent e) 
+	{
+		// handler to remove time series from row/column when
+		// a table element that affects the formula is deleted
+		if (e instanceof DeleteEvent) {
+			Derivable d = getTarget();
+			if (d instanceof TimeSeriesable) {
+				TimeSeriesable ts = (TimeSeriesable)d;
+				if (ts.isTimeSeries())
+					ts.clearTimeSeries();
+			}
+		}
+	}
+	
     public void destroy()
     {
         m_beingDestroyed = true;    
 
+        // cancel any listeners
+        
+        
         // shut down any future executions
         cancelPeriodicExecution();
         
@@ -1199,6 +1222,7 @@ public final class DerivationImpl implements Derivation, Runnable
     	return m_scheduledFuture != null;
     }
     
+    @Override
     public long getPeriodInMilliSeconds()
     {
     	return m_scheduledPeriod;

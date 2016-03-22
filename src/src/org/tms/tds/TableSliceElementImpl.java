@@ -14,8 +14,11 @@ import org.tms.api.Subset;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
+import org.tms.api.derivables.BasicFormula;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.derivables.TimeSeries;
+import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -28,7 +31,7 @@ import org.tms.tds.TableImpl.CellReference;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
-public abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TableRowColumnElement
+public abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TimeSeriesable, TableRowColumnElement
 {
     abstract protected TableSliceElementImpl insertSlice(int idx);
     abstract public TableSliceElementImpl setCurrent();
@@ -36,6 +39,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     private JustInTimeSet<SubsetImpl> m_subsets;
     private int m_index = -1;    
     private DerivationImpl m_deriv;
+    private DerivationImpl m_timeSeries;
 
     public TableSliceElementImpl(TableElementImpl e)
     {
@@ -142,19 +146,33 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         if (m_deriv != null) 
             clearDerivation();
         
+        m_deriv = createDerivation(expr, Derivation.class);
+        
+        if (doRecalc && m_deriv != null)
+        	recalculate();
+        
+        return m_deriv;
+    }
+    
+    private DerivationImpl createDerivation(String expr, Class<? extends BasicFormula> type) 
+    {
+    	DerivationImpl deriv = null;
         if (expr != null && expr.trim().length() > 0) {
-            m_deriv = DerivationImpl.create(expr.trim(), this);
+            deriv = DerivationImpl.create(expr.trim(), this);
             
             // if the parent table is based on a dbms or log file, make sure UUIDs
             // are assigned to affectedBy references
             boolean assignUuids = getTable() != null && getTable() instanceof ExternalDependenceTableElement;
             
             // mark the rows/columns that impact the deriv, and evaluate values
-            if (m_deriv != null && m_deriv.isConverted()) {
-                Derivable elem = m_deriv.getTarget();
-                for (TableElement d : m_deriv.getAffectedBy()) {
+            if (deriv != null && deriv.isConverted()) {
+                Derivable elem = deriv.getTarget();
+                for (TableElement d : deriv.getAffectedBy()) {
                     TableElementImpl tse = (TableElementImpl)d;
-                    tse.registerAffects(elem);
+                    if (type == Derivation.class)
+                    	tse.registerAffects(elem);
+                    else if (type == TimeSeries.class)
+                    	tse.addListeners(TableElementEventType.OnBeforeDelete, deriv);
                     
                     // Assign a UUID, if needed
                     if (assignUuids)
@@ -165,13 +183,10 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
                 	m_deriv.resetAsEnteredExpression();
                 
                 setInUse(true);
-                
-                if (doRecalc)
-                    recalculate();
             }  
-        }
+        }   
         
-        return m_deriv;
+        return deriv;
     }
     
     @Override
@@ -187,9 +202,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     public void clearDerivation()
     {
         if (m_deriv != null) {
-            DerivationImpl deriv = m_deriv;
-            m_deriv = null;
-            
+        	DerivationImpl deriv = m_deriv;
             Derivable elem = deriv.getTarget();
             for (TableElement d : deriv.getAffectedBy()) {
                 TableElementImpl tse = (TableElementImpl)d;
@@ -197,6 +210,8 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
             }
             
             deriv.destroy();
+            
+        	m_deriv = null;
         }   
     }
     
@@ -237,6 +252,49 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         finally {
             if (cr != null) cr.setCurrentCellReference(getTable());
         }       
+    }
+    
+    @Override
+    public boolean isTimeSeries()
+    {
+        vetElement();
+        return m_timeSeries != null;       
+    }
+    
+    @Override
+    public DerivationImpl getTimeSeries()
+    {
+        vetElement();
+        return m_timeSeries;
+    }
+    
+    @Override
+    public void clearTimeSeries()
+    {
+        if (m_timeSeries != null) {
+        	DerivationImpl deriv = m_timeSeries;
+            for (TableElement d : deriv.getAffectedBy()) {
+            	d.removeListeners(TableElementEventType.OnBeforeDelete, deriv);
+            }
+            
+            deriv.destroy();
+            
+            m_timeSeries = null;
+        }   
+    }   
+    
+    @Override
+    public DerivationImpl setTimeSeries(String expr)
+    {
+        vetElement();
+        
+        // clear out any existing time series
+        if (m_timeSeries != null) 
+            clearTimeSeries();
+        
+        m_timeSeries = createDerivation(expr, TimeSeries.class);
+        
+        return m_timeSeries;
     }
     
     @Override
