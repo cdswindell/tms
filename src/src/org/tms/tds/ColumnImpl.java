@@ -462,8 +462,9 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                 // remove element from subsets that contain it
                 removeFromAllSubsets();
                 
-                // clear any derivations
+                // clear any derivations and time series
                 clearDerivation();
+                clearTimeSeries();
                 
                 // clear any derivations on elements affected by this row
                 if (m_affects != null)

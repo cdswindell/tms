@@ -31,7 +31,7 @@ public interface Derivable extends TableElement
     public boolean isDerived();
     
     /**
-     * Returns a {@link List} of the {@code Derivable} elements
+     * Returns a {@link List} of {@code TableElement} 
      * that affect this {@code Derivable}'s calculation
      * @return a List of the TableElement elements that affect this derivation
      */

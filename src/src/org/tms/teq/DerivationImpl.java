@@ -224,7 +224,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
                 ((DerivationImpl)d).recalculateTarget(element, dc);
             }
             
-            // start background threads
+            // start background calculation threads, if any
             dc.processPendings();
         }
         finally {
@@ -320,6 +320,54 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         }
         
         resolved.add(d);
+    }
+
+    static List<TimeSeriesable> calculateTimeSeriesDependencies(Collection<TimeSeriesable> derived)
+    {
+        assert derived != null : "Set<TimeSeriesable> required";
+
+        int numAffected = derived.size();
+
+        Set<TimeSeriesable> resolved = new LinkedHashSet<TimeSeriesable>(numAffected);
+        Set<TimeSeriesable> unresolved = new HashSet<TimeSeriesable>(numAffected);
+
+        for (TimeSeriesable ts : derived) {
+           if (!resolved.contains(ts))
+               resolveTimeSeriesDependencies(ts, resolved, unresolved, null);
+        }
+
+        List<TimeSeriesable> orderedDerivables = new ArrayList<TimeSeriesable>(resolved);        
+        return orderedDerivables;
+    }
+   
+    /**
+     * Helper method that uses simple graph analysis to order dependencies
+     * @param d
+     * @param resolved
+     * @param unresolved
+     * @param omit
+     */
+    private static void resolveTimeSeriesDependencies(TimeSeriesable ts, Set<TimeSeriesable> resolved, Set<TimeSeriesable> unresolved, TimeSeriesable omit)
+    {
+    	DerivationImpl eq = (DerivationImpl)ts.getTimeSeries();
+        List<TableElement> affectedBy = eq.getAffectedBy();
+        if (affectedBy != null) {
+            unresolved.add(ts);
+            for (TableElement te : affectedBy) {
+                if (!(te instanceof TimeSeriesable)) continue;
+                
+                TimeSeriesable ted = (TimeSeriesable)te;
+                if (!ted.isTimeSeries()) continue;
+                if (ted == omit) continue;
+                
+                if (!resolved.contains(ted))
+                	resolveTimeSeriesDependencies(ted, resolved, unresolved, omit);
+            }
+            
+            unresolved.remove(ts); 
+        }
+        
+        resolved.add(ts);
     }
 
     /**
@@ -492,7 +540,6 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     private boolean m_pendingCachesInitialized;
     
     private ScheduledFuture<?> m_scheduledFuture;
-
 	private long m_scheduledPeriod;
     
     private DerivationImpl()
@@ -610,9 +657,6 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     {
         m_beingDestroyed = true;    
 
-        // cancel any listeners
-        
-        
         // shut down any future executions
         cancelPeriodicExecution();
         
@@ -934,6 +978,11 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     private void recalculateTargetCell(TableElement modifiedElement, DerivationContext dc) 
     {
         Cell cell = (Cell)m_target;
+        recalculateTargetCell(cell, dc);
+    }
+    
+    protected void recalculateTargetCell(Cell cell, DerivationContext dc) 
+    {
         Row row = cell.getRow();
         Column col = cell.getColumn();
         
@@ -947,8 +996,10 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         try {
             PostfixStackEvaluator pfe = new PostfixStackEvaluator(this);        
             Token t = pfe.evaluate(row, col, dc);
+            
             if (t.isNumeric()) 
                 t.setValue(applyPrecision(t.getNumericValue()));
+            
             boolean modified = tbl.setCellValue(row, col, t);
             if (modified && dc != null) {
             	dc.remove(row);
@@ -1262,7 +1313,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
 	@Override
 	public void run() 
 	{
-		this.getTarget().recalculate(); // we want events handlers to fire		
+		this.getTarget().recalculate(); // we want event handlers to fire		
 	}
 	
     public String toString()

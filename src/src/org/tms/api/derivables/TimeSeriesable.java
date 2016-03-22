@@ -15,6 +15,7 @@ public interface TimeSeriesable extends TableElement
      * @return the element's time series
      */
     public TimeSeries getTimeSeries();
+    
     public TimeSeries setTimeSeries(String expression);
     
     /**

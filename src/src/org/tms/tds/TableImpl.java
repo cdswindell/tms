@@ -20,6 +20,10 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.tms.api.Access;
@@ -37,6 +41,7 @@ import org.tms.api.TableRowColumnElement;
 import org.tms.api.Taggable;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Precisionable;
+import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.derivables.Token;
 import org.tms.api.events.BlockedRequestException;
 import org.tms.api.events.TableElementEventType;
@@ -51,6 +56,7 @@ import org.tms.api.io.IOOption;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.events.TableElementListeners;
 import org.tms.teq.DerivationImpl;
+import org.tms.teq.TimeSeriedRowsWorker;
 import org.tms.util.JustInTimeSet;
 
 public class TableImpl extends TableCellsElementImpl implements Table, Precisionable
@@ -79,6 +85,19 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         }
     };
     
+    private static final int sf_NUM_THREADS = 1;
+    private static final boolean sf_MAY_INTERRUPT_IF_RUNNING = true;
+    
+    private static ScheduledExecutorService sf_TimeSeriesScheduler;
+    
+    private static final synchronized ScheduledExecutorService getTimeSeriesScheduler()
+    {
+    	if (sf_TimeSeriesScheduler == null)
+    		sf_TimeSeriesScheduler = Executors.newScheduledThreadPool(sf_NUM_THREADS);
+    	
+    	return sf_TimeSeriesScheduler;
+    }
+
     static Map<TableImpl, CellReference> getStaticCurrentCell()
     {
         return sf_CURRENT_CELL.get();
@@ -158,7 +177,16 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     private int m_colCapacityIncr;
     private int m_precision;
     private double m_freeSpaceThreshold;
-    
+
+	private Set<TimeSeriesable> m_columnsTimeSeries;
+	private Set<TimeSeriesable> m_rowsTimeSeries;
+	
+    private ScheduledFuture<?> m_rowsTimeSeriesFuture;
+	private long m_rowsTimeSeriesPeriod;
+
+    private ScheduledFuture<?> m_columnsTimeSeriesFuture;
+	private long m_columnsTimeSeriesPeriod;
+   
     protected TableImpl()
     {
         this(ContextImpl.getPropertyInt(null, TableProperty.RowCapacityIncr),
@@ -227,6 +255,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         m_persistentSubsets = new HashSet<SubsetImpl>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
+        
+        m_rowsTimeSeries = new LinkedHashSet<TimeSeriesable>();
+        m_columnsTimeSeries = new LinkedHashSet<TimeSeriesable>();
         
         int expectedNoOfDerivedCells = m_rowsCapacity * m_colsCapacity / 5; // assume 20%
         m_derivedCells = new HashMap<CellImpl, DerivationImpl>(expectedNoOfDerivedCells);
@@ -831,6 +862,8 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         	this.m_derivedCells.clear();
         	this.m_subsetedCells.clear();
         	this.m_unusedCellOffsets.clear();
+        	this.m_rowsTimeSeries.clear();
+        	this.m_columnsTimeSeries.clear();
         	this.m_cols.clear();
         	this.m_rows.clear();
         }
@@ -2547,6 +2580,112 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         }       
     }    
 
+    /*
+     * Methods to manage time series formulas
+     */
+	void deregisterTimeSeries(TableSliceElementImpl te) 
+	{
+		vetElement(te);
+		
+		if (te instanceof RowImpl) {
+			m_columnsTimeSeries.remove(te);
+			if (m_columnsTimeSeries.isEmpty()) 
+				cancelColumnsTimeSeries();
+		}
+		else if (te instanceof ColumnImpl) {
+			m_rowsTimeSeries.remove(te);
+			if (m_rowsTimeSeries.isEmpty())
+				cancelRowsTimeSeries();
+		}
+	}
+
+	void registerTimeSeries(TableSliceElementImpl te) 
+	{
+		vetElement(te);
+		
+		if (te instanceof RowImpl)
+			m_columnsTimeSeries.add(te);
+		else if (te instanceof ColumnImpl)
+			m_rowsTimeSeries.add(te);
+	}
+	
+    private void cancelRowsTimeSeries() 
+    {
+        if (m_rowsTimeSeriesFuture != null) {
+        	m_rowsTimeSeriesFuture.cancel(sf_MAY_INTERRUPT_IF_RUNNING);
+        	m_rowsTimeSeriesFuture = null;
+        }       	
+	}
+
+    private void cancelColumnsTimeSeries() 
+    {
+        if (m_columnsTimeSeriesFuture != null) {
+        	m_columnsTimeSeriesFuture.cancel(sf_MAY_INTERRUPT_IF_RUNNING);
+        	m_columnsTimeSeriesFuture = null;
+        }       	
+	}
+
+	public void suspendTimeSeries()
+	{
+		cancelRowsTimeSeries();
+		cancelColumnsTimeSeries();
+	}
+	
+	public void resumeTimeSeries()
+	{
+		
+	}
+	
+	@Override
+	public void enableTimeSeriesedRows(Column timeStampCol, long frequency)
+	{
+		enableTimeSeriesedRows(timeStampCol, frequency, TimeUnit.MILLISECONDS);
+	}
+	
+	@Override
+	public void enableTimeSeriesedRows(Column timeStampCol, long frequency, TimeUnit unit)
+	{
+		cancelRowsTimeSeries();
+		
+    	if (unit == null)
+    		unit = TimeUnit.MILLISECONDS;
+    	
+    	if (frequency > 0)  {	    		
+    		TimeSeriedRowsWorker tsrw = new TimeSeriedRowsWorker(this, (ColumnImpl)timeStampCol, m_rowsTimeSeries);
+    		
+    		m_rowsTimeSeriesPeriod = TimeUnit.MILLISECONDS.convert(frequency, unit);
+    		m_rowsTimeSeriesFuture = getTimeSeriesScheduler().scheduleAtFixedRate(tsrw, frequency, frequency, unit);
+    	}
+	}
+	
+	@Override
+	public boolean isTimeSeriesedRows()
+	{
+		return m_rowsTimeSeries != null && !m_rowsTimeSeries.isEmpty();
+	}
+	
+	@Override
+	public boolean isTimeSeriesedRowsActive()
+	{
+		return m_rowsTimeSeriesFuture != null && !m_rowsTimeSeriesFuture.isDone();
+	}
+	
+	@Override
+	public boolean isTimeSeriesedColumns()
+	{
+		return m_columnsTimeSeries != null && !m_columnsTimeSeries.isEmpty();
+	}
+	
+    public long getTimeSeriesedRowsPeriodInMilliSeconds()
+    {
+    	return m_rowsTimeSeriesPeriod;
+    }
+    
+    public long getTimeSeriesedColumnsPeriodInMilliSeconds()
+    {
+    	return m_columnsTimeSeriesPeriod;
+    }
+    
     Map<String, Object> getCellElemProperties(CellImpl cell, boolean createIfEmpty)
     {
         if (cell != null) {

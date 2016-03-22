@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.Comparator;
 
 import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.io.IOOption;
 import org.tms.api.utils.Validatable;
 
@@ -14,7 +15,7 @@ import org.tms.api.utils.Validatable;
  * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public interface TableRowColumnElement extends TableElement, Derivable, Validatable
+public interface TableRowColumnElement extends TableElement, Derivable, TimeSeriesable, Validatable
 {
     /**
      * Return the 1-based ordinal index of this {@link Row}/{@link Column}.

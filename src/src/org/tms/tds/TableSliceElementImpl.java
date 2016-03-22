@@ -273,13 +273,19 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     {
         if (m_timeSeries != null) {
         	DerivationImpl deriv = m_timeSeries;
+        	
+            // deregister from parent table
+            if (getTable() != null)
+            	getTable().deregisterTimeSeries(this);
+            
+            // remove listeners monitoring operand table element deletion
             for (TableElement d : deriv.getAffectedBy()) {
             	d.removeListeners(TableElementEventType.OnBeforeDelete, deriv);
             }
             
-            deriv.destroy();
-            
-            m_timeSeries = null;
+            // destroy the base data structure
+            deriv.destroy();            
+            m_timeSeries = null;           
         }   
     }   
     
@@ -293,6 +299,9 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
             clearTimeSeries();
         
         m_timeSeries = createDerivation(expr, TimeSeries.class);
+        
+        if (getTable() != null)
+        	getTable().registerTimeSeries(this);
         
         return m_timeSeries;
     }

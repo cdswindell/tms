@@ -3,6 +3,7 @@ package org.tms.api;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.io.IOOption;
@@ -479,4 +480,12 @@ public interface Table extends TableElement, InitializableTableProperties
      * @return the unique UUID assigned to this {@code Table}
      */
     public String getUuid();
+
+    public boolean isTimeSeriesedRows();
+	public boolean isTimeSeriesedRowsActive();
+	
+    public boolean isTimeSeriesedColumns();
+
+    public void enableTimeSeriesedRows(Column timeStampCol, long frequency);
+    public void enableTimeSeriesedRows(Column timeStampCol, long frequency, TimeUnit unit);
 }
