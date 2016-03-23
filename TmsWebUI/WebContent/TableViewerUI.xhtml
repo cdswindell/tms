@@ -277,7 +277,7 @@
 			  </p:panelGrid>
             </f:facet>
 			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
-	        <h:outputText value="*" rendered="#{row.derived}" />
+	        <h:outputText value="*" rendered="#{row.derived or row.timeSeries}" />
 			<p:contextMenu for="rowNames" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
 				<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog">
       				<f:setPropertyActionListener value="#{row}" target="#{tableEdit.selectedRow}" />
@@ -297,7 +297,7 @@
           <p:column id="col_#{col.index}" width="200">
             <f:facet name="header">
                 <h:outputText value="#{col.label}"/>
-                <h:outputText value="*" rendered="#{col.derived}" />
+                <h:outputText value="*" rendered="#{col.derived or col.timeSeries}" />
 		        <p:contextMenu for="col_#{col.index}" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
 					<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog">
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
@@ -314,7 +314,7 @@
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 		        	</p:menuitem>
 		        </p:contextMenu>
-   		   	 	<p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived}"/>
+   		   	 	<p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived or col.timeSeries}"/>
             </f:facet>
           	<p:cellEditor>
                <f:facet name="output"><div align="center"><h:outputText value="#{col.formattedValue}" style="#{col.style}"/></div></f:facet>
@@ -353,7 +353,7 @@
        <p:column styleClass="ui-widget-header" width="105">
             <f:facet name="header">
 	    	  <p:panelGrid id="btnPanel" columns="5" styleClass="toolBarGrid" >
-        		<p:commandButton  id="resetTable" icon="ui-icon-refresh" title="New Table" update=":form:mainPanel" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn" partialSubmit="true"/>
+        		<p:commandButton  id="resetTable" icon="ui-icon-newwin" title="New Table" update=":form:mainPanel" actionListener="#{tableEdit.reset}" styleClass="tmsActionBtn" partialSubmit="true"/>
         		<p:commandButton id="fileOpen" icon="ui-icon-folder-open" title="Load Table" update=":form:mainPanel" oncomplete="PF('loadTEDialog').show();" styleClass="tmsActionBtn" partialSubmit="true"/>  
         		<p:commandButton id="fileSave" icon="ui-icon-disk" title="Save Table" ajax="false" onclick="PrimeFaces.monitorDownload(startDownload, stopDownload);" styleClass="tmsActionBtn" partialSubmit="true">
         			<p:fileDownload value="#{tableEdit.savedFile}" contentDisposition="attachment"/>
@@ -364,7 +364,7 @@
             </f:facet>
             
 			<p:outputLabel id="rowNames" value="#{row.label}" style="font-weight:bold;"/>
-	        <h:outputText value="*" rendered="#{row.derived}" />
+	        <h:outputText value="*" rendered="#{row.derived or row.timeSeries}" />
 	        
 			<p:contextMenu for="rowNames" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;" partialSubmit="true">
 				<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog" partialSubmit="true">
@@ -385,7 +385,7 @@
           <p:column id="col_#{col.index}" width="200" >
             <f:facet name="header">
                 <h:outputText value="#{col.label}"/>
-                <h:outputText value="*" rendered="#{col.derived}" />
+                <h:outputText value="*" rendered="#{col.derived or col.timeSeries}" />
 		        <p:contextMenu for="col_#{col.index}" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
 					<p:menuitem  value="Derive..." icon="ui-icon-calculator" oncomplete="PF('deriveTEDialog').show();" update=":derive:deriveTEDialog" partialSubmit="true">
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
@@ -403,7 +403,7 @@
 	      				<f:setPropertyActionListener value="#{col}" target="#{tableEdit.selectedColumn}" />
 		        	</p:menuitem>
 		        </p:contextMenu>
-   		   	 	<p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived}"/>
+   		   	 	<p:tooltip id="colDerivTip" for="col_#{col.index}" value="#{col.derivation}" rendered="#{col.derived or col.timeSeries}"/>
             </f:facet>
           	<p:cellEditor rendered="#{tableEdit.isCellEditable(row, col)}">
                <f:facet name="output"><div align="center"><h:outputText value="#{col.formattedValue}" style="#{col.style}"/></div></f:facet>

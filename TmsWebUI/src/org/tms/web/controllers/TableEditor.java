@@ -109,10 +109,7 @@ public class TableEditor implements Serializable
 	public void clearTable()
 	{
 		m_tableViewer.getTable().clear();
-		clearSelectedEntity();
-		m_eRows = null;
-		m_eCols = null;
-		m_lazyTableModel = null;
+		resetTableEditor();
 	}
 	
 	public String getTableName()
@@ -216,16 +213,25 @@ public class TableEditor implements Serializable
 			Table t = TableFactory.importFile(m_tableFile.getInputstream(), tc, TMSOptions.Default);
 			m_tableViewer.init(t);
             
-    		clearSelectedEntity();
-            m_tableFile = null;
-    		m_eRows = null;
-    		m_eCols = null;
-    		m_lazyTableModel = null;
-    		m_tableFile = null;
+			resetTableEditor();
+	        m_tableFile = null;
 			
             FacesMessage message = new FacesMessage("Succesful", "Table loaded...");
             FacesContext.getCurrentInstance().addMessage(null, message);
 		}
+	}
+	
+	public void resetTableEditor()
+	{
+		clearSelectedEntity();
+		
+		m_eRows = null;
+		m_eCols = null;
+		
+		m_lazyTableModel = null;
+        
+        if (m_tableViewer != null)
+        	m_tableViewer.resetRefreshNeeded();
 	}
 	
 	private String extractClassName(FileUploadEvent event) 
@@ -245,11 +251,7 @@ public class TableEditor implements Serializable
 	
 	public void reset()
 	{
-		clearSelectedEntity();
-		m_eRows = null;
-		m_eCols = null;
-		m_lazyTableModel = null;
-
+		resetTableEditor();
 		m_tableViewer.init(true);
 	}
 	
@@ -265,6 +267,9 @@ public class TableEditor implements Serializable
 	
 	public List<EditRow> getRows()
 	{
+		if (m_tableViewer.isRefreshNeeded())
+			resetTableEditor();
+		
 		if (m_eRows == null) {
 			m_eRows = new ArrayList<EditRow>(m_tableViewer.getNumRows()); 
 			for (Row r : m_tableViewer.getRows()) {
@@ -277,6 +282,9 @@ public class TableEditor implements Serializable
 	
 	public List<EditColumn> getColumns()
 	{
+		if (m_tableViewer.isRefreshNeeded())
+			resetTableEditor();
+		
 		if (m_eCols == null) {
 			m_eCols = new ArrayList<EditColumn>(m_tableViewer.getNumColumns()); 
 			for (Column c : m_tableViewer.getColumns()) {
@@ -361,6 +369,8 @@ public class TableEditor implements Serializable
 	
 	public String getEntityDerivation()
 	{
+		getEntityDerivationType();
+		
 		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
 		if (te != null) {
 			if (sf_TIMESERIES.equals(m_derivType)) {
@@ -381,8 +391,7 @@ public class TableEditor implements Serializable
 
 	public String getEntityDerivationType()
 	{
-		m_derivType = sf_STANDARD;
-		
+		m_derivType = sf_STANDARD;	
 		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
 		if (te != null) {
 			if (te.isTimeSeries())
@@ -412,18 +421,22 @@ public class TableEditor implements Serializable
 			}
 			else {
 				if (sf_TIMESERIES.equals(m_derivType)) {
+					te.clearDerivation();
 					te.setTimeSeries(m_entityDeriv);						
 					if (!te.getTable().isTimeSeriesedRowsActive() && m_updateEvery > 0) {
-						Column tsCol = te.getTable().getColumn(Access.ByLabel, "Time Stamp");
-						if (tsCol == null) {
-							tsCol = te.getTable().addColumn(Access.ByIndex, 1);
-							tsCol.setLabel("Time Stamp");
+						if (te instanceof Column) {
+							Column tsCol = te.getTable().getColumn(Access.ByLabel, "Time Stamp");
+							if (tsCol == null) {
+								tsCol = te.getTable().addColumn(Access.ByIndex, 1);
+								tsCol.setLabel("Time Stamp");
+							}
+							
+							te.getTable().enableTimeSeriesedRows(tsCol, m_updateEvery * 1000);
 						}
-						
-						te.getTable().enableTimeSeriesedRows(tsCol, m_updateEvery * 1000);
 					}
 				}
 				else {
+					te.clearTimeSeries();
 					Derivation d = te.setDerivation(m_entityDeriv);				
 					if (m_updateEvery > 0) 
 						d.recalculateEvery(m_updateEvery, TimeUnit.SECONDS);
@@ -584,7 +597,9 @@ public class TableEditor implements Serializable
 		
 		public String getDerivation()
 		{
-			if (isValid() && isDerived())
+			if (isValid() && m_te.isTimeSeries())
+				return m_te.getTimeSeries().getAsEnteredExpression() + " (TS)";
+			else if (isValid() && isDerived())
 				return m_te.getDerivation().getAsEnteredExpression();
 			else
 				return "";
@@ -594,6 +609,14 @@ public class TableEditor implements Serializable
 		{    
 			if (isValid())
 				return m_te.isDerived();
+			else
+				return false;
+		}
+		
+		public boolean isTimeSeries()
+		{    
+			if (isValid())
+				return m_te.isTimeSeries();
 			else
 				return false;
 		}

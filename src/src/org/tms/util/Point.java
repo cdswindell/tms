@@ -39,6 +39,14 @@ public class Point
 		return Math.sqrt(dx*dx + dy*dy);
 	}
 	
+	@RegisterOp(async=true)
+	public double distanceToAsync(Point other) 
+			throws InterruptedException
+	{
+		Thread.sleep(2500);
+		return distanceTo(other);
+	}
+	
 	public String toString()
 	{
 		return String.format("(%d,%d)", m_x, m_y);

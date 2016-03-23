@@ -581,11 +581,13 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         if (numRows > 0 && numCols == 0) {
             for (Row row : rows()) {
                 row.clearDerivation();
+                row.clearTimeSeries();
             }
         }
         else if (numCols > 0 && numRows == 0) {
             for (Column col : columns()) {
                 col.clearDerivation();
+                col.clearTimeSeries();
             }
         }       
     }

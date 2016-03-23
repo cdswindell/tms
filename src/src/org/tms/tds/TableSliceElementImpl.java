@@ -607,6 +607,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
             synchronized(parent) {
                 // Clear derivation, since fill should override
                 clearDerivation();
+                clearTimeSeries();
                 
                 boolean readOnlyExceptionEncountered = false;
                 boolean nullValueExceptionEncountered = false;

@@ -733,15 +733,6 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         return m_beingDestroyed;
     }
     
-    public void delete()
-    {
-        if (getTarget() != null)
-            getTarget().clearDerivation();
-        else {
-            destroy();
-        }
-    }   
-
     protected PendingStatistic getPendingStatistic(TableElement ref)
     {
         if (!isBeingDestroyed() && ref != null && ref.isValid()) {

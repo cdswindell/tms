@@ -264,7 +264,7 @@ public abstract class TableCellsElementImpl extends TableElementImpl
         return m_listeners;
     }
     
-    protected void fireEvents(TableElement te, TableElementEventType evT, Object... args)
+    public void fireEvents(TableElement te, TableElementEventType evT, Object... args)
     {
         if (TableElementListeners.hasAnyListeners(te.getTable()))
             fetchListeners().fireEvents(te, evT, args);

@@ -24,6 +24,8 @@ public class TableViewer implements TableElementListener
 	private static final int MAX_SIZE = 100;
 	
 	private Table m_table;
+
+	private boolean m_refreshNeeded;
 	
 	public TableViewer()
 	{
@@ -105,6 +107,8 @@ public class TableViewer implements TableElementListener
 	@Override
 	public void eventOccured(TableElementEvent e) 
 	{
+		m_refreshNeeded = true;
+		
 		try {
 			Thread.sleep(250);
 		} catch (InterruptedException e1) { }
@@ -112,12 +116,20 @@ public class TableViewer implements TableElementListener
 		EventBusFactory eb = EventBusFactory.getDefault();
         EventBus eventBus = eb.eventBus();
         eventBus.publish("/tableUpdated", "pending cells updated");
-        //System.out.println(e);
 	}
 
+	public boolean isRefreshNeeded()
+	{
+		return m_refreshNeeded;
+	}
+	
+	public void resetRefreshNeeded()
+	{
+		m_refreshNeeded = false;
+	}
+	
 	public boolean isBigTable() 
 	{
-		
 		return m_table != null && (m_table.getNumRows() > MAX_SIZE || m_table.getNumColumns() > MAX_SIZE);
 	}
 }

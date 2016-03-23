@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.tms.api.derivables.TimeSeriesable;
+import org.tms.api.events.TableElementEventType;
 import org.tms.tds.CellImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.TableSliceElementImpl;
@@ -56,6 +57,8 @@ public abstract class AbstractTimeSeriesWorker implements Runnable
 			
             // start background calculation threads, if any
 			dc.processPendings();
+			
+			nextSliceRef.fireEvents(nextSliceRef, TableElementEventType.OnRecalculate);
 		}
 		finally {
 			m_parentTable.popCurrent();

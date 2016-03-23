@@ -146,8 +146,8 @@ public class TimeSeriesTest
         // clear the time series from c3, this should shut everything down
         c3.clearTimeSeries();
         
-        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (6));
-        assertThat(tbl.getPropertyInt(TableProperty.numRows), is (3));
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (8));
+        assertThat(tbl.getPropertyInt(TableProperty.numRows), is (4));
 
         assertThat(false, is(tbl.isTimeSeriesedRows()));
         assertThat(false, is(tbl.isTimeSeriesedRowsActive()));
@@ -212,8 +212,8 @@ public class TimeSeriesTest
             Thread.sleep(500);
         }
         
-        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (9));
-        assertThat(tbl.getPropertyInt(TableProperty.numRows), is (3));
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (12));
+        assertThat(tbl.getPropertyInt(TableProperty.numRows), is (4));
 
         assertThat(false, is(tbl.isTimeSeriesedRows()));
         assertThat(false, is(tbl.isTimeSeriesedRowsActive()));

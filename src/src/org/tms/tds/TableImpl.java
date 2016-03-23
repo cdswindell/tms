@@ -2654,7 +2654,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     		TimeSeriedRowsWorker tsrw = new TimeSeriedRowsWorker(this, (ColumnImpl)timeStampCol, m_rowsTimeSeries);
     		
     		m_rowsTimeSeriesPeriod = TimeUnit.MILLISECONDS.convert(frequency, unit);
-    		m_rowsTimeSeriesFuture = getTimeSeriesScheduler().scheduleAtFixedRate(tsrw, frequency, frequency, unit);
+    		m_rowsTimeSeriesFuture = getTimeSeriesScheduler().scheduleAtFixedRate(tsrw, 0, frequency, unit);
     	}
 	}
 	
