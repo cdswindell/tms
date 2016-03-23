@@ -52,6 +52,9 @@ public abstract class AbstractTimeSeriesWorker implements Runnable
 				if (di != null) {
 					CellImpl tsCell = getCell(nextSliceRef, (TableSliceElementImpl)ts);
 					di.recalculateTargetCell(tsCell, dc);
+					
+					// also recalculate all dependent elements
+					DerivationImpl.recalculateAffected(tsCell, dc);
 				}
 			}
 			

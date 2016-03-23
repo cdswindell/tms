@@ -188,6 +188,14 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
      */
     public static void recalculateAffected(TableElement element)
     {
+        DerivationContext dc = new DerivationContext();
+        dc.setRecalculateAffected(false);
+        
+        recalculateAffected(element, dc);
+    }   
+    
+    public static void recalculateAffected(TableElement element, DerivationContext dc)
+    {
         if (element == null || element.isInvalid())
             return;
         
@@ -212,14 +220,11 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         if (orderedDerivables == null || orderedDerivables.isEmpty())
             return;
         
-        // iterate over ordered list and recalculate 
-        DerivationContext dc = new DerivationContext();
-        dc.setRecalculateAffected(false);
-        
         if (parent != null) parent.pushCurrent();
         try {
             for (Derivable derivable : orderedDerivables) {
                 if (derivable == null) continue;
+                
                 Derivation d = derivable.getDerivation();
                 ((DerivationImpl)d).recalculateTarget(element, dc);
             }
@@ -972,7 +977,10 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         recalculateTargetCell(cell, dc);
     }
     
-    protected void recalculateTargetCell(Cell cell, DerivationContext dc) 
+    /*
+     * called from AbstractTimeSeriesWorker
+     */
+    void recalculateTargetCell(Cell cell, DerivationContext dc) 
     {
         Row row = cell.getRow();
         Column col = cell.getColumn();
