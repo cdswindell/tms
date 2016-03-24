@@ -381,7 +381,7 @@ public class TableConverter extends BaseConverter
             // enable time series, if we're so told
             if (t.isTimeSeriesedRows() && tsRowsPeriod != null && tsRowsPeriod > 0) {
             	Column tsCol = (Column)context.get(TMS_TS_ROWS_TS_COL_KEY);
-            	if (tsRowsActive != null && tsRowsActive.booleanValue())
+            	if (tsRowsActive != null && tsRowsActive.booleanValue() && options().isReenable())
             		t.enableTimeSeriesedRows(tsCol, tsRowsPeriod);
             	else {          	
 	            	// TODO: handle restoration of period and time stamp column, even
@@ -392,7 +392,7 @@ public class TableConverter extends BaseConverter
             // Columns Time Series
             if (t.isTimeSeriesedColumns() && tsColsPeriod != null && tsColsPeriod > 0) {
             	Row tsRow = (Row)context.get(TMS_TS_COLS_TS_ROW_KEY);
-            	if (tsColsActive != null && tsColsActive.booleanValue())
+            	if (tsColsActive != null && tsColsActive.booleanValue() && options().isReenable())
             		t.enableTimeSeriesedColumns(tsRow, tsColsPeriod);
             	else {
 	            	// TODO: handle restoration of period and time stamp column, even

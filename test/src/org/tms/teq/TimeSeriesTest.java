@@ -245,5 +245,4 @@ public class TimeSeriesTest extends BaseTest
     	
     	TableContextFactory.fetchDefaultTableContext().deregisterAllOperators();
     }
-
 }

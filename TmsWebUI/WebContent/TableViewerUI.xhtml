@@ -264,8 +264,8 @@
 		   <p:contextMenu for="tableTitle" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
 				<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTableTEDialog').show();" update=":renameTable:renameTableTEDialog"/>
 				<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearTable}" update="@form"/>
-				<p:menuitem  value="Suspend Time Series" icon="ui-icon-close" disabled="#{tableEdit.suspendTSDisabled}" actionListener="#{tableEdit.suspendTimeSeries}" update="@form"/>
-				<p:menuitem  value="Resume Time Series" icon="ui-icon-close" disabled="#{tableEdit.resumeTSDisabled}" actionListener="#{tableEdit.resumeTimeSeries}" update="@form"/>
+				<p:menuitem  value="Suspend Time Series" icon="ui-icon-stop" disabled="#{tableEdit.suspendTSDisabled}" actionListener="#{tableEdit.suspendTimeSeries}" update="@form"/>
+				<p:menuitem  value="Resume Time Series" icon="ui-icon-play" disabled="#{tableEdit.resumeTSDisabled}" actionListener="#{tableEdit.resumeTimeSeries}" update="@form"/>
 		   </p:contextMenu>
  	   </f:facet>
        <p:ajax event="cellEdit" oncomplete="onCellEdit()" />

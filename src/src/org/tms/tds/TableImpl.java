@@ -2667,6 +2667,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
 	public void resumeAllTimeSeries()
 	{
 		resumeTimeSeriesedRows();
+		resumeTimeSeriesedColumns();
 	}
 	
 	@Override

@@ -464,9 +464,21 @@ public class TableEditor implements Serializable
 							if (tsCol == null) {
 								tsCol = te.getTable().addColumn(Access.ByIndex, 1);
 								tsCol.setLabel("Time Stamp");
+								tsCol.setDisplayFormat("%1$tY.%1$tm.%1$td %1$tH:%1$tM:%1$tS");
 							}
 							
 							TimeSeriesScheduler tss = new TimeSeriesScheduler(te.getTable(), tsCol, m_updateEvery);
+							tss.start();
+						}
+						else if (te instanceof Row) {
+							Row tsRow = te.getTable().getRow(Access.ByLabel, "Time Stamp");
+							if (tsRow == null) {
+								tsRow = te.getTable().addRow(Access.ByIndex, 1);
+								tsRow.setLabel("Time Stamp");
+								tsRow.setDisplayFormat("%1$tY.%1$tm.%1$td %1$tH:%1$tM:%1$tS");
+							}
+							
+							TimeSeriesScheduler tss = new TimeSeriesScheduler(te.getTable(), tsRow, m_updateEvery);
 							tss.start();
 						}
 					}
@@ -866,11 +878,19 @@ public class TableEditor implements Serializable
 		private Table m_parentTable;
 		private Column m_timeStampCol;
 		private int m_frequency;
+		private Row m_timeStampRow;
 
 		TimeSeriesScheduler(Table t, Column tsCol, int freq)
 		{
 			m_parentTable = t;
 			m_timeStampCol = tsCol;
+			m_frequency = freq;
+		}
+		
+		TimeSeriesScheduler(Table t, Row tsRow, int freq)
+		{
+			m_parentTable = t;
+			m_timeStampRow = tsRow;
 			m_frequency = freq;
 		}
 		
@@ -881,7 +901,10 @@ public class TableEditor implements Serializable
 				Thread.sleep(250);
 			} catch (InterruptedException e) { /* noop */ }
 			
-			m_parentTable.enableTimeSeriesedRows(m_timeStampCol, m_frequency * 1000);
+			if (m_timeStampCol != null)
+				m_parentTable.enableTimeSeriesedRows(m_timeStampCol, m_frequency * 1000);
+			else if (m_timeStampRow != null)
+				m_parentTable.enableTimeSeriesedColumns(m_timeStampRow, m_frequency * 1000);
 		}		
 	}
 }

@@ -19,14 +19,6 @@ package org.tms.api.io;
  */
 public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends IOOption<T> 
 {   
-    public boolean isVerboseState();
-    public T withVerboseState();
-    public T withVerboseState(boolean enabled);
-    
-    public boolean isRecalculate();
-    public T withRecalculate();
-    public T withRecalculate(boolean enabled);
-    
     /**
      * Returns {@code true} if TMS {@link org.tms.api.derivables.Derivation Derivation}s are imported or exported. 
      * @return {@code true} if TMS {@code Derivation}s are imported and exported
@@ -55,12 +47,6 @@ public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends IOOptio
      * @return {@code true} if TMS {@code Derivation}s are imported and exported
      */
     public boolean isDerivations();
-    
-    /**
-     * Returns {@code true} if TMS {@link org.tms.api.derivables.TimeSeries TimeSeries}s are imported or exported. 
-     * @return {@code true} if TMS {@code TimeSeries}s are imported and exported
-     */
-    public boolean isTimeSeries();
     
     /**
      * Enable the import and export of TMS {@link org.tms.api.TableElement TableElement}
@@ -139,6 +125,26 @@ public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends IOOptio
      * @return a new {@link T} that is equal to this with Units field import/export enabled or disabled
      */
     public T withUnits(boolean enabled);
+    
+    /**
+     * Returns {@code true} if TMS {@link org.tms.api.derivables.TimeSeries TimeSeries}s are imported or exported. 
+     * @return {@code true} if TMS {@code TimeSeries}s are imported and exported
+     */
+    public boolean isTimeSeries();
+    public T withTimeSeries();
+    public T withTimeSeries(boolean enabled);
+    
+    public boolean isVerboseState();
+    public T withVerboseState();
+    public T withVerboseState(boolean enabled);
+    
+    public boolean isRecalculate();
+    public T withRecalculate();
+    public T withRecalculate(boolean enabled);
+    
+    public boolean isReenable();
+    public T withReenable();
+    public T withReenable(boolean enabled);
     
     public boolean isDisplayFormats();
     public T withDisplayFormats();

@@ -31,13 +31,18 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
 {    
     public enum Options implements OptionEnum 
     {
-        Recalculate,
         VerboseState,
         
         Derivations,
-        TimeSeries,
-        Validators,
+        Recalculate,      
         
+        TimeSeries,
+        Reenable,
+        
+        PreserveRows,
+        PreserveColumns,
+        
+        Validators,       
         Descriptions, 
         DisplayFormats,
         Units,
@@ -72,6 +77,11 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         set(Options.Tags, true);
         
         set(Options.Recalculate, true);
+        
+        set(Options.Reenable, true);
+        
+        set(Options.PreserveRows, true);
+        set(Options.PreserveColumns, true);
     }
 
     protected ArchivalIOOptions(final ArchivalIOOptions<T> format)
@@ -229,6 +239,29 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
     {
         final T newOptions = clone(this);
         newOptions.set(Options.TimeSeries, enabled);
+        return newOptions;
+    }
+    
+    public boolean isReenable()
+    {
+        return (Boolean)get(Options.Reenable);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withReenable()
+    {
+        return withReenable(true);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withReenable(boolean enabled)
+    {
+        final T newOptions = clone(this);
+        newOptions.set(Options.Reenable, enabled);
         return newOptions;
     }
     
