@@ -89,25 +89,29 @@
 </h:form>
 
 <h:form id="derive">
-    <p:remoteCommand name="onDerivTypeChange" update=":derive:txDeriveTE,:derive:minMax" />
+    <p:remoteCommand name="onDerivTypeChange" update=":derive:deriveTEPanel" actionListener="#{tableEdit.processChanges}"/>
     <p:dialog id="deriveTEDialog" 
-    		  header="Set #{tableEdit.entityTag} Derivation" 
+    		  header="Set #{tableEdit.entityTag} Derivation#{tableEdit.resetAllDerivParams}" 
     		  widgetVar="deriveTEDialog" 
     		  modal="true" 
     		  resizable="false" 
               showEffect="clip" 
               hideEffect="fold">  
+              
 	    <p:panelGrid id="deriveTEPanel" columns="2" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:outputLabel value="#{tableEdit.entityTag} Derivation: "/>  
 	        <p:inputText id="txDeriveTE" value="#{tableEdit.entityDerivation}" widgetVar="newDeriv" size="30" styleClass="txDeriveTE"/> 
+	        
 	          <p:outputLabel for="derivType" value="Derivation Type:" />
-	          <p:selectOneRadio id="derivType" value="#{tableEdit.entityDerivationType}" immediate="true" valueChangeListener="#{tableEdit.derivationTypeChanged}" onchange="onDerivTypeChange()">
+	          <p:selectOneRadio id="derivType" value="#{tableEdit.entityDerivationType}" immediate="true"  valueChangeListener="#{tableEdit.derivationTypeChanged}" onchange="onDerivTypeChange()">
 	            <f:selectItem itemLabel="Standard" itemValue="Standard" />
 	            <f:selectItem itemLabel="Time Series" itemValue="TimeSeries" />
 	          </p:selectOneRadio>
+	          
 	        <p:outputLabel value="Update Every: " for="minMax"/>  
 			<p:spinner id="minMax" value="#{tableEdit.updateEvery}" min="0" max="100" suffix=" seconds"/>
 		</p:panelGrid>  
+		
 	    <p:panelGrid id="deriveTEPanel2" columns="3" cellpadding="4" styleClass="tmsHeaderGrid">
 	        <p:commandButton icon="ui-icon-check"   
 	        				 value="OK" 
@@ -153,7 +157,7 @@
 </h:form>
 
 <h:form id="gScript" enctype="multipart/form-data">
-    <p:remoteCommand name="onScriptTypeChange" update=":gScript:fileUpload" actionListener="#{tableEdit.recalc}"/>
+    <p:remoteCommand name="onScriptTypeChange" update=":gScript:fileUpload" actionListener="#{tableEdit.processChanges}"/>
 	<p:dialog id="scriptTEDialog" 
     		  header="Upload New Operators" 
     		  widgetVar="scriptTEDialog" 
@@ -260,6 +264,8 @@
 		   <p:contextMenu for="tableTitle" style="font-size:12px!important; text-align:left!important; margin-left: 0px!important;">
 				<p:menuitem  value="Rename..." icon="ui-icon-pencil" oncomplete="PF('renameTableTEDialog').show();" update=":renameTable:renameTableTEDialog"/>
 				<p:menuitem  value="Clear" icon="ui-icon-close" actionListener="#{tableEdit.clearTable}" update="@form"/>
+				<p:menuitem  value="Suspend Time Series" icon="ui-icon-close" disabled="#{tableEdit.suspendTSDisabled}" actionListener="#{tableEdit.suspendTimeSeries}" update="@form"/>
+				<p:menuitem  value="Resume Time Series" icon="ui-icon-close" disabled="#{tableEdit.resumeTSDisabled}" actionListener="#{tableEdit.resumeTimeSeries}" update="@form"/>
 		   </p:contextMenu>
  	   </f:facet>
        <p:ajax event="cellEdit" oncomplete="onCellEdit()" />

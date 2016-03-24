@@ -67,6 +67,11 @@ public class RowConverter extends BaseConverter
         writer.startNode(getElementTag());                
         writer.addAttribute(INDEX_ATTR, String.valueOf(getRemappedRowIndex(r)));
         
+        if (options().isVerboseState() || options().isTimeSeries()) {
+	        if (r == context.get(TMS_TS_COLS_TS_ROW_KEY))
+	            writer.addAttribute(TS_COLS_TS_ROW_ATTR, "true");
+        }
+        
         marshalTableElement(r, writer, context, options().isRowLabels());
         
         if (options().isUnits())
@@ -82,10 +87,18 @@ public class RowConverter extends BaseConverter
     public Row unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
     {
         Table t = (Table)context.get(TMS_TABLE_KEY);
+        
         int rIdx = Integer.valueOf(reader.getAttribute(INDEX_ATTR));
+        Boolean isTSRow = readAttributeBoolean(TS_COLS_TS_ROW_ATTR, reader);
         
         Row r = t.addRow(getRemappedRowIdx(rIdx, context));
         postConstructAction(t, r, context);
+        
+        // Time Series support
+        if (options().isVerboseState() || options().isTimeSeries()) {
+	        if (isTSRow != null && isTSRow.booleanValue())
+	        	context.put(TMS_TS_COLS_TS_ROW_KEY, r);
+        }
         
         // upon return, we are left in the Columns or Cells tag
         unmarshalTableElement(r, options().isRowLabels(), reader, context);        

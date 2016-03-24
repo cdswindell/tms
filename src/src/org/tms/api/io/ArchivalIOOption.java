@@ -50,11 +50,17 @@ public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends IOOptio
      */
     public T withTags(boolean enabled);
     
-   /**
+    /**
      * Returns {@code true} if TMS {@link org.tms.api.derivables.Derivation Derivation}s are imported or exported. 
      * @return {@code true} if TMS {@code Derivation}s are imported and exported
      */
     public boolean isDerivations();
+    
+    /**
+     * Returns {@code true} if TMS {@link org.tms.api.derivables.TimeSeries TimeSeries}s are imported or exported. 
+     * @return {@code true} if TMS {@code TimeSeries}s are imported and exported
+     */
+    public boolean isTimeSeries();
     
     /**
      * Enable the import and export of TMS {@link org.tms.api.TableElement TableElement}

@@ -35,6 +35,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         VerboseState,
         
         Derivations,
+        TimeSeries,
         Validators,
         
         Descriptions, 
@@ -52,6 +53,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
                                 final boolean ignoreEmptyRows, 
                                 final boolean ignoreEmptyCols,
                                 final boolean withDerivations,
+                                final boolean withTimeSeries,
                                 final boolean withValidators,
                                 final boolean withVerboseState)
     {
@@ -60,6 +62,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
         set(Options.VerboseState, withVerboseState);
         
         set(Options.Derivations, withDerivations);
+        set(Options.TimeSeries, withTimeSeries);
         set(Options.Validators, withValidators);
         
         set(Options.Descriptions, true);
@@ -200,6 +203,32 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
     {
         final T newOptions = clone(this);
         newOptions.set(Options.Derivations, enabled);
+        return newOptions;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isTimeSeries()
+    {
+        return (Boolean)get(Options.TimeSeries);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withTimeSeries()
+    {
+        return withTimeSeries(true);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public T withTimeSeries(boolean enabled)
+    {
+        final T newOptions = clone(this);
+        newOptions.set(Options.TimeSeries, enabled);
         return newOptions;
     }
     

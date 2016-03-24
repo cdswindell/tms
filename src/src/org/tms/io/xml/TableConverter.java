@@ -13,6 +13,7 @@ import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Precisionable;
+import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableFactory;
 import org.tms.io.BaseReader;
@@ -49,6 +50,12 @@ public class TableConverter extends BaseConverter
     static final protected String SUBIDX_ATTR = "slIdx";
     static final protected String CELLIDX_ATTR = "cllIdx";
     static final protected String PRECISION_ATTR = "precision";
+    
+    static final protected String TIME_SERIESED_ROWS_PERIOD_ATTR = "tsRowsPer";
+    static final protected String TIME_SERIESED_ROWS_ACTIVE_ATTR = "tsRows";
+    
+    static final protected String TIME_SERIESED_COLS_PERIOD_ATTR = "tsColsPer";
+    static final protected String TIME_SERIESED_COLS_ACTIVE_ATTR = "tsCols";
     
     static final protected String ROWS_TAG = "rows";
     static final protected String COLS_TAG = "columns";
@@ -132,6 +139,29 @@ public class TableConverter extends BaseConverter
             writer.addAttribute(PRECISION_ATTR, String.valueOf(t.getPrecision()));
             writer.addAttribute(FREESPACE_ATTR, String.valueOf(t.getProperty(TableProperty.FreeSpaceThreshold)));
         }        
+        
+        // Time Series handling
+        if (options().isVerboseState() || options().isTimeSeries()) {
+        	long tsRowsPeriod = t.getTimeSeriesedRowsPeriodInMilliSeconds();
+        	if (tsRowsPeriod > 0) {
+                writer.addAttribute(TIME_SERIESED_ROWS_PERIOD_ATTR, String.valueOf(tsRowsPeriod));        		
+                writer.addAttribute(TIME_SERIESED_ROWS_ACTIVE_ATTR, String.valueOf(t.getProperty(TableProperty.isTimeSeriesedRowsActive)));
+            }
+        	
+        	Column tsCol = t.getTimeSeriesedRowsTimeStampColumn();
+        	if (tsCol != null)
+        		context.put(TMS_TS_ROWS_TS_COL_KEY, tsCol);
+        	
+        	long tsColsPeriod = t.getTimeSeriesedColumnsPeriodInMilliSeconds();
+        	if (tsColsPeriod > 0) {
+                writer.addAttribute(TIME_SERIESED_COLS_PERIOD_ATTR, String.valueOf(tsColsPeriod));        		
+                writer.addAttribute(TIME_SERIESED_COLS_ACTIVE_ATTR, String.valueOf(t.getProperty(TableProperty.isTimeSeriesedColumnsActive)));
+        	}
+        	
+        	Row tsRow = t.getTimeSeriesedColumnsTimeStampRow();
+        	if (tsRow != null)
+        		context.put(TMS_TS_COLS_TS_ROW_KEY, tsRow);
+        }
         
         marshalTableElement(t, writer, context, true);
         
@@ -236,6 +266,19 @@ public class TableConverter extends BaseConverter
             }
         }
               
+        // Handle time series
+        Long tsRowsPeriod = null;
+        Boolean tsRowsActive = null;
+        Long tsColsPeriod = null;
+        Boolean tsColsActive = null;
+        if (options().isVerboseState() || options().isTimeSeries()) {
+        	tsRowsPeriod = readAttributeLong(TIME_SERIESED_ROWS_PERIOD_ATTR, reader);
+        	tsRowsActive = readAttributeBoolean(TIME_SERIESED_ROWS_ACTIVE_ATTR, reader);
+        	
+        	tsColsPeriod = readAttributeLong(TIME_SERIESED_COLS_PERIOD_ATTR, reader);
+        	tsColsActive = readAttributeBoolean(TIME_SERIESED_COLS_ACTIVE_ATTR, reader);
+        }
+        
         // upon return, we are left in the Rows or Columns or Cells tag
         unmarshalTableElement(t, true, reader, context);
         
@@ -289,8 +332,7 @@ public class TableConverter extends BaseConverter
                 if (bVal != null) t.setCellLabelsIndexed(bVal);
         	}
         	
-            nodeName = processChildren(t,  CellImpl.class, reader, context);
-            
+            nodeName = processChildren(t,  CellImpl.class, reader, context);           
         }
 
         // register annotated dataTypes, if any
@@ -318,13 +360,47 @@ public class TableConverter extends BaseConverter
                 t.recalculate();
         }
                
-        // as a final check, verify the table has the correct number of rows & cols
+        // verify the table has the correct number of rows & cols
         if (extendTableRows() && nRows != null && nRows > t.getNumRows())
         	t.addRow(nRows);
         
         if (extendTableColumns() && nCols != null && nCols > t.getNumColumns())
         	t.addColumn(nCols);
         
+        // process time series, if any; do this only we'e extended the table, as it
+        // can instantly start appending rows/columns
+        if (options().isTimeSeries()) {
+        	// reassign the time series formulas to their rows and columns
+            for (Map.Entry<TimeSeriesable, CachedDerivation> e : getTimeSeriesMap(context).entrySet()) {
+            	TimeSeriesable d = e.getKey();
+                CachedDerivation eq = e.getValue();
+                
+        		d.setTimeSeries(eq.getDerivation());
+            }
+            
+            // enable time series, if we're so told
+            if (t.isTimeSeriesedRows() && tsRowsPeriod != null && tsRowsPeriod > 0) {
+            	Column tsCol = (Column)context.get(TMS_TS_ROWS_TS_COL_KEY);
+            	if (tsRowsActive != null && tsRowsActive.booleanValue())
+            		t.enableTimeSeriesedRows(tsCol, tsRowsPeriod);
+            	else {          	
+	            	// TODO: handle restoration of period and time stamp column, even
+	            	// if we're not reenabling time seriesed rows
+            	}
+            }
+            
+            // Columns Time Series
+            if (t.isTimeSeriesedColumns() && tsColsPeriod != null && tsColsPeriod > 0) {
+            	Row tsRow = (Row)context.get(TMS_TS_COLS_TS_ROW_KEY);
+            	if (tsColsActive != null && tsColsActive.booleanValue())
+            		t.enableTimeSeriesedColumns(tsRow, tsColsPeriod);
+            	else {
+	            	// TODO: handle restoration of period and time stamp column, even
+	            	// if we're not reenabling time seriesed columns
+            	}
+            }
+        }
+               
         return t;
     }
     

@@ -59,6 +59,7 @@ public enum TableProperty implements Comparable<TableProperty>
     numCellsCapacity(true, false, ElementType.Column),
     NextCellOffset(true, false, ElementType.Table),
     Derivation(false, false, ElementType.Column, ElementType.Row, ElementType.Cell),
+    TimeSeries(false, false, ElementType.Column, ElementType.Row),
     Affects(true, false, ElementType.Table, ElementType.Subset, ElementType.Column, ElementType.Row, ElementType.Cell),
     Index(true, false, ElementType.Row, ElementType.Column),
     isEnforceDataType(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
@@ -68,6 +69,17 @@ public enum TableProperty implements Comparable<TableProperty>
     Columns(true, false, ElementType.Table, ElementType.Subset), 
     Subsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     Cells(true, false, ElementType.Row, ElementType.Column, ElementType.Subset),
+    
+    // Time Series support
+    isTimeSeriesedRows(true, false, ElementType.Table),
+    isTimeSeriesedRowsActive(true, false, ElementType.Table),
+    TimeSeriesedRowsPeriod(true, false, ElementType.Table),
+    TimeSeriesedRowsTimeStampColumn(true, false, ElementType.Table),
+    
+    isTimeSeriesedColumns(true, false, ElementType.Table),
+    isTimeSeriesedColumnsActive(true, false, ElementType.Table),
+    TimeSeriesedColumnsPeriod(true, false, ElementType.Table),
+    TimeSeriesedColumnsTimeStampRow(true, false, ElementType.Table),
     
     // CellImpl properties
     Row(true, false, ElementType.Cell),

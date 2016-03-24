@@ -78,6 +78,11 @@ public class TableEditor implements Serializable
 		m_lazyTableModel = null;
 	}	
 	
+	public void processChanges()
+	{
+		// noop
+	}
+		
 	public LazyTableModel getPagedRows()
 	{
 		if (m_lazyTableModel == null)
@@ -343,23 +348,34 @@ public class TableEditor implements Serializable
 
 	public void derivationTypeChanged(ValueChangeEvent vce)
 	{
-		m_derivType = (String) vce.getNewValue();
-		System.out.println(String.format("Derivation Type changed, Old: %s New: %s", vce.getOldValue(), vce.getNewValue()));		
+		System.out.println(String.format("Derivation Type changed, Old: %s New: %s", vce.getOldValue(), vce.getNewValue()));
+		m_derivType = (String)vce.getNewValue();
+		resetDerivAndUpdate();
 	}
 	
 	public int getUpdateEvery()
 	{
-		m_updateEvery = 0;
-		
-		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
-		if (te != null) {
-			if (sf_TIMESERIES.equals(m_derivType)) 
-				m_updateEvery = (int)te.getTable().getTimeSeriesedRowsPeriodInMilliSeconds() / 1000;
-			else if (sf_STANDARD.equals(m_derivType) && te.isDerived()) 
-				m_updateEvery = (int)te.getDerivation().getPeriodInMilliSeconds() / 1000;
+		if (m_updateEvery < 0) {
+			if (m_derivType == null)
+				getEntityDerivationType();
+			
+			m_updateEvery = 0;
+			
+			TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
+			if (te != null) {
+				if (sf_TIMESERIES.equals(m_derivType)) 
+					m_updateEvery = (int)te.getTable().getTimeSeriesedRowsPeriodInMilliSeconds() / 1000;
+				else if (sf_STANDARD.equals(m_derivType) && te.isDerived()) 
+					m_updateEvery = (int)te.getDerivation().getPeriodInMilliSeconds() / 1000;
+			}
 		}
-
+		
 		return m_updateEvery;
+	}
+	
+	public long getGeneration()
+	{
+		return System.currentTimeMillis();
 	}
 	
 	public void setUpdateEvery(int updateEvery)
@@ -369,19 +385,22 @@ public class TableEditor implements Serializable
 	
 	public String getEntityDerivation()
 	{
-		getEntityDerivationType();
-		
-		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
-		if (te != null) {
-			if (sf_TIMESERIES.equals(m_derivType)) {
-				if (te.isTimeSeries())
-					return te.getTimeSeries().getAsEnteredExpression();
+		if (m_entityDeriv == null) {
+			if (m_derivType == null)
+				getEntityDerivationType();
+			
+			TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
+			if (te != null) {
+				if (sf_TIMESERIES.equals(m_derivType)) {
+					if (te.isTimeSeries())
+						m_entityDeriv = te.getTimeSeries().getAsEnteredExpression();
+				}
+				else if (te.isDerived())
+					m_entityDeriv = te.getDerivation().getAsEnteredExpression();
 			}
-			else if (te.isDerived())
-				return te.getDerivation().getAsEnteredExpression();
 		}
 		
-		return "";		
+		return m_entityDeriv;		
 	}
 	
 	public void setEntityDerivation(String deriv)
@@ -391,11 +410,14 @@ public class TableEditor implements Serializable
 
 	public String getEntityDerivationType()
 	{
-		m_derivType = sf_STANDARD;	
-		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
-		if (te != null) {
-			if (te.isTimeSeries())
-				m_derivType = sf_TIMESERIES;
+		if (m_derivType == null) {
+			m_derivType = sf_STANDARD;	
+			
+			TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
+			if (te != null) {
+				if (te.isTimeSeries())
+					m_derivType = sf_TIMESERIES;
+			}
 		}
 		
 		return m_derivType;
@@ -406,6 +428,19 @@ public class TableEditor implements Serializable
 		m_derivType = dt;
 	}
 
+	public String getResetAllDerivParams()
+	{
+		m_derivType = null;
+		resetDerivAndUpdate();
+		return "";
+	}
+	
+	public void resetDerivAndUpdate()
+	{
+		m_entityDeriv = null;
+		m_updateEvery = -1;
+	}
+	
 	public void applyDerivation()
 	{
 		TableRowColumnElement te = getSelectedEntity() != null ? getSelectedEntity().getTE() : null;
@@ -431,7 +466,8 @@ public class TableEditor implements Serializable
 								tsCol.setLabel("Time Stamp");
 							}
 							
-							te.getTable().enableTimeSeriesedRows(tsCol, m_updateEvery * 1000);
+							TimeSeriesScheduler tss = new TimeSeriesScheduler(te.getTable(), tsCol, m_updateEvery);
+							tss.start();
 						}
 					}
 				}
@@ -446,6 +482,31 @@ public class TableEditor implements Serializable
 			m_entityDeriv = null;
 			clearSelectedEntity();
 		}
+	}
+	
+	public void suspendTimeSeries()
+	{
+		m_tableViewer.getTable().suspendAllTimeSeries();
+	}
+	
+	public void resumeTimeSeries()
+	{
+		m_tableViewer.getTable().resumeAllTimeSeries();
+	}
+	
+	public boolean isSuspendTSDisabled()
+	{
+		Table t = m_tableViewer.getTable();
+		return !t.isTimeSeriesedRowsActive() && !t.isTimeSeriesedColumnsActive();
+	}
+	
+	public boolean isResumeTSDisabled()
+	{
+		Table t = m_tableViewer.getTable();
+		boolean resumeAvailable = isSuspendTSDisabled() && 
+								  ((t.isTimeSeriesedRows() && t.getTimeSeriesedRowsPeriodInMilliSeconds() > 0) || 
+							       (t.isTimeSeriesedColumns() && t.getTimeSeriesedColumnsPeriodInMilliSeconds() > 0));								  
+		return !resumeAvailable;
 	}
 	
 	public EditBase getSelectedEntity()
@@ -798,5 +859,29 @@ public class TableEditor implements Serializable
 	        else
 	            super.setRowIndex(rowIndex % getPageSize());
 	    }
+	}
+	
+	static class TimeSeriesScheduler extends Thread
+	{
+		private Table m_parentTable;
+		private Column m_timeStampCol;
+		private int m_frequency;
+
+		TimeSeriesScheduler(Table t, Column tsCol, int freq)
+		{
+			m_parentTable = t;
+			m_timeStampCol = tsCol;
+			m_frequency = freq;
+		}
+		
+		@Override
+		public void run() 
+		{
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) { /* noop */ }
+			
+			m_parentTable.enableTimeSeriesedRows(m_timeStampCol, m_frequency * 1000);
+		}		
 	}
 }

@@ -6,15 +6,21 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
+import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
+import org.tms.api.io.XMLOptions;
 import org.tms.api.utils.StockTickerOp;
 
-public class TimeSeriesTest 
+public class TimeSeriesTest extends BaseTest
 {
+	private static final int sf_EXPECTED_ROW_COUNT = 4;
+	private static final int sf_EXPECTED_CELL_COUNT = 12;
+	
     @Test
     public final void testTimeSeriesedRowsDataStructures()
     {
@@ -152,6 +158,7 @@ public class TimeSeriesTest
         assertThat(false, is(tbl.isTimeSeriesedRows()));
         assertThat(false, is(tbl.isTimeSeriesedRowsActive()));
     }
+    
     @Test
     public final void testDependentSimpleTimeSeriesedRows() throws InterruptedException
     {
@@ -200,7 +207,7 @@ public class TimeSeriesTest
         assertThat(true, is(tbl.isTimeSeriesedRows()));
         assertThat(true, is(tbl.isTimeSeriesedRowsActive()));
         assertThat(false, is(tbl.isTimeSeriesedColumns()));
-        
+              
         // sleep a second, give the code time to fill in some rows
         Thread.sleep(780);
         
@@ -212,10 +219,31 @@ public class TimeSeriesTest
             Thread.sleep(500);
         }
         
-        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (12));
-        assertThat(tbl.getPropertyInt(TableProperty.numRows), is (4));
+        assertThat(tbl.getPropertyInt(TableProperty.numCells), is (sf_EXPECTED_CELL_COUNT));
+        assertThat(tbl.getPropertyInt(TableProperty.numRows), is (sf_EXPECTED_ROW_COUNT));
 
         assertThat(false, is(tbl.isTimeSeriesedRows()));
         assertThat(false, is(tbl.isTimeSeriesedRowsActive()));
     }
+    
+    @Test
+    public final void testReadTimeSeriesFromXMLs() throws InterruptedException
+    {
+        TableContextFactory.fetchDefaultTableContext().registerOperator(new StockTickerOp());
+        
+    	Table t = TableFactory.importFile(qualifiedFileName("TimeSeries.xml"), XMLOptions.Default);
+    	assertNotNull(t);
+    	assertThat(true, is(t.isTimeSeriesedRows()));
+    	assertThat(true, is(t.isTimeSeriesedRowsActive()));
+    	
+    	assertThat(true, is (t.getPropertyInt(TableProperty.numRows) > sf_EXPECTED_ROW_COUNT));
+    	assertThat(true, is (t.getPropertyInt(TableProperty.numCells) > sf_EXPECTED_CELL_COUNT));
+    	
+    	t.suspendAllTimeSeries();
+    	assertThat(true, is(t.isTimeSeriesedRows()));
+    	assertThat(false, is(t.isTimeSeriesedRowsActive()));
+    	
+    	TableContextFactory.fetchDefaultTableContext().deregisterAllOperators();
+    }
+
 }

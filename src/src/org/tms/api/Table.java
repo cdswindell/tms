@@ -481,14 +481,28 @@ public interface Table extends TableElement, InitializableTableProperties
      */
     public String getUuid();
 
+	public void suspendAllTimeSeries();
+	public void resumeAllTimeSeries();
+	
     public boolean isTimeSeriesedRows();
 	public boolean isTimeSeriesedRowsActive();
-	
-    public boolean isTimeSeriesedColumns();
+	public long getTimeSeriesedRowsPeriodInMilliSeconds();
+	public Column getTimeSeriesedRowsTimeStampColumn();	
 
     public void enableTimeSeriesedRows(Column timeStampCol, long frequency);
     public void enableTimeSeriesedRows(Column timeStampCol, long frequency, TimeUnit unit);
+	public void suspendTimeSeriesedRows();
+	public void resumeTimeSeriesedRows();
+	public void resumeTimeSeriesedRows(long frequency);
 
-	public long getTimeSeriesedRowsPeriodInMilliSeconds();
+    public boolean isTimeSeriesedColumns();
+	public boolean isTimeSeriesedColumnsActive();
 	public long getTimeSeriesedColumnsPeriodInMilliSeconds();
+	public Row getTimeSeriesedColumnsTimeStampRow();	
+	
+	public void enableTimeSeriesedColumns(Row timeStampRow, long frequency);
+	public void enableTimeSeriesedColumns(Row timeStampRow, long frequency, TimeUnit unit);
+	public void suspendTimeSeriesedColumns();
+	public void resumeTimeSeriesedColumns();
+	public void resumeTimeSeriesedColumns(long frequency);
 }

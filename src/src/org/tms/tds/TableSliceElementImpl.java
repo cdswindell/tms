@@ -443,6 +443,9 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
             case Derivation:
                 return getDerivation();
                 
+            case TimeSeries:
+                return getTimeSeries();
+                
             case Cells:
                 return getCells();
                 

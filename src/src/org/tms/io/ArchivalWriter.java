@@ -15,6 +15,7 @@ import org.tms.io.xml.LogsCellConverter;
 import org.tms.io.xml.LogsColumnConverter;
 import org.tms.io.xml.LogsRowConverter;
 import org.tms.io.xml.LogsTableConverter;
+import org.tms.io.xml.PendingStateConverter;
 import org.tms.io.xml.RowConverter;
 import org.tms.io.xml.SubsetConverter;
 import org.tms.io.xml.TableContextConverter;
@@ -82,6 +83,8 @@ abstract class ArchivalWriter<T extends ArchivalIOOptions<T>> extends BaseWriter
         xmlStreamer.registerConverter(new SubsetConverter(writer));
         xmlStreamer.registerConverter(new CellConverter(writer));
         
+		xmlStreamer.registerConverter(new PendingStateConverter(writer));
+		
         return xmlStreamer;
     }
     

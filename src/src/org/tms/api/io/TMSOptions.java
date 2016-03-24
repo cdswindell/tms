@@ -16,7 +16,7 @@ public class TMSOptions extends ArchivalIOOptions<TMSOptions> implements Archiva
                       final boolean withState)
     {
         super(IOFileFormat.TMS, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols, 
-        		withDerivations, withValidators, withState);
+        		withDerivations, withDerivations, withValidators, withState);
     }
     
     protected TMSOptions (final TMSOptions format)

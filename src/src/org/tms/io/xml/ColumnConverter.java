@@ -70,6 +70,11 @@ public class ColumnConverter extends BaseConverter
         writer.startNode(getElementTag());                
         writer.addAttribute(INDEX_ATTR, String.valueOf(getRemappedColumnIndex(c)));
         
+        if (options().isVerboseState() || options().isTimeSeries()) {
+	        if (c == context.get(TMS_TS_ROWS_TS_COL_KEY))
+	            writer.addAttribute(TS_ROWS_TS_COL_ATTR, "true");
+        }
+        
         marshalTableElement(c, writer, context, options().isColumnLabels());
         
         if (options().isUnits())
@@ -90,9 +95,16 @@ public class ColumnConverter extends BaseConverter
         Table t = (Table)context.get(TMS_TABLE_KEY);
         
         int cIdx = Integer.valueOf(reader.getAttribute(INDEX_ATTR));
+        Boolean isTSCol = readAttributeBoolean(TS_ROWS_TS_COL_ATTR, reader);
         
         Column c = t.addColumn(getRemappedColIdx(cIdx, context));
         postConstructAction(t, c, context);
+        
+        // Time Series support
+        if (options().isVerboseState() || options().isTimeSeries()) {
+	        if (isTSCol != null && isTSCol.booleanValue())
+	        	context.put(TMS_TS_ROWS_TS_COL_KEY, c);
+        }
         
         // upon return, we are left in the Columns or Cells tag
         unmarshalTableElement(c, options().isColumnLabels(), reader, context);        

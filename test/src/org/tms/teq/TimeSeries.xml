@@ -1,0 +1,64 @@
+<table nRows="4" cCols="3" tsRowsPer="250" tsRows="true" readOnly="false" allowNulls="true" enforce="false">
+  <rows/>
+  <columns>
+    <column index="1" tsCol="true">
+      <label>Time Stamp</label>
+    </column>
+    <column index="2">
+      <timeseries>2.0 * col 3</timeseries>
+    </column>
+    <column index="3">
+      <timeseries>ticker(&quot;jcom&quot;)</timeseries>
+    </column>
+  </columns>
+  <cells>
+    <cell rIdx="1" cIdx="1">
+      <dataType>java.util.Date</dataType>
+      <value>2016-03-24 01:29:14.572 UTC</value>
+    </cell>
+    <cell rIdx="2" cIdx="1">
+      <dataType>java.util.Date</dataType>
+      <value>2016-03-24 01:29:14.817 UTC</value>
+    </cell>
+    <cell rIdx="3" cIdx="1">
+      <dataType>java.util.Date</dataType>
+      <value>2016-03-24 01:29:15.72 UTC</value>
+    </cell>
+    <cell rIdx="4" cIdx="1">
+      <dataType>java.util.Date</dataType>
+      <value>2016-03-24 01:29:15.322 UTC</value>
+    </cell>
+    <cell rIdx="1" cIdx="2">
+      <dataType>java.lang.Double</dataType>
+      <value>118.44</value>
+    </cell>
+    <cell rIdx="2" cIdx="2">
+      <dataType>java.lang.Double</dataType>
+      <value>118.44</value>
+    </cell>
+    <cell rIdx="3" cIdx="2">
+      <dataType>java.lang.Double</dataType>
+      <value>118.44</value>
+    </cell>
+    <cell rIdx="4" cIdx="2">
+      <dataType>java.lang.Double</dataType>
+      <value>118.44</value>
+    </cell>
+    <cell rIdx="1" cIdx="3">
+      <dataType>java.lang.Double</dataType>
+      <value>59.22</value>
+    </cell>
+    <cell rIdx="2" cIdx="3">
+      <dataType>java.lang.Double</dataType>
+      <value>59.22</value>
+    </cell>
+    <cell rIdx="3" cIdx="3">
+      <dataType>java.lang.Double</dataType>
+      <value>59.22</value>
+    </cell>
+    <cell rIdx="4" cIdx="3">
+      <dataType>java.lang.Double</dataType>
+      <value>59.22</value>
+    </cell>
+  </cells>
+</table>

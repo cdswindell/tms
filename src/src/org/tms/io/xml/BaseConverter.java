@@ -16,6 +16,8 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.derivables.TimeSeries;
+import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.io.ArchivalIOOption;
 import org.tms.api.utils.RegisterOp;
 import org.tms.api.utils.TableCellValidator;
@@ -39,16 +41,20 @@ abstract class BaseConverter implements Converter
     static final protected String TMS_TABLE_KEY = "__tms table key__";
     static final protected String TMS_TABLE_CONVERTER_KEY = "__tms table converter key__";
     static final protected String TMS_DERIVATIONS_KEY = "__tms derivations key__";
+    static final protected String TMS_TIMESERIES_KEY = "__tms timeseries key__";
     static final protected String TMS_READONLY_KEY  = "__tms read-only key__";
     static final protected String TMS_ALLOWNULLS_KEY  = "__tms allow nulls key__";
     static final protected String TMS_ENFORCE_KEY  = "__tms enforce datatype key__";
     static final protected String TMS_DATATYPE_CACHE_KEY = "__tms database cache key__";
     static final protected String TMS_TO_REGISTER_CACHE_KEY = "__tms to_register cache key__";
+    static final protected String TMS_TS_ROWS_TS_COL_KEY = "__tms ts rows ts col key__";
+    static final protected String TMS_TS_COLS_TS_ROW_KEY = "__tms ts cols ts row key__";
     
     static final protected String LABEL_TAG = "label";
     static final protected String DESC_TAG = "description";
     static final protected String TAGS_TAG = "tags";
     static final protected String DERIV_TAG = "derivation";
+    static final protected String TIMESERIES_TAG = "timeseries";
     static final protected String VALIDATOR_TAG = "validator";
     static final protected String VALIDATOR_CLASS_TAG = "valClass";
     static final protected String VALIDATOR_IMPL_TAG = "valImpl";
@@ -63,6 +69,9 @@ abstract class BaseConverter implements Converter
     static final protected String ALLOWNULLS_ATTR = "allowNulls";
     static final protected String ENFORCE_DATATYPE_ATTR = "enforce";
     static final protected String DERIV_PERIOD_ATTR = "repeat";
+    
+    static final protected String TS_ROWS_TS_COL_ATTR = "tsCol";
+    static final protected String TS_COLS_TS_ROW_ATTR = "tsRow";
     
     private BaseWriter<?> m_writer;
     private BaseReader<?> m_reader;
@@ -274,6 +283,11 @@ abstract class BaseConverter implements Converter
         		hasValue(te, TableProperty.Derivation))
             return true;
         
+        if ((options().isTimeSeries() || options().isVerboseState()) && 
+        		getTableElementType() == ElementType.Table &&
+        		hasValue(te, TableProperty.TimeSeries))
+            return true;
+        
         if ((options().isValidators() || options().isVerboseState()) && hasValue(te, TableProperty.Validator))
             return true;
         
@@ -317,6 +331,15 @@ abstract class BaseConverter implements Converter
             writer.startNode(DERIV_TAG);
             if (d.isPeriodic())
             	writer.addAttribute(DERIV_PERIOD_ATTR, String.valueOf(((DerivationImpl)d).getPeriodInMilliSeconds()));
+            writer.setValue(d.getExpression());
+            writer.endNode();
+        }
+        
+        if ((options().isTimeSeries() || options().isVerboseState()) && getTableElementType() == ElementType.Table &&
+        		te instanceof TimeSeriesable && ((TimeSeriesable)te).isTimeSeries()) 
+        {
+            TimeSeries d =  ((TimeSeriesable)te).getTimeSeries();
+            writer.startNode(TIMESERIES_TAG);
             writer.setValue(d.getExpression());
             writer.endNode();
         }
@@ -441,6 +464,14 @@ abstract class BaseConverter implements Converter
 	                    }
 	                    break;
 	                    
+	                case TIMESERIES_TAG:
+	                    if (options().isTimeSeries()) {
+	                        strVal = (String)context.convertAnother(t, String.class);
+	                        if (t instanceof TimeSeriesable)
+	                            cacheTimeSeries((TimeSeriesable)t, strVal, context);
+	                    }
+	                    break;
+	                    
 	                case VALIDATOR_TAG:
 	                    if (options().isValidators() && t instanceof Validatable) {
 	                        Validatable v = (Validatable)t;
@@ -522,6 +553,13 @@ abstract class BaseConverter implements Converter
         derivsMap.put(te,  cd);
     }
 
+	private void cacheTimeSeries(TimeSeriesable te, String ts, UnmarshallingContext context)
+    {
+        Map<TimeSeriesable, CachedDerivation> tsMap = getTimeSeriesMap(context);  
+        CachedDerivation cd = new CachedDerivation(ts);
+        tsMap.put(te,  cd);
+    }
+
     protected Map<Derivable, CachedDerivation> getDerivationsMap(UnmarshallingContext context)
     {
         @SuppressWarnings("unchecked")
@@ -532,6 +570,18 @@ abstract class BaseConverter implements Converter
         }
         
         return derivsMap;
+    }
+
+    protected Map<TimeSeriesable, CachedDerivation> getTimeSeriesMap(UnmarshallingContext context)
+    {
+        @SuppressWarnings("unchecked")
+        Map<TimeSeriesable, CachedDerivation> tsMap = (Map<TimeSeriesable, CachedDerivation>)context.get(TMS_TIMESERIES_KEY);
+        if (tsMap == null) {
+        	tsMap = new LinkedHashMap<TimeSeriesable, CachedDerivation>();
+            context.put(TMS_TIMESERIES_KEY, tsMap);
+        }
+        
+        return tsMap;
     }
 
     protected Boolean readAttributeBoolean(String attrName, HierarchicalStreamReader reader)
@@ -624,6 +674,11 @@ abstract class BaseConverter implements Converter
     	private String m_deriv;
 		private long m_period;
 
+		CachedDerivation(String deriv)
+    	{
+    		this(deriv, null);
+    	}
+		
 		CachedDerivation(String deriv, Long period)
     	{
     		m_deriv = deriv;

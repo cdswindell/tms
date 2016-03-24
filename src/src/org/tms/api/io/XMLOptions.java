@@ -15,7 +15,7 @@ public class XMLOptions extends ArchivalIOOptions<XMLOptions> implements Archiva
                        final boolean withState)
     {
         super(IOFileFormat.XML, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols, 
-        		withDerivations, withValidators, withState);
+        		withDerivations, withDerivations, withValidators, withState);
         
         set(Options.Descriptions, false);
         set(Options.DisplayFormats, false);
