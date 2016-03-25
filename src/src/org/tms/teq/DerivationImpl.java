@@ -1117,6 +1117,8 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     /**
      * Returns true if the cell row or column is a parameter
      * in an aggregate operator (StatOp, TransformOp, etc)
+     * For StatOp and TransformOp, first argument or 
+     * first and second argument is/are reference(s), 
      * 
      * @param modifiedElement
      * @return true if in aggregate
@@ -1130,12 +1132,12 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
 		Set<Derivable> derivedElems = new LinkedHashSet<Derivable>(m_pfs.size());
 		
 		Iterator<Token> iter = m_pfs.descendingIterator();
-		Object eRef = null;
+		List<Object> opArgs = new ArrayList<Object>();
 		while (iter != null && iter.hasNext()) {
 			Token t = iter.next();
 			if (t != null && t.getTokenType() != null) {
 				TokenType tt = t.getTokenType();
-				if (eRef != null && (tt == TokenType.StatOp || tt == TokenType.TransformOp)) {
+				if ((tt == TokenType.StatOp || tt == TokenType.TransformOp) && !opArgs.isEmpty()) {
 					/*
 					 * if this cell's row/column matches the target of this
 					 * stat or transform op, we need to recalculate the
@@ -1144,24 +1146,33 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
 					 * Similarly, if the target is a subset, and this
 					 * cell is in a contained row/column, we have to do that too
 					 */
-					if (eRef == cellRow || eRef == cellCol)
-						return true;
-					else if (eRef instanceof Subset) {
-						Subset s = (Subset)eRef;
-						if (s.contains(cellRow) || s.contains(cellCol))
+					for (Object arg : opArgs) {
+						if (arg == cellRow || arg == cellCol)
 							return true;
-					}
-					else if (derivedElems.contains(eRef)){
-						Derivable d = (Derivable)eRef;
-						if (isCellComponentInAggregate(cellRow, cellCol, d, processedElems))
-							return true;
+						else if (arg instanceof Subset) {
+							Subset s = (Subset)arg;
+							if (s.contains(cellRow) || s.contains(cellCol))
+								return true;
+						}
+						else if (derivedElems.contains(arg)){
+							Derivable d = (Derivable)arg;
+							if (isCellComponentInAggregate(cellRow, cellCol, d, processedElems))
+								return true;
+						}
 					}
 				}
 			}
 			
-			eRef = t.getValue();
-			if (eRef instanceof Derivable && ((Derivable)eRef).isDerived())
-				derivedElems.add((Derivable)eRef);
+			// if this token is an operator, clear the arg list
+			if (t.isOperator()) 
+				opArgs.clear();
+			else {		
+				// preserve arguments
+				Object arg = t.getValue();
+				opArgs.add(arg);
+				if (arg instanceof Derivable && ((Derivable)arg).isDerived())
+					derivedElems.add((Derivable)arg);
+			}
 		}
 		
 		// ok, at this point, we know the derivation doesn't contain any direct

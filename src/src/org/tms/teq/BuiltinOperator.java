@@ -197,7 +197,7 @@ public enum BuiltinOperator implements Labeled, Operator
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 8, toLabels("sum"), toArgs(TableElement.class), double.class, toCategories("statistic")),
     Sum2Oper(TokenType.StatOp, 8, toLabels("sumOfSquares", "sumSqs", "ss", "sumsq"), toArgs(TableElement.class), double.class, toCategories("statistic")),
-    SumSqD2Oper(TokenType.StatOp, 8, toLabels("sumOfSquaredDeviates", "ss", "ssd", "devsq"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    SumSqD2Oper(TokenType.StatOp, 8, toLabels("sumOfSquaredDeviates", "ssd", "devsq"), toArgs(TableElement.class), double.class, toCategories("statistic")),
     MeanOper(TokenType.StatOp, 8, toLabels("mean", "average", "avg"), toArgs(TableElement.class), double.class, toCategories("statistic")),
     MedianOper(TokenType.StatOp, 8, toLabels("median"), toArgs(TableElement.class), double.class, toCategories("statistic")),
     QuartileOper(TokenType.StatOp, 8, toLabels("quartile"), toArgs(TableElement.class, int.class), double.class, toCategories("statistic")),
@@ -215,10 +215,10 @@ public enum BuiltinOperator implements Labeled, Operator
     SkewOper(TokenType.StatOp, 8, toLabels("skewness", "skew"), toArgs(TableElement.class), double.class, toCategories("statistic")),
     KurtosisOper(TokenType.StatOp, 8, toLabels("kurtosis", "kurt"), toArgs(TableElement.class), double.class, toCategories("statistic")),
 
-     // Moving window statistics    
+    // Moving window statistics    
     MSumOper(TokenType.StatOp, 8, toLabels("msum"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MSum2Oper(TokenType.StatOp, 8, toLabels("msumOfSquares", "msumSqs", "mss", "msumsq"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
-    MSumSqD2Oper(TokenType.StatOp, 8, toLabels("msumOfSquaredDeviates", "mss", "mssd", "mdevsq"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MSumSqD2Oper(TokenType.StatOp, 8, toLabels("msumOfSquaredDeviates", "mssd", "mdevsq"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MMeanOper(TokenType.StatOp, 8, toLabels("mmean", "mavg", "maverage"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MMedianOper(TokenType.StatOp, 8, toLabels("mmedian"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MQuartileOper(TokenType.StatOp, 8, toLabels("mquartile"), toArgs(TableRowColumnElement.class, int.class, int.class), double.class, toCategories("statistic", "moving")),
@@ -235,6 +235,27 @@ public enum BuiltinOperator implements Labeled, Operator
     MCountOper(TokenType.StatOp, 8, toLabels("mcount", "mcnt"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MSkewOper(TokenType.StatOp, 8, toLabels("mskewness", "mskew"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MKurtosisOper(TokenType.StatOp, 8, toLabels("mkurtosis", "mkurt"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+
+    // Cumulative Statistics
+    CSumOper(TokenType.StatOp, 8, toLabels("csum"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CSum2Oper(TokenType.StatOp, 8, toLabels("csumOfSquares", "csumSqs", "css", "csumsq"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CSumSqD2Oper(TokenType.StatOp, 8, toLabels("csumOfSquaredDeviates", "cssd", "cdevsq"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CMeanOper(TokenType.StatOp, 8, toLabels("cmean", "caverage", "cavg"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CMedianOper(TokenType.StatOp, 8, toLabels("cmedian"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CQuartileOper(TokenType.StatOp, 8, toLabels("cquartile"), toArgs(TableElement.class, int.class), double.class, toCategories("statistic", "cumulative")),
+    CFirstQuartileOper(TokenType.StatOp, 8, toLabels("cfirstQuartile", "cfirstQ"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CThirdQuartileOper(TokenType.StatOp, 8, toLabels("cthirdQuartile", "cthirdQ"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CModeOper(TokenType.StatOp, 8, toLabels("cmode"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CStDevPopulationOper(TokenType.StatOp, 8, toLabels("cstDevPopulation", "cstDevOfPopulation", "cstDev.p"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CStDevSampleOper(TokenType.StatOp, 8, toLabels("cstDevSample", "cstDevOfSample", "cstDev", "cstDev.s"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CVarPopulationOper(TokenType.StatOp, 8, toLabels("cvariancePopulation", "cvarianceOfPopulation", "cvar.p"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CVarSampleOper(TokenType.StatOp, 8, toLabels("cvarianceSample", "cvarianceOfSample", "cvar", "cvar.s", "cvariance"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CMinOper(TokenType.StatOp, 8, toLabels("cmin", "cminimum"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CMaxOper(TokenType.StatOp, 8, toLabels("cmax", "cmaximum"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CRangeOper(TokenType.StatOp, 8, toLabels("crange", "cspread"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CCountOper(TokenType.StatOp, 8, toLabels("ccount", "ccnt"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CSkewOper(TokenType.StatOp, 8, toLabels("cskewness", "cskew"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
+    CKurtosisOper(TokenType.StatOp, 8, toLabels("ckurtosis", "ckurt"), toArgs(TableElement.class), double.class, toCategories("statistic", "cumulative")),
 
     // T Tests
     PValueOper(TokenType.StatOp, 8, toLabels("tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistic")),
@@ -321,6 +342,8 @@ public enum BuiltinOperator implements Labeled, Operator
     }
     
     static private Map<BuiltinOperator, BuiltinOperator> sf_MovingStatToBaseStatMap  = null;
+    static private Map<BuiltinOperator, BuiltinOperator> sf_CumStatToBaseStatMap = null;
+    
     static final public int MAX_PRIORITY = 10;
     
     private String m_label;
@@ -442,7 +465,7 @@ public enum BuiltinOperator implements Labeled, Operator
     {
         switch(this) {
             default:
-                return isMovingStatistic();
+                return isMovingStatistic() || isCumulativeStatistic();
         }
     }
     
@@ -450,6 +473,8 @@ public enum BuiltinOperator implements Labeled, Operator
     {
         if (this.isMovingStatistic())
         	return sf_MovingStatToBaseStatMap.get(this);
+        if (this.isCumulativeStatistic())
+        	return sf_CumStatToBaseStatMap.get(this);
         else
         	return this;
     }
@@ -486,6 +511,40 @@ public enum BuiltinOperator implements Labeled, Operator
     	}
     	
     	return sf_MovingStatToBaseStatMap.containsKey(this);
+    }
+    
+    public boolean isCumulativeStatistic()
+    {
+    	if (sf_CumStatToBaseStatMap == null) {
+    		synchronized (BuiltinOperator.class) {
+    			if (sf_CumStatToBaseStatMap == null) {
+    				sf_CumStatToBaseStatMap = new HashMap<BuiltinOperator, BuiltinOperator>();
+    				
+    				// map all cumulative stats to their basic counterpart
+       				sf_CumStatToBaseStatMap.put(CSumOper, SumOper);
+       				sf_CumStatToBaseStatMap.put(CSum2Oper, Sum2Oper);
+       				sf_CumStatToBaseStatMap.put(CSumSqD2Oper, SumSqD2Oper);
+       				sf_CumStatToBaseStatMap.put(CMeanOper, MeanOper);
+       				sf_CumStatToBaseStatMap.put(CMedianOper, MedianOper);
+       				sf_CumStatToBaseStatMap.put(CQuartileOper, QuartileOper);
+       				sf_CumStatToBaseStatMap.put(CFirstQuartileOper, FirstQuartileOper);
+       				sf_CumStatToBaseStatMap.put(CThirdQuartileOper, ThirdQuartileOper);
+       				sf_CumStatToBaseStatMap.put(CModeOper, ModeOper);
+       				sf_CumStatToBaseStatMap.put(CStDevPopulationOper, StDevPopulationOper);
+       				sf_CumStatToBaseStatMap.put(CStDevSampleOper, StDevSampleOper);
+       				sf_CumStatToBaseStatMap.put(CVarPopulationOper, VarPopulationOper);
+       				sf_CumStatToBaseStatMap.put(CVarSampleOper, VarSampleOper);
+       				sf_CumStatToBaseStatMap.put(CMinOper, MinOper);
+       				sf_CumStatToBaseStatMap.put(CMaxOper, MaxOper);
+       				sf_CumStatToBaseStatMap.put(CRangeOper, RangeOper);
+       				sf_CumStatToBaseStatMap.put(CCountOper, CountOper);
+       				sf_CumStatToBaseStatMap.put(CSkewOper, SkewOper);
+       				sf_CumStatToBaseStatMap.put(CKurtosisOper, KurtosisOper);
+       			}
+    		}
+    	}
+    	
+    	return sf_CumStatToBaseStatMap.containsKey(this);
     }
     
     public TokenType getPrimaryTokenType()

@@ -432,6 +432,10 @@ public class SingleVariableStatEngine
                 	value = calcMovingStatistic(stat, cRow, cCol, window, params);
                 	break;
             	}
+            	if (stat.isCumulativeStatistic()) {
+                	value = calcCumulativeStatistic(stat, cRow, cCol, params);
+                	break;
+            	}
             	else
             		throw new UnimplementedException("Unsupported statistic: " + stat);            
         }
@@ -445,32 +449,71 @@ public class SingleVariableStatEngine
 			return Double.MIN_VALUE;
 		
 		// based on cRow/cCol, figure out where to start the calculation
-		int eIdx = -1;
+		Integer eIdx = null;
 		if (m_elemType == ElementType.Column)
 			eIdx = m_tableElementToDataElementMap.get(cRow);
 		else if (m_elemType == ElementType.Row)
 			eIdx = m_tableElementToDataElementMap.get(cCol);
 		
 		// if we didn't find a hit, ignore
-		if (eIdx == -1)
+		if (eIdx == null)
 			return Double.MIN_VALUE;
 		
 		// if this index is before the window size, return null
 		if (eIdx < window - 1)
 			return Double.MIN_VALUE;
 		
-		// determone the base statistic we need to calculate
+		// determine the base statistic we need to calculate
 		BuiltinOperator baseStat = stat.getBaseStatistic();
 		
 		// create a stat engine to do the work
 		SingleVariableStatEngine svse = new SingleVariableStatEngine(baseStat.isRequiresRetainedDataset(), baseStat.isRequiresRetainedSequence(), m_elemType);
 		
-		// compute the moving average
+		// gather the data for the moving
 		for (int i = window - 1; i >= 0; i--) {
 			svse.enter(m_values.get(eIdx - i));
 		}
 		
-		return svse.calcStatistic(baseStat, params);
+		// and calculate the moving stat
+		Object val = svse.calcStatistic(baseStat, params);
+		svse.reset();
+		svse = null;
+		return val;
+	}
+
+    private Object calcCumulativeStatistic(BuiltinOperator stat, Row cRow, Column cCol, Token... params) 
+    {
+		// based on cRow/cCol, figure out where to end the calculation
+		Integer eIdx = null;
+		if (m_elemType == ElementType.Column)
+			eIdx = m_tableElementToDataElementMap.get(cRow);
+		else if (m_elemType == ElementType.Row)
+			eIdx = m_tableElementToDataElementMap.get(cCol);
+		
+		// if we didn't find a hit, ignore
+		if (eIdx == null)
+			return Double.MIN_VALUE;
+		
+		// determine the base statistic we need to calculate
+		BuiltinOperator baseStat = stat.getBaseStatistic();
+		
+		// if this is the last element, use the main svse
+		if (eIdx == m_n - 1)
+			return this.calcStatistic(baseStat, params);
+		
+		// create a stat engine to do the work
+		SingleVariableStatEngine svse = new SingleVariableStatEngine(baseStat.isRequiresRetainedDataset(), baseStat.isRequiresRetainedSequence(), m_elemType);
+		
+		// gather the cumulative data
+		for (int i = 0; i <= eIdx; i++) {
+			svse.enter(m_values.get(i));
+		}
+		
+		// and calculate the cumulative base statistic
+		Object val = svse.calcStatistic(baseStat, params);
+		svse.reset();
+		svse = null;
+		return val;
 	}
 
 	private double calcMode()
