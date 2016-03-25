@@ -29,7 +29,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
     extends BaseIOOptions<T> 
     implements ArchivalIOOption<T>
 {    
-    public enum Options implements OptionEnum 
+    protected enum Options implements OptionEnum 
     {
         VerboseState,
         

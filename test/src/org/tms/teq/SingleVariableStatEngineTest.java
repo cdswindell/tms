@@ -13,7 +13,7 @@ public class SingleVariableStatEngineTest extends BaseTest
     @Test
     public final void testSingleVariableStats()
     {
-        SingleVariableStatEngine se = new SingleVariableStatEngine(true);
+        SingleVariableStatEngine se = new SingleVariableStatEngine(true, false, null);
         assertThat(se, notNullValue());
         
         int n = se.enter(3096951.0, 1123560.0,5725983.0,918959.0,945761.0, 511297.0);

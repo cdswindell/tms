@@ -18,7 +18,7 @@ public abstract class TitledPageIOOptions<T extends TitledPageIOOptions<T>>
     extends StyledPageIOOptions<T>
     implements TitleableIOOption<T>
 {
-    private enum Options implements OptionEnum 
+	protected enum Options implements OptionEnum 
     {
         Title,
         TitleFontSize,

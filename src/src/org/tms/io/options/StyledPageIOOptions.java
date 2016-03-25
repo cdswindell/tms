@@ -32,7 +32,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
     protected static final int DefaultFontSizePx = 8;
     protected static final String DefaultFontFamily = "SansSerif";
     
-    private enum Options implements OptionEnum 
+    protected enum Options implements OptionEnum 
     {
         ColumnWidth,
         RowLabelColumnWidth,

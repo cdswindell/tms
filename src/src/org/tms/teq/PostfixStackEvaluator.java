@@ -260,7 +260,7 @@ public class PostfixStackEvaluator
                         return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.ReferenceRequired);    
                     
                     try {
-                        m_opStack.push(doStatOp(oper, dc, args));
+                        m_opStack.push(doStatOp(oper, dc, row, col, args));
                     }
                     catch (BlockingSetDerivationException e) {
                         signalBlockedDerivation(rewind, tbl, row, col, oper, e);                                               
@@ -565,7 +565,7 @@ public class PostfixStackEvaluator
         
         if (svse == null) {
             List<TableElement> affectedBy = null;
-            svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset());   
+            svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset(), bio.isRequiresRetainedSequence(), ref.getElementType());   
             
             boolean arePendings = false;
             Set<PendingState> blockingSet = new LinkedHashSet<PendingState>();
@@ -601,7 +601,8 @@ public class PostfixStackEvaluator
                     }
                 }
                 else if (c.isNumericValue()) {                 
-                    svse.enter((Number)c.getCellValue());
+                    svse.enter(c);
+                    //svse.enter((Number)c.getCellValue());
                 }
             }
             
@@ -713,7 +714,7 @@ public class PostfixStackEvaluator
         return tvse;
     }
     
-    private Token doStatOp(Operator oper, DerivationContext dc, Token... args)
+    private Token doStatOp(Operator oper, DerivationContext dc, Row cRow, Column cCol, Token... args)
     throws BlockedDerivationException
     {
         Token result = null;
@@ -744,7 +745,7 @@ public class PostfixStackEvaluator
                     try {
                         if (args.length > 1)
                             params = Arrays.copyOfRange(args, 1, args.length);
-                        Object value = svse.calcStatistic(bio, params);
+                        Object value = svse.calcStatistic(bio, cRow, cCol, params);
                         result = new Token(TokenType.Operand, value);
                     }
                     catch (UnimplementedException ue) {

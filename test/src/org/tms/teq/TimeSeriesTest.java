@@ -236,6 +236,8 @@ public class TimeSeriesTest extends BaseTest
     	assertThat(true, is(t.isTimeSeriesedRows()));
     	assertThat(true, is(t.isTimeSeriesedRowsActive()));
     	
+    	Thread.sleep(100);
+    	
     	assertThat(true, is (t.getPropertyInt(TableProperty.numRows) > sf_EXPECTED_ROW_COUNT));
     	assertThat(true, is (t.getPropertyInt(TableProperty.numCells) > sf_EXPECTED_CELL_COUNT));
     	

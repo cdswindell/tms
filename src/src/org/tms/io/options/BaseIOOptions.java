@@ -30,7 +30,7 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements IOOpt
 {          
     protected Map<OptionEnum, Object> m_options;
     
-    private enum BaseOptions implements OptionEnum 
+    protected enum BaseOptions implements OptionEnum 
     {
         FileFormat,
         IsRowLabels,

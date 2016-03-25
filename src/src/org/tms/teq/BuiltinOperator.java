@@ -4,9 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.simple.JSONObject;
@@ -105,9 +107,9 @@ public enum BuiltinOperator implements Labeled, Operator
     LogOper(TokenType.UnaryFunc, 8, toLabels("ln", "loge"), toArgs(double.class), double.class, toCategories("math"), Math.class, "log"),  
     Log10Oper(TokenType.UnaryFunc, 8, toLabels("log", "log10"), toArgs(double.class), double.class, toCategories("math"), Math.class, "log10"),  
     
-    RandOper(TokenType.BuiltIn, 8, toLabels("random", "rand"), null, double.class, toCategories("math", "statistical"), Math.class),
-    RandIntOper(TokenType.UnaryFunc, 8, toLabels("randomInt", "randomInt", "randInt"), toArgs(double.class), int.class, toCategories("math", "statistical"), MathUtil.class),
-    RandBetweenOper(TokenType.BinaryFunc, 8, toLabels("randomBetween", "randomBetween", "randBetween"), toArgs(double.class, double.class), int.class, toCategories("math", "statistical"), MathUtil.class),
+    RandOper(TokenType.BuiltIn, 8, toLabels("random", "rand"), null, double.class, toCategories("math", "statistic"), Math.class),
+    RandIntOper(TokenType.UnaryFunc, 8, toLabels("randomInt", "randomInt", "randInt"), toArgs(double.class), int.class, toCategories("math", "statistic"), MathUtil.class),
+    RandBetweenOper(TokenType.BinaryFunc, 8, toLabels("randomBetween", "randomBetween", "randBetween"), toArgs(double.class, double.class), int.class, toCategories("math", "statistic"), MathUtil.class),
 
     // TVM Calculations
     PmtOper(TokenType.GenericFunc, 8, toLabels("pmt", "paymentPerTerm"), toArgs(double.class, int.class, double.class, double.class), double.class, toCategories("Financial"), MathUtil.class),
@@ -193,83 +195,88 @@ public enum BuiltinOperator implements Labeled, Operator
     NowOper(TokenType.BuiltIn, 8, toLabels("now"), null, java.util.Date.class, toCategories("Date/Time")),
 
     // Single Variable Stat Functions 
-    SumOper(TokenType.StatOp, 8, toLabels("sum"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    Sum2Oper(TokenType.StatOp, 8, toLabels("sumOfSquares", "sumSqs", "ss", "sumsq"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    SumSqD2Oper(TokenType.StatOp, 8, toLabels("sumOfSquaredDeviates", "ss", "ssd", "devsq"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    MeanOper(TokenType.StatOp, 8, toLabels("mean", "average", "avg"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    MedianOper(TokenType.StatOp, 8, toLabels("median"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    QuartileOper(TokenType.StatOp, 8, toLabels("quartile"), toArgs(TableElement.class, int.class), double.class, toCategories("statistical")),
-    FirstQuartileOper(TokenType.StatOp, 8, toLabels("firstQuartile", "firstQ"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    ThirdQuartileOper(TokenType.StatOp, 8, toLabels("thirdQuartile", "thirdQ"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    ModeOper(TokenType.StatOp, 8, toLabels("mode"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    StDevPopulationOper(TokenType.StatOp, 8, toLabels("stDevPopulation", "stDevOfPopulation", "stDev.p"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    StDevSampleOper(TokenType.StatOp, 8, toLabels("stDevSample", "stDevOfSample", "stDev", "stDev.s"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    VarPopulationOper(TokenType.StatOp, 8, toLabels("variancePopulation", "varianceOfPopulation", "var.p"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    VarSampleOper(TokenType.StatOp, 8, toLabels("varianceSample", "varianceOfSample", "var", "var.s", "variance"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    MinOper(TokenType.StatOp, 8, toLabels("min", "minimum"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    MaxOper(TokenType.StatOp, 8, toLabels("max", "maximum"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    RangeOper(TokenType.StatOp, 8, toLabels("range", "spread"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    CountOper(TokenType.StatOp, 8, toLabels("count", "cnt"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    SkewOper(TokenType.StatOp, 8, toLabels("skewness", "skew"), toArgs(TableElement.class), double.class, toCategories("statistical")),
-    KurtosisOper(TokenType.StatOp, 8, toLabels("kurtosis", "kurt"), toArgs(TableElement.class), double.class, toCategories("statistical")),
+    SumOper(TokenType.StatOp, 8, toLabels("sum"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    Sum2Oper(TokenType.StatOp, 8, toLabels("sumOfSquares", "sumSqs", "ss", "sumsq"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    SumSqD2Oper(TokenType.StatOp, 8, toLabels("sumOfSquaredDeviates", "ss", "ssd", "devsq"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    MeanOper(TokenType.StatOp, 8, toLabels("mean", "average", "avg"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    MedianOper(TokenType.StatOp, 8, toLabels("median"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    QuartileOper(TokenType.StatOp, 8, toLabels("quartile"), toArgs(TableElement.class, int.class), double.class, toCategories("statistic")),
+    FirstQuartileOper(TokenType.StatOp, 8, toLabels("firstQuartile", "firstQ"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    ThirdQuartileOper(TokenType.StatOp, 8, toLabels("thirdQuartile", "thirdQ"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    ModeOper(TokenType.StatOp, 8, toLabels("mode"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    StDevPopulationOper(TokenType.StatOp, 8, toLabels("stDevPopulation", "stDevOfPopulation", "stDev.p"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    StDevSampleOper(TokenType.StatOp, 8, toLabels("stDevSample", "stDevOfSample", "stDev", "stDev.s"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    VarPopulationOper(TokenType.StatOp, 8, toLabels("variancePopulation", "varianceOfPopulation", "var.p"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    VarSampleOper(TokenType.StatOp, 8, toLabels("varianceSample", "varianceOfSample", "var", "var.s", "variance"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    MinOper(TokenType.StatOp, 8, toLabels("min", "minimum"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    MaxOper(TokenType.StatOp, 8, toLabels("max", "maximum"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    RangeOper(TokenType.StatOp, 8, toLabels("range", "spread"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    CountOper(TokenType.StatOp, 8, toLabels("count", "cnt"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    SkewOper(TokenType.StatOp, 8, toLabels("skewness", "skew"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+    KurtosisOper(TokenType.StatOp, 8, toLabels("kurtosis", "kurt"), toArgs(TableElement.class), double.class, toCategories("statistic")),
+
+    // Moving window statistics
+    MMeanOper(TokenType.StatOp, 8, toLabels("mmean", "mavg", "maverage"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MMedianOper(TokenType.StatOp, 8, toLabels("mmedian"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MMaxOper(TokenType.StatOp, 8, toLabels("mmax", "mmaximum"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     
-    PValueOper(TokenType.StatOp, 8, toLabels("tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistical")),
-    TValueOper(TokenType.StatOp, 8, toLabels("tStatistic", "tValue", "oneSampleTwoTailTTestTValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistical")),
-    TTestOper(TokenType.StatOp, 8, toLabels("tTest"), toArgs(TableRowColumnElement.class, double.class, double.class), double.class, toCategories("statistical")),
+    PValueOper(TokenType.StatOp, 8, toLabels("tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistic")),
+    TValueOper(TokenType.StatOp, 8, toLabels("tStatistic", "tValue", "oneSampleTwoTailTTestTValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistic")),
+    TTestOper(TokenType.StatOp, 8, toLabels("tTest"), toArgs(TableRowColumnElement.class, double.class, double.class), double.class, toCategories("statistic")),
     
-    TwoSamplePValueOper(TokenType.StatOp, 8, toLabels("twoSampleTSigLevel",  "tsPValue",  "twoSamplePValue", "twoSampleTwoTailTTestPValue"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical")),
-    TwoSampleTValueOper(TokenType.StatOp, 8, toLabels("twoSampleTStatistic", "tsTValue",  "twoSampleTValue", "twoSampleTwoTailTTestTValue"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical")),
-    TwoSampleTTestOper(TokenType.StatOp, 8, toLabels("twoSampleTTest", "tsTTest"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class, double.class), double.class, toCategories("statistical")),
+    TwoSamplePValueOper(TokenType.StatOp, 8, toLabels("twoSampleTSigLevel",  "tsPValue",  "twoSamplePValue", "twoSampleTwoTailTTestPValue"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistic")),
+    TwoSampleTValueOper(TokenType.StatOp, 8, toLabels("twoSampleTStatistic", "tsTValue",  "twoSampleTValue", "twoSampleTwoTailTTestTValue"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistic")),
+    TwoSampleTTestOper(TokenType.StatOp, 8, toLabels("twoSampleTTest", "tsTTest"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class, double.class), double.class, toCategories("statistic")),
     
     // Normal Distribution Single Variable Stat Functions 
-    NormSampleOper(TokenType.BinaryFunc, 8, toLabels("normalSample", "normalSample", "normS", "normalS"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    NormDensityOper(TokenType.GenericFunc, 8, toLabels("normalDensity", "normalDensity", "normD", "normalD", "normPDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    NormCumProbOper(TokenType.GenericFunc, 8, toLabels("normalCumProb", "normalCumProb", "normCP", "normalCP", "normCDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    NormInvCumProbOper(TokenType.GenericFunc, 8, toLabels("normalInvCumProb", "normalInvCumProb", "normICP", "normalICP", "normInvCDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    NormProbOper(TokenType.GenericFunc, 8, toLabels("normalProbability", "normalProbability", "normalProb", "normP", "normalP", "normPMF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
+    NormSampleOper(TokenType.BinaryFunc, 8, toLabels("normalSample", "normalSample", "normS", "normalS"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    NormDensityOper(TokenType.GenericFunc, 8, toLabels("normalDensity", "normalDensity", "normD", "normalD", "normPDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    NormCumProbOper(TokenType.GenericFunc, 8, toLabels("normalCumProb", "normalCumProb", "normCP", "normalCP", "normCDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    NormInvCumProbOper(TokenType.GenericFunc, 8, toLabels("normalInvCumProb", "normalInvCumProb", "normICP", "normalICP", "normInvCDF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    NormProbOper(TokenType.GenericFunc, 8, toLabels("normalProbability", "normalProbability", "normalProb", "normP", "normalP", "normPMF"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
     NormProbInRangeOper(TokenType.GenericFunc, 8, toLabels("normalProbInRange", "normalProbInRange", "normalProbabilityInRange","normPIR", "normalPIR"), 
     											  toArgs(double.class, double.class, double.class, double.class), 
     											  double.class, 
-    											  toCategories("statistical", "distribution"), 
+    											  toCategories("statistic", "distribution"), 
     											  MathUtil.class), 
     
     // Exponential Distribution Single Variable Stat Functions 
-    ExpSampleOper(TokenType.UnaryFunc, 8, toLabels("exponentialSample", "expS"), toArgs(double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ExpDensityOper(TokenType.BinaryFunc, 8, toLabels("exponentialDensity", "expD", "expPDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ExpCumProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialCumProb", "expCP", "expCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ExpInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialInvCumProb", "expICP", "expInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ExpProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialProbability", "expProb", "expP", "expPMF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ExpProbInRangeOper(TokenType.GenericFunc, 8,toLabels("exponentialProbInRange", "exponentialProbabilityInRange","expPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class), 
+    ExpSampleOper(TokenType.UnaryFunc, 8, toLabels("exponentialSample", "expS"), toArgs(double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ExpDensityOper(TokenType.BinaryFunc, 8, toLabels("exponentialDensity", "expD", "expPDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ExpCumProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialCumProb", "expCP", "expCDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ExpInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialInvCumProb", "expICP", "expInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ExpProbOper(TokenType.BinaryFunc, 8, toLabels("exponentialProbability", "expProb", "expP", "expPMF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ExpProbInRangeOper(TokenType.GenericFunc, 8,toLabels("exponentialProbInRange", "exponentialProbabilityInRange","expPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class), 
     
     // Chi Squared Distribution Single Variable Stat Functions                                                               
-    ChiSqSampleOper(TokenType.UnaryFunc, 8, toLabels("chiSqSample", "ChiSqS"), toArgs(double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ChiSqDensityOper(TokenType.BinaryFunc, 8, toLabels("chiSqDensity", "ChiSqD", "ChiSqPDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ChiSqCumProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqCumProb", "chiSqCP", "chiSqCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ChiSqInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqInvCumProb", "ChiSqICP", "ChiSqInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ChiSqProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqProbability", "ChiSqProb", "ChiSqP", "ChiSqPMF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    ChiSqProbInRangeOper(TokenType.GenericFunc, 8, toLabels("chiSqProbInRange", "ChiSqProbabilityInRange","ChiSqPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
-    ChiSqScoreOper(TokenType.GenericFunc, 8, toLabels("chiSqScore"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
-    ChiSqStatOper(TokenType.StatOp, 8, toLabels("chiSqStat"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "distribution")),
-    ChiSqTestOper(TokenType.StatOp, 8, toLabels("chiSqTest"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class, double.class), double.class, toCategories("statistical", "distribution")),
+    ChiSqSampleOper(TokenType.UnaryFunc, 8, toLabels("chiSqSample", "ChiSqS"), toArgs(double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ChiSqDensityOper(TokenType.BinaryFunc, 8, toLabels("chiSqDensity", "ChiSqD", "ChiSqPDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ChiSqCumProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqCumProb", "chiSqCP", "chiSqCDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ChiSqInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqInvCumProb", "ChiSqICP", "ChiSqInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ChiSqProbOper(TokenType.BinaryFunc, 8, toLabels("chiSqProbability", "ChiSqProb", "ChiSqP", "ChiSqPMF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    ChiSqProbInRangeOper(TokenType.GenericFunc, 8, toLabels("chiSqProbInRange", "ChiSqProbabilityInRange","ChiSqPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),    
+    ChiSqScoreOper(TokenType.GenericFunc, 8, toLabels("chiSqScore"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),    
+    ChiSqStatOper(TokenType.StatOp, 8, toLabels("chiSqStat"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistic", "distribution")),
+    ChiSqTestOper(TokenType.StatOp, 8, toLabels("chiSqTest"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class, double.class), double.class, toCategories("statistic", "distribution")),
 
     // T Distribution Single Variable Stat Functions                                                               
-    TSampleOper(TokenType.UnaryFunc, 8, toLabels("tSample", "tS"), toArgs(double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    TDensityOper(TokenType.BinaryFunc, 8, toLabels("tDensity", "tD", "tPDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    TCumProbOper(TokenType.BinaryFunc, 8, toLabels("tCumProb", "tCP", "tCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    TInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("tInvCumProb", "tICP", "tInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    TProbOper(TokenType.BinaryFunc, 8, toLabels("tProbability", "tProb", "tP", "tPMF"), toArgs(double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),
-    TProbInRangeOper(TokenType.GenericFunc, 8, toLabels("tProbInRange", "tProbabilityInRange","tPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
+    TSampleOper(TokenType.UnaryFunc, 8, toLabels("tSample", "tS"), toArgs(double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    TDensityOper(TokenType.BinaryFunc, 8, toLabels("tDensity", "tD", "tPDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    TCumProbOper(TokenType.BinaryFunc, 8, toLabels("tCumProb", "tCP", "tCDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    TInvCumProbOper(TokenType.BinaryFunc, 8, toLabels("tInvCumProb", "tICP", "tInvCDF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    TProbOper(TokenType.BinaryFunc, 8, toLabels("tProbability", "tProb", "tP", "tPMF"), toArgs(double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),
+    TProbInRangeOper(TokenType.GenericFunc, 8, toLabels("tProbInRange", "tProbabilityInRange","tPIR"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),    
 
-    TScoreOper(TokenType.GenericFunc, 8, toLabels("tScore"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
-    PopMeanOper(TokenType.GenericFunc, 8, toLabels("popMean"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("statistical", "distribution"), MathUtil.class),    
+    TScoreOper(TokenType.GenericFunc, 8, toLabels("tScore"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),    
+    PopMeanOper(TokenType.GenericFunc, 8, toLabels("popMean"), toArgs(double.class, double.class, double.class, double.class), double.class, toCategories("statistic", "distribution"), MathUtil.class),    
     
     // Two Variable Stat Functions
-    LinearSlopeOper(TokenType.StatOp, 8, toLabels("slope"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "regression")),
-    LinearInterceptOper(TokenType.StatOp, 8, toLabels("intercept"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "regression")),
-    LinearROper(TokenType.StatOp, 8, toLabels("correlation", "ccr", "correl"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "regression")),
-    LinearR2Oper(TokenType.StatOp, 8, toLabels("correlation2", "ccr2", "r2", "rsq"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistical", "regression")),
-    LinearComputeXOper(TokenType.GenericFunc, 8, toLabels("lrComputeX", "computeX", "lrComputeX"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "regression"), MathUtil.class),
-    LinearComputeYOper(TokenType.GenericFunc, 8, toLabels("lrComputeY", "computeY", "lrComputeY"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistical", "regression"), MathUtil.class),
+    LinearSlopeOper(TokenType.StatOp, 8, toLabels("slope"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistic", "regression")),
+    LinearInterceptOper(TokenType.StatOp, 8, toLabels("intercept"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistic", "regression")),
+    LinearROper(TokenType.StatOp, 8, toLabels("correlation", "ccr", "correl"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistic", "regression")),
+    LinearR2Oper(TokenType.StatOp, 8, toLabels("correlation2", "ccr2", "r2", "rsq"), toArgs(TableRowColumnElement.class, TableRowColumnElement.class), double.class, toCategories("statistic", "regression")),
+    LinearComputeXOper(TokenType.GenericFunc, 8, toLabels("lrComputeX", "computeX", "lrComputeX"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "regression"), MathUtil.class),
+    LinearComputeYOper(TokenType.GenericFunc, 8, toLabels("lrComputeY", "computeY", "lrComputeY"), toArgs(double.class, double.class, double.class), double.class, toCategories("statistic", "regression"), MathUtil.class),
     
     // Transformation Functions
     MeanCenterOper(TokenType.TransformOp, 8, toLabels("meanCenter"), toArgs(TableElement.class), null, toCategories("transform")),
@@ -296,6 +303,7 @@ public enum BuiltinOperator implements Labeled, Operator
         return args;        
     }
     
+    static private Map<BuiltinOperator, BuiltinOperator> sf_MovingStatToBaseStatMap  = null;
     static final public int MAX_PRIORITY = 10;
     
     private String m_label;
@@ -409,8 +417,42 @@ public enum BuiltinOperator implements Labeled, Operator
                 return true;
                 
             default:
-                return false;
+                return isRequiresRetainedSequence();
         }
+    }
+    
+    public boolean isRequiresRetainedSequence()
+    {
+        switch(this) {
+            default:
+                return isMovingStatistic();
+        }
+    }
+    
+    public BuiltinOperator getBaseStatistic()
+    {
+        if (this.isMovingStatistic())
+        	return sf_MovingStatToBaseStatMap.get(this);
+        else
+        	return this;
+    }
+    
+    public boolean isMovingStatistic()
+    {
+    	if (sf_MovingStatToBaseStatMap == null) {
+    		synchronized (BuiltinOperator.class) {
+    			if (sf_MovingStatToBaseStatMap == null) {
+    				sf_MovingStatToBaseStatMap = new HashMap<BuiltinOperator, BuiltinOperator>();
+    				
+    				// map all moving stats to their basic counterpart
+       				sf_MovingStatToBaseStatMap.put(MMeanOper, MeanOper);
+       				sf_MovingStatToBaseStatMap.put(MMedianOper, MedianOper);
+       				sf_MovingStatToBaseStatMap.put(MMaxOper, MaxOper);
+       			}
+    		}
+    	}
+    	
+    	return sf_MovingStatToBaseStatMap.containsKey(this);
     }
     
     public TokenType getPrimaryTokenType()

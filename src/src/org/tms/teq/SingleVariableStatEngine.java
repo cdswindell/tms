@@ -1,6 +1,7 @@
 package org.tms.teq;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Skewness;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Token;
@@ -22,6 +24,8 @@ import org.tms.api.exceptions.UnimplementedException;
 
 public class SingleVariableStatEngine
 {
+	private ElementType m_elemType;
+	
     private int m_n;
     private double m_sumX;
     private double m_sumX2;
@@ -34,31 +38,43 @@ public class SingleVariableStatEngine
     private double m_1stQ = Double.MIN_VALUE;
     private double m_3rdQ = Double.MIN_VALUE;
     boolean m_retainDataset;
-    private List<Double> m_values;
-    private Set<Cell> m_excludedCells;
-    private Set<Row> m_excludedRows;
-    private Set<Column> m_excludedColumns;
+    boolean m_retainSequence;
     private SummaryStatistics m_sStats;
     private Skewness m_skewness;
     private Kurtosis m_kurtosis;
     
+    private List<Double> m_values;
+    private Set<Cell> m_excludedCells;
+    private Set<Row> m_excludedRows;
+    private Set<Column> m_excludedColumns;
+    
+    private Map<TableRowColumnElement, Integer> m_tableElementToDataElementMap;
+    
     public SingleVariableStatEngine()
     {
         m_retainDataset = false;
+        m_retainSequence = false;
         m_sStats = new SummaryStatistics();
         m_skewness = new Skewness();
         m_kurtosis = new Kurtosis();
+        m_elemType = null;
         
         reset();
     }
     
-    public SingleVariableStatEngine(boolean retainDataset)
+    public SingleVariableStatEngine(boolean retainDataset, boolean retainSequence, ElementType et)
     {
         this();
         m_retainDataset = retainDataset;
+        m_retainSequence = retainSequence;
+        m_elemType = et;
         
-        if (m_retainDataset) 
+        if (m_retainDataset)  {
             m_values = new ArrayList<Double>();
+            
+            if (m_retainSequence)
+            	m_tableElementToDataElementMap = new HashMap<TableRowColumnElement, Integer>();
+        }
     }
     
     public SingleVariableStatEngine(Double[] values)
@@ -70,6 +86,16 @@ public class SingleVariableStatEngine
 	public boolean isRetainDataset() 
 	{
 		return m_retainDataset;
+	}
+	
+	public boolean isRetainSequence() 
+	{
+		return m_retainSequence;
+	}
+	
+	public ElementType getElementType()
+	{
+		return m_elemType;
 	}
 	
     public void reset() 
@@ -88,8 +114,12 @@ public class SingleVariableStatEngine
         m_sStats.clear();
         m_skewness.clear();
         m_kurtosis.clear();
+        
         if (m_retainDataset) 
             m_values.clear();
+        
+        if (m_retainSequence) 
+        	m_tableElementToDataElementMap.clear();
     }
 
     private void resetCalcCache()
@@ -112,6 +142,26 @@ public class SingleVariableStatEngine
         return m_n;
     }
     
+
+	public int enter(Cell c) 
+	{
+		if (c.isNumericValue()) {
+			int oldCnt = m_n;
+			enter((Number)c.getCellValue());
+			
+			// for certain statistics, like moving average, we need to map the row/column of the
+			// cell to the index into the data list of this numeric value
+			if (isRetainSequence() && m_n > oldCnt) {
+				if (getElementType() == ElementType.Row)
+					m_tableElementToDataElementMap.put(c.getColumn(), m_values.size() - 1);
+				else if (getElementType() == ElementType.Column)
+					m_tableElementToDataElementMap.put(c.getRow(), m_values.size() - 1);
+			}
+		}
+		
+        return m_n;		
+	}   
+	
     public int enter(Number x) 
     {
         if (x != null)
@@ -203,6 +253,11 @@ public class SingleVariableStatEngine
     }
     
     public Object calcStatistic(BuiltinOperator stat, Token... params)
+    {        
+    	return calcStatistic(stat, (Row)null, (Column)null, params);
+    }
+    
+    public Object calcStatistic(BuiltinOperator stat, Row cRow, Column cCol, Token... params)
     {        
         if (stat == BuiltinOperator.CountOper)
             return m_n;
@@ -363,6 +418,21 @@ public class SingleVariableStatEngine
                 }
                 break;
                 
+            case MMeanOper:
+            case MMedianOper:
+            case MMaxOper:
+            	if (params == null || params.length < 1 || !params[0].isNumeric() || params[0].getNumericValue() < 1)
+                    throw new UnimplementedException("Second argument must be > 1");  
+            	
+            	int window = (int)(params[0].getNumericValue() + 0.5);
+            	if (params.length > 1)
+            		params = Arrays.copyOfRange(params, 1, params.length);
+            	else
+            		params = null;
+            	
+            	value = calcMovingStatistic(stat, cRow, cCol, window, params);
+            	break;
+                
             default:
                 throw new UnimplementedException("Unsupported statistic: " + stat);            
         }
@@ -370,7 +440,41 @@ public class SingleVariableStatEngine
         return value;
     }
 
-    private double calcMode()
+    private Object calcMovingStatistic(BuiltinOperator stat, Row cRow, Column cCol, int window, Token... params) 
+    {
+		if (window > m_n)
+			return Double.MIN_VALUE;
+		
+		// based on cRow/cCol, figure out where to start the calculation
+		int eIdx = -1;
+		if (m_elemType == ElementType.Column)
+			eIdx = m_tableElementToDataElementMap.get(cRow);
+		else if (m_elemType == ElementType.Row)
+			eIdx = m_tableElementToDataElementMap.get(cCol);
+		
+		// if we didn't find a hit, ignore
+		if (eIdx == -1)
+			return Double.MIN_VALUE;
+		
+		// if this index is before the window size, return null
+		if (eIdx < window - 1)
+			return Double.MIN_VALUE;
+		
+		// determone the base statistic we need to calculate
+		BuiltinOperator baseStat = stat.getBaseStatistic();
+		
+		// create a stat engine to do the work
+		SingleVariableStatEngine svse = new SingleVariableStatEngine(baseStat.isRequiresRetainedDataset(), baseStat.isRequiresRetainedSequence(), m_elemType);
+		
+		// compute the moving average
+		for (int i = window - 1; i >= 0; i--) {
+			svse.enter(m_values.get(eIdx - i));
+		}
+		
+		return svse.calcStatistic(baseStat, params);
+	}
+
+	private double calcMode()
     {
         // special cases
         if (m_n == 0 || !m_retainDataset)
@@ -457,7 +561,7 @@ public class SingleVariableStatEngine
         if (median == Double.NaN)
             return median;
         
-        SingleVariableStatEngine svse = new SingleVariableStatEngine(true);
+        SingleVariableStatEngine svse = new SingleVariableStatEngine(true, false, m_elemType);
         for (double x : m_values) {
             if (x < median)
                 svse.enter(x);
@@ -478,12 +582,12 @@ public class SingleVariableStatEngine
         if (median == Double.NaN)
             return median;
         
-        SingleVariableStatEngine svse = new SingleVariableStatEngine(true);
+        SingleVariableStatEngine svse = new SingleVariableStatEngine(true, false, m_elemType);
         for (double x : m_values) {
             if (x > median)
                 svse.enter(x);
         }
         
         return (m_3rdQ = svse.calcMedian());
-    }    
+    }
 }

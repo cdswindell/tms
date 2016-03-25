@@ -35,7 +35,7 @@ public abstract class FormattedPageIOOptions<T extends FormattedPageIOOptions<T>
     static protected final int DefaultPageWidthPx = (int) (8.5 * 72);
     static protected final int DefaultPageHeightPx = (int) (11 * 72);
 
-    private enum Options implements OptionEnum 
+    protected enum Options implements OptionEnum 
     {
         DateTimeFormat,
         IsPaged,
