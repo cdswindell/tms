@@ -215,11 +215,28 @@ public enum BuiltinOperator implements Labeled, Operator
     SkewOper(TokenType.StatOp, 8, toLabels("skewness", "skew"), toArgs(TableElement.class), double.class, toCategories("statistic")),
     KurtosisOper(TokenType.StatOp, 8, toLabels("kurtosis", "kurt"), toArgs(TableElement.class), double.class, toCategories("statistic")),
 
-    // Moving window statistics
+     // Moving window statistics    
+    MSumOper(TokenType.StatOp, 8, toLabels("msum"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MSum2Oper(TokenType.StatOp, 8, toLabels("msumOfSquares", "msumSqs", "mss", "msumsq"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MSumSqD2Oper(TokenType.StatOp, 8, toLabels("msumOfSquaredDeviates", "mss", "mssd", "mdevsq"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MMeanOper(TokenType.StatOp, 8, toLabels("mmean", "mavg", "maverage"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MMedianOper(TokenType.StatOp, 8, toLabels("mmedian"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MQuartileOper(TokenType.StatOp, 8, toLabels("mquartile"), toArgs(TableRowColumnElement.class, int.class, int.class), double.class, toCategories("statistic", "moving")),
+    MFirstQuartileOper(TokenType.StatOp, 8, toLabels("mfirstQuartile", "mfirstQ"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MThirdQuartileOper(TokenType.StatOp, 8, toLabels("mthirdQuartile", "mthirdQ"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MModeOper(TokenType.StatOp, 8, toLabels("mmode"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MStDevPopulationOper(TokenType.StatOp, 8, toLabels("mstDevPopulation", "mstDevOfPopulation", "mstDev.p"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MStDevSampleOper(TokenType.StatOp, 8, toLabels("mstDevSample", "mstDevOfSample", "mstDev", "mstDev.s"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MVarPopulationOper(TokenType.StatOp, 8, toLabels("mvariancePopulation", "mvarianceOfPopulation", "mvar.p"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MVarSampleOper(TokenType.StatOp, 8, toLabels("mvarianceSample", "mvarianceOfSample", "mvar", "mvar.s", "mvariance"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MMinOper(TokenType.StatOp, 8, toLabels("mmin", "mminimum"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
     MMaxOper(TokenType.StatOp, 8, toLabels("mmax", "mmaximum"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
-    
+    MRangeOper(TokenType.StatOp, 8, toLabels("mrange", "mspread"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MCountOper(TokenType.StatOp, 8, toLabels("mcount", "mcnt"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MSkewOper(TokenType.StatOp, 8, toLabels("mskewness", "mskew"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+    MKurtosisOper(TokenType.StatOp, 8, toLabels("mkurtosis", "mkurt"), toArgs(TableRowColumnElement.class, int.class), double.class, toCategories("statistic", "moving")),
+
+    // T Tests
     PValueOper(TokenType.StatOp, 8, toLabels("tSigLevel",  "pValue", "oneSampleTwoTailTTestPValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistic")),
     TValueOper(TokenType.StatOp, 8, toLabels("tStatistic", "tValue", "oneSampleTwoTailTTestTValue"), toArgs(TableRowColumnElement.class, double.class), double.class, toCategories("statistic")),
     TTestOper(TokenType.StatOp, 8, toLabels("tTest"), toArgs(TableRowColumnElement.class, double.class, double.class), double.class, toCategories("statistic")),
@@ -445,9 +462,25 @@ public enum BuiltinOperator implements Labeled, Operator
     				sf_MovingStatToBaseStatMap = new HashMap<BuiltinOperator, BuiltinOperator>();
     				
     				// map all moving stats to their basic counterpart
+       				sf_MovingStatToBaseStatMap.put(MSumOper, SumOper);
+       				sf_MovingStatToBaseStatMap.put(MSum2Oper, Sum2Oper);
+       				sf_MovingStatToBaseStatMap.put(MSumSqD2Oper, SumSqD2Oper);
        				sf_MovingStatToBaseStatMap.put(MMeanOper, MeanOper);
        				sf_MovingStatToBaseStatMap.put(MMedianOper, MedianOper);
+       				sf_MovingStatToBaseStatMap.put(MQuartileOper, QuartileOper);
+       				sf_MovingStatToBaseStatMap.put(MFirstQuartileOper, FirstQuartileOper);
+       				sf_MovingStatToBaseStatMap.put(MThirdQuartileOper, ThirdQuartileOper);
+       				sf_MovingStatToBaseStatMap.put(MModeOper, ModeOper);
+       				sf_MovingStatToBaseStatMap.put(MStDevPopulationOper, StDevPopulationOper);
+       				sf_MovingStatToBaseStatMap.put(MStDevSampleOper, StDevSampleOper);
+       				sf_MovingStatToBaseStatMap.put(MVarPopulationOper, VarPopulationOper);
+       				sf_MovingStatToBaseStatMap.put(MVarSampleOper, VarSampleOper);
+       				sf_MovingStatToBaseStatMap.put(MMinOper, MinOper);
        				sf_MovingStatToBaseStatMap.put(MMaxOper, MaxOper);
+       				sf_MovingStatToBaseStatMap.put(MRangeOper, RangeOper);
+       				sf_MovingStatToBaseStatMap.put(MCountOper, CountOper);
+       				sf_MovingStatToBaseStatMap.put(MSkewOper, SkewOper);
+       				sf_MovingStatToBaseStatMap.put(MKurtosisOper, KurtosisOper);
        			}
     		}
     	}

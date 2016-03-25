@@ -418,23 +418,22 @@ public class SingleVariableStatEngine
                 }
                 break;
                 
-            case MMeanOper:
-            case MMedianOper:
-            case MMaxOper:
-            	if (params == null || params.length < 1 || !params[0].isNumeric() || params[0].getNumericValue() < 1)
-                    throw new UnimplementedException("Second argument must be > 1");  
-            	
-            	int window = (int)(params[0].getNumericValue() + 0.5);
-            	if (params.length > 1)
-            		params = Arrays.copyOfRange(params, 1, params.length);
-            	else
-            		params = null;
-            	
-            	value = calcMovingStatistic(stat, cRow, cCol, window, params);
-            	break;
-                
             default:
-                throw new UnimplementedException("Unsupported statistic: " + stat);            
+            	if (stat.isMovingStatistic()) {
+                	if (params == null || params.length < 1 || !params[0].isNumeric() || params[0].getNumericValue() < 1)
+                        throw new UnimplementedException("Second argument must be > 1");  
+                	
+                	int window = (int)(params[0].getNumericValue() + 0.5);
+                	if (params.length > 1)
+                		params = Arrays.copyOfRange(params, 1, params.length);
+                	else
+                		params = null;
+                	
+                	value = calcMovingStatistic(stat, cRow, cCol, window, params);
+                	break;
+            	}
+            	else
+            		throw new UnimplementedException("Unsupported statistic: " + stat);            
         }
         
         return value;
