@@ -1,0 +1,11 @@
+from org.tms.api.utils import AsynchronousOp;
+from java.lang import Double
+import time
+class volumeOpAsync(AsynchronousOp):
+	def __init__(self):
+		AsynchronousOp.__init__(self, "volumeAsync", [Double, Double, Double], Double)
+	
+	def performCalculation(self, argMap):
+		time.sleep(5)
+		return argMap[0] * argMap[1] * argMap[2]
+		

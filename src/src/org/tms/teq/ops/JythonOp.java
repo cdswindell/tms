@@ -74,7 +74,7 @@ public class JythonOp extends BaseOp
             	// construct the object, this is the only way we can tell the
 	            // actual class (I think...)
 				PyObject pyObj = pyThing.__call__();
-				if (pyObj != null) {						            
+				if (pyObj != null) {					            
 		            // first, see if we can instantiate the object, and if we can, is it an AbstractOperator?
 		            // if it is, register it and return           
 		            try {

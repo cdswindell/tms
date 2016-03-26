@@ -363,6 +363,21 @@ public class TokenMapperTest extends BaseTest
         assertThat(3.0, is(resToken.getNumericValue()));
         
         // register new operator, class consists of methods
+        tc.registerJythonOperators(qualifiedFileName("volumeOpAsync.jy"));
+        
+        pse = new PostfixStackEvaluator("volumeAsync(2, 3, 4)", null);
+        assertThat(pse, notNullValue());
+        
+        try {
+        	resToken = pse.evaluate();
+        	fail("Calculation not asyncronous");
+        }
+        catch (PendingDerivationException pe) {
+        	assertThat(pe, notNullValue());
+        	assertThat(pe.getAwaitingState().getPendingIntermediate(), notNullValue());
+        }
+        
+        // register new operator, class consists of methods
         tc.registerJythonOperators(qualifiedFileName("volumeOp.jy"));
         
         pse = new PostfixStackEvaluator("volume(3, 4, 5)", null);

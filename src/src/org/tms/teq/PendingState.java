@@ -334,7 +334,9 @@ public abstract class PendingState
         
         public String toString()
         {
-            return String.format("Pending: Row %d Col %d (%s : %s)", m_curRow.getIndex(), m_curCol.getIndex(),
+            return String.format("Pending: Row %d Col %d (%s : %s)", 
+            		m_curRow != null ? m_curRow.getIndex() : 0, 
+            		m_curCol != null ? m_curCol.getIndex() : 0,
                     isValid() ? "OK" : "Expired",
                     isStillPending() ? "Pending" : "Not Pending");
         }
