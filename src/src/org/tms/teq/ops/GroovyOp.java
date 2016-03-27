@@ -21,6 +21,15 @@ import groovy.lang.GroovyObject;
 
 public class GroovyOp extends BaseOp
 {   
+	private static GroovyClassLoader sfGroovyClassLoader = null;
+	
+	protected static synchronized GroovyClassLoader fetchGroovyClassLoader(ClassLoader classLoader)
+	{
+		if (sfGroovyClassLoader == null)
+			sfGroovyClassLoader =  new GroovyClassLoader(classLoader);
+		return sfGroovyClassLoader;
+	}
+	
     public static void registerAllOps(TokenMapper tokenMapper, String text)
     {
         // compile the Groovy class
@@ -31,14 +40,15 @@ public class GroovyOp extends BaseOp
             // compile the code in the supplied file name
             // or, if text doesn't refer to a file, treat it as groovy code
             File file = new File(text);
-            gcl = new GroovyClassLoader();
+            gcl = fetchGroovyClassLoader(tokenMapper.getClass().getClassLoader());
             if (file.exists() && file.canRead())
                 groovyClazz = gcl.parseClass(file);
             else
                 groovyClazz = gcl.parseClass(text);
             
             // first, see if the class is annotated with the RegisterOp annotation
-            if (groovyClazz.getAnnotation(RegisterOp.class) != null) {
+            if (groovyClazz.getAnnotation(RegisterOp.class) != null) {            	
+            	gcl.getLoadedClasses();
             	tokenMapper.registerOperators(groovyClazz);
             	return;
             }
