@@ -150,7 +150,7 @@ public class TwoVariableStatEngine
             double sumX2 = (double)m_statX.calcStatistic(BuiltinOperator.Sum2Oper);
             double sumY2 = (double)m_statY.calcStatistic(BuiltinOperator.Sum2Oper);
             return m_r = (m_sumXY - sumX*sumY/m_n)/
-                    Math.sqrt((sumX2 - sumX*sumX/m_n)*(sumY2 - sumY*sumY/m_n));
+            				Math.sqrt((sumX2 - sumX*sumX/m_n)*(sumY2 - sumY*sumY/m_n));
         }
         else 
             return m_r;

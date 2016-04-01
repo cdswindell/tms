@@ -127,4 +127,15 @@ public enum ElementType
         Collections.sort(list, TableProperty::compareByName);
         return list;
     }
+
+	public String asReferenceLabel() 
+	{
+		switch (this) {
+			case Column:
+				return "col";
+		
+			default:
+				return this.name().toLowerCase();
+		}
+	}
 }

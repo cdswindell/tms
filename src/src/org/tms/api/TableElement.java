@@ -3,6 +3,7 @@ package org.tms.api;
 import java.util.List;
 
 import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.Labeled;
 import org.tms.api.events.Listenable;
 
 /**
@@ -12,7 +13,7 @@ import org.tms.api.events.Listenable;
  * @since {@value org.tms.api.utils.ApiVersion#INITIAL_VERSION_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public interface TableElement extends BaseElement, Listenable, Taggable
+public interface TableElement extends BaseElement, Listenable, Taggable, Labeled
 {
     /**
      * Returns the parent {@link TableContext}.

@@ -1,24 +1,67 @@
 package org.tms.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 public class Tuple<T>
 {
-    private T m_elem1;
-    private T m_elem2;
+    private List<T> m_elems;
     
     public Tuple(T e1, T e2) 
     {
-        m_elem1 = e1;
-        m_elem2 = e2;
+    	m_elems = new ArrayList<T>(2);
+    	m_elems.add(e1);
+    	m_elems.add(e2);
     }
 
+    @SafeVarargs
+	public Tuple(T... elems ) 
+    {
+    	if (elems != null) {
+	    	m_elems = new ArrayList<T>(elems.length);
+	    	for (T elem : elems) {
+	    		m_elems.add(elem);
+	    	}
+    	}
+    	else
+    		m_elems = Collections.emptyList();
+    }
+
+	public Tuple(Collection<T> elems ) 
+    {
+    	if (elems != null) 
+    		m_elems = new ArrayList<T>(elems);
+    	else
+    		m_elems = Collections.emptyList();
+    }
+
+    public int size()
+    {
+    	return m_elems != null ? m_elems.size() : 0;
+    }
+    
+    public T get(int idx) 
+    throws IndexOutOfBoundsException
+    {
+    	return m_elems.get(idx);
+    }
+    
+    @SuppressWarnings("unchecked")
+	public T [] toArray()
+    {
+    	return (T[])m_elems.toArray();
+    }
+    
     public T getFirstElement()
     {
-        return m_elem1;
+        return m_elems != null && m_elems.size() > 0 ? m_elems.get(0) : null;
     }
     
     public T getSecondElement()
     {
-        return m_elem2;
+        return m_elems != null && m_elems.size() > 1 ? m_elems.get(1) : null;
     }
     
     @Override
@@ -26,8 +69,10 @@ public class Tuple<T>
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((m_elem1 == null) ? 0 : m_elem1.hashCode());
-        result = prime * result + ((m_elem2 == null) ? 0 : m_elem2.hashCode());
+        for (T t: m_elems) {
+        	result = prime * result + ((t == null) ? 0 : t.hashCode());
+        }
+
         return result;
     }
 
@@ -36,24 +81,31 @@ public class Tuple<T>
     {
         if (this == obj) 
             return true;
+        
         if (obj == null) 
             return false;
+        
         if (getClass() != obj.getClass()) 
             return false;
-        Tuple<?> other = (Tuple<?>) obj;
-        if (m_elem1 == null) {
-            if (other.m_elem1 != null) 
-                return false;
-        }
         
-        else if (!m_elem1.equals(other.m_elem1)) 
-            return false;
-        if (m_elem2 == null) {
-            if (other.m_elem2 != null) 
+        @SuppressWarnings("unchecked")
+		Tuple<T> other = (Tuple<T>) obj;
+        
+        int thisSize = size();
+        if (thisSize != other.size())
+        	return false;
+        
+        for (int i = 0; i < thisSize; i++) {
+        	T elem = get(i);
+        	T otherElem = other.get(i);
+        	
+        	if (elem == null) {
+                if (otherElem != null) 
+                    return false;        		
+        	}
+            else if (!elem.equals(otherElem)) 
                 return false;
         }
-        else if (!m_elem2.equals(other.m_elem2)) 
-            return false;
         
         return true;
     }
