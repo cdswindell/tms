@@ -1,6 +1,8 @@
 package org.tms.tan;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
@@ -55,7 +57,7 @@ public class RegressionTest extends BaseTest
         RegressionImpl ri = new RegressionImpl(yCol, x1Col, x2Col, x3Col);
         assertNotNull(ri);
         
-        ri.calculateRSquared();
+        assertThat(mr.calculateRSquared(), is(ri.calculateRSquared()));
         
         String eq = ri.generateEquation();
         assertNotNull(eq);
