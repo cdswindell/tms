@@ -2,7 +2,6 @@ package org.tms.tan;
 
 import java.util.List;
 
-import org.tms.api.Access;
 import org.tms.api.TableRowColumnElement;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.TwoVariableStatEngine;
@@ -28,27 +27,28 @@ class LinearRegression extends AbstractRegression
 	}
 
 	@Override
-	String asEquation(Access refType) 
+	double getRegressionParameter(int termIdx) 
 	{
-		double slope = (double) m_tvse.calcStatistic(BuiltinOperator.LinearSlopeOper);
-		double intercept = (double) m_tvse.calcStatistic(BuiltinOperator.LinearInterceptOper);
-		
-		StringBuffer sb = new StringBuffer();
-		
-		sb.append(formatNumber(Math.abs(slope)));
-		
-		sb.append(" * ");
-		
-		sb.append(formatReference(getDependent(0), refType));
-		
-		if (intercept < 0.0)
-			sb.append(" - ");
-		else if (intercept > 0.0)
-			sb.append(" + ");
-		else
-			return sb.toString(); // don't try to append intercept
-		
-		sb.append(formatNumber(Math.abs(intercept)));
-		return sb.toString();
+		switch (termIdx) {
+			case 0:
+				return  (double) m_tvse.calcStatistic(BuiltinOperator.LinearInterceptOper);
+				
+			case 1:
+				return (double) m_tvse.calcStatistic(BuiltinOperator.LinearSlopeOper);
+				
+			default:
+				throw new IllegalArgumentException();
+		}
+	}
+
+	double getR() 
+	{
+		return (double)m_tvse.calcStatistic(BuiltinOperator.LinearROper);
+	}
+
+	@Override
+	double getR2() 
+	{
+		return (double)m_tvse.calcStatistic(BuiltinOperator.LinearR2Oper);
 	}
 }

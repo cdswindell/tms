@@ -22,6 +22,9 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		if (numIndependents == 1) {
 			model = new LinearRegression(y, x);
 		}
+		else {
+			model = new MultipleLinearRegression(y, x);
+		}
 		
 		if (model != null)
 			model.loadData();
@@ -29,8 +32,9 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		return model;
 	}
 	
-	abstract String asEquation(Access refType);
 	abstract void loadData();
+	abstract double getRegressionParameter(int termIdx);
+	abstract double getR2();
 
 	private TableRowColumnElement m_y;
 	private List<TableRowColumnElement> m_x;
@@ -40,6 +44,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 	private ElementType m_source;
 	private int m_maxItems;
 	private int m_nItems;
+	private int m_numObservations;
 	private Double[] m_values;
 	
 	AbstractRegression(TableRowColumnElement y, List<TableRowColumnElement> x) 
@@ -48,6 +53,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		m_x = x;
 		
 		m_idx = 1;
+		m_numObservations = -1;
 		m_nItems = 1 + m_x.size();
 		m_source = m_y.getElementType();
 		m_parentTable = m_y.getTable();	
@@ -58,6 +64,21 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 			m_maxItems = m_parentTable.getNumRows();
 	}
 	
+	public int getNumDependent()
+	{
+		return m_nItems - 1;
+	}
+
+	public int getNumObservations()
+	{
+		if (m_numObservations < 0) {
+			m_numObservations = 0;
+			for (@SuppressWarnings("unused") Tuple<Double> t : this)
+				m_numObservations++;
+		}
+		
+		return m_numObservations;
+	}
 
 	protected String formatNumber(double val) 
 	{
@@ -84,7 +105,6 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		}
 	}
 
-
 	protected TableRowColumnElement getDependent(int idx) 
 	{
 		return m_x.get(idx);
@@ -95,15 +115,57 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		return "\"" + val + "\"";
 	}
 
+	String asEquation(Access refType) 
+	{
+		StringBuffer sb = new StringBuffer();
+		
+		for (int i = 0; i < m_x.size(); i++) {
+			double coef = getRegressionParameter(i + 1);
+			TableRowColumnElement te = m_x.get(i);
+			
+			if (i > 0) {
+				sb.append(" ");
+				
+				if (coef > 0)
+					sb.append("+ ");
+				else if (coef < 0)
+					sb.append("- ");
+			}
+			else if (coef < 0)
+				sb.append("-");				
+			
+			sb.append(formatNumber(Math.abs(coef)));
+			sb.append(" * ");
+			sb.append(formatReference(te, refType));
+		}		
+		
+		double intercept = getRegressionParameter(0);
+		if (intercept < 0.0)
+			sb.append(" - ");
+		else if (intercept > 0.0)
+			sb.append(" + ");
+		else
+			return sb.toString(); // don't try to append intercept
+		
+		sb.append(formatNumber(Math.abs(intercept)));
+		return sb.toString();
+	}
 	@Override
 	public Iterator<Tuple<Double>> iterator() 
 	{
+		m_idx = 1;
 		return this;
 	}
 
 	@Override
 	public boolean hasNext() 
 	{
+		// hasNext generates the next tuple's worth of data; this check
+		// is a short circuit if we've already determined the next
+		// tuple but haven't grabbed it yet
+		if (m_values != null)
+			return true;
+		
 		while (m_idx <= m_maxItems) {
 			Cell yCell = m_y.getCell(Access.ByIndex, m_idx);
 			if (yCell != null && !yCell.isNull() && yCell.isNumericValue()) {
@@ -120,6 +182,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 					}
 					
 					validTuple = false;
+					m_values = null;
 					break; // from for loop
 				}
 				
@@ -130,6 +193,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 			m_idx++;
 		}
 		
+		m_values = null;
 		return false;
 	}
 
@@ -142,6 +206,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
         
         Tuple<Double> values = new Tuple<Double>(m_values);
         m_values = null;
+        m_idx++;
         
 		return values;
 	}

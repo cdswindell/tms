@@ -3,17 +3,24 @@ package org.tms.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-public class Tuple<T>
+public class Tuple<T> implements Iterator<T>, Iterable<T>
 {
     private List<T> m_elems;
+    private int m_idx;
+    private int m_size;
     
     public Tuple(T e1, T e2) 
     {
     	m_elems = new ArrayList<T>(2);
     	m_elems.add(e1);
     	m_elems.add(e2);
+    	
+    	m_idx = 0;
+    	m_size = 2;
     }
 
     @SafeVarargs
@@ -27,6 +34,9 @@ public class Tuple<T>
     	}
     	else
     		m_elems = Collections.emptyList();
+    	
+    	m_idx = 0;
+    	m_size = m_elems.size();
     }
 
 	public Tuple(Collection<T> elems ) 
@@ -35,11 +45,14 @@ public class Tuple<T>
     		m_elems = new ArrayList<T>(elems);
     	else
     		m_elems = Collections.emptyList();
+    	
+    	m_idx = 0;
+    	m_size = m_elems.size();
     }
 
     public int size()
     {
-    	return m_elems != null ? m_elems.size() : 0;
+    	return m_size;
     }
     
     public T get(int idx) 
@@ -56,12 +69,12 @@ public class Tuple<T>
     
     public T getFirstElement()
     {
-        return m_elems != null && m_elems.size() > 0 ? m_elems.get(0) : null;
+        return m_size > 0 ? m_elems.get(0) : null;
     }
     
     public T getSecondElement()
     {
-        return m_elems != null && m_elems.size() > 1 ? m_elems.get(1) : null;
+        return m_size > 1 ? m_elems.get(1) : null;
     }
     
     @Override
@@ -109,4 +122,26 @@ public class Tuple<T>
         
         return true;
     }
+
+	@Override
+	public Iterator<T> iterator() 
+	{
+		m_idx = 0;
+		return this;
+	}
+
+	@Override
+	public boolean hasNext() 
+	{
+		return m_idx < m_size;
+	}
+
+	@Override
+	public T next() 
+	{
+		if (!hasNext())
+            throw new NoSuchElementException();
+			
+		return get(m_idx++);
+	}
 }

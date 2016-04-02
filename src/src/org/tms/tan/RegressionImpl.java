@@ -72,4 +72,12 @@ public class RegressionImpl
 		if (m_regression == null)
 			m_regression = AbstractRegression.buildRegressionModel(m_y, new ArrayList<TableRowColumnElement>(m_x));
 	}
+
+	public double calculateRSquared()
+	{
+		if (m_regression == null)
+			m_regression = AbstractRegression.buildRegressionModel(m_y, new ArrayList<TableRowColumnElement>(m_x));
+		
+		return m_regression.getR2();
+	}
 }
