@@ -715,7 +715,12 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
             m_subset = SubsetImpl.this;
             m_table = m_subset.getTable();
             
-            m_rowIndex = m_colIndex = m_subsetIndex = m_cellIndex = 1;
+            initialize();
+        }
+
+		private void initialize() 
+		{
+			m_rowIndex = m_colIndex = m_subsetIndex = m_cellIndex = 1;
             m_subsetIterator = null;
             
             if (m_subset.getNumRowsInternal() > 0 || m_subset.getNumColumnsInternal() > 0) {
@@ -745,11 +750,12 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
             m_numCells = m_subset.m_cells.size();
             if (m_numCells > 0)
                 m_cells = new ArrayList<CellImpl>(m_subset.m_cells);
-        }
+		}
 
         @Override
         public Iterator<Cell> iterator()
         {
+        	initialize();
             return this;
         }
 

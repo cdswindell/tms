@@ -1054,6 +1054,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         @Override
         public Iterator<Cell> iterator()
         {
+        	m_hasNext = true;
             return this;
         }
 

@@ -3096,7 +3096,12 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         public TableCellIterable()
         {
             m_table = TableImpl.this;
-            m_rowIndex = m_colIndex = 1;
+            initialize();
+        }
+
+		private void initialize() 
+		{
+			m_rowIndex = m_colIndex = 1;
             
             m_numRows = m_table.getNumRows();
             m_numCols = m_table.getNumColumns();
@@ -3106,12 +3111,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             
             m_table.ensureColumnsExist();
             m_cols = new ArrayList<ColumnImpl>(m_table.getColumnsInternal());
-        }
+		}
         
         @Override
         public Iterator<Cell> iterator()
         {
             vetElement(m_table);
+            initialize();
             return this;
         }
 

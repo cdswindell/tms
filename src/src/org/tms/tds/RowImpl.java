@@ -388,6 +388,8 @@ public class RowImpl extends TableSliceElementImpl implements Row
         @Override
         public Iterator<Cell> iterator()
         {
+            m_index = 1;
+            m_numCols = m_table != null ? m_table.getNumColumns() : 0;
             return this;
         }
 

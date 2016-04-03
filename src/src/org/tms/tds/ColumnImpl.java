@@ -551,6 +551,8 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         @Override
         public Iterator<Cell> iterator()
         {
+            m_index = 1;
+            m_numRows = m_table != null ? m_table.getNumRows() : 0;
             return this;
         }
 

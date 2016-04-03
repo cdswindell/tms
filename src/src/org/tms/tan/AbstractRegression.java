@@ -43,7 +43,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 	private Table m_parentTable;
 	private ElementType m_source;
 	private int m_maxItems;
-	private int m_nItems;
+	private int m_numDependents;
 	private int m_numObservations;
 	private Double[] m_values;
 	
@@ -54,7 +54,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		
 		m_idx = 1;
 		m_numObservations = -1;
-		m_nItems = 1 + m_x.size();
+		m_numDependents = m_x.size();
 		m_source = m_y.getElementType();
 		m_parentTable = m_y.getTable();	
 		
@@ -66,7 +66,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 	
 	public int getNumDependent()
 	{
-		return m_nItems - 1;
+		return m_numDependents;
 	}
 
 	public int getNumObservations()
@@ -119,7 +119,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 	{
 		StringBuffer sb = new StringBuffer();
 		
-		for (int i = 0; i < m_x.size(); i++) {
+		for (int i = 0; i < m_numDependents; i++) {
 			double coef = getRegressionParameter(i + 1);
 			TableRowColumnElement te = m_x.get(i);
 			
@@ -169,7 +169,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		while (m_idx <= m_maxItems) {
 			Cell yCell = m_y.getCell(Access.ByIndex, m_idx);
 			if (yCell != null && !yCell.isNull() && yCell.isNumericValue()) {
-				m_values = new Double [m_nItems]; 
+				m_values = new Double [m_numDependents + 1]; 
 				m_values[0] = (Double)yCell.getCellValue();
 				int idx = 1;
 				
