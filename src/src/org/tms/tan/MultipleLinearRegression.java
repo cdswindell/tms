@@ -1,5 +1,6 @@
 package org.tms.tan;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
@@ -41,17 +42,24 @@ class MultipleLinearRegression extends AbstractRegression
 	}
 
 	@Override
-	double getRegressionParameter(int termIdx) 
+	double [] getRegressionParameters() 
 	{
 		if (m_regressionParams == null)
 			m_regressionParams = m_mr.estimateRegressionParameters();
 		
-		return m_regressionParams[termIdx];
+		return Arrays.copyOf(m_regressionParams, m_regressionParams.length);
 	}
 
 	@Override
 	double getR2() 
 	{
 		return  m_mr.calculateRSquared();
+	}
+
+	@Override
+	double[] getCorrelationCoefficients() 
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

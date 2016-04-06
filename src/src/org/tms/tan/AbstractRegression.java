@@ -8,6 +8,7 @@ import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.ElementType;
 import org.tms.api.Table;
+import org.tms.api.TableElement;
 import org.tms.api.TableRowColumnElement;
 import org.tms.util.Tuple;
 
@@ -33,7 +34,8 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 	}
 	
 	abstract void loadData();
-	abstract double getRegressionParameter(int termIdx);
+	abstract double [] getRegressionParameters();
+	abstract double[] getCorrelationCoefficients();
 	abstract double getR2();
 
 	private TableRowColumnElement m_y;
@@ -119,8 +121,10 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 	{
 		StringBuffer sb = new StringBuffer();
 		
+		double [] rParams = getRegressionParameters();
+		
 		for (int i = 0; i < m_numDependents; i++) {
-			double coef = getRegressionParameter(i + 1);
+			double coef = rParams[i + 1];
 			TableRowColumnElement te = m_x.get(i);
 			
 			if (i > 0) {
@@ -139,7 +143,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 			sb.append(formatReference(te, refType));
 		}		
 		
-		double intercept = getRegressionParameter(0);
+		double intercept = rParams[0];
 		if (intercept < 0.0)
 			sb.append(" - ");
 		else if (intercept > 0.0)
@@ -157,6 +161,21 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		return this;
 	}
 
+	private boolean isValid(Cell cell, TableRowColumnElement te)
+	{
+		if (cell != null && !cell.isNull() && cell.isNumericValue()) {
+			if (cell.isDerived()) {
+				List<TableElement> affects = cell.getAffectedBy();
+				if (affects != null && affects.contains(te))
+					return false;					
+			}
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public boolean hasNext() 
 	{
@@ -168,7 +187,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		
 		while (m_idx <= m_maxItems) {
 			Cell yCell = m_y.getCell(Access.ByIndex, m_idx);
-			if (yCell != null && !yCell.isNull() && yCell.isNumericValue()) {
+			if (isValid(yCell, m_y)) {
 				m_values = new Double [m_numDependents + 1]; 
 				m_values[0] = (Double)yCell.getCellValue();
 				int idx = 1;
@@ -176,7 +195,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 				boolean validTuple = true;
 				for (TableRowColumnElement tx : m_x) {
 					Cell xCell = tx.getCell(Access.ByIndex, m_idx);
-					if (xCell != null && !xCell.isNull() && xCell.isNumericValue() ) {
+					if (isValid(xCell, tx)) {
 						m_values[idx++] = (Double)xCell.getCellValue();
 						continue;
 					}

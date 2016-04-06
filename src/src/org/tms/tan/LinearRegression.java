@@ -27,18 +27,10 @@ class LinearRegression extends AbstractRegression
 	}
 
 	@Override
-	double getRegressionParameter(int termIdx) 
+	double [] getRegressionParameters() 
 	{
-		switch (termIdx) {
-			case 0:
-				return  (double) m_tvse.calcStatistic(BuiltinOperator.LinearInterceptOper);
-				
-			case 1:
-				return (double) m_tvse.calcStatistic(BuiltinOperator.LinearSlopeOper);
-				
-			default:
-				throw new IllegalArgumentException();
-		}
+		return new double [] { (double) m_tvse.calcStatistic(BuiltinOperator.LinearInterceptOper),
+							   (double) m_tvse.calcStatistic(BuiltinOperator.LinearSlopeOper) };
 	}
 
 	double getR() 
@@ -50,5 +42,11 @@ class LinearRegression extends AbstractRegression
 	double getR2() 
 	{
 		return (double)m_tvse.calcStatistic(BuiltinOperator.LinearR2Oper);
+	}
+
+	@Override
+	double[] getCorrelationCoefficients() 
+	{
+		return new double[] { getR() }; 
 	}
 }
