@@ -99,7 +99,7 @@
   	<dependency>
   		<groupId>mysql</groupId>
   		<artifactId>mysql-connector-java</artifactId>
-  		<version>5.1.38</version>
+  		<version>6.0.2</version>
   		<exclusions>
   			<exclusion>
   				<artifactId>junit</artifactId>
@@ -164,7 +164,7 @@
   	<dependency>
   		<groupId>net.sf.jasperreports</groupId>
   		<artifactId>jasperreports</artifactId>
-  		<version>6.2.1</version>
+  		<version>6.2.2</version>
   		<exclusions>
   			<exclusion>
   				<artifactId>jfreechart</artifactId>
