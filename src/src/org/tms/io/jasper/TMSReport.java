@@ -433,7 +433,7 @@ abstract public class TMSReport
                         null);        
                 hf.setFontSize(headingFontSize);
                 hf.setBold(true);
-                hf.setStretchType(StretchTypeEnum.RELATIVE_TO_TALLEST_OBJECT);
+                hf.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
                 
                 colHeaderBand.addElement(hf);
                 
@@ -557,7 +557,7 @@ abstract public class TMSReport
         titleField.setWidth(colWidth);
         titleField.setHeight(height - offset);
         titleField.setStretchWithOverflow(true);
-        titleField.setStretchType(StretchTypeEnum.RELATIVE_TO_BAND_HEIGHT);
+        titleField.setStretchType(StretchTypeEnum.CONTAINER_HEIGHT);
         titleField.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
         titleField.setStyle(boldStyle);
         titleField.setFontSize(titleFontSize);
