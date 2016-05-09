@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -27,7 +26,6 @@ public class DbmsTableImplTest extends BaseDbmsTest
 {
     private static final String ExportMusicTableGold = "music.tms";
     
-	@Ignore
     @Test
     public final void testCreateDBMSTable() throws ClassNotFoundException, SQLException
     {
@@ -38,16 +36,16 @@ public class DbmsTableImplTest extends BaseDbmsTest
         assertThat(tc.isDatabaseDriverLoaded("com.mysql.jdbc.Driver"), is(true));
         
         // count the number of expected rows and columns
-        ResultSet rs = fetchResultSet("jdbc:mysql://localhost/cds?user=davids&password=mysql", 
-                                      "select * from emp order by ename");
+        ResultSet rs = fetchResultSet("jdbc:mysql://localhost/cds?user=davids&password=mysql&useSSL=false", 
+                                      "select * from employee order by name");
         
         int numRows = getDbmsRowCount(rs);
         int numCols = getDbmsColumnCount(rs);
         close(rs);
         
         // create basic table using mysql "cds" database
-        DbmsTableImpl t = new DbmsTableImpl("jdbc:mysql://localhost/cds?user=davids&password=mysql", 
-                                            "select * from emp order by ename desc");
+        DbmsTableImpl t = new DbmsTableImpl("jdbc:mysql://localhost/cds?user=davids&password=mysql&useSSL=false", 
+                                            "select * from employee order by name desc");
         assertThat(t, notNullValue());
         assertThat(t.getNumRows(), is(numRows));
         assertThat(t.getNumColumns(), is(numCols));
@@ -83,9 +81,9 @@ public class DbmsTableImplTest extends BaseDbmsTest
         cell.setDerivation("mean(col 1)");
         assertThat(cell.isNumericValue(), is(true));
         
-        cell = t.getCell(r, t.getColumn(Access.ByLabel, "mgr"));
-        cell.setDerivation("mean(col 'mgr')");
-        assertThat(cell.getCellValue(), is(10.0));
+        cell = t.getCell(r, t.getColumn(Access.ByLabel, "boss"));
+        cell.setDerivation("mean(col 'boss')");
+        assertThat(cell.getCellValue(), is(7742.75));
         
         r.delete();
         r = t.addRow();

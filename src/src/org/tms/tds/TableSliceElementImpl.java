@@ -180,7 +180,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
                 }
                 
                 if (assignUuids) 
-                	m_deriv.resetAsEnteredExpression();
+                	deriv.resetAsEnteredExpression();
                 
                 setInUse(true);
             }  
