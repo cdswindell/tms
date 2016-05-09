@@ -270,9 +270,9 @@ public class CSVWriterTest extends BaseIOTest
     @Test
     public final void testExportToString() throws IOException
     {
-        String expected = "\"\",Abc,,\"Def, Ghi\"\r\n" +
+        String expected = ",Abc,,\"Def, Ghi\"\r\n" +
                           "Blue Row,,Blue,true\r\n" + 
-                          "\"\",,,\r\n" +
+                          ",,,\r\n" +
                           "Yellow Row,,Yellow,true\r\n" +
                           "Cyan Row,,Cyan,false\r\n";
         
@@ -295,7 +295,7 @@ public class CSVWriterTest extends BaseIOTest
     public final void testExportToStringNoColNames() throws IOException
     {
         String expected = "Blue Row,,Blue,true\r\n" + 
-                          "\"\",,,\r\n" +
+                          ",,,\r\n" +
                           "Yellow Row,,Yellow,true\r\n" +
                           "Cyan Row,,Cyan,false\r\n";
         
@@ -318,10 +318,10 @@ public class CSVWriterTest extends BaseIOTest
     public final void testExportToStringNoRowNames() throws IOException
     {
         String expected = "Abc,,\"Def, Ghi\"\r\n" +
-                "\"\",Blue,true\r\n" + 
-                "\"\",,\r\n" +
-                "\"\",Yellow,true\r\n" +
-                "\"\",Cyan,false\r\n";
+                ",Blue,true\r\n" + 
+                ",,\r\n" +
+                ",Yellow,true\r\n" +
+                ",Cyan,false\r\n";
 
         Table t = importCVSFile(qualifiedFileName(SAMPLE3, "csv"), true, true);
         assertNotNull(t);
