@@ -1,5 +1,7 @@
 package org.tms.api.derivables;
 
+import java.math.BigDecimal;
+
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
@@ -184,7 +186,10 @@ public class Token implements Labeled
     public Double getNumericValue()
     {
         if (m_value != null && m_value instanceof Number)
-            return (Double)m_value;
+        	if (m_value instanceof BigDecimal)
+        		return ((BigDecimal)m_value).doubleValue();
+        	else
+        		return (Double)m_value;
         else
             return null;
     }
