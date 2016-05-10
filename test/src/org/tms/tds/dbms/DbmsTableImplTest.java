@@ -36,7 +36,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         assertThat(tc.isDatabaseDriverLoaded("com.mysql.jdbc.Driver"), is(true));
         
         // count the number of expected rows and columns
-        ResultSet rs = fetchResultSet("jdbc:mysql://localhost/cds?user=davids&password=mysql&useSSL=false", 
+        ResultSet rs = fetchResultSet("jdbc:mysql://localhost/cds?user=davids&password=mysql", 
                                       "select * from employee order by name");
         
         int numRows = getDbmsRowCount(rs);
@@ -44,7 +44,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         close(rs);
         
         // create basic table using mysql "cds" database
-        DbmsTableImpl t = new DbmsTableImpl("jdbc:mysql://localhost/cds?user=davids&password=mysql&useSSL=false", 
+        DbmsTableImpl t = new DbmsTableImpl("jdbc:mysql://localhost/cds?user=davids&password=mysql", 
                                             "select * from employee order by name desc");
         assertThat(t, notNullValue());
         assertThat(t.getNumRows(), is(numRows));
