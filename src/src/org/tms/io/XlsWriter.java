@@ -17,17 +17,21 @@ import java.util.Set;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FormulaError;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -283,7 +287,7 @@ public class XlsWriter extends BaseWriter<XLSOptions>
                         }
                     }
                     else 
-                        excelC.setCellType(Cell.CELL_TYPE_BLANK);
+                        excelC.setCellType(CellType.BLANK);
                     
                     String label = trimString(tCell.getLabel());
                     if (label != null) 
@@ -847,10 +851,10 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         monthFont.setBold(isBold);
         CellStyle headingStyle = wb.createCellStyle();
         
-        headingStyle.setAlignment(CellStyle.ALIGN_CENTER);
-        headingStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        headingStyle.setAlignment(HorizontalAlignment.CENTER); 
+        headingStyle.setVerticalAlignment(VerticalAlignment.CENTER); 
         headingStyle.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
-        headingStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        headingStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND); 
         headingStyle.setFont(monthFont);
         headingStyle.setWrapText(true);
 
@@ -865,7 +869,7 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         
         CellStyle cellStyle = wb.createCellStyle();
         cellStyle.setFont(cellFont);
-        cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER); 
         
         return cellStyle;
     }

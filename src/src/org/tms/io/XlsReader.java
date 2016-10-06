@@ -54,6 +54,7 @@ import org.apache.poi.ss.formula.ptg.ScalarConstantPtg;
 import org.apache.poi.ss.formula.ptg.StringPtg;
 import org.apache.poi.ss.formula.ptg.SubtractPtg;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.RichTextString;
@@ -412,7 +413,7 @@ public class XlsReader extends BaseReader<XLSOptions>
                         continue; // skip r1c1
 
                     Column tC= t.addColumn(); // add the TMS column
-                    Cell eC = eR.getCell(i, Row.RETURN_BLANK_AS_NULL);
+                    Cell eC = eR.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                     Object cv = fetchCellValue(eC);
                     
                     if (options().isDescriptions()) {
@@ -435,7 +436,7 @@ public class XlsReader extends BaseReader<XLSOptions>
                     org.tms.api.Column tC = t.getColumn(Access.First);
                     boolean rowIsEffectivelyNull = true;
                     for (short i = 0; i < eR.getLastCellNum(); i++) {
-                        Cell eC = eR.getCell(i, Row.RETURN_BLANK_AS_NULL);
+                        Cell eC = eR.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                         Object cv = fetchCellValue(eC);
                         String note = fetchCellComment(eC, true);
                         if (i == 0 && isRowNames()) {
@@ -467,7 +468,7 @@ public class XlsReader extends BaseReader<XLSOptions>
 
                                 // record presence of cell formula; we will process
                                 // once all of table is imported
-                                if (options().isDerivations() && eC.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                                if (options().isDerivations() && eC.getCellTypeEnum() == CellType.FORMULA) {
                                     ParsedFormula pf = processExcelFormula(sheet, sheetNo, eC, tCell);
                                     parsedFormulas.add(pf);
                                     rowIsEffectivelyNull = false;
@@ -834,15 +835,15 @@ public class XlsReader extends BaseReader<XLSOptions>
         
         for (int i = firstEffectiveRow; i < rng1stRowNo; i++) {
             Row r = sheet.getRow(i);
-            Cell cell = r.getCell(colNo, Row.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellType() != Cell.CELL_TYPE_FORMULA)
+            Cell cell = r.getCell(colNo, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA)
                 return false;
         }
         
         for (int i = rngLstRowNo + 1; i < lastRow; i++) {
             Row r = sheet.getRow(i);
-            Cell cell = r.getCell(colNo, Row.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellType() != Cell.CELL_TYPE_FORMULA || !isSameRange(cell, rng))
+            Cell cell = r.getCell(colNo, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA || !isSameRange(cell, rng))
                 return false;
         }
         
@@ -867,16 +868,16 @@ public class XlsReader extends BaseReader<XLSOptions>
         int lastCol = row.getLastCellNum();
         
         for (int i = firstEffectiveCol; i < rng1stColNo; i++) {
-            Cell cell = row.getCell(i, Row.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellType() != Cell.CELL_TYPE_FORMULA)
+            Cell cell = row.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA)
                 return false;
         }
         
         for (int i = rngLstColNo + 1; i < lastCol; i++) {
             if (isExcludedRow(sheet, i))
                 continue;
-            Cell cell = row.getCell(i, Row.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellType() != Cell.CELL_TYPE_FORMULA)
+            Cell cell = row.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA)
                 return false;
         }
         
@@ -1100,18 +1101,18 @@ public class XlsReader extends BaseReader<XLSOptions>
             return null;
 
         // decode based on the cell type
-        int cellType = eC.getCellType();
+        CellType cellType = eC.getCellTypeEnum();
         switch(cellType) {
-            case Cell.CELL_TYPE_BOOLEAN:
+            case BOOLEAN:
                 return eC.getBooleanCellValue();
 
-            case Cell.CELL_TYPE_NUMERIC:
+            case NUMERIC:
                 return eC.getNumericCellValue();
 
-            case Cell.CELL_TYPE_STRING:
+            case STRING:
                 return eC.getRichStringCellValue().getString();
 
-            case Cell.CELL_TYPE_FORMULA:
+            case FORMULA:
                 return fetchFormulaCellValue(eC);
 
             default:

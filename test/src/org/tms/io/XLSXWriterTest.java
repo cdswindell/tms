@@ -19,6 +19,7 @@ import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -257,7 +258,7 @@ public class XLSXWriterTest extends BaseIOTest
         else
             assertThat(cv, is(cellVal));   
         
-        String excelFormula = eCell.getCellType() == org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA ?
+        String excelFormula = eCell.getCellTypeEnum() == CellType.FORMULA ?
                                     eCell.getCellFormula() : null;
         if (formula == null)
             assertThat("No formula expected: " + excelFormula, excelFormula, nullValue());
@@ -277,18 +278,18 @@ public class XLSXWriterTest extends BaseIOTest
             return null;
 
         // decode based on the cell type
-        int cellType = eC.getCellType();
+        CellType cellType = eC.getCellTypeEnum();
         switch(cellType) {
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BOOLEAN:
+            case BOOLEAN:
                 return eC.getBooleanCellValue();
 
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC:
+            case NUMERIC:
                 return eC.getNumericCellValue();
 
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING:
+            case STRING:
                 return eC.getRichStringCellValue().getString();
 
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA:
+            case FORMULA:
                 return fetchFormulaCellValue(eC);
 
             default:
