@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -93,6 +94,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         r.setDerivation("mean(colref(1))");
     }
 	
+    @Ignore
     @Test
     public final void testMusicDBMSTable() throws ClassNotFoundException, SQLException, IOException
     {
