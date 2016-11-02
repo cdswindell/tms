@@ -56,7 +56,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
 {
     private static ContextImpl sf_DEFAULT_CONTEXT;
     
-    static final int sf_ROW_CAPACITY_INCR_DEFAULT = 1024;
+    static final int sf_ROW_CAPACITY_INCR_DEFAULT = 256;
     static final int sf_COLUMN_CAPACITY_INCR_DEFAULT = 32;
     static final double sf_FREE_SPACE_THRESHOLD_DEFAULT = 2.0;
     static final boolean sf_TABLE_PERSISTANCE_DEFAULT = false;

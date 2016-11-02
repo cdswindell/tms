@@ -217,7 +217,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     assert cellOffset >= numCells;
                     
                     // make sure sufficient capacity exists
-                    ensureCellCapacity(); // reget the cells array, in case it was null
+                    ensureCellCapacity(cellOffset + 1); // reget the cells array, in case it was null
                     
                     // if cellOffset is equal to or beyond num cells, add slots to cell array
                     while (cellOffset > numCells) {
@@ -265,17 +265,26 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         TableImpl table = getTable();
         assert table != null : "Parent table required";
         
-        // cell capacity is based on the number of rows in a table
+        // extend the column cell array to the total number of table rows
+    	return ensureCellCapacity(table.getNumRows());
+    }
+    
+    List<CellImpl> ensureCellCapacity(int reqCells)
+    {
+        TableImpl table = getTable();
+        assert table != null : "Parent table required";
+        
+        // cell capacity is based on the cell offset being accessed
+        // coupled with chunk size used to grow rows array
         if (table.getNumRows() > 0) {
-            int reqCapacity = table.getRowsCapacity();
-            if (m_cells == null) {
+        	// allocate cells sparingly, only as needed, in chunks based on row capacity incr
+            int reqCapacity = table.calcRowsCapacity(reqCells);
+            if (m_cells == null) 
                 m_cells = new ArrayList<CellImpl>(reqCapacity);
-                m_cellsCapacity = reqCapacity;
-            }
-            else if (reqCapacity > m_cellsCapacity) {
+            else if (reqCapacity > m_cellsCapacity) 
                 m_cells.ensureCapacity(reqCapacity);
-                m_cellsCapacity = reqCapacity;
-            }
+            
+            m_cellsCapacity = reqCapacity;
         }
         
         return (List<CellImpl>) m_cells;
