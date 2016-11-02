@@ -228,7 +228,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
                     // at this point, cellOffset should equal numCells
                     assert cellOffset == numCells : "cellOffset != numCells";
                     
-                    // create a new cell structure and add it to the array              
+                    // create a new cell and add it to the column cell array              
                     c = createNewCell(row);
                     m_cells.add(c);
                 }
