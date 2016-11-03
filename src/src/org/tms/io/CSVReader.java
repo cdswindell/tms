@@ -16,6 +16,7 @@ import org.tms.api.TableContext;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.CSVOptions;
+import org.tms.teq.MathUtil;
 
 public class CSVReader extends BaseReader<CSVOptions>
 {
@@ -95,7 +96,7 @@ public class CSVReader extends BaseReader<CSVOptions>
                                 if (col == null)
                                     col = t.addColumn(colNum);
                                 
-                                t.setCellValue(row, col, parseCellValue(s));
+                                t.setCellValue(row, col, MathUtil.parseCellValue(s, options().isIgnoreSuroundingSpaces()));
                             }
                             
                             colNum++;
@@ -139,29 +140,6 @@ public class CSVReader extends BaseReader<CSVOptions>
         }
         
         return true;
-    }
-
-    private Object parseCellValue(String s)
-    {
-        try {
-            char c = 0;
-            if (Boolean.valueOf(s))
-                return true;
-            else if ("false".equalsIgnoreCase(s))
-                return false;
-            else if ((c = s.charAt(0)) > 0 && (!Character.isDigit(c) && c != '+' && c != '-'))
-                return options().isIgnoreSuroundingSpaces() ? s.trim() : s;
-            
-            return Integer.parseInt(s);
-        }
-        catch (Exception e) {
-            try {
-                return Double.parseDouble(s);
-            }
-            catch (Exception e2) {
-                return s;
-            }
-        }
     }
 
     private void parseColumnHeaders(Table t, CSVRecord csvRec)

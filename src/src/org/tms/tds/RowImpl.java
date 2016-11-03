@@ -20,6 +20,7 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.io.IOOption;
 import org.tms.io.RowExportAdapter;
 import org.tms.io.TableExportAdapter;
+import org.tms.teq.MathUtil;
 
 public class RowImpl extends TableSliceElementImpl implements Row
 {
@@ -142,6 +143,26 @@ public class RowImpl extends TableSliceElementImpl implements Row
         return col.getCellInternal(this, createIfSparse, setCurrent);
     }
 
+	@Override
+	protected CellImpl getCellByStringReference(String key) 
+	{
+        TableImpl t = getTable();
+        ColumnImpl col = null;
+        
+        // if key is a positive numeric value, use it as a column index
+        Object o = MathUtil.parseCellValue(key, true);
+        if (o != null && o instanceof Integer && ((Integer)o) > 0) {
+        	if (t.isColumnDefined(Access.ByIndex, o))
+        		col = t.getColumnInternal(true, false, Access.ByIndex, o);
+        	else
+            	col = t.addColumn(false, true, false, Access.ByIndex, o);        		
+        }
+        else // Assume key is a column label
+        	col = t.addColumn(true, true, false, Access.ByLabel, key);
+        
+		return col != null ? getCell(col, false) : null;
+	}
+	
     /*
      * Overridden Methods
      */

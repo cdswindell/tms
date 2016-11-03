@@ -21,6 +21,7 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.io.IOOption;
 import org.tms.io.ColumnExportAdapter;
 import org.tms.io.TableExportAdapter;
+import org.tms.teq.MathUtil;
 
 public class ColumnImpl extends TableSliceElementImpl implements Column
 {
@@ -249,6 +250,22 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return c;
     }
     
+	@Override
+	protected CellImpl getCellByStringReference(String key) 
+	{
+        TableImpl t = getTable();
+        RowImpl row = null;
+        
+        // if key is a positive numeric value, use it as a row index
+        Object o = MathUtil.parseCellValue(key, true);
+        if (o != null && o instanceof Integer && ((Integer)o) > 0)
+        	row = t.getRowInternal(true, false, Access.ByIndex, o);
+        else // Assume key is a row label
+        	row = t.getRowInternal(true, false, Access.ByLabel, key);
+        
+		return row != null ? getCell(row, false) : null;
+	}
+	
     /**
      * Create a new cell data structure; can be overridden in subclasses to
      * build other cell types

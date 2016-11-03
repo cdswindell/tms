@@ -40,7 +40,7 @@ public class MathUtil
         for (String token : tokens) {
             leaf = tree.get(token);
             tokensProcessed++;
-            if (leaf instanceof JSONObject)
+            if (leaf != null && leaf instanceof JSONObject)
                 tree = (JSONObject)leaf;
             else
                 break;
@@ -684,5 +684,28 @@ public class MathUtil
     static final public double lrComputeY(double m, double b, double x) 
     {
         return m*x + b;
+    }
+    
+    static final public Object parseCellValue(String s, boolean ignoreSpaces)
+    {
+        try {
+            char c = 0;
+            if (Boolean.valueOf(s))
+                return true;
+            else if ("false".equalsIgnoreCase(s))
+                return false;
+            else if ((c = s.charAt(0)) > 0 && (!Character.isDigit(c) && c != '+' && c != '-'))
+                return ignoreSpaces ? s.trim() : s;
+            
+            return Integer.parseInt(s);
+        }
+        catch (Exception e) {
+            try {
+                return Double.parseDouble(s);
+            }
+            catch (Exception e2) {
+                return s;
+            }
+        }
     }
 }

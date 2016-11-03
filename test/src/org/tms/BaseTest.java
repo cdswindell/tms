@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
+import org.json.simple.JSONObject;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
@@ -137,4 +138,18 @@ public class BaseTest
 		else
 			return bytes;
 	}
+    
+	@SuppressWarnings("unchecked")
+	protected JSONObject buildSimpleJSONObject()
+	{
+		JSONObject json = new JSONObject();
+        json.put("Balance", 1000.21);
+        json.put("Num", 100);
+        json.put("Nick Name", null);
+        json.put("Name", "Sam Sneed");
+        json.put("1", JSONObject.escape("Tricky Text: \\, /, \r, \t"));
+        json.put("VIP", true);
+        
+        return json;
+	}	
 }

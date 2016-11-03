@@ -8,15 +8,39 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
+import org.json.simple.JSONObject;
 import org.junit.Test;
+import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.ElementType;
+import org.tms.api.Row;
 import org.tms.api.TableProperty;
 import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.TableErrorClass;
 
-public class RowTest
+public class RowTest extends BaseTest
 {
+
+	@Test
+	public void fillJSONTest()
+	{
+        // create a JSON object to use as our test
+        JSONObject json = buildSimpleJSONObject();
+        assertThat(json, notNullValue());
+        
+        TableImpl t = new TableImpl(10, 10);
+        assertThat(t, notNullValue());
+        assertThat(t.getNumRows(), is(0));
+        assertThat(t.getNumColumns(), is(0));
+                
+        // create a row, fill it with JSON
+        Row r = t.addRow();
+        assertThat(r, notNullValue());
+        
+        // do the json fill
+        boolean setAny = r.fill(json);
+        assertThat(setAny, is(true));      
+	}
 
     @Test
     public void getPropertiesTest()

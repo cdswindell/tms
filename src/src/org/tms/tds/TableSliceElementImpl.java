@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.json.simple.JSONObject;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Row;
@@ -29,12 +31,15 @@ import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TableImpl.CellReference;
 import org.tms.teq.DerivationImpl;
+import org.tms.teq.MathUtil;
 import org.tms.util.JustInTimeSet;
 
 public abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TimeSeriesable, TableRowColumnElement
 {
     abstract protected TableSliceElementImpl insertSlice(int idx);
     abstract public TableSliceElementImpl setCurrent();
+    abstract protected CellImpl getCellByStringReference(String key);
+
     
     private JustInTimeSet<SubsetImpl> m_subsets;
     private int m_index = -1;    
@@ -612,38 +617,17 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
                 clearDerivation();
                 clearTimeSeries();
                 
-                boolean readOnlyExceptionEncountered = false;
-                boolean nullValueExceptionEncountered = false;
-                for (Cell c : cells()) {
-                    if (c != null) {
-                        if (preserveDerivedCells && isDerived(c)) 
-                            continue;
-                        else
-                        	c.clearDerivation();
-                        
-                        try {
-                            if (((CellImpl)c).setCellValue(o, true, false))
-                                setSome = true;
-                        }
-                        catch (ReadOnlyException e) {
-                            readOnlyExceptionEncountered = true;
-                        }
-                        catch (NullValueException e) {
-                            nullValueExceptionEncountered = true;
-                        }
-                    }
-                }
-                
-                if (setSome) {
-                    setInUse(true); 
-                    
-                    if (fireEvents)
-                        fireEvents(this, TableElementEventType.OnNewValue,  o);
-                }
-                else if (readOnlyExceptionEncountered)
-                    throw new ReadOnlyException(this, TableProperty.CellValue);
-                else if (nullValueExceptionEncountered)
-                    throw new NullValueException(this, TableProperty.CellValue);
+                if (o instanceof JSONObject)
+                	setSome = fillElement((JSONObject)o, preserveDerivedCells);  
+                else
+                	setSome = fillElement(o, preserveDerivedCells);  
+                	
+	    		if (setSome) {
+	    		    setInUse(true); 
+	    		    
+	    		    if (fireEvents)
+	    		        fireEvents(this, TableElementEventType.OnNewValue,  o);
+	    		}   		
            }
         }
         finally { 
@@ -659,8 +643,110 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         
         return setSome;
     }
+    
+    /**
+     * General case: set all cells in the element to the value provided in 'o'
+     * @param o the value to fill
+     * @param preserveDerivedCells
+     * @param fireEvents
+     * @return
+     */
+	boolean fillElement(Object o, boolean preserveDerivedCells) 
+	{
+		boolean setSome = false;
+		boolean readOnlyExceptionEncountered = false;
+		boolean nullValueExceptionEncountered = false;
+		
+		for (Cell c : cells()) {
+		    if (c != null) {
+		        if (preserveDerivedCells && isDerived(c)) 
+		            continue;
+		        else
+		        	c.clearDerivation();
+		        
+		        try {
+		            if (((CellImpl)c).setCellValue(o, true, false))
+		                setSome = true;
+		        }
+		        catch (ReadOnlyException e) {
+		            readOnlyExceptionEncountered = true;
+		        }
+		        catch (NullValueException e) {
+		            nullValueExceptionEncountered = true;
+		        }
+		    }		    	    
+		}
+		
+		// if we set any, ignore exceptions caused by attempting to set a read-only cell
+		// or set a cell that can't hold nulls to null
+		if (!setSome) {
+			if (readOnlyExceptionEncountered)
+			    throw new ReadOnlyException(this, TableProperty.CellValue);
+			else if (nullValueExceptionEncountered)
+			    throw new NullValueException(this, TableProperty.CellValue);
+		}
+		
+		return setSome;
+	}
 
-    @Override
+	@SuppressWarnings("unchecked")
+	boolean fillElement(JSONObject json, boolean preserveDerivedCells) 
+	{
+		boolean setSome = false;
+		boolean readOnlyExceptionEncountered = false;
+		boolean nullValueExceptionEncountered = false;
+		
+		// just in case someone cast null to JSONObject
+		if (json == null)
+			return fillElement((Object)null, preserveDerivedCells);
+		
+		/*
+		 * iterate over the json elements, the 
+		 */
+		Set<Map.Entry<String, Object>> set = json.entrySet();
+		for (Map.Entry<String, Object> e: set) {
+			String key = (String) e.getKey();
+			
+			if (key != null && (key = key.trim()).length() > 0) {
+				Object value = e.getValue();
+				
+				CellImpl c = getCellByStringReference(key);
+			    if (c != null) {
+			        if (preserveDerivedCells && isDerived(c)) 
+			            continue;
+			        else
+			        	c.clearDerivation();
+			        
+			        try {
+			        	if (value instanceof String)
+			        		value = MathUtil.parseCellValue((String)value, true);
+			        	
+			            if (c.setCellValue(value, true, false))
+			                setSome = true;
+			        }
+			        catch (ReadOnlyException ex) {
+			            readOnlyExceptionEncountered = true;
+			        }
+			        catch (NullValueException ex) {
+			            nullValueExceptionEncountered = true;
+			        }
+			    }
+			}
+		}
+		
+		// if we set any, ignore exceptions caused by attempting to set a read-only cell
+		// or set a cell that can't hold nulls to null
+		if (!setSome) {
+			if (readOnlyExceptionEncountered)
+			    throw new ReadOnlyException(this, TableProperty.CellValue);
+			else if (nullValueExceptionEncountered)
+			    throw new NullValueException(this, TableProperty.CellValue);
+		}
+		
+		return setSome;
+	}
+	
+	@Override
     public void fill(Object o, int n, Access mode, Object... mda) 
     {
         vetElement();
@@ -755,7 +841,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
                         if (c.isDerived())
                             continue;
                         
-                        if (c.setCellValue(o[idx++]))
+                        if (c.setCellValue(o[idx]))
                             setSome = true;
                     }
                     catch (ReadOnlyException e) {
@@ -765,7 +851,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
                         nullValueExceptionEncountered = true;
                     }
                     finally {
-                        if (idx >= n) break; // leave the table at the last row/col modified
+                        if (++idx >= n) break; // leave the table at the last row/col modified
                         c = (CellImpl) getCell(Access.Next);
                     }
                 }

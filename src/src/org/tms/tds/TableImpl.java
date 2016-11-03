@@ -1845,10 +1845,14 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
-    synchronized public ColumnImpl addColumn(Access mode, Object... mda)
+    public ColumnImpl addColumn(Access mode, Object... mda)
     {
-        vetElement();
-        
+        vetElement();      
+    	return addColumn(false, true, true, mode, mda);
+    }
+    
+    synchronized ColumnImpl addColumn(boolean returnExisting, boolean createIfNull, boolean setCurrent, Access mode, Object... mda)
+    {
         // in a few cases, we allow adding by a property; we have to check if one already exists 
         // and disallow, if in exact mode
         Access insertMode = mode;
@@ -1856,8 +1860,11 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         	case ByLabel:
         	case ByDescription:
         	{
-        		ColumnImpl existingCol = getColumn(mode, mda);
+        		ColumnImpl existingCol = getColumnInternal(createIfNull, setCurrent, mode, mda);
         		if (existingCol != null) {
+        			if (returnExisting == true)
+        				return existingCol;
+        			
         			boolean allowDups = mda != null && mda.length > 1 && mda[1] != null && mda[1] instanceof Boolean ? (Boolean)mda[1] : false;
         			if (!allowDups)
                         throw new InvalidException(this.getElementType(), 
