@@ -58,7 +58,7 @@ public class RowTest extends BaseTest
         r = t.addRow();
         assertThat(r, notNullValue());
         
-        // do the json fill
+        // fill another row
         setAny = r.fill(json);
         json.toJSONString();
         assertThat(setAny, is(true));      
