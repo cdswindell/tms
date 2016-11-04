@@ -40,6 +40,29 @@ public class RowTest extends BaseTest
         // do the json fill
         boolean setAny = r.fill(json);
         assertThat(setAny, is(true));      
+        
+        Row r2 = t.addRow();
+        setAny = r2.fill(json);
+        assertThat(setAny, is(true));      
+      
+        t = new TableImpl(10, 10);
+        assertThat(t, notNullValue());
+        assertThat(t.getNumRows(), is(0));
+        assertThat(t.getNumColumns(), is(0));
+        
+        t.addColumn(Access.ByLabel, "Balance");
+        t.addColumn(Access.ByLabel, "Num");
+        t.addColumn(Access.ByLabel, "Name");
+                
+        // create a row, fill it with JSON
+        r = t.addRow();
+        assertThat(r, notNullValue());
+        
+        // do the json fill
+        setAny = r.fill(json);
+        json.toJSONString();
+        assertThat(setAny, is(true));      
+
 	}
 
     @Test

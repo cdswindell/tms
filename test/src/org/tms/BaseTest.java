@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.tms.api.Access;
@@ -139,10 +141,9 @@ public class BaseTest
 			return bytes;
 	}
     
-	@SuppressWarnings("unchecked")
 	protected JSONObject buildSimpleJSONObject()
 	{
-		JSONObject json = new JSONObject();
+		Map<String, Object> json = new LinkedHashMap<String, Object>();
         json.put("Balance", 1000.21);
         json.put("Num", 100);
         json.put("Nick Name", null);
@@ -150,6 +151,6 @@ public class BaseTest
         json.put("1", JSONObject.escape("Tricky Text: \\, /, \r, \t"));
         json.put("VIP", true);
         
-        return json;
+        return new JSONObject(json);
 	}	
 }
