@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
@@ -22,10 +23,11 @@ public class RowTest extends BaseTest
 {
 
 	@Test
-	public void fillJSONTest()
+	public void fillJSONRowTest() throws ParseException
 	{
         // create a JSON object to use as our test
-        JSONObject json = buildSimpleJSONObject();
+		String jText = "{\"Balance\":1000.21,\"Num\":100,\"Nick Name\":null,\"Name\":\"Sam Sneed\",\"Tricky\":\"Tricky Text: \\, /, \t, \r, Tricky\",\"VIP\":true}";
+        JSONObject json = buildJSONObject(jText);
         assertThat(json, notNullValue());
         
         TableImpl t = new TableImpl(10, 10);
@@ -36,14 +38,18 @@ public class RowTest extends BaseTest
         // create a row, fill it with JSON
         Row r = t.addRow();
         assertThat(r, notNullValue());
+        assertThat(r.getNumCells(), is(0));
         
         // do the json fill
         boolean setAny = r.fill(json);
         assertThat(setAny, is(true));      
+        assertThat(validateJSONFill(json, (TableSliceElementImpl)r), is(true));      
         
+        // Add another row. Column labels are set this time from prev fill
         Row r2 = t.addRow();
         setAny = r2.fill(json);
         assertThat(setAny, is(true));      
+        assertThat(validateJSONFill(json, (TableSliceElementImpl)r2), is(true));      
       
         t = new TableImpl(10, 10);
         assertThat(t, notNullValue());
@@ -62,7 +68,7 @@ public class RowTest extends BaseTest
         setAny = r.fill(json);
         json.toJSONString();
         assertThat(setAny, is(true));      
-
+        assertThat(validateJSONFill(json, (TableSliceElementImpl)r), is(true));      
 	}
 
     @Test

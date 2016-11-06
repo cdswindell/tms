@@ -3,6 +3,7 @@ package org.tms.tds;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Set;
 import org.json.simple.JSONObject;
 import org.tms.api.Access;
 import org.tms.api.Cell;
+import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.TableElement;
@@ -24,6 +26,7 @@ import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
+import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.NullValueException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnimplementedException;
@@ -39,7 +42,8 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     abstract protected TableSliceElementImpl insertSlice(int idx);
     abstract public TableSliceElementImpl setCurrent();
     abstract protected CellImpl getCellByStringReference(String key);
-
+    abstract public int getNumSlices();
+    abstract public ElementType getSlicesType();
     
     private JustInTimeSet<SubsetImpl> m_subsets;
     private int m_index = -1;    
@@ -701,37 +705,54 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
 			return fillElement((Object)null, preserveDerivedCells);
 		
 		/*
-		 * iterate over the json elements, the 
+		 * If we visit the same cell twice, it's an error
 		 */
-		Set<Map.Entry<String, Object>> set = json.entrySet();
-		for (Map.Entry<String, Object> e: set) {
-			String key = (String) e.getKey();
-			
-			if (key != null && (key = key.trim()).length() > 0) {
-				Object value = e.getValue();
+		Set<CellImpl> visitedCells = new HashSet<CellImpl>(getNumSlices());
+		
+		try {
+			/*
+			 * iterate over the json elements, the 
+			 */
+			Set<Map.Entry<String, Object>> set = json.entrySet();
+			for (Map.Entry<String, Object> e: set) {
+				String key = (String) e.getKey();
 				
-				CellImpl c = getCellByStringReference(key);
-			    if (c != null) {
-			        if (preserveDerivedCells && isDerived(c)) 
-			            continue;
-			        else
-			        	c.clearDerivation();
-			        
-			        try {
-			        	if (value instanceof String)
-			        		value = MathUtil.parseCellValue((String)value, true);
-			        	
-			            if (c.setCellValue(value, true, false))
-			                setSome = true;
-			        }
-			        catch (ReadOnlyException ex) {
-			            readOnlyExceptionEncountered = true;
-			        }
-			        catch (NullValueException ex) {
-			            nullValueExceptionEncountered = true;
-			        }
-			    }
+				if (key != null && (key = key.trim()).length() > 0) {
+					Object value = e.getValue();
+					
+					CellImpl c = getCellByStringReference(key);
+				    if (c != null) {
+				    	if (visitedCells.contains(c))
+	                        throw new InvalidException(this.getElementType(), 
+	                                String.format("JSON Fill: %s previously filled", getSlicesType()));  
+				    	else
+				    		visitedCells.add(c);
+				    	
+				        if (preserveDerivedCells && isDerived(c)) 
+				            continue;
+				        else
+				        	c.clearDerivation();
+				        
+				        try {
+				        	if (value instanceof String)
+				        		value = MathUtil.parseCellValue((String)value, true);
+				        	
+				            if (c.setCellValue(value, true, false))
+				                setSome = true;
+				        }
+				        catch (ReadOnlyException ex) {
+				            readOnlyExceptionEncountered = true;
+				        }
+				        catch (NullValueException ex) {
+				            nullValueExceptionEncountered = true;
+				        }
+				    }
+				}
 			}
+		}
+		finally {
+			visitedCells.clear();
+			visitedCells = null;
 		}
 		
 		// if we set any, ignore exceptions caused by attempting to set a read-only cell

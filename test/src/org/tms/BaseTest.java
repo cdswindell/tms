@@ -3,6 +3,7 @@ package org.tms;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10,11 +11,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.tds.TableSliceElementImpl;
+import org.tms.teq.MathUtil;
 
 public class BaseTest
 {
@@ -148,9 +153,47 @@ public class BaseTest
         json.put("Num", 100);
         json.put("Nick Name", null);
         json.put("Name", "Sam Sneed");
-        json.put("1", JSONObject.escape("Tricky Text: \\, /, \r, \t"));
+        json.put("Trickey", JSONObject.escape("Tricky Text: \\, /, \t, \r, Tricky"));
         json.put("VIP", true);
         
         return new JSONObject(json);
 	}	
+	
+	protected JSONObject buildJSONObject(String jText) 
+	throws ParseException
+	{
+        return (JSONObject) new JSONParser().parse(jText);
+	}
+	
+	protected boolean validateJSONFill(JSONObject json, TableSliceElementImpl tse)
+	{
+		// check size
+		assertThat(json.size(), is(tse.getNumCells()));
+		
+		// for each JSON element, get the corresponding table cell and compare
+		for (Object k: json.keySet()) {
+			String key = (String) k;
+			Object value = json.get(k);
+			
+			Cell cell = null;
+	        Object o = MathUtil.parseCellValue(key, true);
+	        if (o != null && o instanceof Integer && ((Integer)o) > 0)
+	        	cell = tse.getCell(Access.ByIndex, o);
+	        else
+	        	cell = tse.getCell(Access.ByLabel, key);
+	        
+	        if (cell == null)
+	        	fail("Cell not found for reference: " + key);
+	        
+	        if (value == null)
+	        	assertThat(cell.isNull(), is(true));
+	        else if (value instanceof Number)
+	        	assertThat(((Number)cell.getCellValue()).doubleValue(), is(((Number)value).doubleValue()));
+	        else
+	        	assertThat(cell.getCellValue(), is(value));
+		}
+		
+		// if we get here, all is well
+		return true;
+	}
 }

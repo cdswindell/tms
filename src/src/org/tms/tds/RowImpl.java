@@ -61,6 +61,19 @@ public class RowImpl extends TableSliceElementImpl implements Row
         return ElementType.Row;
     }
     
+	@Override
+	public int getNumSlices() 
+	{
+		TableImpl t = getTable();
+		return t != null ? t.getNumColumns() : 0;
+	}
+
+	@Override
+	public ElementType getSlicesType() 
+	{
+		return ElementType.Column;
+	}
+	
     protected int getCellOffset()
     {
         return m_cellOffset;
@@ -152,10 +165,11 @@ public class RowImpl extends TableSliceElementImpl implements Row
         // if key is a positive numeric value, use it as a column index
         Object o = MathUtil.parseCellValue(key, true);
         if (o != null && o instanceof Integer && ((Integer)o) > 0) {
-        	if (t.isColumnDefined(Access.ByIndex, o))
-        		col = t.getColumnInternal(true, false, Access.ByIndex, o);
+        	int colIdx = (Integer)o;
+        	if (colIdx <= t.getNumColumns())
+        		col = t.getColumnInternal(true, false, Access.ByIndex, colIdx);
         	else
-            	col = t.addColumn(false, true, false, Access.ByIndex, o);        		
+            	col = t.addColumn(false, true, false, Access.ByIndex, colIdx);        		
         }
         else // Assume key is a column label
         	col = t.addColumn(true, true, false, Access.ByLabel, key);

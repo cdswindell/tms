@@ -118,6 +118,19 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         return ElementType.Column;
     }
     
+	@Override
+	public int getNumSlices() 
+	{
+		TableImpl t = getTable();
+		return t != null ? t.getNumRows() : 0;
+	}
+
+	@Override
+	public ElementType getSlicesType() 
+	{
+		return ElementType.Row;
+	}
+	
     @Override
     public Class<? extends Object> getDataType()
     {
@@ -143,7 +156,7 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
     protected void setStronglyTyped(boolean stronglyTyped)
     {
         if (stronglyTyped && getDataType() == null)
-            throw new IllegalTableStateException("DataType Missing"); // can't strongly type a column without a datatype
+            throw new IllegalTableStateException("DataType Missing"); // can't strongly type a column without a data type
         
        set(sf_STRONGLY_TYPED_FLAG, stronglyTyped);
     }
@@ -258,10 +271,15 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         
         // if key is a positive numeric value, use it as a row index
         Object o = MathUtil.parseCellValue(key, true);
-        if (o != null && o instanceof Integer && ((Integer)o) > 0)
-        	row = t.getRowInternal(true, false, Access.ByIndex, o);
-        else // Assume key is a row label
-        	row = t.getRowInternal(true, false, Access.ByLabel, key);
+        if (o != null && o instanceof Integer && ((Integer)o) > 0) {
+        	int rowIdx = (Integer)o;
+        	if (rowIdx <= t.getNumColumns())
+        		row = t.getRowInternal(true, false, Access.ByIndex, rowIdx);
+        	else
+        		row = t.addRow(false, true, false, Access.ByIndex, rowIdx);        		
+        }
+        else // Assume key is a column label
+        	row = t.addRow(true, true, false, Access.ByLabel, key);
         
 		return row != null ? getCell(row, false) : null;
 	}

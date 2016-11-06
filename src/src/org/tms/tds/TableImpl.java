@@ -1571,17 +1571,54 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
-    synchronized public RowImpl addRow(Access mode, Object... mda)
+    public RowImpl addRow(Access mode, Object... mda)
     {
         vetElement();
-        RowImpl row = (RowImpl)add(new RowImpl(this), mode, mda);
+    	return addRow(false, true, true, mode, mda);
+    }
+    
+    synchronized RowImpl addRow(boolean returnExisting, boolean createIfNull, boolean setCurrent, Access mode, Object... mda)
+    {
+        // in a few cases, we allow adding by a property; we have to check if one already exists 
+        // and disallow, if in exact mode
+        Access insertMode = mode;
+        switch (mode) {
+        	case ByUUID:
+        	case ByLabel:
+        	case ByDescription:
+        	{
+        		RowImpl existingRow = getRowInternal(createIfNull, setCurrent, mode, mda);
+        		if (existingRow != null) {
+        			if (returnExisting == true)
+        				return existingRow;
+        			
+        			boolean allowDups = mode != Access.ByUUID && mda != null && mda.length > 1 && mda[1] != null && mda[1] instanceof Boolean ? (Boolean)mda[1] : false;
+        			if (!allowDups)
+                        throw new InvalidException(this.getElementType(), 
+                                String.format("%s with %s %s exists", ElementType.Row, mode, mda[0]));  
+         		}
+        		
+    		    // reset access mode, add this row at the end
+    			insertMode = Access.Last;
+        	}
+        	break;
+        
+        	default:
+        		break;
+        }
+        
+        RowImpl row = (RowImpl)add(new RowImpl(this), insertMode, mda);
         
         // depending on the access used, set the qualifier
-        // we know the mda arhs are present and of the right type at this point
+        // we know the mda args are present and of the right type at this point
         if (row != null) {
 	        switch (mode) {
 		    	case ByLabel:
 		    		row.setLabel((String)mda[0]);
+		    		break;
+	        	
+		    	case ByUUID:
+		    		row.setUUID((String)mda[0]);
 		    		break;
 	        	
 		    	case ByDescription:
@@ -1857,6 +1894,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         // and disallow, if in exact mode
         Access insertMode = mode;
         switch (mode) {
+    		case ByUUID:
         	case ByLabel:
         	case ByDescription:
         	{
@@ -1865,7 +1903,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         			if (returnExisting == true)
         				return existingCol;
         			
-        			boolean allowDups = mda != null && mda.length > 1 && mda[1] != null && mda[1] instanceof Boolean ? (Boolean)mda[1] : false;
+        			boolean allowDups = mode != Access.ByUUID && mda != null && mda.length > 1 && mda[1] != null && mda[1] instanceof Boolean ? (Boolean)mda[1] : false;
         			if (!allowDups)
                         throw new InvalidException(this.getElementType(), 
                                 String.format("%s with %s %s exists", ElementType.Column, mode, mda[0]));  
@@ -1908,6 +1946,10 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
 		    		
 		    	case ByLabel:
 		    		col.setLabel((String)mda[0]);
+		    		break;
+	        	
+		    	case ByUUID:
+		    		col.setUUID((String)mda[0]);
 		    		break;
 	        	
 		    	case ByDescription:
