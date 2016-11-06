@@ -13,9 +13,11 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
+import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.NotUniqueException;
 import org.tms.api.exceptions.TableErrorClass;
 
@@ -66,9 +68,94 @@ public class RowTest extends BaseTest
         
         // fill another row
         setAny = r.fill(json);
-        json.toJSONString();
         assertThat(setAny, is(true));      
         assertThat(validateJSONFill(json, (TableSliceElementImpl)r), is(true));      
+        
+        // all numeric column references
+        // create a JSON object to use as our test
+		jText = "{\"1\":1000.21,\"2\":100,\"3\":null,\"4\":\"Sam Sneed\",\"5\":\"Tricky Text: \\, /, \t, \r, Tricky\",\"6\":true}";
+        json = buildJSONObject(jText);
+        assertThat(json, notNullValue());
+        
+        t = new TableImpl(10, 10);
+        assertThat(t, notNullValue());
+        assertThat(t.getNumRows(), is(0));
+        assertThat(t.getNumColumns(), is(0));
+        
+        // create a row, fill it with JSON
+        r = t.addRow();
+        assertThat(r, notNullValue());
+        
+        // fill another row
+        setAny = r.fill(json);
+        assertThat(setAny, is(true));      
+        assertThat(validateJSONFill(json, (TableSliceElementImpl)r), is(true));      
+
+		jText = "{\"1\":1000.21,\"2\":100,\"3\":null,\"4\":\"Sam Sneed\",\"5\":\"Tricky Text: \\, /, \t, \r, Tricky\",\"VIP\":true,\"6\":false}";
+        json = buildJSONObject(jText);
+        assertThat(json, notNullValue());
+        
+        // create a row, fill it with JSON
+        r = t.addRow();
+        t.addColumn(Access.ByIndex, 6).setLabel("VIP");
+        assertThat(r, notNullValue());
+        
+        // this should fail
+        try {
+        	r.fill(json);
+        	fail("Set duplicate element");
+        }
+        catch (InvalidException ie) { /* noop */}
+        catch (Exception e) { fail(e.getMessage()); }      
+	}
+
+	@Test
+	public void fillJSONColumnTest() throws ParseException
+	{
+        // create a JSON object to use as our test
+		String jText = "{\"Balance\":1000.21,\"Num\":100,\"Nick Name\":null,\"Name\":\"Sam Sneed\",\"Tricky\":\"Tricky Text: \\, /, \t, \r, Tricky\",\"VIP\":true}";
+        JSONObject json = buildJSONObject(jText);
+        assertThat(json, notNullValue());
+        
+        TableImpl t = new TableImpl(10, 10);
+        assertThat(t, notNullValue());
+        assertThat(t.getNumRows(), is(0));
+        assertThat(t.getNumColumns(), is(0));
+                
+        // create a row, fill it with JSON
+        Column r = t.addColumn();
+        assertThat(r, notNullValue());
+        assertThat(r.getNumCells(), is(0));
+        
+        // do the json fill
+        boolean setAny = r.fill(json);
+        assertThat(setAny, is(true));      
+        assertThat(validateJSONFill(json, (TableSliceElementImpl)r), is(true));      
+        
+        // Add another row. Column labels are set this time from prev fill
+        Column r2 = t.addColumn();
+        setAny = r2.fill(json);
+        assertThat(setAny, is(true));      
+        assertThat(validateJSONFill(json, (TableSliceElementImpl)r2), is(true));      
+      
+        t = new TableImpl(10, 10);
+        assertThat(t, notNullValue());
+        assertThat(t.getNumRows(), is(0));
+        assertThat(t.getNumColumns(), is(0));
+        
+        t.addRow(Access.ByLabel, "Balance");
+        t.addRow(Access.ByLabel, "Num");
+        t.addRow(Access.ByLabel, "Name");
+                
+        // create a row, fill it with JSON
+        r = t.addColumn();
+        assertThat(r, notNullValue());
+        
+        // fill another row
+        setAny = r.fill(json);
+        json.toJSONString();
+        assertThat(setAny, is(true));      
+        assertThat(validateJSONFill(json, (TableSliceElementImpl)r), is(true)); 
 	}
 
     @Test
