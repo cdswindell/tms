@@ -241,8 +241,8 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         initializeProperties(t);
         
         // allocate base memory for rows and columns
-        m_rows = new ArrayList<RowImpl>(m_rowsCapacity);
-        m_cols = new ArrayList<ColumnImpl>(m_colsCapacity);
+        m_rows = new ArrayList<RowImpl>(Math.max(nRows, m_rowsCapacity));
+        m_cols = new ArrayList<ColumnImpl>(Math.max(nCols, m_colsCapacity));
                 
         setRowsCapacity(calcRowsCapacity(nRows));
         setColumnsCapacity(calcColumnsCapacity(nCols));

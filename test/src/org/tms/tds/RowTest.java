@@ -23,7 +23,35 @@ import org.tms.api.exceptions.TableErrorClass;
 
 public class RowTest extends BaseTest
 {
-
+	@Test
+	public void fillManyJSONRowTest() throws ParseException
+	{
+        // create a JSON object to use as our test
+        int numRows = 5000;
+        TableImpl t = new TableImpl(numRows, 6);
+        assertThat(t, notNullValue());
+        assertThat(t.getNumRows(), is(0));
+        assertThat(t.getNumColumns(), is(0));
+                
+        // create a row, fill it with JSON
+        for (int i = 0; i < numRows; i++) {
+    		String jText = "{\"Balance\":1000.21,\"Num\":100,\"Nick Name\":null,\"Name\":\"Sam Sneed\",\"Tricky\":\"Tricky Text: \\, /, \t, \r, Tricky\",\"VIP\":true}";
+            JSONObject json = buildJSONObject(jText);
+            assertThat(json, notNullValue());
+            
+	        Row r = t.addRow();
+	        assertThat(r, notNullValue());
+	        assertThat(r.getNumCells(), is(0));
+	        
+	        // do the json fill
+	        boolean setAny = r.fill(json);
+	        assertThat(setAny, is(true));      
+	        assertThat(validateJSONFill(json, (TableSliceElementImpl)r), is(true));  
+        }
+        
+        assertThat(t.getNumRows(), is(numRows));
+	}
+	
 	@Test
 	public void fillJSONRowTest() throws ParseException
 	{
