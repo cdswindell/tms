@@ -11,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.tms.api.Access;
 import org.tms.api.Cell;
@@ -20,6 +19,7 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.tds.TableSliceElementImpl;
 import org.tms.teq.MathUtil;
+import org.tms.util.OrderedJSONParser;
 
 public class BaseTest
 {
@@ -162,7 +162,7 @@ public class BaseTest
 	protected JSONObject buildJSONObject(String jText) 
 	throws ParseException
 	{
-        return (JSONObject) new JSONParser().parse(jText);
+        return (JSONObject) new OrderedJSONParser().parse(jText);
 	}
 	
 	protected boolean validateJSONFill(JSONObject json, TableSliceElementImpl tse)
