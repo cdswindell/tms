@@ -1,4 +1,7 @@
 -- creates some test-tables and data
+-- create database cds;
+use cds;
+
 SET FOREIGN_KEY_CHECKS = 0; 
 -- DROP TABLE EMPLOYEE;
 -- DROP TABLE DEPARTMENT;

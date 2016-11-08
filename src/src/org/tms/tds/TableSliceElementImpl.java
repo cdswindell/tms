@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.json.simple.JSONObject;
@@ -693,7 +692,6 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
 		return setSome;
 	}
 
-	@SuppressWarnings("unchecked")
 	boolean fillElement(JSONObject json, boolean preserveDerivedCells) 
 	{
 		boolean setSome = false;
@@ -713,12 +711,11 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
 			/*
 			 * iterate over the json elements, the 
 			 */
-			Set<Map.Entry<String, Object>> set = json.entrySet();
-			for (Map.Entry<String, Object> e: set) {
-				String key = (String) e.getKey();
+			for (Object k: json.keySet()) {
+				String key = (String) k;
 				
 				if (key != null && (key = key.trim()).length() > 0) {
-					Object value = e.getValue();
+					Object value = json.get(k);
 					
 					CellImpl c = getCellByStringReference(key);
 				    if (c != null) {

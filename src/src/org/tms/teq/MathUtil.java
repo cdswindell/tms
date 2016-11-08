@@ -689,6 +689,9 @@ public class MathUtil
     static final public Object parseCellValue(String s, boolean ignoreSpaces)
     {
         try {
+            if (s == null)
+            	return null;
+            
             char c = 0;
             if (Boolean.valueOf(s))
                 return true;

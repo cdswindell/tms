@@ -174,7 +174,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
         else // Assume key is a column label
         	col = t.addColumn(true, true, false, Access.ByLabel, key);
         
-		return col != null ? getCell(col, false) : null;
+		return col != null ? getCellInternal(col, true, false) : null;
 	}
 	
     /*

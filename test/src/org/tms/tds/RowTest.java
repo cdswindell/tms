@@ -23,6 +23,7 @@ import org.tms.api.exceptions.TableErrorClass;
 
 public class RowTest extends BaseTest
 {
+	//@Rule public SimpleRepeatRule repeatRule = new SimpleRepeatRule(100);
 	@Test
 	public void fillManyJSONRowTest() throws ParseException
 	{
@@ -34,6 +35,7 @@ public class RowTest extends BaseTest
         assertThat(t.getNumColumns(), is(0));
                 
         // create a row, fill it with JSON
+        t.addColumn(Access.ByIndex, 6);
         for (int i = 0; i < numRows; i++) {
     		String jText = "{\"Balance\":1000.21,\"Num\":100,\"Nick Name\":null,\"Name\":\"Sam Sneed\",\"Tricky\":\"Tricky Text: \\, /, \t, \r, Tricky\",\"VIP\":true}";
             JSONObject json = buildJSONObject(jText);

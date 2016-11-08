@@ -21,10 +21,14 @@ public class SimpleRepeatRule implements TestRule
         @Override
         public void evaluate() throws Throwable 
         {
+        	long startTime = System.currentTimeMillis();
             for (int i = 0; i < m_numRepeats; i++) {
-            	System.out.println("Test attempt: " + (i + 1));
+            	//System.out.println("Test attempt: " + (i + 1));
                 statement.evaluate();
             }
+            
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            System.out.println(String.format("%d evaluations average: %d mSec", m_numRepeats, elapsedTime/m_numRepeats));
         }
     }
 

@@ -183,15 +183,15 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
 
     protected CellImpl getCell(RowImpl row, boolean setCurrent)
     {
+        assert row != null : "Row required";
+        assert this.getTable() != null: "Table required";
+        assert this.getTable() == row.getTable() : "Row not in same table";
+        
         return getCellInternal(row, true, setCurrent);
     }
     
     protected CellImpl getCellInternal(RowImpl row, boolean createIfSparse, boolean setCurrent)
     {
-        assert row != null : "Row required";
-        assert this.getTable() != null: "Table required";
-        assert this.getTable() == row.getTable() : "Row not in same table";
-        
         CellImpl c = null;
         TableImpl table = getTable();
         if (table != null) {
