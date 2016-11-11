@@ -1,13 +1,12 @@
-package org.tms.teq;
+package org.tms.api.utils;
 
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
+import org.tms.teq.NullsNotAllowedException;
 
 abstract public class AbstractOperator implements Operator 
 {
-	abstract public Object performCalculation(Object [] m_args) throws Exception;
-	
 	private String m_label;
 	private Class<?>[] m_argTypes;
 	private Class<?> m_resultType;
@@ -30,7 +29,7 @@ abstract public class AbstractOperator implements Operator
 	/**
 	 * {@inheritDoc}
 	 */
-	final public String getLabel() 
+	public String getLabel() 
 	{
 		return m_label;
 	}
@@ -39,7 +38,7 @@ abstract public class AbstractOperator implements Operator
 	/**
 	 * {@inheritDoc}
 	 */
-	final public TokenType getTokenType() 
+	public TokenType getTokenType() 
 	{
 		return TokenType.numArgsToTokenType(numArgs());
 	}
@@ -65,11 +64,16 @@ abstract public class AbstractOperator implements Operator
 		return m_argTypes;
 	}
 
+	protected void setArgTypes(Class<?>[] argTypes)
+	{
+		m_argTypes = argTypes;
+	}
+	
 	@Override
 	/**
 	 * {@inheritDoc}
 	 */
-	final public Class<?> getResultType() 
+	public Class<?> getResultType() 
 	{
 		return m_resultType;
 	}
@@ -78,7 +82,7 @@ abstract public class AbstractOperator implements Operator
 	/**
 	 * {@inheritDoc}
 	 */
-	final public String[] getCategories()
+	public String[] getCategories()
 	{
 		return m_categories;
 	}
@@ -101,7 +105,7 @@ abstract public class AbstractOperator implements Operator
 		return mArgs;
 	}
 
-	private Object unpackArg(Object value, Class<?> requiredType) 
+	protected Object unpackArg(Object value, Class<?> requiredType)
 	{
 		if (value != null && requiredType.isPrimitive()) 
 			value = convertToPrimitive(value, requiredType);
@@ -109,7 +113,7 @@ abstract public class AbstractOperator implements Operator
 		return value;
 	}
 
-	private Object convertToPrimitive(Object value, Class<?> requiredType) 
+	protected Object convertToPrimitive(Object value, Class<?> requiredType) 
 	{
 		if (value instanceof Number) {
 			Number n = (Number)value;

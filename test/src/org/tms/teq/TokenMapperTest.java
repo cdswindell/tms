@@ -18,6 +18,7 @@ import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.factories.TableContextFactory;
+import org.tms.api.utils.AbstractOperator;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TokenMapper;
 import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
@@ -506,24 +507,17 @@ public class TokenMapperTest extends BaseTest
 		return false;
 	}
 
-	public class Square implements Operator
+	public class Square extends AbstractOperator
     {
+		public Square()
+		{
+			super("square", new Class<?>[] {double.class}, double.class);
+		}
+
         @Override
         public TokenType getTokenType()
         {
             return TokenType.UnaryFunc;
-        }
-
-        @Override
-        public String getLabel()
-        {
-            return "square";
-        }
-
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-            return new Class<?>[] {double.class};
         }
 
         @Override
@@ -535,11 +529,6 @@ public class TokenMapperTest extends BaseTest
             
             return new Token(d * d);
         }
-
-        public Class<?> getResultType()
-        {
-            return double.class;
-        }  
         
         @Override
         public String[] getCategories()
@@ -548,24 +537,17 @@ public class TokenMapperTest extends BaseTest
         }
     }
     
-    public class Add3 implements Operator
+    public class Add3 extends AbstractOperator
     {
+    	public Add3()
+    	{
+    		super("add3", new Class<?>[] {double.class, double.class, double.class}, double.class);
+    	}
+    	
         @Override
         public TokenType getTokenType()
         {
             return TokenType.GenericFunc;
-        }
-
-        @Override
-        public String getLabel()
-        {
-            return "add3";
-        }
-
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-            return new Class<?>[] {double.class, double.class, double.class};
         }
 
         @Override
@@ -579,31 +561,19 @@ public class TokenMapperTest extends BaseTest
             
             return new Token(d1 + d2 + d3);
         }
-
-        public Class<?> getResultType()
-        {
-            return double.class;
-        }       
     }
     
-    public class AddStringNum implements Operator
+    public class AddStringNum extends AbstractOperator
     {
+    	public AddStringNum()
+    	{
+    		super("+", new Class<?>[] {String.class, Double.class}, double.class);
+    	}
+    	
         @Override
         public TokenType getTokenType()
         {
             return TokenType.BinaryOp;
-        }
-
-        @Override
-        public String getLabel()
-        {
-            return "+";
-        }
-
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-            return new Class<?>[] {String.class, Double.class};
         }
 
         @Override
@@ -616,10 +586,5 @@ public class TokenMapperTest extends BaseTest
             
             return new Token(Double.valueOf(s1) + d2);
         }
-
-        public Class<?> getResultType()
-        {
-            return double.class;
-        }       
     }
 }

@@ -19,11 +19,10 @@ import org.json.simple.parser.JSONParser;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.InvalidOperandsException;
 import org.tms.api.derivables.InvalidOperatorException;
-import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 
-abstract public class RestConsumerOp implements Operator
+abstract public class RestConsumerOp extends AbstractOperator
 {
     static {
         System.setProperty("jsse.enableSNIExtension", "false");
@@ -32,14 +31,11 @@ abstract public class RestConsumerOp implements Operator
     abstract public String getUrl();
     abstract public LinkedHashMap<String, Object> getUrlParamsMap();
     
-    private String m_label;
     private String m_baseUrl;
     private LinkedHashMap<String, Object> m_urlParamsMap;
     private StringBuffer m_constantUrlParamsStr;
-    private Class<?>[] m_argTypes;
     private String[] m_argKeys;
     private String m_resultKey;
-    private Class<?> m_resultType;
     
     protected RestConsumerOp(String label, String resultKey)
     {
@@ -48,16 +44,14 @@ abstract public class RestConsumerOp implements Operator
     
     protected RestConsumerOp(String label, String resultKey, Class<?> resultType)
     {
-        m_label = label;
+    	super(label, null, resultType != null ? resultType : Object.class);
         m_resultKey = resultKey;
-        m_resultType = resultType != null ? resultType : Object.class;
 
         initialize();
     }
     
     private void initialize() 
     {
-        m_argTypes = null;
         m_argKeys = null;
         m_constantUrlParamsStr = new StringBuffer();
         m_baseUrl = getUrl();
@@ -92,7 +86,7 @@ abstract public class RestConsumerOp implements Operator
                 if (!argTypes.isEmpty()) {
                     if (argTypes.size() != argKeys.size())
                         throw new InvalidOperatorException("Inconsistant URL Params Map");
-                    m_argTypes = argTypes.toArray(new Class[] {});
+                    setArgTypes(argTypes.toArray(new Class[] {}));
                     m_argKeys = argKeys.toArray(new String [] {});
                 }
             }
@@ -162,17 +156,18 @@ abstract public class RestConsumerOp implements Operator
     		return null;
     	
         // all we can really do here is coerce strings to numbers...
-        if (Number.class.isAssignableFrom(m_resultType)) 
+    	Class<?> resultType = getResultType();
+        if (Number.class.isAssignableFrom(resultType)) 
             return Double.parseDouble(leaf.toString());
-        else if (m_resultType.isPrimitive())  {   
-            if (m_resultType == boolean.class)
+        else if (resultType.isPrimitive())  {   
+            if (resultType == boolean.class)
                 return Boolean.parseBoolean(leaf.toString());
             else
                 return Double.parseDouble(leaf.toString());
         }
         
         throw new InvalidOperandsException(String.format("Invalid result type, found: %s required: %s", 
-                leaf.getClass().getSimpleName(), m_resultType.getSimpleName()));
+                leaf.getClass().getSimpleName(), resultType.getSimpleName()));
     }
     
     @Override
@@ -181,7 +176,7 @@ abstract public class RestConsumerOp implements Operator
 	 */
     final public String getLabel()
     {
-        return m_label;
+        return super.getLabel();
     }
     
     @Override
@@ -199,18 +194,9 @@ abstract public class RestConsumerOp implements Operator
 	 */
     final public Class<?> getResultType()
     {
-        return m_resultType;
+        return super.getResultType();
     }
     
-    @Override
-	/**
-	 * {@inheritDoc}
-	 */
-    final public Class<?>[] getArgTypes()
-    {
-        return m_argTypes;
-    }
-
     @Override
 	/**
 	 * {@inheritDoc}
@@ -337,7 +323,7 @@ abstract public class RestConsumerOp implements Operator
         private Object parseJsonResponse(JSONObject json)
         {
             if (m_resultKey == null || (m_resultKey.trim()).length() <= 0) {
-                if (m_resultType.isAssignableFrom(json.getClass()))
+                if (getResultType().isAssignableFrom(json.getClass()))
                     return json;
                 
                 return coerceResult(json);           
@@ -363,7 +349,7 @@ abstract public class RestConsumerOp implements Operator
             if (leaf == null)
                 return null;
             
-            if (m_resultType.isAssignableFrom(leaf.getClass()))
+            if (getResultType().isAssignableFrom(leaf.getClass()))
                 return leaf;
             
             // allow implementer to coerce result

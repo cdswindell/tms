@@ -17,11 +17,11 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Derivation;
-import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
+import org.tms.api.utils.AbstractOperator;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 
@@ -607,20 +607,21 @@ public class PendingOperatorTest extends BaseTest
         tc.deregisterAllOperators();
     }
     
-    public class PendingOperator implements Operator, Runnable
+    public class PendingOperator extends AbstractOperator implements Runnable
     {
         private Token[] m_args;
         private UUID m_transId;
         
         public PendingOperator(UUID transId, Token[] args)
         {
+        	super("pending", new Class<?>[] {double.class, double.class}, double.class);
             m_args = args;
             m_transId = transId;
         }
 
         public PendingOperator()
         {
-            m_args = null;
+            this(null, null);
         }
 
         @Override
@@ -645,27 +646,9 @@ public class PendingOperatorTest extends BaseTest
         }
 
         @Override
-        public Class<?> getResultType()
-        {
-            return double.class;
-        }
-
-        @Override
-        public String getLabel()
-        {
-            return "pending";
-        }
-
-        @Override
         public TokenType getTokenType()
         {
             return TokenType.BinaryFunc;
-        }
-
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-             return new Class<?>[] {double.class, double.class};
         }
 
         @Override
@@ -681,20 +664,21 @@ public class PendingOperatorTest extends BaseTest
         }
     }
     
-    public class PendingOperator2 implements Operator, Runnable
+    public class PendingOperator2 extends AbstractOperator implements Runnable
     {
         private Token[] m_args;
         private UUID m_transId;
         
         public PendingOperator2(UUID transId, Token[] args)
         {
+        	super("pending2", new Class<?>[] {double.class, double.class}, double.class);
             m_args = args;
             m_transId = transId;
         }
 
         public PendingOperator2()
         {
-            m_args = null;
+            this(null, null);
         }
 
         @Override
@@ -719,21 +703,9 @@ public class PendingOperatorTest extends BaseTest
         }
 
         @Override
-        public String getLabel()
-        {
-            return "pending2";
-        }
-
-        @Override
         public TokenType getTokenType()
         {
             return TokenType.BinaryFunc;
-        }
-
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-             return new Class<?>[] {double.class, double.class};
         }
 
         @Override
@@ -742,12 +714,6 @@ public class PendingOperatorTest extends BaseTest
             PendingOperator2 po = new PendingOperator2(Derivation.getTransactionID(), args);
             return Token.createPendingToken(po);
         }  
-        
-        @Override
-        public Class<?> getResultType()
-        {
-            return double.class;
-        }
         
         public UUID getTransactionId()
         {

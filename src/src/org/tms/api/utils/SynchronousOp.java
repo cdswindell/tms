@@ -1,10 +1,10 @@
 package org.tms.api.utils;
 
 import org.tms.api.derivables.Token;
-import org.tms.teq.AbstractOperator;
+import org.tms.teq.AbstractOp;
 import org.tms.teq.NullsNotAllowedException;
 
-abstract public class SynchronousOp extends AbstractOperator
+abstract public class SynchronousOp extends AbstractOp
 {
 	public SynchronousOp(String label, Class<?>[] argTypes, Class<?> resultType) 
 	{

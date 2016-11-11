@@ -49,6 +49,7 @@ import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.XLSOptions;
+import org.tms.api.utils.AbstractOperator;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.EquationStack;
 import org.tms.teq.InfixExpressionParser;
@@ -1075,36 +1076,31 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         }
     }
     
-    static class ExcelOp implements Operator
+    static class ExcelOp extends AbstractOperator
     {
         private Operator m_tmsOp;
-        private String m_label;
         private TokenType m_tokenType;
-        private Class<?> m_resultType;
         
         ExcelOp(Operator op)
         {
-            m_tmsOp = op;
-            m_label = op.getLabel();
-            m_tokenType = null;
+        	this(op, op.getLabel());
         }
         
         ExcelOp(Operator op, String label)
         {
-            this(op);
-            m_label = label;
-        }
+            this(op, label, null, op.getResultType());
+         }
         
         ExcelOp(Operator op, String label, Class<?> resultType)
         {
-            this(op, label);
-            m_resultType = resultType;
+            this(op, label, null, resultType);
         }
         
         ExcelOp(Operator op, String label, TokenType tt, Class<?> resultType)
         {
-            this(op, label, tt);
-            m_resultType = resultType;
+        	super(label, op.getArgTypes(), resultType != null ? resultType : op.getResultType() );
+        	m_tmsOp = op;
+        	m_tokenType = tt;
         }
         
         ExcelOp(Operator op, String label, TokenType tt)
@@ -1116,21 +1112,6 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         Operator getTmsOp()
         {
             return m_tmsOp;
-        }
-        
-        @Override
-        public String getLabel()
-        {
-            return m_label;
-        }
-
-        @Override
-        public Class<?> getResultType()
-        {
-            if (m_resultType != null)
-                return m_resultType;
-            else
-                return m_tmsOp.getResultType();
         }
         
         @Override
@@ -1150,12 +1131,6 @@ public class XlsWriter extends BaseWriter<XLSOptions>
                 default:
                     return m_tmsOp.getTokenType();
             }
-        }
-
-        @Override
-        public Class<?>[] getArgTypes()
-        {
-            return m_tmsOp.getArgTypes();
         }
 
         @Override

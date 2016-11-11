@@ -4,10 +4,10 @@ import java.util.UUID;
 
 import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.Token;
-import org.tms.teq.AbstractOperator;
+import org.tms.teq.AbstractOp;
 import org.tms.teq.NullsNotAllowedException;
 
-abstract public class AsynchronousOp extends AbstractOperator
+abstract public class AsynchronousOp extends AbstractOp
 {
 	public AsynchronousOp(String label, Class<?>[] argTypes, Class<?> resultType) 
 	{
