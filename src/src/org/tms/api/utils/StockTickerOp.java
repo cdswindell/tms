@@ -7,20 +7,16 @@ import org.tms.api.derivables.InvalidOperandsException;
 
 public class StockTickerOp extends RestConsumerOp
 {
+	static final private String sf_URL = "http://finance.google.com/finance/info";
+	
 	public StockTickerOp()
     {
-        super("ticker", "l_cur", double.class);
+        super("ticker", "l_cur", double.class, sf_URL);
     }
 
     protected StockTickerOp(String label, String resultKey)
     {
-        super(label, resultKey, double.class);
-    }
-
-    @Override
-    public String getUrl()
-    {
-        return "http://finance.google.com/finance/info";
+        super(label, resultKey, double.class, sf_URL);
     }
 
     @Override

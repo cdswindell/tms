@@ -52,17 +52,5 @@ public class DOCXWriterTest extends BaseIOTest
         assertNotNull(output);
 
         assertThat(gold.length, is(output.length));
-        int failures = 0;
-        int firstFailure = 0;
-        for (int i = 0; i < gold.length; i++) {
-            if (gold[i] != output[i]) {
-                failures++;
-                if (firstFailure == 0)
-                    firstFailure = i;
-            }
-        }
-
-        // there will be failures, as new documents have date/time stamped into them
-        System.out.println(String.format("Export Table to DocX, Failures: %d (%d)", failures, firstFailure));
     }
 }

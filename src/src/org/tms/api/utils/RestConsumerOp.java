@@ -26,24 +26,24 @@ abstract public class RestConsumerOp extends AbstractOperator
         System.setProperty("jsse.enableSNIExtension", "false");
     }
     
-    abstract public String getUrl();
     abstract public LinkedHashMap<String, Object> getUrlParamsMap();
     
-    private String m_baseUrl;
     private LinkedHashMap<String, Object> m_urlParamsMap;
     private StringBuffer m_constantUrlParamsStr;
     private String[] m_argKeys;
     private String m_resultKey;
+    private String m_baseUrl;
     
-    protected RestConsumerOp(String label, String resultKey)
+    protected RestConsumerOp(String label, String resultKey, String url)
     {
-        this(label, resultKey, Object.class);
+        this(label, resultKey, Object.class, url);
     }
     
-    protected RestConsumerOp(String label, String resultKey, Class<?> resultType)
+    protected RestConsumerOp(String label, String resultKey, Class<?> resultType, String url)
     {
     	super(label, null, resultType != null ? resultType : Object.class);
         m_resultKey = resultKey;
+        m_baseUrl = url;
 
         initialize();
     }
@@ -69,6 +69,11 @@ abstract public class RestConsumerOp extends AbstractOperator
                         String key = e.getKey();
                         Object value = e.getValue();
                         
+                        /*
+                         * There can be 2 kinds of URL parameters; those that are appended to the end of the 
+                         * provided URL, with the familiar "key=value" notation, and those that are "in-lined"
+                         * as part of the provided URL. We can handle both.
+                         */
                         if (key.startsWith("{") && key.endsWith("}")) {
                             m_baseUrl = replace(m_baseUrl, key, value.toString());
                         }
@@ -93,6 +98,15 @@ abstract public class RestConsumerOp extends AbstractOperator
         {
            throw new InvalidOperatorException(e);
         }
+    }
+    
+    /**
+     * Override to specify a complex URL that must be constructed
+     * @return
+     */
+    public String getUrl()
+    {
+    	return m_baseUrl;
     }
     
     /**
@@ -121,7 +135,7 @@ abstract public class RestConsumerOp extends AbstractOperator
      */
     protected int getConnectionTimeout()
     {
-        return 10000;
+        return 20000;
     }
     
     /**

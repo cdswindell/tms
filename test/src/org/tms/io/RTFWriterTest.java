@@ -63,7 +63,6 @@ public class RTFWriterTest extends BaseIOTest
         }
 
         // there should be no failures
-        System.out.println("Export Table to RTF, Failures: " + failures);
         assertThat(failures, is(0));
     }
 }

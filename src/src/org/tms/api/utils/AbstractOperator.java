@@ -11,6 +11,7 @@ abstract public class AbstractOperator implements Operator
 	private Class<?>[] m_argTypes;
 	private Class<?> m_resultType;
 	private String [] m_categories;
+	private TokenType m_tokenType;
 	
 	public AbstractOperator(String label, Class<?>[] argTypes, Class<?> resultType)
 	{
@@ -40,9 +41,17 @@ abstract public class AbstractOperator implements Operator
 	 */
 	public TokenType getTokenType() 
 	{
-		return TokenType.numArgsToTokenType(numArgs());
+		if (m_tokenType == null)
+			m_tokenType = TokenType.numArgsToTokenType(numArgs());
+		
+		return m_tokenType;
 	}
 
+	protected void setTokenType(TokenType tType)
+	{
+		m_tokenType = tType;
+	}
+	
 	@Override
 	/**
 	 * {@inheritDoc}

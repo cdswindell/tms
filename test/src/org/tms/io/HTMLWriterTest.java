@@ -66,7 +66,6 @@ public class HTMLWriterTest extends BaseIOTest
         }
 
         // there should be no failures
-        System.out.println("Export Table to HTML, Failures: " + failures);
         assertThat(failures, is(0));
     }
 

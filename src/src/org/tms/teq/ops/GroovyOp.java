@@ -15,6 +15,7 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.utils.AbstractOperator;
 import org.tms.api.utils.RegisterOp;
 import org.tms.tds.TokenMapper;
+import org.tms.teq.NullsNotAllowedException;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
@@ -166,7 +167,7 @@ public class GroovyOp extends BaseOp
         }
         catch (CompilationFailedException | IOException | InstantiationException | 
                IllegalAccessException | NoSuchMethodException | SecurityException | 
-               IllegalArgumentException | InvocationTargetException e)
+               IllegalArgumentException | InvocationTargetException | NullsNotAllowedException e)
         {
             return Token.createErrorToken(e.getMessage());
         }

@@ -55,18 +55,6 @@ public class PDFWriterTest extends BaseIOTest
         assertNotNull(pdf);
         
         assertThat(closeTo(gold.length, pdf.length, 50), is(true));
-        int failures = 0;
-        int firstFailure = 0;
-        for (int i = 0; i < gold.length; i++) {
-            if (gold[i] != pdf[i]) {
-                failures++;
-                if (firstFailure == 0)
-                    firstFailure = i;
-            }
-        }
-        
-        // there will be some failures, they should start at 1983
-        System.out.println(String.format("Export Table to PDF, Failures: %d (%d)", failures, firstFailure));
     }
     
     @Test

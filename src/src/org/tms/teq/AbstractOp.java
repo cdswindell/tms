@@ -48,7 +48,7 @@ public abstract class AbstractOp extends AbstractOperator
     }
     
 	@Override
-    public boolean isRightAssociative() 
+	final public boolean isRightAssociative() 
     {
         return super.isRightAssociative();
     }

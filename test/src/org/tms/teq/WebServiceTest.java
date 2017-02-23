@@ -204,13 +204,7 @@ public class WebServiceTest extends BaseTest
         
         public CurrencyConverterOp(String label, String resultKey)
         {
-            super(label, resultKey, double.class);
-        }
-
-        @Override
-        public String getUrl()
-        {
-            return BASE_URL + ENDPOINT;
+            super(label, resultKey, double.class, BASE_URL + ENDPOINT);
         }
 
         @Override
@@ -235,13 +229,7 @@ public class WebServiceTest extends BaseTest
         
         public WeatherOp(String label, String resultKey, Class<?> resultType)
         {
-            super(label, resultKey, resultType);
-        }
-
-        @Override
-        public String getUrl()
-        {
-            return BASE_URL + ENDPOINT;
+            super(label, resultKey, resultType, BASE_URL + ENDPOINT);
         }
 
         @Override
