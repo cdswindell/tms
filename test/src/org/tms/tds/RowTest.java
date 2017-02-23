@@ -33,6 +33,8 @@ public class RowTest extends BaseTest
         assertThat(t, notNullValue());
         assertThat(t.getNumRows(), is(0));
         assertThat(t.getNumColumns(), is(0));
+        
+        t.setColumnLabelsIndexed(true);
                 
         // create a row, fill it with JSON
         t.addColumn(Access.ByIndex, 6);
@@ -139,6 +141,30 @@ public class RowTest extends BaseTest
         catch (Exception e) { fail(e.getMessage()); }      
 	}
 
+	@Test
+	public void fillJSONRowComplexTest() throws ParseException
+	{
+        // create a JSON object to use as our test
+		String jText = "{\"A\":{\"Balance\":1000.21,\"Num\":100},\"Nick Name\":null,\"Name\":\"Sam Sneed\",\"Tricky\":\"Tricky Text: \\, /, \t, \r, Tricky\",\"VIP\":true}";
+        JSONObject json = buildJSONObject(jText);
+        assertThat(json, notNullValue());
+        
+        TableImpl t = new TableImpl(10, 10);
+        assertThat(t, notNullValue());
+        assertThat(t.getNumRows(), is(0));
+        assertThat(t.getNumColumns(), is(0));
+                
+        // create a row, fill it with JSON
+        Row r = t.addRow();
+        assertThat(r, notNullValue());
+        assertThat(r.getNumCells(), is(0));
+        
+        // do the json fill
+        boolean setAny = r.fill(json);
+        assertThat(setAny, is(true));      
+        assertThat(validateJSONFill(json, (TableSliceElementImpl)r), is(true));   
+	}
+        
 	@Test
 	public void fillJSONColumnTest() throws ParseException
 	{

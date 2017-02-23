@@ -55,6 +55,7 @@ import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.io.IOOption;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.events.TableElementListeners;
+import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.teq.DerivationImpl;
 import org.tms.teq.TimeSeriedColumnsWorker;
 import org.tms.teq.TimeSeriedRowsWorker;
@@ -189,6 +190,8 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     private ScheduledFuture<?> m_colsTimeSeriesFuture;
 	private long m_columnsTimeSeriesPeriod;
 	private RowImpl m_colsTimeSeriesTimeStampRow;
+	
+	private JustInTimeSet<FilteredTableImpl> m_filters = null;
    
     protected TableImpl()
     {
@@ -258,6 +261,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         m_persistentSubsets = new HashSet<SubsetImpl>();
         m_unusedCellOffsets = new ArrayDeque<Integer>();
         m_cellOffsetRowMap = new HashMap<Integer, RowImpl>(getRowsCapacity());
+        m_filters = new JustInTimeSet<FilteredTableImpl>();
         
         m_rowsTimeSeries = new LinkedHashSet<TimeSeriesable>();
         m_colsTimeSeries = new LinkedHashSet<TimeSeriesable>();
@@ -384,6 +388,16 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
      * Methods defined by interface Table; mostly adapters
      */
     
+	public void registerFilter(FilteredTableImpl filter) 
+	{
+		m_filters.add(filter);	
+	}
+	
+	public void deregisterFilter(FilteredTableImpl filter) 
+	{
+		m_filters.remove(filter);	
+	}
+	
     @Override
     public void export(String fileName, IOOption<?> options) 
     throws IOException
@@ -854,7 +868,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         }        
         
         try {
-            // delete all rows and columns, explicitly
+        	// delete filters first
+            for (FilteredTableImpl ft : m_filters.clone()) {
+            	ft.delete();
+            }
+            m_filters.clear();
+            
+        	// delete all rows and columns, explicitly
             // we have to iterate over the indexes as iterating
             // over the ArrayLists themselves throws a 
             // ConcurrentModificaton exception when items are deleted
@@ -1378,6 +1398,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return m_subsets;
     }
     
+    @Override
     public SubsetImpl addSubset()
     {
         return addSubset(Access.First);
@@ -1574,7 +1595,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     public RowImpl addRow(Access mode, Object... mda)
     {
         vetElement();
-    	return addRow(false, true, true, mode, mda);
+    	return addRow(isRowLabelsIndexed(), true, true, mode, mda);
     }
     
     synchronized RowImpl addRow(boolean returnExisting, boolean createIfNull, boolean setCurrent, Access mode, Object... mda)
@@ -1641,7 +1662,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
-    public boolean isRowDefined(Access mode, Object... mda)
+    synchronized public boolean isRowDefined(Access mode, Object... mda)
     {
         vetElement();
         return getRowInternal(false, false, mode, mda) != null;
@@ -1885,7 +1906,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     public ColumnImpl addColumn(Access mode, Object... mda)
     {
         vetElement();      
-    	return addColumn(false, true, true, mode, mda);
+    	return addColumn(isColumnLabelsIndexed(), true, true, mode, mda);
     }
     
     synchronized ColumnImpl addColumn(boolean returnExisting, boolean createIfNull, boolean setCurrent, Access mode, Object... mda)
@@ -2023,6 +2044,11 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return r;
     }
 
+	protected ColumnImpl getColumnInternal(TableImpl parent, boolean createIfNull, Access mode, Object[] mda) 
+	{
+		return parent.getColumnInternal(createIfNull,  false, mode, mda);
+	}
+	
     synchronized void ensureColumnsExist()
     {
         int nCols = getNumColumns();
@@ -2422,6 +2448,20 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return col.getCellInternal(row, createIfNull, true);
     }
     
+
+    synchronized protected CellImpl getCellInternal(TableImpl table, RowImpl row, ColumnImpl col, boolean createIfNull, boolean setCurrent) 
+	{
+        vetElement(row);
+        vetElement(col);
+        
+        if (table != row.getTable())
+            throw new InvalidParentException(row, table);        
+        if (table != col.getTable())
+            throw new InvalidParentException(col, table);
+        
+ 		return col.getCellInternal(row, createIfNull, setCurrent);
+	}
+
     synchronized protected boolean setCellValue(RowImpl row, ColumnImpl col, Object o) 
     {
         CellImpl cell = getCell(row, col, o != null);
@@ -2629,7 +2669,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     }
     
     @Override
-    public List<Derivable> getDerivedElements()
+    synchronized public List<Derivable> getDerivedElements()
     {
         vetElement();
         Set<Derivable> derived = new LinkedHashSet<Derivable>();
@@ -3030,10 +3070,26 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
 	}
 	
 	@Override
-	public void sort(ElementType et, TableProperty tp, TableRowColumnElement... others)
+	synchronized public void sort(ElementType et, TableProperty tp, TableRowColumnElement... others)
 	{
-	    vetElement();
-	    if (et == null || (tp == null && (others == null || others.length == 0)))
+	    vetElement();	    
+    	// special case sorting of row names and column labels
+    	if (et != null && tp == TableProperty.Label && others == null) {
+    		switch (et) {
+	    		case Row:
+	    			sortRowLabels();
+	    			return;
+	    			
+	    		case Column:
+	    			sortColumnLabels();
+	    			return;
+	    			
+	    		default:
+	    			break;
+    		}
+    	}
+    	
+	    if (et == null || (tp == null && (others == null || others.length == 0))) 
 	        throw new IllegalArgumentException("Element type and Table Property and/or other Sort Elements required");
 	        
 	    ElementType otherType;
@@ -3072,6 +3128,18 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
 	    }
 	}
 	
+	private void sortRowLabels() 
+	{
+        Collections.sort(m_rows);
+        reindex(m_rows);        
+	}
+
+	private void sortColumnLabels() 
+	{
+        Collections.sort(m_cols);
+        reindex(m_cols);        
+	}
+
 	private void reindex(ArrayList<? extends TableSliceElementImpl> slices) 
 	{
 		if (slices != null) {
@@ -3198,7 +3266,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             
             // return the target cell
             return c;
-        }	    
+        }	
+        
+    	@Override
+    	public void remove() 
+    	{
+    		throw new UnimplementedException("remove");
+    	}
 	}
     
     protected static class TablePropertySorter implements Comparator<TableSliceElementImpl>

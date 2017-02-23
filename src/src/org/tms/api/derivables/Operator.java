@@ -26,11 +26,14 @@ package org.tms.api.derivables;
  */
 public interface Operator extends Labeled
 {
+	static final int DEFAULT_PRIORITY = 8;
+	
     public TokenType getTokenType();
     
     public Class<?> [] getArgTypes();
 
     public Token evaluate(Token... args);
+    
     
     default public Class<?> getResultType()
     {

@@ -85,7 +85,10 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
     
     protected List<RowImpl> getRowsInternal()
     {
-        return new ArrayList<RowImpl>(m_rows != null ? m_rows : Collections.emptySet());
+    	if (m_rows != null)
+    		return new ArrayList<RowImpl>(m_rows);
+    	else
+    		return Collections.emptyList();
     }
     
     protected Collection<RowImpl> getEffectiveRows()
@@ -116,9 +119,9 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return Collections.emptyList();
     }
     
-    protected Iterable<RowImpl> rows()
+    public Iterable<Row> rows()
     {
-        return getRowsInternal();
+        return Collections.unmodifiableList(new ArrayList<Row>(getRowsInternal()));
     }
     
     @Override
@@ -144,12 +147,15 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
 
     protected List<ColumnImpl> getColumnsInternal()
     {
-        return new ArrayList<ColumnImpl>(m_cols != null ? m_cols : Collections.emptySet());
+    	if (m_cols != null)
+    		return new ArrayList<ColumnImpl>(m_cols);
+    	else
+    		return Collections.emptyList();
     }
-
-    public Iterable<ColumnImpl> columns()
+    
+    public Iterable<Column> columns()
     {
-        return getColumnsInternal();
+        return new BaseElementIterable<Column>(getColumnsInternal());
     }
     
     @Override
@@ -224,7 +230,8 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
             return false;
     }
     
-    protected boolean addAll(Collection<? extends TableElement> elems)
+    @Override
+    public boolean addAll(Collection<? extends TableElement> elems)
     {
         boolean addedAny = false;
         if (elems != null) {            
@@ -239,7 +246,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return addedAny;
     }
     
-    protected boolean removeAll(Collection<? extends TableElement> elems)
+    public boolean removeAll(Collection<? extends TableElement> elems)
     {
         boolean removedAny = false;
         if (elems != null) {            
@@ -254,7 +261,7 @@ public class SubsetImpl extends TableCellsElementImpl implements Subset
         return removedAny;
     }
         
-    protected boolean containsAll(Collection<? extends TableElement> elems)
+    public boolean containsAll(Collection<? extends TableElement> elems)
     {
         if (elems != null && !elems.isEmpty()) {            
             // iterate over all elements

@@ -1,6 +1,7 @@
 package org.tms.api.derivables;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
@@ -20,6 +21,21 @@ import org.tms.teq.PendingState;
  */
 public class Token implements Labeled
 {
+    public static void postResult(UUID transactionId, double rslt)
+    {
+        DerivationImpl.postResult(transactionId, rslt);
+    }
+
+    public static void postResult(UUID transactionId, Token rslt)
+    {
+        DerivationImpl.postResult(transactionId, rslt);
+    }
+
+    public static UUID getTransactionID()
+    {
+        return DerivationImpl.getTransactionID();
+    }
+    
     public static Token createNullToken()
     {
         Token t = new Token(TokenType.NullValue, BuiltinOperator.NULL_operator);

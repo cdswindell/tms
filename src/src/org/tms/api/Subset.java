@@ -2,6 +2,7 @@ package org.tms.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
 
 import org.tms.api.io.IOOption;
@@ -112,4 +113,8 @@ public interface Subset extends TableElement
      */
     public void export(OutputStream out, IOOption<?> options) 
     throws IOException;    
+    
+    public boolean addAll(Collection<? extends TableElement> elems);
+    public boolean removeAll(Collection<? extends TableElement> elems);
+    public boolean containsAll(Collection<? extends TableElement> elems);
 }

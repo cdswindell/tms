@@ -9,6 +9,7 @@ import org.tms.BaseTest;
 import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
@@ -59,5 +60,35 @@ public class ColumnRefTest extends BaseTest
         assertThat(cR3C1, notNullValue());
         cR3C1.setDerivation("range(C \"t1::c2\")");
         assertThat(cR3C1.getCellValue(), is(0.0));
+    }
+    
+    @Test
+    public void testColumnMeansTest()
+    {
+        TableContext c = TableContextFactory.createTableContext();
+        
+        Table t1 = TableFactory.createTable(10, 12, c);        
+        assertThat(t1, notNullValue());
+        assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
+        t1.setLabel("t1");
+        
+        t1.addRow(Access.ByIndex, 10);
+        assertThat(t1.getPropertyInt(TableProperty.numRows), is (10));
+        assertThat(t1.getPropertyInt(TableProperty.numCells), is (0));
+        
+        Column c1 = t1.addColumn(Access.ByIndex, 1);
+        assertThat(c1, notNullValue());      
+        c1.fill(10);
+        
+        Column c2 = t1.addColumn(Access.ByIndex, 1);
+        assertThat(c2, notNullValue());      
+        c2.fill(20);
+        
+        Row avgs = t1.addRow();
+        assertThat(avgs.getIndex(), is(11));
+        
+        avgs.setDerivation("mean(colRef(cIdx))");
+        assertThat(t1.getCellValue(avgs,  c1), is(10.0));
+        assertThat(t1.getCellValue(avgs,  c2), is(20.0));
     }
 }

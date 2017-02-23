@@ -17,19 +17,35 @@ import org.tms.api.events.BlockedRequestException;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.IllegalTableStateException;
+import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.IOOption;
 import org.tms.io.RowExportAdapter;
 import org.tms.io.TableExportAdapter;
+import org.tms.tds.filters.FilteredRowImpl;
+import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.teq.MathUtil;
+import org.tms.util.JustInTimeSet;
 
 public class RowImpl extends TableSliceElementImpl implements Row
 {
     private int m_cellOffset;
     
+	private RowImpl m_proxyRow;
+    private JustInTimeSet<FilteredRowImpl> m_filters;
+    
+    
     protected RowImpl(TableImpl parentTable)
     {
         super(parentTable);
     }
+
+    protected RowImpl(FilteredTableImpl parent, RowImpl parentRow) 
+    {
+    	this(parent);
+    	
+    	m_proxyRow = parentRow;
+    	m_proxyRow.registerFilter((FilteredRowImpl)this);
+	}
 
     @Override
     protected void initialize(TableElementImpl e)
@@ -50,6 +66,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
         }
         
         m_cellOffset = -1;
+        m_filters = new JustInTimeSet<FilteredRowImpl>();
     }
     
     /*
@@ -105,6 +122,16 @@ public class RowImpl extends TableSliceElementImpl implements Row
         writer.export();
     }
 
+	public void registerFilter(FilteredRowImpl filter) 
+	{
+		m_filters.add(filter);	
+	}
+	
+	public void deregisterFilter(FilteredRowImpl filter) 
+	{
+		m_filters.remove(filter);	
+	}
+	
     @Override 
     public List<TableElementListener> removeAllListeners(TableElementEventType... evTs )
     {
@@ -298,6 +325,17 @@ public class RowImpl extends TableSliceElementImpl implements Row
             return;
         }        
         
+    	// for filter rows, make sure we deregister from the source row
+    	if (m_proxyRow != null && this instanceof FilteredRowImpl)
+    		m_proxyRow.deregisterFilter((FilteredRowImpl)this);
+    		
+        // delete any filtered rows that are based on this one
+        for (FilteredRowImpl fr : m_filters.clone()) {
+        	fr.delete();
+        }
+        
+        m_filters.clear();
+        
     	// now, remove from the parent table, if it is defined
     	TableImpl parent = getTable();
     	if (parent != null) {
@@ -444,5 +482,11 @@ public class RowImpl extends TableSliceElementImpl implements Row
             CellImpl c = m_row.getCell(col, false);
             return c;
         }       
+
+    	@Override
+    	public void remove() 
+    	{
+    		throw new UnimplementedException("remove");
+    	}
     }
 }

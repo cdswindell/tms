@@ -16,7 +16,6 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.derivables.DerivableThreadPool;
-import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 import org.tms.api.factories.TableContextFactory;
@@ -699,7 +698,7 @@ public class PendingOperatorTest extends BaseTest
             }
             
             double rslt = 2.0 * (Double)m_args[0].getValue();
-            Derivation.postResult(getTransactionId(), rslt);
+            Token.postResult(getTransactionId(), rslt);
         }
 
         @Override
@@ -711,7 +710,7 @@ public class PendingOperatorTest extends BaseTest
         @Override
         public Token evaluate(Token... args)
         {   
-            PendingOperator2 po = new PendingOperator2(Derivation.getTransactionID(), args);
+            PendingOperator2 po = new PendingOperator2(Token.getTransactionID(), args);
             return Token.createPendingToken(po);
         }  
         

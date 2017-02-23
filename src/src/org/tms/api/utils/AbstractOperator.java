@@ -70,6 +70,12 @@ abstract public class AbstractOperator implements Operator
 	}
 	
 	@Override
+    public int getPriority()
+    {
+        return Operator.DEFAULT_PRIORITY;
+    }
+
+	@Override
 	/**
 	 * {@inheritDoc}
 	 */
@@ -77,6 +83,24 @@ abstract public class AbstractOperator implements Operator
 	{
 		return m_resultType;
 	}
+
+	@Override
+	/**
+	 * {@inheritDoc}
+	 */
+    public boolean isVariableArgs()
+    {
+        return false;
+    }
+    
+	@Override
+	/**
+	 * {@inheritDoc}
+	 */
+    public boolean isRightAssociative() 
+    {
+        return false;
+    }
 
 	@Override
 	/**

@@ -18,6 +18,7 @@ import org.tms.api.derivables.Derivable;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.exceptions.InvalidParentException;
+import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.tds.events.EventsProcessorThreadPoolCreator;
 import org.tms.tds.events.TableElementListeners;
 
@@ -212,7 +213,12 @@ public abstract class TableCellsElementImpl extends TableElementImpl
         fireEvents(this, TableElementEventType.OnBeforeDelete);
         
         // clear label, also resets index, if rows are indexed
-        setLabel(null);        
+        try {
+        	setLabel(null);  
+        }
+        catch (UnsupportedImplementationException ui) {
+        	// noop, just ignore
+        }
     }
     
     /*

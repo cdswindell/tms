@@ -10,6 +10,7 @@ import java.util.Map;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.TableIOException;
@@ -26,8 +27,10 @@ import org.tms.io.TableExportAdapter;
 import org.tms.io.XMLReader;
 import org.tms.io.XlsReader;
 import org.tms.tds.ContextImpl;
+import org.tms.tds.SubsetImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
+import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.tds.logs.LogsTableImpl;
 
 /**
@@ -257,6 +260,25 @@ public final class TableFactory
         return t;
     }
 
+    /*
+     * Filtered Tables
+     */
+    static public Table createFilteredTable(Table parent, Subset scope) 
+    {
+    	Table t = null;
+    	if (parent instanceof TableImpl && scope instanceof SubsetImpl)
+    		t = FilteredTableImpl.createTable((TableImpl)parent, (SubsetImpl)scope, ContextImpl.fetchDefaultContext());       
+        return t;
+    }
+
+    static public Table createFilteredTable(Table parent, Subset scope, TableContext tc) 
+    {
+    	Table t = null;
+    	if (parent instanceof TableImpl && scope instanceof SubsetImpl && tc instanceof ContextImpl)
+    		t = FilteredTableImpl.createTable((TableImpl)parent, (SubsetImpl)scope, (ContextImpl)tc);       
+        return t;
+    }
+    
     /*
      * DBMS Tables
      */

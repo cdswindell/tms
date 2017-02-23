@@ -169,29 +169,33 @@ public class BaseTest
 	protected boolean validateJSONFill(JSONObject json, TableSliceElementImpl tse)
 	{
 		// check size
-		assertThat(json.size(), is(tse.getNumCells()));
+		assertThat(tse.getNumCells() >= json.size(), is(true));
 		
 		// for each JSON element, get the corresponding table cell and compare
 		for (Object k: json.keySet()) {
 			String key = (String) k;
 			Object value = json.get(k);
 			
-			Cell cell = null;
-	        Object o = MathUtil.parseCellValue(key, true);
-	        if (o != null && o instanceof Integer && ((Integer)o) > 0)
-	        	cell = tse.getCell(Access.ByIndex, o);
-	        else
-	        	cell = tse.getCell(Access.ByLabel, key);
-	        
-	        if (cell == null)
-	        	fail("Cell not found for reference: " + key);
-	        
-	        if (value == null)
-	        	assertThat(cell.isNull(), is(true));
-	        else if (value instanceof Number)
-	        	assertThat(((Number)cell.getCellValue()).doubleValue(), is(((Number)value).doubleValue()));
-	        else
-	        	assertThat(cell.getCellValue(), is(value));
+			if (value != null && value instanceof JSONObject)
+				validateJSONFill((JSONObject)value, tse);
+			else {
+				Cell cell = null;
+		        Object o = MathUtil.parseCellValue(key, true);
+		        if (o != null && o instanceof Integer && ((Integer)o) > 0)
+		        	cell = tse.getCell(Access.ByIndex, o);
+		        else
+		        	cell = tse.getCell(Access.ByLabel, key);
+		        
+		        if (cell == null)
+		        	fail("Cell not found for reference: " + key);
+		        
+		        if (value == null)
+		        	assertThat(cell.isNull(), is(true));
+		        else if (value instanceof Number)
+		        	assertThat(((Number)cell.getCellValue()).doubleValue(), is(((Number)value).doubleValue()));
+		        else
+		        	assertThat(cell.getCellValue(), is(value));
+			}
 		}
 		
 		// if we get here, all is well

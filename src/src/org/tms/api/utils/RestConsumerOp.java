@@ -16,11 +16,9 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.InvalidOperandsException;
 import org.tms.api.derivables.InvalidOperatorException;
 import org.tms.api.derivables.Token;
-import org.tms.api.derivables.TokenType;
 
 abstract public class RestConsumerOp extends AbstractOperator
 {
@@ -174,44 +172,11 @@ abstract public class RestConsumerOp extends AbstractOperator
 	/**
 	 * {@inheritDoc}
 	 */
-    final public String getLabel()
-    {
-        return super.getLabel();
-    }
-    
-    @Override
-	/**
-	 * {@inheritDoc}
-	 */
-    final public TokenType getTokenType()
-    {
-        return TokenType.numArgsToTokenType(getArgTypes() != null ? getArgTypes().length : 0);
-    }
-
-    @Override
-	/**
-	 * {@inheritDoc}
-	 */
-    final public Class<?> getResultType()
-    {
-        return super.getResultType();
-    }
-    
-    @Override
-	/**
-	 * {@inheritDoc}
-	 */
     final public Token evaluate(Token... args)
     {
         try {
             // harvest args
-            Object [] mArgs = new Object [numArgs()];
-            for (int i = 0; i < numArgs(); i++) {
-                mArgs[i] = args[i].getValue();
-                
-                if (mArgs[i] == null && !isAllowNulls())
-                	return Token.createNullToken();
-            }
+            Object [] mArgs = unpack(args);
             
             // get a copy of the base URL, it may also contain substitution params
             String baseUrl = m_baseUrl;
@@ -236,7 +201,7 @@ abstract public class RestConsumerOp extends AbstractOperator
             }
             
             // create a RestEvaluator; it is a Runnable
-            RestEvaluator re = new RestEvaluator(Derivation.getTransactionID(), baseUrl, urlParams);
+            RestEvaluator re = new RestEvaluator(Token.getTransactionID(), baseUrl, urlParams);
             
             return Token.createPendingToken(re);
         }
@@ -311,12 +276,12 @@ abstract public class RestConsumerOp extends AbstractOperator
                 JSONObject json = (JSONObject)parser.parse(jsonStr);
                 
                 Token t = Token.createOperandToken(parseJsonResponse(json));
-                Derivation.postResult(m_transId, t);
+                Token.postResult(m_transId, t);
             }
             catch (Exception e)
             {
                 Token errToken = Token.createErrorToken(e.getMessage());
-                Derivation.postResult(m_transId, errToken);
+                Token.postResult(m_transId, errToken);
             }
         }
 

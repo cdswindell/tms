@@ -25,6 +25,11 @@ import org.tms.tds.events.EventProcessorThreadPool;
  */
 public interface TableContext extends BaseElement, InitializableTableProperties
 {
+	/**
+	 * Clears all {@link Table}s contained in this {@code TableContext}.
+	 */
+	public void clear();
+	
     /**
      * Returns the {@link Table} referenced by the {@link Access} specification and associated parameters. 
      * {@code TableContext} instances maintain a directory of the {@link Table} instances created within a given

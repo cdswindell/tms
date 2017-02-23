@@ -192,6 +192,38 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         initialize(ContextImpl.getDefaultContext());
     }
     
+    synchronized public void clear()
+    {
+    	if (!m_registeredPersistantTables.isEmpty()) {
+    		List<TableImpl> tables = new ArrayList<TableImpl>(m_registeredPersistantTables);
+    		for (TableImpl table : tables) {
+    			if (table != null && table.isValid())
+    				table.delete(false);
+    		}
+    	}
+    	
+    	m_registeredNonpersistantTables.clear();
+    	m_registeredPersistantTables.clear();
+    }
+    
+    /*
+     * Java 8
+     */
+    @Override
+    public boolean isDerivableThreadPool()
+    {
+        return this instanceof DerivableThreadPool;
+    }
+    
+    @Override
+    public boolean isEventProcessorThreadPool()
+    {
+        return this instanceof EventProcessorThreadPool;
+    }
+    /*
+     * Java 8
+     */
+    
     protected void initialize(ContextImpl otherContext)
     {
         ContextImpl sourceContext = isDefault() ? otherContext : (otherContext != null ? otherContext : ContextImpl.getDefaultContext());

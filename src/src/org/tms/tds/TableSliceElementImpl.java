@@ -33,10 +33,9 @@ import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TableImpl.CellReference;
 import org.tms.teq.DerivationImpl;
-import org.tms.teq.MathUtil;
 import org.tms.util.JustInTimeSet;
 
-public abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TimeSeriesable, TableRowColumnElement
+public abstract class TableSliceElementImpl extends TableCellsElementImpl implements Derivable, TimeSeriesable, TableRowColumnElement, Comparable<TableSliceElementImpl>
 {
     abstract protected TableSliceElementImpl insertSlice(int idx);
     abstract public TableSliceElementImpl setCurrent();
@@ -713,37 +712,35 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
 			 */
 			for (Object k: json.keySet()) {
 				String key = (String) k;
+				Object value = json.get(key);
 				
-				if (key != null && (key = key.trim()).length() > 0) {
-					Object value = json.get(k);
-					
+				if (value != null && value instanceof JSONObject) {
+					if (fillElement((JSONObject)value, preserveDerivedCells))
+						setSome = true;
+				}
+				else {					
 					CellImpl c = getCellByStringReference(key);
-				    if (c != null) {
-				    	if (visitedCells.contains(c))
-	                        throw new InvalidException(this.getElementType(), 
-	                                String.format("JSON Fill: %s previously filled", getSlicesType()));  
-				    	else
-				    		visitedCells.add(c);
-				    	
-				        if (preserveDerivedCells && isDerived(c)) 
-				            continue;
-				        else
-				        	c.clearDerivation();
-				        
-				        try {
-				        	if (value instanceof String)
-				        		value = MathUtil.parseCellValue((String)value, true);
-				        	
-				            if (c.setCellValue(value, true, false))
-				                setSome = true;
-				        }
-				        catch (ReadOnlyException ex) {
-				            readOnlyExceptionEncountered = true;
-				        }
-				        catch (NullValueException ex) {
-				            nullValueExceptionEncountered = true;
-				        }
-				    }
+					if (c != null) {
+						if (!visitedCells.add(c))
+							throw new InvalidException(this.getElementType(), 
+									String.format("JSON Fill: %s previously filled", getSlicesType()));  
+
+						if (preserveDerivedCells && isDerived(c)) 
+							continue;
+						else
+							c.clearDerivation();
+
+						try {
+							if (c.setCellValue(value, true, false))
+								setSome = true;
+						}
+						catch (ReadOnlyException ex) {
+							readOnlyExceptionEncountered = true;
+						}
+						catch (NullValueException ex) {
+							nullValueExceptionEncountered = true;
+						}
+					}
 				}
 			}
 		}
@@ -976,6 +973,18 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     		throw new UnimplementedException("No support for: " + this.getClass().getSimpleName());
     }
     
+	@Override
+	public int compareTo(TableSliceElementImpl o) 
+	{
+		if (o == null)
+			return -1;
+
+		String thisL = getLabel() != null ? getLabel() : "";
+		String otherL = o.getLabel() != null ?o.getLabel() : "";
+
+		return thisL.compareTo(otherL);
+	}
+
     @Override
     public String toString()
     {

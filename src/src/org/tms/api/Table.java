@@ -258,6 +258,13 @@ public interface Table extends TableElement, InitializableTableProperties
     public Iterable<Column> columns();
     
     /**
+     * Add a new unlabeled {@link Subset} to this {@link Table}. 
+     * @return the new {@code Subset}
+     * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
+     */    
+    public Subset addSubset();    
+    
+    /**
      * Add a new {@link Subset} to this {@link Table} using the {@link Access} specified by {@code mode} and the optional argument(s)
      * specified in {@code mda}. See the Javadoc on {@link Access} to learn more about the various {@code Access} modes and
      * their required parameters (if any). 

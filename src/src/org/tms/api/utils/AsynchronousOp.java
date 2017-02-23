@@ -2,7 +2,6 @@ package org.tms.api.utils;
 
 import java.util.UUID;
 
-import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.Token;
 import org.tms.teq.AbstractOp;
 import org.tms.teq.NullsNotAllowedException;
@@ -30,7 +29,7 @@ abstract public class AsynchronousOp extends AbstractOp
 	        Object [] mArgs = unpack(args);
 	        
 	        // save away the args and the transaction id
-	        CalculationRunner cr = new CalculationRunner(mArgs, Derivation.getTransactionID());
+	        CalculationRunner cr = new CalculationRunner(mArgs, Token.getTransactionID());
 	        
 			// return the pending token
 	        return Token.createPendingToken(cr);
@@ -61,11 +60,11 @@ abstract public class AsynchronousOp extends AbstractOp
 				Object result = performCalculation(m_args);
 				
 	            Token t = Token.createOperandToken(result);
-	            Derivation.postResult(m_transactionId, t);
+	            Token.postResult(m_transactionId, t);
 			}
 			catch (Exception e) {
 	            Token errToken = Token.createErrorToken(e);
-	            Derivation.postResult(m_transactionId, errToken);
+	            Token.postResult(m_transactionId, errToken);
 			}
 		}
 	}
