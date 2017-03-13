@@ -331,10 +331,9 @@ public class XlsReader extends BaseReader<XLSOptions>
             applyDerivations();
             
             // for each table, remove empty elements (if requested) and do a final recalc
-            for (Table t : processedTables) {
+            for (Table t : processedTables) 
                 pruneEmptyElements(t);
-            }
-            
+             
             // release resources
             processedTables.clear();
         }

@@ -50,7 +50,8 @@ public class XLSOptions extends StyledPageIOOptions<XLSOptions> implements Style
         BlanksAsNull,
         Derivations,
         Descriptions, 
-        CommentAuthor
+        CommentAuthor,
+        ReadOnly
     }
 
     private enum ExcelFileFormat  
@@ -73,6 +74,7 @@ public class XLSOptions extends StyledPageIOOptions<XLSOptions> implements Style
         set(Options.BlanksAsNull, true);
         set(Options.Derivations, true);
         set(Options.Descriptions, true);
+        set(Options.ReadOnly, true);
     }
     
     private XLSOptions (final XLSOptions format)

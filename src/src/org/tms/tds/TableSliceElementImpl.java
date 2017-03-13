@@ -991,7 +991,7 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         if (isInvalid())
             return String.format("[Deleted %s]", getElementType());
         
-        String label = (String)getProperty(TableProperty.Label);
+        String label = getLabel();
         if (label != null)
             label = ": " + label;
         else
