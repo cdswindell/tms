@@ -45,12 +45,22 @@ public class ExcelCellImpl extends CellImpl implements ExternalDependenceTableEl
     synchronized public Object getCellValue()
     {
     	if (!isSet(sf_IS_PROCESSED_FLAG)) {
-    		m_cellValue = m_row.getCellValue((ExcelColumnImpl)getColumn());
-    		
+    		m_cellValue = m_row.getCellValue((ExcelColumnImpl)getColumn());   		
     		set(sf_IS_PROCESSED_FLAG, true);
     	}
     	
         return m_cellValue;
+    }
+    
+    void unsetProcessed()
+    {
+		unSet(sf_IS_PROCESSED_FLAG);	
+    }
+    
+    @Override
+    public boolean isDerived()
+    {
+		return m_row.isFormula((ExcelColumnImpl)getColumn()); 	
     }
     
     @Override

@@ -59,33 +59,47 @@ public class ExcelRowImpl extends RowImpl implements ExternalDependenceTableElem
     @Override
     public Derivation setDerivation(String expr) 
     {
-        throw new UnsupportedImplementationException(this, "Cannot set a log file on a database row");
+        throw new UnsupportedImplementationException(this, "Cannot set an Excel on a database row");
     }
     
     @Override
     public boolean clear()
     {
-        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot clear a log file element");
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot clear an Excel element");
     }
     
     @Override
     public boolean fill(Object o)
     {
-        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill a log file row/column");
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill an Excel row/column");
     }
     
     @Override
     public void fill(Object o, int n, Access access, Object... mda)
     {
-        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill a log file row/column");
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill an Excel row/column");
     }
     
     @Override
     public void fill(Object[] o, Access access, Object... mda)
     {
-        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill a log file row/column");
+        throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill an Excel row/column");
     }
 
+	public org.apache.poi.ss.usermodel.Cell getCell(ExcelColumnImpl column) 
+	{
+		return 	m_eRow.getCell(column.getFieldIndex(), MissingCellPolicy.RETURN_BLANK_AS_NULL);
+	}
+	
+	public boolean isFormula(ExcelColumnImpl column) 
+	{
+		org.apache.poi.ss.usermodel.Cell eC = m_eRow.getCell(column.getFieldIndex(), MissingCellPolicy.RETURN_BLANK_AS_NULL);
+		if (eC != null && eC.getCellTypeEnum() == CellType.FORMULA)
+			return true;
+		else
+			return false;
+	}
+	
 	public Object getCellValue(ExcelColumnImpl column) 
 	{
 		org.apache.poi.ss.usermodel.Cell eC = m_eRow.getCell(column.getFieldIndex(), MissingCellPolicy.RETURN_BLANK_AS_NULL);
@@ -120,20 +134,26 @@ public class ExcelRowImpl extends RowImpl implements ExternalDependenceTableElem
     private Object fetchFormulaCellValue(org.apache.poi.ss.usermodel.Cell eC) 
     {
         String cellFormula = eC.getCellFormula();
-        switch (cellFormula) {
-            case "TRUE":
-            case "TRUE()":
-                return true;
-
-            case "FALSE":
-            case "FALSE()":
-                return false;
-
-            case "NOW":
-            case "NOW()":
-            case "TODAY":
-            case "TODAY()":
-                return new Date();
+        if (cellFormula != null) {
+	        switch (cellFormula.toUpperCase()) {
+	            case "TRUE":
+	            case "TRUE()":
+	                return true;
+	
+	            case "FALSE":
+	            case "FALSE()":
+	                return false;
+	
+	            case "RAND":
+	            case "RAND()":
+	                return Math.random();
+	
+	            case "NOW":
+	            case "NOW()":
+	            case "TODAY":
+	            case "TODAY()":
+	                return new Date();
+	        }
         }
 
         // parse formula value

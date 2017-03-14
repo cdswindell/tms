@@ -1856,7 +1856,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
      * Note: <b>for systems use only!</b>
      * @return ArrayList&lt;ColumnImpl&gt;
      */
-    ArrayList<ColumnImpl> getColumnsInternal()
+    protected ArrayList<ColumnImpl> getColumnsInternal()
     {
         return m_cols;
     }

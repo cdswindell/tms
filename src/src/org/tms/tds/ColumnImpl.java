@@ -362,7 +362,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
 			return 0;
 	}
 
-
 	/**
 	 * Invalidate the specified cell in the column cell array. Called by TableImpl.cacheCellOffset
 	 * in response to row deletions

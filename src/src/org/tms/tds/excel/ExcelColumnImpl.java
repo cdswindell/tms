@@ -105,4 +105,9 @@ public class ExcelColumnImpl extends ColumnImpl implements ExternalDependenceTab
     {
         throw new UnsupportedImplementationException(ElementType.Cell, "Cannot fill an Excel row/column");
     }
+
+	synchronized void unsetProcessedFormulaCells() 
+	{
+		cellsInternal().forEach(c -> {if (c != null && c instanceof ExcelCellImpl && c.isDerived()) ((ExcelCellImpl)c).unsetProcessed();});	
+	}
 }

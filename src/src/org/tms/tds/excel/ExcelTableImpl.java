@@ -6,10 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.tms.api.Access;
 import org.tms.api.ElementType;
@@ -27,13 +29,13 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
     public static final ExcelTableImpl createTable(File excelFile, XLSOptions options) 
     throws IOException
     {
-        return new ExcelTableImpl(excelFile, options, ContextImpl.fetchDefaultContext());
+        return new ExcelTableImpl(excelFile, options, null, ContextImpl.fetchDefaultContext());
     }
     
-    public static final ExcelTableImpl createTable(File excelFile, XLSOptions options, ContextImpl tc) 
+    public static final ExcelTableImpl createTable(File excelFile, XLSOptions options, Object sheetRef, ContextImpl tc) 
     throws IOException
     {
-        return new ExcelTableImpl(excelFile, options, tc);
+        return new ExcelTableImpl(excelFile, options, sheetRef, tc);
     }
 
     private int m_numExcelCols;
@@ -46,7 +48,7 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
     private Sheet m_sheet;
     private SpreadsheetVersion m_ssV;
     
-    ExcelTableImpl(File excelFile, XLSOptions options, ContextImpl tc) 
+    ExcelTableImpl(File excelFile, XLSOptions options, Object sheetRef, ContextImpl tc) 
     throws IOException
     {
         // initialize the default table object
@@ -65,7 +67,7 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
         m_excelFile = excelFile;
         m_opts = options;
         
-        processFile(null);
+        processFile(sheetRef);
     }
     
     @Override
@@ -124,7 +126,6 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
 		return m_sheet;
 	}
 	
-    @SuppressWarnings("resource")
 	private void processFile(Object sheetRef) 
     throws IOException 
     {
@@ -136,7 +137,10 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
             excelFileInputStream = new FileInputStream(m_excelFile);
             
             m_wb = WorkbookFactory.create(excelFileInputStream);
-            m_ssV = m_wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;     
+            m_ssV = m_wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;    
+            
+            // close the file
+            excelFileInputStream.close();
             
             // get appropriate sheet
             if (sheetRef == null) {
@@ -159,6 +163,9 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
             else
         		throw new IllegalArgumentException("Invalid Sheet Reference");
 
+            // Name the table
+            this.setLabel(m_sheet.getSheetName());
+            
             // create row data structures
             m_numExcelRows = m_sheet.getLastRowNum() + 1;
             
@@ -208,6 +215,27 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
 			} catch (IOException e) { /* noop */ }
      	}
 
+    }
+    
+    @Override
+    public void recalculate()
+    {
+    	// recalculate Excel sheet
+    	recalculateAllFormulas();
+    	
+    	// force reprocess of all Excel formula cells
+    	getColumnsInternal().forEach(c -> {if (c != null && c instanceof ExcelColumnImpl) ((ExcelColumnImpl)c).unsetProcessedFormulaCells(); });
+    	
+    	// now recalc TMS stuff
+    	super.recalculate();
+    }
+    
+    protected void recalculateAllFormulas()
+    {
+        if (m_ssV == SpreadsheetVersion.EXCEL2007)
+            XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook) m_wb);
+        else
+            HSSFFormulaEvaluator.evaluateAllFormulaCells(m_wb);
     }
     
     @Override

@@ -30,6 +30,7 @@ import org.tms.tds.ContextImpl;
 import org.tms.tds.SubsetImpl;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
+import org.tms.tds.excel.ExcelTableImpl;
 import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.tds.logs.LogsTableImpl;
 
@@ -317,11 +318,63 @@ public final class TableFactory
     {
     	Table t = null;
         if (tc instanceof ContextImpl)
-        	t = LogsTableImpl.createTable(logFile, format, (ContextImpl)tc);       
+        	t = LogsTableImpl.createTable(logFile, format, (ContextImpl)tc);   
+        
         return t;
     }
 
     /*
+     * Excel Table
+     */
+    static public Table createExcelTable(File excelFile, XLSOptions opts) 
+    throws IOException 
+    {
+        return createExcelTable(excelFile, opts, ContextImpl.fetchDefaultContext());
+    }
+
+    static public Table createExcelTable(File excelFile, XLSOptions opts, int sheetNo) 
+    throws IOException 
+    {
+        return createExcelTable(excelFile, opts, sheetNo, ContextImpl.fetchDefaultContext());
+    }
+
+    static public Table createExcelTable(File excelFile, XLSOptions opts, String sheetRef) 
+    throws IOException 
+    {
+        return createExcelTable(excelFile, opts, sheetRef, ContextImpl.fetchDefaultContext());
+    }
+
+    static public Table createExcelTable(File excelFile, XLSOptions opts, TableContext tc) 
+    throws IOException 
+    {
+    	Table t = null;
+        if (tc instanceof ContextImpl)
+        	t = ExcelTableImpl.createTable(excelFile, opts, null, (ContextImpl)tc);  
+        
+        return t;
+    }
+    
+    static public Table createExcelTable(File excelFile, XLSOptions opts, int sheetNo, TableContext tc) 
+    throws IOException 
+    {
+    	Table t = null;
+        if (tc instanceof ContextImpl)
+        	t = ExcelTableImpl.createTable(excelFile, opts, sheetNo, (ContextImpl)tc);  
+        
+        return t;
+    }
+    
+    static public Table createExcelTable(File excelFile, XLSOptions opts, String sheetRef, TableContext tc) 
+    throws IOException 
+    {
+    	Table t = null;
+        if (tc instanceof ContextImpl)
+        	t = ExcelTableImpl.createTable(excelFile, opts, sheetRef, (ContextImpl)tc);  
+        
+        return t;
+    }
+    
+   /*
      * Import Operations
      */    
     static public Table importFile(String fileName)
