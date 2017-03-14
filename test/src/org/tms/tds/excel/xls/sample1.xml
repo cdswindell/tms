@@ -1,0 +1,68 @@
+<exTable nRows="5" cCols="3" readOnly="false" allowNulls="true" enforce="false" lerIdx="4" lecIdx="3">
+  <exFile>/Users/davids/Documents/dev/tms/test/src/org/tms/tds/excel/xls/sample1.xlsx</exFile>
+  <exOpts>
+    <m__options>
+      <entry>
+        <org.tms.io.options.BaseIOOptions_-BaseOptions>IsColumnLabels</org.tms.io.options.BaseIOOptions_-BaseOptions>
+        <boolean>true</boolean>
+      </entry>
+      <entry>
+        <org.tms.io.options.StyledPageIOOptions_-Options>DefaultFontSize</org.tms.io.options.StyledPageIOOptions_-Options>
+        <int>12</int>
+      </entry>
+      <entry>
+        <org.tms.api.io.XLSOptions_-Options>BlanksAsNull</org.tms.api.io.XLSOptions_-Options>
+        <boolean>true</boolean>
+      </entry>
+      <entry>
+        <org.tms.io.options.BaseIOOptions_-BaseOptions>IsIgnoreEmptyRows</org.tms.io.options.BaseIOOptions_-BaseOptions>
+        <boolean>false</boolean>
+      </entry>
+      <entry>
+        <org.tms.io.options.BaseIOOptions_-BaseOptions>IsRowLabels</org.tms.io.options.BaseIOOptions_-BaseOptions>
+        <boolean>true</boolean>
+      </entry>
+      <entry>
+        <org.tms.api.io.XLSOptions_-Options>Derivations</org.tms.api.io.XLSOptions_-Options>
+        <boolean>true</boolean>
+      </entry>
+      <entry>
+        <org.tms.api.io.XLSOptions_-Options>ReadOnly</org.tms.api.io.XLSOptions_-Options>
+        <boolean>true</boolean>
+      </entry>
+      <entry>
+        <org.tms.api.io.XLSOptions_-Options>FileFormat</org.tms.api.io.XLSOptions_-Options>
+        <org.tms.api.io.XLSOptions_-ExcelFileFormat>XLSX</org.tms.api.io.XLSOptions_-ExcelFileFormat>
+      </entry>
+      <entry>
+        <org.tms.io.options.BaseIOOptions_-BaseOptions>IsIgnoreEmptyColumns</org.tms.io.options.BaseIOOptions_-BaseOptions>
+        <boolean>false</boolean>
+      </entry>
+      <entry>
+        <org.tms.api.io.XLSOptions_-Options>Descriptions</org.tms.api.io.XLSOptions_-Options>
+        <boolean>true</boolean>
+      </entry>
+      <entry>
+        <org.tms.io.options.StyledPageIOOptions_-Options>ColumnWidth</org.tms.io.options.StyledPageIOOptions_-Options>
+        <int>65</int>
+      </entry>
+      <entry>
+        <org.tms.io.options.BaseIOOptions_-BaseOptions>FileFormat</org.tms.io.options.BaseIOOptions_-BaseOptions>
+        <org.tms.api.io.IOFileFormat>EXCEL</org.tms.api.io.IOFileFormat>
+      </entry>
+    </m__options>
+  </exOpts>
+  <exSheet>Sample 1</exSheet>
+  <label>Sample 1</label>
+  <rows>
+    <row index="5"/>
+  </rows>
+  <columns/>
+  <cells>
+    <cell rIdx="5" cIdx="1">
+      <derivation>mean(col &quot;A&quot;)</derivation>
+      <dataType>java.lang.Double</dataType>
+      <value>3254.4125</value>
+    </cell>
+  </cells>
+</exTable>

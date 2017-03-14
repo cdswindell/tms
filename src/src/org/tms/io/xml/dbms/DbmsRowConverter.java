@@ -1,8 +1,9 @@
-package org.tms.io.xml;
+package org.tms.io.xml.dbms;
 
 import org.tms.api.Row;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
+import org.tms.io.xml.RowConverter;
 import org.tms.tds.dbms.DbmsRowImpl;
 
 public class DbmsRowConverter extends RowConverter

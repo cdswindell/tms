@@ -3,20 +3,31 @@ package org.tms.tds.excel;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.Test;
 import org.tms.BaseTest;
+import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Table;
+import org.tms.api.TableContext;
+import org.tms.api.factories.TableContextFactory;
 import org.tms.api.io.XLSOptions;
+import org.tms.api.io.XMLOptions;
 
 public class ExcelTableImplTest extends BaseTest
 {
     private static final String SAMPLE1 = "sample1.xlsx";
+    private static final String ExportSample1Gold = "sample1.xml";
 
 	@Test
 	public void testSimpleSheet() throws IOException 
@@ -92,5 +103,63 @@ public class ExcelTableImplTest extends BaseTest
 		assertNotNull(cell);
 		assertThat(cell.isDerived(), is(true));	
 		assertThat(cell.getCellValue(), is(false));	
+	}
+	
+	@Test
+	public void testExcelExport() throws IOException 
+	{
+        Path path = Paths.get(qualifiedFileName(ExportSample1Gold, "xls"));
+        byte[] gold = toLinuxByteArray(Files.readAllBytes(path)); 
+
+        assertNotNull(gold);
+        assertThat(gold.length > 0, is(true));
+		File xlsFile = new File(qualifiedFileName(SAMPLE1, "xls"));
+		
+		ExcelTableImpl et = ExcelTableImpl.createTable(xlsFile, XLSOptions.Default);
+		assertNotNull(et);		
+		assertThat(et.getNumRows(), is(4));
+		
+		Row nr = et.addRow();
+		assertNotNull(nr);
+		
+		Cell cell = et.getCell(nr,  et.getColumn(1));
+		assertNotNull(cell);
+		cell.setDerivation("mean(col 1)");
+		
+	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		et.export(bos, XMLOptions.Default);
+		bos.close();
+		
+        // test byte streams are the same
+        byte [] output = toLinuxByteArray(bos);
+        assertNotNull(output);
+
+        assertThat(gold.length, is(output.length));       
+        
+        // byte contents should be the same
+        assertThat(output, is(gold));
+	}
+	
+	@Test
+	public void testExcelImport() throws IOException 
+	{
+        TableContext tc = TableContextFactory.createTableContext();
+        assertNotNull(tc);
+        assertThat(0, is(tc.getNumTables()));
+        
+        try
+        {
+            tc.importTable(qualifiedFileName(ExportSample1Gold, "xls"));
+            assertThat(1, is(tc.getNumTables()));
+            
+            Table t1 = tc.getTable(Access.ByLabel, "Sample 1");
+            assertNotNull(t1);
+            assertThat(5, is(t1.getNumRows()));
+            assertThat(3, is(t1.getNumColumns()));
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
 	}
 }

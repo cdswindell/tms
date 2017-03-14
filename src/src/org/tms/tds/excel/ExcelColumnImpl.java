@@ -27,19 +27,22 @@ public class ExcelColumnImpl extends ColumnImpl implements ExternalDependenceTab
     public String getLabel()
     {
     	if (getTable().isColumnNames()) {
-    		org.apache.poi.ss.usermodel.Row eR = getTable().getSheet().getRow(0);
-    		if (eR != null) {
-	    		org.apache.poi.ss.usermodel.Cell eC = eR.getCell(m_fieldIndex);
-	    		if (eC != null) {
-	    	        CellType cellType = eC.getCellTypeEnum();
-	    	        if (cellType == CellType.STRING)
-	    	        	return eC.getRichStringCellValue().getString();
+    		if (!isSet(sf_IS_PROCESSED_FLAG)) {
+	    		org.apache.poi.ss.usermodel.Row eR = getTable().getSheet().getRow(0);
+	    		if (eR != null) {
+		    		org.apache.poi.ss.usermodel.Cell eC = eR.getCell(m_fieldIndex);
+		    		if (eC != null) {
+		    	        CellType cellType = eC.getCellTypeEnum();
+		    	        if (cellType == CellType.STRING)
+		    	        	super.setLabel(eC.getRichStringCellValue().getString());
+		    		}
 	    		}
+	    		
+	    		set(sf_IS_PROCESSED_FLAG, true);	    		
     		}
-    		
-    		return null;
     	}
-    	else return super.getLabel();   		
+    	
+    	return super.getLabel();   		
     }
     
     @Override

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.ss.SpreadsheetVersion;
@@ -120,10 +121,19 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
     	return m_ssV;
     }
     
-
+    public XLSOptions getOptions()
+    {
+    	return m_opts;
+    }
+    
 	public Sheet getSheet() 
 	{
 		return m_sheet;
+	}
+	
+	public String getSheetName() 
+	{
+		return m_sheet.getSheetName();
 	}
 	
 	private void processFile(Object sheetRef) 
@@ -236,6 +246,18 @@ public class ExcelTableImpl extends TableImpl implements ExternalDependenceTable
             XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook) m_wb);
         else
             HSSFFormulaEvaluator.evaluateAllFormulaCells(m_wb);
+    }
+    
+    public Iterable<ExcelColumnImpl> excelColumns()
+    {
+        vetElement();
+        return new BaseElementIterable<ExcelColumnImpl>(getColumnsInternal().stream().filter(c -> c != null && c instanceof ExcelColumnImpl).collect(Collectors.toList()));
+    }
+    
+    public Iterable<ExcelRowImpl> excelRows()
+    {
+        vetElement();
+        return new BaseElementIterable<ExcelRowImpl>(getRowsInternal().stream().filter(c -> c != null && c instanceof ExcelRowImpl).collect(Collectors.toList()));
     }
     
     @Override

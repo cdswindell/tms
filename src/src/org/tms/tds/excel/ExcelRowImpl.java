@@ -26,16 +26,19 @@ public class ExcelRowImpl extends RowImpl implements ExternalDependenceTableElem
     public String getLabel()
     {
     	if (getTable().isRowNames()) {
-    		org.apache.poi.ss.usermodel.Cell eC = m_eRow.getCell(0);
-    		if (eC != null) {
-    	        CellType cellType = eC.getCellTypeEnum();
-    	        if (cellType == CellType.STRING)
-    	        	return eC.getRichStringCellValue().getString();
+    		if (!isSet(sf_IS_PROCESSED_FLAG)) {
+	    		org.apache.poi.ss.usermodel.Cell eC = m_eRow.getCell(0);
+	    		if (eC != null) {
+	    	        CellType cellType = eC.getCellTypeEnum();
+	    	        if (cellType == CellType.STRING) 
+	    	        	super.setLabel(eC.getRichStringCellValue().getString());
+	    		}
+	    		
+	    		set(sf_IS_PROCESSED_FLAG, true);
     		}
-    		
-    		return null;
     	}
-    	else return super.getLabel();   		
+    	
+    	return super.getLabel();   		
     }
     
     @Override

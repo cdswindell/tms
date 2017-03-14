@@ -335,6 +335,16 @@ public class TableConverter extends BaseConverter
             nodeName = processChildren(t,  CellImpl.class, reader, context);           
         }
 
+        // verify the table has the correct number of rows & cols
+        if (extendTableRows() && nRows != null && nRows > t.getNumRows())
+        	t.addRow(nRows);
+        
+        if (extendTableColumns() && nCols != null && nCols > t.getNumColumns())
+        	t.addColumn(nCols);
+        
+        // postprocess; this is normally a noop
+        postProcessTable(t);
+        
         // register annotated dataTypes, if any
 		@SuppressWarnings("unchecked")
 		Set<Class<?>> toRegisterDataTypes = (Set<Class<?>>)context.get(TMS_TO_REGISTER_CACHE_KEY);
@@ -360,13 +370,6 @@ public class TableConverter extends BaseConverter
                 t.recalculate();
         }
                
-        // verify the table has the correct number of rows & cols
-        if (extendTableRows() && nRows != null && nRows > t.getNumRows())
-        	t.addRow(nRows);
-        
-        if (extendTableColumns() && nCols != null && nCols > t.getNumColumns())
-        	t.addColumn(nCols);
-        
         // process time series, if any; do this only we'e extended the table, as it
         // can instantly start appending rows/columns
         if (options().isTimeSeries()) {
@@ -404,6 +407,15 @@ public class TableConverter extends BaseConverter
         return t;
     }
     
+	/**
+	 * Override as required
+	 * @param t Table
+	 */
+	protected void postProcessTable(TableImpl t) 
+	{
+		// noop
+	}
+
 	protected boolean extendTableRows()
 	{
 		return true;

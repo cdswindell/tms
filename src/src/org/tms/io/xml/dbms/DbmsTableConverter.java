@@ -1,4 +1,4 @@
-package org.tms.io.xml;
+package org.tms.io.xml.dbms;
 
 import java.sql.SQLException;
 
@@ -7,6 +7,7 @@ import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableFactory;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
+import org.tms.io.xml.ExternalDependenceTableConverter;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
 

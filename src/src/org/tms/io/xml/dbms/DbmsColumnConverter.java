@@ -1,8 +1,9 @@
-package org.tms.io.xml;
+package org.tms.io.xml.dbms;
 
 import org.tms.api.Column;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
+import org.tms.io.xml.ColumnConverter;
 import org.tms.tds.dbms.DbmsColumnImpl;
 
 public class DbmsColumnConverter extends ColumnConverter

@@ -1,4 +1,4 @@
-package org.tms.io.xml;
+package org.tms.io.xml.logs;
 
 import java.io.File;
 
@@ -8,6 +8,7 @@ import org.tms.api.factories.TableFactory;
 import org.tms.api.io.logs.LogFileFormat;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
+import org.tms.io.xml.ExternalDependenceTableConverter;
 import org.tms.tds.TableImpl;
 import org.tms.tds.logs.LogsTableImpl;
 

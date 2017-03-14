@@ -1,8 +1,9 @@
-package org.tms.io.xml;
+package org.tms.io.xml.logs;
 
 import org.tms.api.Cell;
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
+import org.tms.io.xml.CellConverter;
 import org.tms.tds.logs.LogsCellImpl;
 
 public class LogsCellConverter extends CellConverter
