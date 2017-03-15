@@ -50,7 +50,8 @@ public class TableEditor implements Serializable
 	@SuppressWarnings("unchecked")
 	static <T> T findBean(String beanName) {
 	    FacesContext context = FacesContext.getCurrentInstance();
-	    return (T) context.getApplication().evaluateExpressionGet(context, "#{" + beanName + "}", Object.class);
+	    String beanRef = "#" + "{" +beanName + "}";
+	    return (T) context.getApplication().evaluateExpressionGet(context, beanRef, Object.class);
 	}
 	
 	@ManagedProperty(value = "#{tableView}", name="tableViewer")
