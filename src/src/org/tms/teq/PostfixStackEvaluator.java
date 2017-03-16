@@ -900,6 +900,11 @@ public class PostfixStackEvaluator
                     result = new Token(new Date());
                     break;
                     
+                case RemoteValueOper:
+                case RemoteNumericOper:
+                    result = RemoteValue.prepareHandler(this.getDerivation(), oper, row, col);
+                    break;
+                    
                 default:
                     break;
             }

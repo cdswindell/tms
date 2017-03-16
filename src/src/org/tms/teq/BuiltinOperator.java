@@ -193,6 +193,9 @@ public enum BuiltinOperator implements Labeled, Operator
     RowIndexOper(TokenType.BuiltIn, 8, toLabels("rowIndex", "ridx"), null, int.class, toCategories("lookup", "information")),
     
     NowOper(TokenType.BuiltIn, 8, toLabels("now"), null, java.util.Date.class, toCategories("Date/Time")),
+    
+    RemoteValueOper(TokenType.BuiltIn, 8, toLabels("remoteValue", "rv"), null, Object.class, toCategories("information")),
+    RemoteNumericOper(TokenType.BuiltIn, 8, toLabels("remoteNumeric", "rn"), null, double.class, toCategories("information")),
 
     // Single Variable Stat Functions 
     SumOper(TokenType.StatOp, 8, toLabels("sum"), toArgs(TableElement.class), double.class, toCategories("statistic")),

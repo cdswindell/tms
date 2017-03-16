@@ -50,6 +50,7 @@ public class TableViewer implements TableElementListener
     		
     		m_table.addListeners(TableElementEventType.OnNoPendings, this);
     		m_table.addListeners(TableElementEventType.OnRecalculate, this);
+    		m_table.addListeners(TableElementEventType.OnNewValue, this);
     	}
     }
 	
@@ -68,6 +69,7 @@ public class TableViewer implements TableElementListener
 		
 		m_table.addListeners(TableElementEventType.OnNoPendings, this);
 		m_table.addListeners(TableElementEventType.OnRecalculate, this);
+		m_table.addListeners(TableElementEventType.OnNewValue, this);
 		
 		EventBusFactory eb = EventBusFactory.getDefault();
         EventBus eventBus = eb.eventBus();

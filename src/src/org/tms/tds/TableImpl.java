@@ -57,6 +57,7 @@ import org.tms.io.TableExportAdapter;
 import org.tms.tds.events.TableElementListeners;
 import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.teq.DerivationImpl;
+import org.tms.teq.TeqToken;
 import org.tms.teq.TimeSeriedColumnsWorker;
 import org.tms.teq.TimeSeriedRowsWorker;
 import org.tms.util.JustInTimeSet;
@@ -2466,7 +2467,9 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     {
         CellImpl cell = getCell(row, col, o != null);
         if (cell != null) {
-            if (o instanceof Token)
+            if (o instanceof TeqToken)
+                return cell.updateCellValue((TeqToken)o);
+            else if (o instanceof Token)
                 return cell.postResult((Token)o);
             else
                 return cell.setCellValue(o);

@@ -29,7 +29,7 @@ public abstract class AbstractTimeSeriesWorker implements Runnable
 	@Override
 	public void run() 
 	{
-		// if there are no time seriesed elements, do nothing
+		// if there are no time series-ed elements, do nothing
 		if (m_timeSeriesedElems == null || m_timeSeriesedElems.isEmpty())
 			return;
 		

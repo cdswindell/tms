@@ -14,7 +14,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.eclipse.persistence.jaxb.UnmarshallerProperties;
-
+import org.tms.teq.RemoteValue;
 
 @Path("/postResult/{tmsId}")
 public class PostResult 
@@ -22,10 +22,9 @@ public class PostResult
 	@POST
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.TEXT_PLAIN)
-	public String postResult(@PathParam("tmsId") String tmsId, String jsonStr)
+	public String postResult(@PathParam("tmsId") String tmsId, String valueStr)
 	{
-		System.out.println(tmsId);
-		System.out.println(jsonStr);
+		RemoteValue.postRemoteValue(tmsId, valueStr);
 		return "ok";
 	}
 	
@@ -35,10 +34,6 @@ public class PostResult
 	@Produces(MediaType.TEXT_PLAIN)
 	public String postJSONResult(@PathParam("tmsId") String tmsId, @PathParam("dataType") String dataType, String jsonStr)
 	{
-		System.out.println(tmsId);
-		System.out.println(dataType);
-		System.out.println(jsonStr);
-		
 		try {
 	        Class<?> clazz = (Class<?>) Class.forName(dataType);
 	
@@ -48,9 +43,10 @@ public class PostResult
 	        unmarshaller.setProperty(UnmarshallerProperties.JSON_INCLUDE_ROOT, false);
 	        
 	        StreamSource json = new StreamSource(new StringReader(jsonStr));
-	        Object foo = unmarshaller.unmarshal(json, clazz).getValue();
-	        System.out.println(foo.toString());
+	        Object value = unmarshaller.unmarshal(json, clazz).getValue();
+	        System.out.println(value.toString());
 			
+			RemoteValue.postRemoteValue(tmsId, value);
 			return "ok";
 		} 
 		catch (ClassNotFoundException | JAXBException e) {
