@@ -1,4 +1,4 @@
-package org.tms.web.rest;
+package org.tms.teq.rest;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

@@ -9,6 +9,6 @@ public class TmsRestProvider extends ResourceConfig
 {
 	public TmsRestProvider()
 	{
-		packages("org.tms.web.rest");
+		packages("org.tms.teq.rest");
 	}
 }
