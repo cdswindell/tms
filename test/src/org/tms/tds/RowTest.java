@@ -331,6 +331,28 @@ public class RowTest extends BaseTest
     }
     
     @Test
+    public void testRowIdent()
+    {
+        TableImpl t = new TableImpl(10, 10);
+        assertThat(t, notNullValue());
+        
+        t.addRow();
+        t.addRow();
+        
+        RowImpl r = t.addRow();
+        r.setLabel("Test Case");
+        
+        t.addRow();
+        
+        int ident = r.getIdent();
+        assertThat(ident > 0, is(true));
+        
+        // get row by ident
+        Row r2 = t.getRow(Access.ByIdent, ident);
+        assertThat(r2, is(r));
+    }
+
+    @Test
     public void addRowTest()
     {
         TableImpl t = new TableImpl(10, 10);

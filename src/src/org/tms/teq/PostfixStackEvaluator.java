@@ -902,7 +902,7 @@ public class PostfixStackEvaluator
                     
                 case RemoteValueOper:
                 case RemoteNumericOper:
-                    result = RemoteValue.prepareHandler(this.getDerivation(), oper, row, col);
+                    result = RemoteValue.prepareHandler(this.getDerivation(), (BuiltinOperator)oper, row, col);
                     break;
                     
                 default:

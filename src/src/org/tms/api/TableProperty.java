@@ -17,6 +17,7 @@ public enum TableProperty implements Comparable<TableProperty>
     isReadOnly(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column),
     isSupportsNull(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
     UUID(true, true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset, ElementType.Cell),
+    Ident(true, true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     
     // Table Element Properties (TableContext implements initializable ones)
     Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.tms.api.Cell;
 import org.tms.api.Table;
@@ -30,6 +31,8 @@ public abstract class TableCellsElementImpl extends TableElementImpl
 {
     abstract public int getNumCells();
     
+    static final protected AtomicInteger sf_ELEMENT_IDENT_GENERATOR = new AtomicInteger(1000);
+    
     protected TableImpl m_table;   
     protected Set<Derivable> m_affects;
     
@@ -37,12 +40,16 @@ public abstract class TableCellsElementImpl extends TableElementImpl
     private TableElementListeners m_listeners;
     private Map<String, Object> m_elemProperties;
     private UUID m_guid;
+    protected int m_ident;
     
     protected TableCellsElementImpl(TableElementImpl e)
     {
         super(e);
         if (e != null)
             setTable((TableImpl)e.getTable());
+        
+        // initialize iDent
+        m_ident = sf_ELEMENT_IDENT_GENERATOR.getAndIncrement();
         
         // perform base initialization
         initialize(e);
@@ -57,6 +64,7 @@ public abstract class TableCellsElementImpl extends TableElementImpl
             m_guid = UUID.fromString(strVal);
     }
     
+    @Override
     public String getUuid()
     {
         synchronized (this) {
@@ -65,6 +73,11 @@ public abstract class TableCellsElementImpl extends TableElementImpl
         }
         
         return m_guid.toString();
+    }
+    
+    public int getIdent()
+    {
+        return m_ident;
     }
     
     @Override
@@ -116,9 +129,12 @@ public abstract class TableCellsElementImpl extends TableElementImpl
         // Some properties are built into the base Table Element object
         switch (key)
         {
-            case Tags:
-                return getTags();
-                
+	        case Tags:
+	            return getTags();
+	            
+	        case Ident:
+	            return getIdent();
+            
             case UUID:
             {   
                 if (m_guid == null)

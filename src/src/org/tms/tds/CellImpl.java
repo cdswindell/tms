@@ -29,7 +29,6 @@ import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.io.Printable;
 import org.tms.teq.DerivationImpl;
-import org.tms.teq.TeqToken;
 
 public class CellImpl extends TableElementImpl implements Cell, Printable
 {
@@ -110,29 +109,11 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         return valuesDiffer;
     }
     
-	protected boolean updateCellValue(TeqToken token) 
-	{
-        vetElement(); 
-        
-        Object value = token == null || token.isNull() ? null : token.getValue();
-        
-        Object oldValue = m_cellValue;
-        boolean valuesDiffer = setCellValue(value, false, true);
-        
-        TableImpl parentTable = getTable();
-        if (valuesDiffer && parentTable != null && 
-                parentTable.isAutoRecalculateEnabled()) 
-            DerivationImpl.recalculateAffected(this);
-        
-        if (valuesDiffer)
-            fireEvents(TableElementEventType.OnNewValue, oldValue, m_cellValue);
-        
-        return valuesDiffer;
-	}
-	
     synchronized protected boolean postResult(Token t)
     {
         TableImpl parentTable = getTable();
+        boolean isDifferent = false;
+        Object oldValue = m_cellValue;
         if (parentTable != null) {
             synchronized(parentTable) {
                 boolean wasPending = isPendings();
@@ -140,7 +121,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                 decrementPendings();
                 try {
                     if (t.isError()) {
-                        boolean isDifferent = this.setCellValueNoDataTypeCheck(t.getErrorCode());
+                        isDifferent = this.setCellValueNoDataTypeCheck(t.getErrorCode());
                         switch (t.getErrorCode()) {
                             case SeeErrorMessage:
                                 setErrorMessage(t.getStringValue());
@@ -153,7 +134,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                         return isDifferent;
                     }
                     else if (t.isNull())
-                        return setCellValue(null, true, false);
+                        isDifferent =  setCellValue(null, true, false);
                     else if (t.isPending()) {
                         m_cellValue = t.getValue();
                         nowPending = true;
@@ -162,19 +143,22 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                         if (!wasPending)
                             fireEvents(TableElementEventType.OnPendings);
 
-                        return true;
+                        isDifferent = true;
                     }
                     else
-                        return setCellValue(t.getValue(), true, false);
+                        isDifferent = setCellValue(t.getValue(), true, false);
                 }
-                finally {
+                finally {                    
                     if (wasPending && !nowPending)
-                        fireEvents(TableElementEventType.OnNoPendings);                
+                        fireEvents(TableElementEventType.OnNoPendings);    
+                    
+                    if (isDifferent)
+                        fireEvents(TableElementEventType.OnNewValue, oldValue, m_cellValue);
                 }
             }
         }
         
-        return false;
+        return isDifferent;
     }
     
     @Override

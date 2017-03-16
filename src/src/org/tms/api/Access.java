@@ -30,6 +30,8 @@ public enum Access
     Current,
     /** The {@link TableElement} with the specified 1-based index*/
     ByIndex,
+    /** The {@link TableElement} with the specified ident value*/
+    ByIdent,
     /** The {@link TableElement} */
     ByReference,
     /** The {@link TableElement} with the specified label*/

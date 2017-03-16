@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.zip.Adler32;
 
 import org.junit.Test;
 import org.tms.BaseTest;
@@ -136,16 +135,6 @@ public class ExcelTableImplTest extends BaseTest
         assertNotNull(output);
 
         assertThat(gold.length, is(output.length));      
-        
-        Adler32 goldCRC = new Adler32();
-        goldCRC.update(gold);
-        long goldCRCVal = goldCRC.getValue();
-        
-        Adler32 testCRC = new Adler32();
-        testCRC.update(output);
-        long testCRCVal = testCRC.getValue();
-        
-        assertThat(testCRCVal, is(goldCRCVal));     
 	}
 	
 	@Test

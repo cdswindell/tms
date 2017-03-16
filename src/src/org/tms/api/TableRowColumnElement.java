@@ -23,6 +23,7 @@ public interface TableRowColumnElement extends TableElement, Derivable, TimeSeri
      */
     public int getIndex();
     public String getUuid();
+    public int getIdent();   
     
     public void fill(Object o, int n, Access access, Object... mda);
     public void fill(Object[] o, Access access, Object... mda);

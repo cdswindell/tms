@@ -12,6 +12,7 @@ import org.tms.api.Access;
 import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
+import org.tms.api.Row;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.events.BlockedRequestException;
@@ -202,6 +203,12 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
 	{
 		TableExportAdapter writer = new ColumnExportAdapter(this, out, options);
 		writer.export();
+	}
+
+	@Override
+	public CellImpl getCell(Row row)
+	{
+		return getCell((RowImpl)row, false);
 	}
 
 	protected CellImpl getCell(RowImpl row, boolean setCurrent)

@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.tms.api.BaseElement;
 import org.tms.api.Cell;
@@ -55,6 +56,8 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
     private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
+    
+    static final protected AtomicInteger sf_DERIV_IDENT_GENERATOR = new AtomicInteger(1000);
     
     private static final ThreadLocal<UUID> sf_GUID_CACHE = new  ThreadLocal<UUID>() {
         @Override protected UUID initialValue() {
@@ -548,6 +551,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     
     private ScheduledFuture<?> m_scheduledFuture;
 	private long m_scheduledPeriod;
+	private int m_ident;
     
     private DerivationImpl()
     {
@@ -564,6 +568,8 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         
         m_remoteUUIDs = new HashSet<String>();
         
+        m_ident = sf_DERIV_IDENT_GENERATOR.getAndIncrement();
+        
         initializePendingCaches();
     }
     
@@ -575,6 +581,11 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
             m_cachedPendingStats = Collections.synchronizedMap(new LinkedHashMap<TableElement, PendingStatistic>());            
             m_cellBlockedPendingStatesMap = Collections.synchronizedMap(new LinkedHashMap<Cell, Set<PendingState>>());       
         }
+    }
+    
+    public int getIdent()
+    {
+    	return m_ident;
     }
     
     protected void registerRemoteUUID(String uuid)
@@ -672,7 +683,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     {
         m_beingDestroyed = true;    
 
-        if (m_remoteUUIDs != null) {
+        if (m_remoteUUIDs != null && !m_remoteUUIDs.isEmpty()) {
 	        RemoteValue.removeRemoteHandlers(m_remoteUUIDs.toArray(new String [] {}));
 	        m_remoteUUIDs.clear();
         }
@@ -1003,14 +1014,24 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         recalculateTargetCell(row, col, dc);   	
     }
     
+    /**
+     * called from RemoteValue.postResult
+     * @param row
+     * @param col
+     */
     void recalculateTargetCell(Row row, Column col) 
     {
         DerivationContext dc = new DerivationContext();
-        recalculateTargetCell(row, col, dc);   	
+        boolean modified = recalculateTargetCell(row, col, dc);   	
+        if (modified) {
+        	Cell cell = col.getCell(row);
+            DerivationImpl.recalculateAffected(cell);      	
+        }
+        
         dc.processPendings();
     }
     
-    void recalculateTargetCell(Row row, Column col, DerivationContext dc) 
+    boolean recalculateTargetCell(Row row, Column col, DerivationContext dc) 
     {
         if (row == null || col == null)
             throw new IllegalTableStateException("Row/Column required");
@@ -1019,6 +1040,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         if (tbl == null)
             throw new IllegalTableStateException("Table required");
         
+        boolean modified = false;
         try {
             PostfixStackEvaluator pfe = new PostfixStackEvaluator(this);        
             Token t = pfe.evaluate(row, col, dc);
@@ -1026,10 +1048,12 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
             if (t.isNumeric()) 
                 t.setValue(applyPrecision(t.getNumericValue()));
             
-            boolean modified = tbl.setCellValue(row, col, new TeqToken(t));
-            if (modified && dc != null) {
-            	dc.remove(row);
-            	dc.remove(col);
+            modified = tbl.setCellValue(row, col, t);
+            if (modified) {
+            	if (dc != null) {
+	            	dc.remove(row);
+	            	dc.remove(col);
+            	}
             }
         }
         catch (PendingDerivationException pc) {
@@ -1039,6 +1063,8 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         {
             // noop;
         }
+        
+        return modified;
     }
 
     private void recalculateTargetRow(TableElement modifiedElement, DerivationContext dc) 

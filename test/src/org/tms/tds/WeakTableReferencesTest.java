@@ -14,6 +14,7 @@ import org.tms.api.TableContext;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
+import org.tms.teq.RemoteValue;
 
 public class WeakTableReferencesTest
 {
@@ -81,7 +82,7 @@ public class WeakTableReferencesTest
         assertThat(tc.getNumTables(), is(0));     
     }
     
-    private void createLargeTable(TableContext tc, int rows, int cols, Object fillValue)
+    private Table createLargeTable(TableContext tc, int rows, int cols, Object fillValue)
     {
         Table t = TableFactory.createTable(rows, cols, tc);
         assertThat(((TableImpl)t).isPersistant(), is(((ContextImpl)tc).isPersistant()));
@@ -93,10 +94,10 @@ public class WeakTableReferencesTest
         t.addColumn(Access.ByIndex, cols);
         
         Row r1 = t.addRow(Access.ByIndex, rows);
-        t.addListeners(TableElementEventType.OnNewValue, e -> System.out.println(t + ": " + e));
+        t.addListeners(TableElementEventType.OnNewValue, e -> noop(t + ": " + e));
         t.fill(fillValue);
         
-        c1.addListeners(TableElementEventType.OnNewValue, e -> System.out.println(c1 + ": " + e));
+        c1.addListeners(TableElementEventType.OnNewValue, e -> noop(c1 + ": " + e));
         c1.fill("abc");
         
         c1.setDerivation("ridx");
@@ -106,5 +107,42 @@ public class WeakTableReferencesTest
         s.add(r1, c1, c2);
         
         assertThat(c1, notNullValue());
+        
+        return t;
     }    
+    
+    public void noop(String s) {}
+    
+    @Test
+    public void testNonpersistantTableWithRemoteValue() throws InterruptedException
+    {
+        TableContext tc = TableContextFactory.createTableContext();
+        int numTables = 16;
+        int nRows = 1024;
+        int nCols = 256;
+        
+        tc.setRowCapacityIncr(nRows);
+        tc.setColumnCapacityIncr(nCols);
+        for (int i = 0; i < numTables; i++) {
+            createLargeTable(tc, nRows, nCols, "Really big table!!!");
+        }
+        
+        assertThat(tc, notNullValue());
+        
+        Table t = createLargeTable(tc, nRows, nCols, "Really big table!!!");
+        Column c = t.addColumn();
+        c.setDerivation("rn()");
+        
+        assertThat(RemoteValue.numHandlers(), is(nRows));
+        
+        c = null;
+        t = null;
+        for (int i = 0; i < 5; i++) {
+            System.gc();
+            Thread.sleep(500);
+        }
+        
+        assertThat(tc.getNumTables(), is(0));   
+        assertThat(RemoteValue.numHandlers(), is(0));
+    }   
 }

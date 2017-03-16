@@ -487,6 +487,8 @@ public interface Table extends TableElement, InitializableTableProperties
      * @return the unique UUID assigned to this {@code Table}
      */
     public String getUuid();
+    
+    public int getIdent();
 
 	public void suspendAllTimeSeries();
 	public void resumeAllTimeSeries();

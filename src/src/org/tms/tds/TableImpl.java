@@ -57,7 +57,6 @@ import org.tms.io.TableExportAdapter;
 import org.tms.tds.events.TableElementListeners;
 import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.teq.DerivationImpl;
-import org.tms.teq.TeqToken;
 import org.tms.teq.TimeSeriedColumnsWorker;
 import org.tms.teq.TimeSeriedRowsWorker;
 import org.tms.util.JustInTimeSet;
@@ -2241,6 +2240,19 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                     return -1;
             }
                 
+            case ByIdent:
+            {
+                Object md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (isAdding || md == null || !(md instanceof Integer))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
+                
+                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Ident, md);
+                if (target != null) 
+                    return target.getIndex() - 1;
+                break;
+            }
+            
             case ByReference:
             {
                 Object md = mda != null && mda.length > 0 ? mda[0] : null;
@@ -2467,9 +2479,7 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
     {
         CellImpl cell = getCell(row, col, o != null);
         if (cell != null) {
-            if (o instanceof TeqToken)
-                return cell.updateCellValue((TeqToken)o);
-            else if (o instanceof Token)
+            if (o instanceof Token)
                 return cell.postResult((Token)o);
             else
                 return cell.setCellValue(o);

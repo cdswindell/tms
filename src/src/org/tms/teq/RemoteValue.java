@@ -16,7 +16,7 @@ public class RemoteValue
 	static final private Map<String, RCKey> sf_UUID_TO_KEY = new ConcurrentHashMap<String, RCKey>(1024);	
 	static final private Map<String, Object> sf_UUID_TO_VALUE = new ConcurrentHashMap<String, Object>(1024);
 	
-	public static Token prepareHandler(DerivationImpl deriv, Operator oper, Row row, Column col) 
+	public static Token prepareHandler(final DerivationImpl deriv, final BuiltinOperator oper, final Row row, final Column col) 
 	{
 		if (deriv == null || deriv.isBeingDestroyed())
 			return Token.createNullToken();
@@ -46,7 +46,7 @@ public class RemoteValue
 			return new Token(value);
 	}
 	
-	public static void postRemoteValue(String uuid, Object value)
+	public static void postRemoteValue(final String uuid, Object value)
 	{
 		RCKey key = sf_UUID_TO_KEY.get(uuid);
 		if (key != null && key.isValid()) {
@@ -65,7 +65,7 @@ public class RemoteValue
 	 * Called when a derivation is deleted
 	 * @param uuids
 	 */
-	static void removeRemoteHandlers(String[] uuids) 
+    static void removeRemoteHandlers(final String[] uuids) 
 	{
 		for (String uuid : uuids) {
 			RCKey key = sf_UUID_TO_KEY.remove(uuid);
@@ -75,23 +75,36 @@ public class RemoteValue
 			sf_UUID_TO_VALUE.remove(uuid);
 		}		
 	}
+    
+    static public final int numHandlers()
+    {
+    	return sf_KEY_TO_UUID != null ? sf_KEY_TO_UUID.size() : 0;
+    }
 	
 	/**
 	 * Inner class to provide unique key
 	 */
 	static class RCKey
 	{
+		private WeakReference<DerivationImpl> m_deriv;
+		private BuiltinOperator m_oper;
 		private WeakReference<Row> m_row;
 		private WeakReference<Column> m_col;
-		private DerivationImpl m_deriv;
-		private Operator m_oper;
 		
-		RCKey(DerivationImpl d, Operator oper, Row r, Column c)
+		private int m_derivIdent;
+		private int m_rowIdent;
+		private int m_colIdent;
+		
+		RCKey(DerivationImpl d, BuiltinOperator oper, Row r, Column c)
 		{
-			m_deriv = d;
+			m_deriv = new WeakReference<DerivationImpl>(d);
 			m_oper = oper;
 			m_row = new WeakReference<Row>(r);
 			m_col = new WeakReference<Column>(c);
+			
+			m_derivIdent = d.getIdent();
+			m_rowIdent = r.getIdent();
+			m_colIdent = c.getIdent();
 		}
 		
 		Row getRow()
@@ -106,7 +119,7 @@ public class RemoteValue
 		
 		DerivationImpl getDerivation()
 		{
-			return m_deriv;
+			return m_deriv.get();
 		}
 		
 		Operator getOperator()
@@ -118,75 +131,44 @@ public class RemoteValue
 		{
 			Row row = getRow();
 			Column col = getColumn();
+			DerivationImpl deriv = getDerivation();
 			
-			return m_deriv != null && row != null && row.isValid() && col != null && col.isValid();
+			return deriv != null && row != null && row.isValid() && col != null && col.isValid();
 		}
 
 		@Override
-		public int hashCode() 
-		{
+		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((m_deriv == null) ? 0 : m_deriv.hashCode());
+			result = prime * result + m_colIdent;
+			result = prime * result + m_derivIdent;
 			result = prime * result + ((m_oper == null) ? 0 : m_oper.hashCode());
-			
-			Row row = getRow();
-			Column col = getColumn();
-			result = prime * result + ((col == null) ? 0 : col.hashCode());
-			result = prime * result + ((row == null) ? 0 : row.hashCode());
-			
+			result = prime * result + m_rowIdent;
 			return result;
 		}
 
 		@Override
-		public boolean equals(Object obj) 
-		{
+		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
-			
 			if (obj == null)
 				return false;
-			
 			if (getClass() != obj.getClass())
 				return false;
-			
 			RCKey other = (RCKey) obj;
-			
-			if (m_deriv == null) {
-				if (other.m_deriv != null)
-					return false;
-			} 
-			else if (!m_deriv.equals(other.m_deriv))
+			if (m_colIdent != other.m_colIdent)
 				return false;
-			
+			if (m_derivIdent != other.m_derivIdent)
+				return false;
 			if (m_oper == null) {
 				if (other.m_oper != null)
 					return false;
-			} 
-			else if (!m_oper.equals(other.m_oper))
+			} else if (!m_oper.equals(other.m_oper))
 				return false;
-			
-			Row row = getRow();
-			Column col = getColumn();
-			
-			Row oRow = other.getRow();
-			Column oCol = other.getColumn();
-			
-			if (col == null) {
-				if (oCol != null)
-					return false;
-			} 
-			else if (!col.equals(oCol))
+			if (m_rowIdent != other.m_rowIdent)
 				return false;
-			
-			if (row == null) {
-				if (oRow != null)
-					return false;
-			} 
-			else if (!row.equals(oRow))
-				return false;
-			
 			return true;
 		}
+
 	}
 }

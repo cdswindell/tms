@@ -61,7 +61,7 @@ abstract public class BaseElementImpl implements BaseElement
     // to save a little space, all flags are maintained in a 
     // single 32 bit integer
     protected  int m_flags;
-
+ 
     protected BaseElementImpl()
     {
         m_flags = 0;

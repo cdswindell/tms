@@ -27,4 +27,11 @@ public interface Column extends TableElement, Derivable, TableRowColumnElement
      * @param dataType the Java {@code Class} to assign to this column
      */
     public void setDataType(Class<? extends Object> dataType);
+
+    /**
+     * Return the ({@link Cell}) corresponding to the specified {@code Row}
+     * @param row the {@code Row}
+     * @return
+     */
+	public Cell getCell(Row row);
 }
