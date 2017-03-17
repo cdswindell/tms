@@ -57,11 +57,14 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     @Override
     public String getFormattedCellValue()
     {
-        if (getCellValue() == null)
-            return null;
-        
         if (isPending())
         	return "Pending...";
+        
+        if (isAwaiting())
+        	return "Awaiting...";
+        
+        if (getCellValue() == null)
+            return null;
         
         String format = getFormatString();
         if (format != null) {
@@ -93,6 +96,9 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         // explicitly set cells can't be derived
         clearDerivation();
         
+        // clear awaiting status
+        unSet(sf_IS_AWAITING_FLAG);
+        
         // set the cell value, taking datatype enforcement into account, if enabled
         Object oldValue = m_cellValue;
         boolean valuesDiffer = setCellValue(value, true, true);
@@ -120,33 +126,39 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
                 boolean nowPending = false;
                 decrementPendings();
                 try {
-                    if (t.isError()) {
-                        isDifferent = this.setCellValueNoDataTypeCheck(t.getErrorCode());
-                        switch (t.getErrorCode()) {
-                            case SeeErrorMessage:
-                                setErrorMessage(t.getStringValue());
-                                break;
-                                
-                            default:
-                                break;
-                        }
-                        
-                        return isDifferent;
-                    }
-                    else if (t.isNull())
-                        isDifferent =  setCellValue(null, true, false);
-                    else if (t.isPending()) {
-                        m_cellValue = t.getValue();
-                        nowPending = true;
-                        incrementPendings();
-
-                        if (!wasPending)
-                            fireEvents(TableElementEventType.OnPendings);
-
-                        isDifferent = true;
-                    }
-                    else
-                        isDifferent = setCellValue(t.getValue(), true, false);
+                	if (t.isAwaiting())
+                        set(sf_IS_AWAITING_FLAG, true);
+                	else {
+                		unSet(sf_IS_AWAITING_FLAG);
+                		
+	                    if (t.isError()) {
+	                        isDifferent = this.setCellValueNoDataTypeCheck(t.getErrorCode());
+	                        switch (t.getErrorCode()) {
+	                            case SeeErrorMessage:
+	                                setErrorMessage(t.getStringValue());
+	                                break;
+	                                
+	                            default:
+	                                break;
+	                        }
+	                        
+	                        return isDifferent;
+	                    }
+	                    else if (t.isNull())
+	                        isDifferent =  setCellValue(null, true, false);
+	                    else if (t.isPending()) {
+	                        m_cellValue = t.getValue();
+	                        nowPending = true;
+	                        incrementPendings();
+	
+	                        if (!wasPending)
+	                            fireEvents(TableElementEventType.OnPendings);
+	
+	                        isDifferent = true;
+	                    }
+	                    else
+	                        isDifferent = setCellValue(t.getValue(), true, false);
+                	}
                 }
                 finally {                    
                     if (wasPending && !nowPending)
@@ -572,6 +584,11 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
         return getCellValue() == null;
     }
 
+    public boolean isAwaiting()
+    {
+        return isSet(sf_IS_AWAITING_FLAG);
+    }
+    
     public boolean isPending()
     {
         return isPendings();
@@ -1096,7 +1113,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     @Override
     public boolean isCenterAligned()
     {
-        return isBooleanValue() || isPending();
+        return isBooleanValue() || isPending() || isAwaiting();
     }
 
     @Override

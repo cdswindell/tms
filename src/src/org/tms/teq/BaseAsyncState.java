@@ -12,23 +12,23 @@ import org.tms.api.exceptions.DeletedElementException;
 import org.tms.teq.DerivationImpl.DerivationContext;
 
 /**
- * The PendingState abstract class encapsulates derivation state for derivations where operators
+ * The BaseAsyncState abstract class encapsulates derivation state for derivations where operators
  * perform asynchronous calculations, leaving table cells in the "Pending" state while
  * the calculations are performed.
  * <p>
  * There are three possible pending states:
  * <p>
  * <ul>
- * <li><b>AwaitingState</b>: The calculation is awaiting the completion of an asynchronous Operator 
+ * <li><b>PendingState</b>: The calculation is awaiting the completion of an asynchronous Operator 
  *     and will continue when the calculation results are posted.</li>
- * <li><b>BlockedState</b>: The calculation is blocked on a cell in <b>AwaitingState</b> and will
- *     resume the calculation once the <b>AwaitingState</b> cell receives a value.</li>
+ * <li><b>BlockedState</b>: The calculation is blocked on a cell in <b>PendingState</b> and will
+ *     resume the calculation once the <b>PendingState</b> cell receives a value.</li>
  * <li><b>BlockedStatisticState</b>: The calculation is dependent on a Statistics or Transform operator
- *        that has encountered <b>AwaitingState</b>, <b>BlockedState</b> or other <b>BlockedStatisticState</b> cells. </li>
+ *        that has encountered <b>PendingState</b>, <b>BlockedState</b> or other <b>BlockedStatisticState</b> cells. </li>
  * </ul>
  * <p>
  */
-public abstract class PendingState
+public abstract class BaseAsyncState
 {
     private PostfixStackEvaluator m_pse;
     private Token m_pendingToken;
@@ -40,7 +40,7 @@ public abstract class PendingState
     protected Table m_parentTable;
     protected boolean m_valid;
     
-    protected PendingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
+    protected BaseAsyncState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
     {
         m_pse = pse;
         m_curRow = row;
@@ -57,7 +57,7 @@ public abstract class PendingState
         m_lock = new Semaphore(1, true);
     }
 
-    protected PendingState()
+    protected BaseAsyncState()
     {
     }
 
@@ -267,22 +267,22 @@ public abstract class PendingState
         return false;
     }
     
-    protected PendingState getRootPendingState()
+    protected BaseAsyncState getRootPendingState()
     {
         return this;
     }
     
-    protected static class AwaitingState extends PendingState
+    protected static class PendingState extends BaseAsyncState
     {
         private UUID m_uuid;
         private Object m_pendingIntermediate;
         
-        protected AwaitingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
+        protected PendingState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
         {
             super(pse, row, col, tk);
             
             if (pse.getDerivation() != null)
-                getDerivation().registerAwaitingState(this);
+                getDerivation().registerPendingState(this);
             
             m_pendingIntermediate = tk.getValue();
             m_uuid = DerivationImpl.getTransactionID();
@@ -342,7 +342,7 @@ public abstract class PendingState
         }
     }
     
-    protected static class BlockedState extends PendingState
+    protected static class BlockedState extends BaseAsyncState
     {
         protected BlockedState(PostfixStackEvaluator pse, Row row, Column col, Token tk)
         {
@@ -381,7 +381,7 @@ public abstract class PendingState
                     lock();
                     try {
                         if (isValid()) {
-                            AwaitingState newPs = pc.getAwaitingState();
+                            PendingState newPs = pc.getAwaitingState();
                             psDeriv.cacheDeferredCalculation(newPs, dc);
                         }
                         else {
@@ -406,11 +406,11 @@ public abstract class PendingState
         }
         
         @Override
-        protected PendingState getRootPendingState()
+        protected BaseAsyncState getRootPendingState()
         {
             Token  t = getPendingToken();
             if (t != null && t.isPending()) {
-                PendingState ps = t.getPendingState();
+                BaseAsyncState ps = t.getPendingState();
                 if (ps == this)
                     return this;
                 if (ps != null) {
@@ -437,7 +437,7 @@ public abstract class PendingState
         }        
     }
     
-    protected static class BlockedStatisticState extends PendingState
+    protected static class BlockedStatisticState extends BaseAsyncState
     {
         private PendingStatistic m_pendingStat;
         private DerivationImpl m_derivationImpl;
@@ -484,7 +484,7 @@ public abstract class PendingState
         }
         
         @Override
-        protected PendingState getRootPendingState()
+        protected BaseAsyncState getRootPendingState()
         {
             return this;
         }

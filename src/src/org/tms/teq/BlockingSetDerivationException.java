@@ -9,10 +9,10 @@ public class BlockingSetDerivationException extends BlockedDerivationException
     private static final long serialVersionUID = -3577341853539801587L;
     
     private PendingStatistic m_pendingStatistic;
-    private Set<PendingState> m_pendingStates;
+    private Set<BaseAsyncState> m_pendingStates;
     private TableElement m_refElement;
     
-    public BlockingSetDerivationException(Set<PendingState> blockedOnSet, TableElement ref)
+    public BlockingSetDerivationException(Set<BaseAsyncState> blockedOnSet, TableElement ref)
     {
         m_pendingStates = blockedOnSet;
         m_refElement = ref;
@@ -24,7 +24,7 @@ public class BlockingSetDerivationException extends BlockedDerivationException
         m_refElement = pendingStat.getReferencedElement();
     }
 
-    public Set<PendingState> getBlockingSet()
+    public Set<BaseAsyncState> getBlockingSet()
     {
         return m_pendingStates;
     }
@@ -40,7 +40,7 @@ public class BlockingSetDerivationException extends BlockedDerivationException
     }
     
     @Override
-    public PendingState getPendingState()
+    public BaseAsyncState getPendingState()
     {
         return null;
     }

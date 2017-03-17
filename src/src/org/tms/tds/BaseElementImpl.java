@@ -54,6 +54,7 @@ abstract public class BaseElementImpl implements BaseElement
     static final protected int sf_IS_DEFAULT_FLAG                   = 0x1000000;
     static final protected int sf_IS_DIRTY_FLAG                     = 0x2000000;
     static final protected int sf_HAS_CELL_ERROR_MSG_FLAG           = 0x4000000;
+    static final protected int sf_IS_AWAITING_FLAG                  = 0x8000000;
     
     static final protected int sf_IS_INVALID_FLAG                   = 0x10000000;
     static final protected int sf_IS_PROCESSED_FLAG                 = 0x20000000;

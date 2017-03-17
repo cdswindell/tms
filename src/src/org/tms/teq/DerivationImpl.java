@@ -45,7 +45,7 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.factories.TableContextFactory;
-import org.tms.teq.PendingState.AwaitingState;
+import org.tms.teq.BaseAsyncState.PendingState;
 import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 import org.tms.util.Tuple;
 
@@ -53,7 +53,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
 {
     public static final int sf_DEFAULT_PRECISION = 15;
     
-    private static final Map<UUID, PendingState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, PendingState>();
+    private static final Map<UUID, BaseAsyncState> sf_UUID_PENDING_STATE_MAP = new ConcurrentHashMap<UUID, BaseAsyncState>();
     private static final Map<Long, UUID> sf_PROCESS_ID_UUID_MAP = new ConcurrentHashMap<Long, UUID>();
     private static PendingDerivationExecutor sf_PENDING_EXECUTOR = null;
     
@@ -455,7 +455,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         if (transactId == null) 
             return;
         
-        PendingState ps = sf_UUID_PENDING_STATE_MAP.remove(transactId);
+        BaseAsyncState ps = sf_UUID_PENDING_STATE_MAP.remove(transactId);
         if (ps != null) { 
             DerivationImpl psDeriv = null;
             
@@ -500,7 +500,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
                 ps.lock();
                 try {
                     if (ps.isValid()) {
-                        AwaitingState newPs = pc.getAwaitingState();
+                        PendingState newPs = pc.getAwaitingState();
                         psDeriv.cacheDeferredCalculation(newPs, dc);
                     }
                     else {
@@ -539,9 +539,9 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     private MathContext m_precision;
     private DerivableThreadPool m_threadPool;
     
-    private Set<AwaitingState> m_cachedAwaitingStates;
+    private Set<PendingState> m_cachedAwaitingStates;
     private Map<TableElement, PendingStatistic> m_cachedPendingStats;
-    private Map<Cell, Set<PendingState>> m_cellBlockedPendingStatesMap;
+    private Map<Cell, Set<BaseAsyncState>> m_cellBlockedPendingStatesMap;
     
     private Set<String> m_remoteUUIDs;
     
@@ -577,9 +577,9 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     {
         if (!m_pendingCachesInitialized) {
             m_pendingCachesInitialized = true;
-            m_cachedAwaitingStates = Collections.synchronizedSet(new LinkedHashSet<AwaitingState>());
+            m_cachedAwaitingStates = Collections.synchronizedSet(new LinkedHashSet<PendingState>());
             m_cachedPendingStats = Collections.synchronizedMap(new LinkedHashMap<TableElement, PendingStatistic>());            
-            m_cellBlockedPendingStatesMap = Collections.synchronizedMap(new LinkedHashMap<Cell, Set<PendingState>>());       
+            m_cellBlockedPendingStatesMap = Collections.synchronizedMap(new LinkedHashMap<Cell, Set<BaseAsyncState>>());       
         }
     }
     
@@ -594,12 +594,12 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     		m_remoteUUIDs.add(uuid);
     }
     
-    protected void registerBlockingCell(Cell blockingCell, PendingState ps)
+    protected void registerBlockingCell(Cell blockingCell, BaseAsyncState ps)
     {
         if (blockingCell != null && ps != null && blockingCell.isPendings()) {
-            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(blockingCell);
+            Set<BaseAsyncState> blockedStates = m_cellBlockedPendingStatesMap.get(blockingCell);
             if (blockedStates == null) {
-                blockedStates = new LinkedHashSet<PendingState>();
+                blockedStates = new LinkedHashSet<BaseAsyncState>();
                 m_cellBlockedPendingStatesMap.put(blockingCell, blockedStates);
             }
             
@@ -612,12 +612,12 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         assert nonPendingCell.isPendings() == false : "Cell cannot be pending";
         
         if (m_cellBlockedPendingStatesMap != null) {
-            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(nonPendingCell);
+            Set<BaseAsyncState> blockedStates = m_cellBlockedPendingStatesMap.get(nonPendingCell);
             if (blockedStates != null) {
                 synchronized(blockedStates) {
-                    Set<PendingState> unblocked = new HashSet<PendingState>();
+                    Set<BaseAsyncState> unblocked = new HashSet<BaseAsyncState>();
                     
-                    for (PendingState ps : blockedStates) {
+                    for (BaseAsyncState ps : blockedStates) {
                         if (ps != null && ps.isStillPending()) {
                             boolean removed = ps.unblockDerivations(nonPendingCell);
                             if (removed)
@@ -636,9 +636,9 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     protected void resetPendingCell(Cell cell)
     {
         if (cell != null) {
-            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.remove(cell);
+            Set<BaseAsyncState> blockedStates = m_cellBlockedPendingStatesMap.remove(cell);
             if (blockedStates != null) {
-                for (PendingState ps : blockedStates) {
+                for (BaseAsyncState ps : blockedStates) {
                     if (ps != null && ps.isValid()) {
                         ps.lock();
                         try {
@@ -656,7 +656,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     protected boolean isBlockedDerivations(Cell cell)
     {
         if (cell != null) {
-            Set<PendingState> blockedStates = m_cellBlockedPendingStatesMap.get(cell);
+            Set<BaseAsyncState> blockedStates = m_cellBlockedPendingStatesMap.get(cell);
             if (blockedStates != null)
                 return !blockedStates.isEmpty();
         }
@@ -693,7 +693,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         
         // Shut down/clear any async operators
         if (m_cachedAwaitingStates != null) {
-            for (AwaitingState ps : m_cachedAwaitingStates) {
+            for (PendingState ps : m_cachedAwaitingStates) {
                 // don't re-process invalidated pending states
                 if (!ps.isValid())
                     continue;
@@ -714,13 +714,13 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
 
         // clear out all pending cells, and delete the blocked states
         if (m_cellBlockedPendingStatesMap != null) {
-            for (Map.Entry<Cell, Set<PendingState>> e : m_cellBlockedPendingStatesMap.entrySet()) {
+            for (Map.Entry<Cell, Set<BaseAsyncState>> e : m_cellBlockedPendingStatesMap.entrySet()) {
                 Cell c = e.getKey();
                 if (c != null) 
                     c.getColumn().getTable().setCellValue(c.getRow(), c.getColumn(), Token.createNullToken());
 
                 // Cannot call resetPendingCellDependents, as it will modify m_cellBlockedPendingStatesMap
-                for (PendingState ps : e.getValue()) {
+                for (BaseAsyncState ps : e.getValue()) {
                     ps.lock();
                     try {
                         ps.delete();
@@ -806,7 +806,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         }
     }
     
-    protected void registerAwaitingState(AwaitingState ps)
+    protected void registerPendingState(PendingState ps)
     {
         if (ps != null) { 
             if (ps.getDerivation() != this)
@@ -822,7 +822,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         }
     }
     
-    protected void awaitingStateProcessed(PendingState ps)
+    protected void awaitingStateProcessed(BaseAsyncState ps)
     {
         try {
             if (!m_beingDestroyed && ps != null && ps.isValid() && m_cachedAwaitingStates != null) 
@@ -1259,7 +1259,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
 		return false;
 	}
 
-	void cacheDeferredCalculation(AwaitingState pendingState, DerivationContext dc)
+	void cacheDeferredCalculation(PendingState pendingState, DerivationContext dc)
     {
         sf_UUID_PENDING_STATE_MAP.put(pendingState.getTransactionID(), pendingState);
         if (pendingState.isRunnable()) {
@@ -1270,7 +1270,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         }        
     }
 
-    void submitCalculation(AwaitingState pendingState)
+    void submitCalculation(PendingState pendingState)
     {
     	if (m_threadPool == null) {
 	    	Table t = getTable();
@@ -1391,14 +1391,14 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         private Map<TableElement, SingleVariableStatEngine> m_cachedSVSEs;
         private Map<Tuple<TableElement>, TwoVariableStatEngine> m_cachedTVSEs;
     	private boolean m_cachedAny = false;
-    	private Set<AwaitingState> m_pendings;
+    	private Set<PendingState> m_pendings;
     	private boolean m_isRecalculateAffected;
     	
     	DerivationContext()
     	{
             m_cachedSVSEs = new HashMap<TableElement, SingleVariableStatEngine>();
             m_cachedTVSEs = new HashMap<Tuple<TableElement>, TwoVariableStatEngine>();
-            m_pendings = new LinkedHashSet<AwaitingState>();
+            m_pendings = new LinkedHashSet<PendingState>();
             m_isRecalculateAffected = true;
     	}
     	
@@ -1407,12 +1407,12 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     	    m_pendings.clear();
         }
 
-        void cachePending(AwaitingState ps)
+        void cachePending(PendingState ps)
         {
             m_pendings.add(ps);
         }
         
-        void remove(PendingState ps)
+        void remove(BaseAsyncState ps)
         {
             m_pendings.remove(ps);
         }

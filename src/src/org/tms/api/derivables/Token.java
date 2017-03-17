@@ -12,7 +12,7 @@ import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.teq.BuiltinOperator;
 import org.tms.teq.DerivationImpl;
 import org.tms.teq.InfixExpressionParser;
-import org.tms.teq.PendingState;
+import org.tms.teq.BaseAsyncState;
 
 /**
  * The Token class is used by the Derivation engine to represent discrete
@@ -69,7 +69,12 @@ public class Token implements Labeled
         return new Token(TokenType.Pending, runnable);
     }
     
-    public static Token createPendingToken(PendingState ps)
+    public static Token createAwaitingToken(String uuid)
+    {
+        return new Token(TokenType.Awaiting, uuid);
+    }
+    
+    public static Token createPendingToken(BaseAsyncState ps)
     {
         return new Token(TokenType.Pending, ps);
     }
@@ -135,6 +140,11 @@ public class Token implements Labeled
             setTokenType(TokenType.NullValue);
             setOperator(BuiltinOperator.NULL_operator);
             setValue(null);
+        }
+        else if (tt == TokenType.Awaiting) {
+            setTokenType(tt);
+            setValue(value);
+            setLabel(label);
         }
         else {
             setTokenType(tt);
@@ -258,10 +268,10 @@ public class Token implements Labeled
             return null;
     }
     
-    public PendingState getPendingState()
+    public BaseAsyncState getPendingState()
     {
-        if (m_value != null && m_value instanceof PendingState)
-            return (PendingState)m_value;
+        if (m_value != null && m_value instanceof BaseAsyncState)
+            return (BaseAsyncState)m_value;
         else
             return null;
     }
@@ -482,8 +492,16 @@ public class Token implements Labeled
             return this.getTokenType().isPending();
         
         return false;
-    }
-    
+    }    
+
+	public boolean isAwaiting() 
+	{
+        if (this.getTokenType() != null) 
+            return this.getTokenType().isAwaiting();
+        
+        return false;
+	}
+	
     public boolean isBasicOperator()
     {
         return getTokenType() != null ? getTokenType().isBasicOperator() : false;

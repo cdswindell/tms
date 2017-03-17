@@ -10,13 +10,13 @@ import org.tms.api.Cell;
 import org.tms.api.TableElement;
 import org.tms.api.derivables.Operator;
 import org.tms.teq.DerivationImpl.DerivationContext;
-import org.tms.teq.PendingState.AwaitingState;
-import org.tms.teq.PendingState.BlockedStatisticState;
+import org.tms.teq.BaseAsyncState.PendingState;
+import org.tms.teq.BaseAsyncState.BlockedStatisticState;
 
 public class PendingStatistic
 {
     private TableElement m_refElement;
-    private Set<PendingState> m_blockedCells;
+    private Set<BaseAsyncState> m_blockedCells;
     private Set<Cell> m_blockedOnCells;
     private Semaphore m_lock;
     private boolean m_valid;
@@ -24,9 +24,9 @@ public class PendingStatistic
     private Operator m_oper;
     private boolean m_useAccelerator;
     
-    protected PendingStatistic(DerivationImpl deriv, Operator oper, TableElement ref, Set<PendingState> blockedOnSet)
+    protected PendingStatistic(DerivationImpl deriv, Operator oper, TableElement ref, Set<BaseAsyncState> blockedOnSet)
     {
-        m_blockedCells = new LinkedHashSet<PendingState>();
+        m_blockedCells = new LinkedHashSet<BaseAsyncState>();
         m_blockedOnCells = new LinkedHashSet<Cell>();
         m_refElement = ref;
         m_derivationImpl = deriv;
@@ -41,7 +41,7 @@ public class PendingStatistic
         lock();
         try {
             boolean blockedOnAny = false;
-            for (PendingState ps : blockedOnSet) {
+            for (BaseAsyncState ps : blockedOnSet) {
                 if (ps != null) {
                     ps.lock();
                     try {                      
@@ -143,7 +143,7 @@ public class PendingStatistic
         return m_derivationImpl;
     }
 
-    protected boolean registerBlockedDerivation(PendingState ps)
+    protected boolean registerBlockedDerivation(BaseAsyncState ps)
     {
         if (isValid() && ps != null) {
             ps.lock();
@@ -163,7 +163,7 @@ public class PendingStatistic
     protected void delete()
     {
         markInvalid();   
-        for (PendingState ps : m_blockedCells)
+        for (BaseAsyncState ps : m_blockedCells)
         {
             if (ps == null)
                 continue;
@@ -186,7 +186,7 @@ public class PendingStatistic
 
     protected boolean unblockStatistic(Cell unblockedCell)
     {
-        Set<PendingState> toRemove = new HashSet<PendingState>();
+        Set<BaseAsyncState> toRemove = new HashSet<BaseAsyncState>();
         
         lock();
         try {           
@@ -231,7 +231,7 @@ public class PendingStatistic
             } 
             
             DerivationContext dc = new DerivationContext();
-            for (PendingState ps : m_blockedCells) {
+            for (BaseAsyncState ps : m_blockedCells) {
                 DerivationImpl psDeriv = null;
                 if (ps != null && ps.isValid() && (psDeriv = ps.getDerivation()) != null) {
                     try {
@@ -247,7 +247,7 @@ public class PendingStatistic
                         ps.lock();
                         try {
                             if (ps.isValid()) {
-                                AwaitingState newPs = pc.getAwaitingState();
+                                PendingState newPs = pc.getAwaitingState();
                                 psDeriv.cacheDeferredCalculation(newPs, dc);
                             }
                             else {

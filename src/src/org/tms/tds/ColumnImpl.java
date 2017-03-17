@@ -25,6 +25,7 @@ import org.tms.io.TableExportAdapter;
 import org.tms.tds.filters.FilteredColumnImpl;
 import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.teq.MathUtil;
+import org.tms.teq.RemoteValue;
 import org.tms.util.JustInTimeSet;
 
 public class ColumnImpl extends TableSliceElementImpl implements Column
@@ -535,6 +536,12 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
         }
         
         m_filters.clear();
+        
+        // clean up any remote handlers
+        if (m_remoteUUIDs != null && !m_remoteUUIDs.isEmpty()) {
+        	RemoteValue.removeRemoteHandlers(m_remoteUUIDs.toArray(new String [] {}));
+        	m_remoteUUIDs.clear();
+        }
         
 		// now, remove from the parent table, if it is defined
 		TableImpl parent = getTable();

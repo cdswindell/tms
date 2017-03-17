@@ -10,6 +10,7 @@ public enum TokenType implements Labeled
     NullValue(false, "Null", "Empty"),
     EvaluationError(false, "Error"),
     Pending(false),
+    Awaiting(false),
     
     TableRef(false, "Table", "Tbl", "T"),
     ColumnRef(false, "Column", "Col", "C"),
@@ -166,6 +167,12 @@ public enum TokenType implements Labeled
         return this == Pending;
     }
 
+
+	public boolean isAwaiting() 
+	{
+        return this == Awaiting;
+	}
+	
     public static TokenType numArgsToTokenType(int argCnt)
     {
         switch(argCnt) {

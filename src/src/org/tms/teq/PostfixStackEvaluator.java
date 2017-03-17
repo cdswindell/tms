@@ -23,8 +23,8 @@ import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.tds.TokenMapper;
 import org.tms.teq.DerivationImpl.DerivationContext;
-import org.tms.teq.PendingState.AwaitingState;
-import org.tms.teq.PendingState.BlockedState;
+import org.tms.teq.BaseAsyncState.PendingState;
+import org.tms.teq.BaseAsyncState.BlockedState;
 
 public class PostfixStackEvaluator 
 {
@@ -227,7 +227,7 @@ public class PostfixStackEvaluator
                     }
                     catch (BlockedDerivationException e) {
                         // pendingCellState should be locked at this point
-                        PendingState pendingCellState = e.getPendingState();
+                        BaseAsyncState pendingCellState = e.getPendingState();
                         pendingCellState.lock();
                         try {
                             signalBlockedDerivation(rewind, tbl, row, col, pendingCellState, false);
@@ -267,7 +267,7 @@ public class PostfixStackEvaluator
                         // if signalBlockedDerivation doesn't rethrow exception, retry
                     }
                     catch (BlockedDerivationException e) {
-                        PendingState pendingCellState = e.getPendingState();
+                        BaseAsyncState pendingCellState = e.getPendingState();
                         pendingCellState.lock();
                         try {
                             signalBlockedDerivation(rewind, tbl, row, col, pendingCellState, false);
@@ -287,13 +287,18 @@ public class PostfixStackEvaluator
 			if (pendingToken != null && pendingToken.isPending()) {
 			    m_pfsArray = null; // conserve a bit of memory
 			    
-			    AwaitingState pendingState = new AwaitingState(this, row, col, pendingToken);
+			    PendingState pendingState = new PendingState(this, row, col, pendingToken);
 			    pendingToken.setValue(pendingState);
 			    
                 if (tbl != null) 
                     tbl.setCellValue(row,  col, pendingToken);
                 
 			    throw new PendingDerivationException(pendingState);
+			}
+			
+			if (pendingToken != null && pendingToken.isAwaiting()) {
+			    m_pfsArray = null; // conserve a bit of memory
+               return pendingToken;				
 			}
 		}
 		
@@ -362,7 +367,7 @@ public class PostfixStackEvaluator
             
             if (cell != null) {
                 if (cell.isPendings()) {
-                    PendingState ps = getPendingState(cell);
+                    BaseAsyncState ps = getPendingState(cell);
                     if (ps != null) {
                         ps.lock();
                         try {
@@ -462,18 +467,18 @@ public class PostfixStackEvaluator
         return Token.createErrorToken(ErrorCode.InvalidOperand);
     }        
 
-    private PendingState getPendingState(Cell c)
+    private BaseAsyncState getPendingState(Cell c)
     {
         if (c != null) {
             Object v = c.getCellValue();
-            if (v == null || !(v instanceof PendingState))
+            if (v == null || !(v instanceof BaseAsyncState))
                 return null;
-            PendingState ps = (PendingState)v;
+            BaseAsyncState ps = (BaseAsyncState)v;
             if (ps != null) {
                 ps.lock();
                 try {
                     if (ps.isBlocked()) {
-                        PendingState rootPendingState = ps.getRootPendingState();
+                        BaseAsyncState rootPendingState = ps.getRootPendingState();
                         return rootPendingState;
                     }
                 }
@@ -488,7 +493,7 @@ public class PostfixStackEvaluator
             return null;
     }
 
-    private void signalBlockedDerivation(EquationStack rewind, Table tbl, Row row, Column col, PendingState ps, boolean doForce) 
+    private void signalBlockedDerivation(EquationStack rewind, Table tbl, Row row, Column col, BaseAsyncState ps, boolean doForce) 
     throws BlockedDerivationException
     {
         // reset opstack queue
@@ -501,7 +506,7 @@ public class PostfixStackEvaluator
             m_pfsArray = null; // conserve a bit of memory
             
             Token sourcePending = Token.createPendingToken(ps);
-            PendingState pendingState = new BlockedState(this, row, col, sourcePending);
+            BaseAsyncState pendingState = new BlockedState(this, row, col, sourcePending);
             
             ps.getDerivation().registerBlockingCell(ps.getPendingCell(), pendingState);
             if (tbl != null) {
@@ -533,7 +538,7 @@ public class PostfixStackEvaluator
             
             if (pendingStat.isValid()) {
                 m_pfsArray = null; // conserve a bit of memory
-                Token t = Token.createPendingToken((PendingState)null);
+                Token t = Token.createPendingToken((BaseAsyncState)null);
                 BlockedState bs = new BlockedState(this, row, col, t);
                 t.setValue(bs);
                 
@@ -568,7 +573,7 @@ public class PostfixStackEvaluator
             svse = new SingleVariableStatEngine(bio.isRequiresRetainedDataset(), bio.isRequiresRetainedSequence(), ref.getElementType());   
             
             boolean arePendings = false;
-            Set<PendingState> blockingSet = new LinkedHashSet<PendingState>();
+            Set<BaseAsyncState> blockingSet = new LinkedHashSet<BaseAsyncState>();
             DerivationImpl d = getDerivation();
             if (d == null)
                 throw new IllegalTableStateException("DerivationImpl is required");
@@ -593,7 +598,7 @@ public class PostfixStackEvaluator
                     if (pendingStat != null)
                         throw new BlockingSetDerivationException(pendingStat);
                     
-                    PendingState ps = getPendingState(c);
+                    BaseAsyncState ps = getPendingState(c);
                     if (ps != null) {
                         arePendings = true;
                         blockingSet.add(ps);
@@ -634,7 +639,7 @@ public class PostfixStackEvaluator
             // future development goal would be to handle both at the same time 
             TableRowColumnElement pendingsIn = null;
             boolean arePendings = false;
-            Set<PendingState> blockingSet = new LinkedHashSet<PendingState>();
+            Set<BaseAsyncState> blockingSet = new LinkedHashSet<BaseAsyncState>();
             DerivationImpl d = getDerivation();
             if (d == null)
                 throw new IllegalTableStateException("DerivationImpl is required");
@@ -653,7 +658,7 @@ public class PostfixStackEvaluator
                         if (pendingStat != null)
                             throw new BlockingSetDerivationException(pendingStat);
                         
-                        PendingState ps = getPendingState(ref1Cell);
+                        BaseAsyncState ps = getPendingState(ref1Cell);
                         if (ps != null) {
                             arePendings = true;
                             blockingSet.add(ps);
@@ -669,7 +674,7 @@ public class PostfixStackEvaluator
                         if (pendingStat != null)
                             throw new BlockingSetDerivationException(pendingStat);
                         
-                        PendingState ps = getPendingState(ref2Cell);
+                        BaseAsyncState ps = getPendingState(ref2Cell);
                         if (ps != null) {
                             arePendings = true;
                             blockingSet.add(ps);

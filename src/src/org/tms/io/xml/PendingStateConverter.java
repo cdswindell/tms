@@ -2,7 +2,7 @@ package org.tms.io.xml;
 
 import org.tms.io.BaseReader;
 import org.tms.io.BaseWriter;
-import org.tms.teq.PendingState;
+import org.tms.teq.BaseAsyncState;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -25,7 +25,7 @@ public class PendingStateConverter extends BaseConverter
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) 
 	{
-        return PendingState.class.isAssignableFrom(clazz);
+        return BaseAsyncState.class.isAssignableFrom(clazz);
 	}
 
 	@Override

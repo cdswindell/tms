@@ -47,10 +47,13 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     private int m_index = -1;    
     private DerivationImpl m_deriv;
     private DerivationImpl m_timeSeries;
+    protected Set<String> m_remoteUUIDs;
 
     public TableSliceElementImpl(TableElementImpl e)
     {
         super(e);
+        
+        m_remoteUUIDs = new HashSet<String>();
     }
 
     /*
@@ -66,6 +69,11 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
         if (inUse)
             vetElement();
         set(sf_IN_USE_FLAG, inUse);
+    }
+    
+    public void registerRemoteUUID(String uuid)
+    {
+    	m_remoteUUIDs.add(uuid);
     }
     
     @Override
