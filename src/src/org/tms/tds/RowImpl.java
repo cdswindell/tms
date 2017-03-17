@@ -24,7 +24,7 @@ import org.tms.io.TableExportAdapter;
 import org.tms.tds.filters.FilteredRowImpl;
 import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.teq.MathUtil;
-import org.tms.teq.RemoteValue;
+import org.tms.teq.RemoteValueService;
 import org.tms.util.JustInTimeSet;
 
 public class RowImpl extends TableSliceElementImpl implements Row
@@ -339,7 +339,7 @@ public class RowImpl extends TableSliceElementImpl implements Row
         
         // clean up any remote handlers
         if (m_remoteUUIDs != null && !m_remoteUUIDs.isEmpty()) {
-        	RemoteValue.removeRemoteHandlers(m_remoteUUIDs.toArray(new String [] {}));
+        	RemoteValueService.removeRemoteHandlers(m_remoteUUIDs.toArray(new String [] {}));
         	m_remoteUUIDs.clear();
         }
         

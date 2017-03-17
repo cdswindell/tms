@@ -907,7 +907,7 @@ public class PostfixStackEvaluator
                     
                 case RemoteValueOper:
                 case RemoteNumericOper:
-                    result = RemoteValue.prepareHandler(this.getDerivation(), (BuiltinOperator)oper, row, col, null);
+                    result = RemoteValueService.prepareHandler(this.getDerivation(), (BuiltinOperator)oper, row, col, null);
                     break;
                     
                 default:
@@ -1245,7 +1245,7 @@ public class PostfixStackEvaluator
                     
                 case RemoteCellNumericOper:
                 case RemoteCellValueOper:
-                	result = RemoteValue.prepareHandler(this.getDerivation(), (BuiltinOperator)oper, row, col, x);
+                	result = RemoteValueService.prepareHandler(this.getDerivation(), (BuiltinOperator)oper, row, col, x);
                 	break;
                     
                 default:

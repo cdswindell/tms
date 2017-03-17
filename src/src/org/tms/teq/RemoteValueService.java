@@ -20,7 +20,7 @@ import org.tms.tds.RowImpl;
 import org.tms.teq.PendingDerivationExecutor.PendingThreadFactory;
 import org.tms.tds.ColumnImpl;
 
-public class RemoteValue extends ThreadPoolExecutor implements Runnable
+public class RemoteValueService extends ThreadPoolExecutor implements Runnable
 {
 	static final private Map<RCKey, String> sf_KEY_TO_UUID = new ConcurrentHashMap<RCKey, String>(1024);	
 	static final private Map<String, RCKey> sf_UUID_TO_KEY = new ConcurrentHashMap<String, RCKey>(1024);	
@@ -62,6 +62,7 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 		}
 		
 		// if null, register the new value
+		boolean createAwaitingToken = false;
 		if (uuid == null) {
 			if (remoteUuid != null) 
 				uuid = remoteUuid;
@@ -76,16 +77,36 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 			deriv.registerRemoteUUID(uuid);
 			((RowImpl)row).registerRemoteUUID(uuid);
 			((ColumnImpl)col).registerRemoteUUID(uuid);
+			
+			if (!sf_UUID_TO_VALUE.containsKey(uuid))
+				createAwaitingToken = true;
 		}
 		
 		// finally, return the current value
 		Object value = sf_UUID_TO_VALUE.get(uuid);
-		if (value == null)
+		if (createAwaitingToken)
 			return Token.createAwaitingToken(uuid);
 		else
 			return new Token(value);
 	}
 	
+
+	public static String lookupRemoteUUID(final DerivationImpl deriv, final BuiltinOperator op, final Row row, final Column col) 
+	{
+		// calculate the key from the row/column value
+		RCKey key = new RCKey(deriv, op, row, col);
+		
+		// have we already registered this location?
+		String uuid = sf_KEY_TO_UUID.get(key);
+		
+		return uuid;
+	}
+	
+	/**
+	 * Called from REST api to post remote value and trigger recalculation
+	 * @param uuid
+	 * @param value
+	 */
 	public static void postRemoteValue(final String uuid, Object value)
 	{
 		RCKey key = sf_UUID_TO_KEY.get(uuid);
@@ -117,6 +138,10 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 		}		
 	}
     
+    /**
+     * Used by test harness
+     * @return
+     */
     static public final int numHandlers()
     {
     	return sf_KEY_TO_UUID != null ? sf_KEY_TO_UUID.size() : 0;
@@ -125,12 +150,12 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
     /*
      * This class double duties, it also provides an executor to process remote value submissions
      */
-	private static RemoteValue sf_SINGLETON_INSTANCE = null;
+	private static RemoteValueService sf_SINGLETON_INSTANCE = null;
 	
-	synchronized private static final RemoteValue getInstance()
+	synchronized private static final RemoteValueService getInstance()
 	{
 		if (sf_SINGLETON_INSTANCE == null) {
-			sf_SINGLETON_INSTANCE = new RemoteValue();
+			sf_SINGLETON_INSTANCE = new RemoteValueService();
 		}
 		
 		return sf_SINGLETON_INSTANCE;
@@ -140,7 +165,7 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 	private boolean m_continueDraining;
 	private Thread m_drainThread;
 	
-    private RemoteValue()
+    private RemoteValueService()
     {
         super(5, 50, 30, TimeUnit.SECONDS, 
                 new SynchronousQueue<Runnable>(), 

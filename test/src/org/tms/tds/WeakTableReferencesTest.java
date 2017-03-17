@@ -14,7 +14,7 @@ import org.tms.api.TableContext;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.api.factories.TableFactory;
-import org.tms.teq.RemoteValue;
+import org.tms.teq.RemoteValueService;
 
 public class WeakTableReferencesTest
 {
@@ -133,7 +133,7 @@ public class WeakTableReferencesTest
         Column c = t.addColumn();
         c.setDerivation("rn()");
         
-        assertThat(RemoteValue.numHandlers(), is(nRows));
+        assertThat(RemoteValueService.numHandlers(), is(nRows));
         
         c = null;
         t = null;
@@ -143,6 +143,6 @@ public class WeakTableReferencesTest
         }
         
         assertThat(tc.getNumTables(), is(0));   
-        assertThat(RemoteValue.numHandlers(), is(0));
+        assertThat(RemoteValueService.numHandlers(), is(0));
     }   
 }

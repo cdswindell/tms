@@ -34,6 +34,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.TimeSeries;
 import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.derivables.Token;
@@ -600,6 +601,30 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
 			m_remoteUUIDs.remove(uuid);	
 	}
     
+    public String lookupRemoteUUID() 
+    {
+    	BuiltinOperator op = fetchRemoteValueOperator();
+    	if (m_target instanceof Cell && op != null)
+    		return RemoteValueService.lookupRemoteUUID(this, op, ((Cell)m_target).getRow(), ((Cell)m_target).getColumn());
+    	
+    	return null; 
+    }
+    
+    protected BuiltinOperator fetchRemoteValueOperator()
+    {
+    	if (!isConverted())
+    		throw new IllegalTableStateException("Derivation not converted");
+    	
+    	Iterator<Token> pfsIter = m_pfs.descendingIterator();
+    	while (pfsIter != null && pfsIter.hasNext()) {
+    		Token t = pfsIter.next();
+    		if (t.isRemote())
+    			return (BuiltinOperator)t.getOperator();
+    	}
+    	
+    	return null;
+    }
+    
     protected void registerBlockingCell(Cell blockingCell, BaseAsyncState ps)
     {
         if (blockingCell != null && ps != null && blockingCell.isPendings()) {
@@ -690,7 +715,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
         m_beingDestroyed = true;    
 
         if (m_remoteUUIDs != null && !m_remoteUUIDs.isEmpty()) {
-	        RemoteValue.removeRemoteHandlers(m_remoteUUIDs.toArray(new String [] {}));
+	        RemoteValueService.removeRemoteHandlers(m_remoteUUIDs.toArray(new String [] {}));
 	        m_remoteUUIDs.clear();
         }
         

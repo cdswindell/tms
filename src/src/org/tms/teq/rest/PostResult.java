@@ -14,7 +14,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.eclipse.persistence.jaxb.UnmarshallerProperties;
-import org.tms.teq.RemoteValue;
+import org.tms.teq.RemoteValueService;
 
 @Path("/postResult/{tmsId}")
 public class PostResult 
@@ -24,7 +24,7 @@ public class PostResult
 	@Produces(MediaType.TEXT_PLAIN)
 	public String postResult(@PathParam("tmsId") String tmsId, String valueStr)
 	{
-		RemoteValue.postRemoteValue(tmsId, valueStr);
+		RemoteValueService.postRemoteValue(tmsId, valueStr);
 		return "ok";
 	}
 	
@@ -46,7 +46,7 @@ public class PostResult
 	        Object value = unmarshaller.unmarshal(json, clazz).getValue();
 	        System.out.println(value.toString());
 			
-			RemoteValue.postRemoteValue(tmsId, value);
+			RemoteValueService.postRemoteValue(tmsId, value);
 			return "ok";
 		} 
 		catch (ClassNotFoundException | JAXBException e) {
