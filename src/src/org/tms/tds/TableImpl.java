@@ -1356,6 +1356,16 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                 return (SubsetImpl)find(ElementType.Subset, m_subsets, prop, md);
             }
                 
+            case ByIdent:
+            {
+                md = mda != null && mda.length > 0 ? mda[0] : null;
+                if (md == null || !(md instanceof Number))
+                    throw new InvalidException(this.getElementType(), 
+                            String.format("Invalid %s %s argument: %s", ElementType.Subset, mode, (md == null ? "<null>" : md.toString())));  
+                
+                return (SubsetImpl)find(ElementType.Subset, m_subsets, TableProperty.Ident, ((Number)md).longValue());
+            }
+            
             case ByTag:
                 md = mda != null && mda.length > 0 ? mda[0] : null;
                 if (md == null || !(md instanceof String))
@@ -2243,11 +2253,11 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             case ByIdent:
             {
                 Object md = mda != null && mda.length > 0 ? mda[0] : null;
-                if (isAdding || md == null || !(md instanceof Integer))
+                if (isAdding || md == null || !(md instanceof Number))
                     throw new InvalidException(this.getElementType(), 
                             String.format("Invalid %s %s argument: %s", et, mode, (md == null ? "<null>" : md.toString())));  
                 
-                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Ident, md);
+                TableSliceElementImpl target = (TableSliceElementImpl)find(et, slices, TableProperty.Ident, ((Number)md).longValue());
                 if (target != null) 
                     return target.getIndex() - 1;
                 break;

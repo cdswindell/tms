@@ -184,14 +184,22 @@ public class InfixExpressionParser
         // check that the target of the derivation is appropriate
         // only Row, Column, and Cell can be targets of a derivation
         // Cells do not support transform functions
-        if (target != null && target instanceof Cell) {
+		int numRemotes = 0;
+        if (target != null) {
             Iterator<Token> tIter = ifs.descendingIterator();
             while(tIter != null && tIter.hasNext()) {
                 Token t = tIter.next();
+                
+                if (t.isRemote() ) numRemotes++;               
+                if (numRemotes > 1) {
+                    pr.addIssue(ParserStatusCode.InvalidExpression, t.getOperator().getLabel());      
+                    return;
+                }
+                
                 if (!t.isFunction()) continue;
                 
                 TokenType tt = t.getTokenType();
-                if (tt.isTransform()) {
+                if (tt.isTransform() && target instanceof Cell) {
                     pr.addIssue(ParserStatusCode.InvalidFunctionTarget, t.getOperator().getLabel());
                     return;
                 }

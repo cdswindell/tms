@@ -488,7 +488,7 @@ public interface Table extends TableElement, InitializableTableProperties
      */
     public String getUuid();
     
-    public int getIdent();
+    public long getIdent();
 
 	public void suspendAllTimeSeries();
 	public void resumeAllTimeSeries();

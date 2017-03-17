@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.tms.api.Cell;
 import org.tms.api.Table;
@@ -31,7 +31,7 @@ public abstract class TableCellsElementImpl extends TableElementImpl
 {
     abstract public int getNumCells();
     
-    static final protected AtomicInteger sf_ELEMENT_IDENT_GENERATOR = new AtomicInteger(1000);
+    static final protected AtomicLong sf_ELEMENT_IDENT_GENERATOR = new AtomicLong(1000);
     
     protected TableImpl m_table;   
     protected Set<Derivable> m_affects;
@@ -40,7 +40,7 @@ public abstract class TableCellsElementImpl extends TableElementImpl
     private TableElementListeners m_listeners;
     private Map<String, Object> m_elemProperties;
     private UUID m_guid;
-    protected int m_ident;
+    protected long m_ident;
     
     protected TableCellsElementImpl(TableElementImpl e)
     {
@@ -75,7 +75,7 @@ public abstract class TableCellsElementImpl extends TableElementImpl
         return m_guid.toString();
     }
     
-    public int getIdent()
+    public long getIdent()
     {
         return m_ident;
     }

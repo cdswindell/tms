@@ -344,7 +344,7 @@ public class RowTest extends BaseTest
         
         t.addRow();
         
-        int ident = r.getIdent();
+        long ident = r.getIdent();
         assertThat(ident > 0, is(true));
         
         // get row by ident

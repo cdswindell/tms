@@ -232,8 +232,8 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 		private WeakReference<Column> m_col;
 		
 		private int m_derivIdent;
-		private int m_rowIdent;
-		private int m_colIdent;
+		private long m_rowIdent;
+		private long m_colIdent;
 		
 		RCKey(DerivationImpl d, BuiltinOperator oper, Row r, Column c)
 		{
@@ -280,10 +280,10 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + m_colIdent;
+			result = prime * result + Long.hashCode(m_colIdent);
 			result = prime * result + m_derivIdent;
 			result = prime * result + ((m_oper == null) ? 0 : m_oper.hashCode());
-			result = prime * result + m_rowIdent;
+			result = prime * result + Long.hashCode(m_rowIdent);
 			return result;
 		}
 
@@ -291,22 +291,30 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
+			
 			if (obj == null)
 				return false;
+			
 			if (getClass() != obj.getClass())
 				return false;
+			
 			RCKey other = (RCKey) obj;
 			if (m_colIdent != other.m_colIdent)
 				return false;
+			
 			if (m_derivIdent != other.m_derivIdent)
 				return false;
+			
 			if (m_oper == null) {
 				if (other.m_oper != null)
 					return false;
-			} else if (!m_oper.equals(other.m_oper))
+			} 
+			else if (!m_oper.equals(other.m_oper))
 				return false;
+			
 			if (m_rowIdent != other.m_rowIdent)
 				return false;
+			
 			return true;
 		}
 

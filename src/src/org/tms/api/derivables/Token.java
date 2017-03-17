@@ -536,6 +536,18 @@ public class Token implements Labeled
         return getTokenType() != null && getTokenType().isBuiltIn();
     }   
 
+    public boolean isRemote()
+    {
+        if (isBuiltIn()) {
+        	Operator op = getOperator();
+        	if (op == BuiltinOperator.RemoteNumericOper ||
+        		op == BuiltinOperator.RemoteValueOper)
+        		return true;
+        }
+        
+        return false;
+    }   
+
     public boolean hasReferenceArg()
     {
         Operator op = getOperator();
