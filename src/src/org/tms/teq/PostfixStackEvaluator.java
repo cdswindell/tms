@@ -162,7 +162,7 @@ public class PostfixStackEvaluator
 					x = asOperand(rewind, tbl, row, col);
 					if (x == null || (!x.isOperand() && oper != BuiltinOperator.IsErrorOper)) // stack is in invalid state
 					    return Token.createErrorToken(x == null ? ErrorCode.StackUnderflow : ErrorCode.OperandRequired);					
-					m_opStack.push(doUnaryOp(oper, x));					
+					m_opStack.push(doUnaryOp(oper, x, row, col));					
 					break;
 					
                 case BinaryOp:
@@ -907,7 +907,7 @@ public class PostfixStackEvaluator
                     
                 case RemoteValueOper:
                 case RemoteNumericOper:
-                    result = RemoteValue.prepareHandler(this.getDerivation(), (BuiltinOperator)oper, row, col);
+                    result = RemoteValue.prepareHandler(this.getDerivation(), (BuiltinOperator)oper, row, col, null);
                     break;
                     
                 default:
@@ -1216,7 +1216,7 @@ public class PostfixStackEvaluator
         }
     }
 
-    private Token doUnaryOp(Operator oper, Token x) 
+    private Token doUnaryOp(Operator oper, Token x, Row row, Column col) 
 	{
         // special case IsNullOper
         if (oper == BuiltinOperator.IsNullOper) {
@@ -1242,6 +1242,11 @@ public class PostfixStackEvaluator
                 case NotOper:
                     result = doBuiltInUnaryOp(bio, x);
                     break;
+                    
+                case RemoteCellNumericOper:
+                case RemoteCellValueOper:
+                	result = RemoteValue.prepareHandler(this.getDerivation(), (BuiltinOperator)oper, row, col, x);
+                	break;
                     
                 default:
                     break;

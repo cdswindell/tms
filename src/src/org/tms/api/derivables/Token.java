@@ -538,13 +538,12 @@ public class Token implements Labeled
 
     public boolean isRemote()
     {
-        if (isBuiltIn()) {
-        	Operator op = getOperator();
-        	if (op == BuiltinOperator.RemoteNumericOper ||
-        		op == BuiltinOperator.RemoteValueOper)
-        		return true;
-        }
-        
+     	Operator op = getOperator();
+    	if (op == BuiltinOperator.RemoteNumericOper ||
+    		op == BuiltinOperator.RemoteValueOper ||
+    		op == BuiltinOperator.RemoteCellValueOper ||
+    		op == BuiltinOperator.RemoteCellNumericOper)
+    		return true;
         return false;
     }   
 

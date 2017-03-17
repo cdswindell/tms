@@ -590,9 +590,15 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     
     protected void registerRemoteUUID(String uuid)
     {
-    	if (!m_beingDestroyed)
+    	if (!m_beingDestroyed && uuid != null)
     		m_remoteUUIDs.add(uuid);
     }
+
+    protected void unregisterRemoteUUID(String uuid) 
+    {
+		if (uuid != null)
+			m_remoteUUIDs.remove(uuid);	
+	}
     
     protected void registerBlockingCell(Cell blockingCell, BaseAsyncState ps)
     {

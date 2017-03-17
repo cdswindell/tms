@@ -199,8 +199,14 @@ public class InfixExpressionParser
                 if (!t.isFunction()) continue;
                 
                 TokenType tt = t.getTokenType();
+                Operator op = t.getOperator();
                 if (tt.isTransform() && target instanceof Cell) {
-                    pr.addIssue(ParserStatusCode.InvalidFunctionTarget, t.getOperator().getLabel());
+                    pr.addIssue(ParserStatusCode.InvalidFunctionTarget, op.getLabel());
+                    return;
+                }
+                
+                if ((op == BuiltinOperator.RemoteCellNumericOper || op == BuiltinOperator.RemoteCellValueOper) && !(target instanceof Cell)) {
+                    pr.addIssue(ParserStatusCode.InvalidFunctionTarget, op.getLabel());
                     return;
                 }
             }

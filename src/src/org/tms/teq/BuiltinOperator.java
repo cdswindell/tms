@@ -194,6 +194,9 @@ public enum BuiltinOperator implements Labeled, Operator
     
     NowOper(TokenType.BuiltIn, 8, toLabels("now"), null, java.util.Date.class, toCategories("Date/Time")),
     
+    RemoteCellValueOper(TokenType.UnaryFunc, 8, toLabels("remoteCellValue", "rcv"), toArgs(String.class), Object.class, toCategories("information")),
+    RemoteCellNumericOper(TokenType.UnaryFunc, 8, toLabels("remoteCellNumeric", "rcn"), toArgs(String.class), double.class, toCategories("information")),
+
     RemoteValueOper(TokenType.BuiltIn, 8, toLabels("remoteValue", "rv"), null, Object.class, toCategories("information")),
     RemoteNumericOper(TokenType.BuiltIn, 8, toLabels("remoteNumeric", "rn"), null, double.class, toCategories("information")),
 

@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.derivables.ErrorCode;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.exceptions.IllegalTableStateException;
@@ -25,7 +26,7 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 	static final private Map<String, RCKey> sf_UUID_TO_KEY = new ConcurrentHashMap<String, RCKey>(1024);	
 	static final private Map<String, Object> sf_UUID_TO_VALUE = new ConcurrentHashMap<String, Object>(1024);
 	
-	public static Token prepareHandler(final DerivationImpl deriv, final BuiltinOperator oper, final Row row, final Column col) 
+	public static Token prepareHandler(final DerivationImpl deriv, final BuiltinOperator oper, final Row row, final Column col, Token x) 
 	{
 		if (deriv == null || deriv.isBeingDestroyed())
 			return Token.createNullToken();
@@ -36,9 +37,37 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 		// have we already registered this location?
 		String uuid = sf_KEY_TO_UUID.get(key);
 		
+		// handle token
+		String remoteUuid = null;
+		
+		if (x != null) {
+			if (x.isString())
+				remoteUuid = x.getStringValue();
+			else
+				return Token.createErrorToken(ErrorCode.InvalidOperand);
+		}
+		
+		// deactivate the old reference
+		if (remoteUuid != null && uuid != null && !remoteUuid.equals(uuid)) {
+			sf_KEY_TO_UUID.remove(key);
+			sf_UUID_TO_KEY.remove(uuid);
+			sf_UUID_TO_VALUE.remove(uuid);
+			
+			deriv.unregisterRemoteUUID(uuid);
+			((RowImpl)row).unregisterRemoteUUID(uuid);
+			((ColumnImpl)col).unregisterRemoteUUID(uuid);
+			
+			// set uuid to null to force reprocess
+			uuid = null;
+		}
+		
 		// if null, register the new value
 		if (uuid == null) {
-			uuid = UUID.randomUUID().toString();
+			if (remoteUuid != null) 
+				uuid = remoteUuid;
+			else
+				uuid = UUID.randomUUID().toString();
+			
 			System.out.println(uuid);
 			sf_KEY_TO_UUID.put(key, uuid);
 			sf_UUID_TO_KEY.put(uuid, key);
@@ -61,7 +90,7 @@ public class RemoteValue extends ThreadPoolExecutor implements Runnable
 	{
 		RCKey key = sf_UUID_TO_KEY.get(uuid);
 		if (key != null && key.isValid()) {
-			if (key.getOperator() == BuiltinOperator.RemoteNumericOper)
+			if (key.getOperator() == BuiltinOperator.RemoteNumericOper || key.getOperator() == BuiltinOperator.RemoteCellNumericOper)
 				value = Double.parseDouble((String)value);
 			
 			sf_UUID_TO_VALUE.put(uuid, value);

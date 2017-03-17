@@ -73,8 +73,15 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     
     public void registerRemoteUUID(String uuid)
     {
-    	m_remoteUUIDs.add(uuid);
+		if (uuid != null)
+			m_remoteUUIDs.add(uuid);
     }
+    
+    public void unregisterRemoteUUID(String uuid) 
+    {
+		if (uuid != null)
+			m_remoteUUIDs.remove(uuid);	
+	}
     
     @Override
     protected boolean isDataTypeEnforced()
