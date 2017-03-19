@@ -2,10 +2,12 @@ package org.tms.tds;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
@@ -133,10 +135,23 @@ public class WeakTableReferencesTest
         Column c = t.addColumn();
         c.setDerivation("rn()");
         
+        Row r1 = t.getRow(1);
+        assertNotNull(r1);
+        
+        Cell cR1Cr = t.getCell(r1, c);
+        assertNotNull(cR1Cr);
+        
+        String uuid = cR1Cr.lookupRemoteUUID();
+        
         assertThat(RemoteValueService.numHandlers(), is(nRows));
+        assertNotNull(uuid);
         
         c = null;
+        r1 = null;
+        cR1Cr = null;
+        
         t = null;
+        
         for (int i = 0; i < 5; i++) {
             System.gc();
             Thread.sleep(500);

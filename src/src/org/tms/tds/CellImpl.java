@@ -239,11 +239,11 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
             return null;
     }
 
-    public String getUuid()
+    synchronized public String getUuid()
     {
     	String uuidStr = (String)getProperty(TableProperty.UUID);
     	if (uuidStr == null) {
-    		uuidStr = UUID.randomUUID().toString();
+     		uuidStr = UUID.randomUUID().toString();
     		setProperty(TableProperty.UUID, uuidStr);
     	}
     	
@@ -251,7 +251,7 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     }
     
     /**
-     * Should only be called by persistance methods to restore object state
+     * Should only be called by persistence methods to restore object state
      * @param strVal
      */
 	public void setUUID(String strVal) 
@@ -259,6 +259,22 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
 		setProperty(TableProperty.UUID, strVal);
 	}
 	
+    public String lookupRemoteUUID() 
+    {
+    	if (isDerived())
+    		return getDerivation().lookupRemoteUUID(this);
+    	
+    	RowImpl row = getRow();
+    	if (row != null && row.isDerived())
+    		return row.getDerivation().lookupRemoteUUID(this);
+    	
+    	ColumnImpl col = getColumn();
+    	if (col != null && col.isDerived())
+    		return col.getDerivation().lookupRemoteUUID(this);
+    	
+    	return null;
+   }
+    
     private void incrementPendings()
     {
         if (!isPendings()) {

@@ -34,7 +34,6 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Derivation;
-import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.TimeSeries;
 import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.derivables.Token;
@@ -606,8 +605,17 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     	BuiltinOperator op = fetchRemoteValueOperator();
     	if (m_target instanceof Cell && op != null)
     		return RemoteValueService.lookupRemoteUUID(this, op, ((Cell)m_target).getRow(), ((Cell)m_target).getColumn());
-    	
-    	return null; 
+    	else   	
+    		return null; 
+    }
+    
+    public String lookupRemoteUUID(Cell cell) 
+    {
+    	BuiltinOperator op = fetchRemoteValueOperator();
+    	if (op != null)
+    		return RemoteValueService.lookupRemoteUUID(this, op, cell.getRow(), cell.getColumn());
+    	else   	
+    		return null; 
     }
     
     protected BuiltinOperator fetchRemoteValueOperator()

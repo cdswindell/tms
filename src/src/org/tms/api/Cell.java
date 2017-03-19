@@ -112,4 +112,5 @@ public interface Cell extends TableElement, Derivable, Validatable
     public String getFormattedCellValue();
     public String getDisplayFormat();
     public void setDisplayFormat(String format);
+    public String lookupRemoteUUID();
 }
