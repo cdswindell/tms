@@ -11,6 +11,7 @@ import java.util.List;
  */
 public final class ApiVersion
 {
+    protected static final ApiVersion REMOTE_VALUES_TABLES_VERSION = new ApiVersion(1,3,0,0, "Remote Values");
     protected static final ApiVersion FILTERED_TABLES_VERSION = new ApiVersion(1,2,0,0, "Filter Tables");
     protected static final ApiVersion IO_ENHANCEMENTS_VERSION = new ApiVersion(1,1,0,0, "IO Enhancements");
     protected static final ApiVersion INITIAL_VERSION = new ApiVersion(1,0,0,0, "Initial Version");
@@ -18,11 +19,12 @@ public final class ApiVersion
     
     public static final ApiVersion CURRENT_VERSION = FILTERED_TABLES_VERSION;
             
+    public static final String REMOTE_VALUES_TABLES_STR = "1.3";
     public static final String FILTER_TABLES_STR = "1.2";
     public static final String IO_ENHANCEMENTS_STR = "1.1";
     public static final String INITIAL_VERSION_STR = "1.0";    
     
-    public static final String CURRENT_VERSION_STR = FILTER_TABLES_STR;
+    public static final String CURRENT_VERSION_STR = REMOTE_VALUES_TABLES_STR;
 
     private int m_epoch;
     private int m_major;

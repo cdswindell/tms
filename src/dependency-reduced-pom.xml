@@ -4,7 +4,7 @@
   <groupId>org.tms.api</groupId>
   <artifactId>tms-api</artifactId>
   <name>tms</name>
-  <version>1.1</version>
+  <version>1.3</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
@@ -44,7 +44,7 @@
           <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.4.5</version>
+            <version>2.4.10</version>
             <scope>runtime</scope>
           </dependency>
         </dependencies>
