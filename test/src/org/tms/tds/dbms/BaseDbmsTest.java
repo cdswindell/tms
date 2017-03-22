@@ -11,6 +11,9 @@ import java.sql.Statement;
 import org.junit.After;
 import org.junit.Before;
 import org.tms.BaseTest;
+import org.tms.api.exceptions.TableIOException;
+
+import com.mysql.jdbc.JDBC4ResultSet;
 
 public class BaseDbmsTest extends BaseTest
 {
@@ -37,23 +40,42 @@ public class BaseDbmsTest extends BaseTest
         m_connection = DriverManager.getConnection(connUrl);
         m_statement = m_connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                                    ResultSet.CONCUR_READ_ONLY);
+        if (m_statement == null)
+        	m_statement = m_connection.createStatement();
         
         rs =  m_statement.executeQuery(query);
         
         return rs;
     }
 
-    public int getDbmsRowCount(ResultSet resultSet) 
+    public long getDbmsRowCount(ResultSet resultSet) 
     throws SQLException
     {
-        int totalRows = 0;
+        long totalRows = 0;
         try {
-            resultSet.last();
-            totalRows = resultSet.getRow();
+        	totalRows = ((JDBC4ResultSet)resultSet).getUpdateCount();
+        	return totalRows;
+        }
+        catch (ClassCastException e) { }
+        
+        // try another technique
+        try {   
+        	resultSet.beforeFirst();;
+            if (resultSet.last())
+            	totalRows = resultSet.getRow();
+            else {
+            	while (resultSet.next()) {
+            		totalRows++;
+            	}
+            }
             resultSet.beforeFirst();
         } 
         catch(SQLFeatureNotSupportedException ex)  {
             return 0;
+        }
+        catch (SQLException e)
+        {
+            throw new TableIOException(e);
         }
         
         return totalRows ;

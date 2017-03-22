@@ -26,6 +26,8 @@ import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 import org.tms.util.WeakHashSet;
 
+import com.mysql.jdbc.JDBC4ResultSet;
+
 public class DbmsTableImpl extends TableImpl implements ExternalDependenceTableElement
 {
     public static final DbmsTableImpl createTable(String connectionUrl, String query) 
@@ -178,6 +180,9 @@ public class DbmsTableImpl extends TableImpl implements ExternalDependenceTableE
         m_statement = m_connection.prepareStatement(m_query,
                                                     ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                                     ResultSet.CONCUR_READ_ONLY);
+        if (m_statement == null)
+            m_statement = m_connection.prepareStatement(m_query);
+
         m_resultSet =  m_statement.executeQuery();
         processResultSet(m_resultSet, isRefresh);
     }
@@ -207,7 +212,7 @@ public class DbmsTableImpl extends TableImpl implements ExternalDependenceTableE
                 m_numDbmsCols = m_numDbmsRows = 0;
             
             // create row data structures
-            m_numDbmsRows = getDbmsRowCount(resultSet);
+            m_numDbmsRows = (int)getDbmsRowCount(resultSet);
             
             setRowsCapacity(calcRowsCapacity(Math.max(m_numDbmsRows, getNumRows())));
             m_unprocessedRows = new WeakHashSet<DbmsRowImpl>(m_numDbmsRows);
@@ -244,12 +249,25 @@ public class DbmsTableImpl extends TableImpl implements ExternalDependenceTableE
         }
     }
 
-    private int getDbmsRowCount(ResultSet resultSet)
+    private long getDbmsRowCount(ResultSet resultSet)
     {
-        int totalRows = 0;
+        long totalRows = 0;
         try {
-            resultSet.last();
-            totalRows = resultSet.getRow();
+        	totalRows = ((JDBC4ResultSet)resultSet).getUpdateCount();
+        	return totalRows;
+        }
+        catch (ClassCastException e) { }
+        
+        // try another technique
+        try {   
+        	resultSet.beforeFirst();;
+            if (resultSet.last())
+            	totalRows = resultSet.getRow();
+            else {
+            	while (resultSet.next()) {
+            		totalRows++;
+            	}
+            }
             resultSet.beforeFirst();
         } 
         catch(SQLFeatureNotSupportedException ex)  {

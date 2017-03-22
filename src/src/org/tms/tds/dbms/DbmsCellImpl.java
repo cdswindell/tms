@@ -71,7 +71,7 @@ public class DbmsCellImpl extends CellImpl implements ExternalDependenceTableEle
         ResultSet rs = table.getResultSet();
         try
         {
-            rs.absolute(row.getResultSetIndex());
+        	moveToResultSetRow(rs, row.getResultSetIndex());
             for (Cell cell : row.cells()) {
                 if (cell == null || !(cell instanceof DbmsCellImpl)) continue;
                 
@@ -86,6 +86,28 @@ public class DbmsCellImpl extends CellImpl implements ExternalDependenceTableEle
         }
     }
 
+    private void moveToResultSetRow(ResultSet rs, int reqRow) 
+    throws SQLException
+    {
+    	try {
+    		rs.absolute(reqRow);
+    	}
+    	catch (UnsupportedOperationException e) {
+    		// resultSet doesn't support this oper, do it the brute force way
+    		int curRow = rs.getRow();
+    		if (curRow < reqRow) {
+    			rs.beforeFirst();
+    			curRow = rs.getRow();
+    		}
+    		
+    		while (reqRow > (curRow = rs.getRow()) && rs.next())
+    			;
+    		
+    		if (reqRow != rs.getRow())
+    			throw new SQLException("Row not found");
+    	}
+    }
+    
     @Override
     public boolean isWriteProtected()
     {

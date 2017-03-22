@@ -107,6 +107,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+        <dependency>
+            <groupId>com.reliersoft.sforce</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>0.4.203</version>
+        </dependency>
 		<dependency>
 			<groupId>org.python</groupId>
 			<artifactId>jython-standalone</artifactId>

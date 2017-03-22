@@ -40,7 +40,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         ResultSet rs = fetchResultSet("jdbc:mysql://localhost/cds?user=davids&password=mysql", 
                                       "select * from employee order by name");
         
-        int numRows = getDbmsRowCount(rs);
+        int numRows = (int)getDbmsRowCount(rs);
         int numCols = getDbmsColumnCount(rs);
         close(rs);
         
@@ -119,7 +119,7 @@ public class DbmsTableImplTest extends BaseDbmsTest
         ResultSet rs = fetchResultSet("jdbc:mysql://localhost/music?user=davids&password=mysql", 
                                       "select * from metadata");
         
-        int numRows = getDbmsRowCount(rs);
+        int numRows = (int)getDbmsRowCount(rs);
         int numCols = getDbmsColumnCount(rs);
         close(rs);
         
