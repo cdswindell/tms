@@ -42,5 +42,11 @@ public class SalesForceTest extends BaseDbmsTest
         Object value = t.getCellValue(t.getRow(Access.ByIndex, 2), t.getColumn(Access.First));
         assertThat(value, notNullValue());
         assertThat(value, is("GenePoint"));
+//        
+//        t.setLabel("SalesForce Opportunities");
+//        t.export("salesforce.tms");
+//        
+//        Table tsf = TableFactory.importFile("salesforce.tms");
+//		assertThat(tsf, notNullValue());
 	}  
 }

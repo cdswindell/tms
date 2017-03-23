@@ -31,6 +31,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableRowColumnElement;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.derivables.InvalidExpressionException;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.TMSOptions;
 import org.tms.io.Printable;
@@ -784,8 +785,14 @@ public class TableEditor implements Serializable
 			if (cell != null) {
 				if (val == null || (val = val.trim()).length() <= 0) 
 					cell.setCellValue(null);
-				else if (val.startsWith("="))
-					cell.setDerivation(val.substring(1));
+				else if (val.startsWith("=")) {
+					try {
+						cell.setDerivation(val.substring(1));
+					}
+					catch (InvalidExpressionException  e) {
+						System.out.println(e.getMessage());
+					}
+				}
 				else
 					setCellValue(cell, val);
 			}

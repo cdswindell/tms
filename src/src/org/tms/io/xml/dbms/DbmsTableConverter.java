@@ -54,8 +54,8 @@ public class DbmsTableConverter extends ExternalDependenceTableConverter
 		String driver = null;
 		String connectionUrl = null;
 		String query = null;
-		boolean processingDBMSTags = true;
-    	while (processingDBMSTags && reader.hasMoreChildren()) {
+		int processingDBMSTags = 2;
+    	while (processingDBMSTags > 0 && reader.hasMoreChildren()) {
     		reader.moveDown();
     		String nodeName = reader.getNodeName();
     		switch (nodeName) {
@@ -65,14 +65,16 @@ public class DbmsTableConverter extends ExternalDependenceTableConverter
 					
 				case "connectionUrl":
 					connectionUrl = (String)context.convertAnother(null, String.class);
+					processingDBMSTags--;
 					break;
 					
 				case "query":
 					query = (String)context.convertAnother(null, String.class);
+					processingDBMSTags--;
 					break;
 					
 			    default:
-			    	processingDBMSTags = false;
+			    	processingDBMSTags = 0;
 			    	break;
     		}
 

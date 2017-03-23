@@ -56,25 +56,28 @@ public class ExcelTableConverter extends ExternalDependenceTableConverter
 		File exFile = null;
 		XLSOptions exOpts = null;
 		String exSheet = null;
-		boolean processingExcelTags = true;
-    	while (processingExcelTags && reader.hasMoreChildren()) {
+		int processingExcelTags = 3;
+    	while (processingExcelTags > 0 && reader.hasMoreChildren()) {
     		reader.moveDown();
     		String nodeName = reader.getNodeName();
     		switch (nodeName) {
 				case "exFile":
 					exFile = (File)context.convertAnother(null, File.class);
+					processingExcelTags--;
 					break;
 					
 				case "exOpts":
 					exOpts = (XLSOptions)context.convertAnother(null, XLSOptions.class);
+					processingExcelTags--;
 					break;
 					
 				case "exSheet":
 					exSheet = (String)context.convertAnother(null, String.class);
+					processingExcelTags--;
 					break;
 				
 			    default:
-			    	processingExcelTags = false;
+			    	processingExcelTags = 0;
 			    	break;
     		}
 

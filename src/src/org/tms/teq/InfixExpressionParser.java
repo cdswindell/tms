@@ -10,11 +10,11 @@ import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.InvalidExpressionException;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
 import org.tms.tds.TokenMapper;
-import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class InfixExpressionParser
 {
@@ -50,7 +50,7 @@ public class InfixExpressionParser
         if (m_ifs == null) {
             ParseResult pr = parseInfixExpression();
             if (pr != null && pr.isFailure()) 
-                throw new InvalidExpressionExceptionImpl(pr);
+                throw new InvalidExpressionException(pr);
         }
         
         return m_ifs;

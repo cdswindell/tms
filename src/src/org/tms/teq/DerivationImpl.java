@@ -34,6 +34,7 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Derivation;
+import org.tms.api.derivables.InvalidExpressionException;
 import org.tms.api.derivables.TimeSeries;
 import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.derivables.Token;
@@ -46,7 +47,6 @@ import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.factories.TableContextFactory;
 import org.tms.teq.BaseAsyncState.PendingState;
-import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 import org.tms.util.Tuple;
 
 public final class DerivationImpl implements Derivation, TimeSeries, TableElementListener, Runnable
@@ -87,7 +87,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
      * @param expr Expression to use as the basis for the DerivationImpl
      * @param elem TableElement that will receive the derivation
      * @return
-     * @throws InvalidExpressionExceptionImpl if the expression cannot be parsed
+     * @throws InvalidExpressionException if the expression cannot be parsed
      */
     public static final DerivationImpl create(String expr, Derivable elem)
     {
@@ -114,7 +114,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
             InfixExpressionParser ifParser = new InfixExpressionParser(expr, t);            
             ParseResult pr = ifParser.parseInfixExpression(elem);
             if (pr != null && pr.isFailure())
-                throw new InvalidExpressionExceptionImpl(pr);
+                throw new InvalidExpressionException(pr);
             
             // otherwise, harvest the infix stack
             deriv.m_ifs = ifParser.getInfixStack();
@@ -124,7 +124,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
             PostfixStackGenerator pfg = new PostfixStackGenerator(deriv.m_ifs, t);
             pr =  pfg.convertInfixToPostfix();
             if (pr != null && pr.isFailure())
-                throw new InvalidExpressionExceptionImpl(pr);
+                throw new InvalidExpressionException(pr);
             
             // harvest the postfix stack
             deriv.m_pfs = pfg.getPostfixStack();
@@ -154,7 +154,7 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
             // check for circular reference (e.g., c1<==c2<==c3<==c1)
             if (deriv.isCircularReference()) {
                 pr = new ParseResult(ParserStatusCode.CircularReference, String.format("Expression contains circular reference to %s", elem));
-                throw new InvalidExpressionExceptionImpl(pr);
+                throw new InvalidExpressionException(pr);
             }
     
             // finally, return the derivation

@@ -20,6 +20,8 @@ public class ClassOp
 		sf_ExcludedMethods.add("hashCode");
 		sf_ExcludedMethods.add("getClass");
 		sf_ExcludedMethods.add("toString");
+		sf_ExcludedMethods.add("invokeMethod");
+		sf_ExcludedMethods.add("getMetaClass");
 	}
 	
 	/**

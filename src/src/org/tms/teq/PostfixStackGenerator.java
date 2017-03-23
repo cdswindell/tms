@@ -4,10 +4,10 @@ import java.util.Iterator;
 
 import org.tms.api.Table;
 import org.tms.api.TableElement;
+import org.tms.api.derivables.InvalidExpressionException;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
 import org.tms.api.derivables.TokenType;
-import org.tms.teq.exceptions.InvalidExpressionExceptionImpl;
 
 public class PostfixStackGenerator
 {
@@ -20,7 +20,7 @@ public class PostfixStackGenerator
         InfixExpressionParser ifp = new InfixExpressionParser(infixExpr, table);
         ParseResult pr = ifp.parseInfixExpression(table);
         if (pr != null && pr.isFailure())
-            throw new InvalidExpressionExceptionImpl(pr);
+            throw new InvalidExpressionException(pr);
         
         m_ifs = ifp.getInfixStack();
         m_table = table;
@@ -31,13 +31,13 @@ public class PostfixStackGenerator
     	if (ife.getInfixStack() == null || ife.getInfixStack().isEmpty()) {
     		ParseResult pr = ife.parseInfixExpression();
     		if (pr != null && pr.isFailure())
-    			throw new InvalidExpressionExceptionImpl(pr);
+    			throw new InvalidExpressionException(pr);
     	}
 
     	m_ifs = ife.getInfixStack();
     	if (m_ifs == null) {
     		ParseResult pr = new ParseResult(ParserStatusCode.EmptyStack);
-    		throw new InvalidExpressionExceptionImpl(pr);            
+    		throw new InvalidExpressionException(pr);            
     	}
 
     	m_table = ife.getTable();
@@ -47,12 +47,12 @@ public class PostfixStackGenerator
     {
     	if (ifs == null) {
             ParseResult pr = new ParseResult(ParserStatusCode.EmptyStack);
-            throw new InvalidExpressionExceptionImpl(pr);            
+            throw new InvalidExpressionException(pr);            
     	}
     	
     	if (ifs.getStackType() != StackType.Infix) {
             ParseResult pr = new ParseResult(ParserStatusCode.InvalidExpressionStack);
-            throw new InvalidExpressionExceptionImpl(pr);            
+            throw new InvalidExpressionException(pr);            
     	}
     	
         m_ifs = ifs;
@@ -74,7 +74,7 @@ public class PostfixStackGenerator
         if (m_pfs == null) {
             ParseResult pr = convertInfixToPostfix();
                 if (pr != null && pr.isFailure())
-                    throw new InvalidExpressionExceptionImpl(pr);
+                    throw new InvalidExpressionException(pr);
         }
         
         return m_pfs;
