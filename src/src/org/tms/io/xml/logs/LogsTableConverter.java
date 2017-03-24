@@ -57,14 +57,15 @@ public class LogsTableConverter extends ExternalDependenceTableConverter
 		LogFileFormat logFileFormat = null;
 		
 		String tmp = null;
-		boolean processingLogsTags = true;
-    	while (processingLogsTags && reader.hasMoreChildren()) {
+		int processingLogsTags = 3;
+    	while (processingLogsTags > 0 && reader.hasMoreChildren()) {
     		reader.moveDown();
     		String nodeName = reader.getNodeName();
     		switch (nodeName) {
 				case "logFile":
 					tmp = (String)context.convertAnother(null, String.class);
 					logFile = new File(tmp);
+					processingLogsTags--;
 					break;
 					
 				case "formatClass":
@@ -72,18 +73,20 @@ public class LogsTableConverter extends ExternalDependenceTableConverter
 	                try
 	                {
 	                	logFileFormatClass = (Class<?>) Class.forName(tmp).newInstance().getClass();
-	                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+	                } 
+	                catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 						throw new TableIOException(e);
 					}
-	                finally {}
+					processingLogsTags--;
 					break;
 					
 				case "format":
 					logFileFormat = (LogFileFormat)context.convertAnother(null, logFileFormatClass);
+					processingLogsTags--;
 					break;
 					
 			    default:
-			    	processingLogsTags = false;
+			    	processingLogsTags = 0;
 			    	break;
     		}
 
