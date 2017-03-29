@@ -26,14 +26,14 @@ public class SalesForceTest extends BaseDbmsTest
 
 	
         // count the number of expected rows and columns
-        ResultSet rs = fetchResultSet("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=voB-Wxb-4e2-MNM", 
+        ResultSet rs = fetchResultSet("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=voB-Wxb-4e2-MNMlVuMLR32aYLrdfJ4t61TYi62x", 
                                       "select a.Name \"Account\", o.Name \"Opportunity\", o.amount, o.closeDate, o.type from opportunity o Inner Join Account a on o.AccountId = a.Id where o.isClosed = true");
         
         int numRows = (int)getDbmsRowCount(rs);
         int numCols = getDbmsColumnCount(rs);
         close(rs);
         
-        DbmsTableImpl t = new DbmsTableImpl("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=voB-Wxb-4e2-MNM", 
+        DbmsTableImpl t = new DbmsTableImpl("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=voB-Wxb-4e2-MNMlVuMLR32aYLrdfJ4t61TYi62x", 
                 				"select a.Name \"Account\", o.Name \"Opportunity\", o.amount, o.closeDate, o.type from opportunity o Inner Join Account a on o.AccountId = a.Id where o.isClosed = true");
 		assertThat(t, notNullValue());
 		assertThat(t.getNumRows(), is(numRows));
