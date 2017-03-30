@@ -23,12 +23,22 @@ public class DerivationBuilder
 		return db.toExpression();
 	}
 	
-	private EquationStack m_ifs;
-    private EquationStack m_pfs;
+	static final public String algebraic(final Table table, final Object... params) 
+	{
+		DerivationBuilder db = new DerivationBuilder(table);
+		
+		for (Object p : params) {
+			db.add(p);
+		}
+			
+		return db.toExpression();
+	}
+	
+	private EquationStack m_stack;
 	private Table m_table;
 	private TokenMapper m_tm;
 	
-	public DerivationBuilder(final Table table)
+	private DerivationBuilder(final Table table)
 	{
 		m_table = table;
 		
@@ -38,14 +48,33 @@ public class DerivationBuilder
 			m_tm = TokenMapper.fetchTokenMapper();			
 	}
 	
-    private void push(final Object p) 
+	final private void push(final Object p) 
     {
-		if (m_pfs == null) {
-	        m_pfs = EquationStack.createPostfixStack(m_table);
-	        m_pfs.setTokenMapper(m_tm);
+		if (m_stack == null) {
+	        m_stack = EquationStack.createPostfixStack(m_table);
+	        m_stack.setTokenMapper(m_tm);
 		}
 		
 		// create the appropriate token, depending on the argument type
+		Token t = toToken(p);
+		
+		m_stack.push(t);		
+	}
+
+	final private void add(final Object p) 
+    {
+		if (m_stack == null) {
+	        m_stack = EquationStack.createInfixStack(m_table);
+	        m_stack.setTokenMapper(m_tm);
+		}
+		
+		// create the appropriate token, depending on the argument type
+		Token t = toToken(p);
+		
+		m_stack.push(t);		
+	}
+
+	final private Token toToken(final Object p) {
 		Token t = null;
 		if (p == null)
 			t = Token.createNullToken();
@@ -70,23 +99,39 @@ public class DerivationBuilder
 				String str = ((String)p).trim();
 				
 				t = m_tm.lookUpToken(str);
+				if (t == null) {
+					if (str.equals("("))
+						t = new Token(TokenType.LeftParen);
+					else if (str.equals(")"))
+						t = new Token(TokenType.RightParen);
+					else if (str.equals(","))
+						t = new Token(TokenType.Comma);
+				}
+			}
+			else if (p instanceof Character) {
+				
 			}
 			
 			// if t is null, no token found
 			if (t == null)
 				t = Token.createOperandToken(p);
 		}
-		
-		m_pfs.push(t);		
+		return t;
 	}
 
-    public String toExpression()
+	final public String toExpression()
     {
-    	if (m_ifs != null)
-    		return m_ifs.toExpression();
-    	else if (m_pfs != null)
-    		return m_pfs.toExpression(StackType.Infix);
-    	else
-    		return null;
+    	if (m_stack != null) {
+    		switch (m_stack.getStackType()) {
+				case Infix:
+		    		return m_stack.toExpression();
+				case Postfix:
+		    		return m_stack.toExpression(StackType.Infix);
+				default:
+					break;
+    		}
+    	}
+    	
+     	return null;
     }
 }
