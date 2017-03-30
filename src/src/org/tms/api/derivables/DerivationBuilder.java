@@ -109,7 +109,20 @@ public class DerivationBuilder
 				}
 			}
 			else if (p instanceof Character) {
-				
+				t = m_tm.lookUpToken((char)p);
+				if (t == null) {
+					switch ((char)p) {
+						case '(':
+							t = new Token(TokenType.LeftParen);
+							break;
+						case ')':
+							t = new Token(TokenType.RightParen);
+							break;
+						case ',':
+							t = new Token(TokenType.Comma);
+							break;
+					}
+				}
 			}
 			
 			// if t is null, no token found

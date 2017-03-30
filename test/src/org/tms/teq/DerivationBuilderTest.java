@@ -48,6 +48,10 @@ public class DerivationBuilderTest extends BaseTest
 		assertNotNull(dStr);
 		assertThat(dStr, is("(3.0 + 5.0) * (4.0 + 6.0)"));		
 		
+		dStr = DerivationBuilder.algebraic((Table)null,"randBetween", '(', 3, '+', 5, ',',4,'+',6, ')');
+		assertNotNull(dStr);
+		assertThat(dStr, is("randbetween(3.0 + 5.0, 4.0 + 6.0)"));
+		
 		dStr = DerivationBuilder.algebraic((Table)null,"randBetween", "(", 3, "+", 5, ",",4,"+",6, ")");
 		assertNotNull(dStr);
 		assertThat(dStr, is("randbetween(3.0 + 5.0, 4.0 + 6.0)"));
