@@ -19,6 +19,8 @@ public interface Derivable extends TableElement
      */
     public Derivation setDerivation(String expression);
     
+    public Derivation setDerivation(Object ... terms);
+
     /**
      * Clear the derivation assigned to this element, if one is defined.
      */

@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Column;
 import org.tms.api.Table;
-import org.tms.api.derivables.DerivationBuilder;
 import org.tms.api.factories.TableFactory;
 
 public class DerivationBuilderTest extends BaseTest 
@@ -31,8 +30,9 @@ public class DerivationBuilderTest extends BaseTest
 		// test with table
 		Table t = TableFactory.createTable();
 		Column c1 = t.addColumn();
+		Column c2 = t.addColumn();
 		
-		dStr = DerivationBuilder.rpn(t, c1, "mean");
+		dStr = (c2.setDerivation(c1, "mean")).getExpression();
 		assertNotNull(dStr);
 		assertThat(dStr, is("mean(col 1)"));		
 	}

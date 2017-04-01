@@ -28,6 +28,7 @@ import org.tms.api.exceptions.ReadOnlyException;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.io.Printable;
+import org.tms.teq.DerivationBuilder;
 import org.tms.teq.DerivationImpl;
 
 public class CellImpl extends TableElementImpl implements Cell, Printable
@@ -746,6 +747,13 @@ public class CellImpl extends TableElementImpl implements Cell, Printable
     public Derivation setDerivation(String expr)
     {
         return setDerivation(expr, true);
+    }
+    
+    @Override
+    public Derivation setDerivation(Object ... terms)
+    {
+    	String expr = DerivationBuilder.rpn(getTable(), terms);
+    	return setDerivation(expr, true);
     }
     
     protected DerivationImpl setDerivation(String expr, boolean doRecalc)

@@ -1,4 +1,4 @@
-package org.tms.api.derivables;
+package org.tms.teq;
 
 import org.tms.api.Cell;
 import org.tms.api.Column;
@@ -6,9 +6,10 @@ import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
+import org.tms.api.derivables.Operator;
+import org.tms.api.derivables.Token;
+import org.tms.api.derivables.TokenType;
 import org.tms.tds.TokenMapper;
-import org.tms.teq.EquationStack;
-import org.tms.teq.StackType;
 
 public class DerivationBuilder 
 {

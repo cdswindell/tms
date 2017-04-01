@@ -32,6 +32,7 @@ import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.utils.TableCellTransformer;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.tds.TableImpl.CellReference;
+import org.tms.teq.DerivationBuilder;
 import org.tms.teq.DerivationImpl;
 import org.tms.util.JustInTimeSet;
 
@@ -158,6 +159,13 @@ public abstract class TableSliceElementImpl extends TableCellsElementImpl implem
     public Derivation setDerivation(String expr)
     {
         return setDerivation(expr, true);
+    }
+    
+    @Override
+    public Derivation setDerivation(Object ... terms)
+    {
+    	String expr = DerivationBuilder.rpn(getTable(), terms);
+    	return setDerivation(expr, true);
     }
     
     protected DerivationImpl setDerivation(String expr, boolean doRecalc)
