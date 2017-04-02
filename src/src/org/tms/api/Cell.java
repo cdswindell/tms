@@ -109,8 +109,35 @@ public interface Cell extends TableElement, Derivable, Validatable
      */
     public void setUnits(String units);
 
-    public String getFormattedCellValue();
+    /**
+     * Returns the display format string associated with this cell. See {@link String#format} for 
+     * allowable string format patterns.
+     * @return the display format string
+     * @see String#format
+     */
     public String getDisplayFormat();
+    
+    /**
+     * Sets the display format, as specified by {@link String#format}, to use to render the cell value
+     * in {@link Cell#getFormattedCellValue}.
+     * @param format the display format string
+     * @see String#format
+     * @see Cell#getFormattedCellValue
+     */
     public void setDisplayFormat(String format);
+    
+    /**
+     * Return a string representation of this {@code Cell}'s value, using the associated display format string.
+     * @return a string representation of this {@code Cell}'s value, using the associated display format string
+     * @see String#format
+     * @see Cell#getDisplayFormat
+     * @see Cell#setDisplayFormat
+     */
+    public String getFormattedCellValue();
+    
+    /**
+     * Returns the remote UUID string associated with this cell, if assigned.
+     * @return the remote UUID string associated with this cell, if assigned
+     */
     public String lookupRemoteUUID();
 }

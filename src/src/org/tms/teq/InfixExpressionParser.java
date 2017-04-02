@@ -9,6 +9,7 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
+import org.tms.api.TableContext;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.InvalidExpressionException;
 import org.tms.api.derivables.Operator;
@@ -693,8 +694,8 @@ public class InfixExpressionParser
                         (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
                         (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
                 {
-                    String tableName = label.substring(0, tblRefIdx);
-                    Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
+                    String tableRefStr = label.substring(0, tblRefIdx);
+                    Table refTable = getReferencedTable(table, tableRefStr);
                     if (refTable != null) {
                         label = label.substring(tblRefIdx + sf_TABLE_REF.length());
                         cell = refTable.getCell(Access.ByLabel, label);
@@ -790,8 +791,8 @@ public class InfixExpressionParser
                     (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
                     (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
             {
-                String tableName = label.substring(0, tblRefIdx);
-                Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
+                String tableRefStr = label.substring(0, tblRefIdx);
+                Table refTable = getReferencedTable(table, tableRefStr);
                 if (refTable != null) {
                     label = label.substring(tblRefIdx + sf_TABLE_REF.length());
                     cell = refTable.getCell(Access.ByLabel, label);
@@ -809,7 +810,23 @@ public class InfixExpressionParser
         return 0;
     }
 
-    private int parseColumnReference(char[] exprChars, int curPos, Table table, Token t) 
+    private Table getReferencedTable(Table table, String tableRefStr) 
+    {
+    	// get table context; references can only be resolved within the same context
+    	TableContext tc = table.getTableContext();
+    	
+    	// assume ref str is a table name
+        Table refTable = tc.getTable(Access.ByLabel, tableRefStr);
+        
+        // if not, try uuid
+        if (refTable == null)
+        	refTable = tc.getTable(Access.ByUUID, tableRefStr);
+
+		// return what we found
+		return refTable;
+	}
+
+	private int parseColumnReference(char[] exprChars, int curPos, Table table, Token t) 
     {
         ElementReference er = parseElementReference(exprChars, curPos);
         if (er.foundToken()) {
@@ -827,8 +844,8 @@ public class InfixExpressionParser
                         (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
                         (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
                 {
-                    String tableName = label.substring(0, tblRefIdx);
-                    Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
+                    String tableRefStr = label.substring(0, tblRefIdx);
+                    Table refTable = getReferencedTable(table, tableRefStr);
                     if (refTable != null) {
                         label = label.substring(tblRefIdx + sf_TABLE_REF.length());
                         col = refTable.getColumn(Access.ByLabel, label);
@@ -880,8 +897,8 @@ public class InfixExpressionParser
                         (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
                         (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
                 {
-                    String tableName = label.substring(0, tblRefIdx);
-                    Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
+                    String tableRefStr = label.substring(0, tblRefIdx);
+                    Table refTable = getReferencedTable(table, tableRefStr);
                     if (refTable != null) {
                         label = label.substring(tblRefIdx + sf_TABLE_REF.length());
                         row = refTable.getRow(Access.ByLabel, label);
@@ -918,8 +935,8 @@ public class InfixExpressionParser
                     (tblRefIdx = label.indexOf(sf_TABLE_REF)) > 0 &&
                     (tblRefIdx + sf_TABLE_REF.length() < label.length())) 
             {
-                String tableName = label.substring(0, tblRefIdx);
-                Table refTable = table.getTableContext().getTable(Access.ByLabel, tableName);
+                String tableRefStr = label.substring(0, tblRefIdx);
+                Table refTable = getReferencedTable(table, tableRefStr);
                 if (refTable != null) {
                     label = label.substring(tblRefIdx + sf_TABLE_REF.length());
                     subset = refTable.getSubset(Access.ByLabel, label);

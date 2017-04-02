@@ -19,7 +19,12 @@ public interface Derivable extends TableElement
      */
     public Derivation setDerivation(String expression);
     
-    public Derivation setDerivation(Object ... terms);
+    /**
+     * Set the derivation assigned to this element, using the supplied terms array, in RPN format.
+     * @param terms an array of equation terms, in RPN format.
+     * @return the new derivation
+     */
+    public Derivation setDerivation(Object... terms);
 
     /**
      * Clear the derivation assigned to this element, if one is defined.

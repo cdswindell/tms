@@ -154,6 +154,7 @@ abstract class AbstractRegression implements Iterator<Tuple<Double>>, Iterable<T
 		sb.append(formatNumber(Math.abs(intercept)));
 		return sb.toString();
 	}
+	
 	@Override
 	public Iterator<Tuple<Double>> iterator() 
 	{

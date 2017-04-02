@@ -659,9 +659,15 @@ public class Token implements Labeled
         
         boolean requiresTrailingQuote = false;
         if (primaryTable != null && primaryTable != ref.getTable()) {
+        	Table refTable = ref.getTable();
             requiresTrailingQuote = true;
             sb.append('"');
-            sb.append(ref.getTable().getLabel());
+            
+            if (refTable.isLabeled())
+            	sb.append(refTable.getLabel());
+            else
+            	sb.append(refTable.getUuid());
+            
             sb.append(InfixExpressionParser.sf_TABLE_REF);
         }
         

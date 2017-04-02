@@ -42,8 +42,17 @@ public interface BaseElement
      */
     public void setSupportsNull(boolean enabled);
     
+    /**
+     * Returns {@code true} if the data types of the {@link Cell} values in this element are enforced.
+     * @return {@code true} if the data types of the {@link Cell} values in this element are enforced
+     */
     public boolean isEnforceDataType();   
     
+    /**
+     * Set to {@code true} to enforce the data type of the cell values. Set to {@code false}
+     * to disable data type enforcement.
+     * @param enabled set to {@code true} to enforce the cell data types
+     */
     public void setEnforceDataType(boolean enabled);
     
     /**

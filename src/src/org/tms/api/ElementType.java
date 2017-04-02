@@ -128,11 +128,15 @@ public enum ElementType
         return list;
     }
 
+    /**
+     * Returns a string for this {@code ElementType} that is appropriate to use to reference such elements in derivations.
+     * @return a string for this {@code ElementType}
+     */
 	public String asReferenceLabel() 
 	{
 		switch (this) {
 			case Column:
-				return "col";
+				return "Col";
 		
 			default:
 				return this.name().toLowerCase();
