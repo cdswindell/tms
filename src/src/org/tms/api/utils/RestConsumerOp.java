@@ -102,7 +102,7 @@ abstract public class RestConsumerOp extends AbstractOperator
     
     /**
      * Override to specify a complex URL that must be constructed
-     * @return
+     * @return Override to specify a complex URL that must be constructed
      */
     public String getUrl()
     {

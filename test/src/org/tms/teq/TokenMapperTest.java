@@ -17,9 +17,8 @@ import org.tms.api.TableContext;
 import org.tms.api.derivables.InvalidExpressionException;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Token;
-import org.tms.api.derivables.TokenType;
 import org.tms.api.factories.TableContextFactory;
-import org.tms.api.utils.AbstractOperator;
+import org.tms.api.utils.SynchronousOp;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TokenMapper;
 
@@ -507,37 +506,22 @@ public class TokenMapperTest extends BaseTest
 		return false;
 	}
 
-	public class Square extends AbstractOperator
+	public class Square extends SynchronousOp
     {
 		public Square()
 		{
-			super("square", new Class<?>[] {double.class}, double.class);
+			super("square", new Class<?>[] {double.class}, double.class, "Special Math");
 		}
 
         @Override
-        public TokenType getTokenType()
+        public Object performCalculation(Object [] args)
         {
-            return TokenType.UnaryFunc;
-        }
-
-        @Override
-        public Token evaluate(Token... args)
-        {
-            assert args != null && args.length == 1;
-            
-            double d = args[0].getNumericValue();
-            
-            return new Token(d * d);
-        }
-        
-        @Override
-        public String[] getCategories()
-        {
-        	return new String [] {"Special Math"};
-        }
+            double d = (Double)args[0];           
+            return d * d;
+        }        
     }
     
-    public class Add3 extends AbstractOperator
+    public class Add3 extends SynchronousOp
     {
     	public Add3()
     	{
@@ -545,25 +529,17 @@ public class TokenMapperTest extends BaseTest
     	}
     	
         @Override
-        public TokenType getTokenType()
+        public Object performCalculation(Object [] args)
         {
-            return TokenType.GenericFunc;
-        }
-
-        @Override
-        public Token evaluate(Token... args)
-        {
-            assert args != null && args.length == 3;
+            double d1 = (Double)args[0];
+            double d2 = (Double)args[1];
+            double d3 = (Double)args[2];
             
-            double d1 = args[0].getNumericValue();
-            double d2 = args[1].getNumericValue();
-            double d3 = args[2].getNumericValue();
-            
-            return new Token(d1 + d2 + d3);
+            return d1 + d2 + d3;
         }
     }
     
-    public class AddStringNum extends AbstractOperator
+    public class AddStringNum extends SynchronousOp
     {
     	public AddStringNum()
     	{
@@ -571,20 +547,14 @@ public class TokenMapperTest extends BaseTest
     	}
     	
         @Override
-        public TokenType getTokenType()
-        {
-            return TokenType.BinaryOp;
-        }
-
-        @Override
-        public Token evaluate(Token... args)
+        public Object performCalculation(Object [] args)
         {
             assert args != null && args.length == 2;
             
-            String s1 = args[0].getStringValue();
-            double d2 = args[1].getNumericValue();
+            String s1 = (String)args[0];
+            double d2 = (Double)args[1];
             
-            return new Token(Double.valueOf(s1) + d2);
+            return Double.valueOf(s1) + d2;
         }
     }
 }

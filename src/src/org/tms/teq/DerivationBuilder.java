@@ -97,8 +97,7 @@ public class DerivationBuilder
 		}
 		else {
 			if (p instanceof String) {
-				String str = ((String)p).trim();
-				
+				String str = ((String)p).trim();			
 				t = m_tm.lookUpToken(str);
 				if (t == null) {
 					if (str.equals("("))

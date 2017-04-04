@@ -47,7 +47,7 @@ abstract public class AbstractOperator implements Operator
 		return m_tokenType;
 	}
 
-	protected void setTokenType(TokenType tType)
+	protected void setTokenType(final TokenType tType)
 	{
 		m_tokenType = tType;
 	}
@@ -73,7 +73,7 @@ abstract public class AbstractOperator implements Operator
 		return m_argTypes;
 	}
 
-	protected void setArgTypes(Class<?>[] argTypes)
+	protected void setArgTypes(final Class<?>[] argTypes)
 	{
 		m_argTypes = argTypes;
 	}
@@ -125,7 +125,7 @@ abstract public class AbstractOperator implements Operator
 		return false;
 	}
 	
-	protected Object[] unpack(Token[] tokens) throws NullsNotAllowedException
+	protected Object[] unpack(final Token[] tokens) throws NullsNotAllowedException
 	{
         Object [] mArgs = new Object [numArgs()];
         for (int i = 0; i < numArgs(); i++) {
@@ -138,15 +138,16 @@ abstract public class AbstractOperator implements Operator
 		return mArgs;
 	}
 
-	protected Object unpackArg(Object value, Class<?> requiredType)
+	protected Object unpackArg(final Object value, final Class<?> requiredType)
 	{
+		Object convertedValue = value;
 		if (value != null && requiredType.isPrimitive()) 
-			value = convertToPrimitive(value, requiredType);
+			convertedValue = convertToPrimitive(value, requiredType);
 		
-		return value;
+		return convertedValue;
 	}
 
-	protected Object convertToPrimitive(Object value, Class<?> requiredType) 
+	protected Object convertToPrimitive(final Object value, final Class<?> requiredType) 
 	{
 		if (value instanceof Number) {
 			Number n = (Number)value;

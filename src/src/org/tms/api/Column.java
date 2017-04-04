@@ -29,9 +29,9 @@ public interface Column extends TableElement, Derivable, TableRowColumnElement
     public void setDataType(Class<? extends Object> dataType);
 
     /**
-     * Return the ({@link Cell}) corresponding to the specified {@code Row}
+     * Return the ({@link Cell}) corresponding to the specified {@code Row}.
      * @param row the {@code Row}
-     * @return
+     * @return the cell corresponding to the specified row
      */
 	public Cell getCell(Row row);
 }

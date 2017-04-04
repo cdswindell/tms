@@ -548,6 +548,7 @@ public class TokenMapper
         switch(tt) {
             case UnaryOp:
             case BinaryOp:
+            case BinaryFunc:
                 break;
                 
             default:

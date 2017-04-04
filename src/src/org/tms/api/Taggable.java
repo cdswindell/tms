@@ -11,7 +11,7 @@ package org.tms.api;
 public interface Taggable
 {
     /**
-     * Tags this object with the specified tag(s).
+     * Tags this object with the specified tag(s). Existing tags are retained.
      * @param tags String array of tags to apply to this {@code Taggable} element.
      * @return true if any supplied tags are new
      */

@@ -5,7 +5,7 @@ import org.tms.api.utils.AbstractOperator;
 
 public abstract class AbstractOp extends AbstractOperator 
 {
-	abstract public Object performCalculation(Object [] m_args) throws Exception;
+	abstract public Object performCalculation(Object [] args) throws Exception;
 	
 	public AbstractOp(String label, Class<?>[] argTypes, Class<?> resultType) 
 	{
