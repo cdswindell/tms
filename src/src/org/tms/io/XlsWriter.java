@@ -745,7 +745,7 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         comment = trimString(comment);
         if (comment != null) {
             Sheet sheet = excelC.getSheet();
-            Drawing dp = sheet.createDrawingPatriarch();
+            Drawing<?> dp = sheet.createDrawingPatriarch();
             
             // create the anchor object and associate it with the cell
             ClientAnchor anchor = m_wbHelper.createClientAnchor();

@@ -876,7 +876,7 @@ public class XlsReader extends BaseReader<XLSOptions>
             if (isExcludedRow(sheet, i))
                 continue;
             Cell cell = row.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA)
+            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA) 
                 return false;
         }
         
