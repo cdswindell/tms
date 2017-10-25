@@ -26,14 +26,14 @@ public class SalesForceTest extends BaseDbmsTest
 
 	
         // count the number of expected rows and columns
-        ResultSet rs = fetchResultSet("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=voB-Wxb-4e2-MNM&token=lVuMLR32aYLrdfJ4t61TYi62x", 
+        ResultSet rs = fetchResultSet("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=MaB-t3N-K2v-FQk&token=ocubak74KaQL4sWAwvvF4OQQ", 
                                       "select a.Name \"Account\", o.Name \"Opportunity\", o.amount, o.closeDate, o.type from opportunity o Inner Join Account a on o.AccountId = a.Id where o.isClosed = true");
         
         int numRows = (int)getDbmsRowCount(rs);
         int numCols = getDbmsColumnCount(rs);
         close(rs);
         
-        DbmsTableImpl t = new DbmsTableImpl("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=voB-Wxb-4e2-MNM&token=lVuMLR32aYLrdfJ4t61TYi62x", 
+        DbmsTableImpl t = new DbmsTableImpl("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=MaB-t3N-K2v-FQk&token=ocubak74KaQL4sWAwvvF4OQQ", 
                 				"select a.Name \"Account\", o.Name \"Opportunity\", o.amount, o.closeDate, o.type from opportunity o Inner Join Account a on o.AccountId = a.Id where o.isClosed = true");
 		assertThat(t, notNullValue());
 		assertThat(t.getNumRows(), is(numRows));

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -578,7 +579,7 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         CellReference topLeft = new CellReference(trIdx, lcIdx, isRelative, isRelative);
         CellReference bottomRight = new CellReference(brIdx, rcIdx, isRelative, isRelative);
         
-        AreaReference ar = new AreaReference(topLeft, bottomRight);
+        AreaReference ar = new AreaReference(topLeft, bottomRight, getExcelVersion());
         return ar;
     }
 
@@ -658,7 +659,7 @@ public class XlsWriter extends BaseWriter<XLSOptions>
                 int bottomRightColNum = colBounds != null ? colMap.get(colBounds.getSecondElement()) : maxExcelCol;
                 CellReference bottomRight = new CellReference(bottomRightRowNum, bottomRightColNum, true, true);
                 
-                AreaReference ar = new AreaReference(topLeft, bottomRight);
+                AreaReference ar = new AreaReference(topLeft, bottomRight, getExcelVersion());
                 return ar;
             }
         }
@@ -926,6 +927,16 @@ public class XlsWriter extends BaseWriter<XLSOptions>
     private boolean isValidExcelNameChar(char c)
     {
         return Character.isLetterOrDigit(c) || c == '.' || c == '_' || c == '\\';
+    }
+    
+    private SpreadsheetVersion getExcelVersion()
+    {
+    	if (options().isXlsXFormat())
+    		return SpreadsheetVersion.EXCEL2007;
+    	else if(options().isXlsFormat())
+    		return SpreadsheetVersion.EXCEL97;
+    	else 
+    		return null;
     }
     
     class CachedDerivation
