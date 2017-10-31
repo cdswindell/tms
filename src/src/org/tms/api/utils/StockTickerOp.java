@@ -7,11 +7,11 @@ import org.tms.api.derivables.InvalidOperandsException;
 
 public class StockTickerOp extends RestConsumerOp
 {
-	static final private String sf_URL = "http://finance.google.com/finance/info";
+	static final private String sf_URL = "http://ws.cdyne.com/delayedstockquote/delayedstockquote.asmx/GetQuote";
 	
 	public StockTickerOp()
     {
-        super("ticker", "l_cur", double.class, sf_URL);
+        super("ticker", "LastTradeAmount", double.class, sf_URL);
     }
 
     protected StockTickerOp(String label, String resultKey)
@@ -60,8 +60,9 @@ public class StockTickerOp extends RestConsumerOp
     {
         LinkedHashMap<String, Object> urlParams = new LinkedHashMap<String, Object>(2);
         
-        urlParams.put("client", "ig");
-        urlParams.put("q", String.class);
+        urlParams.put("LicenseKey", "0");
+        urlParams.put("StockSymbol", String.class);
+        
         return urlParams;            
     }
  }

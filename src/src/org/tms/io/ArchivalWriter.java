@@ -104,6 +104,11 @@ abstract class ArchivalWriter<T extends ArchivalIOOptions<T>> extends BaseWriter
         
 		xmlStreamer.registerConverter(new PendingStateConverter(writer));
 		
+		XStream.setupDefaultSecurity(xmlStreamer);
+		xmlStreamer.allowTypesByWildcard(new String[] {
+			    "org.tms.tds.**"
+		});
+		
         return xmlStreamer;
     }
     

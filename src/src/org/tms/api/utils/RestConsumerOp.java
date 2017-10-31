@@ -1,6 +1,7 @@
 package org.tms.api.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -14,11 +15,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.tms.api.derivables.InvalidOperandsException;
 import org.tms.api.derivables.InvalidOperatorException;
 import org.tms.api.derivables.Token;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 abstract public class RestConsumerOp extends AbstractOperator
 {
@@ -283,13 +291,35 @@ abstract public class RestConsumerOp extends AbstractOperator
                 reader.close();
                 
                 // allow result to be postprocessed, as some
-                // json streams have to be adjusted
-                String jsonStr = postProcessInputStream(buffer.toString());
-
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject)parser.parse(jsonStr);
+                // streams have to be adjusted
+                String adjustedStr = postProcessInputStream(buffer.toString());
                 
-                Token t = Token.createOperandToken(parseJsonResponse(json));
+                // is the response XML?
+                Object result = null;
+                if (adjustedStr.toLowerCase().startsWith("<?xml ")) {
+                	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                	DocumentBuilder db = dbf.newDocumentBuilder(); 
+                	
+                	Document doc = db.parse(new InputSource(new ByteArrayInputStream(adjustedStr.getBytes("utf-8"))));
+                	NodeList nl = doc.getElementsByTagName(m_resultKey);
+                	
+                	if (nl != null && nl.getLength() > 0) {
+                		Node n = nl.item(0).getFirstChild();
+                		if (n != null && n.getNodeType() == Node.TEXT_NODE) {
+                    		String nValue = n.getNodeValue();
+                    		result = coerceResult(nValue);
+                		}
+                	}
+                }
+                else {
+                	//assume JSON
+                    JSONParser parser = new JSONParser();
+                    JSONObject json = (JSONObject)parser.parse(adjustedStr);
+                    
+                    result = parseJsonResponse(json);                   
+                }
+
+                Token t = Token.createOperandToken(result);
                 Token.postResult(m_transId, t);
             }
             catch (Exception e)

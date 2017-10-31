@@ -2,8 +2,12 @@ package org.tms.io;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.invoke.SerializedLambda;
 
 import org.tms.api.TableContext;
+import org.tms.api.utils.TableCellTransformer;
+import org.tms.api.utils.TableCellValidator;
+import org.tms.api.utils.Validatable;
 import org.tms.io.options.ArchivalIOOptions;
 import org.tms.io.xml.CellConverter;
 import org.tms.io.xml.ColumnConverter;
@@ -60,7 +64,6 @@ abstract class ArchivalReader<T extends ArchivalIOOptions<T>> extends BaseReader
 	protected XStream getXStream(ArchivalReader<T> reader)
 	{
 		XStream xmlStreamer = new XStream();
-		xmlStreamer = new XStream();
 
 		xmlStreamer.alias(TableContextConverter.ELEMENT_TAG, ContextImpl.class);
 
@@ -109,6 +112,18 @@ abstract class ArchivalReader<T extends ArchivalIOOptions<T>> extends BaseReader
 
 		xmlStreamer.registerConverter(new PendingStateConverter(reader));
 
+		XStream.setupDefaultSecurity(xmlStreamer);
+		xmlStreamer.allowTypes(new Class [] {
+				SerializedLambda.class
+		});		
+		xmlStreamer.allowTypeHierarchy(TableCellValidator.class);
+		xmlStreamer.allowTypeHierarchy(TableCellTransformer.class);
+		xmlStreamer.allowTypeHierarchy(Validatable.class);
+		xmlStreamer.allowTypesByWildcard(new String[] {
+			    "org.tms.tds.**",
+			    "org.tms.io.**"
+		});
+		
 		return xmlStreamer;
 	}
 }
