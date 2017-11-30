@@ -15,6 +15,7 @@ import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.utils.StockTickerOp;
+import org.tms.util.Point;
 
 @ManagedBean(name = "tableView")
 @ApplicationScoped
@@ -47,6 +48,7 @@ public class TableViewer implements TableElementListener
     		m_table.addColumn(3);
     		
     		m_table.getTableContext().registerOperator(new StockTickerOp());
+    		m_table.getTableContext().registerOperators(Point.class);
     		
     		m_table.addListeners(TableElementEventType.OnNoPendings, this);
     		m_table.addListeners(TableElementEventType.OnRecalculate, this);
