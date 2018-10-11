@@ -18,7 +18,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>3.8.0</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -43,8 +43,8 @@
         <dependencies>
           <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.4.10</version>
+            <artifactId>groovy</artifactId>
+            <version>2.5.2</version>
             <scope>runtime</scope>
           </dependency>
         </dependencies>
