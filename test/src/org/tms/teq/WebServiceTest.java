@@ -23,8 +23,9 @@ import org.tms.api.utils.StockTickerOp;
 
 public class WebServiceTest extends BaseTest
 {
+	
     @Test
-    public void testWebServiceCall() throws InterruptedException, IOException 
+    public void testStocksWebServiceCall() throws InterruptedException, IOException 
     {       
         StockTickerOp stocks = new StockTickerOp();
         TableContextFactory.fetchDefaultTableContext().registerOperator(stocks);
@@ -41,7 +42,7 @@ public class WebServiceTest extends BaseTest
         Column c1 = t.addColumn();
         assertNotNull(c1);
         
-        t.setCellValue(r1,  c1, "CTCT");
+        t.setCellValue(r1,  c1, "AAPL");
         t.setCellValue(r2,  c1, "XYXYXYXYXY");
         
         Column c2 = t.addColumn();
@@ -69,7 +70,7 @@ public class WebServiceTest extends BaseTest
         assertThat(true, is(cell.isErrorValue()));
         
         // retry 
-        t.setCellValue(r2,  c1, "EIGI");
+        t.setCellValue(r2,  c1, "MSFT");
         while(c2.isPendings()) {
             assertNotNull(c2);
             Thread.sleep(500);
@@ -95,7 +96,7 @@ public class WebServiceTest extends BaseTest
     }
     
     @Test
-    public void testWebServiceCall2() throws InterruptedException 
+    public void testCurrencyWebServiceCall2() throws InterruptedException 
     {       
         StockTickerOp stocks = new StockTickerOp();
         TableContextFactory.fetchDefaultTableContext().registerOperator(stocks);

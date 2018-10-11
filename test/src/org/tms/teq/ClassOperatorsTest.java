@@ -129,7 +129,7 @@ public class ClassOperatorsTest extends BaseTest
         tc.registerOperators(MyPoint.class);
         
         // create some rows and columns to work with
-        t1.addRow(1000);
+        t1.addRow(5000);
         
         // set derivation
         Column c1 = t1.addColumn(1);
@@ -147,7 +147,12 @@ public class ClassOperatorsTest extends BaseTest
         assertNotNull(d3);
         
         // there *should* be some pendings
-        assertThat(true, is(t1.isPendings()));
+        while(c1.isPendings() || c2.isPendings()|| c3.isPendings()) {
+            assertNotNull(c3);
+            Thread.sleep(500);
+        }
+
+        assertThat(false, is(t1.isPendings()));
         
         // set derivation
         Column c4 = t1.addColumn(4);

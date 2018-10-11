@@ -18,6 +18,7 @@ import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.tms.api.derivables.InvalidOperandsException;
@@ -155,14 +156,28 @@ abstract public class RestConsumerOp extends AbstractOperator
         return "GET";
     }
     
+    /*
+     * Override in implementing class to set environment before attempting to connect to URL
+     */
+    protected void beforeOpenConnection()
+    {
+    }
+    
     /**
      * Override in implementing class as needed
      * @param code HTTP Response Code
      */
     protected void processResponseCode(int code)
     {
+        if (code != HttpURLConnection.HTTP_OK)
+            throw new InvalidOperandsException("Web API Failed: " + code);
     }
     
+    protected Object postProcessResult(Object result) 
+    {
+		return result;
+	}
+
     /**
      * Override in implementing class as needed. Implementers should call
      * super.coerceResult(leaf) at the end of their implementation.
@@ -256,8 +271,17 @@ abstract public class RestConsumerOp extends AbstractOperator
             m_transId = transId;
             m_urlString = baseUrl;
             if (urlParams != null) {
-                if (m_urlString.indexOf('?') == -1)
+            	int qmIdx = m_urlString.indexOf('?');
+                if (qmIdx == -1)
                     m_urlString += "?";
+                else {
+                	// check if we need to add an ampersand
+                	if (qmIdx != m_urlString.length()) {
+                        if (m_urlString.indexOf('&') == -1)
+                            m_urlString += "&";
+                	}
+                }
+                
                 m_urlString += urlParams.toString();
             }
         }
@@ -266,14 +290,15 @@ abstract public class RestConsumerOp extends AbstractOperator
         public void run()
         {
             try {
+            	beforeOpenConnection();
                 URL myUrl = new URL(m_urlString);
                 
                 URLConnection urlCon = myUrl.openConnection();
-                urlCon.setConnectTimeout(getConnectionTimeout());
                 if (urlCon instanceof HttpURLConnection) {
                     HttpURLConnection httpCon = (HttpURLConnection)urlCon;
-                    //httpCon.setRequestMethod(getRequestMethod());
-                    
+                    httpCon.setConnectTimeout(getConnectionTimeout());
+                    httpCon.setRequestMethod(getRequestMethod());
+                                       
                     int code = httpCon.getResponseCode();
                     processResponseCode(code);
                 }
@@ -318,7 +343,10 @@ abstract public class RestConsumerOp extends AbstractOperator
                     
                     result = parseJsonResponse(json);                   
                 }
-
+                
+                // postprocess result
+                result = postProcessResult(result);
+                
                 Token t = Token.createOperandToken(result);
                 Token.postResult(m_transId, t);
             }
@@ -329,7 +357,7 @@ abstract public class RestConsumerOp extends AbstractOperator
             }
         }
 
-        private Object parseJsonResponse(JSONObject json)
+		protected Object parseJsonResponse(JSONObject json)
         {
             if (m_resultKey == null || (m_resultKey.trim()).length() <= 0) {
                 if (getResultType().isAssignableFrom(json.getClass()))
@@ -346,14 +374,26 @@ abstract public class RestConsumerOp extends AbstractOperator
             for (String token : tokens) {
                 leaf = tree.get(token);
                 tokensProcessed++;
+                
+                // special case JSONArray; should probably use protected method
+                if (leaf != null && leaf instanceof JSONArray) {
+                	JSONArray ja = (JSONArray)leaf;
+                	if (ja.isEmpty())
+                		leaf = null;
+                	else
+                		leaf = ja.get(0);
+                }
+                
                 if (leaf instanceof JSONObject)
                     tree = (JSONObject)leaf;
                 else
                     break;
             }
             
-            if (leaf == null && tokensProcessed < tokens.length)
-                throw new InvalidOperandsException("Result not found: " + tokens[tokensProcessed]);
+            if (leaf == null && tokensProcessed < tokens.length)  {
+            	postProcessResult(leaf);
+                throw new InvalidOperandsException("Result not found: " + m_resultKey);
+            }
             
             if (leaf == null)
                 return null;
