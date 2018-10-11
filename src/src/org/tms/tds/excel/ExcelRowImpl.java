@@ -29,7 +29,7 @@ public class ExcelRowImpl extends RowImpl implements ExternalDependenceTableElem
     		if (!isSet(sf_IS_PROCESSED_FLAG)) {
 	    		org.apache.poi.ss.usermodel.Cell eC = m_eRow.getCell(0);
 	    		if (eC != null) {
-	    	        CellType cellType = eC.getCellTypeEnum();
+	    	        CellType cellType = eC.getCellType();
 	    	        if (cellType == CellType.STRING) 
 	    	        	super.setLabel(eC.getRichStringCellValue().getString());
 	    		}
@@ -97,7 +97,7 @@ public class ExcelRowImpl extends RowImpl implements ExternalDependenceTableElem
 	public boolean isFormula(ExcelColumnImpl column) 
 	{
 		org.apache.poi.ss.usermodel.Cell eC = m_eRow.getCell(column.getFieldIndex(), MissingCellPolicy.RETURN_BLANK_AS_NULL);
-		if (eC != null && eC.getCellTypeEnum() == CellType.FORMULA)
+		if (eC != null && eC.getCellType() == CellType.FORMULA)
 			return true;
 		else
 			return false;
@@ -115,7 +115,7 @@ public class ExcelRowImpl extends RowImpl implements ExternalDependenceTableElem
             return null;
 
         // decode based on the cell type
-        CellType cellType = eC.getCellTypeEnum();
+        CellType cellType = eC.getCellType();
         switch(cellType) {
             case BOOLEAN:
                 return eC.getBooleanCellValue();

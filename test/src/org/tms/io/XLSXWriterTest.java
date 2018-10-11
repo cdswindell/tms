@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Comment;
@@ -231,7 +230,7 @@ public class XLSXWriterTest extends BaseIOTest
             
             vetExcelCell(sheet, 1, 9, "3 Row: 2 **", "(1.0 + 2.0) & \" Row: \" & (row()) & \" \" & rept(\"*\", row())", false);
         }
-        catch (EncryptedDocumentException | InvalidFormatException e)
+        catch (EncryptedDocumentException e)
         {
             fail(e.getMessage());
         }
@@ -258,7 +257,7 @@ public class XLSXWriterTest extends BaseIOTest
         else
             assertThat(cv, is(cellVal));   
         
-        String excelFormula = eCell.getCellTypeEnum() == CellType.FORMULA ?
+        String excelFormula = eCell.getCellType() == CellType.FORMULA ?
                                     eCell.getCellFormula() : null;
         if (formula == null)
             assertThat("No formula expected: " + excelFormula, excelFormula, nullValue());
@@ -278,7 +277,7 @@ public class XLSXWriterTest extends BaseIOTest
             return null;
 
         // decode based on the cell type
-        CellType cellType = eC.getCellTypeEnum();
+        CellType cellType = eC.getCellType();
         switch(cellType) {
             case BOOLEAN:
                 return eC.getBooleanCellValue();

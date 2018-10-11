@@ -32,7 +32,7 @@ public class ExcelColumnImpl extends ColumnImpl implements ExternalDependenceTab
 	    		if (eR != null) {
 		    		org.apache.poi.ss.usermodel.Cell eC = eR.getCell(m_fieldIndex);
 		    		if (eC != null) {
-		    	        CellType cellType = eC.getCellTypeEnum();
+		    	        CellType cellType = eC.getCellType(); 
 		    	        if (cellType == CellType.STRING)
 		    	        	super.setLabel(eC.getRichStringCellValue().getString());
 		    		}

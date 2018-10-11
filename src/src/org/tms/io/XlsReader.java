@@ -18,10 +18,10 @@ import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFEvaluationWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.formula.FormulaParser;
 import org.apache.poi.ss.formula.FormulaParsingWorkbook;
+import org.apache.poi.ss.formula.FormulaRenderingWorkbook;
 import org.apache.poi.ss.formula.FormulaType;
 import org.apache.poi.ss.formula.ptg.AbstractFunctionPtg;
 import org.apache.poi.ss.formula.ptg.AddPtg;
@@ -239,6 +239,8 @@ public class XlsReader extends BaseReader<XLSOptions>
     private EquationStack m_externalFuncRefStack;
     
     private Workbook m_wb;
+	private FormulaParsingWorkbook m_fpWb;
+	private FormulaRenderingWorkbook m_frWb;
     private SpreadsheetVersion m_ssV;
     
     public XlsReader(String fileName, XLSOptions format)
@@ -267,6 +269,8 @@ public class XlsReader extends BaseReader<XLSOptions>
     {
         // initialize state variables
         m_wb = null;
+        m_fpWb = null;
+        m_frWb = null;
         m_sheetTableMap = new LinkedHashMap<Sheet, Table>();
         m_sheetParsedFormulaMap = new LinkedHashMap<Sheet, List<ParsedFormula>>();
         m_sheetMaxColMap = new HashMap<Sheet, Integer>();
@@ -276,6 +280,8 @@ public class XlsReader extends BaseReader<XLSOptions>
     public void close()
     {
         m_wb = null;
+        m_fpWb = null;
+        m_frWb = null;
         m_ssV = null;
         
         m_sheetTableMap.clear();
@@ -309,7 +315,8 @@ public class XlsReader extends BaseReader<XLSOptions>
         {            
             m_wb = WorkbookFactory.create(getInputStream());
             m_ssV = m_wb instanceof XSSFWorkbook ? SpreadsheetVersion.EXCEL2007 : SpreadsheetVersion.EXCEL97;  
-            
+            m_frWb = (FormulaRenderingWorkbook) m_fpWb;
+        
             int noSheets = m_wb.getNumberOfSheets();
             if (noSheets <= 0)
                 return;
@@ -337,7 +344,7 @@ public class XlsReader extends BaseReader<XLSOptions>
             // release resources
             processedTables.clear();
         }
-        catch (EncryptedDocumentException | InvalidFormatException e)
+        catch (EncryptedDocumentException e)
         {
             throw new TableIOException(e);
         }
@@ -365,7 +372,7 @@ public class XlsReader extends BaseReader<XLSOptions>
             pruneEmptyElements(t);
             return t;
         }
-        catch (EncryptedDocumentException | InvalidFormatException e)
+        catch (EncryptedDocumentException e)
         {
             throw new TableIOException(e);
         }
@@ -467,7 +474,7 @@ public class XlsReader extends BaseReader<XLSOptions>
 
                                 // record presence of cell formula; we will process
                                 // once all of table is imported
-                                if (options().isDerivations() && eC.getCellTypeEnum() == CellType.FORMULA) {
+                                if (options().isDerivations() && eC.getCellType() == CellType.FORMULA) {
                                     ParsedFormula pf = processExcelFormula(sheet, sheetNo, eC, tCell);
                                     parsedFormulas.add(pf);
                                     rowIsEffectivelyNull = false;
@@ -536,8 +543,7 @@ public class XlsReader extends BaseReader<XLSOptions>
     {
         int numNamedRegions = m_wb.getNumberOfNames();
         if (numNamedRegions > 0) {            
-            for (int i = 0; i < numNamedRegions; i++) {
-                Name namedRegion = m_wb.getNameAt(i);
+            for (Name namedRegion : m_wb.getAllNames()) {
                 if (namedRegion != null) {
                     Sheet sheet = m_wb.getSheet(namedRegion.getSheetName());
                     
@@ -751,7 +757,12 @@ public class XlsReader extends BaseReader<XLSOptions>
     private Token createOperandToken(NamePtg eT, ParsedFormula pf)
     {
         if (m_namedTableElements != null) {
-            Name namedRange = m_wb.getNameAt(eT.getIndex());
+        	if (m_frWb == null)
+        		m_frWb = m_wb instanceof HSSFWorkbook ? 
+                    HSSFEvaluationWorkbook.create((HSSFWorkbook)m_wb) : XSSFEvaluationWorkbook.create((XSSFWorkbook)m_wb);
+
+        	String rangeName = m_frWb.getNameText(eT);
+            Name namedRange = m_wb.getName(rangeName);
             
             if (namedRange != null) {
                 String refName = namedRange.getNameName();
@@ -835,14 +846,14 @@ public class XlsReader extends BaseReader<XLSOptions>
         for (int i = firstEffectiveRow; i < rng1stRowNo; i++) {
             Row r = sheet.getRow(i);
             Cell cell = r.getCell(colNo, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA)
+            if (cell == null || cell.getCellType() != CellType.FORMULA)
                 return false;
         }
         
         for (int i = rngLstRowNo + 1; i < lastRow; i++) {
             Row r = sheet.getRow(i);
             Cell cell = r.getCell(colNo, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA || !isSameRange(cell, rng))
+            if (cell == null || cell.getCellType() != CellType.FORMULA || !isSameRange(cell, rng))
                 return false;
         }
         
@@ -868,7 +879,7 @@ public class XlsReader extends BaseReader<XLSOptions>
         
         for (int i = firstEffectiveCol; i < rng1stColNo; i++) {
             Cell cell = row.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA)
+            if (cell == null || cell.getCellType() != CellType.FORMULA)
                 return false;
         }
         
@@ -876,7 +887,7 @@ public class XlsReader extends BaseReader<XLSOptions>
             if (isExcludedRow(sheet, i))
                 continue;
             Cell cell = row.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            if (cell == null || cell.getCellTypeEnum() != CellType.FORMULA) 
+            if (cell == null || cell.getCellType() != CellType.FORMULA) 
                 return false;
         }
         
@@ -1100,7 +1111,7 @@ public class XlsReader extends BaseReader<XLSOptions>
             return null;
 
         // decode based on the cell type
-        CellType cellType = eC.getCellTypeEnum();
+        CellType cellType = eC.getCellType();
         switch(cellType) {
             case BOOLEAN:
                 return eC.getBooleanCellValue();
@@ -1218,12 +1229,15 @@ public class XlsReader extends BaseReader<XLSOptions>
 
     private ParsedFormula processExcelFormula(Sheet sheet, int asi, Cell eC, org.tms.api.Cell tCell)
     {
-        // parse the formula
-        String formula = eC.getCellFormula();
-        FormulaParsingWorkbook fpWb = m_wb instanceof HSSFWorkbook ? 
-                HSSFEvaluationWorkbook.create((HSSFWorkbook)m_wb) : XSSFEvaluationWorkbook.create((XSSFWorkbook)m_wb);
+    	// Initialize
+    	if (m_fpWb == null)
+            m_fpWb = m_wb instanceof HSSFWorkbook ? 
+                    HSSFEvaluationWorkbook.create((HSSFWorkbook)m_wb) : XSSFEvaluationWorkbook.create((XSSFWorkbook)m_wb);
 
-        Ptg [] tokens = FormulaParser.parse(formula, fpWb, FormulaType.NAMEDRANGE, asi);
+        // parse the formula
+        String formula = eC.getCellFormula();     
+
+        Ptg [] tokens = FormulaParser.parse(formula, m_fpWb, FormulaType.NAMEDRANGE, asi);
         return new ParsedFormula(eC, tCell, tokens);
     }
     

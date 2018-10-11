@@ -133,6 +133,7 @@ public class XlsWriter extends BaseWriter<XLSOptions>
     private Map<Derivation, EquationStack> m_infixCache;
     
     private CreationHelper m_wbHelper = null;
+	private Workbook m_wb;
 
     public static void export(TableExportAdapter tea, OutputStream output, XLSOptions options) 
             throws IOException
@@ -152,24 +153,30 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         m_cachedRangeRef = new HashMap<TableElement, String>();
     }
 
-    @Override
+    @SuppressWarnings("resource")
+	@Override
     protected void export() throws IOException
     {
-        Workbook wb = options().isXlsXFormat() ? new XSSFWorkbook() : new HSSFWorkbook(); 
-        m_wbHelper = wb.getCreationHelper();
-        
-        // perform the export
-        export(wb, getTable());
-        
-        // write the output stream
-        wb.write(getOutputStream());    
-        wb.close();
+    	try {
+	        m_wb = options().isXlsXFormat() ? new XSSFWorkbook() : new HSSFWorkbook(); 
+	        m_wbHelper = m_wb.getCreationHelper();
+	        
+	        // perform the export
+	        export(getTable());
+	        
+	        // write the output stream
+	        m_wb.write(getOutputStream());  
+    	}
+    	finally {
+    		if (m_wb != null)
+    			m_wb.close();
+    	}
     }
     
-    protected void export(Workbook wb, Table t) throws IOException
+    protected void export(Table t) throws IOException
     {
         String tableLabel = trimString(t.getLabel());
-        Sheet sheet = tableLabel != null ? wb.createSheet(tableLabel) : wb.createSheet();
+        Sheet sheet = tableLabel != null ? m_wb.createSheet(tableLabel) : m_wb.createSheet();
 
         int cellFontSize = options().getDefaultFontSize();
         int commentFontSize = options().getDefaultFontSize() - 3;
@@ -179,13 +186,13 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         int colWidth = colWidthPx > 0 ? (int)((colWidthPx - 5)/6.0) : 8;        
         sheet.setDefaultColumnWidth(colWidth);
         
-        CellStyle cellStyle = getCachedCellStyle("default", wb, cellFontSize, false);
-        CellStyle headingStyle = getCachedCellStyle("heading", wb, headerFontSize, false);
+        CellStyle cellStyle = getCachedCellStyle("default", m_wb, cellFontSize, false);
+        CellStyle headingStyle = getCachedCellStyle("heading", m_wb, headerFontSize, false);
         
         // make the comment styles, we may or may not need them, but this 
         // saves us from having to cache the comment font size
-        getCachedCellStyle("comment", wb, commentFontSize, false);
-        getCachedCellStyle("author", wb, commentFontSize, true);
+        getCachedCellStyle("comment", m_wb, commentFontSize, false);
+        getCachedCellStyle("author", m_wb, commentFontSize, true);
                
         int firstActiveRow = 0;
         int firstActiveCol = 0;
@@ -293,7 +300,7 @@ public class XlsWriter extends BaseWriter<XLSOptions>
                     
                     String label = trimString(tCell.getLabel());
                     if (label != null) 
-                        applyName(tCell, label, wb, sheet, excelC);
+                        applyName(tCell, label, m_wb, sheet, excelC);
                     
                     if (options().isDescriptions()) {
                         String desc = trimString(tCell.getDescription());
@@ -319,10 +326,10 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         } // of rows
         
         // process TMS subsets
-        processSubsets(t, wb, sheet, maxExcelCol);
+        processSubsets(t, m_wb, sheet, maxExcelCol);
         
         // process derivations
-        processDerivations(t, wb, sheet, maxExcelCol);
+        processDerivations(t, m_wb, sheet, maxExcelCol);
 
         // Freeze pains        
         if (options().isRowLabels() && options().isColumnLabels())
@@ -768,11 +775,13 @@ public class XlsWriter extends BaseWriter<XLSOptions>
             }
             
             // format the comment text
-            short commentFont  = this.getCachedCellFontIndex("comment");
+            int commentFontIdx  = this.getCachedCellFontIndex("comment");
+            Font commentFont = m_wb.getFontAt(commentFontIdx);
             str.applyFont(commentFont);
             
             if (authorLen > -1) {
-                short authorFont  = this.getCachedCellFontIndex("author");
+                int authorFontIdx  = this.getCachedCellFontIndex("author");
+                Font authorFont = m_wb.getFontAt(authorFontIdx);
                 str.applyFont(0, authorLen, authorFont);
             }
             
@@ -817,11 +826,11 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         colMap.put(tmsC, excelC);
     }
 
-    private short getCachedCellFontIndex(String styleName)
+    private int getCachedCellFontIndex(String styleName)
     {
         CellStyle cs = m_styleCache.get(styleName);
         if (cs != null)
-            return cs.getFontIndex();
+            return cs.getFontIndexAsInt();
         else
             return 0;
     }
