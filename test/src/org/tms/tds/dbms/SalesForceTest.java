@@ -15,6 +15,8 @@ import org.tms.api.factories.TableContextFactory;
 
 public class SalesForceTest extends BaseDbmsTest 
 {
+	private String SFPWD = "O7l14UvpzWpxzvqF5zXiVF0MR";
+	
 	@Test
 	public final void testCreateSalesForceOppTable() throws ClassNotFoundException, SQLException, IOException 
 	{
@@ -26,14 +28,14 @@ public class SalesForceTest extends BaseDbmsTest
 
 	
         // count the number of expected rows and columns
-        ResultSet rs = fetchResultSet("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=MaB-t3N-K2v-FQk&token=ocubak74KaQL4sWAwvvF4OQQ", 
+        ResultSet rs = fetchResultSet("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=mosseg-mebbis-3cAkge&token=" + SFPWD, 
                                       "select a.Name \"Account\", o.Name \"Opportunity\", o.amount, o.closeDate, o.type from opportunity o Inner Join Account a on o.AccountId = a.Id where o.isClosed = true");
         
         int numRows = (int)getDbmsRowCount(rs);
         int numCols = getDbmsColumnCount(rs);
         close(rs);
         
-        DbmsTableImpl t = new DbmsTableImpl("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=MaB-t3N-K2v-FQk&token=ocubak74KaQL4sWAwvvF4OQQ", 
+        DbmsTableImpl t = new DbmsTableImpl("jdbc:sforce://login.salesforce.com:443?user=dave@soundadviceservices.com&password=mosseg-mebbis-3cAkge&token=" + SFPWD,
                 				"select a.Name \"Account\", o.Name \"Opportunity\", o.amount, o.closeDate, o.type from opportunity o Inner Join Account a on o.AccountId = a.Id where o.isClosed = true");
 		assertThat(t, notNullValue());
 		assertThat(t.getNumRows(), is(numRows));
