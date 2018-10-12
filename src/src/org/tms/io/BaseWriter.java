@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +20,8 @@ import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
+import org.tms.api.TableElement;
+import org.tms.api.TableProperty;
 import org.tms.api.io.IOOption;
 
 public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
@@ -38,6 +42,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     private List<Row> m_activeRows;
     private Map<Integer, Integer> m_rowIndexMap;
     private Map<Integer, Row> m_effRowIndexMap;
+	private Writer m_outWriter;
 
     abstract protected void export() throws IOException;
     
@@ -79,12 +84,44 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_outStream;
     }
     
+    public Writer getOutputWriter()
+    {
+    	if (m_outWriter == null)
+    		m_outWriter = new OutputStreamWriter(getOutputStream());
+    		
+        return m_outWriter;
+    }
+    
+    protected void flushOutput() throws IOException
+    {
+    	if (m_outWriter != null)
+    		m_outWriter.flush();
+    	
+    	if (m_outStream != null)
+    		m_outStream.flush();
+    }
+    
     /*
      * Publicly available methods for use outside of package
      */
     public E options()
     {
         return m_baseOptions;
+    }
+    
+    protected boolean hasValue(TableElement te, TableProperty key)
+    {
+        if (te.hasProperty(key)) {
+            Object val = te.getProperty(key);
+
+            // one more check for empty strings
+            if (val instanceof String && ((String)val).trim().length() == 0)
+                return false;
+                    
+            return true;
+        }
+        
+        return false;        
     }
     
     public Table getTable()

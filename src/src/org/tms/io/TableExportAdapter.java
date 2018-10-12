@@ -15,6 +15,7 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.UnimplementedException;
 import org.tms.api.io.IOOption;
+import org.tms.api.io.JSONOptions;
 import org.tms.api.io.CSVOptions;
 import org.tms.api.io.HTMLOptions;
 import org.tms.api.io.IOFileFormat;
@@ -58,11 +59,14 @@ public class TableExportAdapter
                     case HTML:
                         return HTMLOptions.Default;
                         
-                    case RTF:
-                        return RTFOptions.Default;
+                    case JSON:
+                        return JSONOptions.Default;
                         
                     case PDF:
                         return PDFOptions.Default;
+                        
+                    case RTF:
+                        return RTFOptions.Default;
                         
                     case XML:
                         return XMLOptions.Default;
@@ -226,6 +230,10 @@ public class TableExportAdapter
                 
             case XML:
                 XMLWriter.export(this, m_output, (XMLOptions)m_options);
+                break;
+                
+            case JSON:
+                JSONWriter.export(this, m_output, (JSONOptions)m_options);
                 break;
                 
             case PDF:

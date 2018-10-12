@@ -2,6 +2,8 @@ package org.tms.tds.dbms;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -25,8 +27,6 @@ import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 import org.tms.tds.TableImpl;
 import org.tms.util.WeakHashSet;
-
-import com.mysql.jdbc.JDBC4ResultSet;
 
 public class DbmsTableImpl extends TableImpl implements ExternalDependenceTableElement
 {
@@ -253,10 +253,13 @@ public class DbmsTableImpl extends TableImpl implements ExternalDependenceTableE
     {
         long totalRows = 0;
         try {
-        	totalRows = ((JDBC4ResultSet)resultSet).getUpdateCount();
-        	return totalRows;
-        }
-        catch (ClassCastException e) { }
+        	Method getUpdateCount = resultSet.getClass().getMethod("getUpdateCount");
+        	if (getUpdateCount != null) {
+	        	totalRows = (long)getUpdateCount.invoke(resultSet);
+	        	return totalRows;
+        	}
+        } 
+        catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {}
         
         // try another technique
         try {   

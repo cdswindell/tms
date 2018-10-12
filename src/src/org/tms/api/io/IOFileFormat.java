@@ -25,6 +25,7 @@ public enum IOFileFormat
     HTML(false, "htm", "html"),
     /** PDF file format, export only */
     PDF(false, "pdf"),
+    /** JSON file format, import and export */
     JSON(true, "json", "jsn"),
     /** Rich Text File (RTF) file format, export only */
     RTF(false, "rtf"),
