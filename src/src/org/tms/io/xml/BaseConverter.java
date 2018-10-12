@@ -132,7 +132,7 @@ abstract class BaseConverter implements Converter
     
     protected boolean isIgnoreColumn(Column c) 
     {
-        return m_writer.isIgnoreColumn(c);
+        return m_writer.isIgnore(c);
     }
     
     protected boolean isIgnoreColumn(int cIdx) 
@@ -152,7 +152,7 @@ abstract class BaseConverter implements Converter
     
     protected boolean isIgnoreRow(Row r) 
     {
-        return m_writer.isIgnoreRow(r);
+        return m_writer.isIgnore(r);
     }
     
     protected boolean isIgnoreRow(int rIdx) 

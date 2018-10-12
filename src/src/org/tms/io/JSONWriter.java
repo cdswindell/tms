@@ -2,6 +2,7 @@ package org.tms.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -9,6 +10,7 @@ import org.json.simple.JSONObject;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.io.JSONOptions;
@@ -45,6 +47,12 @@ public class JSONWriter extends BaseWriter<JSONOptions>
     	
     	// Columns
     	exportColumns(t, tblJson);
+    	
+    	// Subsets
+    	exportSubsets(t, tblJson);
+    	
+    	// Cells
+    	exportCells(t, tblJson);
     	
     	// create the top-level item
     	JSONObject root = new JSONObject();    	
@@ -145,7 +153,7 @@ public class JSONWriter extends BaseWriter<JSONOptions>
             	if (options().isDerivations() && c.isDerived()) 
             		cJson.put("fx", c.getDerivation().getExpression());
             	
-            	// if any data written, include row
+            	// if any data written, include column
             	if (!cJson.isEmpty()) {
             		cJson.put("idx", getRemappedColumnIndex(c));
             		tColsList.add(cJson);
@@ -156,5 +164,67 @@ public class JSONWriter extends BaseWriter<JSONOptions>
         // finally, include entire rows object
     	if (!tColsList.isEmpty()) 
     		tblJson.put("columns", tColsList);    	
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void exportSubsets(Table t, JSONObject tblJson) 
+	{
+		if (!isTable())
+			return;
+		
+    	JSONArray tSetsList = new JSONArray();
+    	
+		List<TableProperty> sProps = (options().isVerboseState() ? ElementType.Subset.getMutableProperties():
+    		Arrays.asList(new TableProperty[] {TableProperty.Label}) );
+		
+		for (Subset s : t.getSubsets()) {
+    		JSONObject sJson = new JSONObject();
+    		
+        	// add metadata
+        	for (TableProperty p : sProps) {
+        		if (hasValue(s, p))
+        			sJson.put(p.toString(), s.getProperty(p));
+        	}
+    		
+        	// encode the rows
+        	List<Integer> rows = new ArrayList<Integer>(this.getNumConsumableRows());
+        	for (Row r : s.getRows()) {
+        		if (this.isIgnore(r)) continue;
+        		
+        		rows.add(getRemappedRowIndex(r));
+        	}
+        	if (!rows.isEmpty())
+        		sJson.put("rows", rows);
+        	
+        	// encode the columns
+        	List<Integer> cols = new ArrayList<Integer>(this.getNumConsumableColumns());
+        	for (Column c : s.getColumns()) {
+        		if (this.isIgnore(c)) continue;
+        		
+        		cols.add(getRemappedColumnIndex(c));
+        	}
+        	
+        	if (!cols.isEmpty())
+        		sJson.put("cols", cols);
+        	
+        	// if any data written, include subset
+        	if (!sJson.isEmpty()) {
+        		tSetsList.add(sJson);
+        	}
+		}
+		
+        // finally, include entire rows object
+    	if (!tSetsList.isEmpty()) 
+    		tblJson.put("subsets", tSetsList);    			
+	}
+
+	@SuppressWarnings("unchecked")
+	private void exportCells(Table t, JSONObject tblJson) 
+	{
+    	JSONArray tCellsList = new JSONArray();
+    	
+        // finally, include entire cells object
+    	if (!tCellsList.isEmpty()) 
+    		tblJson.put("cells", tCellsList);    			
 	}
 }

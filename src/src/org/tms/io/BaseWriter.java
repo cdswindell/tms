@@ -153,7 +153,12 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_tableExportAdapter;
     }
     
-    public int getNumConsumableColumns()
+    public boolean isTable()
+    {
+        return m_tableExportAdapter.getTableElementType() == ElementType.Table;
+    }
+    
+   public int getNumConsumableColumns()
     {
         if (m_nConsumableColumns == -1) {
             m_nConsumableColumns = m_nCols;
@@ -200,7 +205,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_ignoredColumns.contains(i);           
     }
     
-    public boolean isIgnoreColumn(Column c)
+    public boolean isIgnore(Column c)
     {
         if (c == null)
             return true;
@@ -364,7 +369,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_ignoredRows.contains(i);           
     }
     
-    public boolean isIgnoreRow(Row r)
+    public boolean isIgnore(Row r)
     {
         if (r == null)
             return true;

@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
+import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.JSONOptions;
@@ -27,9 +28,17 @@ public class JSONWriterTest extends BaseIOTest
     	
     	// and columns
     	Column c1 = t.addColumn(Access.ByLabel, "Col 1");
+    	Column c2 = t.addColumn();
+    	c2.setDerivation("col 1 * col 1");
     	
-    	// set data
-    	t.setCellValue(r10,  c1, 25);
+    	// set some data
+    	for (int i = 5; i <= 10; i++) {
+    		t.setCellValue(t.getRow(i),  c1, 25);
+    	}
+    	
+    	// and create a subset
+    	Subset s = t.addSubset();
+    	s.add(c2);
     	
         File tmpFile = File.createTempFile("testJSONExport1", ".json");
     	//t.export(tmpFile.getPath());
