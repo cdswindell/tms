@@ -42,6 +42,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     private List<Row> m_activeRows;
     private Map<Integer, Integer> m_rowIndexMap;
     private Map<Integer, Row> m_effRowIndexMap;
+    
 	private Writer m_outWriter;
 
     abstract protected void export() throws IOException;
@@ -113,12 +114,20 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     {
         if (te.hasProperty(key)) {
             Object val = te.getProperty(key);
-
-            // one more check for empty strings
-            if (val instanceof String && ((String)val).trim().length() == 0)
-                return false;
-                    
-            return true;
+            
+            if (val != null) {
+	            // one more check for empty strings
+	            if (val instanceof String && ((String)val).trim().length() == 0)
+	                return false;
+	               
+	            // if te isn't a table, check that value differs from parent table
+	            if (te.getElementType() != ElementType.Table) {
+	            	if (hasValue(te.getTable(), key) && te.getTable().getProperty(key) == val)
+	            		return false;
+	            }
+	            
+	            return true;
+	        }
         }
         
         return false;        
@@ -218,8 +227,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
                     m_activeCols = new ArrayList<Column>(getNumConsumableColumns());
                     for (int i = 1; i <= m_nCols; i++) {
                         if (!isIgnoreColumn(i))
-                            m_activeCols.add(getTable().getColumn(i));
-                                
+                            m_activeCols.add(getTable().getColumn(i));                               
                     }
                 }               
             }
@@ -282,18 +290,24 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
 	                        }
 	                        else {
 	                            if (m_rowIndexMap == null)
-	                                m_rowIndexMap = new HashMap<Integer, Integer>(m_nRows);
+	                                m_rowIndexMap = new HashMap<Integer, Integer>(m_nRows);	                            
+	                            
+	                            if (m_effRowIndexMap == null)
+	                            	m_effRowIndexMap = new HashMap<Integer, Row>(m_nRows);
 	                            
 	                            m_rowIndexMap.put(r.getIndex(), ++remappedIdx);
+	                            m_effRowIndexMap.put(remappedIdx, r);
 	                        }
 	                    }
-	                    else
+	                    else {
+                            emptyRowCnt++;
 	                        m_ignoredRows.add(i);
+	                    }
 	                }
                 }
                 else {
                 	for (Row r : getRows()) {
-                        if (r.isNull()) {
+                        if (r != null && r.isNull()) {
                             emptyRowCnt++;
                             m_ignoredRows.add(r.getIndex());
                         }

@@ -65,7 +65,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
 			}
 		}
 
-		setStronglyTyped(false);
 		m_filters = new JustInTimeSet<FilteredColumnImpl>();
 		m_cells = null;
 		m_cellsCapacity = 0;
@@ -171,19 +170,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
 	int getCellsCapacity()
 	{
 		return m_cellsCapacity;
-	}
-
-	protected boolean isStronglyTyped()
-	{
-		return isSet(sf_STRONGLY_TYPED_FLAG);
-	}
-
-	protected void setStronglyTyped(boolean stronglyTyped)
-	{
-		if (stronglyTyped && getDataType() == null)
-			throw new IllegalTableStateException("DataType Missing"); // can't strongly type a column without a data type
-
-		set(sf_STRONGLY_TYPED_FLAG, stronglyTyped);
 	}
 
 	/*
@@ -408,9 +394,6 @@ public class ColumnImpl extends TableSliceElementImpl implements Column
 		{
 		case DataType:
 			return getDataType();
-
-		case isStronglyTyped:
-			return isStronglyTyped();
 
 		case numCells:
 			return getNumCells();

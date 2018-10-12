@@ -23,10 +23,8 @@ public class LogsColumnImpl extends ColumnImpl implements ExternalDependenceTabl
     	if (colName != null)
     		setLabel(colName);
     	
-        if (dataType != null) {
+        if (dataType != null) 
             setDataType(dataType);
-            setStronglyTyped(true);
-        }
     }
 
     @Override

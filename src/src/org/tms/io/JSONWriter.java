@@ -2,12 +2,18 @@ package org.tms.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
+import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.io.JSONOptions;
+
+import scala.actors.threadpool.Arrays;
 
 public class JSONWriter extends BaseWriter<JSONOptions>
 {
@@ -28,23 +34,17 @@ public class JSONWriter extends BaseWriter<JSONOptions>
 	@Override
     protected void export() throws IOException
     {
-    	JSONObject tblJson = new JSONObject();
+    	Table t = getTable();    	
+    	JSONObject tblJson = new JSONObject();  	
     	
-    	// Table metadata
-    	JSONObject tMd = new JSONObject();
+    	// process table metadata
+    	exportTableMetadata(t, tblJson);
     	
-    	Table t = getTable();
+    	// Rows
+    	exportRows(t, tblJson);
     	
-    	TableProperty[] tProps = (options().isVerboseState() ? TableProperty.values():
-    		new TableProperty[] {TableProperty.Label, TableProperty.Description, TableProperty.isSupportsNull, TableProperty.isReadOnly});
-    	
-    	for (TableProperty tp : tProps) {
-    		if (hasValue(t, tp) && !tp.isReadOnly())
-				tMd.put(tp.toString(), getTable().getProperty(tp));
-    	}
-    	
-    	if (!tMd.isEmpty())
-    		tblJson.put("metadata", tMd);
+    	// Columns
+    	exportColumns(t, tblJson);
     	
     	// create the top-level item
     	JSONObject root = new JSONObject();    	
@@ -53,4 +53,108 @@ public class JSONWriter extends BaseWriter<JSONOptions>
     	// serialize output
     	root.writeJSONString(getOutputWriter());  	
     }
+
+	@SuppressWarnings("unchecked")
+	protected void exportTableMetadata(Table t, JSONObject tblJson) 
+	{
+		List<TableProperty> tProps = (options().isVerboseState() ? ElementType.Table.getMutableProperties():
+    		Arrays.asList(new TableProperty[] {TableProperty.Label, TableProperty.Description}) );
+    	
+    	// Table metadata
+    	JSONObject tMd = new JSONObject();
+    	
+    	for (TableProperty tp : tProps) {
+    		if (hasValue(t, tp))
+				tMd.put(tp.toString(), getTable().getProperty(tp));
+    	}
+    	
+    	if (!tMd.isEmpty())
+    		tblJson.put("metadata", tMd);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void exportRows(Table t, JSONObject tblJson) 
+	{
+    	JSONArray tRowsList = new JSONArray();
+    	
+		List<TableProperty> rProps = (options().isVerboseState() ? ElementType.Row.getMutableProperties():
+    		Arrays.asList(new TableProperty[] {TableProperty.Label}) );
+		
+		// don't export row labels, if not requested
+		if (!options().isRowLabels())
+			rProps.remove(TableProperty.Label);
+		
+		// handle derivations separately
+		rProps.remove(TableProperty.Derivation);
+		
+        int nRows = getNumConsumableRows();
+        for (int i = 1; i <= nRows; i++) { 
+        	Row r = getRowByEffectiveIndex(i);
+        	if (r != null) {
+        		JSONObject rJson = new JSONObject();
+        		
+            	// add metadata
+            	for (TableProperty p : rProps) {
+            		if (hasValue(r, p))
+            			rJson.put(p.toString(), r.getProperty(p));
+            	}
+            	
+            	// add derivations, if requested
+            	if (options().isDerivations() && r.isDerived()) 
+            		rJson.put("fx", r.getDerivation().getExpression());
+            	
+            	// if any data written, include row
+            	if (!rJson.isEmpty()) {
+            		rJson.put("idx", i);
+            		tRowsList.add(rJson);
+            	}
+        	}        	
+        }
+    	
+        // finally, include entire rows object
+    	if (!tRowsList.isEmpty()) 
+    		tblJson.put("rows", tRowsList);    	
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void exportColumns(Table t, JSONObject tblJson) 
+	{
+    	JSONArray tColsList = new JSONArray();
+    	
+		List<TableProperty> rProps = (options().isVerboseState() ? ElementType.Column.getMutableProperties():
+    		Arrays.asList(new TableProperty[] {TableProperty.Label}) );
+		
+		// don't export column labels, if not requested
+		if (!options().isColumnLabels())
+			rProps.remove(TableProperty.Label);
+		
+		// handle derivations separately
+		rProps.remove(TableProperty.Derivation);
+			
+        for (Column c : getActiveColumns()) { 
+        	if (c != null) {
+        		JSONObject cJson = new JSONObject();
+        		
+            	// add metadata
+            	for (TableProperty p : rProps) {
+            		if (hasValue(c, p))
+            			cJson.put(p.toString(), c.getProperty(p));
+            	}
+            	
+            	// add derivations, if requested
+            	if (options().isDerivations() && c.isDerived()) 
+            		cJson.put("fx", c.getDerivation().getExpression());
+            	
+            	// if any data written, include row
+            	if (!cJson.isEmpty()) {
+            		cJson.put("idx", getRemappedColumnIndex(c));
+            		tColsList.add(cJson);
+            	}
+        	}        	
+        }
+    	
+        // finally, include entire rows object
+    	if (!tColsList.isEmpty()) 
+    		tblJson.put("columns", tColsList);    	
+	}
 }

@@ -121,6 +121,25 @@ public enum ElementType
         return toSortedList(properties);
     }
 
+    /**
+     * Returns a {@link List} of the mutable (not read-only) {@link TableProperty}s that 
+     * relate to this {@code ElementType}. Mutable properties may be queried and their values
+     * changed.
+     * @return a {@code List} of the mutable {@code TableProperty}s that 
+     * relate to this {@code ElementType}
+     */
+    public List<TableProperty> getMutableProperties()
+    {
+        Set<TableProperty> properties = new HashSet<TableProperty>();
+        
+        for (TableProperty tp : TableProperty.values()) {
+            if (tp.isImplementedBy(this) && !tp.isReadOnly())
+                properties.add(tp);
+        }
+        
+        return toSortedList(properties);
+    }
+
     private List<TableProperty> toSortedList(Set<TableProperty> props)
     {
         List<TableProperty> list = new ArrayList<TableProperty>(props);

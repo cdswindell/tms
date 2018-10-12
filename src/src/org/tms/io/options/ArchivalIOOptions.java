@@ -203,7 +203,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
      */
     public T withDerivations()
     {
-        return withDescriptions(true);
+        return withDerivations(true);
     }
     
     /**

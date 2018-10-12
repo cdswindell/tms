@@ -23,10 +23,8 @@ public class DbmsColumnImpl extends ColumnImpl implements ExternalDependenceTabl
         setReadOnly(true);
         try
         {
-            if (clazzName != null && (clazzName = clazzName.trim()).length() > 0) {
+            if (clazzName != null && (clazzName = clazzName.trim()).length() > 0) 
                 setDataTypeInternal(Class.forName(clazzName));
-                setStronglyTyped(true);
-            }
         }
         catch (ClassNotFoundException e)
         {
