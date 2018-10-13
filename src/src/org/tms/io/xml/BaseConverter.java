@@ -150,6 +150,11 @@ abstract class BaseConverter implements Converter
         return m_writer.getRemappedColumnIndex(idx);
     }
     
+    protected List<Row> getActiveRows()
+    {
+        return m_writer.getActiveRows();
+    }
+    
     protected boolean isIgnoreRow(Row r) 
     {
         return m_writer.isIgnore(r);

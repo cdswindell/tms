@@ -1,20 +1,11 @@
 package org.tms.api.io;
 
-import org.tms.io.options.BaseIOOptions;
-import org.tms.io.options.OptionEnum;
+import org.tms.io.options.ArchivalIOOptions;
 
-public class JSONOptions extends BaseIOOptions<JSONOptions> implements IOOption<JSONOptions>
+public class JSONOptions extends ArchivalIOOptions<JSONOptions> implements IOOption<JSONOptions>
 {
     public static final JSONOptions Default = new JSONOptions(true, true, true, true, true, false);
 
-    private enum Options implements OptionEnum 
-    {
-        Derivations,
-        Recalculate,
-        
-        VerboseState,
-    }
-    
     /**
      * Constant with the most common JSON import and export configuration options already set.
      * The values for the various configuration options are defined as follows:
@@ -45,88 +36,17 @@ public class JSONOptions extends BaseIOOptions<JSONOptions> implements IOOption<
                        final boolean withDerivations,
                        final boolean withVerboseState)
     {
-        super(IOFileFormat.JSON, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
-        
-        set(Options.Derivations, withDerivations);
-        set(Options.VerboseState, withVerboseState);
+        super(IOFileFormat.JSON, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols, withDerivations, withDerivations, false, withVerboseState);        
     }
     
-    private JSONOptions (final JSONOptions format)
+    private JSONOptions (final JSONOptions options)
     {
-        super(format);
+        super(options);
     }
     
     @Override
-    protected JSONOptions clone(final BaseIOOptions<JSONOptions> model)
+    protected JSONOptions clone(final ArchivalIOOptions<JSONOptions> model)
     {
         return new JSONOptions((JSONOptions)model);
-    } 
-    
-    public boolean isRecalculate()
-    {
-        return (Boolean)get(Options.Recalculate);
-    }
-    
-    public JSONOptions withRecalculate()
-    {
-        return withRecalculate(true);
-    }
-    
-    public JSONOptions withRecalculate(boolean enabled)
-    {
-        final JSONOptions newOptions = clone(this);
-        newOptions.set(Options.Recalculate, enabled);
-        return newOptions;
-    }
-    
-    /**
-     * Returns {@code true} if all table metadata should be included with export.
-     * @return {@code true} if all table metadata should be included with export.
-     */
-    public boolean isVerboseState()
-    {
-        return isTrue(Options.VerboseState);
-    }
-    
-    /**
-     * Export all table metadata
-     * @return a new {@link JSONOptions} that is equal to this with the Verbose State property set to {@code true}
-     */
-    public JSONOptions withVerboseState()
-    {
-        return withVerboseState(true);
-    }
-
-    /**
-     * Enable or disable export table metadata
-     * @param enabled {@code true} to export all table metadata, {@code false} to omit metadata
-     * @return a new {@link JSONOptions} with the Verbose State property set to {@code true} or {@code false}
-     */
-    public JSONOptions withVerboseState(final boolean enabled)
-    {
-    	JSONOptions newOptions = new JSONOptions(this);
-        newOptions.set(Options.VerboseState, enabled);
-        return newOptions;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isDerivations()
-    {
-        return (Boolean)get(Options.Derivations);
-    }
-    
-    public JSONOptions withDerivations()
-    {
-        return withDerivations(true);
-    }
-    
-    public JSONOptions withDerivations(boolean enabled)
-    {
-        final JSONOptions newOptions = clone(this);
-        newOptions.set(Options.Derivations, enabled);
-        return newOptions;
-    }   
-
+    }    
 }

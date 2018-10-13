@@ -72,7 +72,7 @@ public class CSVWriter extends BaseWriter<CSVOptions>
                 out.printRecord(record);
             }
             
-            for (Row r : getRows()) {
+            for (Row r : getActiveRows()) {
                 record.clear();
                 boolean rowIsNull = true;
                 if (!(r == null || r.isNull())) {

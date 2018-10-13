@@ -12,7 +12,7 @@ import org.tms.api.utils.ApiVersion;
 
 import com.thoughtworks.xstream.XStream;
 
-public class TMSWriter extends ArchivalWriter<TMSOptions>
+public class TMSWriter extends XStreamWriter<TMSOptions>
 {
     public static void export(TableExportAdapter tableExportAdapter, OutputStream out, TMSOptions options) 
     throws IOException
@@ -73,5 +73,14 @@ public class TMSWriter extends ArchivalWriter<TMSOptions>
         String head = "TMS" + eType + "[" + ApiVersion.CURRENT_VERSION.toFullVersionString() + "]";
         out.write(head.getBytes());
         out.flush();
+    }
+    
+    @Override
+    public XStreamWriter<?> createDelegate(TableExportAdapter tea)
+    {
+    	XStreamWriter<?> writer = new TMSWriter(tea, (TMSOptions)options());;
+        
+        this.reset(tea);
+        return writer;
     }
 }

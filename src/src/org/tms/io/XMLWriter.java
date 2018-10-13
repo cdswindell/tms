@@ -7,7 +7,7 @@ import org.tms.api.io.XMLOptions;
 
 import com.thoughtworks.xstream.XStream;
 
-public class XMLWriter extends ArchivalWriter<XMLOptions>
+public class XMLWriter extends XStreamWriter<XMLOptions>
 {
     public static void export(TableExportAdapter tea, OutputStream out, XMLOptions options) 
     throws IOException
@@ -43,5 +43,14 @@ public class XMLWriter extends ArchivalWriter<XMLOptions>
     {
         XStream xs = getXStream(this);
         xs.toXML(getTableContext(), getOutputStream());
+    }
+    
+    @Override
+    public XStreamWriter<?> createDelegate(TableExportAdapter tea)
+    {
+    	XStreamWriter<?> writer = new XMLWriter(tea, (XMLOptions)options());;
+        
+        this.reset(tea);
+        return writer;
     }
 }

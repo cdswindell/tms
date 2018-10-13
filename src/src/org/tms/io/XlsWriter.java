@@ -247,10 +247,7 @@ public class XlsWriter extends BaseWriter<XLSOptions>
         
         // Fill data cells
         boolean processedAllColumns = false;
-        for (org.tms.api.Row tr : this.getRows()) {
-            if (options().isIgnoreEmptyRows() && tr.isNull())
-                continue;
-
+        for (org.tms.api.Row tr : this.getActiveRows()) {
             short colCnt = 0;
             Row r = sheet.createRow(rowNum++);
             cacheRowAssociation(sheet, tr, r);

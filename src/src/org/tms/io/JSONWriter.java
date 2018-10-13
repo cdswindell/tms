@@ -17,7 +17,7 @@ import org.tms.api.io.JSONOptions;
 
 import scala.actors.threadpool.Arrays;
 
-public class JSONWriter extends BaseWriter<JSONOptions>
+public class JSONWriter extends ArchivalWriter<JSONOptions>
 {
     public static void export(TableExportAdapter tea, OutputStream out, JSONOptions options) 
     throws IOException
@@ -223,6 +223,14 @@ public class JSONWriter extends BaseWriter<JSONOptions>
 	{
     	JSONArray tCellsList = new JSONArray();
     	
+        for (Column c : getActiveColumns()) {
+            for (Row r : getActiveRows()) {
+                if (t.isCellDefined(r, c)) {
+                	Object o = t.getCell(r,  c);
+                }
+            }
+        }
+
         // finally, include entire cells object
     	if (!tCellsList.isEmpty()) 
     		tblJson.put("cells", tCellsList);    			

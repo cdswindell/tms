@@ -40,6 +40,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     private int m_nConsumableRows;
     private Set<Integer> m_ignoredRows;
     private List<Row> m_activeRows;
+    private List<Row> m_allRows;
     private Map<Integer, Integer> m_rowIndexMap;
     private Map<Integer, Row> m_effRowIndexMap;
     
@@ -70,6 +71,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         m_nConsumableRows = -1; // to be initialized later
         m_ignoredRows = null;
         m_activeRows = null;
+        m_allRows = null;
         m_rowIndexMap = null;
         m_effRowIndexMap = null;
         
@@ -280,6 +282,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     {
         if (m_nConsumableRows == -1) {
             m_nConsumableRows = getNumRows();
+            m_activeRows = new ArrayList<Row>(m_nConsumableRows);
             if (m_baseOptions.isIgnoreEmptyRows()) {               
                 Table t = getTable();
                 m_ignoredRows = new HashSet<Integer>();
@@ -302,6 +305,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
 	                            
 	                            m_rowIndexMap.put(r.getIndex(), ++remappedIdx);
 	                            m_effRowIndexMap.put(remappedIdx, r);
+	                            m_activeRows.add(r);
 	                        }
 	                    }
 	                    else {
@@ -325,6 +329,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
                             
                             m_rowIndexMap.put(r.getIndex(), ++remappedIdx);
                             m_effRowIndexMap.put(remappedIdx, r);
+                            m_activeRows.add(r);
                         }                		
                 	}
                 }
@@ -332,8 +337,10 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
                 m_nConsumableRows -= emptyRowCnt;
             }
             else {
-                if (getTableElementType() == ElementType.Table)
+                if (getTableElementType() == ElementType.Table) {
                 	m_ignoredRows = Collections.emptySet();
+                	m_activeRows = getRows();
+                }
                 else {
                     m_ignoredRows = new HashSet<Integer>();
                     int remappedIdx = 0;
@@ -347,6 +354,7 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
                             
                             m_rowIndexMap.put(r.getIndex(), ++remappedIdx);
                             m_effRowIndexMap.put(remappedIdx, r);
+                            m_activeRows.add(r);
                         }                		
                 	}
                 	
@@ -405,9 +413,19 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return remappedIdx;
     }
     
-    public List<Row> getRows()
+    private List<Row> getRows()
     {
-    	m_activeRows = m_tableExportAdapter.getRows();
+    	if (m_allRows == null)
+    		m_allRows = m_tableExportAdapter.getRows();
+    	
+        return m_allRows;
+    }
+    
+    public List<Row> getActiveRows()
+    {
+    	if (m_activeRows == null)
+    		getNumConsumableRows();
+    	
         return m_activeRows;
     }
     

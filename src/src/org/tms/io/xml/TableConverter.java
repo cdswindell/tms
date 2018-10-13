@@ -223,13 +223,10 @@ public class TableConverter extends BaseConverter
             }
             
             for (Column c : getActiveColumns()) {
-                for (int rIdx = 1; rIdx <= nRows; rIdx++) {
-                    if (!isIgnoreRow(rIdx)) {
-                        Row r = getRowByEffectiveIndex(rIdx);
-                        if (t.isCellDefined(r, c)) {
-                        	Object o = t.getCell(r,  c);
-                            context.convertAnother(o);
-                        }
+                for (Row r : getActiveRows()) {
+                    if (t.isCellDefined(r, c)) {
+                    	Object o = t.getCell(r,  c);
+                        context.convertAnother(o);
                     }
                 }
             }
