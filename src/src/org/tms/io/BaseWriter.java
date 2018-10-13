@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
@@ -112,10 +113,27 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_baseOptions;
     }
     
+	protected Object getProperty(TableElement te, TableProperty tp) 
+	{
+		Object val = te.getProperty(tp);
+		if (val != null) {
+			switch (tp) {			
+				case DataType:
+					if (te.getElementType() == ElementType.Cell && !((Cell)te).isEnforceDataType())
+						val = null;
+					break;
+				default:
+					break;				
+			}
+		}
+		
+		return val;
+	}
+
     protected boolean hasValue(TableElement te, TableProperty key)
     {
         if (te.hasProperty(key)) {
-            Object val = te.getProperty(key);
+            Object val = getProperty(te, key);
             
             if (val != null) {
 	            // one more check for empty strings

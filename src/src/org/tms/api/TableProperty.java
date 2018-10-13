@@ -1,8 +1,11 @@
 package org.tms.api;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.TableErrorClass;
 import org.tms.api.exceptions.TableException;
 import org.tms.tds.BaseElementImpl;
@@ -10,101 +13,103 @@ import org.tms.tds.BaseElementImpl;
 public enum TableProperty implements Comparable<TableProperty>
 {
     // Base Element Properties
-    Label,
-    Description,
-    Tags,
-    isNull(true, false, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
-    isReadOnly(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column),
-    isSupportsNull(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
-    UUID(true, true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset, ElementType.Cell),
-    Ident(true, true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    Label("lb"),
+    Description("desc"),
+    Tags("tags"),
+    isNull(null, true, false, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
+    isReadOnly("isRO", false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column),
+    isSupportsNull("isNulls", false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    UUID("uuid", true, true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset, ElementType.Cell),
+    Ident("id", true, true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
     
     // Table Element Properties (TableContext implements initializable ones)
-    Context(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
-    Table(true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
-    Precision(true, false, true, ElementType.TableContext, ElementType.Table),
+    Context(null, true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
+    Table(null, true, false, ElementType.Row, ElementType.Column, ElementType.Cell, ElementType.Subset),
+    Precision("pr", true, false, true, ElementType.TableContext, ElementType.Table),
     
     // TableContext/Table Properties  
-    numTables(true, false, ElementType.TableContext),
-    TokenMapper(true, true, ElementType.TableContext),
-    RowCapacityIncr(false, true, ElementType.TableContext, ElementType.Table),
-    ColumnCapacityIncr(false, true, ElementType.TableContext, ElementType.Table),
-    FreeSpaceThreshold(false, true, ElementType.TableContext, ElementType.Table),
-    isAutoRecalculate(false, true, ElementType.TableContext, ElementType.Table),
-    isRowLabelsIndexed(false, true, ElementType.TableContext, ElementType.Table),
-    isColumnLabelsIndexed(false, true, ElementType.TableContext, ElementType.Table),
-    isCellLabelsIndexed(false, true, ElementType.TableContext, ElementType.Table),
-    isSubsetLabelsIndexed(false, true, ElementType.TableContext, ElementType.Table),
-    isPersistant(false, true, ElementType.TableContext, ElementType.Table),
+    numTables(null, true, false, ElementType.TableContext),
+    TokenMapper(null, true, true, ElementType.TableContext),
+    RowCapacityIncr("rci", false, true, ElementType.TableContext, ElementType.Table),
+    ColumnCapacityIncr("cci", false, true, ElementType.TableContext, ElementType.Table),
+    FreeSpaceThreshold("fst", false, true, ElementType.TableContext, ElementType.Table),
+    isAutoRecalculate("recalc", false, true, ElementType.TableContext, ElementType.Table),
+    isRowLabelsIndexed("isRLbX", false, true, ElementType.TableContext, ElementType.Table),
+    isColumnLabelsIndexed("isCLbX", false, true, ElementType.TableContext, ElementType.Table),
+    isCellLabelsIndexed("isClLbX", false, true, ElementType.TableContext, ElementType.Table),
+    isSubsetLabelsIndexed("isSLbX", false, true, ElementType.TableContext, ElementType.Table),
+    isPersistant("isP", false, true, ElementType.TableContext, ElementType.Table),
     
     // PendingDerivationThreadPool Properties
-    isPendingAllowCoreThreadTimeout(true, false, true, ElementType.TableContext, ElementType.Table),
-    numPendingCorePoolThreads(true, false, true, ElementType.TableContext, ElementType.Table),
-    numPendingMaxPoolThreads(true, false, true, ElementType.TableContext, ElementType.Table),
-    PendingThreadKeepAliveTimeout(true, false, true, ElementType.TableContext, ElementType.Table),    
+    isPendingAllowCoreThreadTimeout(null, true, false, true, ElementType.TableContext, ElementType.Table),
+    numPendingCorePoolThreads(null, true, false, true, ElementType.TableContext, ElementType.Table),
+    numPendingMaxPoolThreads(null, true, false, true, ElementType.TableContext, ElementType.Table),
+    PendingThreadKeepAliveTimeout(null, true, false, true, ElementType.TableContext, ElementType.Table),    
 
     // EventProcessorThreadPool Properties
-    isEventsNotifyInSameThread(true, false, true, ElementType.TableContext, ElementType.Table),
-    isEventsAllowCoreThreadTimeout(true, false, true, ElementType.TableContext, ElementType.Table),
-    numEventsCorePoolThreads(true, false, true, ElementType.TableContext, ElementType.Table),
-    numEventsMaxPoolThreads(true, false, true, ElementType.TableContext, ElementType.Table),
-    EventsThreadKeepAliveTimeout(true, false, true, ElementType.TableContext, ElementType.Table),    
+    isEventsNotifyInSameThread(null, true, false, true, ElementType.TableContext, ElementType.Table),
+    isEventsAllowCoreThreadTimeout(null, true, false, true, ElementType.TableContext, ElementType.Table),
+    numEventsCorePoolThreads(null, true, false, true, ElementType.TableContext, ElementType.Table),
+    numEventsMaxPoolThreads(null, true, false, true, ElementType.TableContext, ElementType.Table),
+    EventsThreadKeepAliveTimeout(null, true, false, true, ElementType.TableContext, ElementType.Table),    
 
     // Table Element Properties 
-    numSubsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
-    numRows(true, false, ElementType.Table, ElementType.Subset),
-    numColumns(true, false, ElementType.Table, ElementType.Subset),
-    numCells(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
-    numRowsCapacity(true, false, ElementType.Table),
-    numColumnsCapacity(true, false, ElementType.Table),
-    numCellsCapacity(true, false, ElementType.Column),
-    NextCellOffset(true, false, ElementType.Table),
-    Derivation(false, false, ElementType.Column, ElementType.Row, ElementType.Cell),
-    TimeSeries(false, false, ElementType.Column, ElementType.Row),
-    Affects(true, false, ElementType.Table, ElementType.Subset, ElementType.Column, ElementType.Row, ElementType.Cell),
-    Index(true, false, ElementType.Row, ElementType.Column),
-    isEnforceDataType(false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
-    isInUse(true, false, ElementType.Row, ElementType.Column),
+    numSubsets("nSets", true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    numRows("nRows", true, false, ElementType.Table, ElementType.Subset),
+    numColumns("nCols", true, false, ElementType.Table, ElementType.Subset),
+    numCells("nCells", true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    numRowsCapacity(null, true, false, ElementType.Table),
+    numColumnsCapacity(null, true, false, ElementType.Table),
+    numCellsCapacity(null, true, false, ElementType.Column),
+    NextCellOffset(null, true, false, ElementType.Table),
+    Derivation("fx", false, false, ElementType.Column, ElementType.Row, ElementType.Cell),
+    TimeSeries("tx", false, false, ElementType.Column, ElementType.Row),
+    Affects(null, true, false, ElementType.Table, ElementType.Subset, ElementType.Column, ElementType.Row, ElementType.Cell),
+    Index(null, true, false, ElementType.Row, ElementType.Column),
+    isEnforceDataType("isEDT", false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    isInUse(null, true, false, ElementType.Row, ElementType.Column),
     
-    Rows(true, false, ElementType.Table, ElementType.Subset),
-    Columns(true, false, ElementType.Table, ElementType.Subset), 
-    Subsets(true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
-    Cells(true, false, ElementType.Row, ElementType.Column, ElementType.Subset),
+    Rows(null, true, false, ElementType.Table, ElementType.Subset),
+    Columns(null, true, false, ElementType.Table, ElementType.Subset), 
+    Subsets(null, true, false, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Subset),
+    Cells(null, true, false, ElementType.Row, ElementType.Column, ElementType.Subset),
     
     // Time Series support
-    isTimeSeriesedRows(true, false, ElementType.Table),
-    isTimeSeriesedRowsActive(true, false, ElementType.Table),
-    TimeSeriesedRowsPeriod(true, false, ElementType.Table),
-    TimeSeriesedRowsTimeStampColumn(true, false, ElementType.Table),
+    isTimeSeriesedRows(null, true, false, ElementType.Table),
+    isTimeSeriesedRowsActive(null, true, false, ElementType.Table),
+    TimeSeriesedRowsPeriod(null, true, false, ElementType.Table),
+    TimeSeriesedRowsTimeStampColumn(null, true, false, ElementType.Table),
     
-    isTimeSeriesedColumns(true, false, ElementType.Table),
-    isTimeSeriesedColumnsActive(true, false, ElementType.Table),
-    TimeSeriesedColumnsPeriod(true, false, ElementType.Table),
-    TimeSeriesedColumnsTimeStampRow(true, false, ElementType.Table),
+    isTimeSeriesedColumns(null, true, false, ElementType.Table),
+    isTimeSeriesedColumnsActive(null, true, false, ElementType.Table),
+    TimeSeriesedColumnsPeriod(null, true, false, ElementType.Table),
+    TimeSeriesedColumnsTimeStampRow(null, true, false, ElementType.Table),
     
     // CellImpl properties
-    Row(true, false, ElementType.Cell),
-    Column(true, false, ElementType.Cell),
-    CellOffset(true, false, ElementType.Row, ElementType.Cell),
-    DataType(false, false, ElementType.Column, ElementType.Cell),
-    CellValue(false, false, ElementType.Cell),
-    ErrorMessage(true, false, false, ElementType.Cell),
-    Units(true, false, false, ElementType.Row, ElementType.Column, ElementType.Cell),
-    DisplayFormat(true, false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
-    Validator(true, false, false, ElementType.Row, ElementType.Column, ElementType.Cell),
+    Row(null, true, false, ElementType.Cell),
+    Column(null, true, false, ElementType.Cell),
+    CellOffset(null, true, false, ElementType.Row, ElementType.Cell),
+    DataType("dt", false, false, ElementType.Column, ElementType.Cell),
+    CellValue("v", false, false, ElementType.Cell),
+    ErrorMessage("e", true, false, false, ElementType.Cell),
+    Units("u", true, false, false, ElementType.Row, ElementType.Column, ElementType.Cell),
+    DisplayFormat("f", true, false, true, ElementType.TableContext, ElementType.Table, ElementType.Row, ElementType.Column, ElementType.Cell),
+    Validator("cv", true, false, false, ElementType.Row, ElementType.Column, ElementType.Cell),
     ;
     
     private boolean m_optional;
     private boolean m_readOnly;
     private boolean m_initializable;
+    private String m_tag;
     private Set<ElementType> m_implementedBy = new HashSet<ElementType>();
     
     /**
      * Constructor for properties that apply to objects that extend BaseElement
      */
-    private TableProperty()
+    private TableProperty(String tag)
     {
-        this(true  /* optional */,
+        this(tag,
+        	 true  /* optional */,
              false /* isReadOnly */,
              false /* Initializable */,
              ElementType.Table,
@@ -119,9 +124,10 @@ public enum TableProperty implements Comparable<TableProperty>
      * Constructor for properties that apply to objects that extend TableElement
      * @param readOnly
      */
-    private TableProperty(boolean readOnly, boolean initializable)
+    private TableProperty(String tag, boolean readOnly, boolean initializable)
     {
-        this(false,
+        this(tag,
+             false,
              readOnly,
              initializable,
              ElementType.Table,
@@ -137,11 +143,12 @@ public enum TableProperty implements Comparable<TableProperty>
      * @param isInitializable
      * @param implementedBy
      */
-    private TableProperty(boolean isReadOnly,
+    private TableProperty(String tag,
+    					  boolean isReadOnly,
                           boolean isInitializable,
                           ElementType... implementedBy)
     {
-        this(false, isReadOnly, isInitializable, implementedBy);
+        this(tag, false, isReadOnly, isInitializable, implementedBy);
     }
     
     /**
@@ -151,7 +158,8 @@ public enum TableProperty implements Comparable<TableProperty>
      * @param isInitializable
      * @param implementedBy
      */
-    private TableProperty(boolean isOptional,
+    private TableProperty(String tag,
+    					  boolean isOptional,
                           boolean isReadOnly,
                           boolean isInitializable,
                           ElementType... implementedBy)
@@ -159,6 +167,7 @@ public enum TableProperty implements Comparable<TableProperty>
         m_optional = isOptional;
         m_readOnly = isReadOnly;
         m_initializable = isInitializable;
+        m_tag = tag;
         
         if (implementedBy != null)
         {
@@ -245,6 +254,11 @@ public enum TableProperty implements Comparable<TableProperty>
         return m_readOnly;
     }
     
+    public boolean isMutable()
+    {
+        return !m_readOnly;
+    }
+    
     public boolean isOptional()
     {
         return m_optional;
@@ -276,8 +290,45 @@ public enum TableProperty implements Comparable<TableProperty>
             return m_implementedBy.contains(et);
     }
     
+    public String getTag()
+    {
+    	if (m_tag != null)
+    		return m_tag;
+    	else
+    		return this.name();
+    }
+    
+    private static final Map<String, TableProperty> sf_tpLookUp = new HashMap<String, TableProperty>(TableProperty.values().length);
+    static {
+    	for (TableProperty tp : TableProperty.values()) {
+	    	if (sf_tpLookUp.put(tp.getTag(), tp) != null)
+	    		throw new IllegalTableStateException("Mutable Property tag clash: " + tp.name());
+    	}
+    }
     public static int compareByName(TableProperty a, TableProperty b)
     {
         return a.name().compareTo(b.name());
     }
+    
+    public static TableProperty byTag(String tag)
+    {
+    	if (tag == null || (tag = tag.trim()).length() == 0)
+    		return null;
+    	
+    	TableProperty tp = sf_tpLookUp.get(tag);
+    	if (tp != null)
+    		return tp;
+    	
+    	tp = sf_tpLookUp.get(tag.toLowerCase());
+    	if (tp != null)
+    		return tp;
+    	
+    	try {
+    		tp = TableProperty.valueOf(tag);
+    	}
+    	catch (IllegalArgumentException e) {}
+    	
+        return tp;
+    }
+
 }

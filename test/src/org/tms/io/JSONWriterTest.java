@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.tms.api.Access;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
@@ -33,8 +34,13 @@ public class JSONWriterTest extends BaseIOTest
     	
     	// set some data
     	for (int i = 5; i <= 10; i++) {
-    		t.setCellValue(t.getRow(i),  c1, 25);
+    		t.setCellValue(t.getRow(i),  c1, i);
     	}
+    	
+    	// cell derivation
+    	Cell cell = t.getCell(t.getRow(3), c1);
+    	cell.setDerivation("pi");
+    	cell.setReadOnly(true);
     	
     	// and create a subset
     	Subset s = t.addSubset();
