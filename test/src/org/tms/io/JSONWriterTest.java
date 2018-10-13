@@ -1,7 +1,12 @@
 package org.tms.io;
 
-import java.io.File;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.junit.Test;
 import org.tms.api.Access;
@@ -15,9 +20,13 @@ import org.tms.api.io.JSONOptions;
 
 public class JSONWriterTest extends BaseIOTest 
 {
+    private static final String SAMPLE1 = "testJSONExport1.json";
+    
     @Test
     public final void testJSONExport1() throws IOException
     {
+    	String gold = readFileAsString(Paths.get(qualifiedFileName(SAMPLE1, "misc")));
+        
     	Table t = TableFactory.createTable();
     	
     	t.setLabel("JSONExport1");
@@ -31,6 +40,7 @@ public class JSONWriterTest extends BaseIOTest
     	Column c1 = t.addColumn(Access.ByLabel, "Col 1");
     	Column c2 = t.addColumn();
     	c2.setDerivation("col 1 * col 1");
+    	c2.setUnits("foobars");
     	
     	// set some data
     	for (int i = 5; i <= 10; i++) {
@@ -46,11 +56,15 @@ public class JSONWriterTest extends BaseIOTest
     	Subset s = t.addSubset();
     	s.add(c2);
     	s.tag("subset", "column");
-    	
-        File tmpFile = File.createTempFile("testJSONExport1", ".json");
-    	//t.export(tmpFile.getPath());
-    	t.export("foo1.json", JSONOptions.Default.withVerboseState());
-    	
-    	tmpFile.deleteOnExit();
+    	       	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	t.export(baos, JSONOptions.Default.withVerboseState());
+       	
+        // test byte streams are the same
+    	String output = baos.toString();
+        assertNotNull(output);
+
+        assertThat(gold.length(), is(output.length())); 
+        assertThat(gold, is(output));    	
     }
 }

@@ -19,6 +19,8 @@ public enum IOFileFormat
     CSV(true, "csv"),
     /** MS Word file format, export only */
     WORD(false, "docx", "doc"),
+    /** Elastic Search file format, export only*/
+    ES(false, "json", "es"),
     /** MS Excel (both xls and xlsx) file format, import and export*/
     EXCEL(true, "xlsx", "xls"), 
     /** HTML file format, export only */
