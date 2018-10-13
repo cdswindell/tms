@@ -45,6 +45,7 @@ public class JSONWriterTest extends BaseIOTest
     	// and create a subset
     	Subset s = t.addSubset();
     	s.add(c2);
+    	s.tag("subset", "column");
     	
         File tmpFile = File.createTempFile("testJSONExport1", ".json");
     	//t.export(tmpFile.getPath());

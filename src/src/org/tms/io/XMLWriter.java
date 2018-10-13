@@ -22,6 +22,9 @@ public class XMLWriter extends XStreamWriter<XMLOptions>
         writer.exportTableContext();        
     }
     
+    /*
+     * Constructors
+     */
     private XMLWriter(TableExportAdapter t, OutputStream out, XMLOptions options)
     {
         super(t, out, options);
@@ -32,6 +35,9 @@ public class XMLWriter extends XStreamWriter<XMLOptions>
         super(tw, null, options);
     }
 
+    /*
+     * Methods
+     */
     @Override
     protected void export() throws IOException
     {

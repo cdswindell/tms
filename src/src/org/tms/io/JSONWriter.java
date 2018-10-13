@@ -18,6 +18,8 @@ import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.io.JSONOptions;
 
+import scala.actors.threadpool.Arrays;
+
 public class JSONWriter extends ArchivalWriter<JSONOptions>
 {
     public static void export(TableExportAdapter tea, OutputStream out, JSONOptions options) 
@@ -62,34 +64,7 @@ public class JSONWriter extends ArchivalWriter<JSONOptions>
     	root.writeJSONString(getOutputWriter());  	
     }
 
-	protected List<TableProperty> getExportableProperties(ElementType et) 
-	{
-		List<TableProperty> eProps;
-		if (options().isVerboseState())
-			eProps = et.getMutableProperties();
-		else {
-			eProps = new ArrayList<TableProperty>();
-			eProps.add(TableProperty.Label);
-			
-			if (options().isDescriptions()) 
-				eProps.add(TableProperty.Description);
-			
-			if (options().isDisplayFormats()) 
-				eProps.add(TableProperty.DisplayFormat);
-			
-			if (options().isUnits()) 
-				eProps.add(TableProperty.Units);
-			
-			if (options().isTags()) 
-				eProps.add(TableProperty.Tags);
-		}
-    	
-		if (options().isUUIDs()) 
-			eProps.add(TableProperty.UUID);
-		
-		return eProps;
-	}
-	
+	@SuppressWarnings("unchecked")
 	protected Object getProperty(TableElement te, TableProperty tp) 
 	{
 		Object val = super.getProperty(te, tp);
@@ -103,6 +78,12 @@ public class JSONWriter extends ArchivalWriter<JSONOptions>
 					val = ((Class<?>)val).getCanonicalName();
 					break;
 					
+				case Tags:
+					JSONArray ja = new JSONArray();
+					ja.addAll(Arrays.asList((String [])val));
+					val = ja;
+					break;
+				
 				case Validator:
 					val = null; // Validators aren't handled
 					break;

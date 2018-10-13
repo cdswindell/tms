@@ -15,14 +15,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.tms.api.Access;
-import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
-import org.tms.api.TableElement;
-import org.tms.api.TableProperty;
 import org.tms.api.io.IOOption;
 
 public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
@@ -35,7 +32,9 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
     private int m_nConsumableColumns;
     private Set<Integer> m_ignoredColumns;
     private List<Column> m_activeCols;
+	private List<Column> m_allCols;
     private Map<Integer, Integer> m_colIndexMap;
+	private Map<Integer, Column> m_effColIndexMap;
     
     private int m_nRows;
     private int m_nConsumableRows;
@@ -80,7 +79,9 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         m_nConsumableColumns = -1; // to be initialized later
         m_ignoredColumns = null;
         m_activeCols = null;
+        m_allCols = null;
         m_colIndexMap = null;
+        m_effColIndexMap = null;
     }
     
     public OutputStream getOutputStream()
@@ -113,46 +114,6 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_baseOptions;
     }
     
-	protected Object getProperty(TableElement te, TableProperty tp) 
-	{
-		Object val = te.getProperty(tp);
-		if (val != null) {
-			switch (tp) {			
-				case DataType:
-					if (te.getElementType() == ElementType.Cell && !((Cell)te).isEnforceDataType())
-						val = null;
-					break;
-				default:
-					break;				
-			}
-		}
-		
-		return val;
-	}
-
-    protected boolean hasValue(TableElement te, TableProperty key)
-    {
-        if (te.hasProperty(key)) {
-            Object val = getProperty(te, key);
-            
-            if (val != null) {
-	            // one more check for empty strings
-	            if (val instanceof String && ((String)val).trim().length() == 0)
-	                return false;
-	               
-	            // if te isn't a table, check that value differs from parent table
-	            if (te.getElementType() != ElementType.Table) {
-	            	if (hasValue(te.getTable(), key) && te.getTable().getProperty(key) == val)
-	            		return false;
-	            }
-	            
-	            return true;
-	        }
-        }
-        
-        return false;        
-    }
-    
     public Table getTable()
     {
         return m_tableExportAdapter.getTable();
@@ -178,10 +139,11 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_tableExportAdapter.getTableElementType() == ElementType.Table;
     }
     
-   public int getNumConsumableColumns()
+    public int getNumConsumableColumnsxxx()
     {
         if (m_nConsumableColumns == -1) {
             m_nConsumableColumns = m_nCols;
+            m_activeCols = new ArrayList<Column>(m_nCols);
             if (m_baseOptions.isIgnoreEmptyColumns()) {               
                 Table t = getTable();
                 m_ignoredColumns = new HashSet<Integer>();
@@ -197,7 +159,9 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
                         else {
                             if (m_colIndexMap == null)
                                 m_colIndexMap = new HashMap<Integer, Integer>(m_nCols);
+                            
                             m_colIndexMap.put(c.getIndex(), ++remappedIdx);
+                            m_activeCols.add(c);
                         }
                     }
                     else
@@ -208,10 +172,112 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
             }
             else {
                 m_ignoredColumns = Collections.emptySet();
+                m_activeCols =  m_tableExportAdapter.getColumns();
             }
         }
         
         return m_nConsumableColumns;
+    }
+    
+    public int getNumConsumableColumns()
+    {
+    	if (m_nConsumableColumns == -1) {
+    		m_nConsumableColumns = getNumColumns();
+    		m_activeCols = new ArrayList<Column>(m_nConsumableColumns);
+    		if (m_baseOptions.isIgnoreEmptyColumns()) {               
+    			Table t = getTable();
+    			m_ignoredColumns = new HashSet<Integer>();
+    			int emptyColCnt = 0;
+    			int remappedIdx = 0;
+    			if (getTableElementType() == ElementType.Table) {
+    				for (int i = 1; i <= m_nCols; i++) {
+    					if (t.isColumnDefined(Access.ByIndex, i)) {
+    						Column c = t.getColumn(i);
+    						if (c.isNull()) {
+    							emptyColCnt++;
+    							m_ignoredColumns.add(c.getIndex());
+    						}
+    						else {
+    							if (m_colIndexMap == null)
+    								m_colIndexMap = new HashMap<Integer, Integer>(m_nCols);	                            
+
+    							if (m_effColIndexMap == null)
+    								m_effColIndexMap = new HashMap<Integer, Column>(m_nCols);
+
+    							m_colIndexMap.put(c.getIndex(), ++remappedIdx);
+    							m_effColIndexMap.put(remappedIdx, c);
+    							m_activeCols.add(c);
+    						}
+    					}
+    					else {
+    						emptyColCnt++;
+    						m_ignoredColumns.add(i);
+    					}
+    				}
+    			}
+    			else {
+    				for (Column c : getColumns()) {
+    					if (c != null && c.isNull()) {
+    						emptyColCnt++;
+    						m_ignoredColumns.add(c.getIndex());
+    					}
+    					else {
+    						if (m_colIndexMap == null)
+    							m_colIndexMap = new HashMap<Integer, Integer>(m_nCols);	                            
+
+    						if (m_effColIndexMap == null)
+    							m_effColIndexMap = new HashMap<Integer, Column>(m_nCols);
+
+    						m_colIndexMap.put(c.getIndex(), ++remappedIdx);
+    						m_effColIndexMap.put(remappedIdx, c);
+    						m_activeCols.add(c);
+    					}                		
+    				}
+    			}
+
+    			m_nConsumableColumns -= emptyColCnt;
+    		}
+    		else {
+    			if (getTableElementType() == ElementType.Table) {
+    				m_ignoredColumns = Collections.emptySet();
+    				m_activeCols = getColumns();
+    			}
+    			else {
+    				m_ignoredColumns = new HashSet<Integer>();
+    				int remappedIdx = 0;
+    				for (Column c : getColumns()) {
+    					if (c != null) {
+    						if (m_colIndexMap == null)
+    							m_colIndexMap = new HashMap<Integer, Integer>(m_nCols);	                            
+
+    						if (m_effColIndexMap == null)
+    							m_effColIndexMap = new HashMap<Integer, Column>(m_nCols);
+
+    						m_colIndexMap.put(c.getIndex(), ++remappedIdx);
+    						m_effColIndexMap.put(remappedIdx, c);
+    						m_activeCols.add(c);
+    					}                		
+    				}
+
+    				m_nConsumableColumns = remappedIdx;
+    			}
+    		}
+    	}
+
+    	return m_nConsumableColumns;
+    }
+
+    public int getNumColumns()
+    {
+        return m_tableExportAdapter.getNumColumns();
+    }
+
+    private List<Column> getColumns()
+    {
+    	if (m_allCols == null)
+    		m_allCols = m_tableExportAdapter.getColumns();
+    	
+        return m_allCols;
     }
     
     public boolean isIgnoreColumn(int i)
@@ -246,21 +312,8 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
      */
     public List<Column> getActiveColumns()
     {
-        if (m_baseOptions.isIgnoreEmptyColumns()) {
-            if (m_activeCols == null) {                    
-                if (m_activeCols == null) {
-                    m_activeCols = new ArrayList<Column>(getNumConsumableColumns());
-                    for (int i = 1; i <= m_nCols; i++) {
-                        if (!isIgnoreColumn(i))
-                            m_activeCols.add(getTable().getColumn(i));                               
-                    }
-                }               
-            }
-            
-            return m_activeCols;
-        }
-        else        
-            return m_tableExportAdapter.getColumns();
+    	getNumConsumableColumns();
+    	return m_activeCols;
     }
     
     public int getNumActiveColumns()

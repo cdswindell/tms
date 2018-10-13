@@ -130,8 +130,7 @@ public enum ElementType
      */
     public List<TableProperty> getMutableProperties()
     {
-        Set<TableProperty> properties = new HashSet<TableProperty>();
-        
+        Set<TableProperty> properties = new HashSet<TableProperty>();       
         for (TableProperty tp : TableProperty.values()) {
             if (tp.isImplementedBy(this) && !tp.isReadOnly())
                 properties.add(tp);
