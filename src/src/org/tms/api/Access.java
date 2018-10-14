@@ -45,5 +45,5 @@ public enum Access
     /** The {@code TableElement} with the specified UUID value*/
     ByUUID, 
     /** The {@code TableElement} with the specified {@code Tag} */
-    ByTag,
+    ByTag, 
 }

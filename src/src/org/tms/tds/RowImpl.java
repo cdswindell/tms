@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 
 import org.tms.api.Access;
 import org.tms.api.Cell;
+import org.tms.api.Column;
 import org.tms.api.ElementType;
 import org.tms.api.Row;
 import org.tms.api.TableProperty;
@@ -173,6 +174,12 @@ public class RowImpl extends TableSliceElementImpl implements Row
     {
         vetElement();
         return getCellInternal(col, true, setCurrent);
+    }
+    
+    @Override
+    public CellImpl getCell(Column col)
+    {
+        return getCellInternal((ColumnImpl)col, true, true);
     }
     
     CellImpl getCellInternal(ColumnImpl col, boolean createIfSparse, boolean setCurrent)

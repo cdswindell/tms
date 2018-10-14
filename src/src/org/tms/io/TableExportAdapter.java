@@ -14,16 +14,17 @@ import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.exceptions.UnimplementedException;
-import org.tms.api.io.IOOption;
-import org.tms.api.io.JSONOptions;
 import org.tms.api.io.CSVOptions;
+import org.tms.api.io.ESOptions;
 import org.tms.api.io.HTMLOptions;
 import org.tms.api.io.IOFileFormat;
+import org.tms.api.io.IOOption;
+import org.tms.api.io.JSONOptions;
 import org.tms.api.io.PDFOptions;
 import org.tms.api.io.RTFOptions;
 import org.tms.api.io.TMSOptions;
-import org.tms.api.io.XMLOptions;
 import org.tms.api.io.XLSOptions;
+import org.tms.api.io.XMLOptions;
 import org.tms.io.options.TitledPageIOOptions;
 
 public class TableExportAdapter
@@ -230,6 +231,10 @@ public class TableExportAdapter
                 
             case XML:
                 XMLWriter.export(this, m_output, (XMLOptions)m_options);
+                break;
+                
+            case ES:
+                ESWriter.export(this, m_output, (ESOptions)m_options);
                 break;
                 
             case JSON:
