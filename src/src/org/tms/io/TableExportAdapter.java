@@ -300,7 +300,7 @@ public class TableExportAdapter
             return null;
     }
 
-    public BaseWriter<?> createProxy()
+    public LabeledWriter<?> createProxy()
     {
         return null;
     }

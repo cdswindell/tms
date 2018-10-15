@@ -18,7 +18,7 @@ import org.tms.api.factories.TableFactory;
 import org.tms.api.io.CSVOptions;
 import org.tms.teq.MathUtil;
 
-public class CSVReader extends BaseReader<CSVOptions>
+public class CSVReader extends LabeledReader<CSVOptions>
 {
     private CSVFormat m_csvFormat;
     

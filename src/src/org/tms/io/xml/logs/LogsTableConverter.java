@@ -6,8 +6,8 @@ import org.tms.api.TableElement;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.logs.LogFileFormat;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.io.xml.ExternalDependenceTableConverter;
 import org.tms.tds.TableImpl;
 import org.tms.tds.logs.LogsTableImpl;
@@ -21,12 +21,12 @@ public class LogsTableConverter extends ExternalDependenceTableConverter
 {
     static final public String ELEMENT_TAG = "logsTable";
     
-    public LogsTableConverter(BaseReader<?> reader)
+    public LogsTableConverter(LabeledReader<?> reader)
     {
         super(reader);
     }
 
-    public LogsTableConverter(BaseWriter<?> writer)
+    public LogsTableConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }

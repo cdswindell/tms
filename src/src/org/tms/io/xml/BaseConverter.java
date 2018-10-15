@@ -22,8 +22,8 @@ import org.tms.api.io.ArchivalIOOption;
 import org.tms.api.utils.RegisterOp;
 import org.tms.api.utils.TableCellValidator;
 import org.tms.api.utils.Validatable;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.io.TableExportAdapter;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ExternalDependenceTableElement;
@@ -73,14 +73,14 @@ abstract class BaseConverter implements Converter
     static final protected String TS_ROWS_TS_COL_ATTR = "tsCol";
     static final protected String TS_COLS_TS_ROW_ATTR = "tsRow";
     
-    private BaseWriter<?> m_writer;
-    private BaseReader<?> m_reader;
+    private LabeledWriter<?> m_writer;
+    private LabeledReader<?> m_reader;
     private ArchivalIOOption<?> m_options;
     
     private Map<String, String> m_attribCache;
     private boolean m_useAttribCache;
     
-    public BaseConverter(BaseWriter<?> writer)
+    public BaseConverter(LabeledWriter<?> writer)
     {
         m_writer = writer;
         m_options = (ArchivalIOOption<?>)writer.options();
@@ -88,7 +88,7 @@ abstract class BaseConverter implements Converter
         m_useAttribCache = false;
     }
 
-    public BaseConverter(BaseReader<?> reader)
+    public BaseConverter(LabeledReader<?> reader)
     {
         m_reader = reader;
         m_options = (ArchivalIOOption<?>)reader.options();

@@ -40,9 +40,11 @@ public class ESWriterTest extends BaseIOTest
     	for (int i = 1; i <= 10; i++) {
     		t.setCellValue(t.getRow(i),  c1, i);
     	}
+    	
+    	t.setCellValue(t.getRow(4), c1, null);
     	    	       	
     	//ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    	t.export("es.json", ESOptions.Default);
+    	t.export("es.json", ESOptions.Default.withIdColumn(c1).withIgnoreEmptyCells(false).withExceptionOnEmptyIds(false));
        	
         // test byte streams are the same
     	//String output = baos.toString();

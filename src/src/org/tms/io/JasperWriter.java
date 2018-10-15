@@ -11,7 +11,7 @@ import org.tms.io.jasper.RTFReport;
 import org.tms.io.jasper.TMSReport;
 import org.tms.io.options.TitledPageIOOptions;
 
-public class JasperWriter extends BaseWriter<TitledPageIOOptions<?>>
+public class JasperWriter extends LabeledWriter<TitledPageIOOptions<?>>
 {
     public static void export(TableExportAdapter tw, OutputStream out, TitledPageIOOptions<?> options)
     throws IOException

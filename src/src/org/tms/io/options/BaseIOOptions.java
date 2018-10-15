@@ -33,8 +33,6 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements IOOpt
     protected enum BaseOptions implements OptionEnum 
     {
         FileFormat,
-        IsRowLabels,
-        IsColumnLabels,
         IsIgnoreEmptyRows,
         IsIgnoreEmptyColumns;        
     }
@@ -42,16 +40,12 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements IOOpt
     protected abstract T clone(final BaseIOOptions<T> model);
     
     protected BaseIOOptions(final IOFileFormat format, 
-                     final boolean rowNames, 
-                     final boolean columnNames, 
-                     final boolean ignoreEmptyRows,
-                     final boolean ignoreEmptyColumns)
+                     		final boolean ignoreEmptyRows,
+                     		final boolean ignoreEmptyColumns)
     {
         m_options = new HashMap<OptionEnum, Object>();
         
         set(BaseOptions.FileFormat, format);
-        set(BaseOptions.IsRowLabels, rowNames);
-        set(BaseOptions.IsColumnLabels, columnNames);
         set(BaseOptions.IsIgnoreEmptyRows, ignoreEmptyRows);
         set(BaseOptions.IsIgnoreEmptyColumns, ignoreEmptyColumns);
     }
@@ -82,56 +76,6 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements IOOpt
         return true;
     }
     
-    @Override
-    public boolean isColumnLabels()
-    {
-        return isTrue(BaseOptions.IsColumnLabels);
-    }
-    
-    protected void setColumnLabels(boolean b)
-    {
-        set(BaseOptions.IsColumnLabels, b);
-    }
-    
-    @Override
-    public T withColumnLabels()
-    {
-        return withColumnLabels(true);
-    }
-       
-    @Override
-    public T withColumnLabels(final boolean enabled)
-    {
-        final T newOptions = clone(this);
-        newOptions.setColumnLabels(enabled);
-        return newOptions;
-    }
-    
-    @Override
-    public boolean isRowLabels()
-    {
-        return isTrue(BaseOptions.IsRowLabels);
-    }
-    
-    protected void setRowLabels(boolean enabled)
-    {
-        set(BaseOptions.IsRowLabels, enabled);
-    }
-        
-    @Override
-    public T withRowLabels()
-    {
-        return withRowLabels(true);
-    }
-
-    @Override
-    public T withRowLabels(final boolean enabled)
-    {
-        final T newOptions = clone(this);
-        newOptions.setRowLabels(enabled);
-        return newOptions;
-    }
-
     @Override
     public boolean isIgnoreEmptyRows()
     {

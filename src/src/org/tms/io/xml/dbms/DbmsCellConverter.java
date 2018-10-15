@@ -1,8 +1,8 @@
 package org.tms.io.xml.dbms;
 
 import org.tms.api.Cell;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.io.xml.CellConverter;
 import org.tms.tds.dbms.DbmsCellImpl;
 
@@ -10,12 +10,12 @@ public class DbmsCellConverter extends CellConverter
 {
     static final public String ELEMENT_TAG = "dbmsCell";
     
-    public DbmsCellConverter(BaseReader<?> reader)
+    public DbmsCellConverter(LabeledReader<?> reader)
     {
         super(reader);
     }
 
-    public DbmsCellConverter(BaseWriter<?> writer)
+    public DbmsCellConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }

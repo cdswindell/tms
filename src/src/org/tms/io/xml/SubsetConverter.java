@@ -5,8 +5,8 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Subset;
 import org.tms.api.Table;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.tds.SubsetImpl;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -21,12 +21,12 @@ public class SubsetConverter extends BaseConverter
     static final public String SUBSET_ROWS_TAG = "sRows";
     static final public String SUBSET_COLS_TAG = "sCols";
     
-    public SubsetConverter(BaseWriter<?> writer)
+    public SubsetConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }
 
-    public SubsetConverter(BaseReader<?> reader)
+    public SubsetConverter(LabeledReader<?> reader)
     {
         super(reader);
     }

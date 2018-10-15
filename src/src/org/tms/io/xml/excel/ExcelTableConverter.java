@@ -7,8 +7,8 @@ import org.tms.api.TableElement;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.XLSOptions;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.io.xml.ExternalDependenceTableConverter;
 import org.tms.tds.TableImpl;
 import org.tms.tds.excel.ExcelTableImpl;
@@ -22,12 +22,12 @@ public class ExcelTableConverter extends ExternalDependenceTableConverter
 {
     static final public String ELEMENT_TAG = "exTable";
     
-    public ExcelTableConverter(BaseReader<?> reader)
+    public ExcelTableConverter(LabeledReader<?> reader)
     {
         super(reader);
     }
 
-    public ExcelTableConverter(BaseWriter<?> writer)
+    public ExcelTableConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }

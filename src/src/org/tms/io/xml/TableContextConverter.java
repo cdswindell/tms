@@ -3,8 +3,8 @@ package org.tms.io.xml;
 import org.tms.api.Row;
 import org.tms.api.TableContext;
 import org.tms.api.io.TCOptions;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.tds.ContextImpl;
 import org.tms.tds.TableImpl;
 
@@ -18,12 +18,12 @@ public class TableContextConverter extends BaseConverter
     static final public String ELEMENT_TAG = "tableContext";
     static final protected String TABLES_TAG = "tables";
     
-    public TableContextConverter(BaseWriter<?> writer)
+    public TableContextConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }
 
-    public TableContextConverter(BaseReader<?> reader)
+    public TableContextConverter(LabeledReader<?> reader)
     {
         super(reader);
     }

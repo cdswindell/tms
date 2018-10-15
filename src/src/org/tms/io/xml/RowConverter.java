@@ -3,8 +3,8 @@ package org.tms.io.xml;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.tds.ExternalDependenceTableElement;
 import org.tms.tds.RowImpl;
 
@@ -17,12 +17,12 @@ public class RowConverter extends BaseConverter
 {
     static final public String ELEMENT_TAG = "row";
     
-    public RowConverter(BaseWriter<?> writer)
+    public RowConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }
 
-    public RowConverter(BaseReader<?> reader)
+    public RowConverter(LabeledReader<?> reader)
     {
         super(reader);
     }

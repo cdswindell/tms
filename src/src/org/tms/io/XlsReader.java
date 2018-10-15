@@ -88,7 +88,7 @@ import org.tms.teq.BuiltinOperator;
 import org.tms.teq.EquationStack;
 import org.tms.teq.StackType;
 
-public class XlsReader extends BaseReader<XLSOptions>
+public class XlsReader extends LabeledReader<XLSOptions>
 {
     static final Map<Class<? extends OperationPtg>, Operator> sf_OperatorMap 
         = new HashMap<Class<? extends OperationPtg>, Operator>();

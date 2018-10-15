@@ -45,65 +45,6 @@ public interface IOOption<T extends IOOption<T>>
     public boolean canExport();
     
     /**
-     * Returns {@code true} if this {@code T} is configured to import or export
-     * TMS {@link org.tms.api.Column Column} labels.
-     * @return {@code true} if this {@code T} imports/export {@code Column} labels
-     */
-    public boolean isColumnLabels();
-
-    /**
-     * Returns a new {@link T} with column labels enabled. When
-     * exporting, this means that labels assigned to the {@link org.tms.api.Column Column}s
-     * in the exported {@link org.tms.api.Table Table} will be included in the output.
-     * When importing, this means that column labels assigned to the data in the import file
-     * will be assigned to the {@link org.tms.api.Column Column}s read from the file.
-     * @return a new {@link T} with column labels enabled
-     */
-    public T withColumnLabels();
-
-    /**
-     * Returns a new {@link T} with column labels enabled or disabled. When
-     * exporting, this means that when enabled, labels assigned to the {@link org.tms.api.Column Column}s
-     * in the exported {@link org.tms.api.Table Table} will be included in the output. When disabled,
-     * column labels in the exported table are ignored and are not included in the output.
-     * When importing, this means that when enabled, column labels assigned to the data in the import file
-     * will be assigned to the {@link org.tms.api.Column Column}s read from the file.
-     * @param enabled {@code true} to include {@code Column} labels, {@code false} to ignore them
-     * @return a new {@link T} with column labels enabled or disabled
-     */
-    public T withColumnLabels(boolean enabled);
-
-    /**
-     * Returns {@code true} if this {@code T} is configured to import or export
-     * TMS {@link org.tms.api.Row Row} labels.
-     * @return {@code true} if this {@code T} imports/export {@code Row} labels
-     */
-    public boolean isRowLabels();
-
-    /**
-     * Returns a new {@link T} with row labels enabled. When
-     * exporting, this means that labels assigned to the {@link org.tms.api.Row Row}s
-     * in the exported {@link org.tms.api.Table Table} will be included in the output.
-     * When importing, this means that row labels assigned to the data in the import file
-     * will be assigned to the {@link org.tms.api.Row Row}s read from the file.
-     * @return a new {@link T} with row labels enabled
-     */
-    public T withRowLabels();
-
-    /**
-     * Returns a new {@link T} with row labels enabled or disabled, as per the
-     * supplied parameter {@code b}. When
-     * exporting, this means that when enabled, labels assigned to the {@link org.tms.api.Row Row}s
-     * in the exported {@link org.tms.api.Table Table} will be included in the output. When disabled,
-     * row labels in the exported table are ignored and are not included in the output.
-     * When importing, this means that when enabled, row labels assigned to the data in the import file
-     * will be assigned to the {@link org.tms.api.Row Row}s read from the file.
-     * @param enabled {@code true} to include {@code Row} labels, {@code false} to ignore them
-     * @return a new {@link T} with row labels enabled or disabled
-     */
-    public T withRowLabels(boolean enabled);
-
-    /**
      * Returns {@code true} if this {@code T} is configured to ignore empty 
      * {@link org.tms.api.Row Row}s
      * when importing/exporting TMS {@link org.tms.api.Table Table}s.

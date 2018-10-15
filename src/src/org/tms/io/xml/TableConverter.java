@@ -16,8 +16,8 @@ import org.tms.api.derivables.Precisionable;
 import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableFactory;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.tds.CellImpl;
 import org.tms.tds.ColumnImpl;
 import org.tms.tds.ContextImpl;
@@ -100,12 +100,12 @@ public class TableConverter extends BaseConverter
         }
     }
     
-    public TableConverter(BaseWriter<?> writer)
+    public TableConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }
 
-    public TableConverter(BaseReader<?> reader)
+    public TableConverter(LabeledReader<?> reader)
     {
         super(reader);
     }

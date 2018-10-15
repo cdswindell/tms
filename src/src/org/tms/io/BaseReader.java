@@ -15,7 +15,7 @@ import org.tms.api.io.IOOption;
 
 abstract public class BaseReader<E extends IOOption<?>> extends BaseIO
 {
-    private static final InputStream makeInputStream(File inputFile)
+    protected static final InputStream makeInputStream(File inputFile)
     {
         try
         {
@@ -82,24 +82,6 @@ abstract public class BaseReader<E extends IOOption<?>> extends BaseIO
         return m_inputFile.getName();
     }
 
-    /**
-     * Return {@code true} if the Default file contains row names.
-     * @return true if the Default file contains row names
-     */
-    public boolean isRowNames()
-    {
-        return m_options.isRowLabels();
-    }
-    
-    /**
-     * Return {@code true} if the Default file contains column names.
-     * @return true if the Default file contains column names
-     */
-    public boolean isColumnNames()
-    {
-        return m_options.isColumnLabels();
-    }
-    
     /**
      * Prune empty columns from imported table, if so directed
      * @param t

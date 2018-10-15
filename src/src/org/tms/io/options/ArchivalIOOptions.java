@@ -26,7 +26,7 @@ import org.tms.api.io.IOOption;
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
 public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>> 
-    extends BaseIOOptions<T> 
+    extends LabeledIOOptions<T> 
     implements ArchivalIOOption<T>
 {    
     protected enum Options implements OptionEnum 
@@ -90,7 +90,7 @@ public abstract class ArchivalIOOptions<T extends ArchivalIOOptions<T>>
     }
 
     @Override
-    protected T clone(final BaseIOOptions<T> model)
+    protected T clone(final LabeledIOOptions<T> model)
     {
         return clone((ArchivalIOOptions<T>) model);
     }

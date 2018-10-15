@@ -11,8 +11,8 @@ import org.tms.api.Table;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.ErrorCode;
 import org.tms.api.exceptions.TableIOException;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.tds.CellImpl;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -64,12 +64,12 @@ public class CellConverter extends BaseConverter
         }
     }
     
-    public CellConverter(BaseWriter<?> writer)
+    public CellConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }
 
-    public CellConverter(BaseReader<?> reader)
+    public CellConverter(LabeledReader<?> reader)
     {
         super(reader);
     }

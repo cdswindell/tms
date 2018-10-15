@@ -10,7 +10,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.io.options.ArchivalIOOptions;
 
-abstract class ArchivalWriter<T extends ArchivalIOOptions<T>> extends BaseWriter<T>
+abstract class ArchivalWriter<T extends ArchivalIOOptions<T>> extends LabeledWriter<T>
 {  
     public ArchivalWriter(TableExportAdapter tea, OutputStream out, T options)
     {

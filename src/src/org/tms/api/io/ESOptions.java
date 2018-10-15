@@ -10,9 +10,17 @@ public class ESOptions extends BaseIOOptions<ESOptions> implements IOOption<ESOp
 
     private enum Options implements OptionEnum 
     {
-        Index,
+    	Index,
         Type,
-        Id;        
+        IdColumn,
+        IdUuid,
+        IdOrdinal,
+    	LowerCaseFieldNames,
+    	IgnoreEmptyCells,
+    	ExceptionOnEmptyIds,
+    	OmitRecordsWithEmptyIds,
+    	ExceptionOnDuplicatdeIds,
+    	OmitRecordsWithDuplicateIds,
     }
     
     /**
@@ -31,7 +39,15 @@ public class ESOptions extends BaseIOOptions<ESOptions> implements IOOption<ESOp
      */
     private ESOptions()
     {
-        super(IOFileFormat.ES, false, false, true, true);
+        super(IOFileFormat.ES, true, true);
+    	set(Options.LowerCaseFieldNames, true);
+    	set(Options.IgnoreEmptyCells, true);
+    	
+    	set(Options.ExceptionOnEmptyIds, true);
+    	set(Options.OmitRecordsWithEmptyIds, false);
+    	
+    	set(Options.ExceptionOnDuplicatdeIds, true);
+    	set(Options.OmitRecordsWithDuplicateIds, false);
     }
     
     private ESOptions (final ESOptions format)
@@ -57,6 +73,69 @@ public class ESOptions extends BaseIOOptions<ESOptions> implements IOOption<ESOp
         return newOptions;
     }
     
+    public Column getIdColumn() 
+    {
+        return (Column)get(Options.IdColumn);
+    }
+
+    public boolean isIdColumn() 
+    {
+        return get(Options.IdColumn) != null;
+    }
+
+    public ESOptions withIdColumn(final Column column) 
+    {
+    	ESOptions newOptions = new ESOptions(this);
+        newOptions.set(Options.IdColumn, column);
+        newOptions.set(Options.IdUuid, false);
+        newOptions.set(Options.IdOrdinal, false);
+        return newOptions;
+    }
+    
+    public boolean isIdOrdinal() 
+    {
+        return (boolean)get(Options.IdOrdinal);
+    }
+
+    public ESOptions withIdOrdinal()
+    {
+    	return withIdOrdinal(true);
+    }
+    
+    public ESOptions withIdOrdinal(final boolean opt) 
+    {
+    	ESOptions newOptions = new ESOptions(this);
+        if (opt) {
+        	newOptions.set(Options.IdColumn, null);
+            newOptions.set(Options.IdUuid, false);
+        }
+        
+        newOptions.set(Options.IdOrdinal, opt);
+        return newOptions;
+    }
+    
+    public boolean isIdUuid() 
+    {
+        return (boolean)get(Options.IdUuid);
+    }
+
+    public ESOptions withIdUuid()
+    {
+    	return withIdUuid(true);
+    }
+    
+    public ESOptions withIdUuid(final boolean opt) 
+    {
+    	ESOptions newOptions = new ESOptions(this);
+        if (opt) {
+        	newOptions.set(Options.IdColumn, null);
+            newOptions.set(Options.IdOrdinal, false);
+        }
+        
+        newOptions.set(Options.IdUuid, opt);
+        return newOptions;
+    }
+    
     public String getType() 
     {
         return (String)get(Options.Type);
@@ -68,16 +147,110 @@ public class ESOptions extends BaseIOOptions<ESOptions> implements IOOption<ESOp
         newOptions.set(Options.Type, dType);
         return newOptions;
     }
-    
-    public Column getId() 
+        
+    public boolean isLowerCaseFieldNames() 
     {
-        return (Column)get(Options.Id);
+        return (boolean)get(Options.LowerCaseFieldNames);
     }
 
-    public ESOptions withId(final Column idCol) 
+    public ESOptions withLowerCaseFieldNames() 
+    {
+        return withLowerCaseFieldNames(true);
+    }
+
+    public ESOptions withLowerCaseFieldNames(final boolean opt) 
     {
     	ESOptions newOptions = new ESOptions(this);
-        newOptions.set(Options.Id, idCol);
+        newOptions.set(Options.LowerCaseFieldNames, opt);
+        return newOptions;
+    }
+    
+    public boolean isIgnoreEmptyCells() 
+    {
+        return (boolean)get(Options.IgnoreEmptyCells);
+    }
+
+    public ESOptions withIgnoreEmptyCells() 
+    {
+        return withIgnoreEmptyCells(true);
+    }
+
+    public ESOptions withIgnoreEmptyCells(final boolean opt) 
+    {
+    	ESOptions newOptions = new ESOptions(this);
+        newOptions.set(Options.IgnoreEmptyCells, opt);
+        return newOptions;
+    }
+    
+    public boolean isExceptionOnEmptyIs() 
+    {
+        return (boolean)get(Options.ExceptionOnEmptyIds);
+    }
+
+    public ESOptions withExceptionOnEmptyIds() 
+    {
+        return withExceptionOnEmptyIds(true);
+    }
+
+    public ESOptions withExceptionOnEmptyIds(final boolean opt) 
+    {
+    	ESOptions newOptions = new ESOptions(this);
+        newOptions.set(Options.ExceptionOnEmptyIds, opt);
+        if (opt) newOptions.set(Options.OmitRecordsWithEmptyIds, !opt);
+        return newOptions;
+    }
+    
+    public boolean isOmitRecordsWithEmptyIds() 
+    {
+        return (boolean)get(Options.OmitRecordsWithEmptyIds);
+    }
+
+    public ESOptions withOmitRecordsWithEmptyIds() 
+    {
+        return withOmitRecordsWithEmptyIds(true);
+    }
+
+    public ESOptions withOmitRecordsWithEmptyIds(final boolean opt) 
+    {
+    	ESOptions newOptions = new ESOptions(this);
+        newOptions.set(Options.OmitRecordsWithEmptyIds, opt);
+        if (opt) newOptions.set(Options.ExceptionOnEmptyIds, !opt);
+        return newOptions;
+    }
+    
+    public boolean isExceptionOnDuplicatdeIds() 
+    {
+        return (boolean)get(Options.ExceptionOnDuplicatdeIds);
+    }
+
+    public ESOptions withExceptionOnDuplicatdeIds() 
+    {
+        return withExceptionOnDuplicatdeIds(true);
+    }
+
+    public ESOptions withExceptionOnDuplicatdeIds(final boolean opt) 
+    {
+    	ESOptions newOptions = new ESOptions(this);
+        newOptions.set(Options.ExceptionOnDuplicatdeIds, opt);
+        if (opt) newOptions.set(Options.ExceptionOnDuplicatdeIds, !opt);
+        return newOptions;
+    }
+    
+    public boolean isOmitRecordsWithDuplicateIds() 
+    {
+        return (boolean)get(Options.OmitRecordsWithDuplicateIds);
+    }
+
+    public ESOptions withOmitRecordsWithDuplicateIds() 
+    {
+        return withOmitRecordsWithDuplicateIds(true);
+    }
+
+    public ESOptions withOmitRecordsWithDuplicateIds(final boolean opt) 
+    {
+    	ESOptions newOptions = new ESOptions(this);
+        newOptions.set(Options.OmitRecordsWithDuplicateIds, opt);
+        if (opt) newOptions.set(Options.ExceptionOnDuplicatdeIds, !opt);
         return newOptions;
     }
 }

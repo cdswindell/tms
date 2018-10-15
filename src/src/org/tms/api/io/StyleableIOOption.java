@@ -18,7 +18,7 @@ package org.tms.api.io;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public interface StyleableIOOption<T extends StyleableIOOption<T>> extends IOOption<T> 
+public interface StyleableIOOption<T extends StyleableIOOption<T>> 
 {   
     /**
      * Return the default column width, in pixels, used to display

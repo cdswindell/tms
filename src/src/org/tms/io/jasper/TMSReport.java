@@ -10,6 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.tms.api.Column;
+import org.tms.api.Table;
+import org.tms.api.io.DateTimeFormatIOOption;
+import org.tms.api.io.IOFileFormat;
+import org.tms.api.io.IOOption;
+import org.tms.api.io.LabeledIOOption;
+import org.tms.api.io.PageableIOOption;
+import org.tms.api.io.StyleableIOOption;
+import org.tms.api.io.TitleableIOOption;
+import org.tms.io.LabeledWriter;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -36,16 +47,6 @@ import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.type.WhenNoDataTypeEnum;
 import net.sf.jasperreports.export.ExporterInputItem;
 import net.sf.jasperreports.export.SimpleExporterInputItem;
-
-import org.tms.api.Column;
-import org.tms.api.Table;
-import org.tms.api.io.IOOption;
-import org.tms.api.io.DateTimeFormatIOOption;
-import org.tms.api.io.IOFileFormat;
-import org.tms.api.io.PageableIOOption;
-import org.tms.api.io.StyleableIOOption;
-import org.tms.api.io.TitleableIOOption;
-import org.tms.io.BaseWriter;
 
 abstract public class TMSReport
 {
@@ -88,9 +89,9 @@ abstract public class TMSReport
     private static final int sf_PageTopMargin = 50;
     private static final int sf_PageBottomMargin = 30;
     
-    private BaseWriter<?> m_writer;
+    private LabeledWriter<?> m_writer;
     private Table m_table;
-    private IOOption<?> m_options;
+    private LabeledIOOption<?> m_options;
     
     private Map<Column, JRField> m_colFieldMap;
     private Map<String, Object> m_jrParams;
@@ -98,7 +99,7 @@ abstract public class TMSReport
     private List<JasperDesign> m_jrDesigns;
     private List<JasperPrint> m_jrPrints;
     
-    TMSReport(BaseWriter<?> w)
+    TMSReport(LabeledWriter<?> w)
     {
         m_writer = w;
         m_table = w.getTable();
@@ -110,7 +111,7 @@ abstract public class TMSReport
         return m_options.getFileFormat() == IOFileFormat.PDF;
     }
     
-    BaseWriter<?> getWriter()
+    LabeledWriter<?> getWriter()
     {
         return m_writer;
     }

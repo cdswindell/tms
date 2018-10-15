@@ -5,8 +5,8 @@ import java.sql.SQLException;
 import org.tms.api.TableElement;
 import org.tms.api.exceptions.TableIOException;
 import org.tms.api.factories.TableFactory;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.io.xml.ExternalDependenceTableConverter;
 import org.tms.tds.TableImpl;
 import org.tms.tds.dbms.DbmsTableImpl;
@@ -20,12 +20,12 @@ public class DbmsTableConverter extends ExternalDependenceTableConverter
 {
     static final public String ELEMENT_TAG = "dbmsTable";
     
-    public DbmsTableConverter(BaseReader<?> reader)
+    public DbmsTableConverter(LabeledReader<?> reader)
     {
         super(reader);
     }
 
-    public DbmsTableConverter(BaseWriter<?> writer)
+    public DbmsTableConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }

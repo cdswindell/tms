@@ -1,8 +1,8 @@
 package org.tms.io.xml.excel;
 
 import org.tms.api.Cell;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.io.xml.CellConverter;
 import org.tms.tds.excel.ExcelCellImpl;
 
@@ -10,12 +10,12 @@ public class ExcelCellConverter extends CellConverter
 {
     static final public String ELEMENT_TAG = "exCell";
     
-    public ExcelCellConverter(BaseReader<?> reader)
+    public ExcelCellConverter(LabeledReader<?> reader)
     {
         super(reader);
     }
 
-    public ExcelCellConverter(BaseWriter<?> writer)
+    public ExcelCellConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }

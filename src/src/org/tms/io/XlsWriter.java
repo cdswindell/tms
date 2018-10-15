@@ -58,7 +58,7 @@ import org.tms.teq.PostfixStackGenerator;
 import org.tms.teq.StackType;
 import org.tms.util.Tuple;
 
-public class XlsWriter extends BaseWriter<XLSOptions>
+public class XlsWriter extends LabeledWriter<XLSOptions>
 {
     static final Map<Operator, String> sf_tmsToExcelFunctionMap = new HashMap<Operator, String>();
     static final Map<BuiltinOperator, Operator> sf_builtInToExcelMap = new HashMap<BuiltinOperator, Operator>();

@@ -1,8 +1,8 @@
 package org.tms.io.xml.dbms;
 
 import org.tms.api.Row;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.io.xml.RowConverter;
 import org.tms.tds.dbms.DbmsRowImpl;
 
@@ -10,12 +10,12 @@ public class DbmsRowConverter extends RowConverter
 {
     static final public String ELEMENT_TAG = "dbmsRow";
     
-    public DbmsRowConverter(BaseReader<?> reader)
+    public DbmsRowConverter(LabeledReader<?> reader)
     {
         super(reader);
     }
 
-    public DbmsRowConverter(BaseWriter<?> writer)
+    public DbmsRowConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }

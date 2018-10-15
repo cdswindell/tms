@@ -1,7 +1,7 @@
 package org.tms.io.xml;
 
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.teq.BaseAsyncState;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -12,12 +12,12 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 public class PendingStateConverter extends BaseConverter 
 {
 
-    public PendingStateConverter(BaseReader<?> reader)
+    public PendingStateConverter(LabeledReader<?> reader)
     {
         super(reader);
     }
 
-    public PendingStateConverter(BaseWriter<?> writer)
+    public PendingStateConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }

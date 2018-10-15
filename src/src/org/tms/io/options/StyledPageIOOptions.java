@@ -25,7 +25,7 @@ import org.tms.api.io.IOOption;
  * @see StyleableIOOption
  */
 public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>> 
-    extends BaseIOOptions<T> 
+    extends LabeledIOOptions<T> 
     implements StyleableIOOption<T>
 {
     protected static final int DefaultColumnWidthPx = 65;
@@ -67,7 +67,7 @@ public abstract class StyledPageIOOptions<T extends StyledPageIOOptions<T>>
     }
 
     @Override
-    protected T clone(final BaseIOOptions<T> model)
+    protected T clone(final LabeledIOOptions<T> model)
     {
         return clone((StyledPageIOOptions<T>) model);
     }

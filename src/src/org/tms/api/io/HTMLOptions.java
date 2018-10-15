@@ -9,7 +9,7 @@ import org.tms.io.options.TitledPageIOOptions;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public class HTMLOptions extends TitledPageIOOptions<HTMLOptions> implements TitleableIOOption<HTMLOptions>, IOOption<HTMLOptions>
+public class HTMLOptions extends TitledPageIOOptions<HTMLOptions> implements TitleableIOOption<HTMLOptions>, LabeledIOOption<HTMLOptions>
 {
     static final int DefaultHTMLFontSizePx = 12;
     

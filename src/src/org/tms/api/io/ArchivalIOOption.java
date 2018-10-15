@@ -17,7 +17,7 @@ package org.tms.api.io;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends IOOption<T> 
+public interface ArchivalIOOption<T extends ArchivalIOOption<T>> extends LabeledIOOption<T> 
 {   
     /**
      * Returns {@code true} if TMS {@link org.tms.api.derivables.Derivation Derivation}s are imported or exported. 

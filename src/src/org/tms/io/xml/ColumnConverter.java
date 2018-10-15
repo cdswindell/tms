@@ -3,8 +3,8 @@ package org.tms.io.xml;
 import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.api.TableProperty;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.tds.ColumnImpl;
 import org.tms.tds.ExternalDependenceTableElement;
 
@@ -17,12 +17,12 @@ public class ColumnConverter extends BaseConverter
 {
     static final public String ELEMENT_TAG = "column";
     
-    public ColumnConverter(BaseWriter<?> writer)
+    public ColumnConverter(LabeledWriter<?> writer)
     {
         super(writer);
     }
 
-    public ColumnConverter(BaseReader<?> reader)
+    public ColumnConverter(LabeledReader<?> reader)
     {
         super(reader);
     }

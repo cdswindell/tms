@@ -2,7 +2,7 @@ package org.tms.api.io;
 
 import org.tms.io.options.ArchivalIOOptions;
 
-public class JSONOptions extends ArchivalIOOptions<JSONOptions> implements IOOption<JSONOptions>
+public class JSONOptions extends ArchivalIOOptions<JSONOptions> implements ArchivalIOOption<JSONOptions>
 {
     public static final JSONOptions Default = new JSONOptions(true, true, true, true, true, false);
 

@@ -3,6 +3,9 @@ package org.tms.io.jasper;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.tms.api.exceptions.TableIOException;
+import org.tms.io.LabeledWriter;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.export.ExporterInput;
@@ -10,12 +13,9 @@ import net.sf.jasperreports.export.OutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
-import org.tms.api.exceptions.TableIOException;
-import org.tms.io.BaseWriter;
-
 public class PDFReport extends TMSReport
 {
-    public PDFReport(BaseWriter<?> w)
+    public PDFReport(LabeledWriter<?> w)
     {
         super(w);
     }

@@ -7,8 +7,8 @@ import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
-import org.tms.io.BaseReader;
-import org.tms.io.BaseWriter;
+import org.tms.io.LabeledReader;
+import org.tms.io.LabeledWriter;
 import org.tms.tds.ExternalDependenceTableElement;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -32,13 +32,13 @@ public abstract class ExternalDependenceTableConverter extends TableConverter
 	private Map<Integer, Integer> m_rowIdxMap;
 	private Map<Integer, Integer> m_colIdxMap;
 	
-    public ExternalDependenceTableConverter(BaseReader<?> reader)
+    public ExternalDependenceTableConverter(LabeledReader<?> reader)
     {
         super(reader);
         m_lastExtRowIdx = m_lastExtColIdx = m_curExtRowIdx = m_curExtColIdx = -1;
     }
 
-    public ExternalDependenceTableConverter(BaseWriter<?> writer)
+    public ExternalDependenceTableConverter(LabeledWriter<?> writer)
     {
         super(writer);
         m_lastExtRowIdx = m_lastExtColIdx = m_curExtRowIdx = m_curExtColIdx = -1;

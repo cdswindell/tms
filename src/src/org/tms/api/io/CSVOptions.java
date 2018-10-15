@@ -1,7 +1,7 @@
 package org.tms.api.io;
 
-import org.tms.io.options.BaseIOOptions;
 import org.tms.io.options.IOConstants;
+import org.tms.io.options.LabeledIOOptions;
 import org.tms.io.options.OptionEnum;
 
 /**
@@ -11,7 +11,7 @@ import org.tms.io.options.OptionEnum;
  * @since {@value org.tms.api.utils.ApiVersion#IO_ENHANCEMENTS_STR}
  * @version {@value org.tms.api.utils.ApiVersion#CURRENT_VERSION_STR}
  */
-public class CSVOptions extends BaseIOOptions<CSVOptions> implements IOOption<CSVOptions>
+public class CSVOptions extends LabeledIOOptions<CSVOptions> implements LabeledIOOption<CSVOptions>
 {
     /**
      * Constant with the most common CSV import and export configuration options already set.
@@ -67,7 +67,7 @@ public class CSVOptions extends BaseIOOptions<CSVOptions> implements IOOption<CS
     }
     
     @Override
-    protected CSVOptions clone(BaseIOOptions<CSVOptions> model)
+    protected CSVOptions clone(LabeledIOOptions<CSVOptions> model)
     {
         return new CSVOptions((CSVOptions)model);
     }
