@@ -1,24 +1,33 @@
 package org.tms.io;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.junit.Test;
 import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.ESOptions;
 
 public class ESWriterTest extends BaseIOTest 
 {
-    private static final String SAMPLE1 = "testJSONExport1.json";
+    private static final String SAMPLE1 = "testESExport1.json";
+    private static final String SAMPLE2 = "testESExport2.json";
+    private static final String SAMPLE3 = "testESExport3.json";
+    private static final String SAMPLE5 = "testESExport5.json";
     
     @Test
     public final void testElasticSearchExport1() throws IOException
-    {
-    	//String gold = readFileAsString(Paths.get(qualifiedFileName(SAMPLE1, "misc")));
-        
+    {        
     	Table t = TableFactory.createTable();
     	
     	t.setLabel("ESExport1");
@@ -41,16 +50,71 @@ public class ESWriterTest extends BaseIOTest
     		t.setCellValue(t.getRow(i),  c1, i);
     	}
     	
-    	t.setCellValue(t.getRow(4), c1, null);
-    	    	       	
-    	//ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    	t.export("es.json", ESOptions.Default.withIdColumn(c1).withIgnoreEmptyCells(false).withExceptionOnEmptyIds(false));
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	t.export(baos, ESOptions.Default);
        	
         // test byte streams are the same
-    	//String output = baos.toString();
-        //assertNotNull(output);
+    	String output = baos.toString();
+        assertNotNull(output);
 
-        //assertThat(gold.length(), is(output.length())); 
-        //assertThat(gold, is(output));    	
+    	String gold = readFileAsString(Paths.get(qualifiedFileName(SAMPLE1, "misc")));
+        assertThat(gold.length(), is(output.length())); 
+        assertThat(gold, is(output));  
+        
+        // Test 2: Ordinal IDs
+    	baos = new ByteArrayOutputStream();
+    	t.export(baos, ESOptions.Default.withIdOrdinal().withIndex("myIndex").withType("_doc"));
+       	
+        // test byte streams are the same
+    	output = baos.toString();
+        assertNotNull(output);
+
+    	gold = readFileAsString(Paths.get(qualifiedFileName(SAMPLE2, "misc")));
+        assertThat(gold.length(), is(output.length())); 
+        assertThat(gold, is(output));        
+        
+        // Test 3: ID Column
+    	baos = new ByteArrayOutputStream();
+    	t.export(baos, ESOptions.Default.withIdColumn(c1));
+       	
+        // test byte streams are the same
+    	output = baos.toString();
+        assertNotNull(output);
+
+    	gold = readFileAsString(Paths.get(qualifiedFileName(SAMPLE3, "misc")));
+        assertThat(gold.length(), is(output.length())); 
+        assertThat(gold, is(output));        
+        
+        // Test 4: Null ID
+		t.setCellValue(t.getRow(3),  c1, null);
+		
+    	baos = new ByteArrayOutputStream();
+    	try {
+    		t.export(baos, ESOptions.Default.withIdColumn(c1).withIgnoreEmptyCells(false));
+    		fail("Table with null IDs processed");
+    	}
+    	catch (IllegalTableStateException e) {}
+    	
+        // Test 5: Null ID, skip record
+    	baos = new ByteArrayOutputStream();
+    	t.export(baos, ESOptions.Default.withIdColumn(c1).withIgnoreEmptyCells(false).withOmitRecordsWithEmptyIds());
+       	
+        // test byte streams are the same
+    	output = baos.toString();
+        assertNotNull(output);
+
+    	gold = readFileAsString(Paths.get(qualifiedFileName(SAMPLE5, "misc")));
+        assertThat(gold.length(), is(output.length())); 
+        assertThat(gold, is(output));        
+        
+        // Test 6: Null ID, skip record, Duplicate ID Exception
+		t.setCellValue(t.getRow(7),  c1, 2);
+		
+    	baos = new ByteArrayOutputStream();
+    	try {
+    		t.export(baos, ESOptions.Default.withIdColumn(c1).withIgnoreEmptyCells(false).withOmitRecordsWithEmptyIds());
+    		fail("Table with duplicate IDs processed");
+    	}
+    	catch (IllegalTableStateException e) {}
     }
 }

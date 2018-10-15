@@ -500,6 +500,11 @@ public abstract class BaseWriter<E extends IOOption<?>> extends BaseIO
         return m_activeRows;
     }
     
+    public int getNumActiveRows()
+    {
+        return getActiveRows().size();
+    }
+    
     public int getNumRows()
     {
         return m_tableExportAdapter.getNumRows();

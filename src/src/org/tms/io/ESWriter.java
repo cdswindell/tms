@@ -42,6 +42,7 @@ public class ESWriter extends BaseWriter<ESOptions>
     protected void export() throws IOException
     {
     	BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(getOutputStream(), "utf-8"));
+		Map <Object, Row> rowIdMap = new HashMap<Object, Row>(getNumActiveRows());
     	
     	try {   	
 	    	Table t = getTable();
@@ -50,7 +51,7 @@ public class ESWriter extends BaseWriter<ESOptions>
 			JSONObject data;
 			Object cellValue;
 			int ordinalId = 0;
-	    	for (Row r: getActiveRows()) {  		
+	    	for (Row r: getActiveRows()) {  	
 	    		data = new JSONObject();
 	    		int fieldNo = 0;
 	    		
@@ -69,14 +70,13 @@ public class ESWriter extends BaseWriter<ESOptions>
 	    		//write the data row and trailing newline  		
 	    		if (!data.isEmpty()) {
 	    			try {
-		        		writeIndex(r, idCol, ++ordinalId).writeJSONString(bw);
+		        		writeIndex(r, idCol, ++ordinalId, rowIdMap).writeJSONString(bw);
 		    			bw.newLine();
 	    			}
-	    			catch (HaltOnNullIdException e) {
-	    				if (options().isExceptionOnEmptyIs()) 
-	    					throw new IllegalTableStateException(e.getMessage());	    				
+	    			catch (HaltOnInvalidIdException e) {
+	    				throw new IllegalTableStateException(e.getMessage());	    				
 	    			}
-	    			catch (SkipNullIdException s) {
+	    			catch (SkipInvalidIdException s) {
 	    				continue;
 	    			}
 	       		
@@ -88,11 +88,14 @@ public class ESWriter extends BaseWriter<ESOptions>
     	finally {
     		// close buffered writer
     		bw.close();
+    		
+    		rowIdMap.clear();
+    		rowIdMap = null;
     	}
     }
 
 	@SuppressWarnings("unchecked")
-	protected JSONObject writeIndex(Row r, Column idCol, int ordinal)
+	protected JSONObject writeIndex(Row r, Column idCol, int ordinal, Map<Object, Row> rowIdMap)
 	throws IOException 
 	{
 		Object cellValue;
@@ -113,14 +116,22 @@ public class ESWriter extends BaseWriter<ESOptions>
 				
 				if (cellValue == null) {
 					if (options().isOmitRecordsWithEmptyIds())
-						throw new SkipNullIdException(r, idCol);
-					else if (options().isExceptionOnEmptyIs())
-						throw new HaltOnNullIdException(r, idCol);
+						throw new SkipInvalidIdException("Row %d Column %d: Omiting record with null ID value", r, idCol);
+					else if (options().isExceptionOnEmptyIds())
+						throw new HaltOnInvalidIdException("Row %d Column %d: Null ID value not allowed here", r, idCol);
 				}
 				else {
-					;
+					Object id = serializelValue(cellValue);
+					if (options().isExceptionOnDuplicatdeIds() || options().isOmitRecordsWithDuplicateIds()) {
+						if (null != rowIdMap.put(id, r)) {
+							if (options().isOmitRecordsWithDuplicateIds())
+								throw new SkipInvalidIdException("Row %d Column %d: Omiting record with duplicate ID value", r, idCol);
+							else if (options().isExceptionOnDuplicatdeIds())
+								throw new HaltOnInvalidIdException("Row %d Column %d: Duplicte ID value not allowed here", r, idCol);
+						}
+					}
 				
-					idxContent.put("_id", serializelValue(cellValue));
+					idxContent.put("_id", id);
 				}
 			}
 		}
@@ -129,7 +140,7 @@ public class ESWriter extends BaseWriter<ESOptions>
 			idxContent.put("_index", index);
 		
 		if (docType != null)
-			idxContent.put("_doc", docType);
+			idxContent.put("_type", docType);
 		
 		idx.put("index", idxContent);
 		
@@ -171,23 +182,23 @@ public class ESWriter extends BaseWriter<ESOptions>
 	/*
 	 * Inner Classes
 	 */
-	class HaltOnNullIdException extends IllegalTableStateException
+	class HaltOnInvalidIdException extends IllegalTableStateException
 	{
-		private static final long serialVersionUID = 7798845629886149052L;
+		private static final long serialVersionUID = -4858243560467314573L;
 
-		public HaltOnNullIdException(Row r, Column c) 
+		public HaltOnInvalidIdException(String msg, Row r, Column c) 
 		{
-			super(String.format("Row %d Column %d: Null ID value not allowed here", r.getIndex(), c.getIndex()));
+			super(String.format(msg , r.getIndex(), c.getIndex()));
 		}
 	}
 	
-	class SkipNullIdException extends IllegalTableStateException
+	class SkipInvalidIdException extends IllegalTableStateException
 	{
-		private static final long serialVersionUID = 7798845629886149052L;
+		private static final long serialVersionUID = -9193966239451018026L;
 
-		public SkipNullIdException(Row r, Column c) 
+		public SkipInvalidIdException(String msg, Row r, Column c) 
 		{
-			super(String.format("Row %d Column %d: Omiting record with null ID value", r.getIndex(), c.getIndex()));
+			super(String.format(msg, r.getIndex(), c.getIndex()));
 		}
 	}
 }

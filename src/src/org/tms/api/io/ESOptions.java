@@ -48,6 +48,9 @@ public class ESOptions extends BaseIOOptions<ESOptions> implements IOOption<ESOp
     	
     	set(Options.ExceptionOnDuplicatdeIds, true);
     	set(Options.OmitRecordsWithDuplicateIds, false);
+    	
+    	set(Options.IdOrdinal, false);
+    	set(Options.IdUuid, false);
     }
     
     private ESOptions (final ESOptions format)
@@ -182,7 +185,7 @@ public class ESOptions extends BaseIOOptions<ESOptions> implements IOOption<ESOp
         return newOptions;
     }
     
-    public boolean isExceptionOnEmptyIs() 
+    public boolean isExceptionOnEmptyIds() 
     {
         return (boolean)get(Options.ExceptionOnEmptyIds);
     }
