@@ -1,7 +1,5 @@
 package org.tms.io.options;
 
-import java.util.Map;
-
 import org.tms.api.io.IOFileFormat;
 import org.tms.api.io.IOOption;
 import org.tms.api.io.LabeledIOOption;
@@ -27,14 +25,6 @@ import org.tms.api.io.LabeledIOOption;
  */
 public abstract class LabeledIOOptions<T extends LabeledIOOptions<T>> extends BaseIOOptions<T> implements LabeledIOOption<T>
 {          
-    protected Map<OptionEnum, Object> m_options;
-    
-    protected enum BaseOptions implements OptionEnum 
-    {
-        IsRowLabels,
-        IsColumnLabels,
-    }
-    
     protected abstract T clone(final LabeledIOOptions<T> model);
     
     protected LabeledIOOptions(final IOFileFormat format, 

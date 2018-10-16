@@ -33,6 +33,8 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements IOOpt
     protected enum BaseOptions implements OptionEnum 
     {
         FileFormat,
+        IsRowLabels,
+        IsColumnLabels,
         IsIgnoreEmptyRows,
         IsIgnoreEmptyColumns;        
     }

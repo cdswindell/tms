@@ -98,6 +98,7 @@ abstract public class RestConsumerOp extends AbstractOperator
                 if (!argTypes.isEmpty()) {
                     if (argTypes.size() != argKeys.size())
                         throw new InvalidOperatorException("Inconsistant URL Params Map");
+                    
                     setArgTypes(argTypes.toArray(new Class[] {}));
                     m_argKeys = argKeys.toArray(new String [] {});
                 }
@@ -133,11 +134,26 @@ abstract public class RestConsumerOp extends AbstractOperator
     	return false;
     }
     
+    protected String preProcessURLParamKeyPrefix(String key) 
+	{
+		return "&";
+	}
+
+    protected String preProcessURLParamKey(String key) 
+    {
+		return key;
+	}
+
+    protected String preProcessURLParamKeyAssignmentOp(String key) 
+    {
+		return "=";
+	}
+    
     protected Object postProcessParamValue(String paramName, Object paramValue)
     {
         return paramValue;
     }
-    
+       
     /**
      * Override to provide a different timeout
      * @return Connection timeout, in milliseconds
@@ -228,9 +244,14 @@ abstract public class RestConsumerOp extends AbstractOperator
                     baseUrl = replace(baseUrl, m_argKeys[i], mArg == null ? "" : mArgs[i].toString());
                 }
                 else {
-                    if (needPrefix)
-                        urlParams.append('&');
-                    urlParams.append(m_argKeys[i]).append('=');
+                    if (needPrefix) {
+                        String argPrefix = preProcessURLParamKeyPrefix(m_argKeys[i]); // almost always "&"
+                        urlParams.append(argPrefix);
+                    }
+                    
+                    String argName = preProcessURLParamKey(m_argKeys[i]);
+                    String argAssignOp = preProcessURLParamKeyAssignmentOp(m_argKeys[i]); // almost always "="
+                    urlParams.append(argName).append(argAssignOp); // add parameter pair
                     if (mArg != null)
                         urlParams.append(URLEncoder.encode(mArg.toString(), "UTF-8"));
                     needPrefix = true;
@@ -247,8 +268,8 @@ abstract public class RestConsumerOp extends AbstractOperator
             return Token.createErrorToken(e.getMessage());
         }
     }
-    
-    private String replace(String source, String pattern, String replacement)
+
+	private String replace(String source, String pattern, String replacement)
     {
         int idx = source.indexOf(pattern);
         if (idx > -1) {
