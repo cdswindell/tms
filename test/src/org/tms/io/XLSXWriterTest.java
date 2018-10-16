@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.CellType;
@@ -177,12 +176,18 @@ public class XLSXWriterTest extends BaseIOTest
         
         // create output stream
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        t.export(bos, XLSOptions.Default
-                .withColumnLabels(true)
-                .withDefaultColumnWidthInInches(1.5)
-                .withRowLabelColumnWidthInInches(1.25)
-                .withCommentAuthor("TMS via POI")
-                );
+        try {
+	        t.export(bos, XLSOptions.Default
+							                .withColumnLabels(true)
+							                .withDefaultColumnWidthInInches(1.5)
+							                .withRowLabelColumnWidthInInches(1.25)
+							                .withCommentAuthor("TMS via POI")
+	                );
+        }
+        catch (Exception e) {
+        	fail(e.getMessage());
+        }
+        
         bos.close();
 
         // test byte streams are the same, more or less
@@ -192,6 +197,7 @@ public class XLSXWriterTest extends BaseIOTest
         
         // now compare exported file to expected
         File outFile = null;
+        Workbook wb = null;
         try {
             outFile  = File.createTempFile("tmsExcelExportTest", "xlsx");
             OutputStream outputStream = new FileOutputStream (outFile); 
@@ -199,7 +205,7 @@ public class XLSXWriterTest extends BaseIOTest
             outputStream.close();
             
             // open workbook
-            Workbook wb = WorkbookFactory.create(outFile);
+            wb = WorkbookFactory.create(outFile);
             assertNotNull(wb);
             assertThat(wb.getNumberOfSheets(), is(1));
             assertThat(wb.getSheetName(0), is("Test Table"));
@@ -229,13 +235,20 @@ public class XLSXWriterTest extends BaseIOTest
             vetExcelCell(sheet, 6, 4, 9763.2375, "average(E2:E5)", false);
             
             vetExcelCell(sheet, 1, 9, "3 Row: 2 **", "(1.0 + 2.0) & \" Row: \" & (row()) & \" \" & rept(\"*\", row())", false);
+            
+            wb.close();
         }
-        catch (EncryptedDocumentException e)
+        catch (Exception e)
         {
             fail(e.getMessage());
         }
         finally {
-            outFile.delete();
+        	try {
+        		outFile.delete();
+        	}
+        	catch (Exception e2) {
+        		fail(e2.getMessage());
+        	}
         }        
     }
 

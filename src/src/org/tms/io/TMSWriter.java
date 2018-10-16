@@ -48,20 +48,30 @@ public class TMSWriter extends XStreamWriter<TMSOptions>
     @Override
     protected void export() throws IOException
     {
-        writeHeader(ElementType.Table);
-        XStream xs = getXStream(this);
-        GZIPOutputStream gz = new GZIPOutputStream(getOutputStream());
-        xs.toXML(getTable(), gz);
-        gz.finish();
+    	try {
+	        writeHeader(ElementType.Table);
+	        XStream xs = getXStream(this);
+	        GZIPOutputStream gz = new GZIPOutputStream(getOutputStream());
+	        xs.toXML(getTable(), gz);
+	        gz.finish();
+    	}
+    	catch (Exception e) {
+    		throw e;
+    	}
     }
 
     private void exportTableContext() throws IOException
     {
-        writeHeader(ElementType.TableContext);
-        XStream xs = getXStream(this);
-        GZIPOutputStream gz = new GZIPOutputStream(getOutputStream());
-        xs.toXML(getTableContext(), gz);
-        gz.finish();
+    	try {
+	        writeHeader(ElementType.TableContext);
+	        XStream xs = getXStream(this);
+	        GZIPOutputStream gz = new GZIPOutputStream(getOutputStream());
+	        xs.toXML(getTableContext(), gz);
+	        gz.finish();
+    	}
+    	catch (Exception e) {
+    		throw e;
+    	}
     }
 
     @SuppressWarnings("resource")

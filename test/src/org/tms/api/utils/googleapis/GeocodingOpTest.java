@@ -17,7 +17,11 @@ import org.tms.api.factories.TableFactory;
 
 public class GeocodingOpTest 
 {
-	private static JSONObject BOSTON = null;
+	private static String BOSTON_ADDR = "Calle la Pampilla Nº138 Mz I-3 Lt 20 Zona industrial de Ventanilla-Callao, Boston, MA 02116, United States";
+	private static String ACTON_ADDR = "10 John Swift Rd, Acton, MA 01720, USA";
+	private static String MOLTONBOROUGH_ADDR = "182 Castle Shore Rd, Moultonborough, NH 03254, USA";
+	
+	private static JSONObject BOSTON = null;	
 	private static JSONObject ACTON = null;
 	private static JSONObject MOULTONBOROUGH = null;
 	static {
@@ -106,8 +110,14 @@ public class GeocodingOpTest
     	c3.setDerivation("fromLatLong(col 1, col 2)");
     	
     	// add some data
-    	t.setCellValue(t.addRow(1), c1,  42.4836453);
-    	t.setCellValue(t.getRow(1), c2, -71.441810);    
+    	t.setCellValue(t.addRow(1), c1, BOSTON.get("lat"));
+    	t.setCellValue(t.getRow(1), c2, BOSTON.get("lng"));    
+    	
+    	t.setCellValue(t.addRow(2), c1, ACTON.get("lat"));
+    	t.setCellValue(t.getRow(2), c2, ACTON.get("lng"));    
+    	
+    	t.setCellValue(t.addRow(3), c1, MOULTONBOROUGH.get("lat"));
+    	t.setCellValue(t.getRow(3), c2, MOULTONBOROUGH.get("lng"));    
     	
     	// wait for pendings
     	while (t.isPendings()) {
@@ -115,28 +125,28 @@ public class GeocodingOpTest
     	}
     	
     	// check results   	
-    	assertThat(1, is(t.getNumRows()));
+    	assertThat(3, is(t.getNumRows()));
     	
     	Cell cell = t.getCell(t.getRow(1), c3);
     	assertNotNull(cell); 	
     	Object value = cell.getCellValue();
     	assertNotNull(value);
-    	assertThat(true, is(value instanceof JSONObject));
-    	assertThat(BOSTON, is(value));   	   	
+    	assertThat(true, is(value instanceof String));
+    	assertThat(BOSTON_ADDR, is(value));   	   	
     	
-    	cell = t.getCell(t.getRow(2), c2);
+    	cell = t.getCell(t.getRow(2), c3);
     	assertNotNull(cell); 	
     	value = cell.getCellValue();
     	assertNotNull(value);
-    	assertThat(true, is(value instanceof JSONObject));
-    	assertThat(ACTON, is(value));   	   	
+    	assertThat(true, is(value instanceof String));
+    	assertThat(ACTON_ADDR, is(value));   	   	
     	
-    	cell = t.getCell(t.getRow(3), c2);
+    	cell = t.getCell(t.getRow(3), c3);
     	assertNotNull(cell); 	
     	value = cell.getCellValue();
     	assertNotNull(value);
-    	assertThat(true, is(value instanceof JSONObject));
-    	assertThat(MOULTONBOROUGH, is(value));   	   	
+    	assertThat(true, is(value instanceof String));
+    	assertThat(MOLTONBOROUGH_ADDR, is(value));   	   	
 	}
 
 }
