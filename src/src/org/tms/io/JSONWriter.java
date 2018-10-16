@@ -15,6 +15,7 @@ import org.tms.api.Subset;
 import org.tms.api.Table;
 import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
+import org.tms.api.derivables.DerivableThreadPoolConfig;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.io.JSONOptions;
 
@@ -97,6 +98,26 @@ public class JSONWriter extends ArchivalWriter<JSONOptions>
 		return val;
 	}
 
+	@Override
+	protected List<TableProperty> getExportableProperties(ElementType et) 
+	{
+		List<TableProperty> eProps = super.getExportableProperties(et);
+		
+		// pare out pending threadpool properties
+		if (et == ElementType.Table) {
+			if (getTable() instanceof DerivableThreadPoolConfig && !((DerivableThreadPoolConfig)getTable()).isPendingThreadPoolEnabled()) {
+				eProps.remove(TableProperty.isPendingThreadPoolEnabled);
+				eProps.remove(TableProperty.isPendingAllowCoreThreadTimeout);
+				eProps.remove(TableProperty.PendingThreadKeepAliveTimeout);
+				eProps.remove(TableProperty.PendingThreadKeepAliveTimeoutUnit);
+				eProps.remove(TableProperty.numPendingMaxPoolThreads);
+				eProps.remove(TableProperty.numPendingCorePoolThreads);
+			}
+		}
+		
+		return eProps;
+	}
+	
 	@SuppressWarnings("unchecked")
 	protected void exportTableMetadata(JSONObject tblJson) 
 	{

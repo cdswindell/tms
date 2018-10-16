@@ -23,9 +23,11 @@ import org.tms.api.Table;
 import org.tms.api.TableContext;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.api.derivables.DerivableThreadPoolConfig;
 import org.tms.api.derivables.Operator;
 import org.tms.api.derivables.Precisionable;
 import org.tms.api.events.TableElementEvent;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.TableIOException;
@@ -51,8 +53,10 @@ import org.tms.util.WeakHashSet;
 
 public class ContextImpl extends BaseElementImpl implements TableContext, 
                                                             Precisionable,
-                                                            DerivableThreadPool, 
-															EventProcessorThreadPool, EventsProcessorThreadPoolCreator
+                                                            DerivableThreadPool,
+                                                            DerivableThreadPoolConfig,
+															EventProcessorThreadPool,
+															EventsProcessorThreadPoolCreator
 {
     private static ContextImpl sf_DEFAULT_CONTEXT;
     
@@ -65,6 +69,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     static final int sf_PENDING_MAX_POOL_SIZE_DEFAULT = 128;
     static final int sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT = 5;
     static final boolean sf_PENDING_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT = true;
+    static final boolean sf_PENDING_THREAD_POOL_ENABLED_DEFAULT = true;
     
     static final boolean sf_EVENTS_NOTIFY_IN_SAME_THREAD_DEFAULT = false;
     static final int sf_EVENTS_CORE_POOL_SIZE_DEFAULT = 2;
@@ -206,23 +211,11 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     	m_registeredPersistantTables.clear();
     }
     
-    /*
-     * Java 8
-     */
-    @Override
-    public boolean isDerivableThreadPool()
-    {
-        return this instanceof DerivableThreadPool;
-    }
-    
     @Override
     public boolean isEventProcessorThreadPool()
     {
         return this instanceof EventProcessorThreadPool;
     }
-    /*
-     * Java 8
-     */
     
     protected void initialize(ContextImpl otherContext)
     {
@@ -319,8 +312,14 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
                 case isPendingAllowCoreThreadTimeout:
                     if (!isValidPropertyValueBoolean(value))
                         value = sf_PENDING_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT;
-                    pendingAllowCoreThreadTimeOut((boolean)value);
+                    setPendingAllowCoreThreadTimeOut((boolean)value);
                     break;                   
+                    
+                case isPendingThreadPoolEnabled:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = sf_PENDING_THREAD_POOL_ENABLED_DEFAULT;
+                    setPendingThreadPoolEnabled((boolean)value);
+                    break;      
                     
                 case numPendingCorePoolThreads:
                     if (!isValidPropertyValueInt(value))
@@ -378,6 +377,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         
         clearProperty(TableProperty.Label);
         clearProperty(TableProperty.Description);
+        
         m_pendingThreadPool = null;        
         m_eventThreadPool = null;
         m_eventThreadPoolLock = new Object();  
@@ -426,7 +426,10 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
                 return getTokenMapper();
                 
             case isPendingAllowCoreThreadTimeout:
-                return pendingAllowsCoreThreadTimeOut();
+                return isPendingAllowsCoreThreadTimeOut();
+                
+            case isPendingThreadPoolEnabled:
+                return isPendingThreadPoolEnabled();
                 
             case numPendingCorePoolThreads:
                 return getPendingCorePoolSize();
@@ -435,7 +438,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
                 return getPendingMaximumPoolSize();
                 
             case PendingThreadKeepAliveTimeout:
-                return getPendingKeepAliveTime(TimeUnit.SECONDS);                
+                return getPendingKeepAliveTime(m_eventsKeepAliveTimeUnit);                
              
             case isEventsNotifyInSameThread:
                 return isEventsNotifyInSameThread();
@@ -452,6 +455,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
             case EventsThreadKeepAliveTimeout:
                 return getEventsKeepAliveTime(TimeUnit.SECONDS);
                 
+	        case PendingThreadKeepAliveTimeoutUnit:
+	            return getPendingKeepAliveTimeUnit();                
+	         
             default:
                 return super.getProperty(key);
         }        
@@ -823,11 +829,25 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
             m_precision = precision;
     }
 
+	@Override
+	public boolean isPendingThreadPoolEnabled() 
+	{
+		return isSet(sf_PENDING_THREAD_POOL_FLAG);
+	}
+
+	@Override
+	public void setPendingThreadPoolEnabled(boolean threadPoolEnabled) 
+	{
+		set(sf_PENDING_THREAD_POOL_FLAG, threadPoolEnabled);
+	}
+	
+    @Override
     public int getPendingCorePoolSize()
     {
         return m_pendingCorePoolThreads;
     }
 
+    @Override
     public void setPendingCorePoolSize(int corePoolSize)
     {
         if (corePoolSize < 0) {
@@ -843,11 +863,13 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
             m_pendingThreadPool.setCorePoolSize(m_pendingCorePoolThreads);
     }
 
+    @Override
     public int getPendingMaximumPoolSize()
     {
         return m_pendingMaxPoolThreads;
     }
 
+    @Override
     public void setPendingMaximumPoolSize(int maxPoolSize)
     {
         if (maxPoolSize < 1) {
@@ -863,6 +885,13 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
             m_pendingThreadPool.setMaximumPoolSize(m_pendingMaxPoolThreads);
     }
     
+    @Override
+    public TimeUnit getPendingKeepAliveTimeUnit()
+    {
+    	return m_pendingKeepAliveTimeUnit;
+    }
+
+    @Override
     public long getPendingKeepAliveTime(TimeUnit unit)
     {
         if (unit == null)
@@ -870,6 +899,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
         return m_pendingKeepAliveTimeUnit.convert(m_pendingKeepAliveTimeout, unit);
     }
 
+    @Override
     public void setPendingKeepAliveTime(long time, TimeUnit unit)
     {
         if (unit == null)
@@ -894,12 +924,14 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
             m_pendingThreadPool.setKeepAliveTime(m_pendingKeepAliveTimeout, m_pendingKeepAliveTimeUnit);
     }
 
-    public boolean pendingAllowsCoreThreadTimeOut()
+    @Override
+    public boolean isPendingAllowsCoreThreadTimeOut()
     {
         return isSet(sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG);
     }
 
-    public void pendingAllowCoreThreadTimeOut(boolean allowCoreThreadTimeout)
+    @Override
+    public void setPendingAllowCoreThreadTimeOut(boolean allowCoreThreadTimeout)
     {
         set(sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG, allowCoreThreadTimeout);
     }
@@ -907,6 +939,9 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
     @Override
     public void submitCalculation(UUID transactionId, Runnable r)
     {
+    	if (!isPendingThreadPoolEnabled())
+    		throw new IllegalTableStateException("Pending threadpool is disabled.");
+    	
         synchronized(this) {
             if (m_pendingThreadPool == null) {
                 int maxPoolSize = Math.max(getPendingMaximumPoolSize(), getPendingCorePoolSize());
@@ -915,7 +950,7 @@ public class ContextImpl extends BaseElementImpl implements TableContext,
                                                                     maxPoolSize,
                                                                     getPendingKeepAliveTime(unit),
                                                                     unit,
-                                                                    this.pendingAllowsCoreThreadTimeOut());  
+                                                                    isPendingAllowsCoreThreadTimeOut());  
             }
         }
         

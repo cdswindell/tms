@@ -33,6 +33,7 @@ import org.tms.api.TableElement;
 import org.tms.api.TableProperty;
 import org.tms.api.derivables.Derivable;
 import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.api.derivables.DerivableThreadPoolConfig;
 import org.tms.api.derivables.Derivation;
 import org.tms.api.derivables.InvalidExpressionException;
 import org.tms.api.derivables.TimeSeries;
@@ -1314,9 +1315,9 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     	if (m_threadPool == null) {
 	    	Table t = getTable();
 	        TableContext tc = getTableContext();
-	    	if (t.isDerivableThreadPool()) 
+	    	if (t instanceof DerivableThreadPool && t instanceof DerivableThreadPoolConfig && ((DerivableThreadPoolConfig)t).isPendingThreadPoolEnabled()) 
 	    		m_threadPool = (DerivableThreadPool)t;
-	    	else if (tc != null && tc.isDerivableThreadPool()) 
+	    	else if (tc != null && tc instanceof DerivableThreadPool && tc instanceof DerivableThreadPoolConfig && ((DerivableThreadPoolConfig)tc).isPendingThreadPoolEnabled() )
 	            m_threadPool = (DerivableThreadPool)tc;
 	        else {
 	            synchronized(DerivationImpl.class) {
@@ -1330,6 +1331,8 @@ public final class DerivationImpl implements Derivation, TimeSeries, TableElemen
     	
     	if (m_threadPool != null)
     		m_threadPool.submitCalculation(pendingState.getTransactionID(), pendingState.getRunnable());
+    	else
+    		throw new IllegalTableStateException("No pending thread pool available.");
     }
 
     public List<TableElement> getAffectedBy()

@@ -8,7 +8,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.derivables.Operator;
 import org.tms.api.exceptions.UnsupportedImplementationException;
 import org.tms.api.io.IOOption;
@@ -74,15 +73,6 @@ public interface TableContext extends BaseElement, InitializableTableProperties
     default public boolean isDatabaseDriverLoaded(String driverClassName)
     {
         throw new UnsupportedImplementationException(ElementType.TableContext, "loadDatabaseDriver");
-    }
-    
-    /**
-     * Returns {@code true} if this {@link TableContext} implements {@link DerivableThreadPool}.
-     * @return true if this TableContext implements DerivableThreadPool
-     */
-    default public boolean isDerivableThreadPool()
-    {
-        return this instanceof DerivableThreadPool;
     }
     
     /**

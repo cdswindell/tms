@@ -45,6 +45,8 @@ public enum TableProperty implements Comparable<TableProperty>
     numPendingCorePoolThreads(null, true, false, true, ElementType.TableContext, ElementType.Table),
     numPendingMaxPoolThreads(null, true, false, true, ElementType.TableContext, ElementType.Table),
     PendingThreadKeepAliveTimeout(null, true, false, true, ElementType.TableContext, ElementType.Table),    
+    PendingThreadKeepAliveTimeoutUnit(null, true, false, true, ElementType.TableContext, ElementType.Table),    
+    isPendingThreadPoolEnabled(null, true, false, true, ElementType.TableContext, ElementType.Table),
 
     // EventProcessorThreadPool Properties
     isEventsNotifyInSameThread(null, true, false, true, ElementType.TableContext, ElementType.Table),

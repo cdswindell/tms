@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.tms.api.derivables.DerivableThreadPool;
 import org.tms.api.io.IOOption;
 import org.tms.tds.events.EventProcessorThreadPool;
 
@@ -389,15 +388,6 @@ public interface Table extends TableElement, InitializableTableProperties
      * @throws org.tms.api.exceptions.DeletedElementException if this table has been deleted
      */
     public void recalculate();
-    
-    /**
-     * Returns {@code true} if this {@link Table} implements {@link DerivableThreadPool}.
-     * @return true if this Table implements DerivableThreadPool
-     */
-    default public boolean isDerivableThreadPool()
-    {
-        return this instanceof DerivableThreadPool;
-    }
     
     /**
      * Returns {@code true} if this {@link Table} implements {@link EventProcessorThreadPool}.

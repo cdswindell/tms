@@ -33,7 +33,7 @@ abstract public class BaseElementImpl implements BaseElement
     static final protected int sf_AUTO_RECALCULATE_FLAG             = 0x08;
     
     static final protected int sf_AUTO_RECALCULATE_DISABLED_FLAG    = 0x10;
-    static final protected int sf_____________________              = 0x20;
+    static final protected int sf_PENDING_THREAD_POOL_FLAG          = 0x20;
     static final protected int sf_IN_USE_FLAG                       = 0x40;
     static final protected int sf_IS_PENDING_FLAG                   = 0x80;
     

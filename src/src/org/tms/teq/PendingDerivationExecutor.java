@@ -25,7 +25,7 @@ public class PendingDerivationExecutor extends ThreadPoolExecutor implements Run
     
     public PendingDerivationExecutor()
     {
-        this(5, 100, 30, TimeUnit.SECONDS);
+        this(5, 10, 30, TimeUnit.SECONDS);
     }
     
     public PendingDerivationExecutor(int corePoolSize, int maximumPoolSize)

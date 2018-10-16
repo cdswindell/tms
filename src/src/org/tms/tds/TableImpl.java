@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -40,12 +41,15 @@ import org.tms.api.TableProperty;
 import org.tms.api.TableRowColumnElement;
 import org.tms.api.Taggable;
 import org.tms.api.derivables.Derivable;
+import org.tms.api.derivables.DerivableThreadPool;
+import org.tms.api.derivables.DerivableThreadPoolConfig;
 import org.tms.api.derivables.Precisionable;
 import org.tms.api.derivables.TimeSeriesable;
 import org.tms.api.derivables.Token;
 import org.tms.api.events.BlockedRequestException;
 import org.tms.api.events.TableElementEventType;
 import org.tms.api.events.TableElementListener;
+import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.exceptions.InvalidAccessException;
 import org.tms.api.exceptions.InvalidException;
 import org.tms.api.exceptions.InvalidParentException;
@@ -57,11 +61,12 @@ import org.tms.io.TableExportAdapter;
 import org.tms.tds.events.TableElementListeners;
 import org.tms.tds.filters.FilteredTableImpl;
 import org.tms.teq.DerivationImpl;
+import org.tms.teq.PendingDerivationExecutor;
 import org.tms.teq.TimeSeriedColumnsWorker;
 import org.tms.teq.TimeSeriedRowsWorker;
 import org.tms.util.JustInTimeSet;
 
-public class TableImpl extends TableCellsElementImpl implements Table, Precisionable
+public class TableImpl extends TableCellsElementImpl implements Table, Precisionable, DerivableThreadPool, DerivableThreadPoolConfig
 {
     /**
      * We allow each thread to maintain it's own current row/current column state for every table, this 
@@ -193,6 +198,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
 	
 	private JustInTimeSet<FilteredTableImpl> m_filters = null;
    
+	// Derivation Thread Pool Support
+	private int m_pendingCorePoolThreads;
+	private int m_pendingMaxPoolThreads;
+    private PendingDerivationExecutor m_pendingThreadPool;
+	private TimeUnit m_pendingKeepAliveTimeUnit;
+	private long m_pendingKeepAliveTimeout;    
+    
     protected TableImpl()
     {
         this(ContextImpl.getPropertyInt(null, TableProperty.RowCapacityIncr),
@@ -276,7 +288,13 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         m_cellElemProperties = new ConcurrentHashMap<CellImpl, Map<String, Object>>();
         m_subsetedCells = new HashMap<CellImpl, Set<SubsetImpl>>();
         
+        // derivation thread pool
+        setPendingThreadPoolEnabled(false); // all tables start off with their threadpool disabled
+        m_pendingThreadPool = null;        
+        
+        // do specialized table initializations
         initializeSpecialized(t);
+        
         // clear dirty flag, as table is empty
         markClean();
     }
@@ -370,6 +388,30 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
                     setDisplayFormat((String)value);
                     break;
                     
+                case isPendingAllowCoreThreadTimeout:
+                    if (!isValidPropertyValueBoolean(value))
+                        value = ContextImpl.sf_PENDING_ALLOW_CORE_THREAD_TIMEOUT_DEFAULT;
+                    setPendingAllowCoreThreadTimeOut((boolean)value);
+                    break;                   
+                    
+                case numPendingCorePoolThreads:
+                    if (!isValidPropertyValueInt(value))
+                        value = ContextImpl.sf_PENDING_CORE_POOL_SIZE_DEFAULT;
+                    setPendingCorePoolSize((int)value);
+                    break;
+                    
+                case numPendingMaxPoolThreads:
+                    if (!isValidPropertyValueInt(value))
+                        value = ContextImpl.sf_PENDING_MAX_POOL_SIZE_DEFAULT;
+                    setPendingMaximumPoolSize((int)value);
+                    break;
+                    
+                case PendingThreadKeepAliveTimeout:
+                    if (!isValidPropertyValueInt(value))
+                        value = ContextImpl.sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
+                    setPendingKeepAliveTime((int)value, TimeUnit.SECONDS);
+                    break;
+                
                 default:
                 	if (initializeSpecializedProperty(tp, value))
                 		break;
@@ -700,6 +742,24 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
             case TimeSeriesedColumnsTimeStampRow:
                 return getTimeSeriesedColumnsTimeStampRow();
                 
+            case isPendingThreadPoolEnabled:
+                return isPendingThreadPoolEnabled();
+                
+	        case isPendingAllowCoreThreadTimeout:
+	            return isPendingAllowsCoreThreadTimeOut();
+	            
+	        case numPendingCorePoolThreads:
+	            return getPendingCorePoolSize();
+	            
+	        case numPendingMaxPoolThreads:
+	            return getPendingMaximumPoolSize();
+	            
+	        case PendingThreadKeepAliveTimeout:
+	            return getPendingKeepAliveTime(getPendingKeepAliveTimeUnit());                
+	         
+	        case PendingThreadKeepAliveTimeoutUnit:
+	            return getPendingKeepAliveTimeUnit();                
+	         
             default:
                 return super.getProperty(key);
         }
@@ -724,6 +784,132 @@ public class TableImpl extends TableCellsElementImpl implements Table, Precision
         return m_context;
     }
 
+	@Override
+	public boolean isPendingThreadPoolEnabled() 
+	{
+		return isSet(sf_PENDING_THREAD_POOL_FLAG);
+	}
+
+	@Override
+	public void setPendingThreadPoolEnabled(boolean threadPoolEnabled) 
+	{
+		set(sf_PENDING_THREAD_POOL_FLAG, threadPoolEnabled);
+	}
+	
+    @Override
+    public int getPendingCorePoolSize()
+    {
+        return m_pendingCorePoolThreads;
+    }
+
+    @Override
+    public void setPendingCorePoolSize(int corePoolSize)
+    {
+        if (corePoolSize < 0) 
+            m_pendingCorePoolThreads = ContextImpl.sf_PENDING_CORE_POOL_SIZE_DEFAULT;
+        else
+            m_pendingCorePoolThreads = corePoolSize;        
+        
+        if (m_pendingThreadPool != null && m_pendingCorePoolThreads <= m_pendingMaxPoolThreads)
+            m_pendingThreadPool.setCorePoolSize(m_pendingCorePoolThreads);
+    }
+
+    @Override
+    public int getPendingMaximumPoolSize()
+    {
+        return m_pendingMaxPoolThreads;
+    }
+
+    @Override
+    public void setPendingMaximumPoolSize(int maxPoolSize)
+    {
+        if (maxPoolSize < 1) 
+            m_pendingMaxPoolThreads = ContextImpl.sf_PENDING_MAX_POOL_SIZE_DEFAULT;
+        else
+            m_pendingMaxPoolThreads = maxPoolSize;
+        
+        if (m_pendingThreadPool != null && m_pendingMaxPoolThreads >= m_pendingCorePoolThreads)
+            m_pendingThreadPool.setMaximumPoolSize(m_pendingMaxPoolThreads);
+    }
+    
+    @Override
+    public TimeUnit getPendingKeepAliveTimeUnit()
+    {
+    	return m_pendingKeepAliveTimeUnit;
+    }
+
+    public long getPendingKeepAliveTime(TimeUnit unit)
+    {
+        if (unit == null)
+            unit = TimeUnit.SECONDS;
+        return m_pendingKeepAliveTimeUnit.convert(m_pendingKeepAliveTimeout, unit);
+    }
+
+    public void setPendingKeepAliveTime(long time, TimeUnit unit)
+    {
+        if (unit == null)
+            unit = TimeUnit.SECONDS;
+        
+        if (time <= 0) {
+            m_pendingKeepAliveTimeout = ContextImpl.sf_PENDING_KEEP_ALIVE_TIMEOUT_SEC_DEFAULT;
+            m_pendingKeepAliveTimeUnit = TimeUnit.SECONDS;
+        }
+        else {
+            m_pendingKeepAliveTimeout = time;
+            m_pendingKeepAliveTimeUnit = unit;
+        }
+        
+        if (m_pendingThreadPool != null)
+            m_pendingThreadPool.setKeepAliveTime(m_pendingKeepAliveTimeout, m_pendingKeepAliveTimeUnit);
+    }
+
+    public boolean isPendingAllowsCoreThreadTimeOut()
+    {
+        return isSet(sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG);
+    }
+
+    public void setPendingAllowCoreThreadTimeOut(boolean allowCoreThreadTimeout)
+    {
+        set(sf_PENDINGS_ALLOW_CORE_THREAD_TIMEOUT_FLAG, allowCoreThreadTimeout);
+    }
+
+    @Override
+    public void submitCalculation(UUID transactionId, Runnable r)
+    {
+    	if (!isPendingThreadPoolEnabled())
+    		throw new IllegalTableStateException("Pending threadpool is disabled.");
+    	
+        synchronized(this) {
+            if (m_pendingThreadPool == null) {
+                int maxPoolSize = Math.max(getPendingMaximumPoolSize(), getPendingCorePoolSize());
+                TimeUnit unit = m_pendingKeepAliveTimeUnit != null ? m_pendingKeepAliveTimeUnit : TimeUnit.SECONDS;
+                m_pendingThreadPool = new PendingDerivationExecutor(getPendingCorePoolSize(),
+                                                                    maxPoolSize,
+                                                                    getPendingKeepAliveTime(unit),
+                                                                    unit,
+                                                                    isPendingAllowsCoreThreadTimeOut());  
+            }
+        }
+        
+        m_pendingThreadPool.submitCalculation(transactionId, r);       
+    }
+
+    @Override
+    public void shutdownDerivableThreadPool()
+    {
+        if (m_pendingThreadPool != null)
+            m_pendingThreadPool.shutdownDerivableThreadPool();
+    }
+    
+    @Override
+    public boolean remove(UUID r)
+    {
+        if (r != null && m_pendingThreadPool != null)
+            return m_pendingThreadPool.remove(r);  
+        else
+            return false;
+    }  
+    
     @Override
     public ContextImpl getTableContext()
     {
