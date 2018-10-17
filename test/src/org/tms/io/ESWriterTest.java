@@ -17,6 +17,7 @@ import org.tms.api.Table;
 import org.tms.api.exceptions.IllegalTableStateException;
 import org.tms.api.factories.TableFactory;
 import org.tms.api.io.ESOptions;
+import org.tms.api.utils.googleapis.ToLatLongStrOp;
 
 public class ESWriterTest extends BaseIOTest 
 {
@@ -24,6 +25,7 @@ public class ESWriterTest extends BaseIOTest
     private static final String SAMPLE2 = "testESExport2.json";
     private static final String SAMPLE3 = "testESExport3.json";
     private static final String SAMPLE5 = "testESExport5.json";
+    private static final String SAMPLE6 = "testESExport6.json";
     
     @Test
     public final void testElasticSearchExport1() throws IOException
@@ -117,4 +119,43 @@ public class ESWriterTest extends BaseIOTest
     	}
     	catch (IllegalTableStateException e) {}
     }
+    
+    @Test
+    public final void testElasticSearchExport2() throws IOException, InterruptedException
+    {   
+    	Table t = TableFactory.createTable();
+    	t.getTableContext().registerOperator(new ToLatLongStrOp());
+    	
+    	t.setLabel("ESExport2");
+    	t.setDescription("Elastic Search Export Test 2");
+    	    	
+    	// and columns
+    	Column c1 = t.addColumn(Access.ByLabel, "Zip Code");
+    	
+    	Column c2 = t.addColumn(Access.ByLabel, "Location");
+    	c2.setDerivation("toLatLong(col 1)");
+    	
+    	// set data
+    	t.setCellValue(t.addRow(1), c1, "02116");
+    	t.setCellValue(t.addRow(2), c1, "01720");
+    	
+    	while(t.isPendings()) {
+    		Thread.sleep(250);
+    	}
+    	
+    	assertThat("42.353068,-71.0765188", is(t.getCellValue(t.getRow(1), c2)));
+    	assertThat("42.4836453,-71.4418101", is(t.getCellValue(t.getRow(2), c2)));
+    	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	t.export(baos, ESOptions.Default);
+    	
+        // test byte streams are the same
+    	String output = baos.toString();
+        assertNotNull(output);
+
+    	String gold = readFileAsString(Paths.get(qualifiedFileName(SAMPLE6, "misc")));
+        assertThat(gold.length(), is(output.length())); 
+        assertThat(gold, is(output));  
+    }
+
 }

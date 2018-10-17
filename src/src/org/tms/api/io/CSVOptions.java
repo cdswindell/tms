@@ -44,7 +44,8 @@ public class CSVOptions extends LabeledIOOptions<CSVOptions> implements LabeledI
     {
         DelimiterChar,
         QuoteChar,
-        IsIgnoreSurrountingSpaces;        
+        IgnoreSurrountingSpaces, 
+    	IgnoreLeadingZeros
     }
     
     private CSVOptions(final boolean rowNames, 
@@ -58,7 +59,8 @@ public class CSVOptions extends LabeledIOOptions<CSVOptions> implements LabeledI
         super(IOFileFormat.CSV, rowNames, colNames, ignoreEmptyRows, ignoreEmptyCols);
         set(Options.DelimiterChar, delimiter);
         set(Options.QuoteChar, quoteCharacter);
-        set(Options.IsIgnoreSurrountingSpaces, ignoreSurroundingSpaces);
+        set(Options.IgnoreSurrountingSpaces, ignoreSurroundingSpaces);
+        set(Options.IgnoreLeadingZeros, false);
     }
     
     private CSVOptions (final CSVOptions format)
@@ -78,7 +80,7 @@ public class CSVOptions extends LabeledIOOptions<CSVOptions> implements LabeledI
      */
     public boolean isIgnoreSuroundingSpaces()
     {
-        return isTrue(Options.IsIgnoreSurrountingSpaces);
+        return isTrue(Options.IgnoreSurrountingSpaces);
     }
     
     /**
@@ -98,11 +100,28 @@ public class CSVOptions extends LabeledIOOptions<CSVOptions> implements LabeledI
     public CSVOptions withIgnoreSuroundingSpaces(final boolean enabled)
     {
         CSVOptions newOptions = new CSVOptions(this);
-        newOptions.set(Options.IsIgnoreSurrountingSpaces, enabled);
+        newOptions.set(Options.IgnoreSurrountingSpaces, enabled);
         return newOptions;
     } 
     
-    /**
+    public boolean isIgnoreLeadingZeros()
+    {
+        return isTrue(Options.IgnoreLeadingZeros);
+    }
+    
+    public CSVOptions withIgnoreLeadingZeros()
+    {
+        return withIgnoreLeadingZeros(true);
+    }
+
+    public CSVOptions withIgnoreLeadingZeros(final boolean enabled)
+    {
+        CSVOptions newOptions = new CSVOptions(this);
+        newOptions.set(Options.IgnoreLeadingZeros, enabled);
+        return newOptions;
+    } 
+    
+   /**
      * Returns the delimiter character that separates data values in the imported or exported CSV file.
      * The default delimiter character is a comma ('<b>,</b>')
      * @return the delimiter character that separates data values

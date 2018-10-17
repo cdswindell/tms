@@ -688,6 +688,10 @@ public class MathUtil
     
     static final public Object parseCellValue(String s, boolean ignoreSpaces)
     {
+    	return parseCellValue(s, ignoreSpaces, false);
+    }
+    static final public Object parseCellValue(String s, boolean ignoreSpaces, boolean ignoreLeadingZeros)
+    {
         try {
             if (s == null)
             	return null;
@@ -697,7 +701,9 @@ public class MathUtil
                 return true;
             else if ("false".equalsIgnoreCase(s))
                 return false;
-            else if ((c = s.charAt(0)) > 0 && (!Character.isDigit(c) && c != '+' && c != '-'))
+            else if (s.trim().length() > 0 && (c = s.trim().charAt(0)) > 0 && (!Character.isDigit(c) && c != '+' && c != '-'))
+                return ignoreSpaces ? s.trim() : s;
+            else if (!ignoreLeadingZeros && s.trim().length() > 0 && (c = s.trim().charAt(0)) == '0')
                 return ignoreSpaces ? s.trim() : s;
             
             return Integer.parseInt(s);

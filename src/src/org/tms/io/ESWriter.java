@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
+import org.tms.api.Cell;
 import org.tms.api.Column;
 import org.tms.api.Row;
 import org.tms.api.Table;
@@ -17,6 +18,41 @@ import org.tms.api.io.ESOptions;
 
 public class ESWriter extends BaseWriter<ESOptions>
 {
+	
+	protected static String whitespace_chars =  ""       /* dummy empty string for homogeneity */
+            + "\\u0009" // CHARACTER TABULATION
+            + "\\u000A" // LINE FEED (LF)
+            + "\\u000B" // LINE TABULATION
+            + "\\u000C" // FORM FEED (FF)
+            + "\\u000D" // CARRIAGE RETURN (CR)
+            + "\\u0020" // SPACE
+            + "\\u0085" // NEXT LINE (NEL) 
+            + "\\u00A0" // NO-BREAK SPACE
+            + "\\u1680" // OGHAM SPACE MARK
+            + "\\u180E" // MONGOLIAN VOWEL SEPARATOR
+            + "\\u2000" // EN QUAD 
+            + "\\u2001" // EM QUAD 
+            + "\\u2002" // EN SPACE
+            + "\\u2003" // EM SPACE
+            + "\\u2004" // THREE-PER-EM SPACE
+            + "\\u2005" // FOUR-PER-EM SPACE
+            + "\\u2006" // SIX-PER-EM SPACE
+            + "\\u2007" // FIGURE SPACE
+            + "\\u2008" // PUNCTUATION SPACE
+            + "\\u2009" // THIN SPACE
+            + "\\u200A" // HAIR SPACE
+            + "\\u2028" // LINE SEPARATOR
+            + "\\u2029" // PARAGRAPH SEPARATOR
+            + "\\u202F" // NARROW NO-BREAK SPACE
+            + "\\u205F" // MEDIUM MATHEMATICAL SPACE
+            + "\\u3000" // IDEOGRAPHIC SPACE
+            ;        
+	/* A \s that actually works for Java’s native character set: Unicode */
+	protected static String whitespace_charclass = "["  + whitespace_chars + "]";    
+	
+	/* A \S that actually works for  Java’s native character set: Unicode */
+	protected static String not_whitespace_charclass = "[^" + whitespace_chars + "]";
+
     public static void export(TableExportAdapter tea, OutputStream out, ESOptions options) 
     throws IOException
     {
@@ -47,10 +83,11 @@ public class ESWriter extends BaseWriter<ESOptions>
     	try {   	
 	    	Table t = getTable();
 	    	
+	    	Cell cell;
 	    	Column idCol = options().getIdColumn();
 			JSONObject data;
-			Object cellValue;
 			int ordinalId = 0;
+			
 	    	for (Row r: getActiveRows()) {  	
 	    		data = new JSONObject();
 	    		int fieldNo = 0;
@@ -61,9 +98,13 @@ public class ESWriter extends BaseWriter<ESOptions>
 	    			fieldNo++;
 	    			
 	    			if (t.isCellDefined(r, c)) {
-		    			cellValue = (r.getCell(c)).getCellValue();
-		    			if (cellValue != null || !options().isIgnoreEmptyCells())
-		    				data.put(serializeFieldName(c, fieldNo), serializelValue(cellValue)); 
+	    				cell = r.getCell(c);
+	    				
+	    				if (cell.isErrorValue()) continue; // skip error cells
+	    				if (cell.isNull() && options().isIgnoreEmptyCells()) continue; // skip null/empty cells, if so instructed
+	    				
+	    				// write cell value to record
+	    				data.put(serializeFieldName(c, fieldNo), serializelCellValue(cell)); 
 	    			}
 	    		}  	
 	    		
@@ -159,7 +200,7 @@ public class ESWriter extends BaseWriter<ESOptions>
 					fName = fName.toLowerCase();
 				
 				// translate whitespace to underscores
-				fName.replaceAll("\\s", "_");
+				fName = fName.replaceAll(whitespace_charclass, "_");
 			}
 			
 			m_fieldNameMap.put(c,  fName);
@@ -168,15 +209,22 @@ public class ESWriter extends BaseWriter<ESOptions>
 		return fName;
 	}
 
+	private Object serializelCellValue(Cell cell) 
+	{
+		return serializelValue(cell.getCellValue());
+	}
+	
 	private Object serializelValue(Object val) 
 	{
 		if (val == null)
 			return val;
-		if (val instanceof String || val instanceof Number || val instanceof Boolean)
+		if (val instanceof Number || val instanceof Boolean || val instanceof JSONObject)
 			return val;
 		
 		//TODO handle other classes
-		return val.toString();
+		String sVal = val.toString();
+		sVal = sVal.replaceAll(whitespace_charclass, " ");
+		return sVal;
 	}    
 	
 	/*

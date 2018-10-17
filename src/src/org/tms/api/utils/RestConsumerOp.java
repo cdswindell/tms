@@ -411,10 +411,9 @@ abstract public class RestConsumerOp extends AbstractOperator
                     break;
             }
             
-            if (leaf == null && tokensProcessed < tokens.length)  {
-            	postProcessResult(leaf);
+            // result not found check
+            if (leaf == null && tokensProcessed < tokens.length)
                 throw new InvalidOperandsException("Result not found: " + m_resultKey);
-            }
             
             if (leaf == null)
                 return null;
