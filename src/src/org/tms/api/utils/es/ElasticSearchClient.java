@@ -244,7 +244,7 @@ public class ElasticSearchClient
 			        builder.endArray();
 		    	}
 		    	
-		    	if (opts.isMappings()) {
+		    	if (opts.isMappings() || opts.isCatchAllField()) {
 			        builder.startObject("properties");
 			        {
 			        	for (Map.Entry<String, String> t : opts.getMappings().entrySet()) {
@@ -253,6 +253,14 @@ public class ElasticSearchClient
 			        			builder.field("type", t.getValue());
 			        		}
 					        builder.endObject();
+			        	}
+			        	
+			        	if (opts.isCatchAllField()) {
+			        		builder.startObject(opts.getCatchAllField());
+		        			builder.field("type", "text");
+		        			builder.field("term_vector", "with_positions_offsets_payloads");			        		
+		        			builder.field("store", "true");
+			        		builder.endObject();
 			        	}
 			        }
 			        builder.endObject();
