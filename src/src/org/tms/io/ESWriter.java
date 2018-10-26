@@ -18,8 +18,7 @@ import org.tms.api.io.ESOptions;
 
 public class ESWriter extends BaseWriter<ESOptions>
 {
-	
-	protected static String whitespace_chars =  ""       /* dummy empty string for homogeneity */
+	public static String whitespace_chars =  ""       /* dummy empty string for homogeneity */
             + "\\u0009" // CHARACTER TABULATION
             + "\\u000A" // LINE FEED (LF)
             + "\\u000B" // LINE TABULATION

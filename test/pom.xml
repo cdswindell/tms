@@ -64,5 +64,10 @@
         <artifactId>jdbc</artifactId>
         <version>0.4.203</version>
     </dependency>
+    <dependency>
+        <groupId>org.elasticsearch.client</groupId>
+        <artifactId>elasticsearch-rest-high-level-client</artifactId>
+        <version>6.4.2</version>
+    </dependency>
   </dependencies>
 </project>
