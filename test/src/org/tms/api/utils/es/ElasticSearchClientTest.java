@@ -16,6 +16,9 @@ import org.tms.api.Access;
 import org.tms.api.Column;
 import org.tms.api.Table;
 import org.tms.api.factories.TableFactory;
+import org.tms.api.io.CSVOptions;
+import org.tms.api.utils.googleapis.ToLatLongStrOp;
+import org.tms.tds.TableImpl;
 
 public class ElasticSearchClientTest extends BaseTest 
 {
@@ -123,4 +126,24 @@ public class ElasticSearchClientTest extends BaseTest
 			fail(e.getMessage());
 		}
 	}
+	
+	@Test
+	public void testBulkLoadProfiles() throws IOException 
+	{		
+		Table p = TableFactory.importFile("profiles.csv",CSVOptions.Default.withColumnLabels().withRowLabels(false));
+		p.getTableContext().registerOperator(new ToLatLongStrOp());
+		Column id = p.getColumn("id");
+		Column ll = p.addColumn(Access.ByLabel,"location");
+		
+		((TableImpl)p).setPendingThreadPoolEnabled(true);
+		((TableImpl)p).setPendingMaximumPoolSize(2);
+		ll.setDerivation("toLatLong(zip_code)");
+		
+		p.getColumn("lat").delete();
+		p.getColumn("lng").delete();
+		
+		int numLoaded = ElasticSearchClient.bulkLoad(p, "profile",ESCOptions.Default.withIdColumn(id).withCatchAllField("all_text").addMapping("location", "geo_point"));
+		assertThat(numLoaded > 1, is(true));
+	}
+
 }

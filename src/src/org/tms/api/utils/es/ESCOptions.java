@@ -15,6 +15,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 
     private enum Options implements OptionEnum 
     {
+    	CatchAllField,
     	isRecreateIndex,
     	Mappings,
     	Port,
@@ -126,23 +127,40 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     public ESCOptions withPort(final int port) 
     {
     	ESCOptions newOptions = new ESCOptions(this);
-        newOptions.set(Options.Port, port);
-        return newOptions;
+    	newOptions.set(Options.Port, port);
+    	return newOptions;
     }
-       
+
+    public String getCatchAllField() 
+    {
+    	return (String)get(Options.CatchAllField);
+    }
+
+    public boolean isCatchAllField() 
+    {
+    	return null != getCatchAllField();
+    }
+
+    public ESCOptions withCatchAllField(final String val) 
+    {
+    	ESCOptions newOptions = new ESCOptions(this);
+    	newOptions.set(Options.CatchAllField, val);
+    	return newOptions;
+    }
+
     public String getServer() 
     {
-        return (String)get(Options.Server);
+    	return (String)get(Options.Server);
     }
 
     public ESCOptions withServer(final String server) 
     {
     	ESCOptions newOptions = new ESCOptions(this);
-        newOptions.set(Options.Server, server);
-        return newOptions;
+    	newOptions.set(Options.Server, server);
+    	return newOptions;
     }
 
-	public ESOptions asESOptions() 
+    public ESOptions asESOptions() 
 	{
 		ESOptions opts = ESOptions.Default;
 		

@@ -203,7 +203,7 @@ public class ElasticSearchClient
 				    );
 			
 			// build mappings, if they exist
-			if (opts.isMappings())
+			if (opts.isMappings() || opts.isCatchAllField())
 				req.mapping(opts.getWorkingType(), getMappingsAsBuilder(opts));
 			
 			CreateIndexResponse resp = client.indices().create(req, RequestOptions.DEFAULT);
@@ -224,17 +224,39 @@ public class ElasticSearchClient
 	    {
 		    builder.startObject(opts.getWorkingType());
 		    {
-		        builder.startObject("properties");
-		        {
-		        	for (Map.Entry<String, String> t : opts.getMappings().entrySet()) {
-		        		builder.startObject(t.getKey());
-		        		{
-		        			builder.field("type", t.getValue());
-		        		}
+		    	if (opts.isCatchAllField()) {
+			        builder.startArray("dynamic_templates");
+			        builder.startObject();
+			        {
+				        builder.startObject("strings");
+				        {
+		        			builder.field("match_mapping_type", "string");
+					        builder.startObject("mapping");
+					        {
+			        			builder.field("type", "text");
+			        			builder.field("copy_to", opts.getCatchAllField());
+					        }
+					        builder.endObject();				        	
+				        }
 				        builder.endObject();
-		        	}
-		        }
-		        builder.endObject();
+			        }		        
+			        builder.endObject();
+			        builder.endArray();
+		    	}
+		    	
+		    	if (opts.isMappings()) {
+			        builder.startObject("properties");
+			        {
+			        	for (Map.Entry<String, String> t : opts.getMappings().entrySet()) {
+			        		builder.startObject(t.getKey());
+			        		{
+			        			builder.field("type", t.getValue());
+			        		}
+					        builder.endObject();
+			        	}
+			        }
+			        builder.endObject();
+		    	}
 		    }
 		    builder.endObject();
 	    }
