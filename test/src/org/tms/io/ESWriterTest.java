@@ -65,7 +65,7 @@ public class ESWriterTest extends BaseIOTest
         
         // Test 2: Ordinal IDs
     	baos = new ByteArrayOutputStream();
-    	t.export(baos, ESOptions.Default.withIdOrdinal().withIndex("myIndex").withType("_doc"));
+    	t.export(baos, ESOptions.Default.withIdOrdinal().withIndex("myIndex").withType("myType"));
        	
         // test byte streams are the same
     	output = baos.toString();

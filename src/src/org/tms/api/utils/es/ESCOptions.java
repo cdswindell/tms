@@ -3,6 +3,7 @@ package org.tms.api.utils.es;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.json.simple.JSONObject;
 import org.tms.api.io.ESIOOption;
 import org.tms.api.io.ESOptions;
 import org.tms.api.io.IOOption;
@@ -18,6 +19,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     	CatchAllField,
     	isRecreateIndex,
     	Mappings,
+    	Settings,
     	Port,
     	Server,
     	Shards,
@@ -75,32 +77,88 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     }
     
     @SuppressWarnings("unchecked")
-	public Map<String, String> getMappings() 
+	public Map<String, Object> getMappings() 
     {
-        return (Map<String, String>)get(Options.Mappings);
+        return (Map<String, Object>)get(Options.Mappings);
     }
     
     public boolean isMappings()
     {
-    	Map<String, String> mappings = getMappings();
+    	Map<String, Object> mappings = getMappings();
     	return mappings != null && !mappings.isEmpty();
     }
 
     public ESCOptions addMapping(final String field, final String type) 
     {
+    	String val = (type != null ? type.trim() : null);
+    	return addMapping(field, (Object) val);
+    }
+    
+    public ESCOptions addMapping(final String field, final JSONObject val) 
+    {
+    	return addMapping(field, (Object) val);
+    }
+       
+    protected ESCOptions addMapping(final String field, final Object val) 
+    {
     	ESCOptions newOptions = new ESCOptions(this);
     	
-    	Map<String, String> mappings = getMappings();
+    	Map<String, Object> mappings = getMappings();
     	if (mappings == null) {
-    		mappings = new LinkedHashMap<String, String>();
+    		mappings = new LinkedHashMap<String, Object>();
     		newOptions.set(Options.Mappings, mappings);
     	}
     	
-    	mappings.put(field.trim(), type.trim());
+    	mappings.put(field.trim(), val);
         return newOptions;
     }
        
-    public ESCOptions withMappings(final Map<String, String> val) 
+    /***/
+    @SuppressWarnings("unchecked")
+	public Map<String, Object> getSettings() 
+    {
+        return (Map<String, Object>)get(Options.Settings);
+    }
+    
+    public boolean isSettings()
+    {
+    	Map<String, Object> settings = getSettings();
+    	return settings != null && !settings.isEmpty();
+    }
+
+    public ESCOptions addSetting(final String field, final String type) 
+    {
+    	String val = (type != null ? type.trim() : null);
+    	return addSetting(field, (Object) val);
+    }
+    
+    public ESCOptions addSetting(final String field, final JSONObject val) 
+    {
+    	return addSetting(field, (Object) val);
+    }
+       
+    protected ESCOptions addSetting(final String field, final Object val) 
+    {
+    	ESCOptions newOptions = new ESCOptions(this);
+    	
+    	Map<String, Object> settings = getSettings();
+    	if (settings == null) {
+    		settings = new LinkedHashMap<String, Object>();
+    		newOptions.set(Options.Settings, settings);
+    	}
+    	
+    	settings.put(field.trim(), val);
+        return newOptions;
+    }
+       
+    public ESCOptions withSettings(final Map<String, Object> val) 
+    {
+    	ESCOptions newOptions = new ESCOptions(this);
+        newOptions.set(Options.Settings, val);
+        return newOptions;
+    }
+       
+    public ESCOptions withMappings(final Map<String, Object> val) 
     {
     	ESCOptions newOptions = new ESCOptions(this);
         newOptions.set(Options.Mappings, val);

@@ -120,9 +120,8 @@ public class GeocodingOpTest
     	t.setCellValue(t.getRow(3), c2, MOULTONBOROUGH.get("lng"));    
     	
     	// wait for pendings
-    	while (t.isPendings()) {
+    	while (t.isPendings()) 
             Thread.sleep(250);
-    	}
     	
     	// check results   	
     	assertThat(3, is(t.getNumRows()));

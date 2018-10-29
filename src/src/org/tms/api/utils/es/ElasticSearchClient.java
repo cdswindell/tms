@@ -18,9 +18,13 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
+import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
+import org.json.simple.JSONObject;
 import org.tms.api.Table;
 
 public class ElasticSearchClient 
@@ -190,7 +194,7 @@ public class ElasticSearchClient
 		return createIndex(index, opts.getMappings(), opts);
 	}
 	
-	public static boolean createIndex(String index, Map<String, String> mapping, ESCOptions opts) throws IOException
+	public static boolean createIndex(String index, Map<String, Object> mapping, ESCOptions opts) throws IOException
 	{
 		if (opts == null)
 			opts = ESCOptions.Default;
@@ -198,9 +202,7 @@ public class ElasticSearchClient
 		RestHighLevelClient client = build(opts);		
 		try {
 			CreateIndexRequest req = new CreateIndexRequest(index); 
-			req.settings(Settings.builder() 
-				    .put("index.number_of_shards", (int)opts.getShards())
-				    );
+			req.settings(getSettingsAsBuilder(opts));
 			
 			// build mappings, if they exist
 			if (opts.isMappings() || opts.isCatchAllField())
@@ -216,10 +218,27 @@ public class ElasticSearchClient
 		}
 	}
 
+	private static Builder getSettingsAsBuilder(ESCOptions opts) 
+	{
+		Builder builder = null;
+		
+		if (opts.isSettings()) {
+			Map<String, Object> settings = opts.getSettings();
+			builder = Settings.builder().loadFromSource(JSONObject.toJSONString(settings), XContentType.JSON);
+		}
+		else
+			builder = Settings.builder();
+		
+		// add working shards
+		builder.put("index.number_of_shards", (int)opts.getShards());
+		
+		return builder;
+	}
+
 	private static XContentBuilder getMappingsAsBuilder(ESCOptions opts) 
 	throws IOException 
 	{
-		XContentBuilder builder = XContentFactory.jsonBuilder();
+		XContentBuilder builder = JsonXContent.contentBuilder().prettyPrint();
 	    builder.startObject();
 	    {
 		    builder.startObject(opts.getWorkingType());
@@ -244,23 +263,24 @@ public class ElasticSearchClient
 			        builder.endArray();
 		    	}
 		    	
-		    	if (opts.isMappings() || opts.isCatchAllField()) {
+		    	if (opts.isMappings()) {
 			        builder.startObject("properties");
 			        {
-			        	for (Map.Entry<String, String> t : opts.getMappings().entrySet()) {
-			        		builder.startObject(t.getKey());
-			        		{
-			        			builder.field("type", t.getValue());
+			        	for (Map.Entry<String, Object> t : opts.getMappings().entrySet()) {
+			        		Object val = t.getValue();
+			        		if (val instanceof String) {
+				        		builder.startObject(t.getKey());
+			        			builder.field("type", (String) val);
+						        builder.endObject();
 			        		}
-					        builder.endObject();
-			        	}
-			        	
-			        	if (opts.isCatchAllField()) {
-			        		builder.startObject(opts.getCatchAllField());
-		        			builder.field("type", "text");
-		        			builder.field("term_vector", "with_positions_offsets_payloads");			        		
-		        			builder.field("store", "true");
-			        		builder.endObject();
+			        		else if (val instanceof JSONObject) {
+			        	        XContentParser parser = JsonXContent.jsonXContent
+			        	                .createParser(NamedXContentRegistry.EMPTY, null, ((JSONObject)val).toJSONString());
+
+			        	        builder.field(t.getKey());
+			        			builder.copyCurrentStructure(parser);
+			        			parser.close();
+			        		}
 			        	}
 			        }
 			        builder.endObject();

@@ -10,6 +10,9 @@ import java.util.UUID;
 
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.rest.RestStatus;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.tms.BaseTest;
 import org.tms.api.Access;
@@ -127,8 +130,10 @@ public class ElasticSearchClientTest extends BaseTest
 		}
 	}
 	
+	@Ignore
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testBulkLoadProfiles() throws IOException 
+	public void testBulkLoadProfiles() throws IOException, InterruptedException 
 	{		
 		Table p = TableFactory.importFile("profiles.csv",CSVOptions.Default.withColumnLabels().withRowLabels(false));
 		p.getTableContext().registerOperator(new ToLatLongStrOp());
@@ -136,13 +141,100 @@ public class ElasticSearchClientTest extends BaseTest
 		Column ll = p.addColumn(Access.ByLabel,"location");
 		
 		((TableImpl)p).setPendingThreadPoolEnabled(true);
-		((TableImpl)p).setPendingMaximumPoolSize(2);
+		((TableImpl)p).setPendingMaximumPoolSize(4);
 		ll.setDerivation("toLatLong(zip_code)");
 		
 		p.getColumn("lat").delete();
 		p.getColumn("lng").delete();
 		
-		int numLoaded = ElasticSearchClient.bulkLoad(p, "profile",ESCOptions.Default.withIdColumn(id).withCatchAllField("all_text").addMapping("location", "geo_point"));
+		/*
+		 * Define Settings
+		 */		
+		JSONObject shinglesFilter = new JSONObject();
+		shinglesFilter.put("type", "shingle");
+		shinglesFilter.put("min_shingle_size", 2);
+		shinglesFilter.put("max_shingle_size", 2);
+		shinglesFilter.put("output_unigrams", false);
+		
+		JSONObject filter = new JSONObject();
+		filter.put("shingle_filter", shinglesFilter);		
+		
+		JSONObject shinglesAnalyzer = new JSONObject();
+		shinglesAnalyzer.put("type", "custom");
+		shinglesAnalyzer.put("tokenizer", "standard");
+		shinglesAnalyzer.put("stopwords", "_english_");
+		JSONArray shingleFilters = new JSONArray();
+		shingleFilters.add("standard");
+		shingleFilters.add("lowercase");
+		shingleFilters.add("stop");
+		shingleFilters.add("porter_stem");
+		shingleFilters.add("shingle_filter");
+		shinglesAnalyzer.put("filter", shingleFilters);
+		
+		JSONObject foldingAnalyzer = new JSONObject();
+		foldingAnalyzer.put("type", "custom");
+		foldingAnalyzer.put("tokenizer", "standard");
+		foldingAnalyzer.put("stopwords", "_english_");
+		JSONArray foldingFilters = new JSONArray();
+		foldingFilters.add("standard");
+		foldingFilters.add("lowercase");
+		shingleFilters.add("stop");
+		foldingFilters.add("asciifolding");
+		foldingFilters.add("porter_stem");
+		foldingAnalyzer.put("filter", foldingFilters);
+		
+		JSONObject analyzer = new JSONObject();
+		analyzer.put("shingle_analyzer", shinglesAnalyzer);
+		analyzer.put("folding_stemming_analyzer", foldingAnalyzer);
+		
+		JSONObject settings = new JSONObject();
+		settings.put("filter", filter);
+		settings.put("analyzer", analyzer);
+		
+		/*
+		 * Define Mappings
+		 */
+		JSONObject stemOpts = new JSONObject();
+		stemOpts.put("type", "text");
+		stemOpts.put("analyzer", "folding_stemming_analyzer");
+		
+		JSONObject shnglOpts = new JSONObject();
+		shnglOpts.put("type", "text");
+		shnglOpts.put("analyzer", "shingle_analyzer");
+				
+		/*
+		 * Define all_text field mapping
+		 */
+		JSONObject fields = new JSONObject();
+		fields.put("stemmed", stemOpts);
+		fields.put("shingled", shnglOpts);
+		
+		JSONObject allTextOpts = new JSONObject();
+		allTextOpts.put("type", "text");
+		allTextOpts.put("term_vector", "with_positions_offsets_payloads");			        		
+		allTextOpts.put("store", true);
+		allTextOpts.put("fields", fields);
+				
+		/*
+		 * Build options object
+		 */
+		ESCOptions esOpts = ESCOptions.Default.withIdColumn(id);
+		esOpts = esOpts.addSetting("analysis", settings);
+		esOpts = esOpts.addMapping("location", "geo_point");
+		esOpts = esOpts.addMapping("user_id", "keyword");
+		esOpts = esOpts.addMapping("all_text", allTextOpts);
+		esOpts = esOpts.withCatchAllField("all_text");
+		
+		/*
+		 * make sure all pendings are complete
+		 */
+		while (p.isPendings())
+			Thread.sleep(250);
+		
+		/*
+		 * perform bulk load
+		 */
+		int numLoaded = ElasticSearchClient.bulkLoad(p, "profile", esOpts);
 		assertThat(numLoaded > 1, is(true));
 	}
 
