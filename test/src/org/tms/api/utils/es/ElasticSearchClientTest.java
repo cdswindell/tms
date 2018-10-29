@@ -178,7 +178,7 @@ public class ElasticSearchClientTest extends BaseTest
 		JSONArray foldingFilters = new JSONArray();
 		foldingFilters.add("standard");
 		foldingFilters.add("lowercase");
-		shingleFilters.add("stop");
+		foldingFilters.add("stop");
 		foldingFilters.add("asciifolding");
 		foldingFilters.add("porter_stem");
 		foldingAnalyzer.put("filter", foldingFilters);

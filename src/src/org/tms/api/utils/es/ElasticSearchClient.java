@@ -229,8 +229,9 @@ public class ElasticSearchClient
 		else
 			builder = Settings.builder();
 		
-		// add working shards
+		// add working shards and replicas
 		builder.put("index.number_of_shards", (int)opts.getShards());
+		builder.put("index.number_of_replicas", (int)opts.getReplicas());
 		
 		return builder;
 	}

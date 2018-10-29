@@ -19,9 +19,10 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     	CatchAllField,
     	isRecreateIndex,
     	Mappings,
-    	Settings,
     	Port,
+    	Replicas,
     	Server,
+    	Settings,
     	Shards,
     }
     
@@ -46,6 +47,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     	set(Options.isRecreateIndex, true);
     	set(Options.Port, 9200);
     	set(Options.Server, "localhost");
+    	set(Options.Replicas, 1);
     	set(Options.Shards, 5);
     }
     
@@ -162,6 +164,18 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     {
     	ESCOptions newOptions = new ESCOptions(this);
         newOptions.set(Options.Mappings, val);
+        return newOptions;
+    }
+       
+    public int getReplicas() 
+    {
+        return (Integer)get(Options.Replicas);
+    }
+
+    public ESCOptions withReplicas(final int val) 
+    {
+    	ESCOptions newOptions = new ESCOptions(this);
+        newOptions.set(Options.Replicas, val);
         return newOptions;
     }
        
