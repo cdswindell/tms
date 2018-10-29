@@ -135,7 +135,7 @@ public class ElasticSearchClientTest extends BaseTest
 	@Test
 	public void testBulkLoadProfiles() throws IOException, InterruptedException 
 	{		
-		Table p = TableFactory.importFile("profiles.csv",CSVOptions.Default.withColumnLabels().withRowLabels(false));
+		Table p = TableFactory.importFile(qualifiedFileName("profiles.csv", "misc"),CSVOptions.Default.withColumnLabels().withRowLabels(false));
 		p.getTableContext().registerOperator(new ToLatLongStrOp());
 		Column id = p.getColumn("id");
 		Column ll = p.addColumn(Access.ByLabel,"location");
