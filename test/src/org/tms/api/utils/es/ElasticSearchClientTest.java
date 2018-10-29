@@ -156,8 +156,14 @@ public class ElasticSearchClientTest extends BaseTest
 		shinglesFilter.put("max_shingle_size", 2);
 		shinglesFilter.put("output_unigrams", false);
 		
+		JSONObject synonymFilter = new JSONObject();
+		synonymFilter.put("type", "synonym");
+		synonymFilter.put("synonyms_path", "synonyms.txt");
+		synonymFilter.put("lenient", true);
+		
 		JSONObject filter = new JSONObject();
 		filter.put("shingle_filter", shinglesFilter);		
+		filter.put("synonym_filter", synonymFilter);		
 		
 		JSONObject shinglesAnalyzer = new JSONObject();
 		shinglesAnalyzer.put("type", "custom");
@@ -180,6 +186,7 @@ public class ElasticSearchClientTest extends BaseTest
 		foldingFilters.add("lowercase");
 		foldingFilters.add("stop");
 		foldingFilters.add("asciifolding");
+		foldingFilters.add("synonym_filter");
 		foldingFilters.add("porter_stem");
 		foldingAnalyzer.put("filter", foldingFilters);
 		
@@ -235,7 +242,6 @@ public class ElasticSearchClientTest extends BaseTest
 		 * perform bulk load
 		 */
 		int numLoaded = ElasticSearchClient.bulkLoad(p, "profile", esOpts);
-		assertThat(numLoaded > 1, is(true));
+		assertThat(numLoaded, is(437));
 	}
-
 }
