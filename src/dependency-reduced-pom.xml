@@ -4,7 +4,7 @@
   <groupId>org.tms.api</groupId>
   <artifactId>tms-api</artifactId>
   <name>tms</name>
-  <version>1.3</version>
+  <version>1.4</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
