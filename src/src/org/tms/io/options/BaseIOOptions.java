@@ -156,6 +156,11 @@ public abstract class BaseIOOptions<T extends BaseIOOptions<T>> implements IOOpt
         return oldValue;
     }
     
+    protected Object unset(OptionEnum key) 
+    {
+    	return m_options.remove(key);
+    }
+    
     protected boolean isSet(OptionEnum key)
     {
         return m_options.containsKey(key);

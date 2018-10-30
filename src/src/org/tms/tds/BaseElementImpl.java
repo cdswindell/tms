@@ -402,7 +402,7 @@ abstract public class BaseElementImpl implements BaseElement
             for (BaseElement tes : slices) {
                 if (tes != null) {
                     Object p = tes.getProperty(key);
-                    if (p != null && p.equals(value)) {
+                    if (p != null && (p.equals(value) || (p instanceof String && value instanceof String && ((String)p).equalsIgnoreCase((String)value)))) {
                         if (tes instanceof TableSliceElementImpl)
                             ((TableSliceElementImpl)tes).setCurrent();
                         return tes;

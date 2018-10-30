@@ -240,6 +240,8 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 		opts = opts.withType(getType());
 		opts = opts.withLowerCaseFieldNames(isLowerCaseFieldNames());
 		opts = opts.withIgnoreEmptyCells(isIgnoreEmptyCells());
+		opts = opts.withCompletions(getCompletions());
+		opts = opts.withCompletionField(getCompletionField());
 		
 		if (isExceptionOnEmptyIds())
 			opts = opts.withExceptionOnEmptyIds(true);

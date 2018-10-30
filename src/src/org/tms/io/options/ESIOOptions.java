@@ -1,5 +1,12 @@
 package org.tms.io.options;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.tms.api.Column;
 import org.tms.api.io.IOFileFormat;
 import org.tms.api.io.IOOption;
@@ -19,6 +26,8 @@ public abstract class ESIOOptions<T extends ESIOOptions<T>>
     extends BaseIOOptions<T>
     implements IOOption<T>
 {
+	protected static final String DEFAULT_COMPLETION_FIELD = "suggest";
+	
 	protected enum Options implements OptionEnum 
     {
     	Index,
@@ -34,6 +43,8 @@ public abstract class ESIOOptions<T extends ESIOOptions<T>>
     	OmitRecordsWithEmptyIds,
     	ExceptionOnDuplicatdeIds,
     	OmitRecordsWithDuplicateIds,
+    	CompletionField,
+    	Completions,
     }
     
     protected abstract T clone(final ESIOOptions<T> model);
@@ -283,5 +294,71 @@ public abstract class ESIOOptions<T extends ESIOOptions<T>>
         newOptions.set(Options.OmitRecordsWithDuplicateIds, opt);
         if (opt) newOptions.set(Options.ExceptionOnDuplicatdeIds, !opt);
         return newOptions;
+    }
+    
+    public boolean isCompletions() 
+    {
+        return get(Options.Completions) != null;
+    }
+
+    @SuppressWarnings("unchecked")
+	public List<Column> getCompletions() 
+    {
+        Set<Column> cols = (Set<Column>)get(Options.Completions);
+        if (cols != null)
+        	return cols.stream().collect(Collectors.toList());
+        else
+        	return Collections.emptyList();
+    }
+
+    @SuppressWarnings("unchecked")
+	public T addCompletion(final Column column) 
+    {
+    	if (column == null)
+    		return (T)this;
+    	
+    	final T newOptions = clone(this);
+    	
+    	Set<Column> cols = (Set<Column>)newOptions.get(Options.Completions);
+    	if (cols == null) {
+    		cols = new LinkedHashSet<Column>();
+    		newOptions.set(Options.Completions, cols);
+    	}
+    	
+    	cols.add(column);
+		if (!isCompletionField()) newOptions.set(Options.CompletionField, DEFAULT_COMPLETION_FIELD);
+
+        return newOptions;
+    }
+
+	public T withCompletions(final Collection<Column> cols) 
+    {
+    	final T newOptions = clone(this);
+    	
+    	if (cols == null)
+    		this.unset(Options.Completions);
+    	else {
+    		newOptions.set(Options.Completions, new LinkedHashSet<Column>(cols));
+    		if (!isCompletionField()) newOptions.set(Options.CompletionField, DEFAULT_COMPLETION_FIELD);
+    	}
+
+		return newOptions;
+    }
+	
+    public String getCompletionField() 
+    {
+    	return (String)get(Options.CompletionField);
+    }
+
+    public boolean isCompletionField() 
+    {
+    	return null != getCompletionField();
+    }
+
+    public T withCompletionField(final String val) 
+    {
+    	final T newOptions = clone(this);
+    	newOptions.set(Options.CompletionField, val);
+    	return newOptions;
     }
 }

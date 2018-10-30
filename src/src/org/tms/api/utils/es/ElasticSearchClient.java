@@ -201,6 +201,10 @@ public class ElasticSearchClient
 		
 		RestHighLevelClient client = build(opts);		
 		try {
+			// pre-process opts to check for suggestion field
+			if (opts.isCompletionField() && (!opts.isMappings() || null == opts.getMappings().get(opts.getCompletionField())))
+				opts = opts.addMapping(opts.getCompletionField(), "completion");
+			
 			CreateIndexRequest req = new CreateIndexRequest(index); 
 			req.settings(getSettingsAsBuilder(opts));
 			

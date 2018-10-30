@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.tms.api.Cell;
 import org.tms.api.Column;
@@ -48,6 +51,7 @@ public class ESWriter extends BaseWriter<ESOptions>
             ;        
 	/* A \s that actually works for Java’s native character set: Unicode */
 	protected static String whitespace_charclass = "["  + whitespace_chars + "]";    
+	protected static String whitespace_delim_charclass = "["  + whitespace_chars + ",;:" + "]";    
 	
 	/* A \S that actually works for  Java’s native character set: Unicode */
 	protected static String not_whitespace_charclass = "[^" + whitespace_chars + "]";
@@ -87,9 +91,14 @@ public class ESWriter extends BaseWriter<ESOptions>
 			JSONObject data;
 			int ordinalId = 0;
 			
+			// make access to completions columns more efficient
+			Set<Column> compCols = options().isCompletions() ? new LinkedHashSet<Column>(options().getCompletions()) : null;
+			Set<String> completions = new LinkedHashSet<String>();
+			
 	    	for (Row r: getActiveRows()) {  	
 	    		data = new JSONObject();
 	    		int fieldNo = 0;
+	    		completions.clear();
 	    		
 	    		for (Column c: getActiveColumns()) {
 	    			if (c == idCol) continue;  
@@ -103,7 +112,11 @@ public class ESWriter extends BaseWriter<ESOptions>
 	    				if (cell.isNull() && options().isIgnoreEmptyCells()) continue; // skip null/empty cells, if so instructed
 	    				
 	    				// write cell value to record
-	    				data.put(serializeFieldName(c, fieldNo), serializelCellValue(cell)); 
+	    				data.put(serializeFieldName(c, fieldNo), serializeCellValue(cell)); 
+	    				
+	    				// if completion column, process data
+	    				if (compCols != null && !cell.isNull() && compCols.contains(c))
+	    					cacheCompletions(cell, completions);	    					
 	    			}
 	    		}  	
 	    		
@@ -120,6 +133,9 @@ public class ESWriter extends BaseWriter<ESOptions>
 	    				continue;
 	    			}
 	       		
+	    			if (compCols != null && !completions.isEmpty())
+	    				data.put(options().getCompletionField(), serializeCompletions(completions));
+	    			
 	        		data.writeJSONString(bw);   		
 	        		bw.newLine();
 	    		}
@@ -133,6 +149,32 @@ public class ESWriter extends BaseWriter<ESOptions>
     		rowIdMap = null;
     	}
     }
+
+	@SuppressWarnings("unchecked")
+	private JSONObject serializeCompletions(Set<String> completions) 
+	{
+		JSONObject input = new JSONObject();
+		
+		// convert completions to JSONArray
+		JSONArray inputs = new JSONArray();
+		inputs.addAll(completions);
+		
+		input.put("input", inputs);
+		
+		return input;		
+	}
+
+	private void cacheCompletions(Cell cell, Set<String> completions) 
+	{
+		// get cell value as String
+		String scv = cell.getCellValue().toString();
+		
+		String [] tokens = scv.split(whitespace_delim_charclass);
+		for (String s : tokens) {
+			if (s != null && (s=s.trim()).length() > 0)
+				completions.add(s.toLowerCase());
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	protected JSONObject writeIndex(Row r, Column idCol, int ordinal, Map<Object, Row> rowIdMap)
@@ -208,7 +250,7 @@ public class ESWriter extends BaseWriter<ESOptions>
 		return fName;
 	}
 
-	private Object serializelCellValue(Cell cell) 
+	private Object serializeCellValue(Cell cell) 
 	{
 		return serializelValue(cell.getCellValue());
 	}

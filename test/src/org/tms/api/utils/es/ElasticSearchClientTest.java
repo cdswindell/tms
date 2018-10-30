@@ -231,6 +231,8 @@ public class ElasticSearchClientTest extends BaseTest
 		esOpts = esOpts.addMapping("user_id", "keyword");
 		esOpts = esOpts.addMapping("all_text", allTextOpts);
 		esOpts = esOpts.withCatchAllField("all_text");
+		esOpts = esOpts.addCompletion(p.getColumn("Title"));
+		esOpts = esOpts.addCompletion(p.getColumn("Categories"));
 		
 		/*
 		 * make sure all pendings are complete

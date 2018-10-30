@@ -1,5 +1,8 @@
 package org.tms.api.io;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.tms.api.Column;
 
 public interface ESIOOption<T extends ESIOOption<T>> extends IOOption<T> 
@@ -51,4 +54,10 @@ public interface ESIOOption<T extends ESIOOption<T>> extends IOOption<T>
     public boolean isOmitRecordsWithDuplicateIds(); 
     public T withOmitRecordsWithDuplicateIds(); 
     public T withOmitRecordsWithDuplicateIds(final boolean opt); 
+    public boolean isCompletions();
+	public List<Column> getCompletions();
+	public T addCompletion(final Column column);
+	public T withCompletions(final Collection<Column> cols); 
+
+
 }
