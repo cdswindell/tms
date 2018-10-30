@@ -51,7 +51,7 @@ public class ESWriter extends BaseWriter<ESOptions>
             ;        
 	/* A \s that actually works for Java’s native character set: Unicode */
 	protected static String whitespace_charclass = "["  + whitespace_chars + "]";    
-	protected static String whitespace_delim_charclass = "["  + whitespace_chars + ",;:" + "]";    
+	protected static String whitespace_delim_charclass = "["  + whitespace_chars + "\\p{Punct}" + "]";    
 	
 	/* A \S that actually works for  Java’s native character set: Unicode */
 	protected static String not_whitespace_charclass = "[^" + whitespace_chars + "]";
