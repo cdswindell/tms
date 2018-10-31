@@ -3,6 +3,7 @@ package org.tms.api.utils.es;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -103,7 +104,6 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     	return _addMapping(field, (Object) val);
     }
        
-    @SuppressWarnings("unchecked")
 	public ESCOptions addMapping(final String field, final Object... args) 
     {
     	Map<String, Object> config = new LinkedHashMap<String, Object>();
@@ -119,25 +119,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 	    			String key = ((String)o).trim();
 	    			if (key.length() > 0) {
 	    				o = args[++i];
-	    				if (o instanceof JSONObject) 
-	    					config.put(key, (JSONObject)o);
-	    				else if (o instanceof Map<?,?>) {
-	    					Map<String, Object> m = (Map<String, Object>)o;
-	    					config.put(key, new JSONObject(m));
-	    				}
-	    				else if (o instanceof String[]) {
-	    					JSONObject so = new JSONObject();
-	    					String [] sa = (String[])o;
-	    					for (String s : sa) {
-	    		    			parseValues(so, s);
-	    					}
-	    					
-	    					config.put(key,  so);
-	    				}
-	    				else if (o instanceof String) 
-	    					config.put(key,  parseValue((String)o));
-	    				else
-	    		    		throw new IllegalArgumentException("Malformed mapping: " + key);
+	    				config.put(key, parseValue(o));
 	    			}
 	    			else
     		    		throw new IllegalArgumentException("Malformed mapping: null token key");
@@ -157,19 +139,44 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     throws ParseException 
     {
 		String [] tokens = val.trim().split("=");
-		if (tokens.length != 2) throw new IllegalArgumentException("Malformed mapping: " + val);
+		if (tokens.length != 2) 
+			throw new IllegalArgumentException("Malformed mapping: " + val);
 		config.put(tokens[0], parseValue(tokens[1]));
 	}
 
-	private Object parseValue(String val) 
+	@SuppressWarnings("unchecked")
+	private Object parseValue(Object obj) 
     throws ParseException 
     {
-		if ("true".equalsIgnoreCase(val) || "false".equalsIgnoreCase(val))
-			return (boolean)Boolean.valueOf(val.toLowerCase());
-		else if (val.startsWith("{") && val.endsWith("}"))
-			return (JSONObject)(new JSONParser().parse(val));
+		if (obj == null)
+    		throw new IllegalArgumentException("Malformed mapping: null token");
+		
+		if (obj instanceof String) {
+			String val = ((String)obj).trim();
+			if ("true".equalsIgnoreCase(val) || "false".equalsIgnoreCase(val))
+				return (boolean)Boolean.valueOf(val.toLowerCase());
+			else if (val.startsWith("{") && val.endsWith("}"))
+				return (JSONObject)(new JSONParser().parse(val));
+			else if (val.indexOf('=')> 0) {
+				JSONObject json = new JSONObject();
+				parseValues(json, val);
+				return json;
+			}
+			else
+				return val;
+		}
+		else if (obj instanceof Map<?,?>) 
+			return new JSONObject((Map<?,?>)obj);
+		else if (obj instanceof String[]) {
+			JSONArray ar = new JSONArray();
+			for (String s : (String[]) obj)
+				ar.add(s);
+			return ar;
+		}
+		else if (obj instanceof Number || obj instanceof Boolean)
+			return obj;
 		else
-			return (String)val;
+			throw new IllegalArgumentException("Malformed mapping: " + obj.getClass().getSimpleName());
 	}
 
 	private ESCOptions _addMapping(final String field, final Object val) 
