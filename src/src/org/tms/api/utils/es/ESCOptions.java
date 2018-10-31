@@ -93,6 +93,13 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
     	return mappings != null && !mappings.isEmpty();
     }
 
+    public ESCOptions withMappings(final Map<String, Object> val) 
+    {
+    	ESCOptions newOptions = clone(this);
+        newOptions.set(Options.Mappings, val);
+        return newOptions;
+    }
+       
     public ESCOptions addMapping(final String field, final String type) 
     {
     	String val = (type != null ? type.trim() : null);
@@ -181,7 +188,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 
 	private ESCOptions _addMapping(final String field, final Object val) 
     {
-    	ESCOptions newOptions = new ESCOptions(this);
+	   	final ESCOptions newOptions = clone(this);
     	
     	Map<String, Object> mappings = getMappings();
     	if (mappings == null) {
@@ -219,7 +226,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
        
     protected ESCOptions addSetting(final String field, final Object val) 
     {
-    	ESCOptions newOptions = new ESCOptions(this);
+    	ESCOptions newOptions = clone(this);
     	
     	Map<String, Object> settings = getSettings();
     	if (settings == null) {
@@ -233,15 +240,8 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
        
     public ESCOptions withSettings(final Map<String, Object> val) 
     {
-    	ESCOptions newOptions = new ESCOptions(this);
+    	ESCOptions newOptions = clone(this);
         newOptions.set(Options.Settings, val);
-        return newOptions;
-    }
-       
-    public ESCOptions withMappings(final Map<String, Object> val) 
-    {
-    	ESCOptions newOptions = new ESCOptions(this);
-        newOptions.set(Options.Mappings, val);
         return newOptions;
     }
        
@@ -252,7 +252,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 
     public ESCOptions withReplicas(final int val) 
     {
-    	ESCOptions newOptions = new ESCOptions(this);
+    	ESCOptions newOptions = clone(this);
         newOptions.set(Options.Replicas, val);
         return newOptions;
     }
@@ -264,7 +264,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 
     public ESCOptions withShards(final int val) 
     {
-    	ESCOptions newOptions = new ESCOptions(this);
+    	ESCOptions newOptions = clone(this);
         newOptions.set(Options.Shards, val);
         return newOptions;
     }
@@ -276,7 +276,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 
     public ESCOptions withPort(final int port) 
     {
-    	ESCOptions newOptions = new ESCOptions(this);
+    	ESCOptions newOptions = clone(this);
     	newOptions.set(Options.Port, port);
     	return newOptions;
     }
@@ -293,7 +293,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 
     public ESCOptions withCatchAllField(final String val) 
     {
-    	ESCOptions newOptions = new ESCOptions(this);
+    	ESCOptions newOptions = clone(this);
     	newOptions.set(Options.CatchAllField, val);
     	return newOptions;
     }
@@ -305,7 +305,7 @@ public class ESCOptions extends ESIOOptions<ESCOptions> implements ESIOOption<ES
 
     public ESCOptions withServer(final String server) 
     {
-    	ESCOptions newOptions = new ESCOptions(this);
+    	ESCOptions newOptions = clone(this);
     	newOptions.set(Options.Server, server);
     	return newOptions;
     }

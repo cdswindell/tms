@@ -2,7 +2,7 @@ package org.tms.api.io;
 
 import org.tms.io.options.ESIOOptions;
 
-public class ESOptions extends ESIOOptions<ESOptions> implements ESIOOption<ESOptions>
+public class ESOptions extends ESIOOptions<ESOptions> 
 {
     public static final ESOptions Default = new ESOptions();
 

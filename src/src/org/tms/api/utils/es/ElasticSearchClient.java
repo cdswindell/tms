@@ -108,8 +108,9 @@ public class ElasticSearchClient
 		}
 		
 		// recreate index, if requested
-		if (opts.isRecreateIndex() && existsIndex(index, opts)) {
-			deleteIndex(index, opts);
+		if (opts.isRecreateIndex()) {
+			if (existsIndex(index, opts))
+				deleteIndex(index, opts);
 			createIndex(index, opts);
 		}
 		
@@ -244,6 +245,7 @@ public class ElasticSearchClient
 	throws IOException 
 	{
 		XContentBuilder builder = JsonXContent.contentBuilder().prettyPrint();
+		try {
 	    builder.startObject();
 	    {
 		    builder.startObject(opts.getWorkingType());
@@ -273,19 +275,41 @@ public class ElasticSearchClient
 			        {
 			        	for (Map.Entry<String, Object> t : opts.getMappings().entrySet()) {
 			        		Object val = t.getValue();
+			        		
+			        		// value element has to be a String, a Bool, a Map, or a JSONObject
 			        		if (val instanceof String) {
 				        		builder.startObject(t.getKey());
 			        			builder.field("type", (String) val);
 						        builder.endObject();
+						        continue;
 			        		}
-			        		else if (val instanceof JSONObject) {
+			        		else if (val instanceof Boolean) {
+				        		builder.startObject(t.getKey());
+			        			builder.field("type", (Boolean)val);
+						        builder.endObject();
+						        continue;
+			        		}
+			        		else if (val instanceof Number) {
+				        		builder.startObject(t.getKey());
+			        			builder.field("type", (Number)val);
+						        builder.endObject();
+						        continue;
+			        		}
+			        		
+			        		if (val instanceof Map)
+			        			val = new JSONObject((Map<?,?>)val);
+			        		
+			        		if (val instanceof JSONObject) {
 			        	        XContentParser parser = JsonXContent.jsonXContent
 			        	                .createParser(NamedXContentRegistry.EMPTY, null, ((JSONObject)val).toJSONString());
 
 			        	        builder.field(t.getKey());
 			        			builder.copyCurrentStructure(parser);
 			        			parser.close();
+			        			continue;
 			        		}
+			        		else
+			        			throw new IllegalArgumentException("Malformed mapping: " + val.getClass().getSimpleName());
 			        	}
 			        }
 			        builder.endObject();
@@ -296,5 +320,10 @@ public class ElasticSearchClient
 	    builder.endObject();
 
 		return builder;
+		}
+		finally {
+			if (builder != null)
+				builder.close();
+		}
 	}
 }

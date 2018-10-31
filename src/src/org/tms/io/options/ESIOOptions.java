@@ -74,11 +74,11 @@ public abstract class ESIOOptions<T extends ESIOOptions<T>>
     }
 
     @Override
-    protected T clone(BaseIOOptions<T> model)
+    protected T clone(final BaseIOOptions<T> model)
     {
         return clone((ESIOOptions<T>) model);
     }
-    
+
     public String getIndex() 
     {
         return (String)get(Options.Index);

@@ -199,13 +199,13 @@ public class ESWriter extends BaseWriter<ESOptions>
 
 		String [] tokens = scv.split(whitespace_charclass);
 		for (String s : tokens) {
-			if (s != null && (s=s.trim().toLowerCase()).length() > MIN_COMPLETION_TOKEN_LENGTH) {
+			if (s != null && (s=s.trim().toLowerCase()).length() >= MIN_COMPLETION_TOKEN_LENGTH) {
 				if (EmailValidator.getInstance().isValid(s))
 					completions.add(s);
 				else {
 					String tks[] = s.split("\\p{Punct}");
 					for (String s1 : tks) {
-						if (s1 != null && (s1=s1.trim()).length() > MIN_COMPLETION_TOKEN_LENGTH && !STOP_WORDS_SET.contains(s1))
+						if (s1 != null && (s1=s1.trim()).length() >= MIN_COMPLETION_TOKEN_LENGTH && !STOP_WORDS_SET.contains(s1))
 							completions.add(s1);
 					}						
 				}

@@ -130,7 +130,7 @@ public class ElasticSearchClientTest extends BaseTest
 		}
 	}
 	
-	//@Ignore
+	@Ignore
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testBulkLoadProfiles() throws IOException, InterruptedException 
@@ -206,10 +206,10 @@ public class ElasticSearchClientTest extends BaseTest
 		esOpts = esOpts.addMapping("location", "geo_point");
 		esOpts = esOpts.addMapping("user_id", "keyword");
 		esOpts = esOpts.addMapping("all_text", 
-									"type","text", 
-									"term_vector=with_positions_offsets_payloads",
-									"store", true,
-									"fields", "{\"stemmed\":{\"type\":\"text\",\"analyzer\":\"folding_stemming_analyzer\"},\"shingled\":{\"type\":\"text\",\"analyzer\":\"shingle_analyzer\"}}");
+								   "type","text", 
+								   "term_vector=with_positions_offsets_payloads",
+								   "store", true,
+								   "fields", "{\"stemmed\":{\"type\":\"text\",\"analyzer\":\"folding_stemming_analyzer\"},\"shingled\":{\"type\":\"text\",\"analyzer\":\"shingle_analyzer\"}}");
 		esOpts = esOpts.withCatchAllField("all_text");
 		esOpts = esOpts.addCompletion(p.getColumn("Title"));
 		esOpts = esOpts.addCompletion(p.getColumn("Categories"));
