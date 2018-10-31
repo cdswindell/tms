@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.tms.api.Cell;
@@ -169,10 +170,19 @@ public class ESWriter extends BaseWriter<ESOptions>
 		// get cell value as String
 		String scv = cell.getCellValue().toString();
 		
-		String [] tokens = scv.split(whitespace_delim_charclass);
+		String [] tokens = scv.split(whitespace_charclass);
 		for (String s : tokens) {
-			if (s != null && (s=s.trim()).length() > 0)
-				completions.add(s.toLowerCase());
+			if (s != null && (s=s.trim().toLowerCase()).length() > 0) {
+				if (EmailValidator.getInstance().isValid(s))
+					completions.add(s);
+				else {
+					String tks[] = s.split("\\p{Punct}");
+					for (String s1 : tks) {
+						if (s1 != null && (s1=s1.trim()).length() > 0)
+							completions.add(s1);
+					}						
+				}
+			}
 		}
 	}
 

@@ -197,30 +197,6 @@ public class ElasticSearchClientTest extends BaseTest
 		JSONObject settings = new JSONObject();
 		settings.put("filter", filter);
 		settings.put("analyzer", analyzer);
-		
-		/*
-		 * Define Mappings
-		 */
-		JSONObject stemOpts = new JSONObject();
-		stemOpts.put("type", "text");
-		stemOpts.put("analyzer", "folding_stemming_analyzer");
-		
-		JSONObject shnglOpts = new JSONObject();
-		shnglOpts.put("type", "text");
-		shnglOpts.put("analyzer", "shingle_analyzer");
-				
-		/*
-		 * Define all_text field mapping
-		 */
-		JSONObject fields = new JSONObject();
-		fields.put("stemmed", stemOpts);
-		fields.put("shingled", shnglOpts);
-		
-		JSONObject allTextOpts = new JSONObject();
-		allTextOpts.put("type", "text");
-		allTextOpts.put("term_vector", "with_positions_offsets_payloads");			        		
-		allTextOpts.put("store", true);
-		allTextOpts.put("fields", fields);
 				
 		/*
 		 * Build options object
@@ -229,7 +205,11 @@ public class ElasticSearchClientTest extends BaseTest
 		esOpts = esOpts.addSetting("analysis", settings);
 		esOpts = esOpts.addMapping("location", "geo_point");
 		esOpts = esOpts.addMapping("user_id", "keyword");
-		esOpts = esOpts.addMapping("all_text", allTextOpts);
+		esOpts = esOpts.addMapping("all_text", 
+									"type=text", 
+									"term_vector=with_positions_offsets_payloads",
+									"store=true",
+									"fields", "{\"stemmed\":{\"type\":\"text\",\"analyzer\":\"folding_stemming_analyzer\"},\"shingled\":{\"type\":\"text\",\"analyzer\":\"shingle_analyzer\"}}");
 		esOpts = esOpts.withCatchAllField("all_text");
 		esOpts = esOpts.addCompletion(p.getColumn("Title"));
 		esOpts = esOpts.addCompletion(p.getColumn("Categories"));
@@ -239,6 +219,8 @@ public class ElasticSearchClientTest extends BaseTest
 		 */
 		while (p.isPendings())
 			Thread.sleep(250);
+		
+		p.getColumn("zip_code").delete();
 		
 		/*
 		 * perform bulk load
