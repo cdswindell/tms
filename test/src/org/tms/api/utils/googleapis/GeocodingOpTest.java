@@ -17,7 +17,7 @@ import org.tms.api.factories.TableFactory;
 
 public class GeocodingOpTest 
 {
-	private static String BOSTON_ADDR = "Calle la Pampilla Nº138 Mz I-3 Lt 20 Zona industrial de Ventanilla-Callao, Boston, MA 02116, United States";
+	private static String BOSTON_ADDR = "104 Public Alley 424, Boston, MA 02116, USA";
 	private static String ACTON_ADDR = "10 John Swift Rd, Acton, MA 01720, USA";
 	private static String MOLTONBOROUGH_ADDR = "182 Castle Shore Rd, Moultonborough, NH 03254, USA";
 	
