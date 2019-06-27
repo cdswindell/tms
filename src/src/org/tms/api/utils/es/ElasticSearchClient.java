@@ -5,18 +5,18 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.http.HttpHost;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
@@ -121,7 +121,6 @@ public class ElasticSearchClient
 			table.export(baos, opts.asESOptions().withType(null).withIndex(null)); // clear out index & type as we give it on load command
 			
 			BulkRequest req = new BulkRequest();
-			
 			req.add(baos.toByteArray(), 0, baos.size(), index, opts.getWorkingType(), XContentType.JSON);
 			BulkResponse resp = client.bulk(req, RequestOptions.DEFAULT);
 			int numLoaded = resp.getItems().length;
@@ -150,7 +149,7 @@ public class ElasticSearchClient
 		try {
 			DeleteIndexRequest req = new DeleteIndexRequest(index);
 			
-			DeleteIndexResponse resp = client.indices().delete(req, RequestOptions.DEFAULT);
+			AcknowledgedResponse resp = client.indices().delete(req, RequestOptions.DEFAULT);
 			
 			return resp != null && resp.isAcknowledged();
 		}
@@ -172,8 +171,8 @@ public class ElasticSearchClient
 		
 		RestHighLevelClient client = build(opts);		
 		try {
-			GetIndexRequest gReq = new GetIndexRequest();
-			gReq.indices(index);
+			GetIndexRequest gReq = new GetIndexRequest(index);
+			gReq.indices();
 			
 			boolean exists = client.indices().exists(gReq, RequestOptions.DEFAULT);
 			
@@ -210,8 +209,8 @@ public class ElasticSearchClient
 			req.settings(getSettingsAsBuilder(opts));
 			
 			// build mappings, if they exist
-			if (opts.isMappings() || opts.isCatchAllField())
-				req.mapping(opts.getWorkingType(), getMappingsAsBuilder(opts));
+			if (opts.isMappings() || opts.isCatchAllField()) 
+				req.mapping(getMappingsAsBuilder(opts));
 			
 			CreateIndexResponse resp = client.indices().create(req, RequestOptions.DEFAULT);
 			
@@ -248,7 +247,7 @@ public class ElasticSearchClient
 		try {
 	    builder.startObject();
 	    {
-		    builder.startObject(opts.getWorkingType());
+		    builder.startObject("mappings");
 		    {
 		    	if (opts.isCatchAllField()) {
 			        builder.startArray("dynamic_templates");

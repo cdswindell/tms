@@ -276,7 +276,7 @@ abstract public class TMSReport
                     "$F{%s}",
                     null);   
             tf.setFontSize(headingFontSize);
-            tf.setBold(true);
+            tf.setBold(Boolean.TRUE);
             detailBand.addElement(tf);
             
             // bump the field
@@ -433,7 +433,7 @@ abstract public class TMSReport
                         "\"" + label + "\"",
                         null);        
                 hf.setFontSize(headingFontSize);
-                hf.setBold(true);
+                hf.setBold(Boolean.TRUE);
                 hf.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
                 
                 colHeaderBand.addElement(hf);
@@ -443,7 +443,7 @@ abstract public class TMSReport
                 line.setY(colHeadBandHeight-2);
                 line.setWidth(fieldWidth);
                 line.setHeight(0);
-                line.getLinePen().setLineWidth((float) 0.5);
+                line.getLinePen().setLineWidth(Float.valueOf((float)0.5));
                 line.setPositionType(PositionTypeEnum.FLOAT);
 
                 colHeaderBand.addElement(line);
@@ -490,7 +490,7 @@ abstract public class TMSReport
         tf.setStretchWithOverflow(true);
         tf.setBlankWhenNull(true);
         tf.setStyle(ns);
-        tf.setBold(false);
+        tf.setBold(Boolean.FALSE);
         tf.setVerticalTextAlign(va);
         tf.setHorizontalTextAlign(ha);
         
@@ -562,7 +562,7 @@ abstract public class TMSReport
         titleField.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
         titleField.setStyle(boldStyle);
         titleField.setFontSize(titleFontSize);
-        titleField.setBold(true);
+        titleField.setBold(Boolean.TRUE);
         
         JRDesignExpression titleExpression = new JRDesignExpression();
         titleExpression.setText("$P{ReportTitle}");
@@ -588,7 +588,7 @@ abstract public class TMSReport
                 JRDesignTextField nowField = new JRDesignTextField();
                 nowField.setStyle(normalStyle);
                 nowField.setFontSize(fontSize);
-                nowField.setBold(false);
+                nowField.setBold(Boolean.FALSE);
                 nowField.setHeight(height - offset);
                 nowField.setWidth(pageWidth); 
                 nowField.setY(offset);
@@ -606,7 +606,7 @@ abstract public class TMSReport
         JRDesignTextField pageNoField = new JRDesignTextField();
         pageNoField.setStyle(normalStyle);
         pageNoField.setFontSize(fontSize);
-        pageNoField.setBold(false);
+        pageNoField.setBold(Boolean.FALSE);
         pageNoField.setMode(ModeEnum.TRANSPARENT);
         pageNoField.setHeight(height - offset);
         pageNoField.setWidth(pageWidth);
@@ -622,7 +622,7 @@ abstract public class TMSReport
         return pageFooter;
     }
     
-    private JRDesignStyle defineStyle(JasperDesign jrDesign, String name, float fontSize, boolean isDefault, boolean isBold) 
+    private JRDesignStyle defineStyle(JasperDesign jrDesign, String name, float fontSize, boolean isDefault, Boolean isBold) 
     throws JRException
     {
         JRDesignStyle style = new JRDesignStyle();
@@ -638,7 +638,7 @@ abstract public class TMSReport
             style.setFontName(getFontFamily());
         style.setFontSize(fontSize);
         style.setBold(isBold);
-        style.setPdfEmbedded(false);
+        style.setPdfEmbedded(Boolean.FALSE);
         style.setMode(ModeEnum.OPAQUE);
         
         jrDesign.addStyle(style);
